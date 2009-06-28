@@ -93,11 +93,22 @@ class MultilineExpand_ExceptCorrectResult(_VimTest):
 
     def runTest(self):
         self.assertEqual(self.output, "Wie Hallo Welt!\nUnd Wie gehts? gehts?")
+class MultilineExpandTestTyping_ExceptCorrectResult(_VimTest):
+    def cmd(self):
+        PySnipSnippets.add_snippet("hallo","Hallo Welt!\nUnd Wie gehts?")
+        self.insert("Wie hallo gehts?")
+        vim.command("normal 02f ")
+        self.expand()
+        self.insert("Huiui!")
+
+    def runTest(self):
+        self.assertEqual(self.output,
+             "Wie Hallo Welt!\nUnd Wie gehts?Huiui! gehts?")
 
 ############
 # TabStops #
 ############
-class ExitTabStop_ExceptCorrectTrue(_VimTest):
+class ExitTabStop_ExceptCorrectResult(_VimTest):
     def cmd(self):
         PySnipSnippets.add_snippet("echo","$0 run")
         self.insert("echo ")
@@ -106,6 +117,15 @@ class ExitTabStop_ExceptCorrectTrue(_VimTest):
 
     def runTest(self):
         self.assertEqual(self.output,"test run ")
+
+class TextTabStopNoReplace_ExceptCorrectResult(_VimTest):
+    def cmd(self):
+        PySnipSnippets.add_snippet("echo","echo ${1:Hallo}")
+        self.insert("echo ")
+        self.expand()
+
+    def runTest(self):
+        self.assertEqual(self.output,"echo Hallo ")
     
         
 if __name__ == '__main__':
@@ -113,12 +133,25 @@ if __name__ == '__main__':
     from cStringIO import StringIO
 
     s = StringIO()
-    
-    suite = unittest.TestLoader().loadTestsFromModule(__import__("test"))
+
+    tests = [
+        SimpleExpand_ExceptCorrectResult(),
+        SimpleExpandTypeAfterExpand_ExceptCorrectResult(),
+        SimpleExpandTypeAfterExpand1_ExceptCorrectResult(),
+        DoNotExpandAfterSpace_ExceptCorrectResult(),
+        ExpandInTheMiddleOfLine_ExceptCorrectResult(),
+        MultilineExpand_ExceptCorrectResult(),
+        MultilineExpandTestTyping_ExceptCorrectResult(),
+        ExitTabStop_ExceptCorrectResult(),
+        TextTabStopNoReplace_ExceptCorrectResult(),
+    ]
+    # suite = unittest.TestLoader(.loadTestsFromModule(__import__("test"))
+    suite = unittest.TestSuite()
+    suite.addTests(tests)
     res = unittest.TextTestRunner(stream=s).run(suite)
     
-    if res.wasSuccessful():
-        vim.command("qa!")
+    # if res.wasSuccessful():
+    #     vim.command("qa!")
 
     vim.current.buffer[:] = s.getvalue().split('\n')
 
