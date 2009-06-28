@@ -28,8 +28,51 @@ class TabStop(object):
         return self._no
     number = property(number)
 
+class SnippetInstance(object):
+    def __init__(self,start,end, ts):
+        self._start = start
+        self._end = end
+        self._ts = ts
+        
+        self._cts = 1
+
+    def select_next_tab(self):
+        if self._cts not in self._ts:
+            if 0 in self._ts:
+                self._cts = 0
+            else:
+                self._cts = 1
+        
+        ts = self._ts[self._cts]
+        lineno, col = self._start
+
+        newline = lineno + ts.line_idx
+        if newline == lineno:
+            newcol = col + ts.span[0]
+            endcol = col + ts.span[1]
+        else:
+            newcol = ts.span[0]
+            endcol = ts.span[1]
+        
+        self._cts += 1
+
+        vim.current.window.cursor = newline, newcol
+        
+        # Select the word
+       
+        # Depending on the current mode and position, we
+        # might need to move escape out of the mode and this
+        # will move our cursor one left
+        if newcol != 0 and vim.eval("mode()") == 'i':
+            move_one_right = "l"
+        else:
+            move_one_right = ""
+
+        vim.command(r'call feedkeys("\<Esc>%sv%il\<c-g>")'
+            % (move_one_right, endcol-newcol-1))
+
 class Snippet(object):
-    _TB_EXPR = re.compile(r'\$(?:(?:{(\d+):(.*)})|(\d+))')
+    _TB_EXPR = re.compile(r'\$(?:(?:{(\d+):(.*?)})|(\d+))')
 
     def __init__(self,trigger,value):
         self._t = trigger
@@ -40,7 +83,7 @@ class Snippet(object):
     trigger = property(trigger)
 
     def _find_text_tabstops(self, lines):
-        tabstops = []
+        tabstops = {}
 
         for idx in range(len(lines)):
             line = lines[idx]
@@ -61,11 +104,9 @@ class Snippet(object):
 
                 lines[idx] = line
 
-                tabstops.append( (ts.number, ts) )
+                tabstops[ts.number] = ts
 
                 m = self._TB_EXPR.search(line)
-
-        tabstops.sort()
 
         return tabstops
 
@@ -76,7 +117,7 @@ class Snippet(object):
 
         return ts, lines
 
-    def put(self, before, after):
+    def launch(self, before, after):
         lineno,col = vim.current.window.cursor
 
         col -= len(self._t)
@@ -84,38 +125,37 @@ class Snippet(object):
         ts,lines = self._replace_tabstops()
 
         endcol = None
-        if len(ts):
-            zts = ts[0][1]
-            newline = lineno + zts.line_idx
-            if newline == lineno:
-                newcol = col + zts.span[0]
-                endcol = col + zts.span[1]
-            else:
-                newcol = zts.span[0]
-                endcol = zts.span[1]
-        else:
+        newline = 1
+        newcol = 0
+        if not len(ts):
             newline = lineno + len(lines) - 1
             if len(lines) == 1:
                 newcol = col + len(lines[-1])
             else:
                 newcol = len(lines[-1])
-
-
+        
         lines[0] = before + lines[0]
         lines[-1] += after
 
         vim.current.buffer[lineno-1:lineno-1+len(lines)] = lines
 
         vim.current.window.cursor = newline, newcol
-
-        # if endcol:
-        #     # Select the word
-        #     vim.command("insert PyVimSnips_SelectWord(%i)"  % (endcol-newcol))
+        
+        if len(ts):
+            s = SnippetInstance( (lineno,col), (newline,newcol), ts)
+            
+            s.select_next_tab()
+            
+            return s
 
 
 class SnippetManager(object):
     def __init__(self):
+        self.reset()
+
+    def reset(self):
         self.clear_snippets()
+        self._current_snippets = []
 
     def add_snippet(self,trigger,value):
         self._snippets[trigger] = Snippet(trigger,value)
@@ -124,6 +164,10 @@ class SnippetManager(object):
         self._snippets = {}
 
     def try_expand(self):
+        if len(self._current_snippets):
+            self._current_snippets[-1].select_next_tab()
+            return
+
         line = vim.current.line
 
         dummy,col = vim.current.window.cursor
@@ -136,7 +180,14 @@ class SnippetManager(object):
 
         word = before.split()[-1]
         if word in self._snippets:
-            self._snippets[word].put(before.rstrip()[:-len(word)], after)
+            s = self._snippets[word].launch(before.rstrip()[:-len(word)], after)
+            if s is not None:
+                self._current_snippets.append(s)
+    
+    def cursor_moved(self):
+        pass
 
+    def entered_insert_mode(self):
+        pass
 
 PySnipSnippets = SnippetManager()
