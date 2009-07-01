@@ -19,12 +19,6 @@ class _VimTest(unittest.TestCase):
         for c in str:
             self.send(c)
 
-        # splits = str.split('\t')
-        # for w in splits[:-1]:
-        #     _send(w + '\t')
-        # _send(splits[-1])
-
-
     def escape(self):
         self.type("\x1b")
 
@@ -32,6 +26,9 @@ class _VimTest(unittest.TestCase):
         self.escape()
 
         self.send(":py PySnipSnippets.reset()\n")
+
+        if not isinstance(self.snippets[0],tuple):
+            self.snippets = ( self.snippets, )
 
         for sv,content in self.snippets:
             self.send(''':py << EOF
@@ -70,9 +67,7 @@ EOF
 # Simple Expands #
 ##################
 class _SimpleExpands(_VimTest):
-    snippets = (
-        ("hallo", "Hallo Welt!"),
-    )
+    snippets = ("hallo", "Hallo Welt!")
 
 class SimpleExpand_ExceptCorrectResult(_SimpleExpands):
     def cmd(self):
@@ -141,61 +136,131 @@ class MultilineExpandTestTyping_ExceptCorrectResult(_VimTest):
 ############
 # TabStops #
 ############
-class ExitTabStop_ExceptCorrectResult(_VimTest):
-    snippets = (
-        ("echo", "$0 run"),
-    )
+class TabStopSimpleReplace_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo ${0:End} ${1:Beginning}")
+    def cmd(self):
+        self.type("hallo\tna\tDu Nase")
+    def runTest(self):
+        self.assertEqual(self.output,"hallo Du Nase na")
 
+class TabStopSimpleReplaceSurrounded_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo ${0:End} a small feed")
+    def cmd(self):
+        self.type("hallo\tNase")
+    def runTest(self):
+        self.assertEqual(self.output,"hallo Nase a small feed")
+class TabStopSimpleReplaceSurrounded1_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo $0 a small feed")
+    def cmd(self):
+        self.type("hallo\tNase")
+    def runTest(self):
+        self.assertEqual(self.output,"hallo Nase a small feed")
+
+
+class ExitTabStop_ExceptCorrectResult(_VimTest):
+    snippets = ("echo", "$0 run")
     def cmd(self):
         self.type("echo\ttest")
-
     def runTest(self):
         self.assertEqual(self.output,"test run")
 
-class TextTabStopNoReplace_ExceptCorrectResult(_VimTest):
-    snippets = (
-        ("echo", "echo ${1:Hallo}"),
-    )
-
+class TabStopNoReplace_ExceptCorrectResult(_VimTest):
+    snippets = ("echo", "echo ${1:Hallo}")
     def cmd(self):
         self.type("echo\t")
-
     def runTest(self):
         self.assertEqual(self.output,"echo Hallo")
 
-class TextTabStopSimpleReplace_ExceptCorrectResult(_VimTest):
-    snippets = (
-        ("hallo", "hallo ${0:End} ${1:Beginning}"),
-    )
-
+class TabStopTestJumping_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo ${0:End} mitte ${1:Beginning}")
     def cmd(self):
-        self.type("hallo\tna\tDu Nase")
-
+        self.type("hallo\t\tTest\tHi")
     def runTest(self):
-        self.assertEqual(self.output,"hallo Du Nase na")
-
-class TextTabStopSimpleReplace_ExceptCorrectResult(_VimTest):
-    snippets = (
-        ("hallo", "hallo ${0:End} ${1:Beginning}"),
-    )
-
+        self.assertEqual(self.output,"hallo TestHi mitte Beginning")
+class TabStopTestJumping2_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo $0 $1")
     def cmd(self):
-        self.type("hallo\tna\tDu Nase")
-
+        self.type("hallo\t\tTest\tHi")
     def runTest(self):
-        self.assertEqual(self.output,"hallo Du Nase na")
+        self.assertEqual(self.output,"hallo TestHi ")
 
-# TODO: multiline mirrors
+class TabStopTestBackwardJumping_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo ${0:End} mitte${1:Beginning}")
+    def cmd(self):
+        self.type("hallo\tSomelengthy Text\tHi+Lets replace it again\tBlah\t++\t")
+    def runTest(self):
+        self.assertEqual(self.output,"hallo Blah mitteLets replace it again")
+class TabStopTestBackwardJumping2_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo $0 $1")
+    def cmd(self):
+        self.type("hallo\tSomelengthy Text\tHi+Lets replace it again\tBlah\t++\t")
+    def runTest(self):
+        self.assertEqual(self.output,"hallo Blah Lets replace it again")
 
-class TextTabStopSimpleMirror_ExceptCorrectResult(_VimTest):
-    snippets = (
-        ("test", "$1\n$1"),
-    )
+# TODO: pasting with <C-R> while mirroring
+###########
+# MIRRORS #
+###########
+class TextTabStopTextAfterTab_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 Hinten\n$1")
     def cmd(self):
         self.type("test\thallo")
+    def runTest(self):
+        self.assertEqual(self.output,"hallo Hinten\nhallo")
+class TextTabStopTextBeforeTab_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "Vorne $1\n$1")
+    def cmd(self):
+        self.type("test\thallo")
+    def runTest(self):
+        self.assertEqual(self.output,"Vorne hallo\nhallo")
+class TextTabStopTextSurroundedTab_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "Vorne $1 Hinten\n$1")
+    def cmd(self):
+        self.type("test\thallo test")
+    def runTest(self):
+        self.assertEqual(self.output,"Vorne hallo test Hinten\nhallo test")
 
+class TextTabStopTextBeforeMirror_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1\nVorne $1")
+    def cmd(self):
+        self.type("test\thallo")
+    def runTest(self):
+        self.assertEqual(self.output,"hallo\nVorne hallo")
+class TextTabStopAfterMirror_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1\n$1 Hinten")
+    def cmd(self):
+        self.type("test\thallo")
+    def runTest(self):
+        self.assertEqual(self.output,"hallo\nhallo Hinten")
+class TextTabStopSurroundMirror_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1\nVorne $1 Hinten")
+    def cmd(self):
+        self.type("test\thallo welt")
+    def runTest(self):
+        self.assertEqual(self.output,"hallo welt\nVorne hallo welt Hinten")
+class TextTabStopAllSurrounded_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ObenVorne $1 ObenHinten\nVorne $1 Hinten")
+    def cmd(self):
+        self.type("test\thallo welt")
+    def runTest(self):
+        self.assertEqual(self.output,"ObenVorne hallo welt ObenHinten\nVorne hallo welt Hinten")
+
+
+# TODO: mirror mit tabstop mit default variable
+# TODO: Mehrer tabs und mehrere mirrors
+class TextTabStopSimpleMirrorMultiline_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1\n$1")
+    def cmd(self):
+        self.type("test\thallo")
     def runTest(self):
         self.assertEqual(self.output,"hallo\nhallo")
+class TextTabStopSimpleMirrorMultilineMany_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "    $1\n$1\na$1b\n$1\ntest $1 mich")
+    def cmd(self):
+        self.type("test\thallo")
+    def runTest(self):
+        self.assertEqual(self.output,"    hallo\nhallo\nahallob\nhallo\ntest hallo mich")
+
 
 class TextTabStopSimpleMirrorDelete_ExceptCorrectResult(_VimTest):
     snippets = (
@@ -210,15 +275,24 @@ class TextTabStopSimpleMirrorDelete_ExceptCorrectResult(_VimTest):
 
 class TextTabStopSimpleMirrorSameLine_ExceptCorrectResult(_VimTest):
     snippets = (
-        ("test", "$1  $1"),
+        ("test", "$1 $1"),
     )
     def cmd(self):
         self.type("test\thallo")
 
 
     def runTest(self):
-        self.assertEqual(self.output,"hallo  hallo")
+        self.assertEqual(self.output,"hallo hallo")
+class TextTabStopSimpleMirrorSameLineMany_ExceptCorrectResult(_VimTest):
+    snippets = (
+        ("test", "$1 $1 $1 $1"),
+    )
+    def cmd(self):
+        self.type("test\thallo du")
 
+
+    def runTest(self):
+        self.assertEqual(self.output,"hallo du hallo du hallo du hallo du")
 class TextTabStopSimpleMirrorDeleteSomeEnterSome_ExceptCorrectResult(_VimTest):
     snippets = (
         ("test", "$1\n$1"),
@@ -229,7 +303,36 @@ class TextTabStopSimpleMirrorDeleteSomeEnterSome_ExceptCorrectResult(_VimTest):
     def runTest(self):
         self.assertEqual(self.output,"halhups\nhalhups")
 
-# TODO: this is not yet finished
+
+class TextTabStopSimpleTabstopWithDefaultSimpelType_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha ${1:defa}\n$1")
+    def cmd(self):
+        self.type("test\tworld")
+    def runTest(self):
+        self.assertEqual(self.output, "ha world\nworld")
+class TextTabStopSimpleTabstopWithDefaultComplexType_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha ${1:default value} $1\nanother: $1 mirror")
+    def cmd(self):
+        self.type("test\tworld")
+    def runTest(self):
+        self.assertEqual(self.output,
+            "ha world world\nanother: world mirror")
+class TextTabStopSimpleTabstopWithDefaultSimpelKeep_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha ${1:defa}\n$1")
+    def cmd(self):
+        self.type("test\t")
+    def runTest(self):
+        self.assertEqual(self.output, "ha defa\ndefa")
+class TextTabStopSimpleTabstopWithDefaultComplexKeep_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha ${1:default value} $1\nanother: $1 mirror")
+    def cmd(self):
+        self.type("test\t")
+    def runTest(self):
+        self.assertEqual(self.output,
+            "ha default value default value\nanother: default value mirror")
+
+
+
 # class TextTabStopMirrorMoreInvolved_ExceptCorrectResult(_VimTest):
 #     snippets = (
 #         ("for", "for(size_t ${2:i} = 0; $2 < ${1:count}; ${3:++$2})\n{\n\t${0:/* code */}\n}"),
@@ -240,6 +343,9 @@ class TextTabStopSimpleMirrorDeleteSomeEnterSome_ExceptCorrectResult(_VimTest):
 #
 #     def runTest(self):
 #         self.assertEqual(self.output,"hallo Du Nase na")
+# TODO: recursive expansion
+# TODO: mirrors in default expansion
+# TODO: $1 ${1:This is the tabstop}
 
 if __name__ == '__main__':
     import sys
