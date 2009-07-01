@@ -225,16 +225,17 @@ class TextTabStopSimpleMirrorDeleteSomeEnterSome_ExceptCorrectResult(_VimTest):
     def runTest(self):
         self.assertEqual(self.output,"halhups\nhalhups")
 
-class TextTabStopMirrorMoreInvolved_ExceptCorrectResult(_VimTest):
-    snippets = (
-        ("for", "for(size_t ${2:i} = 0; $2 < ${1:count}; ${3:++$2})\n{\n\t${0:/* code */}\n}"),
-    )
-
-    def cmd(self):
-        self.type("for\t")
-
-    def runTest(self):
-        self.assertEqual(self.output,"hallo Du Nase na")
+# TODO: this is not yet finished
+# class TextTabStopMirrorMoreInvolved_ExceptCorrectResult(_VimTest):
+#     snippets = (
+#         ("for", "for(size_t ${2:i} = 0; $2 < ${1:count}; ${3:++$2})\n{\n\t${0:/* code */}\n}"),
+#     )
+#
+#     def cmd(self):
+#         self.type("for\t")
+#
+#     def runTest(self):
+#         self.assertEqual(self.output,"hallo Du Nase na")
 
 if __name__ == '__main__':
     import sys

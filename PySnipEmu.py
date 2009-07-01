@@ -5,11 +5,24 @@ import vim
 import string
 import re
 
-class Mirror(object):
+class TextObject(object):
+    def __init__(self, start, end):
+        self._start = start
+        self._end = end
+
+    @property
+    def start(self):
+        return self._start
+
+    @property
+    def end(self):
+        return self._end
+
+class Mirror(TextObject):
     def __init__(self, ts, idx, start):
         self._ts = ts
-        self._start = (idx, start)
-        self._end = (idx,start)
+        TextObject.__init__(self, (idx,start), (idx,start))
+
         self._delta_rows = 0
         self._delta_cols = 0
 
@@ -39,17 +52,6 @@ class Mirror(object):
     def number(self):
         return self._no
 
-    @property
-    def start(self):
-        "The RO foo property."
-        return self._start
-
-    @property
-    def end(self):
-        "The RO foo property."
-        return self._end
-
-
     def update_span(self):
         start = self._start
         lines = self._ts.current_text.splitlines()
@@ -78,9 +80,9 @@ class TabStop(object):
         return self._lineidx
     line_idx = property(line_idx)
 
+    @property
     def span(self):
         return (self._start,self._start+len(self._ct))
-    span = property(span)
 
     def default_text(self):
         return self._default_text
@@ -335,7 +337,7 @@ class SnippetManager(object):
     def cursor_moved(self):
         cp = vim.current.window.cursor
 
-        if and len(self._current_snippets) and self._last_cursor_pos is not None:
+        if len(self._current_snippets) and self._last_cursor_pos is not None:
             lineno,col = cp
             llineo,lcol = self._last_cursor_pos
             # If we moved the line, somethings fishy.
@@ -349,7 +351,8 @@ class SnippetManager(object):
 
                     chars = line[lcol:col]
                     cs.chars_entered(chars)
-
+        
+        ignore_jumping = False
         self._last_cursor_pos = cp
 
     def entered_insert_mode(self):
