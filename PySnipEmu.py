@@ -102,13 +102,10 @@ class TabStop(TextObject):
         lineno, col = start
 
         newline = lineno + self._start[0]
-        # TODO: remove span
+        newcol = self._start[1] + self._delta_cols
+
         if newline == lineno:
-            newcol = col + self.span[0]
-            endcol = col + self.span[1]
-        else:
-            newcol = self.span[0]
-            endcol = self.span[1]
+            newcol += col
 
         vim.current.window.cursor = newline, newcol
 
@@ -116,19 +113,15 @@ class TabStop(TextObject):
         # Depending on the current mode and position, we
         # might need to move escape out of the mode and this
         # will move our cursor one left
-        if endcol-newcol > 0:
+        if len(self._ct) > 0:
             if newcol != 0 and vim.eval("mode()") == 'i':
                 move_one_right = "l"
             else:
                 move_one_right = ""
 
             vim.command(r'call feedkeys("\<Esc>%sv%il\<c-g>")'
-                % (move_one_right, endcol-newcol-1))
+                % (move_one_right, len(self._ct)-1))
 
-
-    @property
-    def span(self):
-        return (self._start[1]+self._delta_cols,self._start[1]+self._delta_cols+len(self._ct))
 
 class SnippetInstance(TextObject):
     """
@@ -256,7 +249,8 @@ class Snippet(object):
         line_idx = val[:start].count('\n')
         line_start = val[:start].rfind('\n') + 1
         start_in_line = start - line_start
-        ts = TabStop(line_idx, (start_in_line,start_in_line+len(def_text)), def_text)
+        ts = TabStop(line_idx, (start_in_line,start_in_line+len(def_text)),
+                def_text)
 
         tabstops[no] = ts
 
