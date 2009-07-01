@@ -14,7 +14,7 @@ class _VimTest(unittest.TestCase):
         expansion can take place
         """
         def _send(s):
-            os.system("screen -X stuff '%s'" % s)
+            os.system("screen -x %s -X stuff '%s'" % (self.session,s))
 
         splits = str.split('\t')
         for w in splits[:-1]:
@@ -35,27 +35,28 @@ class _VimTest(unittest.TestCase):
 PySnipSnippets.add_snippet("%s","""%s""")
 EOF
 ''' % (sv,content))
-
+        
         # Clear the buffer
         self.type("bggVGd")
 
-        # Enter insert mode
-        self.type("i")
+        if not self.interrupt:
+            # Enter insert mode
+            self.type("i")
 
-        # Execute the command
-        self.cmd()
+            # Execute the command
+            self.cmd()
 
-        handle, fn = tempfile.mkstemp(prefix="PySnipEmuTest",suffix=".txt")
-        os.close(handle)
+            handle, fn = tempfile.mkstemp(prefix="PySnipEmuTest",suffix=".txt")
+            os.close(handle)
 
-        self.escape()
-        self.type(":w! %s\n" % fn)
+            self.escape()
+            self.type(":w! %s\n" % fn)
 
-        # Give screen a chance to send the cmd and vim to write the file
-        time.sleep(.01)
+            # Give screen a chance to send the cmd and vim to write the file
+            time.sleep(.01)
 
-        # Read the output, chop the trailing newline
-        self.output = open(fn,"r").read()[:-1]
+            # Read the output, chop the trailing newline
+            self.output = open(fn,"r").read()[:-1]
 
     def cmd(self):
         """Overwrite these in the children"""
@@ -170,22 +171,109 @@ class TextTabStopSimpleReplace_ExceptCorrectResult(_VimTest):
     def runTest(self):
         self.assertEqual(self.output,"hallo Du Nase na")
 
+class TextTabStopSimpleReplace_ExceptCorrectResult(_VimTest):
+    snippets = (
+        ("hallo", "hallo ${0:End} ${1:Beginning}"),
+    )
+
+    def cmd(self):
+        self.type("hallo\tna\tDu Nase")
+
+    def runTest(self):
+        self.assertEqual(self.output,"hallo Du Nase na")
+
+# TODO: multiline mirrors
+
+class TextTabStopSimpleMirror_ExceptCorrectResult(_VimTest):
+    snippets = (
+        ("test", "$1\n$1"),
+    )
+    def cmd(self):
+        self.type("test\thallo")
+
+    def runTest(self):
+        self.assertEqual(self.output,"hallo\nhallo")
+
+class TextTabStopSimpleMirrorDelete_ExceptCorrectResult(_VimTest):
+    snippets = (
+        ("test", "$1\n$1"),
+    )
+    def cmd(self):
+        self.type("test\thallo")
+        self.type("\b\b")
+
+    def runTest(self):
+        self.assertEqual(self.output,"hal\nhal")
+
+class TextTabStopSimpleMirrorSameLine_ExceptCorrectResult(_VimTest):
+    snippets = (
+        ("test", "$1  $1"),
+    )
+    def cmd(self):
+        self.type("test\thallo")
+
+    def runTest(self):
+        self.assertEqual(self.output,"hal\nhal")
+
+class TextTabStopSimpleMirrorDeleteSomeEnterSome_ExceptCorrectResult(_VimTest):
+    snippets = (
+        ("test", "$1\n$1"),
+    )
+    def cmd(self):
+        self.type("test\thallo\b\bhups")
+
+    def runTest(self):
+        self.assertEqual(self.output,"halhups\nhalhups")
+
+class TextTabStopMirrorMoreInvolved_ExceptCorrectResult(_VimTest):
+    snippets = (
+        ("for", "for(size_t ${2:i} = 0; $2 < ${1:count}; ${3:++$2})\n{\n\t${0:/* code */}\n}"),
+    )
+
+    def cmd(self):
+        self.type("for\t")
+
+    def runTest(self):
+        self.assertEqual(self.output,"hallo Du Nase na")
+
 if __name__ == '__main__':
     import sys
+    import optparse
 
-    tests = [
-        SimpleExpand_ExceptCorrectResult(),
-        SimpleExpandTypeAfterExpand_ExceptCorrectResult(),
-        SimpleExpandTypeAfterExpand1_ExceptCorrectResult(),
-        DoNotExpandAfterSpace_ExceptCorrectResult(),
-        ExpandInTheMiddleOfLine_ExceptCorrectResult(),
-        MultilineExpand_ExceptCorrectResult(),
-        MultilineExpandTestTyping_ExceptCorrectResult(),
-        ExitTabStop_ExceptCorrectResult(),
-        TextTabStopNoReplace_ExceptCorrectResult(),
-        TextTabStopSimpleReplace_ExceptCorrectResult(),
-    ]
-    # suite = unittest.TestLoader(.loadTestsFromModule(__import__("test"))
+    def parse_args():
+        p = optparse.OptionParser("%prog [OPTIONS] <test case names to run>")
+
+        p.set_defaults(session="vim", interrupt=False)
+
+        p.add_option("-s", "--session", dest="session",  metavar="SESSION",
+            help="send commands to screen session SESSION [%default]")
+        p.add_option("-i", "--interrupt", dest="interrupt",
+            action="store_true",
+            help="Stop after defining the snippet. This allows the user" \
+             "to interactively test the snippet in vim. You must give exactly" \
+            "one test case on the cmdline. The test will always fail."
+        )
+
+        o, args = p.parse_args()
+        return o, args
+
+    options,selected_tests = parse_args()
+
+    # The next line doesn't work in python 2.3
+    all_test_suites = unittest.TestLoader().loadTestsFromModule(__import__("test"))
+
+    # Inform all test case which screen session to use
     suite = unittest.TestSuite()
-    suite.addTests(tests)
+    for s in all_test_suites:
+        for test in s:
+            test.session = options.session
+            test.interrupt = options.interrupt
+            if len(selected_tests):
+                id = test.id().split('.')[1]
+                if id not in selected_tests:
+                    continue
+            suite.addTest(test)
+
+
     res = unittest.TextTestRunner().run(suite)
+
