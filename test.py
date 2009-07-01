@@ -107,28 +107,19 @@ class ExpandInTheMiddleOfLine_ExceptCorrectResult(_SimpleExpands):
         self.assertEqual(self.output,"Wie Hallo Welt! gehts?")
 
 class MultilineExpand_ExceptCorrectResult(_VimTest):
-    snippets = (
-        ("hallo", "Hallo Welt!\nUnd Wie gehts?"),
-    )
-
+    snippets = ("hallo", "Hallo Welt!\nUnd Wie gehts?")
     def cmd(self):
         self.type("Wie hallo gehts?")
         self.escape()
         self.type("bhi\t")
-
     def runTest(self):
         self.assertEqual(self.output, "Wie Hallo Welt!\nUnd Wie gehts? gehts?")
-
 class MultilineExpandTestTyping_ExceptCorrectResult(_VimTest):
-    snippets = (
-        ("hallo", "Hallo Welt!\nUnd Wie gehts?"),
-    )
-
+    snippets = ("hallo", "Hallo Welt!\nUnd Wie gehts?")
     def cmd(self):
         self.type("Wie hallo gehts?")
         self.escape()
         self.type("bhi\tHuiui!")
-
     def runTest(self):
         self.assertEqual(self.output,
              "Wie Hallo Welt!\nUnd Wie gehts?Huiui! gehts?")
@@ -196,6 +187,16 @@ class TabStopTestBackwardJumping2_ExceptCorrectResult(_VimTest):
         self.type("hallo\tSomelengthy Text\tHi+Lets replace it again\tBlah\t++\t")
     def runTest(self):
         self.assertEqual(self.output,"hallo Blah Lets replace it again")
+
+class TabStopTestMultilineExpand_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo $0\nnice $1 work\n$3 $2\nSeem to work")
+    def cmd(self):
+        self.type("test hallo World")
+        self.escape()
+        self.type("02f i\tworld\ttry\ttest\tone more\t\t")
+    def runTest(self):
+        self.assertEqual(self.output,
+            "test hallo one more\nnice world work\ntest try\nSeem to work World")
 
 # TODO: pasting with <C-R> while mirroring
 ###########
