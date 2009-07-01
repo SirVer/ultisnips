@@ -2,38 +2,60 @@
 # encoding: utf-8
 #
 
-import vim
+import os
+import tempfile
 import unittest
-
-from PySnipEmu import PySnipSnippets
-
+import time
 
 class _VimTest(unittest.TestCase):
+    def type(self, str):
+        """
+        Send the keystrokes to vim via screen. Pause after each tab, so
+        expansion can take place
+        """
+        def _send(s):
+            os.system("screen -X stuff '%s'" % s)
+
+        splits = str.split('\t')
+        for w in splits[:-1]:
+            _send(w + '\t')
+        _send(splits[-1])
+
+
+    def escape(self):
+        self.type("\x1b")
+
     def setUp(self):
-        PySnipSnippets.reset()
+        self.escape()
+
+        self.type(":py PySnipSnippets.reset()\n")
 
         for sv,content in self.snippets:
-            PySnipSnippets.add_snippet(sv,content)
+            self.type(''':py << EOF
+PySnipSnippets.add_snippet("%s","""%s""")
+EOF
+''' % (sv,content))
 
-        vim.command(":new")
-        try:
-            self.cmd()
-            self.output = '\n'.join(vim.current.buffer[:])
-        finally:
-            vim.command(":q!")
+        # Clear the buffer
+        self.type("bggVGd")
 
-    def insert(self,string):
-        """A helper function to type some text"""
-        vim.command('normal i%s' % string)
-    def change(self,string):
-        """A helper function to type some text"""
-        vim.command('normal c%s' % string)
+        # Enter insert mode
+        self.type("i")
 
-    def expand(self):
-        vim.command("call PyVimSnips_ExpandSnippet()")
+        # Execute the command
+        self.cmd()
 
-    def tearDown(self):
-        PySnipSnippets.clear_snippets()
+        handle, fn = tempfile.mkstemp(prefix="PySnipEmuTest",suffix=".txt")
+        os.close(handle)
+
+        self.escape()
+        self.type(":w! %s\n" % fn)
+
+        # Give screen a chance to send the cmd and vim to write the file
+        time.sleep(.01)
+
+        # Read the output, chop the trailing newline
+        self.output = open(fn,"r").read()[:-1]
 
     def cmd(self):
         """Overwrite these in the children"""
@@ -50,43 +72,37 @@ class _SimpleExpands(_VimTest):
 
 class SimpleExpand_ExceptCorrectResult(_SimpleExpands):
     def cmd(self):
-        self.insert("hallo ")
-        self.expand()
+        self.type("hallo\t")
 
     def runTest(self):
-        self.assertEqual(self.output,"Hallo Welt! ")
+        self.assertEqual(self.output,"Hallo Welt!")
 
 class SimpleExpandTypeAfterExpand_ExceptCorrectResult(_SimpleExpands):
     def cmd(self):
-        self.insert("hallo ")
-        self.expand()
-        self.insert("and again")
+        self.type("hallo\tand again")
 
     def runTest(self):
-        self.assertEqual(self.output,"Hallo Welt!and again ")
+        self.assertEqual(self.output,"Hallo Welt!and again")
 
 class SimpleExpandTypeAfterExpand1_ExceptCorrectResult(_SimpleExpands):
     def cmd(self):
-        self.insert("na du hallo ")
-        self.expand()
-        self.insert("and again")
+        self.type("na du hallo\tand again")
 
     def runTest(self):
-        self.assertEqual(self.output,"na du Hallo Welt!and again ")
+        self.assertEqual(self.output,"na du Hallo Welt!and again")
 
 class DoNotExpandAfterSpace_ExceptCorrectResult(_SimpleExpands):
     def cmd(self):
-        self.insert("hallo  ")
-        self.expand()
+        self.type("hallo \t")
 
     def runTest(self):
-        self.assertEqual(self.output,"hallo  ")
+        self.assertEqual(self.output,"hallo ")
 
 class ExpandInTheMiddleOfLine_ExceptCorrectResult(_SimpleExpands):
     def cmd(self):
-        self.insert("Wie hallo gehts?")
-        vim.command("normal 02f ")
-        self.expand()
+        self.type("Wie hallo gehts?")
+        self.escape()
+        self.type("bhi\t")
 
     def runTest(self):
         self.assertEqual(self.output,"Wie Hallo Welt! gehts?")
@@ -97,22 +113,22 @@ class MultilineExpand_ExceptCorrectResult(_VimTest):
     )
 
     def cmd(self):
-        self.insert("Wie hallo gehts?")
-        vim.command("normal 02f ")
-        self.expand()
+        self.type("Wie hallo gehts?")
+        self.escape()
+        self.type("bhi\t")
 
     def runTest(self):
         self.assertEqual(self.output, "Wie Hallo Welt!\nUnd Wie gehts? gehts?")
+
 class MultilineExpandTestTyping_ExceptCorrectResult(_VimTest):
     snippets = (
         ("hallo", "Hallo Welt!\nUnd Wie gehts?"),
     )
 
     def cmd(self):
-        self.insert("Wie hallo gehts?")
-        vim.command("normal 02f ")
-        self.expand()
-        self.insert("Huiui!")
+        self.type("Wie hallo gehts?")
+        self.escape()
+        self.type("bhi\tHuiui!")
 
     def runTest(self):
         self.assertEqual(self.output,
@@ -127,12 +143,10 @@ class ExitTabStop_ExceptCorrectResult(_VimTest):
     )
 
     def cmd(self):
-        self.insert("echo ")
-        self.expand()
-        self.insert("test")
+        self.type("echo\ttest")
 
     def runTest(self):
-        self.assertEqual(self.output,"test run ")
+        self.assertEqual(self.output,"test run")
 
 class TextTabStopNoReplace_ExceptCorrectResult(_VimTest):
     snippets = (
@@ -140,11 +154,10 @@ class TextTabStopNoReplace_ExceptCorrectResult(_VimTest):
     )
 
     def cmd(self):
-        self.insert("echo ")
-        self.expand()
+        self.type("echo\t")
 
     def runTest(self):
-        self.assertEqual(self.output,"echo Hallo ")
+        self.assertEqual(self.output,"echo Hallo")
 
 class TextTabStopSimpleReplace_ExceptCorrectResult(_VimTest):
     snippets = (
@@ -152,18 +165,13 @@ class TextTabStopSimpleReplace_ExceptCorrectResult(_VimTest):
     )
 
     def cmd(self):
-        self.insert("hallo ")
-        self.expand()
-        vim.command(r'call feedkeys("na")')
-    
+        self.type("hallo\tna\tDu Nase")
+
     def runTest(self):
-        self.assertEqual(self.output,"hallo End na ")
+        self.assertEqual(self.output,"hallo Du Nase na")
 
 if __name__ == '__main__':
     import sys
-    from cStringIO import StringIO
-
-    s = StringIO()
 
     tests = [
         SimpleExpand_ExceptCorrectResult(),
@@ -180,10 +188,4 @@ if __name__ == '__main__':
     # suite = unittest.TestLoader(.loadTestsFromModule(__import__("test"))
     suite = unittest.TestSuite()
     suite.addTests(tests)
-    res = unittest.TextTestRunner(stream=s).run(suite)
-
-    # if res.wasSuccessful():
-    #     vim.command("qa!")
-
-    vim.current.buffer[:] = s.getvalue().split('\n')
-
+    res = unittest.TextTestRunner().run(suite)

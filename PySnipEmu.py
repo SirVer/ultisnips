@@ -33,7 +33,7 @@ class SnippetInstance(object):
         self._start = start
         self._end = end
         self._ts = ts
-        
+
         self._cts = 1
 
     def select_next_tab(self):
@@ -42,7 +42,7 @@ class SnippetInstance(object):
                 self._cts = 0
             else:
                 self._cts = 1
-        
+
         ts = self._ts[self._cts]
         lineno, col = self._start
 
@@ -53,23 +53,24 @@ class SnippetInstance(object):
         else:
             newcol = ts.span[0]
             endcol = ts.span[1]
-        
+
         self._cts += 1
 
         vim.current.window.cursor = newline, newcol
-        
+
         # Select the word
-       
+
         # Depending on the current mode and position, we
         # might need to move escape out of the mode and this
         # will move our cursor one left
-        if newcol != 0 and vim.eval("mode()") == 'i':
-            move_one_right = "l"
-        else:
-            move_one_right = ""
+        if endcol-newcol > 0:
+            if newcol != 0 and vim.eval("mode()") == 'i':
+                move_one_right = "l"
+            else:
+                move_one_right = ""
 
-        vim.command(r'call feedkeys("\<Esc>%sv%il\<c-g>")'
-            % (move_one_right, endcol-newcol-1))
+            vim.command(r'call feedkeys("\<Esc>%sv%il\<c-g>")'
+                % (move_one_right, endcol-newcol-1))
 
 class Snippet(object):
     _TB_EXPR = re.compile(r'\$(?:(?:{(\d+):(.*?)})|(\d+))')
@@ -133,19 +134,19 @@ class Snippet(object):
                 newcol = col + len(lines[-1])
             else:
                 newcol = len(lines[-1])
-        
+
         lines[0] = before + lines[0]
         lines[-1] += after
 
         vim.current.buffer[lineno-1:lineno-1+len(lines)] = lines
 
         vim.current.window.cursor = newline, newcol
-        
+
         if len(ts):
             s = SnippetInstance( (lineno,col), (newline,newcol), ts)
-            
+
             s.select_next_tab()
-            
+
             return s
 
 
@@ -154,14 +155,11 @@ class SnippetManager(object):
         self.reset()
 
     def reset(self):
-        self.clear_snippets()
+        self._snippets = {}
         self._current_snippets = []
 
     def add_snippet(self,trigger,value):
         self._snippets[trigger] = Snippet(trigger,value)
-
-    def clear_snippets(self):
-        self._snippets = {}
 
     def try_expand(self):
         if len(self._current_snippets):
@@ -183,7 +181,7 @@ class SnippetManager(object):
             s = self._snippets[word].launch(before.rstrip()[:-len(word)], after)
             if s is not None:
                 self._current_snippets.append(s)
-    
+
     def cursor_moved(self):
         pass
 
