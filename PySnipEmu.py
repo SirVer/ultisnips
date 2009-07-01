@@ -60,12 +60,32 @@ class Mirror(TextObject):
     def tabstop(self):
         return self._tabstop
 
+    def update(self,ts):
+        if ts != self._tabstop:
+            return 0
+
+        mirror_line = self.start[0]
+        line = vim.current.buffer[mirror_line]
+
+        line = line[:self.start[1]+self.delta_cols] + \
+                self._tabstop.current_text + \
+                line[self.end[1]+self.delta_cols:]
+
+        oldspan = self.end[1]-self.start[1]
+        self._end = (self.start[0],self.start[1]+len(self._tabstop.current_text))
+        newspan = self.end[1]-self.start[1]
+
+        vim.current.buffer[mirror_line] = line
+
+        return newspan-oldspan
+
+
 class TabStop(TextObject):
     """
     This is the most important TextObject. A TabStop is were the cursor
     comes to rest when the user taps through the Snippet.
     """
-    def __init__(self, no, idx, span, default_text = ""):
+    def __init__(self, idx, span, default_text = ""):
         TextObject.__init__(self, (idx,span[0]), (idx,span[1]))
 
         self._ct = default_text
@@ -161,21 +181,10 @@ class SnippetInstance(TextObject):
 
     def _update_mirrors(self,for_ts):
         for m in self._mirrors:
-            if m.tabstop == for_ts:
-                mirror_line = m.start[0]
-                line = vim.current.buffer[mirror_line]
-                line = line[:m.start[1]+m.delta_cols] + \
-                        for_ts.current_text + \
-                        line[m.end[1]+m.delta_cols:]
+            moved = m.update(for_ts)
+            if moved:
+                self._move_to_on_line(moved, m.start[0], m.start[1]+m.delta_cols,cobj=m)
 
-                oldspan = m.end[1]-m.start[1]
-                # TODO: evil hack!
-                m._end = (m.start[0],m.start[1]+len(for_ts.current_text))
-                newspan = m.end[1]-m.start[1]
-
-                vim.current.buffer[mirror_line] = line
-
-                self._move_to_on_line(newspan-oldspan, m.start[0], m.start[1]+m.delta_cols,cobj=m)
 
     def _move_to_on_line(self,amount, lineno = None, col = None, cobj = None):
         if self._cts is None:
@@ -227,14 +236,13 @@ class Snippet(object):
         self._t = trigger
         self._v = value
 
+    @property
     def trigger(self):
         return self._t
-    trigger = property(trigger)
 
     def _handle_tabstop(self, m, val, tabstops, mirrors):
         no = int(m.group(1))
         def_text = m.group(2)
-
 
         start, end = m.span()
         val = val[:start] + def_text + val[end:]
@@ -242,7 +250,7 @@ class Snippet(object):
         line_idx = val[:start].count('\n')
         line_start = val[:start].rfind('\n') + 1
         start_in_line = start - line_start
-        ts = TabStop(no, line_idx, (start_in_line,start_in_line+len(def_text)), def_text)
+        ts = TabStop(line_idx, (start_in_line,start_in_line+len(def_text)), def_text)
 
         tabstops[no] = ts
 
@@ -262,7 +270,7 @@ class Snippet(object):
             m = Mirror(tabstops[no], line_idx, start_in_line)
             mirrors.append(m)
         else:
-            ts = TabStop(no, line_idx, (start_in_line,start_in_line))
+            ts = TabStop(line_idx, (start_in_line,start_in_line))
             tabstops[no] = ts
 
         return val
@@ -282,20 +290,14 @@ class Snippet(object):
             else:
                 break
 
-        return tabstops, mirrors, val
-
-    def _replace_tabstops(self):
-        ts, mirrors, val = self._find_tabstops(self._v)
-        lines = val.split('\n')
-
-        return ts, mirrors, lines
+        return tabstops, mirrors, val.split('\n')
 
     def launch(self, before, after):
         lineno,col = vim.current.window.cursor
 
         col -= len(self._t)
 
-        ts, mirrors, lines = self._replace_tabstops()
+        ts, mirrors, lines = self._find_tabstops(self._v)
 
         endcol = None
         newline = 1
@@ -359,7 +361,6 @@ class SnippetManager(object):
                 self._current_snippets.append(s)
 
     def cursor_moved(self):
-
         cp = vim.current.window.cursor
 
         if len(self._current_snippets) and self._last_cursor_pos is not None:
@@ -383,3 +384,4 @@ class SnippetManager(object):
         pass
 
 PySnipSnippets = SnippetManager()
+
