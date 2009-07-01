@@ -8,18 +8,21 @@ import unittest
 import time
 
 class _VimTest(unittest.TestCase):
-    def type(self, str):
-        """
-        Send the keystrokes to vim via screen. Pause after each tab, so
-        expansion can take place
-        """
-        def _send(s):
+    def send(self, s):
             os.system("screen -x %s -X stuff '%s'" % (self.session,s))
 
-        splits = str.split('\t')
-        for w in splits[:-1]:
-            _send(w + '\t')
-        _send(splits[-1])
+    def type(self, str):
+        """
+        Send the keystrokes to vim via screen. Pause after each char, so
+        vim can handle this
+        """
+        for c in str:
+            self.send(c)
+
+        # splits = str.split('\t')
+        # for w in splits[:-1]:
+        #     _send(w + '\t')
+        # _send(splits[-1])
 
 
     def escape(self):
@@ -28,20 +31,20 @@ class _VimTest(unittest.TestCase):
     def setUp(self):
         self.escape()
 
-        self.type(":py PySnipSnippets.reset()\n")
+        self.send(":py PySnipSnippets.reset()\n")
 
         for sv,content in self.snippets:
-            self.type(''':py << EOF
+            self.send(''':py << EOF
 PySnipSnippets.add_snippet("%s","""%s""")
 EOF
 ''' % (sv,content))
-        
+
         # Clear the buffer
-        self.type("bggVGd")
+        self.send("bggVGd")
 
         if not self.interrupt:
             # Enter insert mode
-            self.type("i")
+            self.send("i")
 
             # Execute the command
             self.cmd()
@@ -50,7 +53,7 @@ EOF
             os.close(handle)
 
             self.escape()
-            self.type(":w! %s\n" % fn)
+            self.send(":w! %s\n" % fn)
 
             # Give screen a chance to send the cmd and vim to write the file
             time.sleep(.01)
@@ -212,8 +215,9 @@ class TextTabStopSimpleMirrorSameLine_ExceptCorrectResult(_VimTest):
     def cmd(self):
         self.type("test\thallo")
 
+
     def runTest(self):
-        self.assertEqual(self.output,"hal\nhal")
+        self.assertEqual(self.output,"hallo  hallo")
 
 class TextTabStopSimpleMirrorDeleteSomeEnterSome_ExceptCorrectResult(_VimTest):
     snippets = (

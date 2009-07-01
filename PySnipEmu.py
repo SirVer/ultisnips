@@ -5,10 +5,18 @@ import vim
 import string
 import re
 
+def debug(s):
+    f = open("/tmp/file.txt","a")
+    f.write(s+'\n')
+    f.close()
+
 class TextObject(object):
     def __init__(self, start, end):
         self._start = start
         self._end = end
+
+        self._delta_rows = 0
+        self._delta_cols = 0
 
     @property
     def start(self):
@@ -18,13 +26,6 @@ class TextObject(object):
     def end(self):
         return self._end
 
-class Mirror(TextObject):
-    def __init__(self, ts, idx, start):
-        self._ts = ts
-        TextObject.__init__(self, (idx,start), (idx,start))
-
-        self._delta_rows = 0
-        self._delta_cols = 0
 
     def delta_rows():
         doc = "The RW foo property."
@@ -44,6 +45,12 @@ class Mirror(TextObject):
         return locals()
     delta_cols = property(**delta_cols())
 
+
+class Mirror(TextObject):
+    def __init__(self, ts, idx, start):
+        self._ts = ts
+        TextObject.__init__(self, (idx,start), (idx,start))
+
     @property
     def tabstop(self):
         return self._ts
@@ -60,12 +67,11 @@ class Mirror(TextObject):
         elif len(lines) > 1:
             self._end = (start[0],start[1]+len(lines[0]) )
 
-class TabStop(object):
+class TabStop(TextObject):
     def __init__(self, no, idx, span, default_text = ""):
+        TextObject.__init__(self, (idx,span[0]), (idx,span[1]))
+
         self._no = no
-        self._default_text = default_text
-        self._start = span[0]
-        self._lineidx = idx
         self._ct = default_text
 
     def current_text():
@@ -76,50 +82,51 @@ class TabStop(object):
         return locals()
     current_text = property(**current_text())
 
-    def line_idx(self):
-        return self._lineidx
-    line_idx = property(line_idx)
-
     @property
     def span(self):
-        return (self._start,self._start+len(self._ct))
-
-    def default_text(self):
-        return self._default_text
-    default_text = property(default_text)
+        return (self._start[1]+self._delta_cols,self._start[1]+self._delta_cols+len(self._ct))
 
     def number(self):
         return self._no
     number = property(number)
 
-class SnippetInstance(object):
+class SnippetInstance(TextObject):
     def __init__(self,start,end, ts, mirrors):
-        self._start = start
-        self._end = end
+        TextObject.__init__(self, start, end)
+
         self._ts = ts
         self._mirrors = mirrors
+        self._text_objects = ts.values() + mirrors
+        self._selected_tab = None
 
-        self._cts = 1
+        self._cts = 0
 
     def select_next_tab(self):
+        self._cts += 1
+
         if self._cts not in self._ts:
             if 0 in self._ts:
                 self._cts = 0
             else:
                 self._cts = 1
 
+        debug("self._cts: %i" % self._cts)
+
         ts = self._ts[self._cts]
         lineno, col = self._start
 
-        newline = lineno + ts.line_idx
+        debug("ts._start: %s" % (ts.start,))
+        debug("ts._delta_cols: %s" % (ts._delta_cols,))
+        debug("ts.span: %s" % (ts.span,))
+        debug("ts._ct: '%s'" % (ts._ct,))
+
+        newline = lineno + ts.start[0]
         if newline == lineno:
             newcol = col + ts.span[0]
             endcol = col + ts.span[1]
         else:
             newcol = ts.span[0]
             endcol = ts.span[1]
-
-        self._cts += 1
 
         vim.current.window.cursor = newline, newcol
 
@@ -135,6 +142,8 @@ class SnippetInstance(object):
 
             vim.command(r'call feedkeys("\<Esc>%sv%il\<c-g>")'
                 % (move_one_right, endcol-newcol-1))
+            self._selected_tab = ts
+
 
     def _update_mirrors(self,for_ts):
         for m in self._mirrors:
@@ -159,38 +168,40 @@ class SnippetInstance(object):
                 #                 om.delta_cols += len(lines[-1])
 
     def _move_to_on_line(self,amount):
+        debug("Move on line: %i" % amount)
         lineno,col = vim.current.window.cursor
         lineno -= 1
-        for m in self._mirrors:
+        for m in self._text_objects:
+            debug("  m.start, lineno, col: %s %s %s" % (m.start, lineno, col))
             if m.start[0] != lineno:
                 continue
-            if m.start[1] > col:
+            if m.start[1]+m.delta_cols >= col:
                 m.delta_cols += amount
+            debug("  m.delta_cols: %s" % (m.delta_cols))
 
 
     def backspace(self,count):
-        if self._cts not in self._ts:
-            if 0 in self._ts:
-                self._cts = 0
-            else:
-                self._cts = 1
-
         cts = self._ts[self._cts]
-        cts.current_text = cts.current_text[:-count]
+        ll = len(cts.current_text)
+        debug("backspace(%i):" % count)
 
-        # self._move_to_on_line(-count)
+        cts.current_text = cts.current_text[:-count]
+        debug("   cts.current_text: %s" % cts.current_text)
+        self._move_to_on_line(len(cts.current_text)-ll)
 
         self._update_mirrors(cts)
 
     def chars_entered(self, chars):
-        if self._cts not in self._ts:
-            if 0 in self._ts:
-                self._cts = 0
-            else:
-                self._cts = 1
-
         cts = self._ts[self._cts]
+
+        if self._selected_tab is not None:
+            self.backspace(len(cts.current_text))
+            self._selected_tab = None
+
         cts.current_text += chars
+
+        debug("chars_entered(%s):" % chars)
+        debug("   cts.current_text: %s" % cts.current_text)
 
         self._move_to_on_line(len(chars))
 
@@ -300,7 +311,6 @@ class Snippet(object):
 
             return s
 
-
 class SnippetManager(object):
     def __init__(self):
         self.reset()
@@ -316,6 +326,7 @@ class SnippetManager(object):
     def try_expand(self):
         if len(self._current_snippets):
             self._current_snippets[-1].select_next_tab()
+            self._last_cursor_pos = vim.current.window.cursor
             return
 
         line = vim.current.line
@@ -335,6 +346,8 @@ class SnippetManager(object):
                 self._current_snippets.append(s)
 
     def cursor_moved(self):
+        debug("CursorMoved: %s" % vim.eval("mode()"))
+
         cp = vim.current.window.cursor
 
         if len(self._current_snippets) and self._last_cursor_pos is not None:
@@ -351,11 +364,11 @@ class SnippetManager(object):
 
                     chars = line[lcol:col]
                     cs.chars_entered(chars)
-        
-        ignore_jumping = False
+
         self._last_cursor_pos = cp
 
     def entered_insert_mode(self):
+        debug("EnteredInsertMode: %s" % vim.eval("mode()"))
         pass
 
 PySnipSnippets = SnippetManager()
