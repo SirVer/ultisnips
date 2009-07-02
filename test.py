@@ -203,7 +203,8 @@ class TabStopTestMultilineExpand_ExceptCorrectResult(_VimTest):
     def cmd(self):
         self.type("test hallo World")
         self.escape()
-        self.type("02f i\tworld\ttry\ttest\tone more\t\t")
+        self.type("02f i\t")
+        self.type("world\ttry\ttest\tone more\t\t")
     def runTest(self): self.check_output()
 
 # TODO: pasting with <C-R> while mirroring

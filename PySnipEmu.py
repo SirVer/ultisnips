@@ -89,10 +89,18 @@ class TextObject(object):
     This base class represents any object in the text
     that has a span in any ways
     """
-    def __init__(self, start, end):
-        self._parent = None
+    def __init__(self, parent, start, end):
         self._start = start
         self._end = end
+        self._parent = parent
+
+        self._children = []
+
+        if parent is not None:
+            parent.add_child(self)
+
+    def add_child(self,c):
+        self._children.append(c)
 
     def parent():
         doc = "The parent TextObject this TextObject resides in"
@@ -102,7 +110,7 @@ class TextObject(object):
             self._parent = value
         return locals()
     parent = property(**parent())
-
+    
     @property
     def start(self):
         return self._start
@@ -116,12 +124,13 @@ class Mirror(TextObject):
     """
     A Mirror object mirrors a TabStop that is, text is repeated here
     """
-    def __init__(self, ts, idx, start_col):
+    def __init__(self, parent, ts, idx, start_col):
         start = Position(idx,start_col)
-        end = Position(idx,start_col)
-        TextObject.__init__(self, start, end)
-
+        end = start + (ts.end - ts.start)
+        TextObject.__init__(self, parent, start, end)
         self._tabstop = ts
+
+        ts.add_mirror(self)
 
     @property
     def tabstop(self):
@@ -144,7 +153,10 @@ class Mirror(TextObject):
         newcolspan = self.end.col - self.start.col
         newlinespan = self.end.line - self.start.line
 
-        return newlinespan-oldlinespan, newcolspan-oldcolspan
+        moved_lines = newlinespan - oldlinespan
+        moved_cols = newcolspan - oldcolspan
+
+        self._parent._move_textobjects_behind(moved_lines, moved_cols, self)
 
 
 class TabStop(TextObject):
@@ -152,12 +164,17 @@ class TabStop(TextObject):
     This is the most important TextObject. A TabStop is were the cursor
     comes to rest when the user taps through the Snippet.
     """
-    def __init__(self, idx, span, default_text = ""):
+    def __init__(self, parent, idx, span, default_text = ""):
         start = Position(idx,span[0])
         end = Position(idx,span[1])
-        TextObject.__init__(self, start, end)
+        TextObject.__init__(self, parent, start, end)
 
         self._ct = default_text
+
+        self._mirrors = []
+
+    def add_mirror(self, m):
+        self._mirrors.append(m)
 
     def current_text():
         def fget(self):
@@ -180,7 +197,10 @@ class TabStop(TextObject):
 
             self._parent._move_textobjects_behind(moved_lines, moved_cols, self)
             self._end = new_end
-            self._parent._update_mirrors(self)
+
+            for m in self._mirrors:
+                m.update(self)
+
         return locals()
     current_text = property(**current_text())
 
@@ -217,22 +237,18 @@ class SnippetInstance(TextObject):
     also a TextObject because it has a start an end
     """
 
-    def __init__(self, start, end, ts, mirrors):
-        TextObject.__init__(self, start, end)
-
-        self._tabstops = ts
-        self._mirrors = mirrors
-        self._text_objects = ts.values() + mirrors
-        self._selected_tab = None
+    def __init__(self, start, end):
+        TextObject.__init__(self, None, start, end)
 
         self._cts = None
+        self._selected_tab = None
+        self._tabstops = {}
 
-        for to in self._text_objects:
-            to.parent = self
+    def has_tabs(self):
+        return len(self._children) > 0
 
-        for ts in self._tabstops.values():
-            self._update_mirrors(ts)
-
+    def add_tabstop(self,no, ts):
+        self._tabstops[no] = ts
 
     def select_next_tab(self, backwards = False):
         if self._cts == 0:
@@ -268,12 +284,6 @@ class SnippetInstance(TextObject):
         return True
 
 
-    def _update_mirrors(self,for_ts):
-        for m in self._mirrors:
-            moved_lines, moved_cols = m.update(for_ts)
-            self._move_textobjects_behind(moved_lines, moved_cols, m)
-
-
     def _move_textobjects_behind(self, lines, cols, obj):
         if lines == 0 and cols == 0:
             return
@@ -281,7 +291,7 @@ class SnippetInstance(TextObject):
         debug("Got: %i %i" % (lines,cols))
         debug("  %s -> %s" % (obj.start,obj.end))
 
-        for m in self._text_objects:
+        for m in self._children:
             if m == obj:
                 continue
 
@@ -318,8 +328,6 @@ class SnippetInstance(TextObject):
         else:
             cts.current_text += chars
 
-        self._update_mirrors(cts)
-
 
 class Snippet(object):
     _TABSTOP = re.compile(r'''(?xms)
@@ -335,7 +343,7 @@ class Snippet(object):
     def trigger(self):
         return self._t
 
-    def _handle_tabstop(self, m, val, tabstops, mirrors):
+    def _handle_tabstop(self, s, m, val, tabstops):
         no = int(m.group(1))
         def_text = m.group(2)
 
@@ -345,59 +353,65 @@ class Snippet(object):
         line_idx = val[:start].count('\n')
         line_start = val[:start].rfind('\n') + 1
         start_in_line = start - line_start
-        ts = TabStop(line_idx,
+        ts = TabStop(s, line_idx,
                 (start_in_line,start_in_line+len(def_text)), def_text)
 
         tabstops[no] = ts
+        s.add_tabstop(no,ts)
 
         return val
 
-    def _handle_ts_or_mirror(self, m, val, tabstops, mirrors):
+    def _handle_ts_or_mirror(self, s, m, val, tabstops):
         no = int(m.group(3))
 
         start, end = m.span()
-        val = val[:start] + val[end:]
 
         line_idx = val[:start].count('\n')
         line_start = val[:start].rfind('\n') + 1
         start_in_line = start - line_start
 
         if no in tabstops:
-            m = Mirror(tabstops[no], line_idx, start_in_line)
-            mirrors.append(m)
+            m = Mirror(s, tabstops[no], line_idx, start_in_line)
+            val = val[:start] + tabstops[no].current_text + val[end:]
         else:
-            ts = TabStop(line_idx, (start_in_line,start_in_line))
+            ts = TabStop(s, line_idx, (start_in_line,start_in_line))
+            val = val[:start] + val[end:]
             tabstops[no] = ts
+            s.add_tabstop(no,ts)
 
         return val
 
-    def _find_tabstops(self, val):
+    def _find_tabstops(self, s, val):
         tabstops = {}
-        mirrors = []
 
         while 1:
             m = self._TABSTOP.search(val)
 
             if m is not None:
                 if m.group(1) is not None: # ${1:hallo}
-                    val = self._handle_tabstop(m,val,tabstops,mirrors)
+                    val = self._handle_tabstop(s,m,val,tabstops)
                 elif m.group(3) is not None: # $1
-                    val = self._handle_ts_or_mirror(m,val,tabstops,mirrors)
+                    val = self._handle_ts_or_mirror(s,m,val,tabstops)
             else:
                 break
 
-        return tabstops, mirrors, val
+        return val
 
     def launch(self, before, after):
-        ts, mirrors, text = self._find_tabstops(self._v)
-
         lineno, col = vim.current.window.cursor
         start = Position(lineno-1,col - len(self._t))
         end = Position(lineno-1,col)
+
+        s = SnippetInstance(start,end)
+        text = self._find_tabstops(s, self._v)
+
         new_end = _replace_text_in_buffer( start, end, text )
 
-        if len(ts) or len(mirrors):
-            s = SnippetInstance(start, new_end, ts, mirrors)
+        # TODO: hack
+        s.end.col = new_end.col
+        s.end.line = new_end.line
+
+        if s.has_tabs():
             s.select_next_tab()
             return s
         else:
