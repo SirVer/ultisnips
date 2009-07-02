@@ -10,11 +10,39 @@ def debug(s):
     f.write(s+'\n')
     f.close()
 
-def _line_count_and_len_of_last_line(txt):
-    lines = txt.splitlines()
-    if not len(lines):
-        return 1, 0 # empty line has zero columns but one line
-    return len(lines), len(lines[-1])
+def _replace_text_in_buffer( start, end, text ):
+    text = self._tabstop.current_text.splitlines()
+
+    first_line_idx = self._parent.start.line + self.start.line
+    first_line = vim.current.buffer[first_line_idx][:self.start.col]
+
+    last_line_idx = self._parent.start.line + self.end.line
+    last_line = vim.current.buffer[last_line_idx][self.end.col:]
+    # last_line = text[-1] + last_line
+
+    debug("Trying to write:")
+
+    if not len(text):
+        arr = [ first_line + last_line ]
+    elif len(text) == 1:
+        arr = [ first_line + text[0] + last_line ]
+    else:
+        arr = [ first_line ] + text + [ last_line ]
+
+    debug("%s" % (arr,))
+    vim.current.buffer[first_line_idx:last_line_idx+1] = arr
+
+    oldcolspan = self.end.col-self.start.col
+    lcol = len(text[-1]) if len(text) else 0
+    self._end.col = self.start.col + lcol
+    newcolspan = self.end.col-self.start.col
+
+    oldlinespan = self.end.line - self.start.line
+    ll = len(text)-1 if len(text) else 0
+    self._end.line = self.start.line + ll
+    newlinespan = self.end.line - self.start.line
+
+
 
 class Position(object):
     def __init__(self, line, col):
@@ -89,6 +117,10 @@ class Mirror(TextObject):
         if ts != self._tabstop:
             return 0
 
+        # _replace_text_in_buffer( self._parent.start + self._start,
+        #         self._parent.start + self._end,
+        #         self._tabstop.current_text
+        # )
         text = self._tabstop.current_text.splitlines()
 
         first_line_idx = self._parent.start.line + self.start.line
@@ -249,8 +281,12 @@ class SnippetInstance(TextObject):
         cts = self._tabstops[self._cts]
         ll = len(cts.current_text)
 
+        deleted_text = cts.current_text[-count:].splitlines()
+
         cts.current_text = cts.current_text[:-count]
-        self._move_textobjects_behind(0, len(cts.current_text)-ll, cts)
+        if len(deleted_text):
+            self._move_textobjects_behind(-(len(deleted_text)-1),
+                len(deleted_text[-1]), cts)
 
         self._update_mirrors(cts)
 
@@ -262,7 +298,9 @@ class SnippetInstance(TextObject):
             cts.current_text = ""
             self._selected_tab = None
         else:
-            self._move_textobjects_behind(0, len(chars), cts)
+            text = chars.splitlines()
+            if len(text):
+                self._move_textobjects_behind(len(text)-1, len(text[-1]), cts)
 
         cts.current_text += chars
 
@@ -412,11 +450,14 @@ class SnippetManager(object):
         if len(self._current_snippets) and self._last_cursor_pos is not None:
             lineno,col = cp
             llineo,lcol = self._last_cursor_pos
-            # If we moved the line, somethings fishy.
-            if lineno == self._last_cursor_pos[0]:
+            if lineno in \
+                [ self._last_cursor_pos[0], self._last_cursor_pos[0]+1]:
                 cs = self._current_snippets[-1]
 
-                if lcol > col: # Some deleting was going on
+                # Detect a carriage return
+                if col == 0 and lineno == self._last_cursor_pos[0] + 1:
+                    cs.chars_entered('\n')
+                elif lcol > col: # Some deleting was going on
                     cs.backspace(lcol-col)
                 else:
                     line = vim.current.line
