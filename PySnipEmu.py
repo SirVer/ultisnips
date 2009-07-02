@@ -17,17 +17,14 @@ def _replace_text_in_buffer( start, end, textblock ):
     # We do not use splitlines() here because it handles cases like 'text\n'
     # differently than we want it here
     text = textblock.replace('\r','').split('\n')
-    if not len(text):
-        new_end = Position(start.line, start.col)
-        arr = [ first_line + last_line ]
-    elif len(text) == 1:
+    if len(text) == 1:
         arr = [ first_line + text[0] + last_line ]
-        new_end = Position(start.line, len(arr[0])-len(last_line))
+        new_end = start + Position(0,len(text[0]))
     else:
         arr = [ first_line + text[0] ] + \
                 text[1:-1] + \
               [ text[-1] + last_line ]
-        new_end = Position(start.line + len(arr)-1, len(arr[-1])-len(last_line))
+        new_end = Position(start.line + len(text)-1, len(text[-1]))
 
     vim.current.buffer[start.line:end.line+1] = arr
 
@@ -120,21 +117,22 @@ class ChangeableText(TextObject):
     def _set_text(self, text):
         self._ct = text
 
+        # We do not use splitlines() here because it handles cases like 'text\n'
+        # differently than we want it here
+        # TODO: this is duplicated in _replace_text_in_buffer
         text = text.replace('\r','').split('\n')
+        if len(text) == 1:
+            new_end = self._start + Position(0,len(text[0]))
+        else:
+            new_end = Position(self._start.line + len(text)-1, len(text[-1]))
 
-        oldlinespan = self.end.line - self.start.line
-        oldcolspan  = self.end.col - self.start.col
-
-        new_end = self._start + Position(len(text) - 1, len(text[-1]))
-
-        newlinespan = new_end.line - self.start.line
-        newcolspan  = new_end.col - self.start.col
-
-        moved_lines = newlinespan - oldlinespan
-        moved_cols = newcolspan - oldcolspan
+        moved_lines = new_end.line - self.end.line
+        moved_cols = new_end.col - self.end.col
 
         self._parent._move_textobjects_behind(moved_lines, moved_cols, self)
+
         self._end = new_end
+
 
     def current_text():
         def fget(self):
@@ -156,6 +154,9 @@ class Mirror(ChangeableText):
 
         ts.add_mirror(self)
 
+    def __repr__(self):
+        return "Mirror(%s -> %s)" % (self._start, self._end)
+
     def _set_text(self,text):
        _replace_text_in_buffer(
            self._parent.start + self._start,
@@ -163,6 +164,7 @@ class Mirror(ChangeableText):
            text,
        )
        ChangeableText._set_text(self, text)
+
 
 
 class TabStop(ChangeableText):
@@ -176,6 +178,9 @@ class TabStop(ChangeableText):
         ChangeableText.__init__(self, parent, start, end, default_text)
 
         self._mirrors = []
+
+    def __repr__(self):
+        return "TabStop(%s -> %s)" % (self._start, self._end)
 
     def _set_text(self,text):
         ChangeableText._set_text(self,text)
@@ -274,20 +279,24 @@ class SnippetInstance(TextObject):
             if m == obj:
                 continue
 
+            delta_lines = 0
+            delta_cols_begin = 0
+            delta_cols_end = 0
+
             if m.start.line > obj.end.line:
-                m.start.line += lines
-                m.end.line += lines
+                delta_lines = lines
             elif m.start.line == obj.end.line:
                 if m.start.col >= obj.end.col:
                     if lines:
-                        m.start.line += lines
-                        m.end.line += lines
-                        m.end.col -= m.start.col
-                        m.start.col = 0
-                    else:
-                        m.start.col += cols
-                        m.end.col += cols
+                        delta_lines = lines
+                    delta_cols_begin = cols
+                    if m.start.line == m.end.line:
+                        delta_cols_end = cols
 
+            m.start.line += delta_lines
+            m.end.line += delta_lines
+            m.start.col += delta_cols_begin
+            m.end.col += delta_cols_end
 
     def backspace(self,count):
         cts = self._tabstops[self._cts]
