@@ -11,10 +11,6 @@ def debug(s):
     f.close()
 
 def _replace_text_in_buffer( start, end, textblock ):
-    # debug("Got start: %s" % start )
-    # debug("Got end: %s" % end )
-    # debug("Got text: '%s'" % textblock )
-
     first_line = vim.current.buffer[start.line][:start.col]
     last_line = vim.current.buffer[end.line][end.col:]
 
@@ -33,10 +29,7 @@ def _replace_text_in_buffer( start, end, textblock ):
               [ text[-1] + last_line ]
         new_end = Position(start.line + len(arr)-1, len(arr[-1])-len(last_line))
 
-    # debug("Trying to write:")
-    # debug("%s" % (arr,))
     vim.current.buffer[start.line:end.line+1] = arr
-    # debug("done writing")
 
     return new_end
 
@@ -241,7 +234,7 @@ class SnippetInstance(TextObject):
         TextObject.__init__(self, None, start, end)
 
         self._cts = None
-        self._selected_tab = None
+        self._tab_selected = False
         self._tabstops = {}
 
     def has_tabs(self):
@@ -280,7 +273,7 @@ class SnippetInstance(TextObject):
 
         ts.select()
 
-        self._selected_tab = ts
+        self._tab_selected = True
         return True
 
 
@@ -288,27 +281,19 @@ class SnippetInstance(TextObject):
         if lines == 0 and cols == 0:
             return
 
-        debug("Got: %i %i" % (lines,cols))
-        debug("  %s -> %s" % (obj.start,obj.end))
-
         for m in self._children:
             if m == obj:
                 continue
 
-            debug("Considering m at %s -> %s" % (m.start,m.end))
             if m.start.line > obj.end.line:
-                debug(" moving %i lines" % lines)
-
                 m.start.line += lines
                 m.end.line += lines
             elif m.start.line == obj.end.line:
                 if m.start.col >= obj.end.col:
                     if lines:
-                        debug(" moving %i lines" % lines)
                         m.start.line += lines
                         m.end.line += lines
                     else:
-                        debug(" moving %i cols" % cols)
                         m.start.col += cols
                         m.end.col += cols
 
@@ -320,11 +305,9 @@ class SnippetInstance(TextObject):
     def chars_entered(self, chars):
         cts = self._tabstops[self._cts]
 
-        debug("Got chars: %s, %i" % (chars, self._selected_tab is not None))
-
-        if self._selected_tab is not None:
+        if self._tab_selected:
             cts.current_text = chars
-            self._selected_tab = None
+            self._tab_selected = False
         else:
             cts.current_text += chars
 
