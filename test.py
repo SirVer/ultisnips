@@ -53,7 +53,7 @@ EOF
             self.send(":w! %s\n" % fn)
 
             # Give screen a chance to send the cmd and vim to write the file
-            time.sleep(.01)
+            time.sleep(.05)
 
             # Read the output, chop the trailing newline
             self.output = open(fn,"r").read()[:-1]
