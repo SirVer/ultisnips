@@ -10,38 +10,35 @@ def debug(s):
     f.write(s+'\n')
     f.close()
 
-def _replace_text_in_buffer( start, end, text ):
-    text = self._tabstop.current_text.splitlines()
+def _replace_text_in_buffer( start, end, textblock ):
+    # debug("Got start: %s" % start )
+    # debug("Got end: %s" % end )
+    # debug("Got text: '%s'" % textblock )
 
-    first_line_idx = self._parent.start.line + self.start.line
-    first_line = vim.current.buffer[first_line_idx][:self.start.col]
+    first_line = vim.current.buffer[start.line][:start.col]
+    last_line = vim.current.buffer[end.line][end.col:]
 
-    last_line_idx = self._parent.start.line + self.end.line
-    last_line = vim.current.buffer[last_line_idx][self.end.col:]
-    # last_line = text[-1] + last_line
-
-    debug("Trying to write:")
-
+    # We do not use splitlines() here because it handles cases like 'text\n'
+    # differently than we want it here
+    text = textblock.replace('\r','').split('\n')
     if not len(text):
+        new_end = Position(start.line, start.col)
         arr = [ first_line + last_line ]
     elif len(text) == 1:
         arr = [ first_line + text[0] + last_line ]
+        new_end = Position(start.line, len(arr[0])-len(last_line))
     else:
-        arr = [ first_line ] + text + [ last_line ]
+        arr = [ first_line + text[0] ] + \
+                text[1:-1] + \
+              [ text[-1] + last_line ]
+        new_end = Position(start.line + len(arr)-1, len(arr[-1])-len(last_line))
 
-    debug("%s" % (arr,))
-    vim.current.buffer[first_line_idx:last_line_idx+1] = arr
+    # debug("Trying to write:")
+    # debug("%s" % (arr,))
+    vim.current.buffer[start.line:end.line+1] = arr
+    # debug("done writing")
 
-    oldcolspan = self.end.col-self.start.col
-    lcol = len(text[-1]) if len(text) else 0
-    self._end.col = self.start.col + lcol
-    newcolspan = self.end.col-self.start.col
-
-    oldlinespan = self.end.line - self.start.line
-    ll = len(text)-1 if len(text) else 0
-    self._end.line = self.start.line + ll
-    newlinespan = self.end.line - self.start.line
-
+    return new_end
 
 
 class Position(object):
@@ -69,6 +66,23 @@ class Position(object):
             self._line = value
         return locals()
     line = property(**line())
+
+    def __add__(self,pos):
+        if not isinstance(pos,Position):
+            raise TypeError("unsupported operand type(s) for +: " \
+                    "'Position' and %s" % type(pos))
+
+        return Position(self.line + pos.line, self.col + pos.col)
+
+    def __sub__(self,pos):
+        if not isinstance(pos,Position):
+            raise TypeError("unsupported operand type(s) for +: " \
+                    "'Position' and %s" % type(pos))
+
+        return Position(self.line - pos.line, self.col - pos.col)
+
+    def __repr__(self):
+        return "(%i,%i)" % (self._line, self._col)
 
 class TextObject(object):
     """
@@ -117,41 +131,18 @@ class Mirror(TextObject):
         if ts != self._tabstop:
             return 0
 
-        # _replace_text_in_buffer( self._parent.start + self._start,
-        #         self._parent.start + self._end,
-        #         self._tabstop.current_text
-        # )
-        text = self._tabstop.current_text.splitlines()
+        new_end = _replace_text_in_buffer(
+            self._parent.start + self._start,
+            self._parent.start + self._end,
+            self._tabstop.current_text
+        )
+        new_end -= self._parent.start
 
-        first_line_idx = self._parent.start.line + self.start.line
-        first_line = vim.current.buffer[first_line_idx][:self.start.col]
-
-        last_line_idx = self._parent.start.line + self.end.line
-        last_line = vim.current.buffer[last_line_idx][self.end.col:]
-        # last_line = text[-1] + last_line
-
-        debug("Trying to write:")
-
-        if not len(text):
-            arr = [ first_line + last_line ]
-        elif len(text) == 1:
-            arr = [ first_line + text[0] + last_line ]
-        else:
-            arr = [ first_line ] + text + [ last_line ]
-
-        debug("%s" % (arr,))
-        vim.current.buffer[first_line_idx:last_line_idx+1] = arr
-
-        oldcolspan = self.end.col-self.start.col
-        lcol = len(text[-1]) if len(text) else 0
-        self._end.col = self.start.col + lcol
-        newcolspan = self.end.col-self.start.col
-
+        oldcolspan = self.end.col - self.start.col
         oldlinespan = self.end.line - self.start.line
-        ll = len(text)-1 if len(text) else 0
-        self._end.line = self.start.line + ll
+        self._end = new_end
+        newcolspan = self.end.col - self.start.col
         newlinespan = self.end.line - self.start.line
-
 
         return newlinespan-oldlinespan, newcolspan-oldcolspan
 
@@ -171,8 +162,25 @@ class TabStop(TextObject):
     def current_text():
         def fget(self):
             return self._ct
-        def fset(self, value):
-            self._ct = value
+        def fset(self, text):
+            self._ct = text
+
+            text = text.replace('\r','').split('\n')
+
+            oldlinespan = self.end.line - self.start.line
+            oldcolspan  = self.end.col - self.start.col
+
+            new_end = self._start + Position(len(text) - 1, len(text[-1]))
+
+            newlinespan = new_end.line - self.start.line
+            newcolspan  = new_end.col - self.start.col
+
+            moved_lines = newlinespan - oldlinespan
+            moved_cols = newcolspan - oldcolspan
+
+            self._parent._move_textobjects_behind(moved_lines, moved_cols, self)
+            self._end = new_end
+            self._parent._update_mirrors(self)
         return locals()
     current_text = property(**current_text())
 
@@ -270,39 +278,45 @@ class SnippetInstance(TextObject):
         if lines == 0 and cols == 0:
             return
 
+        debug("Got: %i %i" % (lines,cols))
+        debug("  %s -> %s" % (obj.start,obj.end))
+
         for m in self._text_objects:
-            if m.start.line != obj.start.line:
+            if m == obj:
                 continue
-            if m.start.col >= obj.start.col and m != obj:
-                m.start.col += cols
-                m.end.col += cols
+
+            debug("Considering m at %s -> %s" % (m.start,m.end))
+            if m.start.line > obj.end.line:
+                debug(" moving %i lines" % lines)
+
+                m.start.line += lines
+                m.end.line += lines
+            elif m.start.line == obj.end.line:
+                if m.start.col >= obj.end.col:
+                    if lines:
+                        debug(" moving %i lines" % lines)
+                        m.start.line += lines
+                        m.end.line += lines
+                    else:
+                        debug(" moving %i cols" % cols)
+                        m.start.col += cols
+                        m.end.col += cols
+
 
     def backspace(self,count):
         cts = self._tabstops[self._cts]
-        ll = len(cts.current_text)
-
-        deleted_text = cts.current_text[-count:].splitlines()
-
         cts.current_text = cts.current_text[:-count]
-        if len(deleted_text):
-            self._move_textobjects_behind(-(len(deleted_text)-1),
-                len(deleted_text[-1]), cts)
-
-        self._update_mirrors(cts)
 
     def chars_entered(self, chars):
         cts = self._tabstops[self._cts]
 
+        debug("Got chars: %s, %i" % (chars, self._selected_tab is not None))
+
         if self._selected_tab is not None:
-            self._move_textobjects_behind(0, len(chars)-len(cts.current_text), cts)
-            cts.current_text = ""
+            cts.current_text = chars
             self._selected_tab = None
         else:
-            text = chars.splitlines()
-            if len(text):
-                self._move_textobjects_behind(len(text)-1, len(text[-1]), cts)
-
-        cts.current_text += chars
+            cts.current_text += chars
 
         self._update_mirrors(cts)
 
@@ -372,40 +386,22 @@ class Snippet(object):
             else:
                 break
 
-        return tabstops, mirrors, val.split('\n')
+        return tabstops, mirrors, val
 
     def launch(self, before, after):
-        lineno,col = vim.current.window.cursor
+        ts, mirrors, text = self._find_tabstops(self._v)
 
-        col -= len(self._t)
-
-        ts, mirrors, lines = self._find_tabstops(self._v)
-
-        endcol = None
-        newline = 1
-        newcol = 0
-        if not len(ts):
-            newline = lineno + len(lines) - 1
-            if len(lines) == 1:
-                newcol = col + len(lines[-1])
-            else:
-                newcol = len(lines[-1])
-
-        lines[0] = before + lines[0]
-        lines[-1] += after
-
-        vim.current.buffer[lineno-1:lineno-1+1] = lines
-
-        vim.current.window.cursor = newline, newcol
+        lineno, col = vim.current.window.cursor
+        start = Position(lineno-1,col - len(self._t))
+        end = Position(lineno-1,col)
+        new_end = _replace_text_in_buffer( start, end, text )
 
         if len(ts) or len(mirrors):
-            s = SnippetInstance(
-                Position(lineno-1,col), Position(newline-1,newcol),
-                ts, mirrors)
-
+            s = SnippetInstance(start, new_end, ts, mirrors)
             s.select_next_tab()
-
             return s
+        else:
+            vim.current.window.cursor = new_end.line + 1, new_end.col
 
 class SnippetManager(object):
     def __init__(self):

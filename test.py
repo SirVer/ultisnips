@@ -270,10 +270,23 @@ class SimpleMirrorMultilineMany_ExceptCorrectResult(_VimTest):
         self.type("test\thallo")
     def runTest(self): self.check_output()
 class MultilineTabStopSimpleMirrorMultiline_ExceptCorrectResult(_VimTest):
-    snippets = ("test", "$1\n\n\n$1\n\n\n$1")
-    wanted = "hallo Du\nHi\nhallo Du\nHi"
+    snippets = ("test", "$1\n\n$1\n\n$1")
+    wanted = "hallo Du\nHi\n\nhallo Du\nHi\n\nhallo Du\nHi"
     def cmd(self):
-        self.type("test\thallo Du\nHu")
+        self.type("test\thallo Du\nHi")
+    def runTest(self): self.check_output()
+class MultilineTabStopSimpleMirrorMultiline1_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1\n$1\n$1")
+    wanted = "hallo Du\nHi\nhallo Du\nHi\nhallo Du\nHi"
+    def cmd(self):
+        self.type("test\thallo Du\nHi")
+    def runTest(self): self.check_output()
+# TODO: Multiline delete over line endings
+class MultilineTabStopSimpleMirrorDeleteInLine_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1\n$1\n$1")
+    wanted = "hallo Du\nAch Blah\nhallo Du\nAch Blah\nhallo Du\nAch Blah"
+    def cmd(self):
+        self.type("test\thallo Du\nHi\b\bAch Blah")
     def runTest(self): self.check_output()
 
 
