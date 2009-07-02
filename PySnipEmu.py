@@ -104,14 +104,13 @@ class TextObject(object):
         return locals()
     parent = property(**parent())
 
-    @property
     def start(self):
         return self._start
+    start = property(start)
 
-    @property
     def end(self):
         return self._end
-
+    end = property(end)
 
 class ChangeableText(TextObject):
     def __init__(self, parent, start, end, initial = ""):
@@ -314,9 +313,9 @@ class Snippet(object):
         self._t = trigger
         self._v = value
 
-    @property
     def trigger(self):
         return self._t
+    trigger = property(trigger)
 
     def _handle_tabstop(self, s, m, val, tabstops):
         no = int(m.group(1))
