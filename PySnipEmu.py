@@ -10,6 +10,12 @@ def debug(s):
     f.write(s+'\n')
     f.close()
 
+def _line_count_and_len_of_last_line(txt):
+    lines = txt.splitlines()
+    if not len(lines):
+        return 1, 0 # empty line has zero columns but one line
+    return len(lines), len(lines[-1])
+
 class Position(object):
     def __init__(self, line, col):
         self.line = line
@@ -83,20 +89,39 @@ class Mirror(TextObject):
         if ts != self._tabstop:
             return 0
 
-        mirror_line = self._parent.start.line + self.start.line
-        line = vim.current.buffer[mirror_line]
+        text = self._tabstop.current_text.splitlines()
 
-        line = line[:self.start.col] + \
-                self._tabstop.current_text + \
-                line[self.end.col:]
+        first_line_idx = self._parent.start.line + self.start.line
+        first_line = vim.current.buffer[first_line_idx][:self.start.col]
 
-        oldspan = self.end.col-self.start.col
-        self._end.col = self.start.col+len(self._tabstop.current_text)
-        newspan = self.end.col-self.start.col
+        last_line_idx = self._parent.start.line + self.end.line
+        last_line = vim.current.buffer[last_line_idx][self.end.col:]
+        # last_line = text[-1] + last_line
 
-        vim.current.buffer[mirror_line] = line
+        debug("Trying to write:")
 
-        return newspan-oldspan
+        if not len(text):
+            arr = [ first_line + last_line ]
+        elif len(text) == 1:
+            arr = [ first_line + text[0] + last_line ]
+        else:
+            arr = [ first_line ] + text + [ last_line ]
+
+        debug("%s" % (arr,))
+        vim.current.buffer[first_line_idx:last_line_idx+1] = arr
+
+        oldcolspan = self.end.col-self.start.col
+        lcol = len(text[-1]) if len(text) else 0
+        self._end.col = self.start.col + lcol
+        newcolspan = self.end.col-self.start.col
+
+        oldlinespan = self.end.line - self.start.line
+        ll = len(text)-1 if len(text) else 0
+        self._end.line = self.start.line + ll
+        newlinespan = self.end.line - self.start.line
+
+
+        return newlinespan-oldlinespan, newcolspan-oldcolspan
 
 
 class TabStop(TextObject):
@@ -205,28 +230,27 @@ class SnippetInstance(TextObject):
 
     def _update_mirrors(self,for_ts):
         for m in self._mirrors:
-            moved = m.update(for_ts)
-            if moved:
-                self._move_textobjects_behind(moved, m)
+            moved_lines, moved_cols = m.update(for_ts)
+            self._move_textobjects_behind(moved_lines, moved_cols, m)
 
 
-    def _move_textobjects_behind(self, amount, obj):
-        if self._cts is None:
+    def _move_textobjects_behind(self, lines, cols, obj):
+        if lines == 0 and cols == 0:
             return
 
         for m in self._text_objects:
             if m.start.line != obj.start.line:
                 continue
             if m.start.col >= obj.start.col and m != obj:
-                m.start.col += amount
-                m.end.col += amount
+                m.start.col += cols
+                m.end.col += cols
 
     def backspace(self,count):
         cts = self._tabstops[self._cts]
         ll = len(cts.current_text)
 
         cts.current_text = cts.current_text[:-count]
-        self._move_textobjects_behind(len(cts.current_text)-ll, cts)
+        self._move_textobjects_behind(0, len(cts.current_text)-ll, cts)
 
         self._update_mirrors(cts)
 
@@ -234,11 +258,11 @@ class SnippetInstance(TextObject):
         cts = self._tabstops[self._cts]
 
         if self._selected_tab is not None:
-            self._move_textobjects_behind(len(chars)-len(cts.current_text), cts)
+            self._move_textobjects_behind(0, len(chars)-len(cts.current_text), cts)
             cts.current_text = ""
             self._selected_tab = None
         else:
-            self._move_textobjects_behind(len(chars), cts)
+            self._move_textobjects_behind(0, len(chars), cts)
 
         cts.current_text += chars
 

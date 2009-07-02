@@ -185,18 +185,21 @@ class TabStopTestBackwardJumping_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo ${0:End} mitte${1:Beginning}")
     wanted = "hallo Blah mitteLets replace it again"
     def cmd(self):
-        self.type("hallo\tSomelengthy Text\tHi+Lets replace it again\tBlah\t++\t")
+        self.type(
+            "hallo\tSomelengthy Text\tHi+Lets replace it again\tBlah\t++\t")
     def runTest(self): self.check_output()
 class TabStopTestBackwardJumping2_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo $0 $1")
     wanted = "hallo Blah Lets replace it again"
     def cmd(self):
-        self.type("hallo\tSomelengthy Text\tHi+Lets replace it again\tBlah\t++\t")
+        self.type(
+            "hallo\tSomelengthy Text\tHi+Lets replace it again\tBlah\t++\t")
     def runTest(self): self.check_output()
 
 class TabStopTestMultilineExpand_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo $0\nnice $1 work\n$3 $2\nSeem to work")
-    wanted = "test hallo one more\nnice world work\ntest try\nSeem to work World"
+    wanted = "test hallo one more\nnice world work\n" \
+            "test try\nSeem to work World"
     def cmd(self):
         self.type("test hallo World")
         self.escape()
@@ -265,6 +268,12 @@ class SimpleMirrorMultilineMany_ExceptCorrectResult(_VimTest):
     wanted = "    hallo\nhallo\nahallob\nhallo\ntest hallo mich"
     def cmd(self):
         self.type("test\thallo")
+    def runTest(self): self.check_output()
+class MultilineTabStopSimpleMirrorMultiline_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1\n\n\n$1\n\n\n$1")
+    wanted = "hallo Du\nHi\nhallo Du\nHi"
+    def cmd(self):
+        self.type("test\thallo Du\nHu")
     def runTest(self): self.check_output()
 
 
@@ -367,7 +376,8 @@ if __name__ == '__main__':
     options,selected_tests = parse_args()
 
     # The next line doesn't work in python 2.3
-    all_test_suites = unittest.TestLoader().loadTestsFromModule(__import__("test"))
+    test_loader = unittest.TestLoader()
+    all_test_suites = test_loader.loadTestsFromModule(__import__("test"))
 
     # Inform all test case which screen session to use
     suite = unittest.TestSuite()
