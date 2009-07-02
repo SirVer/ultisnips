@@ -103,7 +103,7 @@ class TextObject(object):
             self._parent = value
         return locals()
     parent = property(**parent())
-    
+
     @property
     def start(self):
         return self._start
@@ -121,35 +121,29 @@ class Mirror(TextObject):
         start = Position(idx,start_col)
         end = start + (ts.end - ts.start)
         TextObject.__init__(self, parent, start, end)
-        self._tabstop = ts
 
         ts.add_mirror(self)
 
-    @property
-    def tabstop(self):
-        return self._tabstop
-
-    def update(self,ts):
-        if ts != self._tabstop:
-            return 0
-
+    def update(self,text):
         new_end = _replace_text_in_buffer(
             self._parent.start + self._start,
             self._parent.start + self._end,
-            self._tabstop.current_text
+            text,
         )
         new_end -= self._parent.start
 
         oldcolspan = self.end.col - self.start.col
         oldlinespan = self.end.line - self.start.line
-        self._end = new_end
-        newcolspan = self.end.col - self.start.col
-        newlinespan = self.end.line - self.start.line
+
+        newcolspan =  new_end.col - self.start.col
+        newlinespan = new_end.line - self.start.line
 
         moved_lines = newlinespan - oldlinespan
         moved_cols = newcolspan - oldcolspan
 
         self._parent._move_textobjects_behind(moved_lines, moved_cols, self)
+
+        self._end = new_end
 
 
 class TabStop(TextObject):
@@ -192,7 +186,7 @@ class TabStop(TextObject):
             self._end = new_end
 
             for m in self._mirrors:
-                m.update(self)
+                m.update(self._ct)
 
         return locals()
     current_text = property(**current_text())
@@ -293,6 +287,8 @@ class SnippetInstance(TextObject):
                     if lines:
                         m.start.line += lines
                         m.end.line += lines
+                        m.end.col -= m.start.col
+                        m.start.col = 0
                     else:
                         m.start.col += cols
                         m.end.col += cols

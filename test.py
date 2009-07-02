@@ -256,8 +256,6 @@ class TextTabStopAllSurrounded_ExceptCorrectResult(_VimTest):
     def runTest(self): self.check_output()
 
 
-# TODO: mirror mit tabstop mit default variable
-# TODO: Mehrer tabs und mehrere mirrors
 class TextTabStopSimpleMirrorMultiline_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1\n$1")
     wanted = "hallo\nhallo"
@@ -305,14 +303,17 @@ class SimpleMirrorSameLine_ExceptCorrectResult(_VimTest):
     wanted = "hallo hallo"
     def cmd(self):
         self.type("test\thallo")
-
-
     def runTest(self): self.check_output()
 class SimpleMirrorSameLineMany_ExceptCorrectResult(_VimTest):
-    snippets = ("test", "$1 $1 $1 $1")
+    snippets = ("test", "$1 $1 $1hj)
     wanted = "hallo du hallo du hallo du hallo du"
     def cmd(self):
         self.type("test\thallo du")
+class SimpleMirrorSameLineManyMultiline_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 $1 $1 $1")
+    wanted = "hallo du\nwie gehts? hallo du\nwie gehts? hallo du\nwie gehts."
+    def cmd(self):
+        self.type("test\thallo du\nwie gehts?")
 
 
     def runTest(self): self.check_output()
@@ -350,6 +351,7 @@ class SimpleTabstopWithDefaultComplexKeep_ExceptCorrectResult(_VimTest):
         self.type("test\t")
     def runTest(self): self.check_output()
 
+# TODO: Mehrer tabs und mehrere mirrors
 
 
 # class MirrorMoreInvolved_ExceptCorrectResult(_VimTest):
