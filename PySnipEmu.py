@@ -113,40 +113,60 @@ class TextObject(object):
         return self._end
 
 
-class Mirror(TextObject):
+class ChangeableText(TextObject):
+    def __init__(self, parent, start, end, initial = ""):
+        TextObject.__init__(self, parent, start, end)
+        self._ct = initial
+
+    def _set_text(self, text):
+        self._ct = text
+
+        text = text.replace('\r','').split('\n')
+
+        oldlinespan = self.end.line - self.start.line
+        oldcolspan  = self.end.col - self.start.col
+
+        new_end = self._start + Position(len(text) - 1, len(text[-1]))
+
+        newlinespan = new_end.line - self.start.line
+        newcolspan  = new_end.col - self.start.col
+
+        moved_lines = newlinespan - oldlinespan
+        moved_cols = newcolspan - oldcolspan
+
+        self._parent._move_textobjects_behind(moved_lines, moved_cols, self)
+        self._end = new_end
+
+    def current_text():
+        def fget(self):
+            return self._ct
+        def fset(self, text):
+            self._set_text(text)
+        return locals()
+    current_text = property(**current_text())
+
+
+class Mirror(ChangeableText):
     """
     A Mirror object mirrors a TabStop that is, text is repeated here
     """
     def __init__(self, parent, ts, idx, start_col):
         start = Position(idx,start_col)
         end = start + (ts.end - ts.start)
-        TextObject.__init__(self, parent, start, end)
+        ChangeableText.__init__(self, parent, start, end)
 
         ts.add_mirror(self)
 
-    def update(self,text):
-        new_end = _replace_text_in_buffer(
-            self._parent.start + self._start,
-            self._parent.start + self._end,
-            text,
-        )
-        new_end -= self._parent.start
-
-        oldcolspan = self.end.col - self.start.col
-        oldlinespan = self.end.line - self.start.line
-
-        newcolspan =  new_end.col - self.start.col
-        newlinespan = new_end.line - self.start.line
-
-        moved_lines = newlinespan - oldlinespan
-        moved_cols = newcolspan - oldcolspan
-
-        self._parent._move_textobjects_behind(moved_lines, moved_cols, self)
-
-        self._end = new_end
+    def _set_text(self,text):
+       _replace_text_in_buffer(
+           self._parent.start + self._start,
+           self._parent.start + self._end,
+           text,
+       )
+       ChangeableText._set_text(self, text)
 
 
-class TabStop(TextObject):
+class TabStop(ChangeableText):
     """
     This is the most important TextObject. A TabStop is were the cursor
     comes to rest when the user taps through the Snippet.
@@ -154,42 +174,18 @@ class TabStop(TextObject):
     def __init__(self, parent, idx, span, default_text = ""):
         start = Position(idx,span[0])
         end = Position(idx,span[1])
-        TextObject.__init__(self, parent, start, end)
-
-        self._ct = default_text
+        ChangeableText.__init__(self, parent, start, end, default_text)
 
         self._mirrors = []
 
+    def _set_text(self,text):
+        ChangeableText._set_text(self,text)
+
+        for m in self._mirrors:
+            m.current_text = text
+
     def add_mirror(self, m):
         self._mirrors.append(m)
-
-    def current_text():
-        def fget(self):
-            return self._ct
-        def fset(self, text):
-            self._ct = text
-
-            text = text.replace('\r','').split('\n')
-
-            oldlinespan = self.end.line - self.start.line
-            oldcolspan  = self.end.col - self.start.col
-
-            new_end = self._start + Position(len(text) - 1, len(text[-1]))
-
-            newlinespan = new_end.line - self.start.line
-            newcolspan  = new_end.col - self.start.col
-
-            moved_lines = newlinespan - oldlinespan
-            moved_cols = newcolspan - oldcolspan
-
-            self._parent._move_textobjects_behind(moved_lines, moved_cols, self)
-            self._end = new_end
-
-            for m in self._mirrors:
-                m.update(self._ct)
-
-        return locals()
-    current_text = property(**current_text())
 
     def select(self):
         lineno, col = self._parent.start.line, self._parent.start.col
@@ -206,14 +202,14 @@ class TabStop(TextObject):
         # Depending on the current mode and position, we
         # might need to move escape out of the mode and this
         # will move our cursor one left
-        if len(self._ct) > 0:
+        if len(self.current_text) > 0:
             if newcol != 0 and vim.eval("mode()") == 'i':
                 move_one_right = "l"
             else:
                 move_one_right = ""
 
             vim.command(r'call feedkeys("\<Esc>%sv%il\<c-g>")'
-                % (move_one_right, len(self._ct)-1))
+                % (move_one_right, len(self.current_text)-1))
 
 
 class SnippetInstance(TextObject):

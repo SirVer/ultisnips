@@ -305,7 +305,7 @@ class SimpleMirrorSameLine_ExceptCorrectResult(_VimTest):
         self.type("test\thallo")
     def runTest(self): self.check_output()
 class SimpleMirrorSameLineMany_ExceptCorrectResult(_VimTest):
-    snippets = ("test", "$1 $1 $1hj)
+    snippets = ("test", "$1 $1 $1")
     wanted = "hallo du hallo du hallo du hallo du"
     def cmd(self):
         self.type("test\thallo du")
