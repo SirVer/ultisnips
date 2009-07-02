@@ -42,8 +42,18 @@ class TextObject(object):
     that has a span in any ways
     """
     def __init__(self, start, end):
+        self._parent = None
         self._start = start
         self._end = end
+
+    def parent():
+        doc = "The parent TextObject this TextObject resides in"
+        def fget(self):
+            return self._parent
+        def fset(self, value):
+            self._parent = value
+        return locals()
+    parent = property(**parent())
 
     @property
     def start(self):
@@ -73,7 +83,7 @@ class Mirror(TextObject):
         if ts != self._tabstop:
             return 0
 
-        mirror_line = self.start.line
+        mirror_line = self._parent.start.line + self.start.line
         line = vim.current.buffer[mirror_line]
 
         line = line[:self.start.col] + \
@@ -109,8 +119,8 @@ class TabStop(TextObject):
         return locals()
     current_text = property(**current_text())
 
-    def select(self,start):
-        lineno, col = start.line, start.col
+    def select(self):
+        lineno, col = self._parent.start.line, self._parent.start.col
 
         newline = lineno + self._start.line
         newcol = self._start.col
@@ -152,8 +162,12 @@ class SnippetInstance(TextObject):
 
         self._cts = None
 
+        for to in self._text_objects:
+            to.parent = self
+
         for ts in self._tabstops.values():
             self._update_mirrors(ts)
+
 
     def select_next_tab(self, backwards = False):
         if self._cts == 0:
@@ -183,7 +197,7 @@ class SnippetInstance(TextObject):
 
         ts = self._tabstops[self._cts]
 
-        ts.select(self._start)
+        ts.select()
 
         self._selected_tab = ts
         return True
@@ -193,32 +207,26 @@ class SnippetInstance(TextObject):
         for m in self._mirrors:
             moved = m.update(for_ts)
             if moved:
-                self._move_to_on_line(moved, m.start.line, m.start.col,cobj=m)
+                self._move_textobjects_behind(moved, m)
 
 
-    def _move_to_on_line(self,amount, lineno = None, col = None, cobj = None):
+    def _move_textobjects_behind(self, amount, obj):
         if self._cts is None:
             return
 
-        if lineno is None and col is None:
-            lineno,col = vim.current.window.cursor
-            lineno -= 1
-            cobj = self._tabstops[self._cts]
-
         for m in self._text_objects:
-            if m.start.line != lineno:
+            if m.start.line != obj.start.line:
                 continue
-            if m.start.col >= col and m != cobj:
+            if m.start.col >= obj.start.col and m != obj:
                 m.start.col += amount
                 m.end.col += amount
-
 
     def backspace(self,count):
         cts = self._tabstops[self._cts]
         ll = len(cts.current_text)
 
         cts.current_text = cts.current_text[:-count]
-        self._move_to_on_line(len(cts.current_text)-ll)
+        self._move_textobjects_behind(len(cts.current_text)-ll, cts)
 
         self._update_mirrors(cts)
 
@@ -226,11 +234,11 @@ class SnippetInstance(TextObject):
         cts = self._tabstops[self._cts]
 
         if self._selected_tab is not None:
-            self._move_to_on_line(len(chars)-len(cts.current_text))
+            self._move_textobjects_behind(len(chars)-len(cts.current_text), cts)
             cts.current_text = ""
             self._selected_tab = None
         else:
-            self._move_to_on_line(len(chars))
+            self._move_textobjects_behind(len(chars), cts)
 
         cts.current_text += chars
 
@@ -261,8 +269,8 @@ class Snippet(object):
         line_idx = val[:start].count('\n')
         line_start = val[:start].rfind('\n') + 1
         start_in_line = start - line_start
-        ts = TabStop(line_idx, (start_in_line,start_in_line+len(def_text)),
-                def_text)
+        ts = TabStop(line_idx,
+                (start_in_line,start_in_line+len(def_text)), def_text)
 
         tabstops[no] = ts
 
@@ -324,7 +332,7 @@ class Snippet(object):
         lines[0] = before + lines[0]
         lines[-1] += after
 
-        vim.current.buffer[lineno-1:lineno-1+len(lines)] = lines
+        vim.current.buffer[lineno-1:lineno-1+1] = lines
 
         vim.current.window.cursor = newline, newcol
 
