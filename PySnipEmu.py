@@ -146,7 +146,7 @@ class TextObject(object):
     def update(self, change_buffer, indend = ""):
         debug("%sUpdating %s" % (indend, self))
         for c in self._children:
-            debug("%s   Updating Child%s" % (indend, self))
+            debug("%s   Updating Child%s" % (indend, c))
             oldend = Position(c.end.line, c.end.col)
 
             moved_lines, moved_cols = c.update( self._current_text, indend + ' '*8 )
@@ -505,10 +505,15 @@ class SnippetManager(object):
 
                 # Detect a carriage return
                 if col == 0 and lineno == self._last_cursor_pos[0] + 1:
-                    # Hack, remove this line in vim, because we are going
-                    # to overwrite the old range with the new snippet value.
-                    del vim.current.buffer[lineno]
+                    # Hack, remove a line in vim, because we are going to
+                    # overwrite the old line range with the new snippet value.
+                    # After the expansion, we put the cursor were the user left
+                    # it. This action should be completely transparent for the
+                    # user
+                    cache_pos = vim.current.window.cursor
+                    del vim.current.buffer[lineno-1]
                     cs.chars_entered('\n')
+                    vim.current.window.cursor = cache_pos
                 elif lcol > col: # Some deleting was going on
                     cs.backspace(lcol-col)
                 else:
