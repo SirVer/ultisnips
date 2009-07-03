@@ -203,18 +203,26 @@ class TextObject(object):
             m.start.col += delta_cols_begin
             m.end.col += delta_cols_end
 
+    def _get_start_end(self, val, start_pos, end_pos):
+        def _get_pos(s, pos):
+            line_idx = s[:pos].count('\n')
+            line_start = s[:pos].rfind('\n') + 1
+            start_in_line = start_pos - line_start
+            return Position(line_idx, start_in_line)
+
+        return _get_pos(val, start_pos), _get_pos(val, end_pos)
+
 
     def _handle_tabstop(self, m, val):
         no = int(m.group(1))
         def_text = m.group(2)
 
-        start, end = m.span()
-        val = val[:start] + val[end:]
+        start_pos, end_pos = m.span()
+        start, end = self._get_start_end(val,start_pos,end_pos)
 
-        line_idx = val[:start].count('\n')
-        line_start = val[:start].rfind('\n') + 1
-        start_in_line = start - line_start
-        ts = TabStop(self, line_idx, start_in_line, def_text)
+        val = val[:start_pos] + val[end_pos:]
+
+        ts = TabStop(self, start, def_text)
 
         self.add_tabstop(no,ts)
 
@@ -229,20 +237,17 @@ class TextObject(object):
     def _handle_ts_or_mirror(self, m, val):
         no = int(m.group(3))
 
-        start, end = m.span()
-
-        line_idx = val[:start].count('\n')
-        line_start = val[:start].rfind('\n') + 1
-        start_in_line = start - line_start
+        start_pos, end_pos = m.span()
+        start, end = self._get_start_end(val,start_pos,end_pos)
 
         ts = self._get_tabstop(no)
         if ts is not None:
-            m = Mirror(self, ts, line_idx, start_in_line)
-            val = val[:start] + val[end:]
+            m = Mirror(self, ts, start)
         else:
-            ts = TabStop(self, line_idx, start_in_line)
-            val = val[:start] + val[end:]
+            ts = TabStop(self, start)
             self.add_tabstop(no,ts)
+
+        val = val[:start_pos] + val[end_pos:]
 
         return val
     def add_tabstop(self,no, ts):
@@ -307,8 +312,7 @@ class Mirror(ChangeableText):
     """
     A Mirror object mirrors a TabStop that is, text is repeated here
     """
-    def __init__(self, parent, ts, idx, start_col):
-        start = Position(idx,start_col)
+    def __init__(self, parent, ts, start):
         end = start + (ts.end - ts.start)
         ChangeableText.__init__(self, parent, start, end)
 
@@ -327,9 +331,8 @@ class TabStop(ChangeableText):
     This is the most important TextObject. A TabStop is were the cursor
     comes to rest when the user taps through the Snippet.
     """
-    def __init__(self, parent, idx, start_col, default_text = ""):
-        start = Position(idx,start_col)
-        end = Position(idx,start_col)
+    def __init__(self, parent, start, default_text = ""):
+        end = Position(start.line,start.col)
         ChangeableText.__init__(self, parent, start, end, default_text)
 
     def __repr__(self):
