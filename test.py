@@ -41,7 +41,7 @@ class _VimTest(unittest.TestCase):
             self.send(''':py << EOF
 PySnipSnippets.add_snippet("%s","""%s""")
 EOF
-''' % (sv,content))
+''' % (sv,content.encode("string-escape")))
 
         # Clear the buffer
         self.send("bggVGd")
@@ -432,6 +432,13 @@ class Transformation_SimpleCaseNoTransform_ExceptCorrectResult(_VimTest):
     def cmd(self):
         self.type("test\thallo")
     def runTest(self): self.check_output()
+class Transformation_MultipleTransformations_ECR(_VimTest):
+    snippets = ("test", "${1:Some Text}${1/.+/\U$0\E/}\n${1/.+/\L$0\E/}")
+    wanted = "SomE tExt SOME TEXT \nsome text "
+    def cmd(self):
+        self.type("test\tSomE tExt ")
+    def runTest(self): self.check_output()
+
 class Transformation_Backreference_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/([ab])oo/$1ull/}")
     wanted = "foo boo aoo foo bull aoo"
@@ -470,13 +477,58 @@ class Transformation_CleverTransformLongLower_ExceptCorrectResult(_VimTest):
         self.type("test\tHALLO")
     def runTest(self): self.check_output()
 
-# TODO: python init replacement
-# class Transformation_RealLifeExample_ExceptCorrectResult(_VimTest):
-#     snippets = ("func", "def func$1 ${1/foo/batzl/}")
-#     wanted = "hallo hallo"
-#     def cmd(self):
-#         self.type("test\thallo")
-#     def runTest(self): self.check_output()
+class Transformation_ConditionalInsertionSimple_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/(^a).*/(?0:began with an a)/}")
+    wanted = "a some more text began with an a"
+    def cmd(self):
+        self.type("test\ta some more text")
+    def runTest(self): self.check_output()
+class Transformation_CIBothDefinedNegative_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/(?:(^a)|(^b)).*/(?1:yes:no)/}")
+    wanted = "b some no"
+    def cmd(self):
+        self.type("test\tb some")
+    def runTest(self): self.check_output()
+class Transformation_CIBothDefinedPositive_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/(?:(^a)|(^b)).*/(?1:yes:no)/}")
+    wanted = "a some yes"
+    def cmd(self):
+        self.type("test\ta some")
+    def runTest(self): self.check_output()
+class Transformation_ConditionalInsertRWEllipsis_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1/(\w+(?:\W+\w+){,7})\W*(.+)?/$1(?2:...)/}")
+    wanted = "a b  c d e f ghhh h oha a b  c d e f ghhh h..."
+    def cmd(self):
+        self.type("test\ta b  c d e f ghhh h oha")
+    def runTest(self): self.check_output()
+
+class Transformation_CINewlines_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1/, */\n/}")
+    wanted = "test, hallo test\nhallo"
+    def cmd(self):
+        self.type("test\ttest, hallo")
+    def runTest(self): self.check_output()
+
+class Transformation_OptionIgnoreCase_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1/test/blah/i}")
+    wanted = "TEST blah"
+    def cmd(self):
+        self.type("test\tTEST")
+    def runTest(self): self.check_output()
+class Transformation_OptionReplaceGlobal_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1/, */-/g}")
+    wanted = "a, nice, building a-nice-building"
+    def cmd(self):
+        self.type("test\ta, nice, building")
+    def runTest(self): self.check_output()
+class Transformation_OptionReplaceGlobalMatchInReplace_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1/, */, /g}")
+    wanted = "a, nice,   building a, nice, building"
+    def cmd(self):
+        self.type("test\ta, nice,   building")
+    def runTest(self): self.check_output()
+
+# TODO: conditional in conditional, case folding recursive
 
 if __name__ == '__main__':
     import sys
@@ -513,7 +565,7 @@ if __name__ == '__main__':
             test.interrupt = options.interrupt
             if len(selected_tests):
                 id = test.id().split('.')[1]
-                if id not in selected_tests:
+                if not any([ id.startswith(t) for t in selected_tests ]):
                     continue
             suite.addTest(test)
 

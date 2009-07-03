@@ -125,7 +125,7 @@ class TextObject(object):
     # A mirror or a tabstop without default value.
     _MIRROR_OR_TS = re.compile(r'\$(\d+)')
     # A mirror or a tabstop without default value.
-    _TRANSFORMATION = re.compile(r'\${(\d+)/(.*)}')
+    _TRANSFORMATION = re.compile(r'\${(\d+)/(.*?)/(.*?)/([a-zA-z]*)}')
 
     def __init__(self, parent, start, end, initial_text):
         self._start = start
@@ -239,7 +239,9 @@ class TextObject(object):
 
     def _handle_transformation(self, m, val):
         no = int(m.group(1))
-        arg = m.group(2)
+        search = m.group(2)
+        replace = m.group(3)
+        options = m.group(4)
 
         start_pos, end_pos = m.span()
         start, end = self._get_start_end(val,start_pos,end_pos)
@@ -247,9 +249,9 @@ class TextObject(object):
         ts = self._get_tabstop(no)
         # TODO: This is so ugly
         if ts is None:
-            Transformation(self, no, start, end, arg)
+            Transformation(self, no, start, end, search, replace, options)
         else:
-            Transformation(self, ts, start, end, arg)
+            Transformation(self, no, start, end, search, replace, options)
 
 
 
@@ -345,9 +347,10 @@ class CleverReplace(object):
     """
     This class mimics TextMates replace syntax
     """
-    _DOLLAR = re.compile(r"\$(\d+)")
-    _SIMPLE_CASEFOLDINGS = re.compile(r"\\([ul].)")
-    _LONG_CASEFOLDINGS = re.compile(r"\\([UL].*)\\E")
+    _DOLLAR = re.compile(r"\$(\d+)", re.DOTALL)
+    _SIMPLE_CASEFOLDINGS = re.compile(r"\\([ul].)", re.DOTALL)
+    _LONG_CASEFOLDINGS = re.compile(r"\\([UL].*?)\\E", re.DOTALL)
+    _CONDITIONAL = re.compile(r"\(\?(\d+):(.*?)\)", re.DOTALL)
 
     def __init__(self, s):
         self._s = s
@@ -365,16 +368,23 @@ class CleverReplace(object):
         else:
             return m.group(1)[1:].lower()
 
-
-    def replace(self, orig, match):
+    def replace(self, match):
         start, end = match.span()
-
-        debug("In replace: %s" % repr(orig))
 
         tv = self._s
 
         # Replace all $? with capture groups
         tv = self._DOLLAR.subn(lambda m: match.group(int(m.group(1))), tv)[0]
+
+        def _conditional(m):
+            args = m.group(2).split(':')
+            # TODO: the returned string should be checked for conditionals
+            if match.group(int(m.group(1))):
+                return args[0]
+            elif len(args) > 1:
+                return args[1]
+            else:
+                return ""
 
         # Replace CaseFoldings
         debug("after dollar replace: %s" % tv)
@@ -382,32 +392,36 @@ class CleverReplace(object):
         debug("after simple case tv: %s" % tv)
         tv = self._LONG_CASEFOLDINGS.subn(self._lcase_folding, tv)[0]
         debug("after long case tv: %s" % tv)
+        tv = self._CONDITIONAL.subn(_conditional, tv)[0]
+        debug("after condition tv: %s" % tv)
 
-        rv = orig[:start] + tv + orig[end:]
+        rv = tv.decode("string-escape")
 
         debug("   Returning: %s" % repr(rv))
 
         return rv
 
 class Transformation(Mirror):
-    def __init__(self, parent, ts, start, end, content):
+    def __init__(self, parent, ts, start, end, s, r, options):
         Mirror.__init__(self, parent, ts, start, end)
 
-        res = content.split('/')
+        flags = 0
+        self._match_this_many = 1
+        if options:
+            if "g" in options:
+                self._match_this_many = 0
+            if "i" in options:
+                flags |=  re.IGNORECASE
 
-        self._find = re.compile(res[0])
-        self._replace = CleverReplace(res[1])
+        self._find = re.compile(s, flags)
+        self._replace = CleverReplace(r)
 
     def _do_update(self):
         if isinstance(self._ts,int):
             self._ts = self._parent._get_tabstop(self._ts)
 
         t = self._ts.current_text
-
-        m = self._find.search(t)
-        if m:
-            t = self._replace.replace(t, m)
-
+        t = self._find.subn(self._replace.replace, t, self._match_this_many)[0]
         self.current_text = t
 
     def __repr__(self):
