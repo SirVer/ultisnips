@@ -348,14 +348,25 @@ class SimpleTabstopWithDefaultComplexKeep_ExceptCorrectResult(_VimTest):
     def runTest(self): self.check_output()
 
 # TODO: Mehrer tabs und mehrere mirrors
+class TabstopWithMirrorInDefaultNoType_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha ${1:blub} ${2:$1.h}")
+    wanted = "ha blub blub.h"
+    def cmd(self):
+        self.type("test\t")
+    def runTest(self): self.check_output()
+class TabstopWithMirrorInDefaultTwiceAndExtra_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha $1 ${2:$1.h $1.c}\ntest $1")
+    wanted = "ha stdin stdin.h stdin.c\ntest stdin"
+    def cmd(self):
+        self.type("test\tstdin")
+    def runTest(self): self.check_output()
+class TabstopWithMirrorInDefaultOverwrite_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha $1 ${2:$1.h}")
+    wanted = "ha stdin overwritten"
+    def cmd(self):
+        self.type("test\tstdin\toverwritten")
+    def runTest(self): self.check_output()
 
-# class TabstopWithMirrorInDefaultNoType_ExceptCorrectResult(_VimTest):
-#     snippets = ("test", "ha ${2:$1.h} ${1:blub}")
-#     wanted = "ha blub.h blub"
-#     def cmd(self):
-#         self.type("test\t")
-#     def runTest(self): self.check_output()
-#
 
 
 # class MirrorMoreInvolved_ExceptCorrectResult(_VimTest):

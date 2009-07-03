@@ -139,7 +139,7 @@ class TextObject(object):
 
         self._current_text = TextBuffer(self._parse(initial_text))
 
-    
+
     def _do_update(self):
         pass
 
@@ -209,17 +209,22 @@ class TextObject(object):
         def_text = m.group(2)
 
         start, end = m.span()
-        val = val[:start] + def_text + val[end:]
+        val = val[:start] + val[end:]
 
         line_idx = val[:start].count('\n')
         line_start = val[:start].rfind('\n') + 1
         start_in_line = start - line_start
-        ts = TabStop(self, line_idx,
-                (start_in_line,start_in_line+len(def_text)), def_text)
+        ts = TabStop(self, line_idx, start_in_line, def_text)
 
         self.add_tabstop(no,ts)
 
         return val
+
+    def _get_tabstop(self,no):
+        if no in self._tabstops:
+            return self._tabstops[no]
+        if self._parent:
+            return self._parent._get_tabstop(no)
 
     def _handle_ts_or_mirror(self, m, val):
         no = int(m.group(3))
@@ -230,11 +235,12 @@ class TextObject(object):
         line_start = val[:start].rfind('\n') + 1
         start_in_line = start - line_start
 
-        if no in self._tabstops:
-            m = Mirror(self, self._tabstops[no], line_idx, start_in_line)
-            val = val[:start] + self._tabstops[no].current_text + val[end:]
+        ts = self._get_tabstop(no)
+        if ts is not None:
+            m = Mirror(self, ts, line_idx, start_in_line)
+            val = val[:start] + val[end:]
         else:
-            ts = TabStop(self, line_idx, (start_in_line,start_in_line))
+            ts = TabStop(self, line_idx, start_in_line)
             val = val[:start] + val[end:]
             self.add_tabstop(no,ts)
 
@@ -285,6 +291,9 @@ class ChangeableText(TextObject):
         debug("_set_text: %s" % repr(text))
         self._current_text = TextBuffer(text)
 
+        # Now, we can have no more childen
+        self._children = []
+
     def current_text():
         def fget(self):
             return str(self._current_text)
@@ -302,9 +311,9 @@ class Mirror(ChangeableText):
         start = Position(idx,start_col)
         end = start + (ts.end - ts.start)
         ChangeableText.__init__(self, parent, start, end)
-        
+
         self._ts = ts
-    
+
     def _do_update(self):
         debug("In Mirror: %s %s" % (repr(self.current_text),repr(self._ts.current_text)))
         self.current_text = self._ts.current_text
@@ -318,9 +327,9 @@ class TabStop(ChangeableText):
     This is the most important TextObject. A TabStop is were the cursor
     comes to rest when the user taps through the Snippet.
     """
-    def __init__(self, parent, idx, span, default_text = ""):
-        start = Position(idx,span[0])
-        end = Position(idx,span[1])
+    def __init__(self, parent, idx, start_col, default_text = ""):
+        start = Position(idx,start_col)
+        end = Position(idx,start_col)
         ChangeableText.__init__(self, parent, start, end, default_text)
 
     def __repr__(self):
