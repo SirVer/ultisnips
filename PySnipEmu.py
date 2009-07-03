@@ -120,10 +120,10 @@ class TextObject(object):
     This base class represents any object in the text
     that has a span in any ways
     """
-    _TABSTOP = re.compile(r'''(?xms)
-(?:\${(\d+):(.*?)})|   # A simple tabstop with default value
-(?:\$(\d+))           # A mirror or a tabstop without default value.
-''')
+    # A simple tabstop with default value
+    _TABSTOP = re.compile(r'''\${(\d+):(.*?)}''')
+    # A mirror or a tabstop without default value.
+    _MIRROR_OR_TS = re.compile(r'\$(\d+)')
 
     def __init__(self, parent, start, end, initial_text):
         self._start = start
@@ -137,13 +137,23 @@ class TextObject(object):
         if parent is not None:
             parent.add_child(self)
 
-        self._current_text = TextBuffer(self._parse(initial_text))
+        self._has_parsed = False
 
+        self._current_text = initial_text
+
+        debug("New text_object: %s" % self)
+        if len(self._children):
+            debug("  Children:")
+            for c in self._children:
+                debug("  %s" % c)
 
     def _do_update(self):
         pass
 
     def update(self, change_buffer, indend = ""):
+        if not self._has_parsed:
+            self._current_text = TextBuffer(self._parse(self._current_text))
+
         debug("%sUpdating %s" % (indend, self))
         for c in self._children:
             debug("%s   Updating Child%s" % (indend, c))
@@ -180,7 +190,6 @@ class TextObject(object):
             if m == obj:
                 continue
 
-            debug("Considering %s for moving!" % m)
 
             delta_lines = 0
             delta_cols_begin = 0
@@ -196,8 +205,6 @@ class TextObject(object):
                     if m.start.line == m.end.line:
                         delta_cols_end = cols
 
-            debug("delta_lines: %i, delta_cols_begin: %i, delta_cols_end: %i" %
-                  (delta_lines, delta_cols_begin, delta_cols_end))
             m.start.line += delta_lines
             m.end.line += delta_lines
             m.start.col += delta_cols_begin
@@ -207,7 +214,7 @@ class TextObject(object):
         def _get_pos(s, pos):
             line_idx = s[:pos].count('\n')
             line_start = s[:pos].rfind('\n') + 1
-            start_in_line = start_pos - line_start
+            start_in_line = pos - line_start
             return Position(line_idx, start_in_line)
 
         return _get_pos(val, start_pos), _get_pos(val, end_pos)
@@ -220,13 +227,9 @@ class TextObject(object):
         start_pos, end_pos = m.span()
         start, end = self._get_start_end(val,start_pos,end_pos)
 
-        val = val[:start_pos] + val[end_pos:]
-
-        ts = TabStop(self, start, def_text)
+        ts = TabStop(self, start, end, def_text)
 
         self.add_tabstop(no,ts)
-
-        return val
 
     def _get_tabstop(self,no):
         if no in self._tabstops:
@@ -235,35 +238,41 @@ class TextObject(object):
             return self._parent._get_tabstop(no)
 
     def _handle_ts_or_mirror(self, m, val):
-        no = int(m.group(3))
+        no = int(m.group(1))
 
         start_pos, end_pos = m.span()
         start, end = self._get_start_end(val,start_pos,end_pos)
 
         ts = self._get_tabstop(no)
         if ts is not None:
-            m = Mirror(self, ts, start)
+            m = Mirror(self, ts, start, end)
         else:
-            ts = TabStop(self, start)
+            ts = TabStop(self, start, end)
             self.add_tabstop(no,ts)
 
-        val = val[:start_pos] + val[end_pos:]
-
-        return val
     def add_tabstop(self,no, ts):
         self._tabstops[no] = ts
 
     def _parse(self, val):
-        while 1:
-            m = self._TABSTOP.search(val)
+        self._has_parsed = True
 
-            if m is not None:
-                if m.group(1) is not None: # ${1:hallo}
-                    val = self._handle_tabstop(m,val)
-                elif m.group(3) is not None: # $1
-                    val = self._handle_ts_or_mirror(m,val)
-            else:
-                break
+        if not len(val):
+            return val
+
+        for m in self._TABSTOP.finditer(val):
+            self._handle_tabstop(m,val)
+            # Replace the whole definition with spaces
+            s, e = m.span()
+            val = val[:s] + (e-s)*" " + val[e:]
+            debug("Handled a tabstop: %s" % repr(val))
+
+        for m in self._MIRROR_OR_TS.finditer(val):
+            self._handle_ts_or_mirror(m,val)
+            # Replace the whole definition with spaces
+            s, e = m.span()
+            val = val[:s] + (e-s)*" " + val[e:]
+            debug("Handled a mirror or ts: %s" % repr(val))
+
         debug("End of parse: %s" % repr(val))
 
         return val
@@ -312,8 +321,7 @@ class Mirror(ChangeableText):
     """
     A Mirror object mirrors a TabStop that is, text is repeated here
     """
-    def __init__(self, parent, ts, start):
-        end = start + (ts.end - ts.start)
+    def __init__(self, parent, ts, start, end):
         ChangeableText.__init__(self, parent, start, end)
 
         self._ts = ts
@@ -331,16 +339,15 @@ class TabStop(ChangeableText):
     This is the most important TextObject. A TabStop is were the cursor
     comes to rest when the user taps through the Snippet.
     """
-    def __init__(self, parent, start, default_text = ""):
-        end = Position(start.line,start.col)
+    def __init__(self, parent, start, end, default_text = ""):
         ChangeableText.__init__(self, parent, start, end, default_text)
 
     def __repr__(self):
         return "TabStop(%s -> %s, %s)" % (self._start, self._end,
             repr(self._current_text))
 
-    def select(self):
-        lineno, col = self._parent.start.line, self._parent.start.col
+    def select(self, start):
+        lineno, col = start.line, start.col
 
         newline = lineno + self._start.line
         newcol = self._start.col
@@ -350,18 +357,23 @@ class TabStop(ChangeableText):
 
         vim.current.window.cursor = newline + 1, newcol
 
-        # Select the word
-        # Depending on the current mode and position, we
-        # might need to move escape out of the mode and this
-        # will move our cursor one left
         if len(self.current_text) > 0:
+            # Select the word
+            # Depending on the current mode and position, we
+            # might need to move escape out of the mode and this
+            # will move our cursor one left
             if newcol != 0 and vim.eval("mode()") == 'i':
                 move_one_right = "l"
             else:
                 move_one_right = ""
 
-            vim.command(r'call feedkeys("\<Esc>%sv%il\<c-g>")'
-                % (move_one_right, len(self.current_text)-1))
+            if len(self.current_text) == 1:
+                do_select = ""
+            else:
+                do_select = "%il" % (len(self.current_text)-1)
+
+            vim.command(r'call feedkeys("\<Esc>%sv%s\<c-g>")' %
+                (move_one_right, do_select))
 
 
 class SnippetInstance(TextObject):
@@ -379,6 +391,8 @@ class SnippetInstance(TextObject):
         self._tab_selected = False
 
         self._vb = VimBuffer(text_before, text_after)
+
+        self._current_text = TextBuffer(self._parse(initial_text))
 
         debug("Before update!");
         self.update(self._vb)
@@ -417,7 +431,7 @@ class SnippetInstance(TextObject):
 
         ts = self._tabstops[self._cts]
 
-        ts.select()
+        ts.select(self._start)
 
         self._tab_selected = True
         return True

@@ -167,8 +167,17 @@ class TabStopNoReplace_ExceptCorrectResult(_VimTest):
         self.type("echo\t")
     def runTest(self): self.check_output()
 
+# TODO: multiline tabstops, maybe?
+
+class TabStopWithOneChar_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "nothing ${1:i} hups")
+    wanted = "nothing ship hups"
+    def cmd(self):
+        self.type("hallo\tship")
+    def runTest(self): self.check_output()
+
 class TabStopTestJumping_ExceptCorrectResult(_VimTest):
-    snippets = ("hallo", "hallo ${0:End} mitte ${1:Beginning}")
+    snippets = ("hallo", "hallo ${2:End} mitte ${1:Beginning}")
     wanted = "hallo TestHi mitte Beginning"
     def cmd(self):
         self.type("hallo\t\tTest\tHi")
@@ -254,6 +263,19 @@ class TextTabStopAllSurrounded_ExceptCorrectResult(_VimTest):
         self.type("test\thallo welt")
     def runTest(self): self.check_output()
 
+class MirrorBeforeTabstopLeave_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1:this is it} $1")
+    wanted = "this is it this is it this is it"
+    def cmd(self):
+        self.type("test\t")
+    def runTest(self): self.check_output()
+class MirrorBeforeTabstopOverwrite_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1:this is it} $1")
+    wanted = "a a a"
+    def cmd(self):
+        self.type("test\ta")
+    def runTest(self): self.check_output()
+
 class TextTabStopSimpleMirrorMultiline_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1\n$1")
     wanted = "hallo\nhallo"
@@ -285,7 +307,6 @@ class MultilineTabStopSimpleMirrorDeleteInLine_ExceptCorrectResult(_VimTest):
     def cmd(self):
         self.type("test\thallo Du\nHi\b\bAch Blah")
     def runTest(self): self.check_output()
-
 
 class SimpleMirrorDelete_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1\n$1")
@@ -379,21 +400,36 @@ class TabstopWithMirrorInDefaultOverwrite_ExceptCorrectResult(_VimTest):
         self.type("test\tstdin\toverwritten")
     def runTest(self): self.check_output()
 
+class MirrorRealLifeExample_ExceptCorrectResult(_VimTest):
+    snippets = (
+        ("for", "for(size_t ${2:i} = 0; $2 < ${1:count}; ${3:++$2})" \
+         "\n{\n\t${0:/* code */}\n}"),
+    )
+    wanted = """for(size_t a_variable = 0; a_variable < 100; a_variable *= 2)
+{
+\t// do nothing
+}"""
+    def cmd(self):
+        self.type("for\t100\tavar\b\b\b\ba_variable\ta_variable *= 2"
+                  "\t// do nothing")
 
+    def runTest(self): self.check_output()
 
-# class MirrorMoreInvolved_ExceptCorrectResult(_VimTest):
-#     snippets = (
-#         ("for", "for(size_t ${2:i} = 0; $2 < ${1:count}; ${3:++$2})\n{\n\t${0:/* code */}\n}"),
-#     )
-#
-#     def cmd(self):
-#         self.type("for\t")
-#
-#     def runTest(self):
-#         self.assertEqual(self.output,"hallo Du Nase na")
 # TODO: recursive expansion
-# TODO: mirrors in default expansion
-# TODO: $1 ${1:This is the tabstop}
+
+###################
+# TRANSFORMATIONS #
+###################
+class Transformation_SimpleCase_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/foo/batzl/}")
+    wanted = "hallo foo boy hallo batzl boy"
+    def cmd(self):
+        self.type("test\t","hallo foo boy")
+class Transformation_SimpleCaseNoTransform_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/foo/batzl/}")
+    wanted = "hallo hallo"
+    def cmd(self):
+        self.type("test\t","hallo")
 
 if __name__ == '__main__':
     import sys
