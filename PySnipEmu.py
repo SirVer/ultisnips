@@ -10,26 +10,67 @@ def debug(s):
     f.write(s+'\n')
     f.close()
 
-def _replace_text_in_buffer( start, end, textblock ):
-    first_line = vim.current.buffer[start.line][:start.col]
-    last_line = vim.current.buffer[end.line][end.col:]
+class Buffer(object):
+    def _replace(self, start, end, content, first_line, last_line):
 
-    # We do not use splitlines() here because it handles cases like 'text\n'
-    # differently than we want it here
-    text = textblock.replace('\r','').split('\n')
-    if len(text) == 1:
-        arr = [ first_line + text[0] + last_line ]
-        new_end = start + Position(0,len(text[0]))
-    else:
-        arr = [ first_line + text[0] ] + \
-                text[1:-1] + \
-              [ text[-1] + last_line ]
-        new_end = Position(start.line + len(text)-1, len(text[-1]))
+        text = content[:]
+        if len(text) == 1:
+            arr = [ first_line + text[0] + last_line ]
+            new_end = start + Position(0,len(text[0]))
+        else:
+            arr = [ first_line + text[0] ] + \
+                    text[1:-1] + \
+                    [ text[-1] + last_line ]
+            new_end = Position(start.line + len(text)-1, len(text[-1]))
 
-    vim.current.buffer[start.line:end.line+1] = arr
+        self[start.line:end.line+1] = arr
 
-    return new_end
+        return new_end
 
+class TextBuffer(Buffer):
+    def __init__(self, textblock):
+        # We do not use splitlines() here because it handles cases like 'text\n'
+        # differently than we want it here
+        self._lines = textblock.replace('\r','').split('\n')
+
+    def calc_end(self, start):
+        text = self._lines[:]
+        if len(text) == 1:
+            new_end = start + Position(0,len(text[0]))
+        else:
+            new_end = Position(start.line + len(text)-1, len(text[-1]))
+        return new_end
+
+    def replace_text( self, start, end, content ):
+        first_line = self[start.line][:start.col]
+        last_line = self[end.line][end.col:]
+        return self._replace( start, end, content, first_line, last_line)
+
+    def __getitem__(self, a):
+        return self._lines.__getitem__(a)
+    def __setitem__(self, a, b):
+        return self._lines.__setitem__(a,b)
+    def __repr__(self):
+        return repr('\n'.join(self._lines))
+    def __str__(self):
+        return '\n'.join(self._lines)
+
+class VimBuffer(Buffer):
+    def __init__(self, before, after):
+        self._bf = before
+        self._af = after
+    def __getitem__(self, a):
+        return vim.current.buffer[a]
+    def __setitem__(self, a, b):
+        if isinstance(a,slice):
+            vim.current.buffer[a.start:a.stop] = b
+        else:
+            vim.current.buffer[a] = b
+    def __repr__(self):
+        return "VimBuffer()"
+
+    def replace_text( self, start, end, content ):
+        return self._replace( start, end, content, self._bf, self._af)
 
 class Position(object):
     def __init__(self, line, col):
@@ -79,15 +120,134 @@ class TextObject(object):
     This base class represents any object in the text
     that has a span in any ways
     """
-    def __init__(self, parent, start, end):
+    _TABSTOP = re.compile(r'''(?xms)
+(?:\${(\d+):(.*?)})|   # A simple tabstop with default value
+(?:\$(\d+))           # A mirror or a tabstop without default value.
+''')
+
+    def __init__(self, parent, start, end, initial_text):
         self._start = start
         self._end = end
+
         self._parent = parent
 
         self._children = []
+        self._tabstops = {}
 
         if parent is not None:
             parent.add_child(self)
+
+        self._current_text = TextBuffer(self._parse(initial_text))
+
+    def _do_update(self, buffer):
+        return buffer.replace_text(self.start, self.end, self._current_text)
+
+    def update(self, change_buffer, indend = ""):
+        debug("%sUpdating %s" % (indend, self))
+        for c in self._children:
+            debug("%s   Updating Child%s" % (indend, self))
+            oldend = c.end
+
+            moved_lines, moved_cols = c.update( self._current_text, indend + ' '*8 )
+            self._move_textobjects_behind(oldend, moved_lines, moved_cols, c)
+
+            debug("%s     Moved%i, %i" % (indend, moved_lines, moved_cols))
+
+        debug("%s  self._current_text: %s" % (indend, repr(self._current_text)))
+
+        new_end = self._do_update(change_buffer)
+
+        moved_lines = new_end.line - self._end.line
+        moved_cols = new_end.col - self._end.col
+
+        self._end = new_end
+        debug("%s  new_end: %s" % (indend, new_end))
+
+        return moved_lines, moved_cols
+
+
+
+    def _move_textobjects_behind(self, end, lines, cols, obj):
+        if lines == 0 and cols == 0:
+            return
+
+        for m in self._children:
+            if m == obj:
+                continue
+
+            delta_lines = 0
+            delta_cols_begin = 0
+            delta_cols_end = 0
+
+            if m.start.line > end:
+                delta_lines = lines
+            elif m.start.line == end.line:
+                if m.start.col >= end.col:
+                    if lines:
+                        delta_lines = lines
+                    delta_cols_begin = cols
+                    if m.start.line == m.end.line:
+                        delta_cols_end = cols
+
+            m.start.line += delta_lines
+            m.end.line += delta_lines
+            m.start.col += delta_cols_begin
+            m.end.col += delta_cols_end
+
+
+    def _handle_tabstop(self, m, val):
+        no = int(m.group(1))
+        def_text = m.group(2)
+
+        start, end = m.span()
+        val = val[:start] + def_text + val[end:]
+
+        line_idx = val[:start].count('\n')
+        line_start = val[:start].rfind('\n') + 1
+        start_in_line = start - line_start
+        ts = TabStop(self, line_idx,
+                (start_in_line,start_in_line+len(def_text)), def_text)
+
+        self.add_tabstop(no,ts)
+
+        return val
+
+    def _handle_ts_or_mirror(self, m, val):
+        no = int(m.group(3))
+
+        start, end = m.span()
+
+        line_idx = val[:start].count('\n')
+        line_start = val[:start].rfind('\n') + 1
+        start_in_line = start - line_start
+
+        # TODO: recomment int
+        # if no in self._tabstops:
+        #     m = Mirror(self, self._tabstops[no], line_idx, start_in_line)
+        #     val = val[:start] + self._tabstops[no].current_text + val[end:]
+        # if:
+        ts = TabStop(self, line_idx, (start_in_line,start_in_line))
+        val = val[:start] + val[end:]
+        self.add_tabstop(no,ts)
+
+        return val
+    def add_tabstop(self,no, ts):
+        self._tabstops[no] = ts
+
+    def _parse(self, val):
+        while 1:
+            m = self._TABSTOP.search(val)
+
+            if m is not None:
+                if m.group(1) is not None: # ${1:hallo}
+                    val = self._handle_tabstop(m,val)
+                elif m.group(3) is not None: # $1
+                    val = self._handle_ts_or_mirror(m,val)
+            else:
+                break
+        debug("End of parse: %s" % repr(val))
+
+        return val
 
     def add_child(self,c):
         self._children.append(c)
@@ -111,59 +271,42 @@ class TextObject(object):
 
 class ChangeableText(TextObject):
     def __init__(self, parent, start, end, initial = ""):
-        TextObject.__init__(self, parent, start, end)
-        self._ct = initial
+        TextObject.__init__(self, parent, start, end, initial)
 
     def _set_text(self, text):
-        self._ct = text
-
-        # We do not use splitlines() here because it handles cases like 'text\n'
-        # differently than we want it here
-        # TODO: this is duplicated in _replace_text_in_buffer
-        text = text.replace('\r','').split('\n')
-        if len(text) == 1:
-            new_end = self._start + Position(0,len(text[0]))
-        else:
-            new_end = Position(self._start.line + len(text)-1, len(text[-1]))
-
-        moved_lines = new_end.line - self.end.line
-        moved_cols = new_end.col - self.end.col
-
-        self._parent._move_textobjects_behind(moved_lines, moved_cols, self)
-
-        self._end = new_end
-
+        debug("_set_text: %s" % repr(text))
+        self._current_text = TextBuffer(text)
 
     def current_text():
         def fget(self):
-            return self._ct
+            return str(self._current_text)
         def fset(self, text):
             self._set_text(text)
         return locals()
     current_text = property(**current_text())
 
 
-class Mirror(ChangeableText):
-    """
-    A Mirror object mirrors a TabStop that is, text is repeated here
-    """
-    def __init__(self, parent, ts, idx, start_col):
-        start = Position(idx,start_col)
-        end = start + (ts.end - ts.start)
-        ChangeableText.__init__(self, parent, start, end)
-
-        ts.add_mirror(self)
-
-    def __repr__(self):
-        return "Mirror(%s -> %s)" % (self._start, self._end)
-
-    def _set_text(self,text):
-       _replace_text_in_buffer(
-           self._parent.start + self._start,
-           self._parent.start + self._end,
-           text,
-       )
-       ChangeableText._set_text(self, text)
+# class Mirror(ChangeableText):
+#     """
+#     A Mirror object mirrors a TabStop that is, text is repeated here
+#     """
+#     def __init__(self, parent, ts, idx, start_col):
+#         start = Position(idx,start_col)
+#         end = start + (ts.end - ts.start)
+#         ChangeableText.__init__(self, parent, start, end)
+#
+#         ts.add_mirror(self)
+#
+#     def __repr__(self):
+#         return "Mirror(%s -> %s)" % (self._start, self._end)
+#
+#     def _set_text(self,text):
+#        _replace_text_in_buffer(
+#            self._parent.start + self._start,
+#            self._parent.start + self._end,
+#            text,
+#        )
+#        ChangeableText._set_text(self, text)
 
 
 
@@ -180,7 +323,8 @@ class TabStop(ChangeableText):
         self._mirrors = []
 
     def __repr__(self):
-        return "TabStop(%s -> %s)" % (self._start, self._end)
+        return "TabStop(%s -> %s, %s)" % (self._start, self._end,
+            repr(self._current_text))
 
     def _set_text(self,text):
         ChangeableText._set_text(self,text)
@@ -224,18 +368,22 @@ class SnippetInstance(TextObject):
     also a TextObject because it has a start an end
     """
 
-    def __init__(self, start, end):
-        TextObject.__init__(self, None, start, end)
+    def __init__(self, start, end, initial_text, text_before, text_after):
+        TextObject.__init__(self, None, start, end, initial_text)
 
         self._cts = None
         self._tab_selected = False
-        self._tabstops = {}
+
+        self._vb = VimBuffer(text_before, text_after)
+
+        debug("Before update!");
+        self.update(self._vb)
+        debug("After update!");
+
 
     def has_tabs(self):
         return len(self._children) > 0
 
-    def add_tabstop(self,no, ts):
-        self._tabstops[no] = ts
 
     def select_next_tab(self, backwards = False):
         if self._cts == 0:
@@ -270,37 +418,11 @@ class SnippetInstance(TextObject):
         self._tab_selected = True
         return True
 
-
-    def _move_textobjects_behind(self, lines, cols, obj):
-        if lines == 0 and cols == 0:
-            return
-
-        for m in self._children:
-            if m == obj:
-                continue
-
-            delta_lines = 0
-            delta_cols_begin = 0
-            delta_cols_end = 0
-
-            if m.start.line > obj.end.line:
-                delta_lines = lines
-            elif m.start.line == obj.end.line:
-                if m.start.col >= obj.end.col:
-                    if lines:
-                        delta_lines = lines
-                    delta_cols_begin = cols
-                    if m.start.line == m.end.line:
-                        delta_cols_end = cols
-
-            m.start.line += delta_lines
-            m.end.line += delta_lines
-            m.start.col += delta_cols_begin
-            m.end.col += delta_cols_end
-
     def backspace(self,count):
         cts = self._tabstops[self._cts]
         cts.current_text = cts.current_text[:-count]
+
+        self.update(self._vb)
 
     def chars_entered(self, chars):
         cts = self._tabstops[self._cts]
@@ -311,13 +433,10 @@ class SnippetInstance(TextObject):
         else:
             cts.current_text += chars
 
+        self.update(self._vb)
+
 
 class Snippet(object):
-    _TABSTOP = re.compile(r'''(?xms)
-(?:\${(\d+):(.*?)})|   # A simple tabstop with default value
-(?:\$(\d+))           # A mirror or a tabstop without default value.
-''')
-
     def __init__(self,trigger,value):
         self._t = trigger
         self._v = value
@@ -326,79 +445,24 @@ class Snippet(object):
         return self._t
     trigger = property(trigger)
 
-    def _handle_tabstop(self, s, m, val, tabstops):
-        no = int(m.group(1))
-        def_text = m.group(2)
-
-        start, end = m.span()
-        val = val[:start] + def_text + val[end:]
-
-        line_idx = val[:start].count('\n')
-        line_start = val[:start].rfind('\n') + 1
-        start_in_line = start - line_start
-        ts = TabStop(s, line_idx,
-                (start_in_line,start_in_line+len(def_text)), def_text)
-
-        tabstops[no] = ts
-        s.add_tabstop(no,ts)
-
-        return val
-
-    def _handle_ts_or_mirror(self, s, m, val, tabstops):
-        no = int(m.group(3))
-
-        start, end = m.span()
-
-        line_idx = val[:start].count('\n')
-        line_start = val[:start].rfind('\n') + 1
-        start_in_line = start - line_start
-
-        if no in tabstops:
-            m = Mirror(s, tabstops[no], line_idx, start_in_line)
-            val = val[:start] + tabstops[no].current_text + val[end:]
-        else:
-            ts = TabStop(s, line_idx, (start_in_line,start_in_line))
-            val = val[:start] + val[end:]
-            tabstops[no] = ts
-            s.add_tabstop(no,ts)
-
-        return val
-
-    def _find_tabstops(self, s, val):
-        tabstops = {}
-
-        while 1:
-            m = self._TABSTOP.search(val)
-
-            if m is not None:
-                if m.group(1) is not None: # ${1:hallo}
-                    val = self._handle_tabstop(s,m,val,tabstops)
-                elif m.group(3) is not None: # $1
-                    val = self._handle_ts_or_mirror(s,m,val,tabstops)
-            else:
-                break
-
-        return val
 
     def launch(self, before, after):
         lineno, col = vim.current.window.cursor
         start = Position(lineno-1,col - len(self._t))
         end = Position(lineno-1,col)
 
-        s = SnippetInstance(start,end)
-        text = self._find_tabstops(s, self._v)
+        line = vim.current.line
 
-        new_end = _replace_text_in_buffer( start, end, text )
+        text_before = line[:start.col]
+        text_after = line[end.col:]
 
-        # TODO: hack
-        s.end.col = new_end.col
-        s.end.line = new_end.line
+        s = SnippetInstance(start, end, self._v, text_before, text_after)
 
         if s.has_tabs():
             s.select_next_tab()
             return s
         else:
-            vim.current.window.cursor = new_end.line + 1, new_end.col
+            vim.current.window.cursor = s.end.line + 1, s.end.col
 
 class SnippetManager(object):
     def __init__(self):
