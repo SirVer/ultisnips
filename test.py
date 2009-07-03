@@ -360,6 +360,18 @@ class TabstopWithMirrorInDefaultTwiceAndExtra_ExceptCorrectResult(_VimTest):
     def cmd(self):
         self.type("test\tstdin")
     def runTest(self): self.check_output()
+class TabstopWithMirrorInDefaultMultipleLeave_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha $1 ${2:snip} ${3:$1.h $2}")
+    wanted = "ha stdin snip stdin.h snip"
+    def cmd(self):
+        self.type("test\tstdin")
+    def runTest(self): self.check_output()
+class TabstopWithMirrorInDefaultMultipleOverwrite_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha $1 ${2:snip} ${3:$1.h $2}")
+    wanted = "ha stdin do snap stdin.h do snap"
+    def cmd(self):
+        self.type("test\tstdin\tdo snap")
+    def runTest(self): self.check_output()
 class TabstopWithMirrorInDefaultOverwrite_ExceptCorrectResult(_VimTest):
     snippets = ("test", "ha $1 ${2:$1.h}")
     wanted = "ha stdin overwritten"
