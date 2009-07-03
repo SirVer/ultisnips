@@ -424,12 +424,59 @@ class Transformation_SimpleCase_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/foo/batzl/}")
     wanted = "hallo foo boy hallo batzl boy"
     def cmd(self):
-        self.type("test\t","hallo foo boy")
+        self.type("test\thallo foo boy")
+    def runTest(self): self.check_output()
 class Transformation_SimpleCaseNoTransform_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/foo/batzl/}")
     wanted = "hallo hallo"
     def cmd(self):
-        self.type("test\t","hallo")
+        self.type("test\thallo")
+    def runTest(self): self.check_output()
+class Transformation_Backreference_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/([ab])oo/$1ull/}")
+    wanted = "foo boo aoo foo bull aoo"
+    def cmd(self):
+        self.type("test\tfoo boo aoo")
+    def runTest(self): self.check_output()
+class Transformation_BackreferenceTwice_ExceptCorrectResult(_VimTest):
+    snippets = ("test", r"$1 ${1/(dead) (par[^ ]*)/this $2 is a bit $1/}")
+    wanted = "dead parrot this parrot is a bit dead"
+    def cmd(self):
+        self.type("test\tdead parrot")
+    def runTest(self): self.check_output()
+
+class Transformation_CleverTransformUpercaseChar_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/(.)/\u$1/}")
+    wanted = "hallo Hallo"
+    def cmd(self):
+        self.type("test\thallo")
+    def runTest(self): self.check_output()
+class Transformation_CleverTransformLowercaseChar_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/(.*)/\l$1/}")
+    wanted = "Hallo hallo"
+    def cmd(self):
+        self.type("test\tHallo")
+    def runTest(self): self.check_output()
+class Transformation_CleverTransformLongUpper_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/(.*)/\U$1\E/}")
+    wanted = "hallo HALLO"
+    def cmd(self):
+        self.type("test\thallo")
+    def runTest(self): self.check_output()
+class Transformation_CleverTransformLongLower_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/(.*)/\L$1\E/}")
+    wanted = "HALLO hallo"
+    def cmd(self):
+        self.type("test\tHALLO")
+    def runTest(self): self.check_output()
+
+# TODO: python init replacement
+# class Transformation_RealLifeExample_ExceptCorrectResult(_VimTest):
+#     snippets = ("func", "def func$1 ${1/foo/batzl/}")
+#     wanted = "hallo hallo"
+#     def cmd(self):
+#         self.type("test\thallo")
+#     def runTest(self): self.check_output()
 
 if __name__ == '__main__':
     import sys

@@ -124,6 +124,8 @@ class TextObject(object):
     _TABSTOP = re.compile(r'''\${(\d+):(.*?)}''')
     # A mirror or a tabstop without default value.
     _MIRROR_OR_TS = re.compile(r'\$(\d+)')
+    # A mirror or a tabstop without default value.
+    _TRANSFORMATION = re.compile(r'\${(\d+)/(.*)}')
 
     def __init__(self, parent, start, end, initial_text):
         self._start = start
@@ -141,31 +143,18 @@ class TextObject(object):
 
         self._current_text = initial_text
 
-        debug("New text_object: %s" % self)
-        if len(self._children):
-            debug("  Children:")
-            for c in self._children:
-                debug("  %s" % c)
-
     def _do_update(self):
         pass
 
-    def update(self, change_buffer, indend = ""):
+    def update(self, change_buffer):
         if not self._has_parsed:
             self._current_text = TextBuffer(self._parse(self._current_text))
 
-        debug("%sUpdating %s" % (indend, self))
         for c in self._children:
-            debug("%s   Updating Child%s" % (indend, c))
             oldend = Position(c.end.line, c.end.col)
 
-            moved_lines, moved_cols = c.update( self._current_text, indend + ' '*8 )
+            moved_lines, moved_cols = c.update(self._current_text)
             self._move_textobjects_behind(oldend, moved_lines, moved_cols, c)
-
-            debug("%s     Moved%i, %i" % (indend, moved_lines, moved_cols))
-            debug("%s     Our text is now: %s" % (indend, repr(self._current_text)))
-
-        debug("%s  self._current_text: %s" % (indend, repr(self._current_text)))
 
         self._do_update()
 
@@ -175,7 +164,6 @@ class TextObject(object):
         moved_cols = new_end.col - self._end.col
 
         self._end = new_end
-        debug("%s  new_end: %s" % (indend, new_end))
 
         return moved_lines, moved_cols
 
@@ -185,7 +173,6 @@ class TextObject(object):
         if lines == 0 and cols == 0:
             return
 
-        debug("_move_textobjects_behind: %s" % end)
         for m in self._children:
             if m == obj:
                 continue
@@ -245,10 +232,26 @@ class TextObject(object):
 
         ts = self._get_tabstop(no)
         if ts is not None:
-            m = Mirror(self, ts, start, end)
+            Mirror(self, ts, start, end)
         else:
             ts = TabStop(self, start, end)
             self.add_tabstop(no,ts)
+
+    def _handle_transformation(self, m, val):
+        no = int(m.group(1))
+        arg = m.group(2)
+
+        start_pos, end_pos = m.span()
+        start, end = self._get_start_end(val,start_pos,end_pos)
+
+        ts = self._get_tabstop(no)
+        # TODO: This is so ugly
+        if ts is None:
+            Transformation(self, no, start, end, arg)
+        else:
+            Transformation(self, ts, start, end, arg)
+
+
 
     def add_tabstop(self,no, ts):
         self._tabstops[no] = ts
@@ -266,6 +269,14 @@ class TextObject(object):
             val = val[:s] + (e-s)*" " + val[e:]
             debug("Handled a tabstop: %s" % repr(val))
 
+        for m in self._TRANSFORMATION.finditer(val):
+            self._handle_transformation(m,val)
+            # Replace the whole definition with spaces
+            s, e = m.span()
+            val = val[:s] + (e-s)*" " + val[e:]
+            debug("Handled a transformation: %s" % repr(val))
+
+
         for m in self._MIRROR_OR_TS.finditer(val):
             self._handle_ts_or_mirror(m,val)
             # Replace the whole definition with spaces
@@ -273,7 +284,6 @@ class TextObject(object):
             val = val[:s] + (e-s)*" " + val[e:]
             debug("Handled a mirror or ts: %s" % repr(val))
 
-        debug("End of parse: %s" % repr(val))
 
         return val
 
@@ -302,7 +312,6 @@ class ChangeableText(TextObject):
         TextObject.__init__(self, parent, start, end, initial)
 
     def _set_text(self, text):
-        debug("_set_text: %s" % repr(text))
         self._current_text = TextBuffer(text)
 
         # Now, we can have no more childen
@@ -327,11 +336,83 @@ class Mirror(ChangeableText):
         self._ts = ts
 
     def _do_update(self):
-        debug("In Mirror: %s %s" % (repr(self.current_text),repr(self._ts.current_text)))
         self.current_text = self._ts.current_text
 
     def __repr__(self):
         return "Mirror(%s -> %s)" % (self._start, self._end)
+
+class CleverReplace(object):
+    """
+    This class mimics TextMates replace syntax
+    """
+    _DOLLAR = re.compile(r"\$(\d+)")
+    _SIMPLE_CASEFOLDINGS = re.compile(r"\\([ul].)")
+    _LONG_CASEFOLDINGS = re.compile(r"\\([UL].*)\\E")
+
+    def __init__(self, s):
+        self._s = s
+
+    def _scase_folding(self, m):
+        if m.group(1)[0] == 'u':
+            return m.group(1)[-1].upper()
+        else:
+            return m.group(1)[-1].lower()
+    def _lcase_folding(self, m):
+        debug("lcase_folding: %s" % m.groups())
+
+        if m.group(1)[0] == 'U':
+            return m.group(1)[1:].upper()
+        else:
+            return m.group(1)[1:].lower()
+
+
+    def replace(self, orig, match):
+        start, end = match.span()
+
+        debug("In replace: %s" % repr(orig))
+
+        tv = self._s
+
+        # Replace all $? with capture groups
+        tv = self._DOLLAR.subn(lambda m: match.group(int(m.group(1))), tv)[0]
+
+        # Replace CaseFoldings
+        debug("after dollar replace: %s" % tv)
+        tv = self._SIMPLE_CASEFOLDINGS.subn(self._scase_folding, tv)[0]
+        debug("after simple case tv: %s" % tv)
+        tv = self._LONG_CASEFOLDINGS.subn(self._lcase_folding, tv)[0]
+        debug("after long case tv: %s" % tv)
+
+        rv = orig[:start] + tv + orig[end:]
+
+        debug("   Returning: %s" % repr(rv))
+
+        return rv
+
+class Transformation(Mirror):
+    def __init__(self, parent, ts, start, end, content):
+        Mirror.__init__(self, parent, ts, start, end)
+
+        res = content.split('/')
+
+        self._find = re.compile(res[0])
+        self._replace = CleverReplace(res[1])
+
+    def _do_update(self):
+        if isinstance(self._ts,int):
+            self._ts = self._parent._get_tabstop(self._ts)
+
+        t = self._ts.current_text
+
+        m = self._find.search(t)
+        if m:
+            t = self._replace.replace(t, m)
+
+        self.current_text = t
+
+    def __repr__(self):
+        return "Transformation(%s -> %s)" % (self._start, self._end)
+
 
 
 class TabStop(ChangeableText):
@@ -394,9 +475,7 @@ class SnippetInstance(TextObject):
 
         self._current_text = TextBuffer(self._parse(initial_text))
 
-        debug("Before update!");
         self.update(self._vb)
-        debug("After update!");
 
 
     def has_tabs(self):
