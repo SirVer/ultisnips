@@ -139,23 +139,27 @@ class TextObject(object):
 
         self._current_text = TextBuffer(self._parse(initial_text))
 
-    def _do_update(self, buffer):
-        return buffer.replace_text(self.start, self.end, self._current_text)
+    
+    def _do_update(self):
+        pass
 
     def update(self, change_buffer, indend = ""):
         debug("%sUpdating %s" % (indend, self))
         for c in self._children:
             debug("%s   Updating Child%s" % (indend, self))
-            oldend = c.end
+            oldend = Position(c.end.line, c.end.col)
 
             moved_lines, moved_cols = c.update( self._current_text, indend + ' '*8 )
             self._move_textobjects_behind(oldend, moved_lines, moved_cols, c)
 
             debug("%s     Moved%i, %i" % (indend, moved_lines, moved_cols))
+            debug("%s     Our text is now: %s" % (indend, repr(self._current_text)))
 
         debug("%s  self._current_text: %s" % (indend, repr(self._current_text)))
 
-        new_end = self._do_update(change_buffer)
+        self._do_update()
+
+        new_end = change_buffer.replace_text(self.start, self.end, self._current_text)
 
         moved_lines = new_end.line - self._end.line
         moved_cols = new_end.col - self._end.col
@@ -171,15 +175,18 @@ class TextObject(object):
         if lines == 0 and cols == 0:
             return
 
+        debug("_move_textobjects_behind: %s" % end)
         for m in self._children:
             if m == obj:
                 continue
+
+            debug("Considering %s for moving!" % m)
 
             delta_lines = 0
             delta_cols_begin = 0
             delta_cols_end = 0
 
-            if m.start.line > end:
+            if m.start.line > end.line:
                 delta_lines = lines
             elif m.start.line == end.line:
                 if m.start.col >= end.col:
@@ -189,6 +196,8 @@ class TextObject(object):
                     if m.start.line == m.end.line:
                         delta_cols_end = cols
 
+            debug("delta_lines: %i, delta_cols_begin: %i, delta_cols_end: %i" %
+                  (delta_lines, delta_cols_begin, delta_cols_end))
             m.start.line += delta_lines
             m.end.line += delta_lines
             m.start.col += delta_cols_begin
@@ -221,14 +230,13 @@ class TextObject(object):
         line_start = val[:start].rfind('\n') + 1
         start_in_line = start - line_start
 
-        # TODO: recomment int
-        # if no in self._tabstops:
-        #     m = Mirror(self, self._tabstops[no], line_idx, start_in_line)
-        #     val = val[:start] + self._tabstops[no].current_text + val[end:]
-        # if:
-        ts = TabStop(self, line_idx, (start_in_line,start_in_line))
-        val = val[:start] + val[end:]
-        self.add_tabstop(no,ts)
+        if no in self._tabstops:
+            m = Mirror(self, self._tabstops[no], line_idx, start_in_line)
+            val = val[:start] + self._tabstops[no].current_text + val[end:]
+        else:
+            ts = TabStop(self, line_idx, (start_in_line,start_in_line))
+            val = val[:start] + val[end:]
+            self.add_tabstop(no,ts)
 
         return val
     def add_tabstop(self,no, ts):
@@ -286,28 +294,23 @@ class ChangeableText(TextObject):
     current_text = property(**current_text())
 
 
-# class Mirror(ChangeableText):
-#     """
-#     A Mirror object mirrors a TabStop that is, text is repeated here
-#     """
-#     def __init__(self, parent, ts, idx, start_col):
-#         start = Position(idx,start_col)
-#         end = start + (ts.end - ts.start)
-#         ChangeableText.__init__(self, parent, start, end)
-#
-#         ts.add_mirror(self)
-#
-#     def __repr__(self):
-#         return "Mirror(%s -> %s)" % (self._start, self._end)
-#
-#     def _set_text(self,text):
-#        _replace_text_in_buffer(
-#            self._parent.start + self._start,
-#            self._parent.start + self._end,
-#            text,
-#        )
-#        ChangeableText._set_text(self, text)
+class Mirror(ChangeableText):
+    """
+    A Mirror object mirrors a TabStop that is, text is repeated here
+    """
+    def __init__(self, parent, ts, idx, start_col):
+        start = Position(idx,start_col)
+        end = start + (ts.end - ts.start)
+        ChangeableText.__init__(self, parent, start, end)
+        
+        self._ts = ts
+    
+    def _do_update(self):
+        debug("In Mirror: %s %s" % (repr(self.current_text),repr(self._ts.current_text)))
+        self.current_text = self._ts.current_text
 
+    def __repr__(self):
+        return "Mirror(%s -> %s)" % (self._start, self._end)
 
 
 class TabStop(ChangeableText):
@@ -320,20 +323,9 @@ class TabStop(ChangeableText):
         end = Position(idx,span[1])
         ChangeableText.__init__(self, parent, start, end, default_text)
 
-        self._mirrors = []
-
     def __repr__(self):
         return "TabStop(%s -> %s, %s)" % (self._start, self._end,
             repr(self._current_text))
-
-    def _set_text(self,text):
-        ChangeableText._set_text(self,text)
-
-        for m in self._mirrors:
-            m.current_text = text
-
-    def add_mirror(self, m):
-        self._mirrors.append(m)
 
     def select(self):
         lineno, col = self._parent.start.line, self._parent.start.col
@@ -513,6 +505,9 @@ class SnippetManager(object):
 
                 # Detect a carriage return
                 if col == 0 and lineno == self._last_cursor_pos[0] + 1:
+                    # Hack, remove this line in vim, because we are going
+                    # to overwrite the old range with the new snippet value.
+                    del vim.current.buffer[lineno]
                     cs.chars_entered('\n')
                 elif lcol > col: # Some deleting was going on
                     cs.backspace(lcol-col)
