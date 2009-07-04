@@ -185,13 +185,13 @@ class TabStopWithOneChar_ExceptCorrectResult(_VimTest):
 
 class TabStopTestJumping_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo ${2:End} mitte ${1:Beginning}")
-    wanted = "hallo TestHi mitte Beginning"
+    wanted = "hallo Test mitte BeginningHi"
     def cmd(self):
         self.type("hallo\t\tTest\tHi")
     def runTest(self): self.check_output()
 class TabStopTestJumping2_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo $0 $1")
-    wanted = "hallo TestHi "
+    wanted = "hallo Test Hi"
     def cmd(self):
         self.type("hallo\t\tTest\tHi")
     def runTest(self): self.check_output()
@@ -560,6 +560,7 @@ class Transformation_OptionReplaceGlobalMatchInReplace_ECR(_VimTest):
     def runTest(self): self.check_output()
 
 # TODO: conditional in conditional, case folding recursive
+# TODO: jumping out of snippet in insert mode
 
 ###################
 # CURSOR MOVEMENT #
@@ -572,6 +573,8 @@ class CursorMovement_Multiline_ECR(_VimTest):
         self.type("test\tthis is something\nvery nice\nnot?\t")
         self.type("more text")
     def runTest(self): self.check_output()
+
+# TODO: expandtab and therelikes
 
 if __name__ == '__main__':
     import sys

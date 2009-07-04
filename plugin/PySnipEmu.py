@@ -145,7 +145,7 @@ class TextObject(object):
         pass
 
     def update(self, change_buffer):
-        debug("Updating: %s" % self)
+        # debug("Updating: %s" % self)
         if not self._has_parsed:
             self._current_text = TextBuffer(self._parse(self._current_text))
 
@@ -188,8 +188,8 @@ class TextObject(object):
                     delta_cols_begin = cols
                     if m.start.line == m.end.line:
                         delta_cols_end = cols
-            debug("  Moving %s: %i (b: %i, e: %i)" % (
-                m, delta_lines, delta_cols_begin, delta_cols_end))
+            # debug("  Moving %s: %i (b: %i, e: %i)" % (
+                # m, delta_lines, delta_cols_begin, delta_cols_end))
             m.start.line += delta_lines
             m.end.line += delta_lines
             m.start.col += delta_cols_begin
@@ -451,8 +451,14 @@ class TabStop(ChangeableText):
             newcol += col
 
         vim.current.window.cursor = newline + 1, newcol
-
-        if len(self.current_text) > 0:
+        
+        if len(self.current_text) == 0:
+            if newcol == 0:
+                vim.command(r'call feedkeys("\<Esc>i")')
+            else:
+                vim.command(r'call feedkeys("\<Esc>a")')
+            debug("feeding insertmode!")
+        else:
             # Select the word
             # Depending on the current mode and position, we
             # might need to move escape out of the mode and this
@@ -462,7 +468,7 @@ class TabStop(ChangeableText):
             else:
                 move_one_right = ""
 
-            if len(self.current_text) == 1:
+            if len(self.current_text) <= 1:
                 do_select = ""
             else:
                 do_select = "%il" % (len(self.current_text)-1)
@@ -490,6 +496,10 @@ class SnippetInstance(TextObject):
         self._current_text = TextBuffer(self._parse(initial_text))
 
         TextObject.update(self, self._vb)
+
+    def tab_selected(self):
+        return self._tab_selected
+    tab_selected = property(tab_selected)
 
     def update(self, buf, cur):
 
@@ -652,13 +662,10 @@ class SnippetManager(object):
 
 
     def _load_snippets_for(self, ft):
-        debug("Loading for: %s" % ft)
-
         self._snippets[ft] = {}
         for p in vim.eval("&runtimepath").split(','):
             fn = p + os.path.sep + "PySnippets" + os.path.sep + \
                     "%s.snippets" % ft
-            debug("Checking: %s" % fn)
             if os.path.exists(fn):
                 self._load_snippets_from(ft, fn)
 
@@ -683,8 +690,13 @@ class SnippetManager(object):
         if len(self._current_snippets):
             cs = self._current_snippets[-1]
             if not cs.select_next_tab(backwards):
+                # Jump to the end of the snippet and enter insert mode
+                cs = self._current_snippets[-1]
+                vim.current.window.cursor = cs.end.line +1, cs.end.col
+                vim.command(r'call feedkeys("\<Esc>a")')
                 self._current_snippets.pop()
-                return False
+
+                return True
 
             self._cursor.update_position()
             return True
@@ -728,7 +740,7 @@ class SnippetManager(object):
                 cs = self._current_snippets[-1]
 
                 # Detect a carriage return
-                if self._cursor.pos.col == 0 and self._cursor.moved.line == 1:
+                if self._cursor.moved.col < 0 and self._cursor.moved.line == 1:
                     # Hack, remove a line in vim, because we are going to
                     # overwrite the old line range with the new snippet value.
                     # After the expansion, we put the cursor were the user left
@@ -751,7 +763,12 @@ class SnippetManager(object):
         self._cursor.update_position()
 
     def entered_insert_mode(self):
-        pass
+        debug("Entered insert mode.")
+        if len(self._current_snippets) and \
+           not self._current_snippets[-1].tab_selected:
+            debug("Dropping snippets")
+            self._current_snippets = []
+
 
 PySnipSnippets = SnippetManager()
 

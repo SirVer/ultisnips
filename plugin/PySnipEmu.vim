@@ -20,8 +20,6 @@ function! PyVimSnips_ExpandSnippet()
 
    " Now, really expand something
     py << EOF
-from PySnipEmu import PySnipSnippets
-import vim
 if not PySnipSnippets.try_expand():
    vim.command("""if exists('SuperTabKey')
    call feedkeys(SuperTabKey)

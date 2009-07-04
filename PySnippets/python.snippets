@@ -6,12 +6,17 @@ debug("${1/(\w+)(, *)?/$1: %s(?2:, )/g}" % (${1:args}))
 $0
 endsnippet
 
+snippet print
+debug("$1")
+$0
+endsnippet
+
 ###########################################################################
 #                            TEXTMATE SNIPPETS                            #
 ###########################################################################
 snippet ifmain "ifmain"
 if __name__ == '__main__':
-	${1:main()}$0
+    ${1:main()}$0
 endsnippet
 
 ##########################
@@ -19,8 +24,8 @@ endsnippet
 ##########################
 snippet try "Try / Except"
 try:
-	${1:pass}
+    ${1:pass}
 except ${2:Exception}, ${3:e}:
-	${4:raise $3}
+    ${4:raise $3}
 endsnippet
 
