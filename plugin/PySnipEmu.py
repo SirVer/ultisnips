@@ -151,7 +151,6 @@ class TextObject(object):
         pass
 
     def update(self, change_buffer):
-        # debug("Updating: %s" % self)
         if not self._has_parsed:
             self._current_text = TextBuffer(self._parse(self._current_text))
 
@@ -159,7 +158,9 @@ class TextObject(object):
             oldend = Position(c.end.line, c.end.col)
 
             moved_lines, moved_cols = c.update(self._current_text)
-            self._move_textobjects_behind(c.start, oldend, moved_lines, moved_cols, idx)
+            self._move_textobjects_behind(c.start, oldend, moved_lines,
+                        moved_cols, idx)
+
 
         self._do_update()
 
@@ -169,9 +170,6 @@ class TextObject(object):
         moved_lines = new_end.line - self._end.line
         moved_cols = new_end.col - self._end.col
 
-        debug("    self: %s, ct: %s" % (self, self._current_text))
-        debug("    new_end: %s" % (new_end))
-
         self._end = new_end
 
         return moved_lines, moved_cols
@@ -179,10 +177,6 @@ class TextObject(object):
     def _move_textobjects_behind(self, start, end, lines, cols, obj_idx):
         if lines == 0 and cols == 0:
             return
-
-        debug("In _move_textobjects_behind")
-        debug("  childs: %s" % self._children)
-        debug("  obj_idx: %i" % obj_idx)
 
         for idx,m in enumerate(self._children[obj_idx+1:]):
             delta_lines = 0
@@ -198,8 +192,6 @@ class TextObject(object):
                     delta_cols_begin = cols
                     if m.start.line == m.end.line:
                         delta_cols_end = cols
-            debug("  Moving %s: %i (b: %i, e: %i)" % (
-                m, delta_lines, delta_cols_begin, delta_cols_end))
             m.start.line += delta_lines
             m.end.line += delta_lines
             m.start.col += delta_cols_begin
@@ -279,14 +271,12 @@ class TextObject(object):
             # Replace the whole definition with spaces
             s, e = m.span()
             val = val[:s] + (e-s)*" " + val[e:]
-            debug("Handled a tabstop: %s" % repr(val))
 
         for m in self._TRANSFORMATION.finditer(val):
             self._handle_transformation(m,val)
             # Replace the whole definition with spaces
             s, e = m.span()
             val = val[:s] + (e-s)*" " + val[e:]
-            debug("Handled a transformation: %s" % repr(val))
 
 
         for m in self._MIRROR_OR_TS.finditer(val):
@@ -294,7 +284,6 @@ class TextObject(object):
             # Replace the whole definition with spaces
             s, e = m.span()
             val = val[:s] + (e-s)*" " + val[e:]
-            debug("Handled a mirror or ts: %s" % repr(val))
 
 
         return val
@@ -361,7 +350,9 @@ class CleverReplace(object):
     _DOLLAR = re.compile(r"\$(\d+)", re.DOTALL)
     _SIMPLE_CASEFOLDINGS = re.compile(r"\\([ul].)", re.DOTALL)
     _LONG_CASEFOLDINGS = re.compile(r"\\([UL].*?)\\E", re.DOTALL)
-    _CONDITIONAL = re.compile(r"\(\?(\d+):(.*?)\)", re.DOTALL)
+    _CONDITIONAL = re.compile(r"\(\?(\d+):(.*?)(?<!\\)\)", re.DOTALL)
+
+    _UNESCAPE = re.compile(r'\\[^ntrab]')
 
     def __init__(self, s):
         self._s = s
@@ -372,13 +363,13 @@ class CleverReplace(object):
         else:
             return m.group(1)[-1].lower()
     def _lcase_folding(self, m):
-        debug("lcase_folding: %s" % m.groups())
-
         if m.group(1)[0] == 'U':
             return m.group(1)[1:].upper()
         else:
             return m.group(1)[1:].lower()
 
+    def _unescape(self, v):
+        return self._UNESCAPE.subn(lambda m: m.group(0)[-1], v)[0]
     def replace(self, match):
         start, end = match.span()
 
@@ -391,24 +382,18 @@ class CleverReplace(object):
             args = m.group(2).split(':')
             # TODO: the returned string should be checked for conditionals
             if match.group(int(m.group(1))):
-                return args[0]
+                return self._unescape(args[0])
             elif len(args) > 1:
-                return args[1]
+                return self._unescape(args[1])
             else:
                 return ""
 
         # Replace CaseFoldings
-        debug("after dollar replace: %s" % tv)
         tv = self._SIMPLE_CASEFOLDINGS.subn(self._scase_folding, tv)[0]
-        debug("after simple case tv: %s" % tv)
         tv = self._LONG_CASEFOLDINGS.subn(self._lcase_folding, tv)[0]
-        debug("after long case tv: %s" % tv)
         tv = self._CONDITIONAL.subn(_conditional, tv)[0]
-        debug("after condition tv: %s" % tv)
 
         rv = tv.decode("string-escape")
-
-        debug("   Returning: %s" % repr(rv))
 
         return rv
 
@@ -468,7 +453,6 @@ class TabStop(ChangeableText):
                 vim.command(r'call feedkeys("\<Esc>i")')
             else:
                 vim.command(r'call feedkeys("\<Esc>a")')
-            debug("feeding insertmode!")
         else:
             # Select the word
             # Depending on the current mode and position, we
@@ -517,7 +501,6 @@ class SnippetInstance(TextObject):
         TextObject.update(self, buf)
 
         cts = self._tabstops[self._cts]
-        debug("cts: %s" % cts)
 
         cursor = self.start + cts.end
         if cts.end.line != 0:
@@ -564,14 +547,12 @@ class SnippetInstance(TextObject):
         return True
 
     def backspace(self,count, previous_cp):
-        debug("Backspacing: %s" % count)
         cts = self._tabstops[self._cts]
         cts.current_text = cts.current_text[:-count]
 
         self.update(self._vb, previous_cp)
 
     def chars_entered(self, chars, cur):
-        debug("chars_entered: %s" % chars)
         cts = self._tabstops[self._cts]
 
         if self._tab_selected:
@@ -616,8 +597,6 @@ class Snippet(object):
             lines = self._v.splitlines()
             v = lines[0] + os.linesep + \
                     os.linesep.join([ indend + l for l in lines[1:]])
-
-        debug("args: %s" % (repr(v)))
 
         s = SnippetInstance(start, end, v, text_before, text_after)
 
@@ -773,7 +752,6 @@ class SnippetManager(object):
                  enumerate(snippets)
                 ]
             )
-            debug("display: %s" % (display))
 
             rv = vim.eval("inputlist(%s)" % display)
             if rv is None:
@@ -812,7 +790,6 @@ class SnippetManager(object):
                 else:
                     line = vim.current.line
 
-                    debug("moved: %s" % self._cursor.moved)
                     chars = line[self._cursor.pos.col - self._cursor.moved.col:
                                  self._cursor.pos.col]
                     cs.chars_entered(chars, self._cursor)

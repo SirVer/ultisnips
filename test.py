@@ -570,6 +570,12 @@ class Transformation_CINewlines_ECR(_VimTest):
     def cmd(self):
         self.type("test\ttest, hallo")
     def runTest(self): self.check_output()
+class Transformation_CIEscapedParensinReplace_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1/hal((?:lo)|(?:ul))/(?1:ha\($1\))/}")
+    wanted = "test, halul test, ha(ul)"
+    def cmd(self):
+        self.type("test\ttest, halul")
+    def runTest(self): self.check_output()
 
 class Transformation_OptionIgnoreCase_ECR(_VimTest):
     snippets = ("test", r"$1 ${1/test/blah/i}")
@@ -594,7 +600,6 @@ class Transformation_OptionReplaceGlobalMatchInReplace_ECR(_VimTest):
 # TODO: jumping out of snippet in insert mode
 # 
 print "TODO: backspacing when tab is selected"
-print "TODO: escape characters '\(' in regular expressions
 
 ###################
 # CURSOR MOVEMENT #
