@@ -323,6 +323,12 @@ class SimpleMirrorSameLine_ExceptCorrectResult(_VimTest):
     def cmd(self):
         self.type("test\thallo")
     def runTest(self): self.check_output()
+class Transformation_SimpleMirrorSameLineBeforeTabDefVal_ECR(_VimTest):
+    snippets = ("test", "$1 ${1:replace me}")
+    wanted = "hallo foo hallo foo"
+    def cmd(self):
+        self.type("test\thallo foo")
+    def runTest(self): self.check_output()
 class SimpleMirrorSameLineMany_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 $1 $1")
     wanted = "hallo du hallo du hallo du hallo du"
@@ -432,6 +438,18 @@ class Transformation_SimpleCaseNoTransform_ExceptCorrectResult(_VimTest):
     def cmd(self):
         self.type("test\thallo")
     def runTest(self): self.check_output()
+class Transformation_SimpleCaseTransformInFront_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "${1/foo/batzl/} $1")
+    wanted = "hallo batzl hallo foo"
+    def cmd(self):
+        self.type("test\thallo foo")
+    def runTest(self): self.check_output()
+class Transformation_SimpleCaseTransformInFrontDefVal_ECR(_VimTest):
+    snippets = ("test", "${1/foo/batzl/} ${1:replace me}")
+    wanted = "hallo batzl hallo foo"
+    def cmd(self):
+        self.type("test\thallo foo")
+    def runTest(self): self.check_output()
 class Transformation_MultipleTransformations_ECR(_VimTest):
     snippets = ("test", "${1:Some Text}${1/.+/\U$0\E/}\n${1/.+/\L$0\E/}")
     wanted = "SomE tExt SOME TEXT \nsome text "
@@ -529,6 +547,10 @@ class Transformation_OptionReplaceGlobalMatchInReplace_ECR(_VimTest):
     def runTest(self): self.check_output()
 
 # TODO: conditional in conditional, case folding recursive
+
+###################
+# CURSOR MOVEMENT #
+###################
 
 if __name__ == '__main__':
     import sys

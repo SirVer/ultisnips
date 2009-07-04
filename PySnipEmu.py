@@ -5,6 +5,8 @@ import vim
 import string
 import re
 
+import os
+
 def debug(s):
     f = open("/tmp/file.txt","a")
     f.write(s+'\n')
@@ -147,6 +149,7 @@ class TextObject(object):
         pass
 
     def update(self, change_buffer):
+        debug("Updating: %s" % self)
         if not self._has_parsed:
             self._current_text = TextBuffer(self._parse(self._current_text))
 
@@ -158,7 +161,8 @@ class TextObject(object):
 
         self._do_update()
 
-        new_end = change_buffer.replace_text(self.start, self.end, self._current_text)
+        new_end = change_buffer.replace_text(self.start, self.end,
+                self._current_text)
 
         moved_lines = new_end.line - self._end.line
         moved_cols = new_end.col - self._end.col
@@ -168,7 +172,6 @@ class TextObject(object):
         return moved_lines, moved_cols
 
 
-
     def _move_textobjects_behind(self, end, lines, cols, obj):
         if lines == 0 and cols == 0:
             return
@@ -176,7 +179,6 @@ class TextObject(object):
         for m in self._children:
             if m == obj:
                 continue
-
 
             delta_lines = 0
             delta_cols_begin = 0
@@ -196,6 +198,20 @@ class TextObject(object):
             m.end.line += delta_lines
             m.start.col += delta_cols_begin
             m.end.col += delta_cols_end
+
+        # Finally, check if the vim cursor needs moving
+        cursor_line, cursor_col = vim.current.window.cursor
+        cursor_line -= 1
+        delta_lines = 0
+        delta_col = 0
+        if cursor_line > end.line:
+            delta_lines = lines
+        elif cursor_line == end.line:
+            if cursor_col >= end.col:
+                delta_col = cols
+        vim.current.window.cursor = cursor_line + 1 + delta_lines, \
+                cursor_col + delta_col
+
 
     def _get_start_end(self, val, start_pos, end_pos):
         def _get_pos(s, pos):
@@ -530,12 +546,14 @@ class SnippetInstance(TextObject):
         return True
 
     def backspace(self,count):
+        debug("Backspacing: %s" % count)
         cts = self._tabstops[self._cts]
         cts.current_text = cts.current_text[:-count]
 
         self.update(self._vb)
 
     def chars_entered(self, chars):
+        debug("chars_entered: %s" % chars)
         cts = self._tabstops[self._cts]
 
         if self._tab_selected:
@@ -580,14 +598,56 @@ class SnippetManager(object):
         self.reset()
         self._last_cursor_pos = None
 
+    def _load_snippets_from(self, ft, fn):
+        debug("Loading snippets from: %s" % fn)
+        cs = None
+        cv = ""
+        for line in open(fn):
+            if line.startswith("#"):
+                continue
+            if line.startswith("snippet"):
+                cs = line.split()[1]
+                continue
+            if cs != None:
+                if line.startswith("endsnippet"):
+                    cv = cv[:-1] # Chop the last newline
+                    self._snippets[ft][cs] = Snippet(cs,cv)
+                    cv = ""
+                    cs = None
+                    continue
+                else:
+                    cv += line
+
+
+    def _load_snippets_for(self, ft):
+        debug("Loading for: %s" % ft)
+
+        self._snippets[ft] = {}
+        for p in vim.eval("&runtimepath").split(','):
+            fn = p + os.path.sep + "PySnippets" + os.path.sep + \
+                    "%s.snippets" % ft
+            debug("Checking: %s" % fn)
+            if os.path.exists(fn):
+                self._load_snippets_from(ft, fn)
+
+
     def reset(self):
         self._snippets = {}
         self._current_snippets = []
 
     def add_snippet(self,trigger,value):
-        self._snippets[trigger] = Snippet(trigger,value)
+        if "all" not in self._snippets:
+            self._snippets["all"] = {}
+        self._snippets["all"][trigger] = Snippet(trigger,value)
 
     def try_expand(self, backwards = False):
+        ft = vim.eval("&filetype")
+        if len(ft) and ft not in self._snippets:
+            self._load_snippets_for(ft)
+        if "all" not in self._snippets:
+            self._load_snippets_for("all")
+
+
         if len(self._current_snippets):
             cs = self._current_snippets[-1]
             if not cs.select_next_tab(backwards):
@@ -595,9 +655,11 @@ class SnippetManager(object):
             self._last_cursor_pos = vim.current.window.cursor
             return
 
-        line = vim.current.line
-
         dummy,col = vim.current.window.cursor
+        if col == 0:
+            return
+
+        line = vim.current.line
 
         if col > 0 and line[col-1] in string.whitespace:
             return
@@ -606,11 +668,20 @@ class SnippetManager(object):
         before,after = line[:col], line[col:]
 
         word = before.split()[-1]
-        if word in self._snippets:
-            s = self._snippets[word].launch(before.rstrip()[:-len(word)], after)
-            self._last_cursor_pos = vim.current.window.cursor
-            if s is not None:
-                self._current_snippets.append(s)
+        snippet = None
+        if len(ft):
+            snippet = self._snippets[ft].get(word,None)
+        if snippet is None:
+            snippet = self._snippets["all"].get(word,None)
+
+        if snippet is None:
+            # No snippet found
+            return
+
+        s = snippet.launch(before.rstrip()[:-len(word)], after)
+        self._last_cursor_pos = vim.current.window.cursor
+        if s is not None:
+            self._current_snippets.append(s)
 
     def cursor_moved(self):
         cp = vim.current.window.cursor
@@ -641,7 +712,7 @@ class SnippetManager(object):
                     chars = line[lcol:col]
                     cs.chars_entered(chars)
 
-        self._last_cursor_pos = cp
+        self._last_cursor_pos = vim.current.window.cursor
 
     def entered_insert_mode(self):
         pass
