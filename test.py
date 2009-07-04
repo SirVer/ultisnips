@@ -307,6 +307,12 @@ class MultilineTabStopSimpleMirrorDeleteInLine_ExceptCorrectResult(_VimTest):
     def cmd(self):
         self.type("test\thallo Du\nHi\b\bAch Blah")
     def runTest(self): self.check_output()
+class TextTabStopSimpleMirrorMultilineMirrorInFront_ECR(_VimTest):
+    snippets = ("test", "$1\n${1:sometext}")
+    wanted = "hallo\nagain\nhallo\nagain"
+    def cmd(self):
+        self.type("test\thallo\nagain")
+    def runTest(self): self.check_output()
 
 class SimpleMirrorDelete_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1\n$1")
@@ -551,6 +557,14 @@ class Transformation_OptionReplaceGlobalMatchInReplace_ECR(_VimTest):
 ###################
 # CURSOR MOVEMENT #
 ###################
+class CursorMovement_Multiline_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1:a tab}")
+    wanted = "this is something\nvery nice\nnot? " \
+            "this is something\nvery nice\nnot?more text"
+    def cmd(self):
+        self.type("test\tthis is something\nvery nice\nnot?\t")
+        self.type("more text")
+    def runTest(self): self.check_output()
 
 if __name__ == '__main__':
     import sys
@@ -559,8 +573,10 @@ if __name__ == '__main__':
     def parse_args():
         p = optparse.OptionParser("%prog [OPTIONS] <test case names to run>")
 
-        p.set_defaults(session="vim", interrupt=False)
+        p.set_defaults(session="vim", interrupt=False, verbose=False)
 
+        p.add_option("-v", "--verbose", dest="verbose", action="store_true",
+            help="print name of tests as they are executed")
         p.add_option("-s", "--session", dest="session",  metavar="SESSION",
             help="send commands to screen session SESSION [%default]")
         p.add_option("-i", "--interrupt", dest="interrupt",
@@ -592,5 +608,9 @@ if __name__ == '__main__':
             suite.addTest(test)
 
 
-    res = unittest.TextTestRunner().run(suite)
+    if options.verbose:
+        v = 2
+    else:
+        v = 1
+    res = unittest.TextTestRunner(verbosity=v).run(suite)
 

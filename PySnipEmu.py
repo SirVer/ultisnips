@@ -119,7 +119,7 @@ class TextObject(object):
     that has a span in any ways
     """
     # A simple tabstop with default value
-    _TABSTOP = re.compile(r'''\${(\d+):(.*?)}''')
+    _TABSTOP = re.compile(r'''\${(\d+)(?::(.*?))?}''')
     # A mirror or a tabstop without default value.
     _MIRROR_OR_TS = re.compile(r'\$(\d+)')
     # A mirror or a tabstop without default value.
@@ -188,25 +188,12 @@ class TextObject(object):
                     delta_cols_begin = cols
                     if m.start.line == m.end.line:
                         delta_cols_end = cols
-
+            debug("  Moving %s: %i (b: %i, e: %i)" % (
+                m, delta_lines, delta_cols_begin, delta_cols_end))
             m.start.line += delta_lines
             m.end.line += delta_lines
             m.start.col += delta_cols_begin
             m.end.col += delta_cols_end
-
-        # # Finally, check if the vim cursor needs moving
-        # cursor_line, cursor_col = vim.current.window.cursor
-        # cursor_line -= 1
-        # delta_lines = 0
-        # delta_col = 0
-        # if cursor_line > end.line:
-        #     delta_lines = lines
-        # elif cursor_line == end.line:
-        #     if cursor_col >= end.col:
-        #         delta_col = cols
-        # vim.current.window.cursor = cursor_line + 1 + delta_lines, \
-        #         cursor_col + delta_col
-        #
 
     def _get_start_end(self, val, start_pos, end_pos):
         def _get_pos(s, pos):
@@ -221,6 +208,8 @@ class TextObject(object):
     def _handle_tabstop(self, m, val):
         no = int(m.group(1))
         def_text = m.group(2)
+        if def_text is None:
+            def_text = ""
 
         start_pos, end_pos = m.span()
         start, end = self._get_start_end(val,start_pos,end_pos)
@@ -500,8 +489,21 @@ class SnippetInstance(TextObject):
 
         self._current_text = TextBuffer(self._parse(initial_text))
 
-        self.update(self._vb)
+        TextObject.update(self, self._vb)
 
+    def update(self, buf, cur):
+
+        TextObject.update(self, buf)
+
+        cts = self._tabstops[self._cts]
+        debug("cts: %s" % cts)
+        
+        cursor = self.start + cts.end
+        if cts.end.line != 0:
+            cursor.col -= self.start.col
+        lineno, col = cursor.line, cursor.col
+
+        vim.current.window.cursor = lineno +1, col
 
     def has_tabs(self):
         return len(self._children) > 0
@@ -540,14 +542,14 @@ class SnippetInstance(TextObject):
         self._tab_selected = True
         return True
 
-    def backspace(self,count):
+    def backspace(self,count, previous_cp):
         debug("Backspacing: %s" % count)
         cts = self._tabstops[self._cts]
         cts.current_text = cts.current_text[:-count]
 
-        self.update(self._vb)
+        self.update(self._vb, previous_cp)
 
-    def chars_entered(self, chars):
+    def chars_entered(self, chars, cur):
         debug("chars_entered: %s" % chars)
         cts = self._tabstops[self._cts]
 
@@ -557,7 +559,7 @@ class SnippetInstance(TextObject):
         else:
             cts.current_text += chars
 
-        self.update(self._vb)
+        self.update(self._vb, cur)
 
 
 class Snippet(object):
@@ -607,6 +609,12 @@ class Cursor(object):
         return self._abs_pos
     pos = property(pos)
 
+    def ppos(self):
+        if not self.has_moved:
+            return self.pos
+        return self.pos - self.moved
+    ppos = property(ppos)
+
     def moved(self):
         return self._moved
     moved = property(moved)
@@ -619,7 +627,7 @@ class Cursor(object):
 class SnippetManager(object):
     def __init__(self):
         self.reset()
-        
+
         self._cursor = Cursor()
 
 
@@ -726,17 +734,17 @@ class SnippetManager(object):
                     # user
                     cache_pos = vim.current.window.cursor
                     del vim.current.buffer[self._cursor.pos.line-1]
-                    cs.chars_entered('\n')
+                    cs.chars_entered('\n', self._cursor)
                     vim.current.window.cursor = cache_pos
                 elif self._cursor.moved.col < 0: # Some deleting was going on
-                    cs.backspace(-self._cursor.moved.col)
+                    cs.backspace(-self._cursor.moved.col, self._cursor)
                 else:
                     line = vim.current.line
-                    
+
                     debug("moved: %s" % self._cursor.moved)
                     chars = line[self._cursor.pos.col - self._cursor.moved.col:
                                  self._cursor.pos.col]
-                    cs.chars_entered(chars)
+                    cs.chars_entered(chars, self._cursor)
 
         self._cursor.update_position()
 
