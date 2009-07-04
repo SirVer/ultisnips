@@ -19,6 +19,8 @@ if __name__ == '__main__':
     ${1:main()}$0
 endsnippet
 
+# self.
+
 ##########################
 # Try / Except / Finally #
 ##########################
@@ -56,5 +58,28 @@ else:
 	${6:pass}
 finally:
 	${7:pass}
+endsnippet
+
+##############
+# Assertions #
+##############
+snippet ae
+self.assertEqual(${1:first},${2:second})
+endsnippet
+
+snippet at
+self.assertTrue(${0:exp})
+endsnippet
+
+snippet af
+self.assertFalse(${1:expression})
+endsnippet
+
+snippet aae
+self.assertAlmostEqual(${1:first},${2:second})
+endsnippet
+
+snippet ar
+self.assertRaises(${1:exception}, ${2:func}${3/.+/, /}${3:arguments})
 endsnippet
 

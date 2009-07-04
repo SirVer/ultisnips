@@ -141,6 +141,12 @@ class TextObject(object):
 
         self._current_text = initial_text
 
+    def __cmp__(self, other):
+        s = self._start.line, self._start.col
+        o = other._start.line, other._start.col
+
+        return cmp(s, o)
+
     def _do_update(self):
         pass
 
@@ -149,11 +155,14 @@ class TextObject(object):
         if not self._has_parsed:
             self._current_text = TextBuffer(self._parse(self._current_text))
 
-        for c in self._children:
+        debug("In update:")
+        for idx,c in enumerate(self._children):
+            debug("Updating children:")
+            debug("   c: %s" % c )
             oldend = Position(c.end.line, c.end.col)
 
             moved_lines, moved_cols = c.update(self._current_text)
-            self._move_textobjects_behind(oldend, moved_lines, moved_cols, c)
+            self._move_textobjects_behind(c.start, oldend, moved_lines, moved_cols, idx)
 
         self._do_update()
 
@@ -163,18 +172,24 @@ class TextObject(object):
         moved_lines = new_end.line - self._end.line
         moved_cols = new_end.col - self._end.col
 
+        debug("    self: %s, ct: %s" % (self, self._current_text))
+        debug("    new_end: %s" % (new_end))
+
         self._end = new_end
 
         return moved_lines, moved_cols
 
-    def _move_textobjects_behind(self, end, lines, cols, obj):
+    def _move_textobjects_behind(self, start, end, lines, cols, obj_idx):
         if lines == 0 and cols == 0:
             return
 
-        for m in self._children:
-            if m == obj:
-                continue
+        debug("In _move_textobjects_behind")
+        debug("  childs: %s" % self._children)
+        debug("  obj_idx: %i" % obj_idx)
 
+        for idx,m in enumerate(self._children[:]):
+            if idx == obj_idx:
+                continue
             delta_lines = 0
             delta_cols_begin = 0
             delta_cols_end = 0
@@ -188,8 +203,8 @@ class TextObject(object):
                     delta_cols_begin = cols
                     if m.start.line == m.end.line:
                         delta_cols_end = cols
-            # debug("  Moving %s: %i (b: %i, e: %i)" % (
-                # m, delta_lines, delta_cols_begin, delta_cols_end))
+            debug("  Moving %s: %i (b: %i, e: %i)" % (
+                m, delta_lines, delta_cols_begin, delta_cols_end))
             m.start.line += delta_lines
             m.end.line += delta_lines
             m.start.col += delta_cols_begin
@@ -291,6 +306,7 @@ class TextObject(object):
 
     def add_child(self,c):
         self._children.append(c)
+        self._children.sort()
 
     def parent():
         doc = "The parent TextObject this TextObject resides in"
@@ -779,7 +795,6 @@ class SnippetManager(object):
         return True
 
     def cursor_moved(self):
-        debug("Cursor moved!")
         self._cursor.update_position()
 
         if len(self._current_snippets) and (self._cursor.has_moved):

@@ -474,6 +474,31 @@ class Transformation_MultipleTransformations_ECR(_VimTest):
     def cmd(self):
         self.type("test\tSomE tExt ")
     def runTest(self): self.check_output()
+class Transformation_TabIsAtEndAndDeleted_ECR(_VimTest):
+    snippets = ("test", "${1/.+/is something/}${1:some}")
+    wanted = "hallo "
+    def cmd(self):
+        self.type("hallo test\tsome\b\b\b\b\b")
+    def runTest(self): self.check_output()
+class Transformation_TabIsAtEndAndDeleted1_ECR(_VimTest):
+    snippets = ("test", "${1/.+/is something/}${1:some}")
+    wanted = "hallo is somethingmore"
+    def cmd(self):
+        self.type("hallo test\tsome\b\b\b\bmore")
+    def runTest(self): self.check_output()
+class Transformation_TabIsAtEndNoTextLeave_ECR(_VimTest):
+    snippets = ("test", "${1/.+/is something/}${1}")
+    wanted = "hallo "
+    def cmd(self):
+        self.type("hallo test\t")
+    def runTest(self): self.check_output()
+class Transformation_TabIsAtEndNoTextType_ECR(_VimTest):
+    snippets = ("test", "${1/.+/is something/}${1}")
+    wanted = "hallo is somethingb"
+    def cmd(self):
+        self.type("hallo test\tb")
+    def runTest(self): self.check_output()
+
 
 class Transformation_Backreference_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/([ab])oo/$1ull/}")
