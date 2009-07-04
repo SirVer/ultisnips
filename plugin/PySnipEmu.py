@@ -187,9 +187,7 @@ class TextObject(object):
         debug("  childs: %s" % self._children)
         debug("  obj_idx: %i" % obj_idx)
 
-        for idx,m in enumerate(self._children[:]):
-            if idx == obj_idx:
-                continue
+        for idx,m in enumerate(self._children[obj_idx+1:]):
             delta_lines = 0
             delta_cols_begin = 0
             delta_cols_end = 0
