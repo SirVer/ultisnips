@@ -44,11 +44,16 @@ class _VimTest(unittest.TestCase):
         if not isinstance(self.snippets[0],tuple):
             self.snippets = ( self.snippets, )
 
-        for sv,content in self.snippets:
+        for s in self.snippets:
+            sv,content = s[:2]
+            descr = ""
+            if len(s) == 3:
+                descr = s[-1]
             self.send(''':py << EOF
-PySnipSnippets.add_snippet("%s","""%s""")
+PySnipSnippets.add_snippet("%s","""%s""", "%s")
 EOF
-''' % (sv,content.encode("string-escape")))
+''' % (sv,content.encode("string-escape"), descr.encode("string-escape"))
+            )
 
         # Clear the buffer
         self.send("bggVGd")
@@ -582,10 +587,31 @@ class CursorMovement_Multiline_ECR(_VimTest):
 class ProperIndenting_SimpleCase_ECR(_VimTest):
     snippets = ("test", "for\n    blah")
     wanted = "    for\n        blahHui"
-
     def cmd(self):
         self.type("    test\tHui")
     def runTest(self): self.check_output()
+
+######################
+# SELECTING MULTIPLE #
+######################
+class Multiple_SimpleCaseSelectFirst_ECR(_VimTest):
+    snippets = ( ("test", "Case1", "This is Case 1"),
+                 ("test", "Case2", "This is Case 2") )
+    wanted = "Case1"
+    def cmd(self):
+        self.type("test\t1\n")
+    def runTest(self): self.check_output()
+class Multiple_SimpleCaseSelectSecond_ECR(_VimTest):
+    snippets = ( ("test", "Case1", "This is Case 1"),
+                 ("test", "Case2", "This is Case 2") )
+    wanted = "Case2"
+    def cmd(self):
+        self.type("test\t2\n")
+    def runTest(self): self.check_output()
+
+###########################################################################
+#                               END OF TEST                               #
+###########################################################################
 if __name__ == '__main__':
     import sys
     import optparse

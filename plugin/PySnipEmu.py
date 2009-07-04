@@ -451,7 +451,7 @@ class TabStop(ChangeableText):
             newcol += col
 
         vim.current.window.cursor = newline + 1, newcol
-        
+
         if len(self.current_text) == 0:
             if newcol == 0:
                 vim.command(r'call feedkeys("\<Esc>i")')
@@ -575,9 +575,14 @@ class SnippetInstance(TextObject):
 class Snippet(object):
     _INDENT = re.compile(r"^[ \t]*")
 
-    def __init__(self,trigger,value):
+    def __init__(self,trigger,value, descr):
         self._t = trigger
         self._v = value
+        self._d = descr
+
+    def description(self):
+        return self._d
+    description = property(description)
 
     def trigger(self):
         return self._t
@@ -597,10 +602,10 @@ class Snippet(object):
         indend = self._INDENT.match(text_before).group(0)
         v = self._v
         if len(indend):
-            lines = self._v.splitlines() 
+            lines = self._v.splitlines()
             v = lines[0] + os.linesep + \
                     os.linesep.join([ indend + l for l in lines[1:]])
-        
+
         debug("args: %s" % (repr(v)))
 
         s = SnippetInstance(start, end, v, text_before, text_after)
@@ -652,20 +657,27 @@ class SnippetManager(object):
 
 
     def _load_snippets_from(self, ft, fn):
-        debug("Loading snippets from: %s" % fn)
         cs = None
         cv = ""
+        cdescr = ""
         for line in open(fn):
             if line.startswith("#"):
                 continue
             if line.startswith("snippet"):
                 cs = line.split()[1]
+                left = line.find('"')
+                if left != -1:
+                    right = line.rfind('"')
+                    cdescr = line[left+1:right]
                 continue
             if cs != None:
                 if line.startswith("endsnippet"):
                     cv = cv[:-1] # Chop the last newline
-                    self._snippets[ft][cs] = Snippet(cs,cv)
+                    l = self._snippets[ft].get(cs,[])
+                    l.append(Snippet(cs,cv,cdescr))
+                    self._snippets[ft][cs] = l
                     cv = ""
+                    cdescr = ""
                     cs = None
                     continue
                 else:
@@ -685,10 +697,19 @@ class SnippetManager(object):
         self._snippets = {}
         self._current_snippets = []
 
-    def add_snippet(self,trigger,value):
+    def add_snippet(self,trigger,value, descr):
         if "all" not in self._snippets:
             self._snippets["all"] = {}
-        self._snippets["all"][trigger] = Snippet(trigger,value)
+        l = self._snippets["all"].get(trigger,[])
+        l.append(Snippet(trigger,value, descr))
+        self._snippets["all"][trigger] = l
+
+    def _find_snippets(self, ft, trigger):
+        snips = self._snippets.get(ft,None)
+        if not snips:
+            return []
+
+        return snips.get(trigger, [])
 
     def try_expand(self, backwards = False):
         ft = vim.eval("&filetype")
@@ -725,15 +746,29 @@ class SnippetManager(object):
         before,after = line[:col], line[col:]
 
         word = before.split()[-1]
-        snippet = None
+        snippets = []
         if len(ft):
-            snippet = self._snippets[ft].get(word,None)
-        if snippet is None:
-            snippet = self._snippets["all"].get(word,None)
+            snippets += self._find_snippets(ft, word)
+        snippets += self._find_snippets("all", word)
 
-        if snippet is None:
+        if not len(snippets):
             # No snippet found
             return False
+        elif len(snippets) == 1:
+            snippet, = snippets
+        else:
+            display = repr(
+                [ "%i: %s" % (i+1,s.description) for i,s in
+                 enumerate(snippets)
+                ]
+            )
+            debug("display: %s" % (display))
+
+            rv = vim.eval("inputlist(%s)" % display)
+            if rv is None:
+                return True
+            rv = int(rv)
+            snippet = snippets[rv-1]
 
         s = snippet.launch(before.rstrip()[:-len(word)], after)
 
@@ -744,6 +779,7 @@ class SnippetManager(object):
         return True
 
     def cursor_moved(self):
+        debug("Cursor moved!")
         self._cursor.update_position()
 
         if len(self._current_snippets) and (self._cursor.has_moved):
@@ -771,13 +807,11 @@ class SnippetManager(object):
                                  self._cursor.pos.col]
                     cs.chars_entered(chars, self._cursor)
 
-        self._cursor.update_position()
+            self._cursor.update_position()
 
     def entered_insert_mode(self):
-        debug("Entered insert mode.")
         if len(self._current_snippets) and \
            not self._current_snippets[-1].tab_selected:
-            debug("Dropping snippets")
             self._current_snippets = []
 
 
