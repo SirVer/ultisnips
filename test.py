@@ -348,10 +348,11 @@ class Transformation_SimpleMirrorSameLineBeforeTabDefVal_ECR(_VimTest):
         self.type("test\thallo foo")
     def runTest(self): self.check_output()
 class SimpleMirrorSameLineMany_ExceptCorrectResult(_VimTest):
-    snippets = ("test", "$1 $1 $1")
+    snippets = ("test", "$1 $1 $1 $1")
     wanted = "hallo du hallo du hallo du hallo du"
     def cmd(self):
         self.type("test\thallo du")
+    def runTest(self): self.check_output()
 class SimpleMirrorSameLineManyMultiline_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 $1 $1 $1")
     wanted = "hallo du\nwie gehts? hallo du\nwie gehts? hallo du\nwie gehts?" \
