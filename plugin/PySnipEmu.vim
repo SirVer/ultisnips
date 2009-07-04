@@ -60,9 +60,7 @@ EOF
 inoremap <Tab> <C-R>=PyVimSnips_ExpandSnippet()<cr>
 snoremap <Tab> <Esc>:call PyVimSnips_ExpandSnippet()<cr>
 inoremap <S-Tab> <C-R>=PyVimSnips_JumpBackwards()<cr>
-snoremap <S-Tab>+ <Esc>:call PyVimSnips_JumpBackwards()<cr>
-
-" TODO: the next two are only needed for testing
+snoremap <S-Tab> <Esc>:call PyVimSnips_JumpBackwards()<cr>
 
 au CursorMovedI * py PySnipSnippets.cursor_moved()
 au InsertEnter * py PySnipSnippets.entered_insert_mode()

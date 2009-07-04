@@ -590,7 +590,6 @@ class Snippet(object):
         else:
             vim.current.window.cursor = s.end.line + 1, s.end.col
 
-
 class Cursor(object):
     def __init__(self):
         self._abs_pos = None
