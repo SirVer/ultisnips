@@ -497,7 +497,7 @@ class SnippetInstance(TextObject):
 
         cts = self._tabstops[self._cts]
         debug("cts: %s" % cts)
-        
+
         cursor = self.start + cts.end
         if cts.end.line != 0:
             cursor.col -= self.start.col
@@ -685,18 +685,19 @@ class SnippetManager(object):
             cs = self._current_snippets[-1]
             if not cs.select_next_tab(backwards):
                 self._current_snippets.pop()
+                return False
 
             self._cursor.update_position()
-            return
+            return True
 
         dummy,col = vim.current.window.cursor
         if col == 0:
-            return
+            return False
 
         line = vim.current.line
 
         if col > 0 and line[col-1] in string.whitespace:
-            return
+            return False
 
         # Get the word to the left of the current edit position
         before,after = line[:col], line[col:]
@@ -710,13 +711,15 @@ class SnippetManager(object):
 
         if snippet is None:
             # No snippet found
-            return
+            return False
 
         s = snippet.launch(before.rstrip()[:-len(word)], after)
 
         self._cursor.update_position()
         if s is not None:
             self._current_snippets.append(s)
+
+        return True
 
     def cursor_moved(self):
         self._cursor.update_position()

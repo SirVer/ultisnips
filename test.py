@@ -7,19 +7,26 @@ import tempfile
 import unittest
 import time
 
+def send(s,session):
+        os.system("screen -x %s -X stuff '%s'" % (session,s))
+
+def type(str, session):
+    """
+    Send the keystrokes to vim via screen. Pause after each char, so
+    vim can handle this
+    """
+    for c in str:
+        send(c, session)
+
 class _VimTest(unittest.TestCase):
     text_before = " --- some text before --- "
     text_after =  " --- some text after --- "
-    def send(self, s):
-            os.system("screen -x %s -X stuff '%s'" % (self.session,s))
+    
+    def send(self,s):
+        send(s, self.session)
 
-    def type(self, str):
-        """
-        Send the keystrokes to vim via screen. Pause after each char, so
-        vim can handle this
-        """
-        for c in str:
-            self.send(c)
+    def type(self,s):
+        type(s, self.session)
 
     def check_output(self):
         wanted = self.text_before + '\n\n' + self.wanted + \
@@ -594,6 +601,12 @@ if __name__ == '__main__':
     # The next line doesn't work in python 2.3
     test_loader = unittest.TestLoader()
     all_test_suites = test_loader.loadTestsFromModule(__import__("test"))
+
+    # Send some mappings to vim
+    send(":inoremap + <C-R>=PyVimSnips_JumpBackwards()<cr>\n", options.session)
+    send(":snoremap + <Esc>:call PyVimSnips_JumpBackwards()<cr>\n",
+         options.session)
+
 
     # Inform all test case which screen session to use
     suite = unittest.TestSuite()

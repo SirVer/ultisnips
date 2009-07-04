@@ -1,9 +1,5 @@
-snippet cls
-class ${1:MyClass}(${2:object}):
-	  
-    def __init__( self${4/([^,])?(.*)/(?1:, )/}${4:arg} ):
-		"""
-		TODO: Fill me in
-		"""
-${2/object$|(.+)/(?1:\t\t$0.__init__\(self\)\n\n)/}${4/(\A\s*,\s*\Z)|,?\s*([A-Za-z_][A-Za-z0-9_]*)\s*(=[^,]*)?(,\s*|$)/(?2:\t\tself._$2 = $2\n)/g}		$0
+snippet db
+debug("${1/(\w+)(, *)?/$1: %s(?2:, )/g}" % (${1:args}))
+$0
 endsnippet
+
