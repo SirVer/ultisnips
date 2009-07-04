@@ -19,7 +19,23 @@ if __name__ == '__main__':
     ${1:main()}$0
 endsnippet
 
-# self.
+##########
+# COMMON #
+##########
+snippet class
+class ${1:MyClass}(${2:object}):
+    """${3:Docstring for $1}"""
+
+    def __init__( self${4/([^,])?(.*)/(?1:, )/}${4:arg} ):
+        """
+        TODO: Fill me in
+        """
+${2/object$|(.+)/(?1:\t\t$0.__init__\(self\))/}${4/(\A\s*,\s*\Z)|,?\s*([A-Za-z_][A-Za-z0-9_]*)\s*(=[^,]*)?(,\s*|$)/(?2:\t\tself._$2 = $2\n)/g}    $0
+endsnippet
+
+snippet .
+self.
+endsnippet
 
 ##########################
 # Try / Except / Finally #
@@ -33,31 +49,31 @@ endsnippet
 
 snippet try "Try / Except / Else"
 try:
-	${1:pass}
+    ${1:pass}
 except ${2:Exception}, ${3:e}:
-	${4:raise $3}
+    ${4:raise $3}
 else:
-	${5:pass}
+    ${5:pass}
 endsnippet
 
 snippet try "Try / Except / Finally"
 try:
-	${1:pass}
+    ${1:pass}
 except ${2:Exception}, ${3:e}:
-	${4:raise $3}
+    ${4:raise $3}
 else:
-	${5:pass}
+    ${5:pass}
 endsnippet
 
 snippet try "Try / Except / Else / Finally"
 try:
-	${1:pass}
+    ${1:pass}
 except${2: ${3:Exception}, ${4:e}}:
-	${5:raise}
+    ${5:raise}
 else:
-	${6:pass}
+    ${6:pass}
 finally:
-	${7:pass}
+    ${7:pass}
 endsnippet
 
 ##############

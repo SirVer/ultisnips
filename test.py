@@ -592,6 +592,9 @@ class Transformation_OptionReplaceGlobalMatchInReplace_ECR(_VimTest):
 
 # TODO: conditional in conditional, case folding recursive
 # TODO: jumping out of snippet in insert mode
+# 
+print "TODO: backspacing when tab is selected"
+print "TODO: escape characters '\(' in regular expressions
 
 ###################
 # CURSOR MOVEMENT #

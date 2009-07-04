@@ -155,10 +155,7 @@ class TextObject(object):
         if not self._has_parsed:
             self._current_text = TextBuffer(self._parse(self._current_text))
 
-        debug("In update:")
         for idx,c in enumerate(self._children):
-            debug("Updating children:")
-            debug("   c: %s" % c )
             oldend = Position(c.end.line, c.end.col)
 
             moved_lines, moved_cols = c.update(self._current_text)
