@@ -576,6 +576,16 @@ class CursorMovement_Multiline_ECR(_VimTest):
 
 # TODO: expandtab and therelikes
 
+####################
+# PROPER INDENTING #
+####################
+class ProperIndenting_SimpleCase_ECR(_VimTest):
+    snippets = ("test", "for\n    blah")
+    wanted = "    for\n        blahHui"
+
+    def cmd(self):
+        self.type("    test\tHui")
+    def runTest(self): self.check_output()
 if __name__ == '__main__':
     import sys
     import optparse

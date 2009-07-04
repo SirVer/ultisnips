@@ -573,6 +573,8 @@ class SnippetInstance(TextObject):
 
 
 class Snippet(object):
+    _INDENT = re.compile(r"^[ \t]*")
+
     def __init__(self,trigger,value):
         self._t = trigger
         self._v = value
@@ -592,7 +594,16 @@ class Snippet(object):
         text_before = line[:start.col]
         text_after = line[end.col:]
 
-        s = SnippetInstance(start, end, self._v, text_before, text_after)
+        indend = self._INDENT.match(text_before).group(0)
+        v = self._v
+        if len(indend):
+            lines = self._v.splitlines() 
+            v = lines[0] + os.linesep + \
+                    os.linesep.join([ indend + l for l in lines[1:]])
+        
+        debug("args: %s" % (repr(v)))
+
+        s = SnippetInstance(start, end, v, text_before, text_after)
 
         if s.has_tabs():
             s.select_next_tab()
