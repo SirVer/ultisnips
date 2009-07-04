@@ -83,8 +83,6 @@ class Position(object):
         def fget(self):
             return self._col
         def fset(self, value):
-            if value < 0:
-                raise RuntimeError, "Invalid Column: %i" % col
             self._col = value
         return locals()
     col = property(**col())
@@ -94,8 +92,6 @@ class Position(object):
         def fget(self):
             return self._line
         def fset(self, value):
-            if value < 0:
-                raise RuntimeError, "Invalid Line: %i" % line
             self._line = value
         return locals()
     line = property(**line())
@@ -171,7 +167,6 @@ class TextObject(object):
 
         return moved_lines, moved_cols
 
-
     def _move_textobjects_behind(self, end, lines, cols, obj):
         if lines == 0 and cols == 0:
             return
@@ -199,19 +194,19 @@ class TextObject(object):
             m.start.col += delta_cols_begin
             m.end.col += delta_cols_end
 
-        # Finally, check if the vim cursor needs moving
-        cursor_line, cursor_col = vim.current.window.cursor
-        cursor_line -= 1
-        delta_lines = 0
-        delta_col = 0
-        if cursor_line > end.line:
-            delta_lines = lines
-        elif cursor_line == end.line:
-            if cursor_col >= end.col:
-                delta_col = cols
-        vim.current.window.cursor = cursor_line + 1 + delta_lines, \
-                cursor_col + delta_col
-
+        # # Finally, check if the vim cursor needs moving
+        # cursor_line, cursor_col = vim.current.window.cursor
+        # cursor_line -= 1
+        # delta_lines = 0
+        # delta_col = 0
+        # if cursor_line > end.line:
+        #     delta_lines = lines
+        # elif cursor_line == end.line:
+        #     if cursor_col >= end.col:
+        #         delta_col = cols
+        # vim.current.window.cursor = cursor_line + 1 + delta_lines, \
+        #         cursor_col + delta_col
+        #
 
     def _get_start_end(self, val, start_pos, end_pos):
         def _get_pos(s, pos):
@@ -593,10 +588,40 @@ class Snippet(object):
         else:
             vim.current.window.cursor = s.end.line + 1, s.end.col
 
+
+class Cursor(object):
+    def __init__(self):
+        self._abs_pos = None
+        self._moved = Position(0,0)
+
+    def update_position(self):
+        line, col = vim.current.window.cursor
+        line -= 1
+        abs_pos = Position(line,col)
+        if self._abs_pos:
+            self._moved = abs_pos - self._abs_pos
+        # self._start = abs_pos - self._parent.start
+        self._abs_pos = abs_pos
+
+    def pos(self):
+        return self._abs_pos
+    pos = property(pos)
+
+    def moved(self):
+        return self._moved
+    moved = property(moved)
+
+    def has_moved(self):
+        return bool(self._moved.line or self._moved.col)
+    has_moved = property(has_moved)
+
+
 class SnippetManager(object):
     def __init__(self):
         self.reset()
-        self._last_cursor_pos = None
+        
+        self._cursor = Cursor()
+
 
     def _load_snippets_from(self, ft, fn):
         debug("Loading snippets from: %s" % fn)
@@ -652,7 +677,8 @@ class SnippetManager(object):
             cs = self._current_snippets[-1]
             if not cs.select_next_tab(backwards):
                 self._current_snippets.pop()
-            self._last_cursor_pos = vim.current.window.cursor
+
+            self._cursor.update_position()
             return
 
         dummy,col = vim.current.window.cursor
@@ -679,40 +705,40 @@ class SnippetManager(object):
             return
 
         s = snippet.launch(before.rstrip()[:-len(word)], after)
-        self._last_cursor_pos = vim.current.window.cursor
+
+        self._cursor.update_position()
         if s is not None:
             self._current_snippets.append(s)
 
     def cursor_moved(self):
-        cp = vim.current.window.cursor
+        self._cursor.update_position()
 
-        if len(self._current_snippets) and self._last_cursor_pos is not None:
-            lineno,col = cp
-            llineo,lcol = self._last_cursor_pos
-            if lineno in \
-                [ self._last_cursor_pos[0], self._last_cursor_pos[0]+1]:
+        if len(self._current_snippets) and (self._cursor.has_moved):
+            if 0 <= self._cursor.moved.line <= 1:
                 cs = self._current_snippets[-1]
 
                 # Detect a carriage return
-                if col == 0 and lineno == self._last_cursor_pos[0] + 1:
+                if self._cursor.pos.col == 0 and self._cursor.moved.line == 1:
                     # Hack, remove a line in vim, because we are going to
                     # overwrite the old line range with the new snippet value.
                     # After the expansion, we put the cursor were the user left
                     # it. This action should be completely transparent for the
                     # user
                     cache_pos = vim.current.window.cursor
-                    del vim.current.buffer[lineno-1]
+                    del vim.current.buffer[self._cursor.pos.line-1]
                     cs.chars_entered('\n')
                     vim.current.window.cursor = cache_pos
-                elif lcol > col: # Some deleting was going on
-                    cs.backspace(lcol-col)
+                elif self._cursor.moved.col < 0: # Some deleting was going on
+                    cs.backspace(-self._cursor.moved.col)
                 else:
                     line = vim.current.line
-
-                    chars = line[lcol:col]
+                    
+                    debug("moved: %s" % self._cursor.moved)
+                    chars = line[self._cursor.pos.col - self._cursor.moved.col:
+                                 self._cursor.pos.col]
                     cs.chars_entered(chars)
 
-        self._last_cursor_pos = vim.current.window.cursor
+        self._cursor.update_position()
 
     def entered_insert_mode(self):
         pass
