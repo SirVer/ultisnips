@@ -21,7 +21,7 @@ def type(str, session):
 class _VimTest(unittest.TestCase):
     text_before = " --- some text before --- "
     text_after =  " --- some text after --- "
-    
+
     def send(self,s):
         send(s, self.session)
 
@@ -75,15 +75,19 @@ EOF
 
             handle, fn = tempfile.mkstemp(prefix="PySnipEmuTest",suffix=".txt")
             os.close(handle)
+            os.unlink(fn)
 
             self.escape()
             self.send(":w! %s\n" % fn)
 
-            # Give screen a chance to send the cmd and vim to write the file
-            time.sleep(.25)
-
             # Read the output, chop the trailing newline
-            self.output = open(fn,"r").read()[:-1]
+            tries = 50
+            while tries:
+                if os.path.exists(fn):
+                    self.output = open(fn,"r").read()[:-1]
+                    break
+                time.sleep(.05)
+                tries -= 1
 
 
     def cmd(self):
@@ -598,7 +602,7 @@ class Transformation_OptionReplaceGlobalMatchInReplace_ECR(_VimTest):
 
 # TODO: conditional in conditional, case folding recursive
 # TODO: jumping out of snippet in insert mode
-# 
+#
 print "TODO: backspacing when tab is selected"
 
 ###################
