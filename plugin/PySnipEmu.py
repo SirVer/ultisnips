@@ -611,14 +611,52 @@ class Cursor(object):
         self._abs_pos = None
         self._moved = Position(0,0)
 
+        self._lines = None
+        self._dlines = None
+        self._cols = None
+        self._dcols = None
+        self._lt = None
+        self._text_changed = None
+
     def update_position(self):
         line, col = vim.current.window.cursor
         line -= 1
         abs_pos = Position(line,col)
         if self._abs_pos:
             self._moved = abs_pos - self._abs_pos
-        # self._start = abs_pos - self._parent.start
         self._abs_pos = abs_pos
+
+        # Update buffer insof
+        # TODO: instead of caching the whole buffer, 
+        # it will suffice to cache the lenghts and only
+        # compare the char under the cursor to the previous
+        # if lenghts have not changed.
+        text = '\n'.join(vim.current.buffer[:])
+        if self._lt is not None:
+            self._text_changed = text != self._lt
+        self._lt = text
+
+        cols = len(vim.current.buffer[line])
+        if self._cols:
+            self._dcols = cols - self._cols
+        self._cols = cols
+
+        lines = len(vim.current.buffer)
+        if self._lines:
+            self._dlines = lines - self._lines
+        self._lines = lines
+
+    def buf_changed(self):
+        return self._text_changed
+    buf_changed = property(buf_changed)
+
+    def nr_lines(self):
+        return self._lines
+    nr_lines = property(nr_lines)
+
+    def cols_in_line(self):
+        return self._cols
+    cols_in_line = property(cols_in_line)
 
     def pos(self):
         return self._abs_pos
@@ -644,6 +682,7 @@ class SnippetManager(object):
         self.reset()
 
         self._cursor = Cursor()
+        self._accept_input = False
 
 
     def _load_snippets_from(self, ft, fn):
@@ -687,7 +726,7 @@ class SnippetManager(object):
         self._snippets = {}
         self._current_snippets = []
 
-    def add_snippet(self,trigger,value, descr):
+    def add_snippet(self, trigger, value, descr):
         if "all" not in self._snippets:
             self._snippets["all"] = {}
         l = self._snippets["all"].get(trigger,[])
@@ -708,9 +747,12 @@ class SnippetManager(object):
         if "all" not in self._snippets:
             self._load_snippets_for("all")
 
+        self._accept_input = False
+        self._expect_move_wo_change = False
 
         if len(self._current_snippets):
             cs = self._current_snippets[-1]
+            self._expect_move_wo_change = True
             if not cs.select_next_tab(backwards):
                 # Jump to the end of the snippet and enter insert mode
                 cs = self._current_snippets[-1]
@@ -721,6 +763,7 @@ class SnippetManager(object):
                 return True
 
             self._cursor.update_position()
+            self._accept_input = True
             return True
 
         dummy,col = vim.current.window.cursor
@@ -759,21 +802,33 @@ class SnippetManager(object):
             rv = int(rv)
             snippet = snippets[rv-1]
 
+        self._expect_move_wo_change = True
         s = snippet.launch(before.rstrip()[:-len(word)], after)
 
         self._cursor.update_position()
         if s is not None:
             self._current_snippets.append(s)
+            self._accept_input = True
+            
 
         return True
 
     def cursor_moved(self):
         debug("Cursor moved")
 
-
         self._cursor.update_position()
+        if not self._accept_input:
+            return
 
-        if len(self._current_snippets) and (self._cursor.has_moved):
+        debug("self._cursor._dlines: %s" % (self._cursor._dlines))
+        debug("self._cursor._dcols: %s" % (self._cursor._dcols))
+        debug("self._cursor.buf_changed: %s" % (self._cursor.buf_changed))
+        if not self._cursor.buf_changed and not self._expect_move_wo_change:
+            # Cursor moved without input.
+            self._accept_input = False
+
+            # TODO: check if we left the current snippet
+        elif len(self._current_snippets):
             if 0 <= self._cursor.moved.line <= 1:
                 cs = self._current_snippets[-1]
 
@@ -798,6 +853,8 @@ class SnippetManager(object):
                     cs.chars_entered(chars, self._cursor)
 
             self._cursor.update_position()
+
+        self._expect_move_wo_change = False
 
     def entered_insert_mode(self):
         if len(self._current_snippets) and \

@@ -188,7 +188,21 @@ class TabStopTestMultilineExpand_ExceptCorrectResult(_VimTest):
     wanted = "test hallo one more\nnice world work\n" \
             "test try\nSeem to work World"
 
-# # TODO: pasting with <C-R> while mirroring
+# TODO: expand, jump forward, jump backwards should all be individual
+# functions
+# TODO: a dirty bug when escaping when a tabstop is selected. This must be detected
+# Multiline text pasting
+# Recursive Tabstops: TODO: this will still take some time
+# class RecTabStops_SimpleCase_ExceptCorrectResult(_VimTest):
+#     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
+#     keys = "m\tm\thello\tworld\tend"
+#     wanted = "[ [ hello  world ]  end ]"
+# class RecTabStops_SimpleCaseLeaveSecond_ExceptCorrectResult(_VimTest):
+#     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
+#     keys = "m\tm\thello\tworld\t"
+#     wanted = "[ [ hello  world ]  sec ]"
+
+# # TODO: pasting with <C-R> while mirroring, also multiline
 # ###########
 # # MIRRORS #
 # ###########
@@ -336,8 +350,6 @@ class MirrorRealLifeExample_ExceptCorrectResult(_VimTest):
 }"""
 
 
-# TODO: recursive expansion
-
 ###################
 # TRANSFORMATIONS #
 ###################
@@ -458,7 +470,22 @@ class CursorMovement_Multiline_ECR(_VimTest):
     wanted = "this is something\nvery nice\nnot? " \
             "this is something\nvery nice\nnot?more text"
 
+
 # TODO: expandtab and therelikes
+
+######################
+# INSERT MODE MOVING #
+######################
+class IMMoving_CursorsKeys_ECR(_VimTest):
+    snippets = ("test", "${1:Some}")
+    keys = "test\ttext" + 3*ARR_U + 6*ARR_D
+    wanted = "text"
+class CursorMovement_DoNotAcceptInputWhenMoved_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1:a tab}")
+    keys = "test\tthis" + ARR_L + "hallo"
+    wanted = "this thihallos"
+
+# TODO: exit when outside snippet
 
 ####################
 # PROPER INDENTING #
