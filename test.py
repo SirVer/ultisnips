@@ -7,6 +7,14 @@ import tempfile
 import unittest
 import time
 
+# Some constants for better reading
+BS = '\x7f'
+ESC = '\x1b'
+ARR_L = '\x1bOD'
+ARR_R = '\x1bOC'
+ARR_U = '\x1bOA'
+ARR_D = '\x1bOB'
+
 def send(s,session):
         os.system("screen -x %s -X stuff '%s'" % (session,s))
 
@@ -33,11 +41,8 @@ class _VimTest(unittest.TestCase):
                 '\n\n' + self.text_after
         self.assertEqual(self.output, wanted)
 
-    def escape(self):
-        self.type("\x1b")
-
     def setUp(self):
-        self.escape()
+        self.send(ESC)
 
         self.send(":py PySnipSnippets.reset()\n")
 
@@ -66,8 +71,7 @@ EOF
             self.send('\n\n' + self.text_after)
 
             # Go to the middle of the buffer
-            self.escape()
-            self.send("ggjji")
+            self.send(ESC + "ggjji")
 
             # Execute the command
             self.cmd()
@@ -77,8 +81,7 @@ EOF
             os.close(handle)
             os.unlink(fn)
 
-            self.escape()
-            self.send(":w! %s\n" % fn)
+            self.send(ESC + ":w! %s\n" % fn)
 
             # Read the output, chop the trailing newline
             tries = 50
@@ -124,26 +127,20 @@ class DoNotExpandAfterSpace_ExceptCorrectResult(_SimpleExpands):
 class ExpandInTheMiddleOfLine_ExceptCorrectResult(_SimpleExpands):
     wanted = "Wie Hallo Welt! gehts?"
     def cmd(self):
-        self.type("Wie hallo gehts?")
-        self.escape()
-        self.type("bhi\t")
+        self.type("Wie hallo gehts?" + ESC + "bhi\t")
     def runTest(self): self.check_output()
 
 class MultilineExpand_ExceptCorrectResult(_VimTest):
     wanted = "Wie Hallo Welt!\nUnd Wie gehts? gehts?"
     snippets = ("hallo", "Hallo Welt!\nUnd Wie gehts?")
     def cmd(self):
-        self.type("Wie hallo gehts?")
-        self.escape()
-        self.type("bhi\t")
+        self.type("Wie hallo gehts?" + ESC + "bhi\t")
     def runTest(self): self.check_output()
 class MultilineExpandTestTyping_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "Hallo Welt!\nUnd Wie gehts?")
     wanted = "Wie Hallo Welt!\nUnd Wie gehts?Huiui! gehts?"
     def cmd(self):
-        self.type("Wie hallo gehts?")
-        self.escape()
-        self.type("bhi\tHuiui!")
+        self.type("Wie hallo gehts?" + ESC + "bhi\tHuiui!")
     def runTest(self): self.check_output()
 
 ############
@@ -225,10 +222,8 @@ class TabStopTestMultilineExpand_ExceptCorrectResult(_VimTest):
     wanted = "test hallo one more\nnice world work\n" \
             "test try\nSeem to work World"
     def cmd(self):
-        self.type("test hallo World")
-        self.escape()
-        self.type("02f i\t")
-        self.type("world\ttry\ttest\tone more\t\t")
+        self.type("test hallo World" + ESC + "02f i\t"
+                "world\ttry\ttest\tone more\t\t")
     def runTest(self): self.check_output()
 
 # # TODO: pasting with <C-R> while mirroring
