@@ -27,9 +27,11 @@ def type(str, session):
         send(c, session)
 
 class _VimTest(unittest.TestCase):
+    snippets = ("dummy", "donotdefine")
     text_before = " --- some text before --- "
     text_after =  " --- some text after --- "
-    keys = None
+    wanted = ""
+    keys = ""
 
     def send(self,s):
         send(s, self.session)
@@ -41,6 +43,8 @@ class _VimTest(unittest.TestCase):
         wanted = self.text_before + '\n\n' + self.wanted + \
                 '\n\n' + self.text_after
         self.assertEqual(self.output, wanted)
+
+    def runTest(self): self.check_output()
 
     def setUp(self):
         self.send(ESC)
@@ -101,37 +105,30 @@ class _SimpleExpands(_VimTest):
 class SimpleExpand_ExceptCorrectResult(_SimpleExpands):
     keys = "hallo\t"
     wanted = "Hallo Welt!"
-    def runTest(self): self.check_output()
 
 class SimpleExpandTypeAfterExpand_ExceptCorrectResult(_SimpleExpands):
     keys = "hallo\tand again"
     wanted = "Hallo Welt!and again"
-    def runTest(self): self.check_output()
 
 class SimpleExpandTypeAndDelete_ExceptCorrectResult(_SimpleExpands):
     keys = "na du hallo\tand again\b\b\b\b\bblub"
     wanted = "na du Hallo Welt!and blub"
-    def runTest(self): self.check_output()
 
 class DoNotExpandAfterSpace_ExceptCorrectResult(_SimpleExpands):
     keys = "hallo \t"
     wanted = "hallo "
-    def runTest(self): self.check_output()
 
 class ExpandInTheMiddleOfLine_ExceptCorrectResult(_SimpleExpands):
     keys = "Wie hallo gehts?" + ESC + "bhi\t"
     wanted = "Wie Hallo Welt! gehts?"
-    def runTest(self): self.check_output()
 class MultilineExpand_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "Hallo Welt!\nUnd Wie gehts?")
     keys = "Wie hallo gehts?" + ESC + "bhi\t"
     wanted = "Wie Hallo Welt!\nUnd Wie gehts? gehts?"
-    def runTest(self): self.check_output()
 class MultilineExpandTestTyping_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "Hallo Welt!\nUnd Wie gehts?")
     wanted = "Wie Hallo Welt!\nUnd Wie gehts?Huiui! gehts?"
     keys = "Wie hallo gehts?" + ESC + "bhi\tHuiui!"
-    def runTest(self): self.check_output()
 
 ############
 # TabStops #
@@ -140,30 +137,25 @@ class TabStopSimpleReplace_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo ${0:End} ${1:Beginning}")
     keys = "hallo\tna\tDu Nase"
     wanted = "hallo Du Nase na"
-    def runTest(self): self.check_output()
 class TabStopSimpleReplaceSurrounded_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo ${0:End} a small feed")
     keys = "hallo\tNase"
     wanted = "hallo Nase a small feed"
-    def runTest(self): self.check_output()
 class TabStopSimpleReplaceSurrounded1_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo $0 a small feed")
     keys = "hallo\tNase"
     wanted = "hallo Nase a small feed"
-    def runTest(self): self.check_output()
 
 
 class ExitTabStop_ExceptCorrectResult(_VimTest):
     snippets = ("echo", "$0 run")
     keys = "echo\ttest"
     wanted = "test run"
-    def runTest(self): self.check_output()
 
 class TabStopNoReplace_ExceptCorrectResult(_VimTest):
     snippets = ("echo", "echo ${1:Hallo}")
     keys = "echo\t"
     wanted = "echo Hallo"
-    def runTest(self): self.check_output()
 
 # TODO: multiline tabstops, maybe?
 
@@ -171,36 +163,30 @@ class TabStopWithOneChar_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "nothing ${1:i} hups")
     keys = "hallo\tship"
     wanted = "nothing ship hups"
-    def runTest(self): self.check_output()
 
 class TabStopTestJumping_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo ${2:End} mitte ${1:Beginning}")
     keys = "hallo\t\tTest\tHi"
     wanted = "hallo Test mitte BeginningHi"
-    def runTest(self): self.check_output()
 class TabStopTestJumping2_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo $0 $1")
     keys = "hallo\t\tTest\tHi"
     wanted = "hallo Test Hi"
-    def runTest(self): self.check_output()
 
 class TabStopTestBackwardJumping_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo ${0:End} mitte${1:Beginning}")
     keys = "hallo\tSomelengthy Text\tHi+Lets replace it again\tBlah\t++\t"
     wanted = "hallo Blah mitteLets replace it again"
-    def runTest(self): self.check_output()
 class TabStopTestBackwardJumping2_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo $0 $1")
     keys = "hallo\tSomelengthy Text\tHi+Lets replace it again\tBlah\t++\t"
     wanted = "hallo Blah Lets replace it again"
-    def runTest(self): self.check_output()
 
 class TabStopTestMultilineExpand_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo $0\nnice $1 work\n$3 $2\nSeem to work")
     keys ="test hallo World" + ESC + "02f i\tworld\ttry\ttest\tone more\t\t"
     wanted = "test hallo one more\nnice world work\n" \
             "test try\nSeem to work World"
-    def runTest(self): self.check_output()
 
 # # TODO: pasting with <C-R> while mirroring
 # ###########
@@ -210,163 +196,133 @@ class TextTabStopTextAfterTab_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 Hinten\n$1")
     keys = "test\thallo"
     wanted = "hallo Hinten\nhallo"
-    def runTest(self): self.check_output()
 class TextTabStopTextBeforeTab_ExceptCorrectResult(_VimTest):
     snippets = ("test", "Vorne $1\n$1")
     keys = "test\thallo"
     wanted = "Vorne hallo\nhallo"
-    def runTest(self): self.check_output()
 class TextTabStopTextSurroundedTab_ExceptCorrectResult(_VimTest):
     snippets = ("test", "Vorne $1 Hinten\n$1")
     keys = "test\thallo test"
     wanted = "Vorne hallo test Hinten\nhallo test"
-    def runTest(self): self.check_output()
 
 class TextTabStopTextBeforeMirror_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1\nVorne $1")
     keys = "test\thallo"
     wanted = "hallo\nVorne hallo"
-    def runTest(self): self.check_output()
 class TextTabStopAfterMirror_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1\n$1 Hinten")
     keys = "test\thallo"
     wanted = "hallo\nhallo Hinten"
-    def runTest(self): self.check_output()
 class TextTabStopSurroundMirror_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1\nVorne $1 Hinten")
     keys = "test\thallo welt"
     wanted = "hallo welt\nVorne hallo welt Hinten"
-    def runTest(self): self.check_output()
 class TextTabStopAllSurrounded_ExceptCorrectResult(_VimTest):
     snippets = ("test", "ObenVorne $1 ObenHinten\nVorne $1 Hinten")
     keys = "test\thallo welt"
     wanted = "ObenVorne hallo welt ObenHinten\nVorne hallo welt Hinten"
-    def runTest(self): self.check_output()
 
 class MirrorBeforeTabstopLeave_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1:this is it} $1")
     keys = "test\t"
     wanted = "this is it this is it this is it"
-    def runTest(self): self.check_output()
 class MirrorBeforeTabstopOverwrite_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1:this is it} $1")
     keys = "test\ta"
     wanted = "a a a"
-    def runTest(self): self.check_output()
 
 class TextTabStopSimpleMirrorMultiline_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1\n$1")
     keys = "test\thallo"
     wanted = "hallo\nhallo"
-    def runTest(self): self.check_output()
 class SimpleMirrorMultilineMany_ExceptCorrectResult(_VimTest):
     snippets = ("test", "    $1\n$1\na$1b\n$1\ntest $1 mich")
     keys = "test\thallo"
     wanted = "    hallo\nhallo\nahallob\nhallo\ntest hallo mich"
-    def runTest(self): self.check_output()
 class MultilineTabStopSimpleMirrorMultiline_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1\n\n$1\n\n$1")
     keys = "test\thallo Du\nHi"
     wanted = "hallo Du\nHi\n\nhallo Du\nHi\n\nhallo Du\nHi"
-    def runTest(self): self.check_output()
 class MultilineTabStopSimpleMirrorMultiline1_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1\n$1\n$1")
     keys = "test\thallo Du\nHi"
     wanted = "hallo Du\nHi\nhallo Du\nHi\nhallo Du\nHi"
-    def runTest(self): self.check_output()
 # TODO: Multiline delete over line endings
 class MultilineTabStopSimpleMirrorDeleteInLine_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1\n$1\n$1")
     keys = "test\thallo Du\nHi\b\bAch Blah"
     wanted = "hallo Du\nAch Blah\nhallo Du\nAch Blah\nhallo Du\nAch Blah"
-    def runTest(self): self.check_output()
 class TextTabStopSimpleMirrorMultilineMirrorInFront_ECR(_VimTest):
     snippets = ("test", "$1\n${1:sometext}")
     keys = "test\thallo\nagain"
     wanted = "hallo\nagain\nhallo\nagain"
-    def runTest(self): self.check_output()
 
 class SimpleMirrorDelete_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1\n$1")
     keys = "test\thallo\b\b"
     wanted = "hal\nhal"
-    def runTest(self): self.check_output()
 
 class SimpleMirrorSameLine_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 $1")
     keys = "test\thallo"
     wanted = "hallo hallo"
-    def runTest(self): self.check_output()
 class Transformation_SimpleMirrorSameLineBeforeTabDefVal_ECR(_VimTest):
     snippets = ("test", "$1 ${1:replace me}")
     keys = "test\thallo foo"
     wanted = "hallo foo hallo foo"
-    def runTest(self): self.check_output()
 class SimpleMirrorSameLineMany_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 $1 $1 $1")
     keys = "test\thallo du"
     wanted = "hallo du hallo du hallo du hallo du"
-    def runTest(self): self.check_output()
 class SimpleMirrorSameLineManyMultiline_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 $1 $1 $1")
     keys = "test\thallo du\nwie gehts?"
     wanted = "hallo du\nwie gehts? hallo du\nwie gehts? hallo du\nwie gehts?" \
             " hallo du\nwie gehts?"
-    def runTest(self): self.check_output()
 class SimpleMirrorDeleteSomeEnterSome_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1\n$1")
     keys = "test\thallo\b\bhups"
     wanted = "halhups\nhalhups"
-    def runTest(self): self.check_output()
 
 
 class SimpleTabstopWithDefaultSimpelType_ExceptCorrectResult(_VimTest):
     snippets = ("test", "ha ${1:defa}\n$1")
     keys = "test\tworld"
     wanted = "ha world\nworld"
-    def runTest(self): self.check_output()
 class SimpleTabstopWithDefaultComplexType_ExceptCorrectResult(_VimTest):
     snippets = ("test", "ha ${1:default value} $1\nanother: $1 mirror")
     keys = "test\tworld"
     wanted = "ha world world\nanother: world mirror"
-    def runTest(self): self.check_output()
 class SimpleTabstopWithDefaultSimpelKeep_ExceptCorrectResult(_VimTest):
     snippets = ("test", "ha ${1:defa}\n$1")
     keys = "test\t"
     wanted = "ha defa\ndefa"
-    def runTest(self): self.check_output()
 class SimpleTabstopWithDefaultComplexKeep_ExceptCorrectResult(_VimTest):
     snippets = ("test", "ha ${1:default value} $1\nanother: $1 mirror")
     keys = "test\t"
     wanted = "ha default value default value\nanother: default value mirror"
-    def runTest(self): self.check_output()
 
 # TODO: Mehrer tabs und mehrere mirrors
 class TabstopWithMirrorInDefaultNoType_ExceptCorrectResult(_VimTest):
     snippets = ("test", "ha ${1:blub} ${2:$1.h}")
     keys = "test\t"
     wanted = "ha blub blub.h"
-    def runTest(self): self.check_output()
 class TabstopWithMirrorInDefaultTwiceAndExtra_ExceptCorrectResult(_VimTest):
     snippets = ("test", "ha $1 ${2:$1.h $1.c}\ntest $1")
     keys = "test\tstdin"
     wanted = "ha stdin stdin.h stdin.c\ntest stdin"
-    def runTest(self): self.check_output()
 class TabstopWithMirrorInDefaultMultipleLeave_ExceptCorrectResult(_VimTest):
     snippets = ("test", "ha $1 ${2:snip} ${3:$1.h $2}")
     keys = "test\tstdin"
     wanted = "ha stdin snip stdin.h snip"
-    def runTest(self): self.check_output()
 class TabstopWithMirrorInDefaultMultipleOverwrite_ExceptCorrectResult(_VimTest):
     snippets = ("test", "ha $1 ${2:snip} ${3:$1.h $2}")
     keys = "test\tstdin\tdo snap"
     wanted = "ha stdin do snap stdin.h do snap"
-    def runTest(self): self.check_output()
 class TabstopWithMirrorInDefaultOverwrite_ExceptCorrectResult(_VimTest):
     snippets = ("test", "ha $1 ${2:$1.h}")
     keys = "test\tstdin\toverwritten"
     wanted = "ha stdin overwritten"
-    def runTest(self): self.check_output()
 
 class MirrorRealLifeExample_ExceptCorrectResult(_VimTest):
     snippets = (
@@ -379,7 +335,6 @@ class MirrorRealLifeExample_ExceptCorrectResult(_VimTest):
 \t// do nothing
 }"""
 
-    def runTest(self): self.check_output()
 
 # TODO: recursive expansion
 
@@ -390,128 +345,104 @@ class Transformation_SimpleCase_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/foo/batzl/}")
     keys = "test\thallo foo boy"
     wanted = "hallo foo boy hallo batzl boy"
-    def runTest(self): self.check_output()
 class Transformation_SimpleCaseNoTransform_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/foo/batzl/}")
     keys = "test\thallo"
     wanted = "hallo hallo"
-    def runTest(self): self.check_output()
 class Transformation_SimpleCaseTransformInFront_ExceptCorrectResult(_VimTest):
     snippets = ("test", "${1/foo/batzl/} $1")
     keys = "test\thallo foo"
     wanted = "hallo batzl hallo foo"
-    def runTest(self): self.check_output()
 class Transformation_SimpleCaseTransformInFrontDefVal_ECR(_VimTest):
     snippets = ("test", "${1/foo/batzl/} ${1:replace me}")
     keys = "test\thallo foo"
     wanted = "hallo batzl hallo foo"
-    def runTest(self): self.check_output()
 class Transformation_MultipleTransformations_ECR(_VimTest):
     snippets = ("test", "${1:Some Text}${1/.+/\U$0\E/}\n${1/.+/\L$0\E/}")
     keys = "test\tSomE tExt "
     wanted = "SomE tExt SOME TEXT \nsome text "
-    def runTest(self): self.check_output()
 class Transformation_TabIsAtEndAndDeleted_ECR(_VimTest):
     snippets = ("test", "${1/.+/is something/}${1:some}")
     keys = "hallo test\tsome\b\b\b\b\b"
     wanted = "hallo "
-    def runTest(self): self.check_output()
 class Transformation_TabIsAtEndAndDeleted1_ECR(_VimTest):
     snippets = ("test", "${1/.+/is something/}${1:some}")
     keys = "hallo test\tsome\b\b\b\bmore"
     wanted = "hallo is somethingmore"
-    def runTest(self): self.check_output()
 class Transformation_TabIsAtEndNoTextLeave_ECR(_VimTest):
     snippets = ("test", "${1/.+/is something/}${1}")
     keys = "hallo test\t"
     wanted = "hallo "
-    def runTest(self): self.check_output()
 class Transformation_TabIsAtEndNoTextType_ECR(_VimTest):
     snippets = ("test", "${1/.+/is something/}${1}")
     keys = "hallo test\tb"
     wanted = "hallo is somethingb"
-    def runTest(self): self.check_output()
 
 
 class Transformation_Backreference_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/([ab])oo/$1ull/}")
     keys = "test\tfoo boo aoo"
     wanted = "foo boo aoo foo bull aoo"
-    def runTest(self): self.check_output()
 class Transformation_BackreferenceTwice_ExceptCorrectResult(_VimTest):
     snippets = ("test", r"$1 ${1/(dead) (par[^ ]*)/this $2 is a bit $1/}")
     keys = "test\tdead parrot"
     wanted = "dead parrot this parrot is a bit dead"
-    def runTest(self): self.check_output()
 
 class Transformation_CleverTransformUpercaseChar_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/(.)/\u$1/}")
     keys = "test\thallo"
     wanted = "hallo Hallo"
-    def runTest(self): self.check_output()
 class Transformation_CleverTransformLowercaseChar_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/(.*)/\l$1/}")
     keys = "test\tHallo"
     wanted = "Hallo hallo"
-    def runTest(self): self.check_output()
 class Transformation_CleverTransformLongUpper_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/(.*)/\U$1\E/}")
     keys = "test\thallo"
     wanted = "hallo HALLO"
-    def runTest(self): self.check_output()
 class Transformation_CleverTransformLongLower_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/(.*)/\L$1\E/}")
     keys = "test\tHALLO"
     wanted = "HALLO hallo"
-    def runTest(self): self.check_output()
 
 class Transformation_ConditionalInsertionSimple_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/(^a).*/(?0:began with an a)/}")
     keys = "test\ta some more text"
     wanted = "a some more text began with an a"
-    def runTest(self): self.check_output()
 class Transformation_CIBothDefinedNegative_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/(?:(^a)|(^b)).*/(?1:yes:no)/}")
     keys = "test\tb some"
     wanted = "b some no"
-    def runTest(self): self.check_output()
 class Transformation_CIBothDefinedPositive_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/(?:(^a)|(^b)).*/(?1:yes:no)/}")
     keys = "test\ta some"
     wanted = "a some yes"
-    def runTest(self): self.check_output()
 class Transformation_ConditionalInsertRWEllipsis_ECR(_VimTest):
     snippets = ("test", r"$1 ${1/(\w+(?:\W+\w+){,7})\W*(.+)?/$1(?2:...)/}")
     keys = "test\ta b  c d e f ghhh h oha"
     wanted = "a b  c d e f ghhh h oha a b  c d e f ghhh h..."
-    def runTest(self): self.check_output()
 
 class Transformation_CINewlines_ECR(_VimTest):
     snippets = ("test", r"$1 ${1/, */\n/}")
     keys = "test\ttest, hallo"
     wanted = "test, hallo test\nhallo"
-    def runTest(self): self.check_output()
 class Transformation_CIEscapedParensinReplace_ECR(_VimTest):
     snippets = ("test", r"$1 ${1/hal((?:lo)|(?:ul))/(?1:ha\($1\))/}")
     keys = "test\ttest, halul"
     wanted = "test, halul test, ha(ul)"
-    def runTest(self): self.check_output()
 
 class Transformation_OptionIgnoreCase_ECR(_VimTest):
     snippets = ("test", r"$1 ${1/test/blah/i}")
     keys = "test\tTEST"
     wanted = "TEST blah"
-    def runTest(self): self.check_output()
 class Transformation_OptionReplaceGlobal_ECR(_VimTest):
     snippets = ("test", r"$1 ${1/, */-/g}")
     keys = "test\ta, nice, building"
     wanted = "a, nice, building a-nice-building"
-    def runTest(self): self.check_output()
 class Transformation_OptionReplaceGlobalMatchInReplace_ECR(_VimTest):
     snippets = ("test", r"$1 ${1/, */, /g}")
     keys = "test\ta, nice,   building"
     wanted = "a, nice,   building a, nice, building"
-    def runTest(self): self.check_output()
 
 # TODO: conditional in conditional, case folding recursive
 # TODO: jumping out of snippet in insert mode
@@ -526,7 +457,6 @@ class CursorMovement_Multiline_ECR(_VimTest):
     keys = "test\tthis is something\nvery nice\nnot?\tmore text"
     wanted = "this is something\nvery nice\nnot? " \
             "this is something\nvery nice\nnot?more text"
-    def runTest(self): self.check_output()
 
 # TODO: expandtab and therelikes
 
@@ -537,7 +467,6 @@ class ProperIndenting_SimpleCase_ECR(_VimTest):
     snippets = ("test", "for\n    blah")
     keys = "    test\tHui"
     wanted = "    for\n        blahHui"
-    def runTest(self): self.check_output()
 
 ######################
 # SELECTING MULTIPLE #
@@ -547,13 +476,11 @@ class Multiple_SimpleCaseSelectFirst_ECR(_VimTest):
                  ("test", "Case2", "This is Case 2") )
     keys = "test\t1\n"
     wanted = "Case1"
-    def runTest(self): self.check_output()
 class Multiple_SimpleCaseSelectSecond_ECR(_VimTest):
     snippets = ( ("test", "Case1", "This is Case 1"),
                  ("test", "Case2", "This is Case 2") )
     keys = "test\t2\n"
     wanted = "Case2"
-    def runTest(self): self.check_output()
 
 ###########################################################################
 #                               END OF TEST                               #
