@@ -769,8 +769,8 @@ class SnippetManager(object):
 
     def cursor_moved(self):
         debug("Cursor moved")
-        
-        
+
+
         self._cursor.update_position()
 
         if len(self._current_snippets) and (self._cursor.has_moved):
