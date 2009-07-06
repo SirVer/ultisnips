@@ -163,6 +163,14 @@ class TabStopEscapingWhenSelected_ECR(_VimTest):
     snippets = ("test", "snip ${1:default}")
     keys = "test\t" + ESC + "0ihi"
     wanted = "hisnip default"
+class TabStopEscapingWhenSelectedSingleCharTS_ECR(_VimTest):
+    snippets = ("test", "snip ${1:i}")
+    keys = "test\t" + ESC + "0ihi"
+    wanted = "hisnip i"
+class TabStopEscapingWhenSelectedNoCharTS_ECR(_VimTest):
+    snippets = ("test", "snip $1")
+    keys = "test\t" + ESC + "0ihi"
+    wanted = "hisnip "
 
 class TabStopWithOneChar_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "nothing ${1:i} hups")
