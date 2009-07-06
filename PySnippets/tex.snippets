@@ -2,6 +2,36 @@
 #                             LATEX SNIPPETS                              #
 ###########################################################################
 
+snippet r "\ref{}"
+\ref{$1}
+endsnippet
+
+#####################
+# TEXTMATE SNIPPETS #
+#####################
+
+#####################################
+# SECTIONS, CHAPTERS AND THERE LIKE #
+#####################################
+
+snippet part
+\part{${1:part name}}
+\label{prt:${2:${1/(\w+)|\W+/(?1:\L$0\E:_)/g}}}
+
+${0}
+
+% part $2 (end)
+endsnippet
+
+snippet cha
+\chapter{${1:chapter name}}
+\label{cha:${2:${1/\\\w+\{(.*?)\}|\\(.)|(\w+)|([^\w\\]+)/(?4:_:\L$1$2$3\E)/g}}}
+
+${0}
+
+% chapter $2 (end)
+endsnippet
+
 snippet sec
 \section{${1:section name}} 
 \label{sec:${2:${1/\\\w+\{(.*?)\}|\\(.)|(\w+)|([^\w\\]+)/(?4:_:\L$1$2$3\E)/g}}}
@@ -11,10 +41,42 @@ ${0}
 % section $2 (end)
 endsnippet
 
-snippet r "\ref{}"
-\ref{$1}
+
+snippet sub
+\subsection{${1:subsection name}}
+\label{sub:${2:${1/\\\w+\{(.*?)\}|\\(.)|(\w+)|([^\w\\]+)/(?4:_:\L$1$2$3\E)/g}}}
+
+${0}
+
+% subsection $2 (end)
 endsnippet
 
-#####################
-# TEXTMATE SNIPPETS #
-#####################
+snippet ssub
+\subsubsection{${1:subsubsection name}}
+\label{ssub:${2:${1/\\\w+\{(.*?)\}|\\(.)|(\w+)|([^\w\\]+)/(?4:_:\L$1$2$3\E)/g}}}
+
+${0}
+
+% subsubsection $2 (end)
+
+endsnippet
+
+snippet par
+\paragraph{${1:paragraph name}}
+\label{par:${2:${1/\\\w+\{(.*?)\}|\\(.)|(\w+)|([^\w\\]+)/(?4:_:\L$1$2$3\E)/g}}}
+
+${0}
+
+% paragraph $2 (end)
+endsnippet
+
+
+snippet subp
+\subparagraph{${1:subparagraph name}}
+\label{par:${2:${1/\\\w+\{(.*?)\}|\\(.)|(\w+)|([^\w\\]+)/(?4:_:\L$1$2$3\E)/g}}}
+
+${0}
+
+% subparagraph $2 (end)
+endsnippet
+
