@@ -509,9 +509,14 @@ class IMMoving_ExitWhenOutsideLeft_ECR(_VimTest):
     snippets = ("test", r"${1:Hi} ${2:blub}")
     keys = "hello test this" + ESC + "02f i\ttab" + 4*ARR_L + "\thallo"
     wanted = "hellohallo tab blub this"
-
-# TODO: exit when below or above snippet
-# TODO: single line snippet insertions always adds newline 
+class IMMoving_ExitWhenOutsideAbove_ECR(_VimTest):
+    snippets = ("test", "${1:Hi}\n${2:blub}")
+    keys = "hello test this" + ESC + "02f i\ttab" + 1*ARR_U + "\t\nhallo"
+    wanted = "hallo\nhello tab\nblub this"
+class IMMoving_ExitWhenOutsideBelow_ECR(_VimTest):
+    snippets = ("test", "${1:Hi}\n${2:blub}")
+    keys = "hello test this" + ESC + "02f i\ttab" + 2*ARR_D + "\ttesthallo\n"
+    wanted = "hello tab\nblub this\ntesthallo"
 
 ####################
 # PROPER INDENTING #

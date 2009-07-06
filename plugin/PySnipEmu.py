@@ -890,8 +890,6 @@ class SnippetManager(object):
                 if not is_inside:
                     self._current_snippets.pop()
 
-            # TODO: check if we left the current snippet
-
         if not self._accept_input:
             return
 
