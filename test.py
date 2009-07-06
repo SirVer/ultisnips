@@ -227,7 +227,6 @@ class TabStopTestMultilineExpand_ExceptCorrectResult(_VimTest):
 
 # TODO: expand, jump forward, jump backwards should all be individual
 # functions
-# TODO: a dirty bug when escaping when a tabstop is selected. This must be detected
 # Multiline text pasting
 # Recursive Tabstops: TODO: this will still take some time
 # class RecTabStops_SimpleCase_ExceptCorrectResult(_VimTest):
@@ -353,7 +352,10 @@ class SimpleTabstopWithDefaultComplexKeep_ExceptCorrectResult(_VimTest):
     keys = "test\t"
     wanted = "ha default value default value\nanother: default value mirror"
 
-# TODO: Mehrer tabs und mehrere mirrors
+class TabstopWithMirrorManyFromAll_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha $5 ${1:blub} $4 $0 ${2:$1.h} $1 $3 ${4:More}")
+    keys = "test\thi\thu\thub\thulla\tblah\tend"
+    wanted = "ha blah hi hulla end hu hi hub hulla"
 class TabstopWithMirrorInDefaultNoType_ExceptCorrectResult(_VimTest):
     snippets = ("test", "ha ${1:blub} ${2:$1.h}")
     keys = "test\t"
