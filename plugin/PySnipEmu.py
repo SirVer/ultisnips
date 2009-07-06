@@ -281,13 +281,7 @@ class TextObject(object):
         start_pos, end_pos = m.span()
         start, end = self._get_start_end(val,start_pos,end_pos)
 
-        ts = self._get_tabstop(no)
-        # TODO: This is so ugly
-        if ts is None:
-            Transformation(self, no, start, end, search, replace, options)
-        else:
-            Transformation(self, no, start, end, search, replace, options)
-
+        Transformation(self, no, start, end, search, replace, options)
 
 
     def add_tabstop(self,no, ts):
