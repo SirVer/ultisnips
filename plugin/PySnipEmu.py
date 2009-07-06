@@ -929,7 +929,7 @@ class SnippetManager(object):
 
     def entered_insert_mode(self):
         debug("Entered insert mode")
-        
+
         self._vstate.update()
         debug("self._vstate.has_moved: %s" % (self._vstate.has_moved))
         if len(self._current_snippets) and \
@@ -938,12 +938,11 @@ class SnippetManager(object):
 
             self._current_snippets = []
 
-    def normal_mode_moved(self):
+    def backspace(self):
         # BS was called in select mode
-        
+
         if len(self._current_snippets) and \
-           self._current_snippets[-1].tab_selected and \
-           self._vstate.buf_changed:
+           self._current_snippets[-1].tab_selected:
             # This only happens when a default value is delted using backspace
             vim.command(r'call feedkeys("i")')
             cs = self._current_snippets[-1]

@@ -494,9 +494,6 @@ class Transformation_OptionReplaceGlobalMatchInReplace_ECR(_VimTest):
     wanted = "a, nice,   building a, nice, building"
 
 # TODO: conditional in conditional, case folding recursive
-# TODO: jumping out of snippet in insert mode
-#
-print "TODO: backspacing when tab is selected"
 
 ###################
 # CURSOR MOVEMENT #
