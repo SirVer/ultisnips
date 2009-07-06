@@ -225,10 +225,12 @@ class TabStopTestMultilineExpand_ExceptCorrectResult(_VimTest):
     wanted = "test hallo one more\nnice world work\n" \
             "test try\nSeem to work World"
 
-# TODO: expand, jump forward, jump backwards should all be individual
+print "expand, jump forward, jump backwards should all be individual"
+print "Shell eval snippets"
+
 # functions
 # Multiline text pasting
-# Recursive Tabstops: TODO: this will still take some time
+print "Recursive Tabstops: TODO: this will still take some time"
 # class RecTabStops_SimpleCase_ExceptCorrectResult(_VimTest):
 #     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
 #     keys = "m\tm\thello\tworld\tend"
