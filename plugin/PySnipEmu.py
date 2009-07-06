@@ -606,7 +606,7 @@ class Snippet(object):
         else:
             vim.current.window.cursor = s.end.line + 1, s.end.col
 
-class Cursor(object):
+class VimState(object):
     def __init__(self):
         self._abs_pos = None
         self._moved = Position(0,0)
@@ -615,10 +615,10 @@ class Cursor(object):
         self._dlines = None
         self._cols = None
         self._dcols = None
-        self._lt = None
+        self._last_char = None
         self._text_changed = None
 
-    def update_position(self):
+    def update(self):
         line, col = vim.current.window.cursor
         line -= 1
         abs_pos = Position(line,col)
@@ -626,16 +626,7 @@ class Cursor(object):
             self._moved = abs_pos - self._abs_pos
         self._abs_pos = abs_pos
 
-        # Update buffer insof
-        # TODO: instead of caching the whole buffer, 
-        # it will suffice to cache the lenghts and only
-        # compare the char under the cursor to the previous
-        # if lenghts have not changed.
-        text = '\n'.join(vim.current.buffer[:])
-        if self._lt is not None:
-            self._text_changed = text != self._lt
-        self._lt = text
-
+        # Update buffer infos
         cols = len(vim.current.buffer[line])
         if self._cols:
             self._dcols = cols - self._cols
@@ -645,6 +636,22 @@ class Cursor(object):
         if self._lines:
             self._dlines = lines - self._lines
         self._lines = lines
+
+        # Check if the buffer has changed in any ways
+        self._text_changed = False
+        char = vim.current.buffer[line + 1:col]
+        if self._last_char is not None:
+            # does it have more lines?
+            if self._dlines:
+                self._text_changed = True
+            # did we stay in the same line and it has more columns now?
+            elif not self.moved.line and self._dcols:
+                self._text_changed = True
+            # If we didn't move and no length changes occured, 
+            # check if the char under the cursor has changed.
+            elif not self.has_moved:
+                self._text_changed = char != self._last_char
+        self._last_char = char
 
     def buf_changed(self):
         return self._text_changed
@@ -681,7 +688,7 @@ class SnippetManager(object):
     def __init__(self):
         self.reset()
 
-        self._cursor = Cursor()
+        self._vstate = VimState()
         self._accept_input = False
 
 
@@ -762,7 +769,7 @@ class SnippetManager(object):
 
                 return True
 
-            self._cursor.update_position()
+            self._vstate.update()
             self._accept_input = True
             return True
 
@@ -805,54 +812,54 @@ class SnippetManager(object):
         self._expect_move_wo_change = True
         s = snippet.launch(before.rstrip()[:-len(word)], after)
 
-        self._cursor.update_position()
+        self._vstate.update()
         if s is not None:
             self._current_snippets.append(s)
             self._accept_input = True
-            
+
 
         return True
 
     def cursor_moved(self):
         debug("Cursor moved")
 
-        self._cursor.update_position()
+        self._vstate.update()
         if not self._accept_input:
             return
 
-        debug("self._cursor._dlines: %s" % (self._cursor._dlines))
-        debug("self._cursor._dcols: %s" % (self._cursor._dcols))
-        debug("self._cursor.buf_changed: %s" % (self._cursor.buf_changed))
-        if not self._cursor.buf_changed and not self._expect_move_wo_change:
+        debug("self._vstate._dlines: %s" % (self._vstate._dlines))
+        debug("self._vstate._dcols: %s" % (self._vstate._dcols))
+        debug("self._vstate.buf_changed: %s" % (self._vstate.buf_changed))
+        if not self._vstate.buf_changed and not self._expect_move_wo_change:
             # Cursor moved without input.
             self._accept_input = False
 
             # TODO: check if we left the current snippet
         elif len(self._current_snippets):
-            if 0 <= self._cursor.moved.line <= 1:
+            if 0 <= self._vstate.moved.line <= 1:
                 cs = self._current_snippets[-1]
 
                 # Detect a carriage return
-                if self._cursor.moved.col < 0 and self._cursor.moved.line == 1:
+                if self._vstate.moved.col < 0 and self._vstate.moved.line == 1:
                     # Hack, remove a line in vim, because we are going to
                     # overwrite the old line range with the new snippet value.
                     # After the expansion, we put the cursor were the user left
                     # it. This action should be completely transparent for the
                     # user
                     cache_pos = vim.current.window.cursor
-                    del vim.current.buffer[self._cursor.pos.line-1]
-                    cs.chars_entered('\n', self._cursor)
+                    del vim.current.buffer[self._vstate.pos.line-1]
+                    cs.chars_entered('\n', self._vstate)
                     vim.current.window.cursor = cache_pos
-                elif self._cursor.moved.col < 0: # Some deleting was going on
-                    cs.backspace(-self._cursor.moved.col, self._cursor)
+                elif self._vstate.moved.col < 0: # Some deleting was going on
+                    cs.backspace(-self._vstate.moved.col, self._vstate)
                 else:
                     line = vim.current.line
 
-                    chars = line[self._cursor.pos.col - self._cursor.moved.col:
-                                 self._cursor.pos.col]
-                    cs.chars_entered(chars, self._cursor)
+                    chars = line[self._vstate.pos.col - self._vstate.moved.col:
+                                 self._vstate.pos.col]
+                    cs.chars_entered(chars, self._vstate)
 
-            self._cursor.update_position()
+            self._vstate.update()
 
         self._expect_move_wo_change = False
 
