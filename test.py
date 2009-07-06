@@ -172,6 +172,25 @@ class TabStopEscapingWhenSelectedNoCharTS_ECR(_VimTest):
     keys = "test\t" + ESC + "0ihi"
     wanted = "hisnip "
 
+class TabStopUsingBackspaceToDeleteDefaultValue_ECR(_VimTest):
+    snippets = ("test", "snip ${1/.+/(?0:matched)/} ${1:default}")
+    keys = "test\t" + BS
+    wanted = "snip  "
+class TabStopUsingBackspaceToDeleteDefaultValueInFirstTab_ECR(_VimTest):
+    snippets = ("test", "snip ${1/.+/(?0:m1)/} ${2/.+/(?0:m2)/} "
+                "${1:default} ${2:def}")
+    keys = "test\t" + BS + "\thi"
+    wanted = "snip  m2  hi"
+class TabStopUsingBackspaceToDeleteDefaultValueInSecondTab_ECR(_VimTest):
+    snippets = ("test", "snip ${1/.+/(?0:m1)/} ${2/.+/(?0:m2)/} "
+                "${1:default} ${2:def}")
+    keys = "test\thi\t" + BS
+    wanted = "snip m1  hi "
+class TabStopUsingBackspaceToDeleteDefaultValueTypeSomethingThen_ECR(_VimTest):
+    snippets = ("test", "snip ${1/.+/(?0:matched)/} ${1:default}")
+    keys = "test\t" + BS + "hallo"
+    wanted = "snip matched hallo"
+
 class TabStopWithOneChar_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "nothing ${1:i} hups")
     keys = "hallo\tship"

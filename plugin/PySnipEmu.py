@@ -579,6 +579,9 @@ class SnippetInstance(TextObject):
         return self._cts
 
     def backspace(self,count, previous_cp):
+        debug("In backspace")
+        debug("count: %s" % (count))
+
         cts = self._tabstops[self._cts]
         cts.current_text = cts.current_text[:-count]
 
@@ -811,6 +814,8 @@ class SnippetManager(object):
                 self._current_snippets.pop()
 
                 return True
+            # else:
+                # vim.command(":au CursorMoved * py PySnipSnippets.normal_mode_moved()")
 
             self._vstate.update()
             self._accept_input = True
@@ -859,6 +864,7 @@ class SnippetManager(object):
         if s is not None:
             self._current_snippets.append(s)
             self._accept_input = True
+            # vim.command(":au CursorMoved * py PySnipSnippets.normal_mode_moved()")
 
 
         return True
@@ -922,6 +928,8 @@ class SnippetManager(object):
         self._expect_move_wo_change = False
 
     def entered_insert_mode(self):
+        debug("Entered insert mode")
+        
         self._vstate.update()
         debug("self._vstate.has_moved: %s" % (self._vstate.has_moved))
         if len(self._current_snippets) and \
@@ -930,6 +938,19 @@ class SnippetManager(object):
 
             self._current_snippets = []
 
+    def normal_mode_moved(self):
+        # BS was called in select mode
+        
+        if len(self._current_snippets) and \
+           self._current_snippets[-1].tab_selected and \
+           self._vstate.buf_changed:
+            # This only happens when a default value is delted using backspace
+            vim.command(r'call feedkeys("i")')
+            cs = self._current_snippets[-1]
+            cs.chars_entered('', self._vstate)
+            self._vstate.update()
+        else:
+            vim.command(r'call feedkeys("\<BS>")')
 
 PySnipSnippets = SnippetManager()
 
