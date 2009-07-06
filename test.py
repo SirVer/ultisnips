@@ -159,6 +159,11 @@ class TabStopNoReplace_ExceptCorrectResult(_VimTest):
 
 # TODO: multiline tabstops, maybe?
 
+class TabStopEscapingWhenSelected_ECR(_VimTest):
+    snippets = ("test", "snip ${1:default}")
+    keys = "test\t" + ESC + "0ihi"
+    wanted = "hisnip default"
+
 class TabStopWithOneChar_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "nothing ${1:i} hups")
     keys = "hallo\tship"

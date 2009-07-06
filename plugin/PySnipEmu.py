@@ -922,8 +922,12 @@ class SnippetManager(object):
         self._expect_move_wo_change = False
 
     def entered_insert_mode(self):
+        self._vstate.update()
+        debug("self._vstate.has_moved: %s" % (self._vstate.has_moved))
         if len(self._current_snippets) and \
-           not self._current_snippets[-1].tab_selected:
+           self._vstate.has_moved:
+           # not self._current_snippets[-1].tab_selected and \
+
             self._current_snippets = []
 
 
