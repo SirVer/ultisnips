@@ -169,9 +169,14 @@ class TabStopTestJumping_ExceptCorrectResult(_VimTest):
     keys = "hallo\t\tTest\tHi"
     wanted = "hallo Test mitte BeginningHi"
 class TabStopTestJumping2_ExceptCorrectResult(_VimTest):
-    snippets = ("hallo", "hallo $0 $1")
+    snippets = ("hallo", "hallo $2 $1")
     keys = "hallo\t\tTest\tHi"
     wanted = "hallo Test Hi"
+
+class TestJumpingDontJumpToEndIfThereIsTabZero_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo $0 $1")
+    keys = "hallo\tTest\tHi\t\tdu"
+    wanted = "hallo Hidu Test"
 
 class TabStopTestBackwardJumping_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo ${0:End} mitte${1:Beginning}")
