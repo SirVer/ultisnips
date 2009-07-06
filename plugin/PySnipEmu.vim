@@ -55,10 +55,13 @@ for p in vim.eval("&runtimepath").split(','):
 from PySnipEmu import PySnipSnippets
 EOF
 
+" You can remap these
 inoremap <Tab> <C-R>=PyVimSnips_ExpandSnippet()<cr>
 snoremap <Tab> <Esc>:call PyVimSnips_ExpandSnippet()<cr>
 inoremap <S-Tab> <C-R>=PyVimSnips_JumpBackwards()<cr>
 snoremap <S-Tab> <Esc>:call PyVimSnips_JumpBackwards()<cr>
+
+" Do not remap this.
 snoremap <BS> <Esc>:py  PySnipSnippets.backspace()<cr>
 
 au CursorMovedI * py PySnipSnippets.cursor_moved()

@@ -1,16 +1,4 @@
 ###########################################################################
-#                             MY OWN SNIPPETS                             #
-###########################################################################
-snippet db
-debug("${1/([\w.\[\]()]+)(, *)?/$1: %s(?2:, )/g}" % (${1:args}))$0
-endsnippet
-
-snippet print
-debug("$1")
-$0
-endsnippet
-
-###########################################################################
 #                            TEXTMATE SNIPPETS                            #
 ###########################################################################
 snippet ifmain "ifmain"
@@ -34,6 +22,25 @@ endsnippet
 
 snippet .
 self.
+endsnippet
+
+##############
+# PROPERTIES #
+##############
+snippet roprop
+@property
+def ${1:property}(self):
+    ${2:return self._$1}$0
+endsnippet
+
+snippet rwprop
+def ${1:property}(self):
+    ${2/.+/(?0:""")/}${2:The RW property $1}${2/.+/(?0:"""\n    )/}def fget(self):
+        return self._$1$0
+    def fset(self, value):
+        self._$1 = value
+    return locals()
+$1 = property($1)
 endsnippet
 
 ##########################

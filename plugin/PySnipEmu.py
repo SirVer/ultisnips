@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import vim
-import string
-import re
-
+import glob
 import os
+import re
+import string
+import vim
 
 def debug(s):
     f = open("/tmp/file.txt","a")
@@ -766,10 +766,11 @@ class SnippetManager(object):
 
     def _load_snippets_for(self, ft):
         self._snippets[ft] = {}
-        for p in vim.eval("&runtimepath").split(','):
-            fn = p + os.path.sep + "PySnippets" + os.path.sep + \
-                    "%s.snippets" % ft
-            if os.path.exists(fn):
+        for p in vim.eval("&runtimepath").split(',')[::-1]:
+            pattern = p + os.path.sep + "PySnippets" + os.path.sep + \
+                    "*%s.snippets" % ft
+
+            for fn in glob.glob(pattern):
                 self._load_snippets_from(ft, fn)
 
 
