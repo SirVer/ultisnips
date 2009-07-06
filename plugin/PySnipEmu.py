@@ -141,7 +141,7 @@ class Range(object):
             self._e = value
         return locals()
     end = property(**end())
-    
+
     def __repr__(self):
         return "(%s -> %s)" % (self._s, self._e)
 
@@ -172,7 +172,7 @@ class TextObject(object):
         self._has_parsed = False
 
         self._current_text = initial_text
-    
+
     def span(self):
         return Range(self._start, self._end)
     span = property(span)
@@ -624,12 +624,14 @@ class Snippet(object):
         text_before = line[:start.col]
         text_after = line[end.col:]
 
-        indend = self._INDENT.match(text_before).group(0)
+        indent = self._INDENT.match(text_before).group(0)
         v = self._v
-        if len(indend):
+        if len(indent):
             lines = self._v.splitlines()
-            v = lines[0] + os.linesep + \
-                    os.linesep.join([ indend + l for l in lines[1:]])
+            v = lines[0]
+            if len(lines) > 1:
+                v += os.linesep + \
+                        os.linesep.join([indent + l for l in lines[1:]])
 
         s = SnippetInstance(start, end, v, text_before, text_after)
 
@@ -716,7 +718,6 @@ class VimState(object):
     def has_moved(self):
         return bool(self._moved.line or self._moved.col)
     has_moved = property(has_moved)
-
 
 class SnippetManager(object):
     def __init__(self):
@@ -867,7 +868,7 @@ class SnippetManager(object):
         if not self._vstate.buf_changed and not self._expect_move_wo_change:
             # Cursor moved without input.
             self._accept_input = False
-            
+
             # Did we leave the snippet with this movement?
             debug("Checking if we left the snippet")
             debug("self._vstate.pos: %s" % (self._vstate.pos))
@@ -882,9 +883,9 @@ class SnippetManager(object):
 
                 if not is_inside:
                     self._current_snippets.pop()
-                    
+
             # TODO: check if we left the current snippet
-        
+
         if not self._accept_input:
             return
 

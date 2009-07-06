@@ -515,6 +515,10 @@ class ProperIndenting_SimpleCase_ECR(_VimTest):
     snippets = ("test", "for\n    blah")
     keys = "    test\tHui"
     wanted = "    for\n        blahHui"
+class ProperIndenting_SingleLineNoReindenting_ECR(_VimTest):
+    snippets = ("test", "hui")
+    keys = "    test\tblah"
+    wanted = "    huiblah"
 
 ######################
 # SELECTING MULTIPLE #
@@ -586,6 +590,4 @@ if __name__ == '__main__':
     else:
         v = 1
     res = unittest.TextTestRunner(verbosity=v).run(suite)
-
-    self.assertRaises(#, func, arguments)
 
