@@ -427,11 +427,11 @@ class Transformation_TabIsAtEndNoTextType_ECR(_VimTest):
     keys = "hallo test\tb"
     wanted = "hallo is somethingb"
 class Transformation_InsideTabLeaveAtDefault_ECR(_VimTest):
-    snippets = ("test", r"$1 ${2${1/.+/(?0:defined $0)/}}")
+    snippets = ("test", r"$1 ${2:${1/.+/(?0:defined $0)/}}")
     keys = "test\tsometext\t"
     wanted = "sometext defined sometext"
 class Transformation_InsideTabOvertype_ECR(_VimTest):
-    snippets = ("test", r"$1 ${2${1/.+/(?0:defined $0)/}}")
+    snippets = ("test", r"$1 ${2:${1/.+/(?0:defined $0)/}}")
     keys = "test\tsometext\toverwrite"
     wanted = "sometext overwrite"
 

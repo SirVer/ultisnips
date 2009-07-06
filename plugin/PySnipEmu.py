@@ -151,7 +151,7 @@ class TextObject(object):
     that has a span in any ways
     """
     # A simple tabstop with default value
-    _TABSTOP = re.compile(r'''\${(\d+)(?::(.*?))?}''')
+    _TABSTOP = re.compile(r'''\${(\d+)[:}]''')
     # A mirror or a tabstop without default value.
     _MIRROR_OR_TS = re.compile(r'\$(\d+)')
     # A mirror or a tabstop without default value.
@@ -241,17 +241,31 @@ class TextObject(object):
 
 
     def _handle_tabstop(self, m, val):
-        no = int(m.group(1))
-        def_text = m.group(2)
-        if def_text is None:
-            def_text = ""
 
-        start_pos, end_pos = m.span()
+        def _find_closingbracket(v,start_pos):
+            bracks_open = 1
+            for idx, c in enumerate(v[start_pos:]):
+                if c == '{':
+                    if v[idx+start_pos-1] != '\\':
+                        bracks_open += 1
+                elif c == '}':
+                    if v[idx+start_pos-1] != '\\':
+                        bracks_open -= 1
+                    if not bracks_open:
+                        return start_pos+idx+1
+
+        start_pos = m.start()
+        end_pos = _find_closingbracket(val, start_pos+2)
+
+        def_text = val[m.end():end_pos-1]
+
         start, end = self._get_start_end(val,start_pos,end_pos)
 
         ts = TabStop(self, start, end, def_text)
 
-        self.add_tabstop(no,ts)
+        self.add_tabstop(int(m.group(1)),ts)
+
+        return val[:start_pos] + (end_pos-start_pos)*" " + val[end_pos:]
 
     def _get_tabstop(self,no):
         if no in self._tabstops:
@@ -294,10 +308,7 @@ class TextObject(object):
             return val
 
         for m in self._TABSTOP.finditer(val):
-            self._handle_tabstop(m,val)
-            # Replace the whole definition with spaces
-            s, e = m.span()
-            val = val[:s] + (e-s)*" " + val[e:]
+            val = self._handle_tabstop(m,val)
 
         for m in self._TRANSFORMATION.finditer(val):
             self._handle_transformation(m,val)
