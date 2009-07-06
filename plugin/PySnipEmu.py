@@ -809,7 +809,7 @@ class SnippetManager(object):
                 if 0 not in cs._tabstops:
                     vim.current.window.cursor = cs.end.line +1, cs.end.col
                     vim.command(r'call feedkeys("\<Esc>a")')
-                    self._current_snippets.pop()
+                self._current_snippets.pop()
 
                 return True
 
