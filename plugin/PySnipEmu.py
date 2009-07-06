@@ -548,8 +548,7 @@ class SnippetInstance(TextObject):
 
     def select_next_tab(self, backwards = False):
         if self._cts == 0:
-            if not backwards:
-                return False
+            return False
 
         if backwards:
             cts_bf = self._cts
@@ -577,7 +576,7 @@ class SnippetInstance(TextObject):
         ts.select(self._start)
 
         self._tab_selected = True
-        return True
+        return self._cts
 
     def backspace(self,count, previous_cp):
         cts = self._tabstops[self._cts]

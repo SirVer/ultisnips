@@ -179,11 +179,11 @@ class TestJumpingDontJumpToEndIfThereIsTabZero_ExceptCorrectResult(_VimTest):
     wanted = "hallo Hidu Test"
 
 class TabStopTestBackwardJumping_ExceptCorrectResult(_VimTest):
-    snippets = ("hallo", "hallo ${0:End} mitte${1:Beginning}")
+    snippets = ("hallo", "hallo ${2:End} mitte${1:Beginning}")
     keys = "hallo\tSomelengthy Text\tHi+Lets replace it again\tBlah\t++\t"
     wanted = "hallo Blah mitteLets replace it again"
 class TabStopTestBackwardJumping2_ExceptCorrectResult(_VimTest):
-    snippets = ("hallo", "hallo $0 $1")
+    snippets = ("hallo", "hallo $2 $1")
     keys = "hallo\tSomelengthy Text\tHi+Lets replace it again\tBlah\t++\t"
     wanted = "hallo Blah Lets replace it again"
 
