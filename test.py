@@ -480,12 +480,33 @@ class IMMoving_CursorsKeys_ECR(_VimTest):
     snippets = ("test", "${1:Some}")
     keys = "test\ttext" + 3*ARR_U + 6*ARR_D
     wanted = "text"
-class CursorMovement_DoNotAcceptInputWhenMoved_ECR(_VimTest):
+class IMMoving_DoNotAcceptInputWhenMoved_ECR(_VimTest):
     snippets = ("test", r"$1 ${1:a tab}")
     keys = "test\tthis" + ARR_L + "hallo"
     wanted = "this thihallos"
+class IMMoving_NoExiting_ECR(_VimTest):
+    snippets = ("test", r"$1 ${2:a tab} ${1:Tab}")
+    keys = "hello test this" + ESC + "02f i\ttab" + 7*ARR_L + "\thallo"
+    wanted = "hello tab hallo tab this"
+class IMMoving_NoExitingEventAtEnd_ECR(_VimTest):
+    snippets = ("test", r"$1 ${2:a tab} ${1:Tab}")
+    keys = "hello test this" + ESC + "02f i\ttab" + "\thallo"
+    wanted = "hello tab hallo tab this"
+class IMMoving_ExitWhenOutsideRight_ECR(_VimTest):
+    snippets = ("test", r"$1 ${2:blub} ${1:Tab}")
+    keys = "hello test this" + ESC + "02f i\ttab" + ARR_R + "\thallo"
+    wanted = "hello tab blub tab hallothis"
+class IMMoving_NotExitingWhenBarelyOutsideLeft_ECR(_VimTest):
+    snippets = ("test", r"${1:Hi} ${2:blub}")
+    keys = "hello test this" + ESC + "02f i\ttab" + 3*ARR_L + "\thallo"
+    wanted = "hello tab hallo this"
+class IMMoving_ExitWhenOutsideLeft_ECR(_VimTest):
+    snippets = ("test", r"${1:Hi} ${2:blub}")
+    keys = "hello test this" + ESC + "02f i\ttab" + 4*ARR_L + "\thallo"
+    wanted = "hellohallo tab blub this"
 
-# TODO: exit when outside snippet
+# TODO: exit when below or above snippet
+# TODO: single line snippet insertions always adds newline 
 
 ####################
 # PROPER INDENTING #
@@ -565,4 +586,6 @@ if __name__ == '__main__':
     else:
         v = 1
     res = unittest.TextTestRunner(verbosity=v).run(suite)
+
+    self.assertRaises(#, func, arguments)
 

@@ -110,8 +110,40 @@ class Position(object):
 
         return Position(self.line - pos.line, self.col - pos.col)
 
+    def __cmp__(self, other):
+        s = self._line, self._col
+        o = other._line, other._col
+        return cmp(s,o)
+
     def __repr__(self):
         return "(%i,%i)" % (self._line, self._col)
+
+class Range(object):
+    def __init__(self, start, end):
+        self._s = start
+        self._e = end
+
+    def __contains__(self, pos):
+        return self._s <= pos < self._e
+
+    def start():
+        def fget(self):
+            return self._s
+        def fset(self, value):
+            self._s = value
+        return locals()
+    start = property(**start())
+
+    def end():
+        def fget(self):
+            return self._e
+        def fset(self, value):
+            self._e = value
+        return locals()
+    end = property(**end())
+    
+    def __repr__(self):
+        return "(%s -> %s)" % (self._s, self._e)
 
 class TextObject(object):
     """
@@ -140,12 +172,13 @@ class TextObject(object):
         self._has_parsed = False
 
         self._current_text = initial_text
+    
+    def span(self):
+        return Range(self._start, self._end)
+    span = property(span)
 
     def __cmp__(self, other):
-        s = self._start.line, self._start.col
-        o = other._start.line, other._start.col
-
-        return cmp(s, o)
+        return cmp(self._start, other._start)
 
     def _do_update(self):
         pass
@@ -615,7 +648,7 @@ class VimState(object):
         self._dlines = None
         self._cols = None
         self._dcols = None
-        self._last_char = None
+        self._lline = None
         self._text_changed = None
 
     def update(self):
@@ -639,19 +672,20 @@ class VimState(object):
 
         # Check if the buffer has changed in any ways
         self._text_changed = False
-        char = vim.current.buffer[line + 1:col]
-        if self._last_char is not None:
-            # does it have more lines?
-            if self._dlines:
-                self._text_changed = True
-            # did we stay in the same line and it has more columns now?
-            elif not self.moved.line and self._dcols:
-                self._text_changed = True
-            # If we didn't move and no length changes occured, 
-            # check if the char under the cursor has changed.
-            elif not self.has_moved:
-                self._text_changed = char != self._last_char
-        self._last_char = char
+        # does it have more lines?
+        if self._dlines:
+            self._text_changed = True
+        # did we stay in the same line and it has more columns now?
+        elif not self.moved.line and self._dcols:
+            self._text_changed = True
+        # If the length didn't change but we moved a column, check if
+        # the char under the cursor has changed (might be one char tab).
+        elif self.moved.col == 1:
+            debug("self._ll: %s" % (self._lline))
+            debug("vim.current.buffer[line]: %s" % (vim.current.buffer[line]))
+
+            self._text_changed = self._lline != vim.current.buffer[line]
+        self._lline = vim.current.buffer[line]
 
     def buf_changed(self):
         return self._text_changed
@@ -690,6 +724,8 @@ class SnippetManager(object):
 
         self._vstate = VimState()
         self._accept_input = False
+
+        self._expect_move_wo_change = False
 
 
     def _load_snippets_from(self, ft, fn):
@@ -824,8 +860,6 @@ class SnippetManager(object):
         debug("Cursor moved")
 
         self._vstate.update()
-        if not self._accept_input:
-            return
 
         debug("self._vstate._dlines: %s" % (self._vstate._dlines))
         debug("self._vstate._dcols: %s" % (self._vstate._dcols))
@@ -833,9 +867,28 @@ class SnippetManager(object):
         if not self._vstate.buf_changed and not self._expect_move_wo_change:
             # Cursor moved without input.
             self._accept_input = False
+            
+            # Did we leave the snippet with this movement?
+            debug("Checking if we left the snippet")
+            debug("self._vstate.pos: %s" % (self._vstate.pos))
 
+            if len(self._current_snippets):
+                cs = self._current_snippets[-1]
+                debug("cs.span: %s" % (cs.span))
+
+                is_inside = self._vstate.pos in cs.span
+
+                debug("is_inside: %s" % (is_inside))
+
+                if not is_inside:
+                    self._current_snippets.pop()
+                    
             # TODO: check if we left the current snippet
-        elif len(self._current_snippets):
+        
+        if not self._accept_input:
+            return
+
+        if self._vstate.buf_changed and len(self._current_snippets):
             if 0 <= self._vstate.moved.line <= 1:
                 cs = self._current_snippets[-1]
 
