@@ -108,14 +108,6 @@ class VimState(object):
         return self._text_changed
     buf_changed = property(buf_changed)
 
-    def nr_lines(self):
-        return self._lines
-    nr_lines = property(nr_lines)
-
-    def cols_in_line(self):
-        return self._cols
-    cols_in_line = property(cols_in_line)
-
     def pos(self):
         return self._abs_pos
     pos = property(pos)
@@ -142,7 +134,6 @@ class SnippetManager(object):
         self._accept_input = False
 
         self._expect_move_wo_change = False
-
 
     def _load_snippets_from(self, ft, fn):
         cs = None
