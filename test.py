@@ -225,6 +225,38 @@ class TabStopTestMultilineExpand_ExceptCorrectResult(_VimTest):
     wanted = "test hallo one more\nnice world work\n" \
             "test try\nSeem to work World"
 
+
+class TabStop_TSInDefaultTextRLExample_OverwriteNone_ECR(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
+    keys = "test\t"
+    wanted = """<div id="some_id">\n  \n</div>"""
+class TabStop_TSInDefaultTextRLExample_OverwriteFirst(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
+    keys = "test\t blah\tHallo"
+    wanted = """<div blah>\n  Hallo\n</div>"""
+class TabStop_TSInDefaultTextRLExample_DeleteFirst(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
+    keys = "test\t" + BS + "tHallo"
+    wanted = """<div>\n  Hallo\n</div>"""
+class TabStop_TSInDefaultTextRLExample_OverwriteFirstJumpBack(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $3  $0\n</div>""")
+    keys = "test\tHi\ttHallo+SomethingElse\tNupl\tNox"
+    wanted = """<divSomethingElse>\n  Nulp  Nox\n</div>"""
+class TabStop_TSInDefaultTextRLExample_OverwriteSecond(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
+    keys = "test\t\tno\tEnd"
+    wanted = """<div id="no">\n  End\n</div>"""
+class TabStop_TSInDefaultTextRLExample_OverwriteSecondTabBack(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $3 $0\n</div>""")
+    keys = "test\t\tno\tEnd+yes\tBegin\tHi"
+    wanted = """<div id="yes">\n  Begin Hi\n</div>"""
+class TabStop_TSInDefaultTextRLExample_OverwriteSecondTabBackTwice(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $3 $0\n</div>""")
+    keys = "test\t\tno\tEnd+yes+ allaway\tThird\tLast"
+    wanted = """<div allaway>\n  Third Last\n</div>"""
+
+
+
 print "expand, jump forward, jump backwards should all be individual"
 print "Shell eval snippets"
 print "Tabstop in default text of tabstop. Like in Ruby Dir snippet in TextMate"

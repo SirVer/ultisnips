@@ -820,8 +820,6 @@ class SnippetManager(object):
                 self._current_snippets.pop()
 
                 return True
-            # else:
-                # vim.command(":au CursorMoved * py PySnipSnippets.normal_mode_moved()")
 
             self._vstate.update()
             self._accept_input = True
@@ -870,7 +868,6 @@ class SnippetManager(object):
         if s is not None:
             self._current_snippets.append(s)
             self._accept_input = True
-            # vim.command(":au CursorMoved * py PySnipSnippets.normal_mode_moved()")
 
 
         return True
