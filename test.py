@@ -227,6 +227,7 @@ class TabStopTestMultilineExpand_ExceptCorrectResult(_VimTest):
 
 print "expand, jump forward, jump backwards should all be individual"
 print "Shell eval snippets"
+print "Tabstop in default text of tabstop. Like in Ruby Dir snippet in TextMate"
 
 # functions
 # Multiline text pasting
