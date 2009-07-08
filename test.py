@@ -257,6 +257,7 @@ class TabStopTestMultilineExpand_ExceptCorrectResult(_VimTest):
 #     wanted = """<div allaway>\n  Third Last\n</div>"""
 #
 
+# TODO: Bug: nach sig direkt return: cursor bewegt sich nicht
 
 print "expand, jump forward, jump backwards should all be individual"
 print "Shell eval snippets"
