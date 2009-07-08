@@ -6,8 +6,8 @@ import vim
 
 import re
 
-from Buffer import VimBuffer, TextBuffer
-from Geometry import Range, Position
+from PySnipEmu.Buffer import VimBuffer, TextBuffer
+from PySnipEmu.Geometry import Range, Position
 
 __all__ = [ "Mirror", "Transformation", "SnippetInstance" ]
 

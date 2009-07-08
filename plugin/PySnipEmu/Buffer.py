@@ -4,7 +4,7 @@
 
 import vim
 
-from Geometry import Position
+from PySnipEmu.Geometry import Position
 
 
 __all__ = [ "TextBuffer", "VimBuffer" ]

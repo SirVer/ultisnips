@@ -7,10 +7,10 @@ import re
 import string
 import vim
 
-from TextObjects import *
-from Geometry import Position
+from PySnipEmu.TextObjects import *
+from PySnipEmu.Geometry import Position
 
-from debug import debug
+from PySnipEmu.debug import debug
 
 class Snippet(object):
     _INDENT = re.compile(r"^[ \t]*")

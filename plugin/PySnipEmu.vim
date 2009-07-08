@@ -47,7 +47,7 @@ import vim, os, sys
 
 for p in vim.eval("&runtimepath").split(','):
    dname = p + os.path.sep + "plugin"
-   if os.path.exists(dname + os.path.sep + "PySnipEmu.py"):
+   if os.path.exists(dname + os.path.sep + "PySnipEmu"):
       if dname not in sys.path:
          sys.path.append(dname)
       break
