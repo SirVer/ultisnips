@@ -9,6 +9,7 @@ import vim
 
 from PySnipEmu.Geometry import Position
 from PySnipEmu.TextObjects import *
+from PySnipEmu.Buffer import VimBuffer
 
 from PySnipEmu.debug import debug
 
@@ -29,16 +30,7 @@ class Snippet(object):
     trigger = property(trigger)
 
 
-    def launch(self, before, after):
-        lineno, col = vim.current.window.cursor
-        start = Position(lineno-1,col - len(self._t))
-        end = Position(lineno-1,col)
-
-        line = vim.current.line
-
-        text_before = line[:start.col]
-        text_after = line[end.col:]
-
+    def launch(self, text_before, start):
         indent = self._INDENT.match(text_before).group(0)
         v = self._v
         if len(indent):
@@ -48,12 +40,7 @@ class Snippet(object):
                 v += os.linesep + \
                         os.linesep.join([indent + l for l in lines[1:]])
 
-        s = SnippetInstance(start, end, v, text_before, text_after)
-
-        if s.has_tabs():
-            return s
-        else:
-            vim.current.window.cursor = s.end.line + 1, s.end.col
+        return SnippetInstance(StartMarker(start), v )
 
 class VimState(object):
     def __init__(self):
@@ -97,19 +84,12 @@ class VimState(object):
         # If the length didn't change but we moved a column, check if
         # the char under the cursor has changed (might be one char tab).
         elif self.moved.col == 1:
-            debug("self._ll: %s" % (self._lline))
-            debug("vim.current.buffer[line]: %s" % (vim.current.buffer[line]))
-
             self._text_changed = self._lline != vim.current.buffer[line]
         self._lline = vim.current.buffer[line]
 
     def select_range(self, r):
-        debug("r: %s" % (r))
         delta = r.end - r.start
-        debug("delta: %s" % (delta))
         lineno, col = r.start.line, r.start.col
-
-        debug("lineno: %s, col: %s" % (lineno, col))
 
         vim.current.window.cursor = lineno + 1, col
 
@@ -248,7 +228,7 @@ class SnippetManager(object):
             self._vstate.update()
             return True
 
-        dummy,col = vim.current.window.cursor
+        lineno,col = vim.current.window.cursor
         if col == 0:
             return False
 
@@ -285,47 +265,43 @@ class SnippetManager(object):
             snippet = snippets[rv-1]
 
         self._expect_move_wo_change = True
-        self._csnippet = snippet.launch(before.rstrip()[:-len(word)], after)
-        self._ctab = None
+
+        text_before = before.rstrip()[:-len(word)]
+        self._vb = VimBuffer(text_before, after)
+
+        start = Position(lineno-1, len(text_before))
+        self._csnippet = snippet.launch(text_before, start)
+
+        self._vb.replace_lines(lineno-1, lineno-1, self._csnippet._current_text)
 
         # TODO: this code is duplicated above
-        if self._csnippet is not None:
-            self._ctab = self._csnippet.select_next_tab()
-            if self._ctab is not None:
-                self._vstate.select_range(self._ctab.abs_range)
+        self._ctab = self._csnippet.select_next_tab()
+        if self._ctab is not None:
+            self._vstate.select_range(self._ctab.abs_range)
 
         self._vstate.update()
 
         return True
 
     def cursor_moved(self):
-        debug("Cursor moved")
-
         self._vstate.update()
 
-        debug("self._vstate._dlines: %s" % (self._vstate._dlines))
-        debug("self._vstate._dcols: %s" % (self._vstate._dcols))
-        debug("self._vstate.buf_changed: %s" % (self._vstate.buf_changed))
         if not self._vstate.buf_changed and not self._expect_move_wo_change:
             # Cursor moved without input.
             self._ctab = None
 
             # Did we leave the snippet with this movement?
-            debug("Checking if we left the snippet")
-            debug("self._vstate.pos: %s" % (self._vstate.pos))
-
-            if self._csnippet:
-                is_inside = self._vstate.pos in self._csnippet.span
-
-                debug("is_inside: %s" % (is_inside))
-
-                if not is_inside:
-                    self.reset()
+            if self._csnippet and not \
+               (self._vstate.pos in self._csnippet.abs_range):
+                self.reset()
 
         if not self._ctab:
             return
 
         if self._vstate.buf_changed and self._ctab:
+            sline = self._csnippet.abs_start.line
+            dlines = self._csnippet.end.line - self._csnippet.start.line
+
             if 0 <= self._vstate.moved.line <= 1:
                 # Detect a carriage return
                 if self._vstate.moved.col <= 0 and self._vstate.moved.line == 1:
@@ -345,6 +321,10 @@ class SnippetManager(object):
                                  self._vstate.pos.col]
                     self._csnippet.chars_entered(chars)
 
+            # Replace
+            self._vb.replace_lines(sline, sline + dlines,
+                                   self._csnippet._current_text)
+
             ct_end = self._ctab.abs_end
             vim.current.window.cursor = ct_end.line +1, ct_end.col
 
@@ -354,10 +334,7 @@ class SnippetManager(object):
         self._expect_move_wo_change = False
 
     def entered_insert_mode(self):
-        debug("Entered insert mode")
-
         self._vstate.update()
-        debug("self._vstate.has_moved: %s" % (self._vstate.has_moved))
         if self._csnippet and self._vstate.has_moved:
             self.reset()
 
@@ -366,9 +343,19 @@ class SnippetManager(object):
 
         if self._csnippet and self._csnippet.tab_selected:
             # This only happens when a default value is delted using backspace
+            old_range = self._csnippet.abs_range
             vim.command(r'call feedkeys("i")')
             self._csnippet.chars_entered('')
+
+            # TODOCode is duplicated aboce
+            # Replace
+            self._vb.replace_lines(old_range.start.line, old_range.end.line,
+                    self._csnippet._current_text)
+            ct_end = self._ctab.abs_end
+            vim.current.window.cursor = ct_end.line +1, ct_end.col
+
             self._vstate.update()
+
         else:
             vim.command(r'call feedkeys("\<BS>")')
 

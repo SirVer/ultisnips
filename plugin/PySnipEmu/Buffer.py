@@ -65,7 +65,9 @@ class VimBuffer(Buffer):
     def __repr__(self):
         return "VimBuffer()"
 
-    def replace_text( self, start, end, content ):
+    def replace_lines( self, fline, eline, content ):
+        start = Position(fline,0 )
+        end = Position(eline, 100000)
         return self._replace( start, end, content, self._bf, self._af)
 
 

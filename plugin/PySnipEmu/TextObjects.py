@@ -3,10 +3,12 @@
 
 import re
 
-from PySnipEmu.Buffer import VimBuffer, TextBuffer
+from PySnipEmu.Buffer import TextBuffer
 from PySnipEmu.Geometry import Range, Position
 
-__all__ = [ "Mirror", "Transformation", "SnippetInstance" ]
+__all__ = [ "Mirror", "Transformation", "SnippetInstance", "StartMarker" ]
+
+from PySnipEmu.debug import debug
 
 class TextObject(object):
     """
@@ -79,22 +81,23 @@ class TextObject(object):
         for idx,c in enumerate(self._children):
             oldend = Position(c.end.line, c.end.col)
 
-            moved_lines, moved_cols = c.update(self._current_text)
+            new_end = c.update(None)
+
+            moved_lines = new_end.line - oldend.line
+            moved_cols = new_end.col - oldend.col
+            
+            self._current_text.replace_text(c.start, oldend, c._current_text)
+
             self._move_textobjects_behind(c.start, oldend, moved_lines,
                         moved_cols, idx)
 
-
         self._do_update()
 
-        new_end = change_buffer.replace_text(self.start, self.end,
-                self._current_text)
-
-        moved_lines = new_end.line - self._end.line
-        moved_cols = new_end.col - self._end.col
+        new_end = self._current_text.calc_end(self._start)
 
         self._end = new_end
 
-        return moved_lines, moved_cols
+        return new_end
 
     def _move_textobjects_behind(self, start, end, lines, cols, obj_idx):
         if lines == 0 and cols == 0:
@@ -364,8 +367,12 @@ class TabStop(ChangeableText):
         return "TabStop(%s -> %s, %s)" % (self._start, self._end,
             repr(self._current_text))
 
+class StartMarker(TextObject):
+    def __init__(self, start):
+        end = Position(start.line, start.col)
+        TextObject.__init__(self, None, start, end, "")
 
-class SnippetInstance(TextObject):
+class SnippetInstance(ChangeableText):
     """
     A Snippet instance is an instance of a Snippet Definition. That is,
     when the user expands a snippet, a SnippetInstance is created to
@@ -373,17 +380,18 @@ class SnippetInstance(TextObject):
     also a TextObject because it has a start an end
     """
 
-    def __init__(self, start, end, initial_text, text_before, text_after):
-        TextObject.__init__(self, None, start, end, initial_text)
+    def __init__(self, parent, initial_text):
+        start = Position(0,0)
+        end = Position(0,0)
+        ChangeableText.__init__(self, parent, start, end, "")
+        self._current_text = TextBuffer(self._parse(initial_text))
+
+        self._end = self._current_text.calc_end(start)
 
         self._cts = None
         self._tab_selected = False
 
-        self._vb = VimBuffer(text_before, text_after)
-
-        self._current_text = TextBuffer(self._parse(initial_text))
-
-        TextObject.update(self, self._vb)
+        TextObject.update(self, self._current_text)
 
         # Check if we have a zero Tab, if not, add one at the end
         if 0 not in self._tabstops:
@@ -396,7 +404,10 @@ class SnippetInstance(TextObject):
             ts = TabStop(self, start, end, "")
             self.add_tabstop(0,ts)
 
-            TextObject.update(self, self._vb)
+            TextObject.update(self, self._current_text)
+    
+    def __repr__(self):
+        return "SnippetInstance(%s -> %s)" % (self._start, self._end)
 
     def tab_selected(self):
         return self._tab_selected
@@ -446,7 +457,7 @@ class SnippetInstance(TextObject):
         cts = self._tabstops[self._cts]
         cts.current_text = cts.current_text[:-count]
 
-        self.update(self._vb)
+        self.update(self._current_text)
 
     def chars_entered(self, chars):
         cts = self._tabstops[self._cts]
@@ -456,7 +467,7 @@ class SnippetInstance(TextObject):
             self._tab_selected = False
         else:
             cts.current_text += chars
-
-        self.update(self._vb)
+        
+        self.update(self._current_text)
 
 
