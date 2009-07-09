@@ -164,7 +164,7 @@ class SnippetManager(object):
         self.reset()
 
         self._vstate = VimState()
-        self._accept_input = False
+        self._ctab = None
 
         self._expect_move_wo_change = False
 
@@ -231,21 +231,20 @@ class SnippetManager(object):
         if "all" not in self._snippets:
             self._load_snippets_for("all")
 
-        self._accept_input = False
+        self._ctab = None
         self._expect_move_wo_change = False
 
         if self._csnippet:
             self._expect_move_wo_change = True
-            ts = self._csnippet.select_next_tab(backwards)
-            if ts is None:
+            self._ctab = self._csnippet.select_next_tab(backwards)
+            if self._ctab is None:
                 self._csnippet = None
 
                 return True
             else:
-                self._vstate.select_range(ts.abs_range)
+                self._vstate.select_range(self._ctab.abs_range)
 
             self._vstate.update()
-            self._accept_input = True
             return True
 
         dummy,col = vim.current.window.cursor
@@ -285,18 +284,15 @@ class SnippetManager(object):
             snippet = snippets[rv-1]
 
         self._expect_move_wo_change = True
-        s = snippet.launch(before.rstrip()[:-len(word)], after)
+        self._csnippet = snippet.launch(before.rstrip()[:-len(word)], after)
+
         # TODO: this code is duplicated above
-        if s is not None:
-            ts = s.select_next_tab()
-            if ts is not None:
-                self._vstate.select_range(ts.abs_range)
+        if self._csnippet is not None:
+            self._ctab = self._csnippet.select_next_tab()
+            if self._ctab is not None:
+                self._vstate.select_range(self._ctab.abs_range)
 
         self._vstate.update()
-        if s is not None:
-            self._csnippet = s
-            self._accept_input = True
-
 
         return True
 
@@ -310,7 +306,7 @@ class SnippetManager(object):
         debug("self._vstate.buf_changed: %s" % (self._vstate.buf_changed))
         if not self._vstate.buf_changed and not self._expect_move_wo_change:
             # Cursor moved without input.
-            self._accept_input = False
+            self._ctab = None
 
             # Did we leave the snippet with this movement?
             debug("Checking if we left the snippet")
@@ -324,8 +320,7 @@ class SnippetManager(object):
                 if not is_inside:
                     self._csnippet = None
 
-        debug("self._accept_input): %s" % (self._accept_input))
-        if not self._accept_input:
+        if not self._ctab:
             return
 
         if self._vstate.buf_changed and self._csnippet:
@@ -342,7 +337,7 @@ class SnippetManager(object):
                     self._csnippet.chars_entered('\n', self._vstate)
                     vim.current.window.cursor = cache_pos
                 elif self._vstate.moved.col < 0: # Some deleting was going on
-                    self._csnippet.backspace(-self._vstate.moved.col, 
+                    self._csnippet.backspace(-self._vstate.moved.col,
                         self._vstate)
                 else:
                     line = vim.current.line
