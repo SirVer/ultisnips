@@ -9,6 +9,8 @@ import re
 from PySnipEmu.Buffer import VimBuffer, TextBuffer
 from PySnipEmu.Geometry import Range, Position
 
+from PySnipEmu.debug import debug
+
 __all__ = [ "Mirror", "Transformation", "SnippetInstance" ]
 
 class TextObject(object):
@@ -39,9 +41,35 @@ class TextObject(object):
 
         self._current_text = initial_text
 
+    # TODO: span or range. To use both is not clever
     def span(self):
         return Range(self._start, self._end)
     span = property(span)
+
+    def abs_start(self):
+        if self._parent:
+            ps = self._parent.abs_start
+            if self._start.line == 0:
+                return ps + self._start
+            else:
+                return Position(ps.line + self._start.line, self._start.col)
+        return self._start
+    abs_start = property(abs_start)
+
+    def abs_end(self):
+        if self._parent:
+            ps = self._parent.abs_start
+            if self._end.line == 0:
+                return ps + self._end
+            else:
+                return Position(ps.line + self._end.line, self._start.col)
+
+        return self._end
+    abs_end = property(abs_end)
+
+    def abs_range(self):
+        return Range(self.abs_start, self.abs_end)
+    abs_range = property(abs_range)
 
     def __cmp__(self, other):
         return cmp(self._start, other._start)
@@ -341,40 +369,6 @@ class TabStop(ChangeableText):
         return "TabStop(%s -> %s, %s)" % (self._start, self._end,
             repr(self._current_text))
 
-    def select(self, start):
-        lineno, col = start.line, start.col
-
-        newline = lineno + self._start.line
-        newcol = self._start.col
-
-        if newline == lineno:
-            newcol += col
-
-        vim.current.window.cursor = newline + 1, newcol
-
-        if len(self.current_text) == 0:
-            if newcol == 0:
-                vim.command(r'call feedkeys("\<Esc>i")')
-            else:
-                vim.command(r'call feedkeys("\<Esc>a")')
-        else:
-            # Select the word
-            # Depending on the current mode and position, we
-            # might need to move escape out of the mode and this
-            # will move our cursor one left
-            if newcol != 0 and vim.eval("mode()") == 'i':
-                move_one_right = "l"
-            else:
-                move_one_right = ""
-
-            if len(self.current_text) <= 1:
-                do_select = ""
-            else:
-                do_select = "%il" % (len(self.current_text)-1)
-
-            vim.command(r'call feedkeys("\<Esc>%sv%s\<c-g>")' %
-                (move_one_right, do_select))
-
 
 class SnippetInstance(TextObject):
     """
@@ -400,6 +394,12 @@ class SnippetInstance(TextObject):
         return self._tab_selected
     tab_selected = property(tab_selected)
 
+    def current_tab(self):
+        if self._cts in self._tabstops:
+            return self._tabstops[self._cts]
+        return None
+    current_tab = property(current_tab)
+
     def update(self, buf, cur):
 
         TextObject.update(self, buf)
@@ -419,7 +419,7 @@ class SnippetInstance(TextObject):
 
     def select_next_tab(self, backwards = False):
         if self._cts == 0:
-            return False
+            return None
 
         if backwards:
             cts_bf = self._cts
@@ -440,14 +440,10 @@ class SnippetInstance(TextObject):
             if self._cts not in self._tabstops:
                 self._cts = 0
                 if 0 not in self._tabstops:
-                    return False
-
-        ts = self._tabstops[self._cts]
-
-        ts.select(self._start)
+                    return None
 
         self._tab_selected = True
-        return self._cts
+        return self._tabstops[self._cts]
 
     def backspace(self,count, previous_cp):
         cts = self._tabstops[self._cts]
@@ -458,11 +454,14 @@ class SnippetInstance(TextObject):
     def chars_entered(self, chars, cur):
         cts = self._tabstops[self._cts]
 
+        debug("chars_entered");
         if self._tab_selected:
             cts.current_text = chars
+            debug("cts.current_text: %s" % (cts.current_text))
             self._tab_selected = False
         else:
             cts.current_text += chars
+            debug("cts.current_text: %s" % (cts.current_text))
 
         self.update(self._vb, cur)
 

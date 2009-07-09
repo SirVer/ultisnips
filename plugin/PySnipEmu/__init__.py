@@ -7,8 +7,8 @@ import re
 import string
 import vim
 
-from PySnipEmu.TextObjects import *
 from PySnipEmu.Geometry import Position
+from PySnipEmu.TextObjects import *
 
 from PySnipEmu.debug import debug
 
@@ -51,7 +51,6 @@ class Snippet(object):
         s = SnippetInstance(start, end, v, text_before, text_after)
 
         if s.has_tabs():
-            s.select_next_tab()
             return s
         else:
             vim.current.window.cursor = s.end.line + 1, s.end.col
@@ -103,6 +102,40 @@ class VimState(object):
 
             self._text_changed = self._lline != vim.current.buffer[line]
         self._lline = vim.current.buffer[line]
+
+    def select_range(self, r):
+        debug("r: %s" % (r))
+        delta = r.end - r.start
+        debug("delta: %s" % (delta))
+        lineno, col = r.start.line, r.start.col
+
+        debug("lineno: %s, col: %s" % (lineno, col))
+
+        vim.current.window.cursor = lineno + 1, col
+
+        if delta.col == 0:
+            if (col + delta.col) == 0:
+                vim.command(r'call feedkeys("\<Esc>i")')
+            else:
+                vim.command(r'call feedkeys("\<Esc>a")')
+        else:
+            # Select the word
+            # Depending on the current mode and position, we
+            # might need to move escape out of the mode and this
+            # will move our cursor one left
+            if col != 0 and vim.eval("mode()") == 'i':
+                move_one_right = "l"
+            else:
+                move_one_right = ""
+
+            if delta.col <= 1:
+                do_select = ""
+            else:
+                do_select = "%il" % (delta.col-1)
+
+            vim.command(r'call feedkeys("\<Esc>%sv%s\<c-g>")' %
+                (move_one_right, do_select))
+
 
     def buf_changed(self):
         return self._text_changed
@@ -204,8 +237,8 @@ class SnippetManager(object):
         if len(self._current_snippets):
             cs = self._current_snippets[-1]
             self._expect_move_wo_change = True
-            if not cs.select_next_tab(backwards):
-
+            ts = cs.select_next_tab(backwards)
+            if ts is None:
                 # HACK: only jump to end if there is no zero defined. This
                 # TODO: this jump should be inside select_next_tab or even
                 # better: when the snippet is launched and no parent snippet is
@@ -219,6 +252,8 @@ class SnippetManager(object):
                 self._current_snippets.pop()
 
                 return True
+            else:
+                self._vstate.select_range(ts.abs_range)
 
             self._vstate.update()
             self._accept_input = True
@@ -262,6 +297,11 @@ class SnippetManager(object):
 
         self._expect_move_wo_change = True
         s = snippet.launch(before.rstrip()[:-len(word)], after)
+        # TODO: this code is duplicated above
+        if s is not None:
+            ts = s.select_next_tab()
+            if ts is not None:
+                self._vstate.select_range(ts.abs_range)
 
         self._vstate.update()
         if s is not None:
@@ -298,6 +338,7 @@ class SnippetManager(object):
                 if not is_inside:
                     self._current_snippets.pop()
 
+        debug("self._accept_input): %s" % (self._accept_input))
         if not self._accept_input:
             return
 

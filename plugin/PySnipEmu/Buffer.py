@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-
 import vim
-
 from PySnipEmu.Geometry import Position
-
 
 __all__ = [ "TextBuffer", "VimBuffer" ]
 
@@ -70,3 +67,5 @@ class VimBuffer(Buffer):
 
     def replace_text( self, start, end, content ):
         return self._replace( start, end, content, self._bf, self._af)
+
+
