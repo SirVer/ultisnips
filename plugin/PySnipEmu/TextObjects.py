@@ -449,15 +449,3 @@ class SnippetInstance(ChangeableText):
 
         self.update()
 
-    def chars_entered(self, chars):
-        cts = self._tabstops[self._cts]
-
-        if self._tab_selected:
-            cts.current_text = chars
-            self._tab_selected = False
-        else:
-            cts.current_text += chars
-        
-        self.update()
-
-

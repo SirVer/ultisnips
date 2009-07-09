@@ -299,37 +299,30 @@ class SnippetManager(object):
             return
 
         if self._vstate.buf_changed and self._ctab:
-            sline = self._csnippet.abs_start.line
-            dlines = self._csnippet.end.line - self._csnippet.start.line
-
             if 0 <= self._vstate.moved.line <= 1:
                 # Detect a carriage return
                 if self._vstate.moved.col <= 0 and self._vstate.moved.line == 1:
-                    # Hack, remove a line in vim, because we are going to
-                    # overwrite the old line range with the new snippet value.
-                    # After the expansion, we put the cursor were the user left
-                    # it. This action should be completely transparent for the
-                    # user
-                    del vim.current.buffer[self._vstate.pos.line-1]
-                    self._csnippet.chars_entered('\n')
+                    self._chars_entered('\n')
                 elif self._vstate.moved.col < 0: # Some deleting was going on
+                    sline = self._csnippet.abs_start.line
+                    dlines = self._csnippet.end.line - self._csnippet.start.line
+
                     self._csnippet.backspace(-self._vstate.moved.col)
+                    # Replace
+                    self._vb.replace_lines(sline, sline + dlines,
+                                           self._csnippet._current_text)
+
+                    ct_end = self._ctab.abs_end
+                    vim.current.window.cursor = ct_end.line +1, ct_end.col
+
+                    self._vstate.update()
                 else:
                     line = vim.current.line
 
                     chars = line[self._vstate.pos.col - self._vstate.moved.col:
                                  self._vstate.pos.col]
-                    self._csnippet.chars_entered(chars)
+                    self._chars_entered(chars)
 
-            # Replace
-            self._vb.replace_lines(sline, sline + dlines,
-                                   self._csnippet._current_text)
-
-            ct_end = self._ctab.abs_end
-            vim.current.window.cursor = ct_end.line +1, ct_end.col
-
-
-            self._vstate.update()
 
         self._expect_move_wo_change = False
 
@@ -338,11 +331,26 @@ class SnippetManager(object):
         if self._csnippet and self._vstate.has_moved:
             self.reset()
 
-    # TODO
-    # def self._chars_entered(self, chars):
-    #     self._ctab.current_text += chars
-    #
-    #     self._csnippet.update()
+    def _chars_entered(self, chars):
+        sline = self._csnippet.abs_start.line
+        dlines = self._csnippet.end.line - self._csnippet.start.line
+
+        if self._csnippet._tab_selected:
+            self._ctab.current_text = chars
+            self._csnippet._tab_selected = False
+        else:
+            self._ctab.current_text += chars
+        
+        self._csnippet.update()
+            
+        # Replace
+        dlines += self._vstate.moved.line
+        self._vb.replace_lines(sline, sline + dlines,
+                       self._csnippet._current_text)
+        ct_end = self._ctab.abs_end
+        vim.current.window.cursor = ct_end.line +1, ct_end.col
+
+        self._vstate.update()
 
     def backspace(self):
         # BS was called in select mode
@@ -351,16 +359,8 @@ class SnippetManager(object):
             # This only happens when a default value is delted using backspace
             old_range = self._csnippet.abs_range
             vim.command(r'call feedkeys("i")')
-            self._csnippet.chars_entered('')
+            self._chars_entered('')
 
-            # TODOCode is duplicated aboce
-            # Replace
-            self._vb.replace_lines(old_range.start.line, old_range.end.line,
-                    self._csnippet._current_text)
-            ct_end = self._ctab.abs_end
-            vim.current.window.cursor = ct_end.line +1, ct_end.col
-
-            self._vstate.update()
 
         else:
             vim.command(r'call feedkeys("\<BS>")')
