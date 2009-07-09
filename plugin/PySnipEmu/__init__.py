@@ -304,25 +304,13 @@ class SnippetManager(object):
                 if self._vstate.moved.col <= 0 and self._vstate.moved.line == 1:
                     self._chars_entered('\n')
                 elif self._vstate.moved.col < 0: # Some deleting was going on
-                    sline = self._csnippet.abs_start.line
-                    dlines = self._csnippet.end.line - self._csnippet.start.line
-
-                    self._csnippet.backspace(-self._vstate.moved.col)
-                    # Replace
-                    self._vb.replace_lines(sline, sline + dlines,
-                                           self._csnippet._current_text)
-
-                    ct_end = self._ctab.abs_end
-                    vim.current.window.cursor = ct_end.line +1, ct_end.col
-
-                    self._vstate.update()
+                    self._backspace(-self._vstate.moved.col)
                 else:
                     line = vim.current.line
 
                     chars = line[self._vstate.pos.col - self._vstate.moved.col:
                                  self._vstate.pos.col]
                     self._chars_entered(chars)
-
 
         self._expect_move_wo_change = False
 
@@ -332,17 +320,24 @@ class SnippetManager(object):
             self.reset()
 
     def _chars_entered(self, chars):
-        sline = self._csnippet.abs_start.line
-        dlines = self._csnippet.end.line - self._csnippet.start.line
-
         if self._csnippet._tab_selected:
             self._ctab.current_text = chars
             self._csnippet._tab_selected = False
         else:
             self._ctab.current_text += chars
         
+        self._update_vim_buffer()
+
+    def _backspace(self, count):
+        self._ctab.current_text = self._ctab.current_text[:-count]
+        self._update_vim_buffer()
+
+    def _update_vim_buffer(self):
+        sline = self._csnippet.abs_start.line
+        dlines = self._csnippet.end.line - self._csnippet.start.line
+
         self._csnippet.update()
-            
+
         # Replace
         dlines += self._vstate.moved.line
         self._vb.replace_lines(sline, sline + dlines,
@@ -352,7 +347,7 @@ class SnippetManager(object):
 
         self._vstate.update()
 
-    def backspace(self):
+    def backspace_while_selected(self):
         # BS was called in select mode
 
         if self._csnippet and self._csnippet.tab_selected:

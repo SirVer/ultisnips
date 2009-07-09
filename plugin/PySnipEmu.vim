@@ -62,7 +62,7 @@ inoremap <S-Tab> <C-R>=PyVimSnips_JumpBackwards()<cr>
 snoremap <S-Tab> <Esc>:call PyVimSnips_JumpBackwards()<cr>
 
 " Do not remap this.
-snoremap <BS> <Esc>:py  PySnipSnippets.backspace()<cr>
+snoremap <BS> <Esc>:py  PySnipSnippets.backspace_while_selected()<cr>
 
 au CursorMovedI * py PySnipSnippets.cursor_moved()
 au InsertEnter * py PySnipSnippets.entered_insert_mode()
