@@ -237,28 +237,26 @@ class TabStopTestMultilineExpand_ExceptCorrectResult(_VimTest):
     wanted = "test hallo one more\nnice world work\n" \
             "test try\nSeem to work World"
 
-# TODO: thats next
-
-# class TabStop_TSInDefaultTextRLExample_OverwriteNone_ECR(_VimTest):
-#     snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
-#     keys = "test" + EX
-#     wanted = """<div id="some_id">\n  \n</div>"""
-# class TabStop_TSInDefaultTextRLExample_OverwriteFirst(_VimTest):
-#     snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
-#     keys = "test" + EX + " blah" + JF + "Hallo"
-#     wanted = """<div blah>\n  Hallo\n</div>"""
-# class TabStop_TSInDefaultTextRLExample_DeleteFirst(_VimTest):
-#     snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
-#     keys = "test" + EX + BS + "tHallo"
-#     wanted = """<div>\n  Hallo\n</div>"""
+class TabStop_TSInDefaultTextRLExample_OverwriteNone_ECR(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
+    keys = "test" + EX
+    wanted = """<div id="some_id">\n  \n</div>"""
+class TabStop_TSInDefaultTextRLExample_OverwriteFirst(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
+    keys = "test" + EX + " blah" + JF + "Hallo"
+    wanted = """<div blah>\n  Hallo\n</div>"""
+class TabStop_TSInDefaultTextRLExample_DeleteFirst(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
+    keys = "test" + EX + BS + JF + "Hallo"
+    wanted = """<div>\n  Hallo\n</div>"""
 # class TabStop_TSInDefaultTextRLExample_OverwriteFirstJumpBack(_VimTest):
 #     snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $3  $0\n</div>""")
 #     keys = "test" + EX + "Hi" + JF + "tHallo+SomethingElse\tNupl\tNox"
 #     wanted = """<divSomethingElse>\n  Nulp  Nox\n</div>"""
-# class TabStop_TSInDefaultTextRLExample_OverwriteSecond(_VimTest):
-#     snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
-#     keys = "test" + EX + JF + "no\tEnd"
-#     wanted = """<div id="no">\n  End\n</div>"""
+class TabStop_TSInDefaultTextRLExample_OverwriteSecond(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
+    keys = "test" + EX + JF + "no" + JF + "End"
+    wanted = """<div id="no">\n  End\n</div>"""
 # class TabStop_TSInDefaultTextRLExample_OverwriteSecondTabBack(_VimTest):
 #     snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $3 $0\n</div>""")
 #     keys = "test" + EX + JF + "no\tEnd+yes\tBegin\tHi"

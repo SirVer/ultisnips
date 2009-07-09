@@ -98,6 +98,9 @@ class TextObject(object):
 
         self._current_text = initial_text
 
+        self._lt_provider_idx = None
+        self._cts = None
+
     def __cmp__(self, other):
         return cmp(self._start, other._start)
 
@@ -111,8 +114,12 @@ class TextObject(object):
         def fset(self, text):
             self._current_text = TextBuffer(text)
 
-            # Now, we can have no more childen
+            # All our children are set to "" so they 
+            # do no longer disturb anything that mirrors it
+            for c in self._children:
+                c.current_text = ""
             self._children = []
+            self._tabstops = {}
         return locals()
 
     current_text = property(**current_text())
@@ -181,6 +188,38 @@ class TextObject(object):
 
         return new_end
 
+    def select_next_tab(self, backwards = False):
+        if self._cts == 0:
+            return None
+
+        if backwards:
+            cts_bf = self._cts
+
+            if self._cts == 0:
+                self._cts = max(self._tabstops.keys())
+            else:
+                self._cts -= 1
+            if self._cts <= 0:
+                self._cts = cts_bf
+        else:
+            # All tabs handled?
+            if self._cts is None:
+                self._cts = 1
+            else:
+                self._cts += 1
+
+            if self._cts not in self._tabstops:
+                debug("Checking in my children!")
+                for c in self._children:
+                    if self._cts in c._tabstops:
+                        return c._tabstops[self._cts]
+                self._cts = 0
+                if 0 not in self._tabstops:
+                    return None
+
+        return self._tabstops[self._cts]
+
+
     ###############################
     # Private/Protected functions #
     ###############################
@@ -236,6 +275,8 @@ class TextObject(object):
         return _get_pos(val, start_pos), _get_pos(val, end_pos)
 
     def _handle_tabstop(self, m, val):
+        debug("m: %s, val: %s" % (m, repr(val)))
+    
         def _find_closingbracket(v,start_pos):
             bracks_open = 1
             for idx, c in enumerate(v[start_pos:]):
@@ -251,6 +292,7 @@ class TextObject(object):
         start_pos = m.start()
         end_pos = _find_closingbracket(val, start_pos+2)
 
+        debug("m.end(): %s, start_pos: %s, end_pos: %s" % (m.end(), start_pos, end_pos))
         def_text = val[m.end():end_pos-1]
 
         start, end = self._get_start_end(val,start_pos,end_pos)
@@ -293,8 +335,10 @@ class TextObject(object):
         if not len(val):
             return val
 
-        for m in self._TABSTOP.finditer(val):
+        m = self._TABSTOP.search(val)
+        while m:
             val = self._handle_tabstop(m,val)
+            m = self._TABSTOP.search(val)
 
         for m in self._TRANSFORMATION.finditer(val):
             self._handle_transformation(m,val)
@@ -388,12 +432,11 @@ class SnippetInstance(TextObject):
     def __init__(self, parent, initial_text):
         start = Position(0,0)
         end = Position(0,0)
+
         TextObject.__init__(self, parent, start, end, "")
+
         self._current_text = TextBuffer(self._parse(initial_text))
-
         self._end = self._current_text.calc_end(start)
-
-        self._cts = None
 
         TextObject.update(self)
 
@@ -412,31 +455,4 @@ class SnippetInstance(TextObject):
 
     def __repr__(self):
         return "SnippetInstance(%s -> %s)" % (self._start, self._end)
-
-    def select_next_tab(self, backwards = False):
-        if self._cts == 0:
-            return None
-
-        if backwards:
-            cts_bf = self._cts
-
-            if self._cts == 0:
-                self._cts = max(self._tabstops.keys())
-            else:
-                self._cts -= 1
-            if self._cts <= 0:
-                self._cts = cts_bf
-        else:
-            # All tabs handled?
-            if self._cts is None:
-                self._cts = 1
-            else:
-                self._cts += 1
-
-            if self._cts not in self._tabstops:
-                self._cts = 0
-                if 0 not in self._tabstops:
-                    return None
-
-        return self._tabstops[self._cts]
 
