@@ -334,10 +334,8 @@ class SnippetManager(object):
                     # After the expansion, we put the cursor were the user left
                     # it. This action should be completely transparent for the
                     # user
-                    cache_pos = vim.current.window.cursor
                     del vim.current.buffer[self._vstate.pos.line-1]
                     self._csnippet.chars_entered('\n')
-                    vim.current.window.cursor = cache_pos
                 elif self._vstate.moved.col < 0: # Some deleting was going on
                     self._csnippet.backspace(-self._vstate.moved.col)
                 else:
