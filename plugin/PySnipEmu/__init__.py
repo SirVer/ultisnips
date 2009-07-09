@@ -338,6 +338,12 @@ class SnippetManager(object):
         if self._csnippet and self._vstate.has_moved:
             self.reset()
 
+    # TODO
+    # def self._chars_entered(self, chars):
+    #     self._ctab.current_text += chars
+    #
+    #     self._csnippet.update()
+
     def backspace(self):
         # BS was called in select mode
 

@@ -74,14 +74,14 @@ class TextObject(object):
     def _do_update(self):
         pass
 
-    def update(self, change_buffer):
+    def update(self):
         if not self._has_parsed:
             self._current_text = TextBuffer(self._parse(self._current_text))
 
         for idx,c in enumerate(self._children):
             oldend = Position(c.end.line, c.end.col)
 
-            new_end = c.update(None)
+            new_end = c.update()
 
             moved_lines = new_end.line - oldend.line
             moved_cols = new_end.col - oldend.col
@@ -391,7 +391,7 @@ class SnippetInstance(ChangeableText):
         self._cts = None
         self._tab_selected = False
 
-        TextObject.update(self, self._current_text)
+        TextObject.update(self)
 
         # Check if we have a zero Tab, if not, add one at the end
         if 0 not in self._tabstops:
@@ -404,7 +404,7 @@ class SnippetInstance(ChangeableText):
             ts = TabStop(self, start, end, "")
             self.add_tabstop(0,ts)
 
-            TextObject.update(self, self._current_text)
+            TextObject.update(self)
     
     def __repr__(self):
         return "SnippetInstance(%s -> %s)" % (self._start, self._end)
@@ -412,16 +412,6 @@ class SnippetInstance(ChangeableText):
     def tab_selected(self):
         return self._tab_selected
     tab_selected = property(tab_selected)
-
-    def current_tab(self):
-        if self._cts in self._tabstops:
-            return self._tabstops[self._cts]
-        return None
-    current_tab = property(current_tab)
-
-    def has_tabs(self):
-        return len(self._children) > 0
-
 
     def select_next_tab(self, backwards = False):
         if self._cts == 0:
@@ -457,7 +447,7 @@ class SnippetInstance(ChangeableText):
         cts = self._tabstops[self._cts]
         cts.current_text = cts.current_text[:-count]
 
-        self.update(self._current_text)
+        self.update()
 
     def chars_entered(self, chars):
         cts = self._tabstops[self._cts]
@@ -468,6 +458,6 @@ class SnippetInstance(ChangeableText):
         else:
             cts.current_text += chars
         
-        self.update(self._current_text)
+        self.update()
 
 
