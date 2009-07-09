@@ -85,7 +85,7 @@ class TextObject(object):
 
             moved_lines = new_end.line - oldend.line
             moved_cols = new_end.col - oldend.col
-            
+
             self._current_text.replace_text(c.start, oldend, c._current_text)
 
             self._move_textobjects_behind(c.start, oldend, moved_lines,
@@ -389,7 +389,6 @@ class SnippetInstance(ChangeableText):
         self._end = self._current_text.calc_end(start)
 
         self._cts = None
-        self._tab_selected = False
 
         TextObject.update(self)
 
@@ -405,13 +404,9 @@ class SnippetInstance(ChangeableText):
             self.add_tabstop(0,ts)
 
             TextObject.update(self)
-    
+
     def __repr__(self):
         return "SnippetInstance(%s -> %s)" % (self._start, self._end)
-
-    def tab_selected(self):
-        return self._tab_selected
-    tab_selected = property(tab_selected)
 
     def select_next_tab(self, backwards = False):
         if self._cts == 0:
@@ -438,14 +433,5 @@ class SnippetInstance(ChangeableText):
                 if 0 not in self._tabstops:
                     return None
 
-        self._tab_selected = True
-
         return self._tabstops[self._cts]
-
-    # TODO: handling of input should be done completly outside this class
-    def backspace(self,count):
-        cts = self._tabstops[self._cts]
-        cts.current_text = cts.current_text[:-count]
-
-        self.update()
 

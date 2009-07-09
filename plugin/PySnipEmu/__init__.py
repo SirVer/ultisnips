@@ -190,6 +190,7 @@ class SnippetManager(object):
         self._snippets = {}
         self._csnippet = None
         self._ctab = None
+        self._tab_selected = False
 
     def add_snippet(self, trigger, value, descr):
         if "all" not in self._snippets:
@@ -218,12 +219,12 @@ class SnippetManager(object):
         if self._csnippet:
             self._expect_move_wo_change = True
             self._ctab = self._csnippet.select_next_tab(backwards)
-            if self._ctab is None:
-                self._csnippet = None
-
-                return True
-            else:
+            if self._ctab:
                 self._vstate.select_range(self._ctab.abs_range)
+                self._tab_selected = True
+            else:
+                self._csnippet = None
+                return True
 
             self._vstate.update()
             return True
@@ -277,6 +278,7 @@ class SnippetManager(object):
         # TODO: this code is duplicated above
         self._ctab = self._csnippet.select_next_tab()
         if self._ctab is not None:
+            self._tab_selected = True
             self._vstate.select_range(self._ctab.abs_range)
 
         self._vstate.update()
@@ -320,9 +322,9 @@ class SnippetManager(object):
             self.reset()
 
     def _chars_entered(self, chars):
-        if self._csnippet._tab_selected:
+        if self._tab_selected:
             self._ctab.current_text = chars
-            self._csnippet._tab_selected = False
+            self._tab_selected = False
         else:
             self._ctab.current_text += chars
         
@@ -350,7 +352,7 @@ class SnippetManager(object):
     def backspace_while_selected(self):
         # BS was called in select mode
 
-        if self._csnippet and self._csnippet.tab_selected:
+        if self._csnippet and self._tab_selected:
             # This only happens when a default value is delted using backspace
             old_range = self._csnippet.abs_range
             vim.command(r'call feedkeys("i")')
