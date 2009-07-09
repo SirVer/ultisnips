@@ -110,6 +110,9 @@ class _SimpleExpands(_VimTest):
 class SimpleExpand_ExceptCorrectResult(_SimpleExpands):
     keys = "hallo" + EX
     wanted = "Hallo Welt!"
+class SimpleExpandTwice_ExceptCorrectResult(_SimpleExpands):
+    keys = "hallo" + EX + '\nhallo' + EX
+    wanted = "Hallo Welt!\nHallo Welt!"
 
 class SimpleExpandTypeAfterExpand_ExceptCorrectResult(_SimpleExpands):
     keys = "hallo" + EX + "and again"
@@ -249,24 +252,54 @@ class TabStop_TSInDefaultTextRLExample_DeleteFirst(_VimTest):
     snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
     keys = "test" + EX + BS + JF + "Hallo"
     wanted = """<div>\n  Hallo\n</div>"""
-# class TabStop_TSInDefaultTextRLExample_OverwriteFirstJumpBack(_VimTest):
-#     snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $3  $0\n</div>""")
-#     keys = "test" + EX + "Hi" + JF + "tHallo+SomethingElse\tNupl\tNox"
-#     wanted = """<divSomethingElse>\n  Nulp  Nox\n</div>"""
+class TabStop_TSInDefaultTextRLExample_OverwriteFirstJumpBack(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $3  $0\n</div>""")
+    keys = "test" + EX + "Hi" + JF + "Hallo" + JB + "SomethingElse" + JF + \
+            "Nupl" + JF + "Nox"
+    wanted = """<divSomethingElse>\n  Nupl  Nox\n</div>"""
 class TabStop_TSInDefaultTextRLExample_OverwriteSecond(_VimTest):
     snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
     keys = "test" + EX + JF + "no" + JF + "End"
     wanted = """<div id="no">\n  End\n</div>"""
-# class TabStop_TSInDefaultTextRLExample_OverwriteSecondTabBack(_VimTest):
-#     snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $3 $0\n</div>""")
-#     keys = "test" + EX + JF + "no\tEnd+yes\tBegin\tHi"
-#     wanted = """<div id="yes">\n  Begin Hi\n</div>"""
-# class TabStop_TSInDefaultTextRLExample_OverwriteSecondTabBackTwice(_VimTest):
-#     snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $3 $0\n</div>""")
-#     keys = "test" + EX + JF + "no\tEnd+yes+ allaway\tThird\tLast"
-#     wanted = """<div allaway>\n  Third Last\n</div>"""
-#
+class TabStop_TSInDefaultTextRLExample_OverwriteSecondTabBack(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $3 $0\n</div>""")
+    keys = "test" + EX + JF + "no" + JF + "End" + JB + "yes" + JF + "Begin" \
+            + JF + "Hi"
+    wanted = """<div id="yes">\n  Begin Hi\n</div>"""
+class TabStop_TSInDefaultTextRLExample_OverwriteSecondTabBackTwice(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $3 $0\n</div>""")
+    keys = "test" + EX + JF + "no" + JF + "End" + JB + "yes" + JB + \
+            " allaway" + JF + "Third" + JF + "Last"
+    wanted = """<div allaway>\n  Third Last\n</div>"""
 
+class TabStop_TSInDefaultNested_OverwriteOneJumpBackToOther(_VimTest):
+    snippets = ("test", "hi ${1:this ${2:second ${3:third}}} $4")
+    keys = "test" + EX + JF + "Hallo" + JF + "Ende"
+    wanted = "hi this Hallo Ende"
+class TabStop_TSInDefaultNested_OverwriteOneJumpToThird(_VimTest):
+    snippets = ("test", "hi ${1:this ${2:second ${3:third}}} $4")
+    keys = "test" + EX + JF + JF + "Hallo" + JF + "Ende"
+    wanted = "hi this second Hallo Ende"
+class TabStop_TSInDefaultNested_OverwriteOneJumpAround(_VimTest):
+    snippets = ("test", "hi ${1:this ${2:second ${3:third}}} $4")
+    keys = "test" + EX + JF + JF + "Hallo" + JB+JB + "Blah" + JF + "Ende"
+    wanted = "hi Blah Ende"
+
+class TabStop_TSInDefault_MirrorsOutside_DoNothing(_VimTest):
+    snippets = ("test", "hi ${1:this ${2:second}} $2")
+    keys = "test" + EX
+    wanted = "hi this second second"
+class TabStop_TSInDefault_MirrorsOutside_OverwriteSecond(_VimTest):
+    snippets = ("test", "hi ${1:this ${2:second}} $2")
+    keys = "test" + EX + JF + "Hallo"
+    wanted = "hi Hallo Hallo"
+class TabStop_TSInDefault_MirrorsOutside_Overwrite(_VimTest):
+    snippets = ("test", "hi ${1:this ${2:second}} $2")
+    keys = "test" + EX + "Hallo"
+    wanted = "hi Hallo "
+
+# TODO: Example with Transformations / Mirrors outside of recursion
+#
 print "Shell eval snippets"
 print "Tabstop in default text of tabstop. Like in Ruby Dir snippet in TextMate"
 

@@ -98,8 +98,7 @@ class TextObject(object):
 
         self._current_text = initial_text
 
-        self._lt_provider_idx = None
-        self._cts = None
+        self._cts = 0
 
     def __cmp__(self, other):
         return cmp(self._start, other._start)
@@ -114,7 +113,7 @@ class TextObject(object):
         def fset(self, text):
             self._current_text = TextBuffer(text)
 
-            # All our children are set to "" so they 
+            # All our children are set to "" so they
             # do no longer disturb anything that mirrors it
             for c in self._children:
                 c.current_text = ""
@@ -188,34 +187,74 @@ class TextObject(object):
 
         return new_end
 
-    def select_next_tab(self, backwards = False):
-        if self._cts == 0:
+    def _get_next_tab(self, no):
+        if not len(self._tabstops.keys()):
+            return
+        tno_max = max(self._tabstops.keys())
+
+        posible_sol = []
+        i = no + 1
+        while i <= tno_max:
+            if i in self._tabstops:
+                posible_sol.append( (i, self._tabstops[i]) )
+                break
+            i += 1
+
+        c = [ c._get_next_tab(no) for c in self._children ]
+        c = filter(lambda i: i, c)
+
+        posible_sol += c
+
+        debug("posi: %s" % (posible_sol,))
+        if not len(posible_sol):
             return None
+
+        return min(posible_sol)
+
+
+    def _get_prev_tab(self, no):
+        if not len(self._tabstops.keys()):
+            return
+        tno_min = min(self._tabstops.keys())
+
+        posible_sol = []
+        i = no - 1
+        while i >= tno_min:
+            if i in self._tabstops:
+                posible_sol.append( (i, self._tabstops[i]) )
+                break
+            i -= 1
+
+        c = [ c._get_prev_tab(no) for c in self._children ]
+        c = filter(lambda i: i, c)
+
+        posible_sol += c
+
+        if not len(posible_sol):
+            return None
+
+        return max(posible_sol)
+
+    def select_next_tab(self, backwards = False):
 
         if backwards:
             cts_bf = self._cts
 
-            if self._cts == 0:
-                self._cts = max(self._tabstops.keys())
-            else:
-                self._cts -= 1
-            if self._cts <= 0:
+            res = self._get_prev_tab(self._cts)
+            if res is None:
                 self._cts = cts_bf
+                return self._tabstops[self._cts]
+            self._cts, ts = res
+            return ts
         else:
-            # All tabs handled?
-            if self._cts is None:
-                self._cts = 1
-            else:
-                self._cts += 1
-
-            if self._cts not in self._tabstops:
-                debug("Checking in my children!")
-                for c in self._children:
-                    if self._cts in c._tabstops:
-                        return c._tabstops[self._cts]
+            res = self._get_next_tab(self._cts)
+            if res is None:
                 self._cts = 0
                 if 0 not in self._tabstops:
                     return None
+            else:
+                self._cts, ts = res
+                return ts
 
         return self._tabstops[self._cts]
 
@@ -276,7 +315,7 @@ class TextObject(object):
 
     def _handle_tabstop(self, m, val):
         debug("m: %s, val: %s" % (m, repr(val)))
-    
+
         def _find_closingbracket(v,start_pos):
             bracks_open = 1
             for idx, c in enumerate(v[start_pos:]):
