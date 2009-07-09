@@ -4,7 +4,7 @@
 import re
 
 from PySnipEmu.Buffer import TextBuffer
-from PySnipEmu.Geometry import Range, Position
+from PySnipEmu.Geometry import Span, Position
 
 __all__ = [ "Mirror", "Transformation", "SnippetInstance", "StartMarker" ]
 
@@ -38,11 +38,13 @@ class TextObject(object):
 
         self._current_text = initial_text
 
-    # TODO: span or range. To use both is not clever
-    def span(self):
-        return Range(self._start, self._end)
-    span = property(span)
+    def __cmp__(self, other):
+        return cmp(self._start, other._start)
 
+
+    ##############
+    # PROPERTIES #
+    ##############
     def abs_start(self):
         if self._parent:
             ps = self._parent.abs_start
@@ -64,12 +66,21 @@ class TextObject(object):
         return self._end
     abs_end = property(abs_end)
 
-    def abs_range(self):
-        return Range(self.abs_start, self.abs_end)
-    abs_range = property(abs_range)
+    def span(self):
+        return Span(self._start, self._end)
+    span = property(span)
 
-    def __cmp__(self, other):
-        return cmp(self._start, other._start)
+    def start(self):
+        return self._start
+    start = property(start)
+
+    def end(self):
+        return self._end
+    end = property(end)
+
+    def abs_span(self):
+        return Span(self.abs_start, self.abs_end)
+    abs_span = property(abs_span)
 
     def _do_update(self):
         pass
@@ -222,22 +233,6 @@ class TextObject(object):
         self._children.append(c)
         self._children.sort()
 
-    def parent():
-        doc = "The parent TextObject this TextObject resides in"
-        def fget(self):
-            return self._parent
-        def fset(self, value):
-            self._parent = value
-        return locals()
-    parent = property(**parent())
-
-    def start(self):
-        return self._start
-    start = property(start)
-
-    def end(self):
-        return self._end
-    end = property(end)
 
 class ChangeableText(TextObject):
     def __init__(self, parent, start, end, initial = ""):

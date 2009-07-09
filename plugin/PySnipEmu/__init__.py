@@ -87,7 +87,7 @@ class VimState(object):
             self._text_changed = self._lline != vim.current.buffer[line]
         self._lline = vim.current.buffer[line]
 
-    def select_range(self, r):
+    def select_span(self, r):
         delta = r.end - r.start
         lineno, col = r.start.line, r.start.col
 
@@ -220,7 +220,7 @@ class SnippetManager(object):
             self._expect_move_wo_change = True
             self._ctab = self._csnippet.select_next_tab(backwards)
             if self._ctab:
-                self._vstate.select_range(self._ctab.abs_range)
+                self._vstate.select_span(self._ctab.abs_span)
                 self._tab_selected = True
             else:
                 self._csnippet = None
@@ -279,7 +279,7 @@ class SnippetManager(object):
         self._ctab = self._csnippet.select_next_tab()
         if self._ctab is not None:
             self._tab_selected = True
-            self._vstate.select_range(self._ctab.abs_range)
+            self._vstate.select_span(self._ctab.abs_span)
 
         self._vstate.update()
 
@@ -294,7 +294,7 @@ class SnippetManager(object):
 
             # Did we leave the snippet with this movement?
             if self._csnippet and not \
-               (self._vstate.pos in self._csnippet.abs_range):
+               (self._vstate.pos in self._csnippet.abs_span):
                 self.reset()
 
         if not self._ctab:
@@ -354,7 +354,7 @@ class SnippetManager(object):
 
         if self._csnippet and self._tab_selected:
             # This only happens when a default value is delted using backspace
-            old_range = self._csnippet.abs_range
+            old_span = self._csnippet.abs_span
             vim.command(r'call feedkeys("i")')
             self._chars_entered('')
 

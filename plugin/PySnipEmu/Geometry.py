@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-__all__ = [ "Position", "Range" ]
+__all__ = [ "Position", "Span" ]
 
 
 class Position(object):
@@ -48,7 +48,7 @@ class Position(object):
     def __repr__(self):
         return "(%i,%i)" % (self._line, self._col)
 
-class Range(object):
+class Span(object):
     def __init__(self, start, end):
         self._s = start
         self._e = end
