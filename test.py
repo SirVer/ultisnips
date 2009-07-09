@@ -145,6 +145,10 @@ class TabStopSimpleReplaceSurrounded1_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo $0 a small feed")
     keys = "hallo\tNase"
     wanted = "hallo Nase a small feed"
+class TabStopSimpleReplaceEndingWithNewline_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "Hallo Welt\n")
+    keys = "hallo\t\nAnd more"
+    wanted = "Hallo Welt\n\nAnd more"
 
 
 class ExitTabStop_ExceptCorrectResult(_VimTest):

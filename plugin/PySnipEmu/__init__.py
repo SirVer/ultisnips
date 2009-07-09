@@ -285,6 +285,7 @@ class SnippetManager(object):
 
         self._expect_move_wo_change = True
         self._csnippet = snippet.launch(before.rstrip()[:-len(word)], after)
+        self._ctab = None
 
         # TODO: this code is duplicated above
         if self._csnippet is not None:
@@ -334,17 +335,20 @@ class SnippetManager(object):
                     # user
                     cache_pos = vim.current.window.cursor
                     del vim.current.buffer[self._vstate.pos.line-1]
-                    self._csnippet.chars_entered('\n', self._vstate)
+                    self._csnippet.chars_entered('\n')
                     vim.current.window.cursor = cache_pos
                 elif self._vstate.moved.col < 0: # Some deleting was going on
-                    self._csnippet.backspace(-self._vstate.moved.col,
-                        self._vstate)
+                    self._csnippet.backspace(-self._vstate.moved.col)
                 else:
                     line = vim.current.line
 
                     chars = line[self._vstate.pos.col - self._vstate.moved.col:
                                  self._vstate.pos.col]
-                    self._csnippet.chars_entered(chars, self._vstate)
+                    self._csnippet.chars_entered(chars)
+
+            ct_end = self._ctab.abs_end
+            vim.current.window.cursor = ct_end.line +1, ct_end.col
+
 
             self._vstate.update()
 
@@ -364,7 +368,7 @@ class SnippetManager(object):
         if self._csnippet and self._csnippet.tab_selected:
             # This only happens when a default value is delted using backspace
             vim.command(r'call feedkeys("i")')
-            self._csnippet.chars_entered('', self._vstate)
+            self._csnippet.chars_entered('')
             self._vstate.update()
         else:
             vim.command(r'call feedkeys("\<BS>")')

@@ -1,15 +1,10 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-# TODO: this shouldn't be here
-import vim
-
 import re
 
 from PySnipEmu.Buffer import VimBuffer, TextBuffer
 from PySnipEmu.Geometry import Range, Position
-
-from PySnipEmu.debug import debug
 
 __all__ = [ "Mirror", "Transformation", "SnippetInstance" ]
 
@@ -62,7 +57,7 @@ class TextObject(object):
             if self._end.line == 0:
                 return ps + self._end
             else:
-                return Position(ps.line + self._end.line, self._start.col)
+                return Position(ps.line + self._end.line, self._end.col)
 
         return self._end
     abs_end = property(abs_end)
@@ -398,8 +393,6 @@ class SnippetInstance(TextObject):
                 col -= self.start.col
             start = Position(delta.line, col)
             end = Position(delta.line, col)
-            debug("Adding zero Tabstop!")
-            debug("start: %s, end: %s" % (start, end))
             ts = TabStop(self, start, end, "")
             self.add_tabstop(0,ts)
 
@@ -414,19 +407,6 @@ class SnippetInstance(TextObject):
             return self._tabstops[self._cts]
         return None
     current_tab = property(current_tab)
-
-    def update(self, buf, cur):
-
-        TextObject.update(self, buf)
-
-        cts = self._tabstops[self._cts]
-
-        cursor = self.start + cts.end
-        if cts.end.line != 0:
-            cursor.col -= self.start.col
-        lineno, col = cursor.line, cursor.col
-
-        vim.current.window.cursor = lineno +1, col
 
     def has_tabs(self):
         return len(self._children) > 0
@@ -460,24 +440,21 @@ class SnippetInstance(TextObject):
         self._tab_selected = True
         return self._tabstops[self._cts]
 
-    def backspace(self,count, previous_cp):
+    def backspace(self,count):
         cts = self._tabstops[self._cts]
         cts.current_text = cts.current_text[:-count]
 
-        self.update(self._vb, previous_cp)
+        self.update(self._vb)
 
-    def chars_entered(self, chars, cur):
+    def chars_entered(self, chars):
         cts = self._tabstops[self._cts]
 
-        debug("chars_entered");
         if self._tab_selected:
             cts.current_text = chars
-            debug("cts.current_text: %s" % (cts.current_text))
             self._tab_selected = False
         else:
             cts.current_text += chars
-            debug("cts.current_text: %s" % (cts.current_text))
 
-        self.update(self._vb, cur)
+        self.update(self._vb)
 
 
