@@ -390,6 +390,21 @@ class SnippetInstance(TextObject):
 
         TextObject.update(self, self._vb)
 
+        # Check if we have a zero Tab, if not, add one at the end
+        if 0 not in self._tabstops:
+            delta = self._end - self._start
+            col = self.end.col
+            if delta.line == 0:
+                col -= self.start.col
+            start = Position(delta.line, col)
+            end = Position(delta.line, col)
+            debug("Adding zero Tabstop!")
+            debug("start: %s, end: %s" % (start, end))
+            ts = TabStop(self, start, end, "")
+            self.add_tabstop(0,ts)
+
+            TextObject.update(self, self._vb)
+
     def tab_selected(self):
         return self._tab_selected
     tab_selected = property(tab_selected)

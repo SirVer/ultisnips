@@ -238,16 +238,6 @@ class SnippetManager(object):
             self._expect_move_wo_change = True
             ts = self._csnippet.select_next_tab(backwards)
             if ts is None:
-                # HACK: only jump to end if there is no zero defined. This
-                # TODO: this jump should be inside select_next_tab or even
-                # better: when the snippet is launched and no parent snippet is
-                # defined, a $0 should be appended to the end of it and this
-                # extra code should be ignored Jump to the end of the snippet
-                # and enter insert mode
-                if 0 not in self._csnippet._tabstops:
-                    vim.current.window.cursor = self._csnippet.end.line +1, \
-                            self._csnippet.end.col
-                    vim.command(r'call feedkeys("\<Esc>a")')
                 self._csnippet = None
 
                 return True
