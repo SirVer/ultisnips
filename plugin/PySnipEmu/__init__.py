@@ -208,7 +208,7 @@ class SnippetManager(object):
 
     def reset(self):
         self._snippets = {}
-        self._current_snippets = []
+        self._csnippet = None
 
     def add_snippet(self, trigger, value, descr):
         if "all" not in self._snippets:
@@ -234,10 +234,9 @@ class SnippetManager(object):
         self._accept_input = False
         self._expect_move_wo_change = False
 
-        if len(self._current_snippets):
-            cs = self._current_snippets[-1]
+        if self._csnippet:
             self._expect_move_wo_change = True
-            ts = cs.select_next_tab(backwards)
+            ts = self._csnippet.select_next_tab(backwards)
             if ts is None:
                 # HACK: only jump to end if there is no zero defined. This
                 # TODO: this jump should be inside select_next_tab or even
@@ -245,11 +244,11 @@ class SnippetManager(object):
                 # defined, a $0 should be appended to the end of it and this
                 # extra code should be ignored Jump to the end of the snippet
                 # and enter insert mode
-                cs = self._current_snippets[-1]
-                if 0 not in cs._tabstops:
-                    vim.current.window.cursor = cs.end.line +1, cs.end.col
+                if 0 not in self._csnippet._tabstops:
+                    vim.current.window.cursor = self._csnippet.end.line +1, \
+                            self._csnippet.end.col
                     vim.command(r'call feedkeys("\<Esc>a")')
-                self._current_snippets.pop()
+                self._csnippet = None
 
                 return True
             else:
@@ -305,7 +304,7 @@ class SnippetManager(object):
 
         self._vstate.update()
         if s is not None:
-            self._current_snippets.append(s)
+            self._csnippet = s
             self._accept_input = True
 
 
@@ -327,25 +326,20 @@ class SnippetManager(object):
             debug("Checking if we left the snippet")
             debug("self._vstate.pos: %s" % (self._vstate.pos))
 
-            if len(self._current_snippets):
-                cs = self._current_snippets[-1]
-                debug("cs.span: %s" % (cs.span))
-
-                is_inside = self._vstate.pos in cs.span
+            if self._csnippet:
+                is_inside = self._vstate.pos in self._csnippet.span
 
                 debug("is_inside: %s" % (is_inside))
 
                 if not is_inside:
-                    self._current_snippets.pop()
+                    self._csnippet = None
 
         debug("self._accept_input): %s" % (self._accept_input))
         if not self._accept_input:
             return
 
-        if self._vstate.buf_changed and len(self._current_snippets):
+        if self._vstate.buf_changed and self._csnippet:
             if 0 <= self._vstate.moved.line <= 1:
-                cs = self._current_snippets[-1]
-
                 # Detect a carriage return
                 if self._vstate.moved.col < 0 and self._vstate.moved.line == 1:
                     # Hack, remove a line in vim, because we are going to
@@ -355,16 +349,17 @@ class SnippetManager(object):
                     # user
                     cache_pos = vim.current.window.cursor
                     del vim.current.buffer[self._vstate.pos.line-1]
-                    cs.chars_entered('\n', self._vstate)
+                    self._csnippet.chars_entered('\n', self._vstate)
                     vim.current.window.cursor = cache_pos
                 elif self._vstate.moved.col < 0: # Some deleting was going on
-                    cs.backspace(-self._vstate.moved.col, self._vstate)
+                    self._csnippet.backspace(-self._vstate.moved.col, 
+                        self._vstate)
                 else:
                     line = vim.current.line
 
                     chars = line[self._vstate.pos.col - self._vstate.moved.col:
                                  self._vstate.pos.col]
-                    cs.chars_entered(chars, self._vstate)
+                    self._csnippet.chars_entered(chars, self._vstate)
 
             self._vstate.update()
 
@@ -375,21 +370,16 @@ class SnippetManager(object):
 
         self._vstate.update()
         debug("self._vstate.has_moved: %s" % (self._vstate.has_moved))
-        if len(self._current_snippets) and \
-           self._vstate.has_moved:
-           # not self._current_snippets[-1].tab_selected and \
-
-            self._current_snippets = []
+        if self._csnippet and self._vstate.has_moved:
+            self._csnippet = None
 
     def backspace(self):
         # BS was called in select mode
 
-        if len(self._current_snippets) and \
-           self._current_snippets[-1].tab_selected:
+        if self._csnippet and self._csnippet.tab_selected:
             # This only happens when a default value is delted using backspace
             vim.command(r'call feedkeys("i")')
-            cs = self._current_snippets[-1]
-            cs.chars_entered('', self._vstate)
+            self._csnippet.chars_entered('', self._vstate)
             self._vstate.update()
         else:
             vim.command(r'call feedkeys("\<BS>")')
