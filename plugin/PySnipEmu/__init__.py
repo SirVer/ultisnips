@@ -209,6 +209,7 @@ class SnippetManager(object):
     def reset(self):
         self._snippets = {}
         self._csnippet = None
+        self._ctab = None
 
     def add_snippet(self, trigger, value, descr):
         if "all" not in self._snippets:
@@ -319,15 +320,15 @@ class SnippetManager(object):
                 debug("is_inside: %s" % (is_inside))
 
                 if not is_inside:
-                    self._csnippet = None
+                    self.reset()
 
         if not self._ctab:
             return
 
-        if self._vstate.buf_changed and self._csnippet:
+        if self._vstate.buf_changed and self._ctab:
             if 0 <= self._vstate.moved.line <= 1:
                 # Detect a carriage return
-                if self._vstate.moved.col < 0 and self._vstate.moved.line == 1:
+                if self._vstate.moved.col <= 0 and self._vstate.moved.line == 1:
                     # Hack, remove a line in vim, because we are going to
                     # overwrite the old line range with the new snippet value.
                     # After the expansion, we put the cursor were the user left
@@ -360,7 +361,7 @@ class SnippetManager(object):
         self._vstate.update()
         debug("self._vstate.has_moved: %s" % (self._vstate.has_moved))
         if self._csnippet and self._vstate.has_moved:
-            self._csnippet = None
+            self.reset()
 
     def backspace(self):
         # BS was called in select mode

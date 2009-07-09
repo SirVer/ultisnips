@@ -438,8 +438,10 @@ class SnippetInstance(TextObject):
                     return None
 
         self._tab_selected = True
+
         return self._tabstops[self._cts]
 
+    # TODO: handling of input should be done completly outside this class
     def backspace(self,count):
         cts = self._tabstops[self._cts]
         cts.current_text = cts.current_text[:-count]
