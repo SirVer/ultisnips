@@ -181,9 +181,6 @@ class TextObject(object):
 
         return new_end
 
-    def add_tabstop(self,no, ts):
-        self._tabstops[no] = ts
-
     ###############################
     # Private/Protected functions #
     ###############################
@@ -223,8 +220,12 @@ class TextObject(object):
         self._children.append(c)
         self._children.sort()
 
+    def _add_tabstop(self, no, ts):
+        self._tabstops[no] = ts
 
-    # Parsing below 
+
+
+    # Parsing below
     def _get_start_end(self, val, start_pos, end_pos):
         def _get_pos(s, pos):
             line_idx = s[:pos].count('\n')
@@ -256,7 +257,7 @@ class TextObject(object):
 
         ts = TabStop(self, start, end, def_text)
 
-        self.add_tabstop(int(m.group(1)),ts)
+        self._add_tabstop(int(m.group(1)),ts)
 
         return val[:start_pos] + (end_pos-start_pos)*" " + val[end_pos:]
 
@@ -272,7 +273,7 @@ class TextObject(object):
             Mirror(self, ts, start, end)
         else:
             ts = TabStop(self, start, end)
-            self.add_tabstop(no,ts)
+            self._add_tabstop(no,ts)
 
     def _handle_transformation(self, m, val):
         no = int(m.group(1))
@@ -405,7 +406,7 @@ class SnippetInstance(TextObject):
             start = Position(delta.line, col)
             end = Position(delta.line, col)
             ts = TabStop(self, start, end, "")
-            self.add_tabstop(0,ts)
+            self._add_tabstop(0,ts)
 
             TextObject.update(self)
 

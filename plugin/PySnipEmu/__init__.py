@@ -29,7 +29,6 @@ class Snippet(object):
         return self._t
     trigger = property(trigger)
 
-
     def launch(self, text_before, start):
         indent = self._INDENT.match(text_before).group(0)
         v = self._v
@@ -148,43 +147,6 @@ class SnippetManager(object):
 
         self._expect_move_wo_change = False
 
-    def _load_snippets_from(self, ft, fn):
-        cs = None
-        cv = ""
-        cdescr = ""
-        for line in open(fn):
-            if line.startswith("#"):
-                continue
-            if line.startswith("snippet"):
-                cs = line.split()[1]
-                left = line.find('"')
-                if left != -1:
-                    right = line.rfind('"')
-                    cdescr = line[left+1:right]
-                continue
-            if cs != None:
-                if line.startswith("endsnippet"):
-                    cv = cv[:-1] # Chop the last newline
-                    l = self._snippets[ft].get(cs,[])
-                    l.append(Snippet(cs,cv,cdescr))
-                    self._snippets[ft][cs] = l
-                    cv = ""
-                    cdescr = ""
-                    cs = None
-                    continue
-                else:
-                    cv += line
-
-
-    def _load_snippets_for(self, ft):
-        self._snippets[ft] = {}
-        for p in vim.eval("&runtimepath").split(',')[::-1]:
-            pattern = p + os.path.sep + "PySnippets" + os.path.sep + \
-                    "*%s.snippets" % ft
-
-            for fn in glob.glob(pattern):
-                self._load_snippets_from(ft, fn)
-
 
     def reset(self):
         self._snippets = {}
@@ -199,23 +161,7 @@ class SnippetManager(object):
         l.append(Snippet(trigger,value, descr))
         self._snippets["all"][trigger] = l
 
-    def _find_snippets(self, ft, trigger):
-        snips = self._snippets.get(ft,None)
-        if not snips:
-            return []
-
-        return snips.get(trigger, [])
-
-    def try_expand(self, backwards = False):
-        ft = vim.eval("&filetype")
-        if len(ft) and ft not in self._snippets:
-            self._load_snippets_for(ft)
-        if "all" not in self._snippets:
-            self._load_snippets_for("all")
-
-        self._ctab = None
-        self._expect_move_wo_change = False
-
+    def jump(self, backwards = False):
         if self._csnippet:
             self._expect_move_wo_change = True
             self._ctab = self._csnippet.select_next_tab(backwards)
@@ -228,6 +174,17 @@ class SnippetManager(object):
 
             self._vstate.update()
             return True
+        return False
+
+    def try_expand(self, backwards = False):
+        ft = vim.eval("&filetype")
+        if len(ft) and ft not in self._snippets:
+            self._load_snippets_for(ft)
+        if "all" not in self._snippets:
+            self._load_snippets_for("all")
+
+        self._ctab = None
+        self._expect_move_wo_change = False
 
         lineno,col = vim.current.window.cursor
         if col == 0:
@@ -285,6 +242,17 @@ class SnippetManager(object):
 
         return True
 
+    def backspace_while_selected(self):
+        # BS was called in select mode
+
+        if self._csnippet and self._tab_selected:
+            # This only happens when a default value is delted using backspace
+            old_span = self._csnippet.abs_span
+            vim.command(r'call feedkeys("i")')
+            self._chars_entered('')
+        else:
+            vim.command(r'call feedkeys("\<BS>")')
+
     def cursor_moved(self):
         self._vstate.update()
 
@@ -321,13 +289,17 @@ class SnippetManager(object):
         if self._csnippet and self._vstate.has_moved:
             self.reset()
 
+    ###################################
+    # Private/Protect Functions Below #
+    ###################################
+    # Input Handling
     def _chars_entered(self, chars):
         if self._tab_selected:
             self._ctab.current_text = chars
             self._tab_selected = False
         else:
             self._ctab.current_text += chars
-        
+
         self._update_vim_buffer()
 
     def _backspace(self, count):
@@ -349,18 +321,52 @@ class SnippetManager(object):
 
         self._vstate.update()
 
-    def backspace_while_selected(self):
-        # BS was called in select mode
+    # Loading
+    def _load_snippets_from(self, ft, fn):
+        cs = None
+        cv = ""
+        cdescr = ""
+        for line in open(fn):
+            if line.startswith("#"):
+                continue
+            if line.startswith("snippet"):
+                cs = line.split()[1]
+                left = line.find('"')
+                if left != -1:
+                    right = line.rfind('"')
+                    cdescr = line[left+1:right]
+                continue
+            if cs != None:
+                if line.startswith("endsnippet"):
+                    cv = cv[:-1] # Chop the last newline
+                    l = self._snippets[ft].get(cs,[])
+                    l.append(Snippet(cs,cv,cdescr))
+                    self._snippets[ft][cs] = l
+                    cv = ""
+                    cdescr = ""
+                    cs = None
+                    continue
+                else:
+                    cv += line
 
-        if self._csnippet and self._tab_selected:
-            # This only happens when a default value is delted using backspace
-            old_span = self._csnippet.abs_span
-            vim.command(r'call feedkeys("i")')
-            self._chars_entered('')
+    def _load_snippets_for(self, ft):
+        self._snippets[ft] = {}
+        for p in vim.eval("&runtimepath").split(',')[::-1]:
+            pattern = p + os.path.sep + "PySnippets" + os.path.sep + \
+                    "*%s.snippets" % ft
+
+            for fn in glob.glob(pattern):
+                self._load_snippets_from(ft, fn)
 
 
-        else:
-            vim.command(r'call feedkeys("\<BS>")')
+
+    def _find_snippets(self, ft, trigger):
+        snips = self._snippets.get(ft,None)
+        if not snips:
+            return []
+
+        return snips.get(trigger, [])
+
 
 PySnipSnippets = SnippetManager()
 

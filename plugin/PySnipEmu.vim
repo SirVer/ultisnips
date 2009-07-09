@@ -32,8 +32,14 @@ endfunction
 
 function! PyVimSnips_JumpBackwards()
     py << EOF
-from PySnipEmu import PySnipSnippets
-PySnipSnippets.try_expand(True)
+PySnipSnippets.jump(True)
+EOF
+    return ""
+endfunction
+
+function! PyVimSnips_JumpForwards()
+    py << EOF
+PySnipSnippets.jump()
 EOF
     return ""
 endfunction
@@ -58,8 +64,10 @@ EOF
 " You can remap these
 inoremap <Tab> <C-R>=PyVimSnips_ExpandSnippet()<cr>
 snoremap <Tab> <Esc>:call PyVimSnips_ExpandSnippet()<cr>
-inoremap <S-Tab> <C-R>=PyVimSnips_JumpBackwards()<cr>
-snoremap <S-Tab> <Esc>:call PyVimSnips_JumpBackwards()<cr>
+inoremap <C-k> <C-R>=PyVimSnips_JumpBackwards()<cr>
+snoremap <C-k> <Esc>:call PyVimSnips_JumpBackwards()<cr>
+inoremap <C-j> <C-R>=PyVimSnips_JumpForwards()<cr>
+snoremap <C-j> <Esc>:call PyVimSnips_JumpForwards()<cr>
 
 " Do not remap this.
 snoremap <BS> <Esc>:py  PySnipSnippets.backspace_while_selected()<cr>
