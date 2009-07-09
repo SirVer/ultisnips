@@ -224,9 +224,7 @@ class TextObject(object):
         self._children.sort()
 
 
-    #################
-    # Parsing below #
-    #################
+    # Parsing below 
     def _get_start_end(self, val, start_pos, end_pos):
         def _get_pos(s, pos):
             line_idx = s[:pos].count('\n')
@@ -312,6 +310,16 @@ class TextObject(object):
 
         return val
 
+class StartMarker(TextObject):
+    """
+    This class only remembers it's starting position. It is used to
+    transform relative values into absolute position values in the vim
+    buffer
+    """
+    def __init__(self, start):
+        end = Position(start.line, start.col)
+        TextObject.__init__(self, None, start, end, "")
+
 
 class Mirror(TextObject):
     """
@@ -356,7 +364,6 @@ class Transformation(Mirror):
         return "Transformation(%s -> %s)" % (self._start, self._end)
 
 
-
 class TabStop(TextObject):
     """
     This is the most important TextObject. A TabStop is were the cursor
@@ -368,11 +375,6 @@ class TabStop(TextObject):
     def __repr__(self):
         return "TabStop(%s -> %s, %s)" % (self._start, self._end,
             repr(self._current_text))
-
-class StartMarker(TextObject):
-    def __init__(self, start):
-        end = Position(start.line, start.col)
-        TextObject.__init__(self, None, start, end, "")
 
 class SnippetInstance(TextObject):
     """
