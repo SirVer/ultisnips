@@ -10,8 +10,6 @@ __all__ = [ "Mirror", "Transformation", "SnippetInstance", "StartMarker" ]
 
 from PySnipEmu.debug import debug
 
-ENDING_TAB = 0
-
 ###########################################################################
 #                              Helper class                               #
 ###########################################################################
@@ -540,6 +538,9 @@ class SnippetInstance(TextObject):
 
 
     def select_next_tab(self, backwards = False):
+        if self._cts is None:
+            return
+
         if backwards:
             cts_bf = self._cts
 
@@ -552,9 +553,9 @@ class SnippetInstance(TextObject):
         else:
             res = self._get_next_tab(self._cts)
             if res is None:
-                self._cts = 0
-                if 0 not in self._tabstops:
-                    return None
+                self._cts = None
+                if 0 in self._tabstops:
+                    return self._tabstops[0]
             else:
                 self._cts, ts = res
                 return ts
