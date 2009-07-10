@@ -305,7 +305,6 @@ class TabStop_TSInDefault_MirrorsOutside_Overwrite(_VimTest):
 # TODO: Example with Transformations / Mirrors outside of recursion
 #
 print "Shell eval snippets"
-print "Tabstop in default text of tabstop. Like in Ruby Dir snippet in TextMate"
 
 # functions
 # Multiline text pasting
