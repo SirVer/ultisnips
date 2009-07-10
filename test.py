@@ -302,10 +302,55 @@ class TabStop_TSInDefault_MirrorsOutside_Overwrite(_VimTest):
     keys = "test" + EX + "Hallo"
     wanted = "hi Hallo "
 
-print "Shell eval snippets"
+class TabStop_Multiline_Leave(_VimTest):
+    snippets = ("test", "hi ${1:first line\nsecond line} world" )
+    keys = "test" + EX
+    wanted = "hi first line\nsecond line world"
+class TabStop_Multiline_Overwrite(_VimTest):
+    snippets = ("test", "hi ${1:first line\nsecond line} world" )
+    keys = "test" + EX + "Nothing"
+    wanted = "hi Nothing world"
+class TabStop_Multiline_MirrorInFront_Leave(_VimTest):
+    snippets = ("test", "hi $1 ${1:first line\nsecond line} world" )
+    keys = "test" + EX
+    wanted = "hi first line\nsecond line first line\nsecond line world"
+class TabStop_Multiline_MirrorInFront_Overwrite(_VimTest):
+    snippets = ("test", "hi $1 ${1:first line\nsecond line} world" )
+    keys = "test" + EX + "Nothing"
+    wanted = "hi Nothing Nothing world"
+class TabStop_Multiline_DelFirstOverwriteSecond_Overwrite(_VimTest):
+    snippets = ("test", "hi $1 $2 ${1:first line\nsecond line} ${2:Hi} world" )
+    keys = "test" + EX + BS + JF + "Nothing"
+    wanted = "hi  Nothing  Nothing world"
 
-# functions
-# Multiline text pasting
+###########################
+# ShellCode Interpolation #
+###########################
+class TabStop_Shell_SimpleExample(_VimTest):
+    snippets = ("test", "hi `echo hallo` you!")
+    keys = "test" + EX + "and more"
+    wanted = "hi hallo you!and more"
+class TabStop_Shell_TextInNextLine(_VimTest):
+    snippets = ("test", "hi `echo hallo`\nWeiter")
+    keys = "test" + EX + "and more"
+    wanted = "hi hallo\nWeiterand more"
+class TabStop_Shell_InDefValue_Leave(_VimTest):
+    snippets = ("test", "Hallo ${1:now `echo fromecho`} end")
+    keys = "test" + EX + JF + "and more"
+    wanted = "Hallo now fromecho endand more"
+class TabStop_Shell_InDefValue_Overwrite(_VimTest):
+    snippets = ("test", "Hallo ${1:now `echo fromecho`} end")
+    keys = "test" + EX + "overwrite" + JF + "and more"
+    wanted = "Hallo overwrite endand more"
+
+class TabStop_Shell_ShebangPython(_VimTest):
+    snippets = ("test", """Hallo ${1:now `#!/usr/bin/env python
+print "Hallo Welt"
+`} end""")
+    keys = "test" + EX + JF + "and more"
+    wanted = "Hallo now Hallo Welt endand more"
+
+# TODO: Multiline text pasting
 print "Recursive Tabstops: TODO: this will still take some time"
 # class RecTabStops_SimpleCase_ExceptCorrectResult(_VimTest):
 #     snippets = ("m", "[ ${1:first}  ${2:sec} ]")

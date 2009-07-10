@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+import os
 import re
+import stat
+import tempfile
 
 from PySnipEmu.Buffer import TextBuffer
 from PySnipEmu.Geometry import Span, Position
 
 __all__ = [ "Mirror", "Transformation", "SnippetInstance", "StartMarker" ]
-
-# TODO: remove me
-from PySnipEmu.debug import debug
 
 ###########################################################################
 #                              Helper class                               #
@@ -75,6 +75,8 @@ class _TOParser(object):
     _MIRROR_OR_TS = re.compile(r'\$(\d+)')
     # A mirror or a tabstop without default value.
     _TRANSFORMATION = re.compile(r'\${(\d+)/(.*?)/(.*?)/([a-zA-z]*)}')
+    # The beginning of a shell code fragment
+    _SHELLCODE = re.compile(r'(?!<\\)`')
 
     def __init__(self, parent, val):
         self._v = val
@@ -87,9 +89,39 @@ class _TOParser(object):
 
     def parse(self):
         self._parse_tabs()
+        self._parse_shellcode()
         self._parse_transformations()
         self._parse_mirrors_or_ts()
         self._finish()
+
+    ##############
+    # Shell Code #
+    ##############
+    def _parse_shellcode(self):
+        m = self._SHELLCODE.search(self._v)
+        while m:
+            self._handle_shellcode(m)
+            m = self._SHELLCODE.search(self._v)
+
+        for c in self._childs:
+            c._parse_shellcode()
+
+    def _handle_shellcode(self, m):
+        def _find_closing(start_pos):
+            for idx,c in enumerate(self._v[start_pos:]):
+                if c == '`' and self._v[idx+start_pos-1] != '\\':
+                    return idx + start_pos + 1
+
+        start_pos = m.start()
+        end_pos = _find_closing(start_pos+1)
+
+        content = self._v[start_pos+1:end_pos-1]
+
+        start, end = self._get_start_end(self._v,start_pos,end_pos)
+
+        self._overwrite_area(start_pos,end_pos)
+
+        return ShellCode(self._p, start, end, content)
 
     ########
     # TABS #
@@ -100,7 +132,6 @@ class _TOParser(object):
         while m:
             ts.append(self._handle_tabstop(m))
             m = self._TABSTOP.search(self._v)
-
 
         for t, def_text in ts:
             child_parser = _TOParser(t, def_text)
@@ -212,8 +243,10 @@ class _TOParser(object):
         return _get_pos(val, start_pos), _get_pos(val, end_pos)
 
     def _overwrite_area(self, s, e):
-        """Overwrite the given span with spaces"""
-        self._v = self._v[:s] + (e-s)*" " + self._v[e:]
+        """Overwrite the given span with spaces. But keep newlines in place"""
+        area = self._v[s:e]
+        area = '\n'.join( [" "*len(i) for i in area.splitlines()] )
+        self._v = self._v[:s] + area + self._v[e:]
 
 
 
@@ -476,6 +509,32 @@ class Transformation(Mirror):
     def __repr__(self):
         return "Transformation(%s -> %s)" % (self._start, self._end)
 
+class ShellCode(TextObject):
+    def __init__(self, parent, start, end, code):
+
+        code = code.replace("\\`", "`")
+
+        # Write the code to a temporary file
+        handle, path = tempfile.mkstemp(text=True)
+        os.write(handle, code)
+        os.close(handle)
+
+        os.chmod(path, stat.S_IRWXU)
+
+        # Interpolate the shell code. We try to stay as compatible with Python
+        # 2.3, therefore, we do not use the subprocess module here
+        output = os.popen(path, "r").read()
+        if len(output) and output[-1] == '\n':
+            output = output[:-1]
+        if len(output) and output[-1] == '\r':
+            output = output[:-1]
+
+        os.unlink(path)
+
+        TextObject.__init__(self, parent, start, end, output)
+
+    def __repr__(self):
+        return "ShellCode(%s -> %s)" % (self._start, self._end)
 
 class TabStop(TextObject):
     """

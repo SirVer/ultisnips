@@ -11,8 +11,6 @@ from PySnipEmu.Geometry import Position
 from PySnipEmu.TextObjects import *
 from PySnipEmu.Buffer import VimBuffer
 
-from PySnipEmu.debug import debug
-
 class Snippet(object):
     _INDENT = re.compile(r"^[ \t]*")
 
@@ -92,12 +90,16 @@ class VimState(object):
 
         vim.current.window.cursor = lineno + 1, col
 
-        if delta.col == 0:
+        if delta.line == delta.col == 0:
             if col == 0 or vim.eval("mode()") != 'i':
                 vim.command(r'call feedkeys("\<Esc>i")')
             else:
                 vim.command(r'call feedkeys("\<Esc>a")')
         else:
+            if delta.line:
+                move_lines = "%ij" % delta.line
+            else:
+                move_lines = ""
             # Depending on the current mode and position, we
             # might need to move escape out of the mode and this
             # will move our cursor one left
@@ -106,14 +108,16 @@ class VimState(object):
             else:
                 move_one_right = ""
 
-
-            if delta.col <= 1:
+            if 0 <= delta.col <= 1:
                 do_select = ""
-            else:
+            elif delta.col > 0:
                 do_select = "%il" % (delta.col-1)
+            else:
+                do_select = "%ih" % (-delta.col+1)
 
-            vim.command(r'call feedkeys("\<Esc>%sv%s\<c-g>")' %
-                (move_one_right, do_select))
+
+            vim.command(r'call feedkeys("\<Esc>%sv%s%s\<c-g>")' %
+                (move_one_right, move_lines, do_select))
 
 
     def buf_changed(self):
@@ -147,12 +151,11 @@ class SnippetManager(object):
 
         self._expect_move_wo_change = False
 
-
     def reset(self):
         self._snippets = {}
         self._csnippet = None
         self._ctab = None
-        self._tab_selected = False
+        self._span_selected = None
 
     def add_snippet(self, trigger, value, descr):
         if "all" not in self._snippets:
@@ -167,7 +170,7 @@ class SnippetManager(object):
             self._ctab = self._csnippet.select_next_tab(backwards)
             if self._ctab:
                 self._vstate.select_span(self._ctab.abs_span)
-                self._tab_selected = True
+                self._span_selected = self._ctab.abs_span
             else:
                 self._csnippet = None
                 return True
@@ -235,8 +238,8 @@ class SnippetManager(object):
         # TODO: this code is duplicated above
         self._ctab = self._csnippet.select_next_tab()
         if self._ctab is not None:
-            self._tab_selected = True
             self._vstate.select_span(self._ctab.abs_span)
+            self._span_selected = self._ctab.abs_span
 
         self._vstate.update()
 
@@ -245,9 +248,8 @@ class SnippetManager(object):
     def backspace_while_selected(self):
         # BS was called in select mode
 
-        if self._csnippet and self._tab_selected:
+        if self._csnippet and (self._span_selected is not None):
             # This only happens when a default value is delted using backspace
-            old_span = self._csnippet.abs_span
             vim.command(r'call feedkeys("i")')
             self._chars_entered('')
         else:
@@ -269,18 +271,18 @@ class SnippetManager(object):
             return
 
         if self._vstate.buf_changed and self._ctab:
-            if 0 <= self._vstate.moved.line <= 1:
-                # Detect a carriage return
-                if self._vstate.moved.col <= 0 and self._vstate.moved.line == 1:
-                    self._chars_entered('\n')
-                elif self._vstate.moved.col < 0: # Some deleting was going on
-                    self._backspace(-self._vstate.moved.col)
-                else:
-                    line = vim.current.line
+            # Detect a carriage return
+            if self._vstate.moved.col <= 0 and self._vstate.moved.line == 1:
+                self._chars_entered('\n')
+            elif self._vstate.moved.line == 0 and self._vstate.moved.col<0:
+                # Some deleting was going on
+                self._backspace(-self._vstate.moved.col)
+            else:
+                line = vim.current.line
 
-                    chars = line[self._vstate.pos.col - self._vstate.moved.col:
-                                 self._vstate.pos.col]
-                    self._chars_entered(chars)
+                chars = line[self._vstate.pos.col - self._vstate.moved.col:
+                             self._vstate.pos.col]
+                self._chars_entered(chars)
 
         self._expect_move_wo_change = False
 
@@ -294,26 +296,31 @@ class SnippetManager(object):
     ###################################
     # Input Handling
     def _chars_entered(self, chars):
-        if self._tab_selected:
+        if (self._span_selected is not None):
             self._ctab.current_text = chars
-            self._tab_selected = False
+
+            moved = self._span_selected.start.line - \
+                    self._span_selected.end.line
+            self._span_selected = None
+
+            self._update_vim_buffer(moved)
         else:
             self._ctab.current_text += chars
+            self._update_vim_buffer()
 
-        self._update_vim_buffer()
 
     def _backspace(self, count):
         self._ctab.current_text = self._ctab.current_text[:-count]
         self._update_vim_buffer()
 
-    def _update_vim_buffer(self):
+    def _update_vim_buffer(self, del_more_lines = 0):
         sline = self._csnippet.abs_start.line
         dlines = self._csnippet.end.line - self._csnippet.start.line
 
         self._csnippet.update()
 
         # Replace
-        dlines += self._vstate.moved.line
+        dlines += self._vstate.moved.line + del_more_lines
         self._vb.replace_lines(sline, sline + dlines,
                        self._csnippet._current_text)
         ct_end = self._ctab.abs_end
@@ -327,7 +334,7 @@ class SnippetManager(object):
         cv = ""
         cdescr = ""
         for line in open(fn):
-            if line.startswith("#"):
+            if cs is None and line.startswith("#"):
                 continue
             if line.startswith("snippet"):
                 cs = line.split()[1]
