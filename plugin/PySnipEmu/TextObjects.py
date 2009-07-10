@@ -8,6 +8,7 @@ from PySnipEmu.Geometry import Span, Position
 
 __all__ = [ "Mirror", "Transformation", "SnippetInstance", "StartMarker" ]
 
+# TODO: remove me
 from PySnipEmu.debug import debug
 
 ###########################################################################
@@ -209,12 +210,10 @@ class _TOParser(object):
             return Position(line_idx, start_in_line)
 
         return _get_pos(val, start_pos), _get_pos(val, end_pos)
-    
+
     def _overwrite_area(self, s, e):
         """Overwrite the given span with spaces"""
         self._v = self._v[:s] + (e-s)*" " + self._v[e:]
-
-
 
 
 
@@ -345,7 +344,6 @@ class TextObject(object):
 
         posible_sol += c
 
-        debug("posi: %s" % (posible_sol,))
         if not len(posible_sol):
             return None
 
@@ -503,10 +501,9 @@ class SnippetInstance(TextObject):
         start = Position(0,0)
         end = Position(0,0)
 
-        TextObject.__init__(self, parent, start, end, "")
+        TextObject.__init__(self, parent, start, end, initial_text)
 
-        self._current_text = TextBuffer(self._parse(initial_text))
-        self._end = self._current_text.calc_end(start)
+        _TOParser(self, initial_text).parse()
 
         TextObject.update(self)
 
@@ -542,16 +539,6 @@ class SnippetInstance(TextObject):
             rv = c._get_tabstop(self, no)
             if rv is not None:
                 return rv
-
-    def _parse(self, val):
-        if not len(val):
-            return val
-
-        _TOParser(self, val).parse()
-
-        # TODO: remove this return. The parser will set our text
-        return val
-
 
     def select_next_tab(self, backwards = False):
         if self._cts is None:
