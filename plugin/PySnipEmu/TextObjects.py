@@ -265,7 +265,7 @@ class TextObject(object):
 
         self._parent = parent
 
-        self._children = []
+        self._childs = []
         self._tabstops = {}
 
         if parent is not None:
@@ -288,11 +288,11 @@ class TextObject(object):
         def fset(self, text):
             self._current_text = TextBuffer(text)
 
-            # All our children are set to "" so they
+            # All our childs are set to "" so they
             # do no longer disturb anything that mirrors it
-            for c in self._children:
+            for c in self._childs:
                 c.current_text = ""
-            self._children = []
+            self._childs = []
             self._tabstops = {}
         return locals()
 
@@ -338,7 +338,7 @@ class TextObject(object):
     # Public functions #
     ####################
     def update(self):
-        for idx,c in enumerate(self._children):
+        for idx,c in enumerate(self._childs):
             oldend = Position(c.end.line, c.end.col)
 
             new_end = c.update()
@@ -372,7 +372,7 @@ class TextObject(object):
                 break
             i += 1
 
-        c = [ c._get_next_tab(no) for c in self._children ]
+        c = [ c._get_next_tab(no) for c in self._childs ]
         c = filter(lambda i: i, c)
 
         posible_sol += c
@@ -396,7 +396,7 @@ class TextObject(object):
                 break
             i -= 1
 
-        c = [ c._get_prev_tab(no) for c in self._children ]
+        c = [ c._get_prev_tab(no) for c in self._childs ]
         c = filter(lambda i: i, c)
 
         posible_sol += c
@@ -417,7 +417,7 @@ class TextObject(object):
         if lines == 0 and cols == 0:
             return
 
-        for idx,m in enumerate(self._children[obj_idx+1:]):
+        for idx,m in enumerate(self._childs[obj_idx+1:]):
             delta_lines = 0
             delta_cols_begin = 0
             delta_cols_end = 0
@@ -439,7 +439,7 @@ class TextObject(object):
     def _get_tabstop(self, requester, no):
         if no in self._tabstops:
             return self._tabstops[no]
-        for c in self._children:
+        for c in self._childs:
             if c == requester:
                 continue
 
@@ -451,8 +451,8 @@ class TextObject(object):
             return self._parent._get_tabstop(self, no)
 
     def _add_child(self,c):
-        self._children.append(c)
-        self._children.sort()
+        self._childs.append(c)
+        self._childs.sort()
 
     def _add_tabstop(self, no, ts):
         self._tabstops[no] = ts
@@ -591,7 +591,7 @@ class SnippetInstance(TextObject):
         # TextObject._get_tabstop
         if no in self._tabstops:
             return self._tabstops[no]
-        for c in self._children:
+        for c in self._childs:
             if c == requester:
                 continue
 
