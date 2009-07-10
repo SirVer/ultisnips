@@ -10,6 +10,8 @@ __all__ = [ "Mirror", "Transformation", "SnippetInstance", "StartMarker" ]
 
 from PySnipEmu.debug import debug
 
+ENDING_TAB = 0
+
 ###########################################################################
 #                              Helper class                               #
 ###########################################################################
@@ -70,11 +72,7 @@ class _CleverReplace(object):
 ###########################################################################
 #                             Public classes                              #
 ###########################################################################
-class TextObject(object):
-    """
-    This base class represents any object in the text
-    that has a span in any ways
-    """
+class TOParser(object):
     # A simple tabstop with default value
     _TABSTOP = re.compile(r'''\${(\d+)[:}]''')
     # A mirror or a tabstop without default value.
@@ -82,6 +80,136 @@ class TextObject(object):
     # A mirror or a tabstop without default value.
     _TRANSFORMATION = re.compile(r'\${(\d+)/(.*?)/(.*?)/([a-zA-z]*)}')
 
+
+    def __init__(self, parent, val):
+        self._v = val
+        self._p = parent
+
+        self._childs = []
+
+
+    def __repr__(self):
+        return "TOParser(%s)" % self._p
+
+    def parse_tabs(self):
+        ts = []
+        m = self._TABSTOP.search(self._v)
+        while m:
+            ts.append(self._handle_tabstop(m))
+            m = self._TABSTOP.search(self._v)
+
+
+        for t, def_text in ts:
+            child_parser = TOParser(t, def_text)
+            child_parser.parse_tabs()
+            self._childs.append(child_parser)
+
+    def parse_transformations(self):
+        self._trans = []
+        for m in self._TRANSFORMATION.finditer(self._v):
+            self._trans.append(self._handle_transformation(m))
+
+        for t in self._childs:
+            t.parse_transformations()
+
+    def parse_mirrors_or_ts(self):
+        for m in self._MIRROR_OR_TS.finditer(self._v):
+            self._handle_ts_or_mirror(m)
+
+        for t in self._childs:
+            t.parse_mirrors_or_ts()
+
+    def finish(self):
+        for c in self._childs:
+            c.finish()
+
+        for t in self._trans:
+            ts = self._p._get_tabstop(self._p,t._ts)
+            if ts is None:
+                raise RuntimeError, "Tabstop %i is not known" % t._ts
+            t._ts = ts
+
+
+    def _handle_tabstop(self, m):
+        def _find_closingbracket(v,start_pos):
+            bracks_open = 1
+            for idx, c in enumerate(v[start_pos:]):
+                if c == '{':
+                    if v[idx+start_pos-1] != '\\':
+                        bracks_open += 1
+                elif c == '}':
+                    if v[idx+start_pos-1] != '\\':
+                        bracks_open -= 1
+                    if not bracks_open:
+                        return start_pos+idx+1
+
+        start_pos = m.start()
+        end_pos = _find_closingbracket(self._v, start_pos+2)
+
+        def_text = self._v[m.end():end_pos-1]
+
+        start, end = self._get_start_end(self._v,start_pos,end_pos)
+
+        ts = TabStop(self._p, start, end, def_text)
+
+        self._p._add_tabstop(int(m.group(1)),ts)
+
+        self._v = self._v[:start_pos] + (end_pos-start_pos)*" " + \
+                self._v[end_pos:]
+
+        return ts, def_text
+
+    def _handle_ts_or_mirror(self, m):
+        no = int(m.group(1))
+
+        start_pos, end_pos = m.span()
+        start, end = self._get_start_end(self._v,start_pos,end_pos)
+
+        ts = self._p._get_tabstop(self._p, no)
+        if ts is not None:
+            rv = Mirror(self._p, ts, start, end)
+        else:
+            rv = TabStop(self._p, start, end)
+            self._p._add_tabstop(no,rv)
+
+        # Replace the whole definition with spaces
+        s, e = m.span()
+        self._v = self._v[:s] + (e-s)*" " + self._v[e:]
+
+        return rv
+
+    def _handle_transformation(self, m):
+        no = int(m.group(1))
+        search = m.group(2)
+        replace = m.group(3)
+        options = m.group(4)
+
+        start_pos, end_pos = m.span()
+        start, end = self._get_start_end(self._v,start_pos,end_pos)
+
+        # Replace the whole definition with spaces
+        s, e = m.span()
+        self._v = self._v[:s] + (e-s)*" " + self._v[e:]
+
+        return Transformation(self._p, no, start, end, search, replace, options)
+
+    def _get_start_end(self, val, start_pos, end_pos):
+        def _get_pos(s, pos):
+            line_idx = s[:pos].count('\n')
+            line_start = s[:pos].rfind('\n') + 1
+            start_in_line = pos - line_start
+            return Position(line_idx, start_in_line)
+
+        return _get_pos(val, start_pos), _get_pos(val, end_pos)
+
+
+
+
+class TextObject(object):
+    """
+    This base class represents any object in the text
+    that has a span in any ways
+    """
     def __init__(self, parent, start, end, initial_text):
         self._start = start
         self._end = end
@@ -94,9 +222,7 @@ class TextObject(object):
         if parent is not None:
             parent._add_child(self)
 
-        self._has_parsed = False
-
-        self._current_text = initial_text
+        self._current_text = TextBuffer(initial_text)
 
         self._cts = 0
 
@@ -163,9 +289,6 @@ class TextObject(object):
     # Public functions #
     ####################
     def update(self):
-        if not self._has_parsed:
-            self._current_text = TextBuffer(self._parse(self._current_text))
-
         for idx,c in enumerate(self._children):
             oldend = Position(c.end.line, c.end.col)
 
@@ -219,7 +342,7 @@ class TextObject(object):
 
         posible_sol = []
         i = no - 1
-        while i >= tno_min:
+        while i >= tno_min and i > 0:
             if i in self._tabstops:
                 posible_sol.append( (i, self._tabstops[i]) )
                 break
@@ -234,29 +357,6 @@ class TextObject(object):
             return None
 
         return max(posible_sol)
-
-    def select_next_tab(self, backwards = False):
-
-        if backwards:
-            cts_bf = self._cts
-
-            res = self._get_prev_tab(self._cts)
-            if res is None:
-                self._cts = cts_bf
-                return self._tabstops[self._cts]
-            self._cts, ts = res
-            return ts
-        else:
-            res = self._get_next_tab(self._cts)
-            if res is None:
-                self._cts = 0
-                if 0 not in self._tabstops:
-                    return None
-            else:
-                self._cts, ts = res
-                return ts
-
-        return self._tabstops[self._cts]
 
 
     ###############################
@@ -288,11 +388,19 @@ class TextObject(object):
             m.start.col += delta_cols_begin
             m.end.col += delta_cols_end
 
-    def _get_tabstop(self,no):
+    def _get_tabstop(self, requester, no):
         if no in self._tabstops:
             return self._tabstops[no]
-        if self._parent:
-            return self._parent._get_tabstop(no)
+        for c in self._children:
+            if c == requester:
+                continue
+
+            rv = c._get_tabstop(self, no)
+            if rv is not None:
+                return rv
+
+        if self._parent and requester != self._parent:
+            return self._parent._get_tabstop(self, no)
 
     def _add_child(self,c):
         self._children.append(c)
@@ -302,97 +410,6 @@ class TextObject(object):
         self._tabstops[no] = ts
 
 
-
-    # Parsing below
-    def _get_start_end(self, val, start_pos, end_pos):
-        def _get_pos(s, pos):
-            line_idx = s[:pos].count('\n')
-            line_start = s[:pos].rfind('\n') + 1
-            start_in_line = pos - line_start
-            return Position(line_idx, start_in_line)
-
-        return _get_pos(val, start_pos), _get_pos(val, end_pos)
-
-    def _handle_tabstop(self, m, val):
-        debug("m: %s, val: %s" % (m, repr(val)))
-
-        def _find_closingbracket(v,start_pos):
-            bracks_open = 1
-            for idx, c in enumerate(v[start_pos:]):
-                if c == '{':
-                    if v[idx+start_pos-1] != '\\':
-                        bracks_open += 1
-                elif c == '}':
-                    if v[idx+start_pos-1] != '\\':
-                        bracks_open -= 1
-                    if not bracks_open:
-                        return start_pos+idx+1
-
-        start_pos = m.start()
-        end_pos = _find_closingbracket(val, start_pos+2)
-
-        debug("m.end(): %s, start_pos: %s, end_pos: %s" % (m.end(), start_pos, end_pos))
-        def_text = val[m.end():end_pos-1]
-
-        start, end = self._get_start_end(val,start_pos,end_pos)
-
-        ts = TabStop(self, start, end, def_text)
-
-        self._add_tabstop(int(m.group(1)),ts)
-
-        return val[:start_pos] + (end_pos-start_pos)*" " + val[end_pos:]
-
-
-    def _handle_ts_or_mirror(self, m, val):
-        no = int(m.group(1))
-
-        start_pos, end_pos = m.span()
-        start, end = self._get_start_end(val,start_pos,end_pos)
-
-        ts = self._get_tabstop(no)
-        if ts is not None:
-            Mirror(self, ts, start, end)
-        else:
-            ts = TabStop(self, start, end)
-            self._add_tabstop(no,ts)
-
-    def _handle_transformation(self, m, val):
-        no = int(m.group(1))
-        search = m.group(2)
-        replace = m.group(3)
-        options = m.group(4)
-
-        start_pos, end_pos = m.span()
-        start, end = self._get_start_end(val,start_pos,end_pos)
-
-        Transformation(self, no, start, end, search, replace, options)
-
-
-    def _parse(self, val):
-        self._has_parsed = True
-
-        if not len(val):
-            return val
-
-        m = self._TABSTOP.search(val)
-        while m:
-            val = self._handle_tabstop(m,val)
-            m = self._TABSTOP.search(val)
-
-        for m in self._TRANSFORMATION.finditer(val):
-            self._handle_transformation(m,val)
-            # Replace the whole definition with spaces
-            s, e = m.span()
-            val = val[:s] + (e-s)*" " + val[e:]
-
-
-        for m in self._MIRROR_OR_TS.finditer(val):
-            self._handle_ts_or_mirror(m,val)
-            # Replace the whole definition with spaces
-            s, e = m.span()
-            val = val[:s] + (e-s)*" " + val[e:]
-
-        return val
 
 class StartMarker(TextObject):
     """
@@ -437,9 +454,6 @@ class Transformation(Mirror):
         self._replace = _CleverReplace(r)
 
     def _do_update(self):
-        if isinstance(self._ts,int):
-            self._ts = self._parent._get_tabstop(self._ts)
-
         t = self._ts.current_text
         t = self._find.subn(self._replace.replace, t, self._match_this_many)[0]
         self.current_text = t
@@ -494,4 +508,57 @@ class SnippetInstance(TextObject):
 
     def __repr__(self):
         return "SnippetInstance(%s -> %s)" % (self._start, self._end)
+
+
+    def _get_tabstop(self, requester, no):
+        # SnippetInstances are completly self contained,
+        # therefore, we do not need to ask our parent
+        # for Tabstops
+        # TODO: otherwise, this code is identical to
+        # TextObject._get_tabstop
+        if no in self._tabstops:
+            return self._tabstops[no]
+        for c in self._children:
+            if c == requester:
+                continue
+
+            rv = c._get_tabstop(self, no)
+            if rv is not None:
+                return rv
+
+    def _parse(self, val):
+        if not len(val):
+            return val
+
+        to = TOParser(self, val)
+        to.parse_tabs()
+        to.parse_transformations()
+        to.parse_mirrors_or_ts()
+        to.finish()
+
+        return val
+
+
+    def select_next_tab(self, backwards = False):
+        if backwards:
+            cts_bf = self._cts
+
+            res = self._get_prev_tab(self._cts)
+            if res is None:
+                self._cts = cts_bf
+                return self._tabstops[self._cts]
+            self._cts, ts = res
+            return ts
+        else:
+            res = self._get_next_tab(self._cts)
+            if res is None:
+                self._cts = 0
+                if 0 not in self._tabstops:
+                    return None
+            else:
+                self._cts, ts = res
+                return ts
+
+        return self._tabstops[self._cts]
+
 

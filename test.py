@@ -292,7 +292,7 @@ class TabStop_TSInDefault_MirrorsOutside_DoNothing(_VimTest):
 class TabStop_TSInDefault_MirrorsOutside_OverwriteSecond(_VimTest):
     snippets = ("test", "hi ${1:this ${2:second}} $2")
     keys = "test" + EX + JF + "Hallo"
-    wanted = "hi Hallo Hallo"
+    wanted = "hi this Hallo Hallo"
 class TabStop_TSInDefault_MirrorsOutside_Overwrite(_VimTest):
     snippets = ("test", "hi ${1:this ${2:second}} $2")
     keys = "test" + EX + "Hallo"
