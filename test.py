@@ -54,7 +54,7 @@ class _VimTest(unittest.TestCase):
     def setUp(self):
         self.send(ESC)
 
-        self.send(":py PySnipSnippets.reset()\n")
+        self.send(":py UltiSnips_Manager.reset()\n")
 
         if not isinstance(self.snippets[0],tuple):
             self.snippets = ( self.snippets, )
@@ -65,7 +65,7 @@ class _VimTest(unittest.TestCase):
             if len(s) == 3:
                 descr = s[-1]
             self.send(''':py << EOF
-PySnipSnippets.add_snippet("%s","""%s""", "%s")
+UltiSnips_Manager.add_snippet("%s","""%s""", "%s")
 EOF
 ''' % (sv,content.encode("string-escape"), descr.encode("string-escape"))
             )
@@ -86,7 +86,7 @@ EOF
             # Execute the command
             self.type(self.keys)
 
-            handle, fn = tempfile.mkstemp(prefix="PySnipEmuTest",suffix=".txt")
+            handle, fn = tempfile.mkstemp(prefix="UltiSnips_Test",suffix=".txt")
             os.close(handle)
             os.unlink(fn)
 
@@ -749,19 +749,19 @@ if __name__ == '__main__':
     send(":imapclear\n", options.session)
     send(":smapclear\n", options.session)
 
-    send(":inoremap <Tab> <C-R>=PyVimSnips_ExpandSnippet()<cr>\n",
+    send(":inoremap <Tab> <C-R>=UltiSnips_ExpandSnippet()<cr>\n",
          options.session)
-    send(":snoremap <Tab> <Esc>:call PyVimSnips_ExpandSnippet()<cr>\n",
+    send(":snoremap <Tab> <Esc>:call UltiSnips_ExpandSnippet()<cr>\n",
          options.session)
-    send(":inoremap + <C-R>=PyVimSnips_JumpBackwards()<cr>\n", options.session)
-    send(":snoremap + <Esc>:call PyVimSnips_JumpBackwards()<cr>\n",
+    send(":inoremap + <C-R>=UltiSnips_JumpBackwards()<cr>\n", options.session)
+    send(":snoremap + <Esc>:call UltiSnips_JumpBackwards()<cr>\n",
          options.session)
-    send(":inoremap ? <C-R>=PyVimSnips_JumpForwards()<cr>\n", options.session)
-    send(":snoremap ? <Esc>:call PyVimSnips_JumpForwards()<cr>\n",
+    send(":inoremap ? <C-R>=UltiSnips_JumpForwards()<cr>\n", options.session)
+    send(":snoremap ? <Esc>:call UltiSnips_JumpForwards()<cr>\n",
          options.session)
 
     # Mandatory remapping
-    send(":snoremap <BS> <Esc>:py  PySnipSnippets." \
+    send(":snoremap <BS> <Esc>:py  UltiSnips_Manager." \
          "backspace_while_selected()<cr>\n", options.session)
 
     # Inform all test case which screen session to use

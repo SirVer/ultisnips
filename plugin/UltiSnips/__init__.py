@@ -7,9 +7,9 @@ import re
 import string
 import vim
 
-from PySnipEmu.Geometry import Position
-from PySnipEmu.TextObjects import *
-from PySnipEmu.Buffer import VimBuffer
+from UltiSnips.Geometry import Position
+from UltiSnips.TextObjects import *
+from UltiSnips.Buffer import VimBuffer
 
 class Snippet(object):
     _INDENT = re.compile(r"^[ \t]*")
@@ -359,7 +359,7 @@ class SnippetManager(object):
     def _load_snippets_for(self, ft):
         self._snippets[ft] = {}
         for p in vim.eval("&runtimepath").split(',')[::-1]:
-            pattern = p + os.path.sep + "PySnippets" + os.path.sep + \
+            pattern = p + os.path.sep + "UltiSnips" + os.path.sep + \
                     "*%s.snippets" % ft
 
             for fn in glob.glob(pattern):
@@ -375,5 +375,5 @@ class SnippetManager(object):
         return snips.get(trigger, [])
 
 
-PySnipSnippets = SnippetManager()
+UltiSnips_Manager = SnippetManager()
 

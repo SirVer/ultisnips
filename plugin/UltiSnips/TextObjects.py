@@ -6,8 +6,8 @@ import re
 import stat
 import tempfile
 
-from PySnipEmu.Buffer import TextBuffer
-from PySnipEmu.Geometry import Span, Position
+from UltiSnips.Buffer import TextBuffer
+from UltiSnips.Geometry import Span, Position
 
 __all__ = [ "Mirror", "Transformation", "SnippetInstance", "StartMarker" ]
 

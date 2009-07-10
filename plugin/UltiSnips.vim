@@ -1,7 +1,7 @@
 
 "" FUNCTIONS
 
-function! PyVimSnips_ExpandSnippet()
+function! UltiSnips_ExpandSnippet()
     if exists('g:SuperTabMappingForward')
         if g:SuperTabMappingForward == "<s-tab>"
             let SuperTabKey = "\<c-n>"
@@ -20,7 +20,7 @@ function! PyVimSnips_ExpandSnippet()
 
    " Now, really expand something
     py << EOF
-if not PySnipSnippets.try_expand():
+if not UltiSnips_Manager.try_expand():
    vim.command("""if exists('SuperTabKey')
    call feedkeys(SuperTabKey)
 endif
@@ -30,16 +30,16 @@ EOF
    return ""
 endfunction
 
-function! PyVimSnips_JumpBackwards()
+function! UltiSnips_JumpBackwards()
     py << EOF
-PySnipSnippets.jump(True)
+UltiSnips_Manager.jump(True)
 EOF
     return ""
 endfunction
 
-function! PyVimSnips_JumpForwards()
+function! UltiSnips_JumpForwards()
     py << EOF
-PySnipSnippets.jump()
+UltiSnips_Manager.jump()
 EOF
     return ""
 endfunction
@@ -53,25 +53,25 @@ import vim, os, sys
 
 for p in vim.eval("&runtimepath").split(','):
    dname = p + os.path.sep + "plugin"
-   if os.path.exists(dname + os.path.sep + "PySnipEmu"):
+   if os.path.exists(dname + os.path.sep + "UltiSnips"):
       if dname not in sys.path:
          sys.path.append(dname)
       break
 
-from PySnipEmu import PySnipSnippets
+from UltiSnips import UltiSnips_Manager
 EOF
 
 " You can remap these
-inoremap <Tab> <C-R>=PyVimSnips_ExpandSnippet()<cr>
-snoremap <Tab> <Esc>:call PyVimSnips_ExpandSnippet()<cr>
-inoremap <C-k> <C-R>=PyVimSnips_JumpBackwards()<cr>
-snoremap <C-k> <Esc>:call PyVimSnips_JumpBackwards()<cr>
-inoremap <C-j> <C-R>=PyVimSnips_JumpForwards()<cr>
-snoremap <C-j> <Esc>:call PyVimSnips_JumpForwards()<cr>
+inoremap <Tab> <C-R>=UltiSnips_ExpandSnippet()<cr>
+snoremap <Tab> <Esc>:call UltiSnips_ExpandSnippet()<cr>
+inoremap <C-k> <C-R>=UltiSnips_JumpBackwards()<cr>
+snoremap <C-k> <Esc>:call UltiSnips_JumpBackwards()<cr>
+inoremap <C-j> <C-R>=UltiSnips_JumpForwards()<cr>
+snoremap <C-j> <Esc>:call UltiSnips_JumpForwards()<cr>
 
 " Do not remap this.
-snoremap <BS> <Esc>:py  PySnipSnippets.backspace_while_selected()<cr>
+snoremap <BS> <Esc>:py  UltiSnips_Manager.backspace_while_selected()<cr>
 
-au CursorMovedI * py PySnipSnippets.cursor_moved()
-au InsertEnter * py PySnipSnippets.entered_insert_mode()
+au CursorMovedI * py UltiSnips_Manager.cursor_moved()
+au InsertEnter * py UltiSnips_Manager.entered_insert_mode()
    

@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 import vim
-from PySnipEmu.Geometry import Position
+from UltiSnips.Geometry import Position
 
 __all__ = [ "TextBuffer", "VimBuffer" ]
 
