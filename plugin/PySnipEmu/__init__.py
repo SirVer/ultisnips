@@ -93,12 +93,11 @@ class VimState(object):
         vim.current.window.cursor = lineno + 1, col
 
         if delta.col == 0:
-            if (col + delta.col) == 0:
+            if col == 0 or vim.eval("mode()") != 'i':
                 vim.command(r'call feedkeys("\<Esc>i")')
             else:
                 vim.command(r'call feedkeys("\<Esc>a")')
         else:
-            # Select the word
             # Depending on the current mode and position, we
             # might need to move escape out of the mode and this
             # will move our cursor one left
@@ -106,6 +105,7 @@ class VimState(object):
                 move_one_right = "l"
             else:
                 move_one_right = ""
+
 
             if delta.col <= 1:
                 do_select = ""
