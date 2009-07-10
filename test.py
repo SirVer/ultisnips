@@ -302,8 +302,6 @@ class TabStop_TSInDefault_MirrorsOutside_Overwrite(_VimTest):
     keys = "test" + EX + "Hallo"
     wanted = "hi Hallo "
 
-# TODO: Example with Transformations / Mirrors outside of recursion
-#
 print "Shell eval snippets"
 
 # functions
