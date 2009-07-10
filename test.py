@@ -21,7 +21,8 @@ JB = "+" # Jump backwards
 EX = "\t" # EXPAND
 
 def send(s,session):
-        os.system("screen -x %s -X stuff '%s'" % (session,s))
+    os.system("screen -x %s -X stuff '%s'" % (session,s))
+    time.sleep(.005)
 
 def type(str, session):
     """
