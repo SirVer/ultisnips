@@ -67,10 +67,7 @@ class _CleverReplace(object):
 
         return rv
 
-###########################################################################
-#                             Public classes                              #
-###########################################################################
-class TOParser(object):
+class _TOParser(object):
     # A simple tabstop with default value
     _TABSTOP = re.compile(r'''\${(\d+)[:}]''')
     # A mirror or a tabstop without default value.
@@ -78,18 +75,25 @@ class TOParser(object):
     # A mirror or a tabstop without default value.
     _TRANSFORMATION = re.compile(r'\${(\d+)/(.*?)/(.*?)/([a-zA-z]*)}')
 
-
     def __init__(self, parent, val):
         self._v = val
         self._p = parent
 
         self._childs = []
 
-
     def __repr__(self):
         return "TOParser(%s)" % self._p
 
-    def parse_tabs(self):
+    def parse(self):
+        self._parse_tabs()
+        self._parse_transformations()
+        self._parse_mirrors_or_ts()
+        self._finish()
+
+    ########
+    # TABS #
+    ########
+    def _parse_tabs(self):
         ts = []
         m = self._TABSTOP.search(self._v)
         while m:
@@ -98,35 +102,9 @@ class TOParser(object):
 
 
         for t, def_text in ts:
-            child_parser = TOParser(t, def_text)
-            child_parser.parse_tabs()
+            child_parser = _TOParser(t, def_text)
+            child_parser._parse_tabs()
             self._childs.append(child_parser)
-
-    def parse_transformations(self):
-        self._trans = []
-        for m in self._TRANSFORMATION.finditer(self._v):
-            self._trans.append(self._handle_transformation(m))
-
-        for t in self._childs:
-            t.parse_transformations()
-
-    def parse_mirrors_or_ts(self):
-        for m in self._MIRROR_OR_TS.finditer(self._v):
-            self._handle_ts_or_mirror(m)
-
-        for t in self._childs:
-            t.parse_mirrors_or_ts()
-
-    def finish(self):
-        for c in self._childs:
-            c.finish()
-
-        for t in self._trans:
-            ts = self._p._get_tabstop(self._p,t._ts)
-            if ts is None:
-                raise RuntimeError, "Tabstop %i is not known" % t._ts
-            t._ts = ts
-
 
     def _handle_tabstop(self, m):
         def _find_closingbracket(v,start_pos):
@@ -152,10 +130,43 @@ class TOParser(object):
 
         self._p._add_tabstop(int(m.group(1)),ts)
 
-        self._v = self._v[:start_pos] + (end_pos-start_pos)*" " + \
-                self._v[end_pos:]
+        self._overwrite_area(start_pos, end_pos)
 
         return ts, def_text
+
+    ###################
+    # TRANSFORMATIONS #
+    ###################
+    def _parse_transformations(self):
+        self._trans = []
+        for m in self._TRANSFORMATION.finditer(self._v):
+            self._trans.append(self._handle_transformation(m))
+
+        for t in self._childs:
+            t._parse_transformations()
+
+    def _handle_transformation(self, m):
+        no = int(m.group(1))
+        search = m.group(2)
+        replace = m.group(3)
+        options = m.group(4)
+
+        start_pos, end_pos = m.span()
+        start, end = self._get_start_end(self._v,start_pos,end_pos)
+
+        self._overwrite_area(*m.span())
+
+        return Transformation(self._p, no, start, end, search, replace, options)
+
+    #####################
+    # MIRRORS OR TS: $1 #
+    #####################
+    def _parse_mirrors_or_ts(self):
+        for m in self._MIRROR_OR_TS.finditer(self._v):
+            self._handle_ts_or_mirror(m)
+
+        for t in self._childs:
+            t._parse_mirrors_or_ts()
 
     def _handle_ts_or_mirror(self, m):
         no = int(m.group(1))
@@ -170,27 +181,26 @@ class TOParser(object):
             rv = TabStop(self._p, start, end)
             self._p._add_tabstop(no,rv)
 
-        # Replace the whole definition with spaces
-        s, e = m.span()
-        self._v = self._v[:s] + (e-s)*" " + self._v[e:]
+        self._overwrite_area(*m.span())
 
         return rv
 
-    def _handle_transformation(self, m):
-        no = int(m.group(1))
-        search = m.group(2)
-        replace = m.group(3)
-        options = m.group(4)
+    ###################
+    # Resolve symbols #
+    ###################
+    def _finish(self):
+        for c in self._childs:
+            c._finish()
 
-        start_pos, end_pos = m.span()
-        start, end = self._get_start_end(self._v,start_pos,end_pos)
+        for t in self._trans:
+            ts = self._p._get_tabstop(self._p,t._ts)
+            if ts is None:
+                raise RuntimeError, "Tabstop %i is not known" % t._ts
+            t._ts = ts
 
-        # Replace the whole definition with spaces
-        s, e = m.span()
-        self._v = self._v[:s] + (e-s)*" " + self._v[e:]
-
-        return Transformation(self._p, no, start, end, search, replace, options)
-
+    ####################
+    # Helper functions #
+    ####################
     def _get_start_end(self, val, start_pos, end_pos):
         def _get_pos(s, pos):
             line_idx = s[:pos].count('\n')
@@ -199,9 +209,18 @@ class TOParser(object):
             return Position(line_idx, start_in_line)
 
         return _get_pos(val, start_pos), _get_pos(val, end_pos)
+    
+    def _overwrite_area(self, s, e):
+        """Overwrite the given span with spaces"""
+        self._v = self._v[:s] + (e-s)*" " + self._v[e:]
 
 
 
+
+
+###########################################################################
+#                             Public classes                              #
+###########################################################################
 
 class TextObject(object):
     """
@@ -528,12 +547,9 @@ class SnippetInstance(TextObject):
         if not len(val):
             return val
 
-        to = TOParser(self, val)
-        to.parse_tabs()
-        to.parse_transformations()
-        to.parse_mirrors_or_ts()
-        to.finish()
+        _TOParser(self, val).parse()
 
+        # TODO: remove this return. The parser will set our text
         return val
 
 
