@@ -11,6 +11,8 @@ from UltiSnips.Geometry import Position
 from UltiSnips.TextObjects import *
 from UltiSnips.Buffer import VimBuffer
 
+from UltiSnips.debug import debug
+
 class Snippet(object):
     _INDENT = re.compile(r"^[ \t]*")
 
@@ -277,6 +279,9 @@ class SnippetManager(object):
             elif self._vstate.moved.line == 0 and self._vstate.moved.col<0:
                 # Some deleting was going on
                 self._backspace(-self._vstate.moved.col)
+            elif self._vstate.moved.line < 0:
+                # Backspace over line end
+                self._backspace(1)
             else:
                 line = vim.current.line
 

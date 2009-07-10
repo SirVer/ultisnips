@@ -22,15 +22,15 @@ EX = "\t" # EXPAND
 
 def send(s,session):
     os.system("screen -x %s -X stuff '%s'" % (session,s))
-    time.sleep(.005)
 
-def type(str, session):
+def type(str, session, sleeptime):
     """
     Send the keystrokes to vim via screen. Pause after each char, so
     vim can handle this
     """
     for c in str:
         send(c, session)
+        time.sleep(sleeptime)
 
 class _VimTest(unittest.TestCase):
     snippets = ("dummy", "donotdefine")
@@ -38,12 +38,13 @@ class _VimTest(unittest.TestCase):
     text_after =  " --- some text after --- "
     wanted = ""
     keys = ""
+    sleeptime = 0.01
 
     def send(self,s):
         send(s, self.session)
 
     def type(self,s):
-        type(s, self.session)
+        type(s, self.session, self.sleeptime)
 
     def check_output(self):
         wanted = self.text_before + '\n\n' + self.wanted + \
@@ -102,6 +103,8 @@ EOF
                 time.sleep(.05)
                 tries -= 1
 
+# TODO: correct indent after newline in snippet
+#
 ##################
 # Simple Expands #
 ##################
@@ -114,6 +117,18 @@ class SimpleExpand_ExceptCorrectResult(_SimpleExpands):
 class SimpleExpandTwice_ExceptCorrectResult(_SimpleExpands):
     keys = "hallo" + EX + '\nhallo' + EX
     wanted = "Hallo Welt!\nHallo Welt!"
+
+class SimpleExpandNewLineAndBackspae_ExceptCorrectResult(_SimpleExpands):
+    keys = "hallo" + EX + "\nHallo Welt!\n\n\b\b\b\b\b"
+    wanted = "Hallo Welt!\nHallo We"
+    def setUp(self):
+        self.send(":set backspace=eol,start\n")
+        _SimpleExpands.setUp(self)
+    def tearDown(self):
+        self.send(":set backspace=\n")
+        _SimpleExpands.tearDown(self)
+
+
 
 class SimpleExpandTypeAfterExpand_ExceptCorrectResult(_SimpleExpands):
     keys = "hallo" + EX + "and again"
@@ -169,8 +184,6 @@ class TabStopNoReplace_ExceptCorrectResult(_VimTest):
     snippets = ("echo", "echo ${1:Hallo}")
     keys = "echo" + EX
     wanted = "echo Hallo"
-
-# TODO: multiline tabstops, maybe?
 
 class TabStopEscapingWhenSelected_ECR(_VimTest):
     snippets = ("test", "snip ${1:default}")
@@ -345,6 +358,7 @@ class TabStop_Shell_InDefValue_Overwrite(_VimTest):
     wanted = "Hallo overwrite endand more"
 
 class TabStop_Shell_ShebangPython(_VimTest):
+    sleeptime = 0.05 # Do this very slowly
     snippets = ("test", """Hallo ${1:now `#!/usr/bin/env python
 print "Hallo Welt"
 `} end""")
@@ -421,7 +435,6 @@ class MultilineTabStopSimpleMirrorMultiline1_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1\n$1\n$1")
     keys = "test" + EX + "hallo Du\nHi"
     wanted = "hallo Du\nHi\nhallo Du\nHi\nhallo Du\nHi"
-# TODO: Multiline delete over line endings
 class MultilineTabStopSimpleMirrorDeleteInLine_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1\n$1\n$1")
     keys = "test" + EX + "hallo Du\nHi\b\bAch Blah"
@@ -628,8 +641,6 @@ class Transformation_OptionReplaceGlobalMatchInReplace_ECR(_VimTest):
     snippets = ("test", r"$1 ${1/, */, /g}")
     keys = "test" + EX + "a, nice,   building"
     wanted = "a, nice,   building a, nice, building"
-
-# TODO: conditional in conditional, case folding recursive
 
 ###################
 # CURSOR MOVEMENT #
