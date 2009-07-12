@@ -1,0 +1,14 @@
+This directory contains the main scripts that come bundled with UltiSnips.
+
+Standing On The Shoulders of Giants
+===================================
+
+The snippets have been collected from various other project which I want to
+express my gratitude for. Not all files have been reviewed for 100%
+compatibility with UltiSnips, but bugs will be fixed over time. 
+
+The prefixes for the file show their origin:
+
+   tm - TextMate: http://svn.textmate.org/trunk/Bundles/
+   sm - SnipMate: http://code.google.com/p/snipmate/
+

@@ -1,0 +1,346 @@
+snippet imp "#import "" (imp)"
+#import "${1:${TM_FILENAME/\...*$/.h/}}"
+endsnippet
+
+snippet Imp "#import &lt;&gt; (Imp)"
+#import <${1:Cocoa/Cocoa.h}>
+endsnippet
+
+snippet cl "020 Class (objc)"
+@interface ${1:${TM_FILENAME/\...*$|(^$)/(?1:object)/}} : ${2:NSObject}
+{
+}
+@end
+
+@implementation $1
+- (id)init
+{
+	if((self = [super init]))
+	{$0
+	}
+	return self;
+}
+@end
+endsnippet
+
+snippet array "030 NSArray (array)"
+NSMutableArray${TM_C_POINTER: *}${1:array} = [NSMutableArray array];
+endsnippet
+
+snippet dict "040 NSDictionary (dict)"
+NSMutableDictionary${TM_C_POINTER: *}${1:dict} = [NSMutableDictionary dictionary];
+endsnippet
+
+snippet m "050 Method (m)"
+- (${1:id})${2:${TM_SELECTED_TEXT:method}}${3::(${4:id})${5:${4/(NS([AEIOQUY])?(\w+).*)|(.)?.*/(?1:a(?2:n$2)$3:(?4:anArgument))/}}}
+{$0${1/^(void|IBAction)$|(.*)/(?2:
+	return nil;)/}
+}
+endsnippet
+
+snippet sm "060 SubMethod (sm)"
+- (${1:id})${2:method}${3::(${4:id})${5:${4/(NS([AEIOQUY])?(\w+).*)|(.)?.*/(?1:a(?2:n$2)$3:(?4:anArgument))/}}}
+{
+	${1/^(void|IBAction)$|(.*)/(?2:$2 res = )/}[super ${2:method}${5/.+/:$0/}];$0${1/^(void|IBAction)$|(.*)/(?2:
+	return res;)/}
+}
+endsnippet
+
+snippet forarray "080 for NSArray loop (forarray)"
+unsigned int	${1:object}Count = [${2:array} count];
+
+for(unsigned int index = 0; index < ${1}Count; index += 1)
+{
+	${3:id}	${1} = [$2 objectAtIndex:index];
+	$0
+}
+endsnippet
+
+snippet objacc "090 Object Accessors (objacc)"
+- (${1:id})${2:thing}
+{
+	return $2;
+}
+
+- (void)set${2/./\u$0/}:($1)aValue
+{
+	$0${1/( \*)?$/(?1:$1: )/}old${2/./\u$0/} = $2;
+	$2 = [aValue retain];
+	[old${2/./\u$0/} release];
+}
+endsnippet
+
+snippet sel "@selector"
+@selector(${1:method}:)
+endsnippet
+
+snippet cat "Category (cat)"
+@interface ${1:${TM_FILENAME/.*?(\w+).*|.*/(?1:$1:NSObject)/}} (${2:${TM_FILENAME/.*?\w+\W+(\w+).*\..+|.*/(?1:$1:Category)/}})
+@end
+
+@implementation $1 ($2)
+$0
+@end
+endsnippet
+
+snippet catm "Category Implementation"
+@implementation ${1:${TM_FILENAME/.*?(\w+).*|.*/(?1:$1:NSObject)/}} (${2:${TM_FILENAME/.*?\w+\W+(\w+).*\..+|.*/(?1:$1:Category)/}})
+$0
+@end
+endsnippet
+
+snippet cath "Category Interface Only (cati)"
+@interface ${1:${TM_FILENAME/.*?(\w+).*|.*/(?1:$1:NSObject)/}} (${2:${TM_FILENAME/.*?\w+\W+(\w+).*\..+|.*/(?1:$1:Category)/}})
+$0
+@end
+endsnippet
+
+snippet clm "Class Implementation"
+@implementation ${1:${TM_FILENAME/\...*$|(^$)/(?1:object)/}}
+- (id)init
+{
+	if((self = [super init]))
+	{$0
+	}
+	return self;
+}
+@end
+endsnippet
+
+snippet clh "Class Interface Only (classi)"
+@interface ${1:${TM_FILENAME/\...*$|(^$)/(?1:object)/}} : ${2:NSObject}
+{$3
+}
+$0
+@end
+endsnippet
+
+snippet M "Class Method (M)"
++ (${1:id})${2:method}${3::(${4:id})${5:${4/(NS([AEIOQUY])?(\w+).*)|(.)?.*/(?1:a(?2:n$2)$3:(?4:anArgument))/}}}
+{$0${1/^(void|IBAction)$|(.*)/(?2:
+	return nil;)/}
+}
+endsnippet
+
+snippet M "Class Method Interface (M)"
++ (${1:id})${0:method};
+endsnippet
+
+snippet cdacc "CoreData Accessors Implementation"
+- (${1:id})${2:attribute}
+{
+	[self willAccessValueForKey:@"${2: attribute}"];
+	${1:id} value = [self primitiveValueForKey:@"${2: attribute}"];
+	[self didAccessValueForKey:@"${2: attribute}"];
+	return value;
+}
+
+- (void)set${2/./\u$0/}:($1)aValue
+{
+	[self willChangeValueForKey:@"${2: attribute}"];
+	[self setPrimitiveValue:aValue forKey:@"${2: attribute}"];
+	[self didChangeValueForKey:@"${2: attribute}"];
+}
+endsnippet
+
+snippet delegate "Delegate Responds to Selector"
+if([${1:[self delegate]} respondsToSelector:@selector(${2:selfDidSomething:})])
+	[$1 ${3:${2/((^\s*([A-Za-z0-9_]*:)\s*)|(:\s*$)|(:\s*))/(?2:$2self :\:<>)(?4::)(?5: :)/g}}];
+
+endsnippet
+
+snippet thread "Detach New NSThread"
+[NSThread detachNewThreadSelector:@selector(${1:method}:) toTarget:${2:aTarget} withObject:${3:anArgument}]
+endsnippet
+
+snippet ibo "IBOutlet (ibo)"
+IBOutlet ${1:NSSomeClass}${TM_C_POINTER: *}${2:${1/^[A-Z](?:[A-Z]+|[a-z]+)([A-Z]\w*)/\l$1/}};
+endsnippet
+
+snippet I "Initialize Implementation (I)"
++ (void)initialize
+{
+	[[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
+		$0@"value", @"key",
+		nil]];
+}
+endsnippet
+
+snippet bind "Key:value binding (bind)"
+bind:@"${2:binding}" toObject:${3:observableController} withKeyPath:@"${4:keyPath}" options:${5:nil}
+endsnippet
+
+snippet arracc "LoD array (arracc)"
+- (void)addObjectTo${1:Things}:(${2:id})anObject
+{
+	[${3:${1/./\l$0/}} addObject:anObject];
+}
+
+- (void)insertObject:($2)anObject in$1AtIndex:(unsigned int)i 
+{
+	[$3 insertObject:anObject atIndex:i];
+}
+
+- ($2)objectIn$1AtIndex:(unsigned int)i
+{
+	return [$3 objectAtIndex:i];
+}
+
+- (unsigned int)indexOfObjectIn$1:($2)anObject
+{
+	return [$3 indexOfObject:anObject];
+}
+
+- (void)removeObjectFrom$1AtIndex:(unsigned int)i
+{
+	[$3 removeObjectAtIndex:i];
+}
+
+- (unsigned int)countOf$1
+{
+	return [$3 count];
+}
+
+- (NSArray${TM_C_POINTER/(^(.+?)\s*$)?/(?1:$2: *)/})${1/./\l$0/}
+{
+	return $3;
+}
+
+- (void)set$1:(NSArray${TM_C_POINTER/(^(.+?)\s*$)?/(?1:$2: *)/})new$1
+{
+	[$3 setArray:new$1];
+}
+endsnippet
+
+snippet arracc "LoD array interface (arracc)"
+- (void)addObjectTo${1:Things}:(${2:id})anObject;
+- (void)insertObject:($2)anObject in$1AtIndex:(unsigned int)i;
+- ($2)objectIn$1AtIndex:(unsigned int)i;
+- (unsigned int)indexOfObjectIn$1:($2)anObject;
+- (void)removeObjectFrom$1AtIndex:(unsigned int)i;
+- (unsigned int)countOf$1;
+- (NSArray${TM_C_POINTER/(^(.+?)\s*$)?/(?1:$2: *)/})${1/./\l$0/};
+- (void)set$1:(NSArray${TM_C_POINTER/(^(.+?)\s*$)?/(?1:$2: *)/})new$1;
+endsnippet
+
+snippet focus "Lock Focus"
+[self lockFocus];
+$0
+[self unlockFocus];
+endsnippet
+
+snippet m "Method Interface (m)"
+- (${1:id})${2:${TM_SELECTED_TEXT:method}}${3::(${4:id})${5:${4/(NS([AEIOQUY])?(\w+).*)|(.)?.*/(?1:a(?2:n$2)$3:(?4:anArgument))/}}};
+endsnippet
+
+snippet pool "NSAutoreleasePool (pool)"
+NSAutoreleasePool${TM_C_POINTER: *}pool = [NSAutoreleasePool new];
+$0
+[pool drain];
+endsnippet
+
+snippet bez "NSBezierPath (bez)"
+NSBezierPath${TM_C_POINTER: *}${1:path} = [NSBezierPath bezierPath];
+$0
+endsnippet
+
+snippet log "NSLog (log) 2"
+NSLog(@"$1"${1/[^%]*(%)?.*/(?1:, :\);)/}$2${1/[^%]*(%)?.*/(?1:\);)/}
+endsnippet
+
+snippet log "NSLog(.., _cmd) (log)"
+NSLog(@"%s$1", _cmd${1/[^%]*(%)?.*/(?1:, :\);)/}$2${1/[^%]*(%)?.*/(?1:\);)/}
+endsnippet
+
+snippet alert "NSRunAlertPanel (alert)"
+int choice = NSRunAlertPanel(@"${1:Something important!}", @"${2:Something important just happend, and now I need to ask you, do you want to continue?}", @"${3:Continue}", @"${4:Cancel}", nil);
+if(choice == NSAlertDefaultReturn) // "${3:Continue}"
+{
+	$0;
+}
+else if(choice == NSAlertAlternateReturn) // "${4:Cancel}"
+{
+	
+}
+endsnippet
+
+snippet format "NSString stringWithFormat (format)"
+[NSString stringWithFormat:@"$1", $2]$0
+endsnippet
+
+snippet objacc "Object Accessors Interface (objacc)"
+- (${1:id})${2:thing};
+- (void)set${2/./\u$0/}:($1)aValue;
+endsnippet
+
+snippet prop "Property"
+@property (${1/^(e)$|.*/(?1:r)/}${1:r}${1/^(?:(r)|(e)|(c)|(a))$|.*/(?1:etain)(?2:adonly)(?3:opy)(?4:ssign)/}) ${2:NSSomeClass}${TM_C_POINTER: *}${3:${2/^[A-Z](?:[A-Z]+|[a-z]+)([A-Z]\w*)/\l$1/}};
+endsnippet
+
+snippet getprefs "Read from defaults (getprefs)"
+[[NSUserDefaults standardUserDefaults] objectForKey:${1:key}];
+endsnippet
+
+snippet obs "Register for Notification"
+[[NSNotificationCenter defaultCenter] addObserver:${1:self} selector:@selector(${3:${2/^([A-Z]{2})?(.+?)(Notification)?$/\l$2/}}:) name:${2:NSWindowDidBecomeMainNotification} object:${4:nil}];
+endsnippet
+
+snippet responds "Responds to Selector"
+${TM_COMMENT_START} ${4:Send $2 to $1, if $1 supports it}${TM_COMMENT_END}
+if ([${1:self} respondsToSelector:@selector(${2:someSelector:})])
+{
+    [$1 ${3:${2/((:\s*$)|(:\s*))/:<>(?3: )/g}}];
+}
+endsnippet
+
+snippet gsave "Save and Restore Graphics Context (gsave)"
+[NSGraphicsContext saveGraphicsState];
+$0
+[NSGraphicsContext restoreGraphicsState];
+
+endsnippet
+
+snippet acc "Scalar Accessors (acc)"
+- (${1:unsigned int})${2:thing}
+{
+	return ${3:$2};
+}
+
+- (void)set${2/./\u$0/}:(${1:unsigned int})new${2/./\u$0/}
+{
+	$3 = new${2/./\u$0/};
+}
+endsnippet
+
+snippet acc "Scalar Accessors Interface (acc)"
+- (${1:unsigned int})${2:thing};
+- (void)set${2/./\u$0/}:($1)new${2/./\u$0/};
+endsnippet
+
+snippet stracc "String Accessors (stracc)"
+- (NSString${TM_C_POINTER/(^(.+?)\s*$)?/(?1:$2: *)/})${1:thing}
+{
+	return ${2:$1};
+}
+
+- (void)set${1/.*/\u$0/}:(NSString${TM_C_POINTER/(^(.+?)\s*$)?/(?1:$2: *)/})${3:a${1/.*/\u$0/}}
+{
+	$3 = [$3 copy];
+	[$2 release];
+	$2 = $3;
+}
+endsnippet
+
+snippet stracc "String Accessors Interface (stracc)"
+- (NSString${TM_C_POINTER/(^(.+?)\s*$)?/(?1:$2: *)/})${1:thing};
+- (void)set${1/./\u$0/}:(NSString${TM_C_POINTER/(^(.+?)\s*$)?/(?1:$2: *)/})${2:a${1/.*/\u$0/}};
+endsnippet
+
+snippet syn "Synthesize"
+@synthesize ${1:property};
+endsnippet
+
+snippet setprefs "Write to defaults (setprefs)"
+[[NSUserDefaults standardUserDefaults] setObject:${1:object} forKey:${2:key}];
+endsnippet
+
