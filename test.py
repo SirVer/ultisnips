@@ -53,6 +53,12 @@ class _VimTest(unittest.TestCase):
 
     def runTest(self): self.check_output()
 
+    def _options_on(self):
+        pass
+
+    def _options_off(self):
+        pass
+
     def setUp(self):
         self.send(ESC)
 
@@ -82,11 +88,21 @@ EOF
             self.send(self.text_before + '\n\n')
             self.send('\n\n' + self.text_after)
 
+            self.send(ESC)
+
             # Go to the middle of the buffer
-            self.send(ESC + "ggjji")
+            self.send(ESC + "ggjj")
+
+            self._options_on()
+
+            self.send("i")
 
             # Execute the command
             self.type(self.keys)
+
+            self.send(ESC)
+
+            self._options_off()
 
             handle, fn = tempfile.mkstemp(prefix="UltiSnips_Test",suffix=".txt")
             os.close(handle)
@@ -103,8 +119,6 @@ EOF
                 time.sleep(.05)
                 tries -= 1
 
-# TODO: correct indent after newline in snippet
-#
 ##################
 # Simple Expands #
 ##################
@@ -121,12 +135,10 @@ class SimpleExpandTwice_ExceptCorrectResult(_SimpleExpands):
 class SimpleExpandNewLineAndBackspae_ExceptCorrectResult(_SimpleExpands):
     keys = "hallo" + EX + "\nHallo Welt!\n\n\b\b\b\b\b"
     wanted = "Hallo Welt!\nHallo We"
-    def setUp(self):
+    def _options_on(self):
         self.send(":set backspace=eol,start\n")
-        _SimpleExpands.setUp(self)
-    def tearDown(self):
+    def _options_off(self):
         self.send(":set backspace=\n")
-        _SimpleExpands.tearDown(self)
 
 
 
@@ -710,7 +722,15 @@ class ProperIndenting_SingleLineNoReindenting_ECR(_VimTest):
     snippets = ("test", "hui")
     keys = "    test" + EX + "blah"
     wanted = "    huiblah"
-
+class ProperIndenting_AutoIndentAndNewline_ECR(_VimTest):
+    snippets = ("test", "hui")
+    keys = "    test" + EX + "\n"+ "blah"
+    wanted = "    hui\n    blah"
+    def _options_on(self):
+        self.send(":set autoindent\n")
+    def _options_off(self):
+        self.send(":set noautoindent\n")
+        _VimTest.tearDown(self)
 ######################
 # SELECTING MULTIPLE #
 ######################

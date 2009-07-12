@@ -275,7 +275,12 @@ class SnippetManager(object):
         if self._vstate.buf_changed and self._ctab:
             # Detect a carriage return
             if self._vstate.moved.col <= 0 and self._vstate.moved.line == 1:
-                self._chars_entered('\n')
+                lline = vim.current.buffer[self._vstate.ppos.line]
+                pentered = lline[self._vstate.ppos.col:]
+                
+                this_entered = vim.current.line[:self._vstate.pos.col]
+
+                self._chars_entered(pentered + '\n' + this_entered)
             elif self._vstate.moved.line == 0 and self._vstate.moved.col<0:
                 # Some deleting was going on
                 self._backspace(-self._vstate.moved.col)
