@@ -731,6 +731,7 @@ class ProperIndenting_AutoIndentAndNewline_ECR(_VimTest):
     def _options_off(self):
         self.send(":set noautoindent\n")
         _VimTest.tearDown(self)
+
 ######################
 # SELECTING MULTIPLE #
 ######################
