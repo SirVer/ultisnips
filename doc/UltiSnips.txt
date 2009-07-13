@@ -2,13 +2,16 @@
 
 UltiSnips                                      *snippet* *snippets* *UltiSnips*
 
-|UltiSnips-description|  Description
-|UltiSnips-installation| Installation & Deinstallation
-|UltiSnips-syntax|       Syntax
-|UltiSnips-settings|     Settings
-|UltiSnips-roadmap|      Roadmap
-|UltiSnips-helping|      Helping out
-|UltiSnips-contact|      Contact
+1. Description                                  |UltiSnips-description|  
+2. Installation and Updating                    |UltiSnips-installnupgrade| 
+   2.1 Installation                             |UltiSnips-installation|
+   2.2 Deinstallation                           |UltiSnips-deinstallation|
+   2.3 Updating                                 |UltiSnips-updating|
+3. Settings                                     |UltiSnips-settings|     
+4. Syntax                                       |UltiSnips-syntax|       
+5. Roadmap                                      |UltiSnips-roadmap|      
+6. Helping out                                  |UltiSnips-helping|      
+7. Contact                                      |UltiSnips-contact|      
 
 For Vim version 7.0 or later.
 This plugin only works if 'compatible' is not set.
@@ -18,7 +21,6 @@ This plugin needs Python support compiled into Vim.
 
 =============================================================================
 DESCRIPTION                                           *UltiSnips-description*
-
 
 UltiSnips aims to provide a snippets solution that users came to expect from
 editors. A Snippet is a short piece of text which is either typed very often
@@ -31,7 +33,11 @@ UltiSnips is an implementation that is developed with in the philosophy of TDD
 bugs do not reappear after they have been fixed once. 
 
 =============================================================================
-INSTALLATION                                         *UltiSnips-installation*
+2. INSTALLATION AND UPDATING                       *UltiSnips-installnupdate*
+
+
+2.1 Installation                                     *UltiSnips-installation*
+----------------
 
 UltiSnips has only been tested on Mac OS X and Linux. Like TextMates Snippets
 it also relies heavily on shell integration, therefore Windows users will have
@@ -44,35 +50,44 @@ yields '1'.
 If you have Python, you only need to install UltiSnips. The recommended way to
 do so is by using bzr (http://bazaar-vcs.org/). It is in all major linux
 distribution (either package bzr or bazaar) and can be easily installed under
-Mac OS X: 
+Mac OS X: >
    $ easy_install bzr
 
 To get UltiSnips, check it out into a directory of your choice. Then add this
-directory to your Vim runtime path:
+directory to your Vim runtime path: >
    $ cd ~/.vim/
    $ bzr get lp:ultisnips ultisnips_rep
    $ vim ~/.vimrc
-   add the line:
+
+add the line: >
    set runtimepath+=~/.vim/ultisnips_rep
 
-   Restart vim and UltiSnips should work. 
+Restart vim and UltiSnips should work. 
 
-To Update an installation, simply pull the latest revision:
+2.2 Deinstallation                                 *UltiSnips-deinstallation*
+------------------
+
+To Uninstall UltiSnips, remove the directory you installed it to and remove
+the path from your vim runtimepath: >
+   $ rm -rf ~/.vim/ultisnips_rep
+   $ vim ~/.vimrc
+
+remove the line: >
+   set runtimepath+=~/.vim/ultisnips_rep
+
+2.3 Updating                                             *UltiSnips-updating*
+------------
+
+To Update an installation, simply pull the latest revision: >
    $ cd ~/.vim/ultisnips_rep
    $ bzr pull 
 
-To Uninstall UltiSnips, remove the directory you installed it to and remove
-the path from your vim runtimepath:
-   $ rm -rf ~/.vim/ultisnips_rep
-   $ vim ~/.vimrc
-   remove the line:
-   set runtimepath+=~/.vim/ultisnips_rep
 
 =============================================================================
-CONTACT                                                   *UltiSnips-contact*
+7. CONTACT                                                *UltiSnips-contact*
 
 You can reach me at SirVer -AT- gmx -ADOT- de. You can find the launchpad
 project for UltiSnips at https://launchpad.net/ultisnips/, there is also the
 bug tracker. 
 
-vim:ft=help:
+vim:tw=78:ts=8:ft=help:norl:
