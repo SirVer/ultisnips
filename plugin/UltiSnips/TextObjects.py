@@ -5,11 +5,15 @@ import os
 import re
 import stat
 import tempfile
+import vim
 
 from UltiSnips.Buffer import TextBuffer
 from UltiSnips.Geometry import Span, Position
 
+
 __all__ = [ "Mirror", "Transformation", "SnippetInstance", "StartMarker" ]
+
+from UltiSnips.debug import debug
 
 ###########################################################################
 #                              Helper class                               #
@@ -77,6 +81,8 @@ class _TOParser(object):
     _TRANSFORMATION = re.compile(r'\${(\d+)/(.*?)/(.*?)/([a-zA-z]*)}')
     # The beginning of a shell code fragment
     _SHELLCODE = re.compile(r'(?!<\\)`')
+    # The beginning of a python code fragment
+    _PYTHONCODE = re.compile(r'(?!<\\)`!p')
 
     def __init__(self, parent, val):
         self._v = val
@@ -89,6 +95,7 @@ class _TOParser(object):
 
     def parse(self):
         self._parse_tabs()
+        self._parse_pythoncode()
         self._parse_shellcode()
         self._parse_transformations()
         self._parse_mirrors_or_ts()
@@ -107,13 +114,8 @@ class _TOParser(object):
             c._parse_shellcode()
 
     def _handle_shellcode(self, m):
-        def _find_closing(start_pos):
-            for idx,c in enumerate(self._v[start_pos:]):
-                if c == '`' and self._v[idx+start_pos-1] != '\\':
-                    return idx + start_pos + 1
-
         start_pos = m.start()
-        end_pos = _find_closing(start_pos+1)
+        end_pos = self._find_closing_bt(start_pos+1)
 
         content = self._v[start_pos+1:end_pos-1]
 
@@ -122,6 +124,32 @@ class _TOParser(object):
         self._overwrite_area(start_pos,end_pos)
 
         return ShellCode(self._p, start, end, content)
+
+    ###############
+    # Python Code #
+    ###############
+    def _parse_pythoncode(self):
+        m = self._PYTHONCODE.search(self._v)
+        while m:
+            self._handle_pythoncode(m)
+            m = self._PYTHONCODE.search(self._v)
+
+        for c in self._childs:
+            c._parse_pythoncode()
+
+    def _handle_pythoncode(self, m):
+        start_pos = m.start()
+        end_pos = self._find_closing_bt(start_pos+1)
+
+        # Strip `!p `
+        content = self._v[start_pos+3:end_pos-1]
+
+        start, end = self._get_start_end(self._v,start_pos,end_pos)
+
+        self._overwrite_area(start_pos,end_pos)
+
+        return PythonCode(self._p, start, end, content)
+
 
     ########
     # TABS #
@@ -233,6 +261,11 @@ class _TOParser(object):
     ####################
     # Helper functions #
     ####################
+    def _find_closing_bt(self, start_pos):
+        for idx,c in enumerate(self._v[start_pos:]):
+            if c == '`' and self._v[idx+start_pos-1] != '\\':
+                return idx + start_pos + 1
+
     def _get_start_end(self, val, start_pos, end_pos):
         def _get_pos(s, pos):
             line_idx = s[:pos].count('\n')
@@ -532,6 +565,47 @@ class ShellCode(TextObject):
         os.unlink(path)
 
         TextObject.__init__(self, parent, start, end, output)
+
+    def __repr__(self):
+        return "ShellCode(%s -> %s)" % (self._start, self._end)
+
+class _Tabs(object):
+    def __init__(self, to):
+        self._to = to
+
+    def __getitem__(self, no):
+        ts = self._to._get_tabstop(self._to, int(no))
+        if ts is None:
+            return ""
+        return ts.current_text
+
+class PythonCode(TextObject):
+    def __init__(self, parent, start, end, code):
+
+        code = code.replace("\\`", "`")
+
+        # Add Some convenience to the code
+        self._code = "import re, os\n" + code.strip()
+
+        TextObject.__init__(self, parent, start, end, "")
+
+    def _do_update(self):
+        path = vim.eval('expand("%")')
+        if path is None:
+            path = ""
+        fn = os.path.basename(path)
+
+        d = {
+            't': _Tabs(self),
+            'fn': fn,
+            'path': path,
+        }
+
+        debug("self._code: %s" % (repr(self._code)))
+        exec self._code in d
+
+        self.current_text = str(d["res"])
+
 
     def __repr__(self):
         return "ShellCode(%s -> %s)" % (self._start, self._end)

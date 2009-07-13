@@ -377,6 +377,18 @@ print "Hallo Welt"
     keys = "test" + EX + JF + "and more"
     wanted = "Hallo now Hallo Welt endand more"
 
+############################
+# PythonCode Interpolation #
+############################
+class TabStop_PythonCode_SimpleExample(_VimTest):
+    snippets = ("test", """hi `!p res = "Hallo"` End""")
+    keys = "test" + EX
+    wanted = "hi Hallo End"
+class TabStop_PythonCode_ReferencePlaceholder(_VimTest):
+    snippets = ("test", """${1:hi} `!p res = t[1]+".blah"` End""")
+    keys = "test" + EX + "ho"
+    wanted = "ho ho.blah End"
+
 # TODO: Multiline text pasting
 print "Recursive Tabstops: TODO: this will still take some time"
 # class RecTabStops_SimpleCase_ExceptCorrectResult(_VimTest):
