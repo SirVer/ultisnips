@@ -601,7 +601,6 @@ class PythonCode(TextObject):
             'path': path,
         }
 
-        debug("self._code: %s" % (repr(self._code)))
         exec self._code in d
 
         self.current_text = str(d["res"])
