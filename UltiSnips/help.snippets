@@ -1,0 +1,7 @@
+# Snippets for VIM Help Files
+
+snippet sec
+=============================================================================
+${1:SECTION}`!p res = ("*%s-%s*" % (fn.split('.')[0], t[1].lower())).rjust(77-len(t[1]))`
+endsnippet
+
