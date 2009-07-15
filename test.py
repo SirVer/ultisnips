@@ -20,6 +20,10 @@ JF = "?" # Jump forwards
 JB = "+" # Jump backwards
 EX = "\t" # EXPAND
 
+# Some VIM functions
+COMPL_KW = chr(24)+chr(14)
+COMPL_ACCEPT = chr(25)
+
 def send(s,session):
     os.system("screen -x %s -X stuff '%s'" % (session,s))
 
@@ -756,6 +760,17 @@ class ProperIndenting_AutoIndentAndNewline_ECR(_VimTest):
     def _options_off(self):
         self.send(":set noautoindent\n")
         _VimTest.tearDown(self)
+
+####################
+# COMPLETION TESTS #
+####################
+class Completion_SimpleExample_ECR(_VimTest):
+    snippets = ("test", "$1 ${1:blah}")
+    keys = "superkallifragilistik\ntest" + EX + "sup" + COMPL_KW + \
+            COMPL_ACCEPT + " some more"
+    wanted = "superkallifragilistik\nsuperkallifragilistik some more " \
+            "superkallifragilistik some more"
+
 
 
 ######################

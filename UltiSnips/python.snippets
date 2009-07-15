@@ -6,6 +6,24 @@ if __name__ == '__main__':
     ${1:main()}$0
 endsnippet
 
+##############
+# NICE BOXES #
+##############
+snippet box
+`!p res = (len(t[1])+4)*"#"`
+# ${1:content} #
+`!p res = (len(t[1])+4)*"#"`
+$0
+endsnippet
+
+snippet bbox
+`!p res = 75*"#"`
+# `!p res = (71-len(t[1]))/2*' '`${1:content}`!p a = 71-len(t[1]); res = (a/2 + a%2) * " " ` #
+`!p res = 75*"#"`
+$0
+endsnippet
+
+
 ##########
 # COMMON #
 ##########
