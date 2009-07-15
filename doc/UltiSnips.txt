@@ -451,6 +451,10 @@ keys work.
 Leaving to normal mode leaves snippet expansion currently. This shouldn't
 happen. This is related to Cursor key movement. 
 
+ Jumping back from TS zero:               *UltiSnips-jumping-back-from-ts-zero*
+
+Currently, jumping back from $0 with <c-k> doesn't work. This is really not
+necessary and should be fixed.
 
 =============================================================================
 6. HELPING OUT                                            *UltiSnips-helping*
