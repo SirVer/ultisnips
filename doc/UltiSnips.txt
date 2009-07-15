@@ -18,6 +18,8 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    4.4 Tab Stops and Placeholders               |UltiSnips-tabstops|
    4.6 Mirrors                                  |UltiSnips-mirrors|
    4.7 Transformations                          |UltiSnips-transformations|
+      4.7.1 Replacement String                  |UltiSnips-replacement-string|
+      4.7.2 Demos                               |UltiSnips-demos|
 5. Roadmap                                      |UltiSnips-roadmap|      
 6. Helping out                                  |UltiSnips-helping|      
 7. Contact                                      |UltiSnips-contact|      
@@ -40,6 +42,14 @@ signatures and to insert the current date or time into the text while typing.
 UltiSnips is an implementation that is developed with in the philosophy of TDD
 (Test driven development). This guarantees that features do not disappear and
 bugs do not reappear after they have been fixed once. 
+
+ Acknowledgments:                                 *UltiSnips-acknowledgments*
+
+UltiSnips is inspired by the snippets solution implemented in TextMate
+(http://macromates.com/). The idea of implementing snippets for vim is not new
+and I want to thank Michael Sander (Author of snipMate) for some
+implementation details I stole from him and for the permission to use some of
+his snippets.
 
 =============================================================================
 2. INSTALLATION AND UPDATING                       *UltiSnips-installnupdate*
@@ -278,22 +288,181 @@ interpolation.
 4.6 Mirrors                                               *UltiSnips-mirrors*
 -----------
 
-TODO
+Mirrors simply repeat the content of a tabstop. A classical example would be a
+TeX Environment which needs a \begin{} and an \end{} tag:
+
+------------------- SNIP -------------------
+snippet env
+\begin{${1:enumerate}}
+    $0
+\end{$1}
+endsnippet
+------------------- SNAP -------------------
+env<tab>itemize ->
+\begin{itemize}
+    
+\end{itemize}
+
+Another typical example is #ifndef block in C code:
+------------------- SNIP -------------------
+snippet ifndef
+#ifndef ${1:SOME_DEFINE}
+#define $1
+$0
+#endif /* $1 */
+endsnippet
+------------------- SNAP -------------------
+ifndef<tab>WIN32 ->
+#ifndef WIN32
+#define WIN32
+
+#endif /* WIN32 */
 
 4.7 Transformations                               *UltiSnips-transformations*
 -------------------
 
-TODO
+A complete description of the features follows, the chapter closes with some
+demos, because this feature is rather mighty and hard to understand. 
+
+Transformations are like mirrors. But instead of just verbatim copying text
+from the original tab stop, a regular expression is matched to the content of
+the referenced tab stop and a transformation is then applied to the matched
+pattern. UltiSnips follows the syntax and features of TextMate very closely
+here. 
+
+A Transformation has the syntax >
+   ${<tab stop no/regular expression/replacement/options}
+
+with >
+   tab stop no        - The number of the tab stop to reference
+   regular expression - The regular expression to match to the value of the
+                        tab stop
+   replacement        - The replacement string, see below
+   options            - options for the regular expression
+
+The options can be any combination of >
+   g    - global replace, replaces all matches of the regular expression, not
+        just the first
+
+Regular expressions are not handled here. Python regular expressions are used
+internally, so the reference for matching is the re module of python: 
+   http://docs.python.org/library/re.html
+
+The replacement string is using a own syntax and is handled in the next paragraph.
+
+ 4.7.1 Replacement String:                       *UltiSnips-replacement-string*
+
+The replacement string can contain $no variables to reference matched groups
+in the regular expression, $0 is special and yields the whole match. The
+replacement string can also contain special escape sequences: >
+   \u   - Uppercase next letter; 
+   \l   - Lowercase next letter
+   \U   - Uppercase everything till the next \E
+   \L   - Lowercase everything till the next \E
+   \E   - End upper or lowercase started with \L or \U
+   \n   - A newline
+   \t   - A literal tab
+
+Last, but not least the replacement string might contain conditional
+replacements with the following syntax (?no:text:other text). This reads as
+follows: if the group $no has matched, insert "text", otherwise insert "other
+text". "other text" could be skipped and would default to "", that is the
+empty string. This is a very powerful feature to add optional text into
+snippets. 
+
+ 4.7.2 Demos:                                                 *UltiSnips-demos*
+
+The transformations are very powerful but yield often a convoluted snippet
+syntax. Therefore I offer for each feature a simple example below.
+
+This shows uppercasing one character
+------------------- SNIP -------------------
+snippet title "Titelize in the Transformation"
+${1:a text}
+${1/\w+\s*/\u$0/}
+endsnippet
+------------------- SNAP -------------------
+title<tab>big small ->
+big small
+Big small
+
+
+This shows uppercasing one character and global replace:
+------------------- SNIP -------------------
+snippet title "Titelize in the Transformation"
+${1:a text}
+${1/\w+\s*/\u$0/g}
+endsnippet
+------------------- SNAP -------------------
+title<tab>this is a title ->
+this is a title
+This Is A Title
+
+This is a clever c-like printf snippet, the second tabstop is only shown
+when there is a format (%) character in the first tab stop.
+------------------- SNIP -------------------
+snippet printf
+printf("${1:%s}\n"${1/([^%]|%%)*(%.)?.*/(?2:, :\);)/}$2${1/([^%]|%%)*(%.)?.*/(?2:\);)/}
+endsnippet
+------------------- SNAP -------------------
+printf<tab>Hello<c-j> // End of line ->
+printf("Hello\n"); // End of line
+
+But
+printf<tab>A is: %s<c-j>A<c-j> // End of line ->
+printf("A is: %s\n", A); // End of line
+
+
+There are many more examples of what can be done with transformations in the
+bundled snippets.
 
 =============================================================================
 5. ROADMAP                                                *UltiSnips-roadmap*
 
-TODO
+UltiSnips is useful as it is now; but I plan to add more features. I use this
+section as a brain storming of what should come in the future to provide some
+insight into which direction development is headed. Please feel free to
+comment on any feature here or if you have any good ideas what is missing
+contact me. 
+
+ Snippet options:                                   *UltiSnips-snippet-options*
+
+I have a snippet defined that inserts nice comment boxes in code. But I
+sometime get this expanded in the middle of the line. I therefore want to add
+options to the snippet definition like this: >
+   snippet tab_trigger "Description" option_chars
+
+one option would be 
+   b  - beginning; only whitespaces are allowed in front of this trigger
+
+so when I use box<tab> at the beginning of a line, I get my snippet expanded.
+If I use <box> in the middle of the line, nothing will happen or another
+snippet with the same tab trigger but without this option will be expanded.
+
+ Cursor key movement:                           *UltiSnips-cursor-key-movement*
+
+Currently, cursor key movement is not possible in snippets. When you use the 
+cursors, you need to use <c-j> or <c-k> to jump to the next tab stop again
+before anything gets updated. This is a bit annoying and I want to make cursor
+keys work. 
+
+ Escaping:                                                 *UltiSnips-escaping*
+
+Leaving to normal mode leaves snippet expansion currently. This shouldn't
+happen. This is related to Cursor key movement. 
+
 
 =============================================================================
 6. HELPING OUT                                            *UltiSnips-helping*
 
-TODO
+UltiSnips needs the help of a vibrant vim community to make it more useful
+tomorrow than it is today. Please consider joining this effort by providing
+new snippets, new features or bug reports. 
+
+If you like this plugin, please also vote for it on its vim script page. It is
+life changing for me, maybe it is for you too. 
+
+TODO: add link here
 
 =============================================================================
 7. CONTACT                                                *UltiSnips-contact*
