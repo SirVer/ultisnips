@@ -62,7 +62,9 @@ directory to your Vim runtime path: >
 add the line: >
    set runtimepath+=~/.vim/ultisnips_rep
 
-Restart vim and UltiSnips should work. 
+Restart vim. UltiSnips should work now. To access the help, use >
+   :helptags ~/.vim/ultisnips_rep/doc
+   :help UltiSnips
 
 2.2 Deinstallation                                 *UltiSnips-deinstallation*
 ------------------

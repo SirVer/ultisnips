@@ -83,6 +83,8 @@ class _TOParser(object):
     _SHELLCODE = re.compile(r'(?!<\\)`')
     # The beginning of a python code fragment
     _PYTHONCODE = re.compile(r'(?!<\\)`!p')
+    # The beginning of a vimL code fragment
+    _VIMCODE = re.compile(r'(?!<\\)`!v')
 
     def __init__(self, parent, val):
         self._v = val
@@ -96,6 +98,7 @@ class _TOParser(object):
     def parse(self):
         self._parse_tabs()
         self._parse_pythoncode()
+        self._parse_vimlcode()
         self._parse_shellcode()
         self._parse_transformations()
         self._parse_mirrors_or_ts()
@@ -149,6 +152,32 @@ class _TOParser(object):
         self._overwrite_area(start_pos,end_pos)
 
         return PythonCode(self._p, start, end, content)
+
+    #############
+    # VimL Code #
+    #############
+    def _parse_vimlcode(self):
+        m = self._VIMCODE.search(self._v)
+        while m:
+            self._handle_vimlcode(m)
+            m = self._VIMCODE.search(self._v)
+
+        for c in self._childs:
+            c._parse_vimlcode()
+
+    def _handle_vimlcode(self, m):
+        start_pos = m.start()
+        end_pos = self._find_closing_bt(start_pos+1)
+
+        # Strip `!v `
+        content = self._v[start_pos+3:end_pos-1]
+
+        start, end = self._get_start_end(self._v,start_pos,end_pos)
+
+        self._overwrite_area(start_pos,end_pos)
+
+        return VimLCode(self._p, start, end, content)
+
 
 
     ########
@@ -569,6 +598,18 @@ class ShellCode(TextObject):
     def __repr__(self):
         return "ShellCode(%s -> %s)" % (self._start, self._end)
 
+class VimLCode(TextObject):
+    def __init__(self, parent, start, end, code):
+        self._code = code.replace("\\`", "`").strip()
+
+        TextObject.__init__(self, parent, start, end, "")
+
+    def _do_update(self):
+        self.current_text = str(vim.eval(self._code))
+
+    def __repr__(self):
+        return "VimLCode(%s -> %s)" % (self._start, self._end)
+
 class _Tabs(object):
     def __init__(self, to):
         self._to = to
@@ -607,7 +648,7 @@ class PythonCode(TextObject):
 
 
     def __repr__(self):
-        return "ShellCode(%s -> %s)" % (self._start, self._end)
+        return "PythonCode(%s -> %s)" % (self._start, self._end)
 
 class TabStop(TextObject):
     """

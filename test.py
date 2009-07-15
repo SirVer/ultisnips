@@ -389,6 +389,14 @@ class TabStop_PythonCode_ReferencePlaceholder(_VimTest):
     keys = "test" + EX + "ho"
     wanted = "ho ho.blah End"
 
+###########################
+# VimScript Interpolation #
+###########################
+class TabStop_VimScriptInterpolation_SimpleExample(_VimTest):
+    snippets = ("test", """hi `!v indent(".")` End""")
+    keys = "    test" + EX
+    wanted = "    hi 4 End"
+
 # TODO: Multiline text pasting
 print "Recursive Tabstops: TODO: this will still take some time"
 # class RecTabStops_SimpleCase_ExceptCorrectResult(_VimTest):
