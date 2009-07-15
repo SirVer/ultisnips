@@ -219,6 +219,7 @@ class TabStopUsingBackspaceToDeleteDefaultValue_ECR(_VimTest):
     keys = "test" + EX + BS
     wanted = "snip  "
 class TabStopUsingBackspaceToDeleteDefaultValueInFirstTab_ECR(_VimTest):
+    sleeptime = 0.05 # Do this very slowly
     snippets = ("test", "snip ${1/.+/(?0:m1)/} ${2/.+/(?0:m2)/} "
                 "${1:default} ${2:def}")
     keys = "test" + EX + BS + JF + "hi"
@@ -739,6 +740,9 @@ class IMMoving_ExitWhenOutsideBelow_ECR(_VimTest):
     keys = "hello test this" + ESC + "02f i" + EX + "tab" + 2*ARR_D + JF + \
             "testhallo\n"
     wanted = "hello tab\nblub this\ntesthallo"
+
+
+# TODO: formatoptions with auto wrapping gives problems inside snippets
 
 ####################
 # PROPER INDENTING #
