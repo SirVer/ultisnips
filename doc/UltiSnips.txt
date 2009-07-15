@@ -9,6 +9,15 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    2.3 Updating                                 |UltiSnips-updating|
 3. Settings                                     |UltiSnips-settings|     
 4. Syntax                                       |UltiSnips-syntax|       
+   4.1 Adding snippets                          |UltiSnips-adding-snippets|
+   4.2 Plaintext snippets                       |UltiSnips-plaintext-snippets|
+   4.3 Interpolation                            |UltiSnips-integration|
+      4.3.1 Shellcode                           |UltiSnips-shellcode|
+      4.3.2 VimScript                           |UltiSnips-vimscript|
+      4.3.3 Python                              |UltiSnips-python|
+   4.4 Tab Stops and Placeholders               |UltiSnips-tabstops|
+   4.6 Mirrors                                  |UltiSnips-mirrors|
+   4.7 Transformations                          |UltiSnips-transformations|
 5. Roadmap                                      |UltiSnips-roadmap|      
 6. Helping out                                  |UltiSnips-helping|      
 7. Contact                                      |UltiSnips-contact|      
@@ -84,6 +93,207 @@ To Update an installation, simply pull the latest revision: >
    $ cd ~/.vim/ultisnips_rep
    $ bzr pull 
 
+=============================================================================
+3. SETTINGS                                              *UltiSnips-settings*
+
+Currently, there are no settings configurable for UltiSnips. The following key
+keys are defined for snippets expansion: >
+   
+   <TAB>     Expands a snippet
+   <c-j>     In insert mode: Jump to the next placeholder
+   <c-k>     Jump to the previous placeholder
+
+=============================================================================
+4. SYNTAX                                                  *UltiSnips-syntax*
+
+This chapter describes where to add new snippets and how to write them. I'll
+provide many examples to make things clearer. 
+
+4.1 Adding Snippets                               *UltiSnips-adding-snippets*
+-------------------
+
+Snippets are searched in *runtimepath* . In each directory, a directory called
+"UltiSnips" (case matters) is looked for. Inside these directories, files are
+looked for called ft.snippets, for example: >
+   ruby.snippets
+   c.snippets
+   perl.snippets
+These files contain the snippet definitions for the various file types. A
+special file is >
+   all.snippets
+which contains snippets that are always expanded, no matter what file type is
+defined. For example, I keep mail signatures and date insertion snippets here. 
+
+The snippets file format is simple. A line starting with # is a comment, each
+snippet starts with a line in the form of: >
+   snippet tab_trigger "description"
+The following lines are the snippets definition; a line starting with >
+   endsnippet
+marks the end of the snippet. The trailing newline is chopped from the
+definition.
+
+4.2 Plaintext snippets                         *UltiSnips-plaintext-snippets*
+----------------------
+
+Lets start with a simple example. Add this to your all snippets file: >
+   ~/.vim/UltiSnips/all.snippets
+
+------------------- SNIP -------------------
+snippet bye "My mail signature"
+Good bye, Sir. Hope to talk to you soon.
+- Arthur, King of Britain
+endsnippet
+------------------- SNAP -------------------
+
+Now, restart vim or reset UltiSnips by typing >
+   :py UltiSnips_Manager.reset()
+
+now try it in insert mode:
+bye<tab> -->
+Good bye, Sir. Hope to talk to you soon.
+- Arthur, King of Britain
+
+4.3 Interpolation                                   *UltiSnips-interpolation*
+-----------------
+
+ 4.3.1 Shellcode:                                         *UltiSnips-shellcode*
+
+You can enter shellcode in your snippets in nearly all places. Shell code is
+written to a script and then executed. The output is inserted into the snippet
+instead of the shell code itself. Since the code is executed as a shell
+script, you can use #!/bin/ notation to feed the input of your code to every
+program you like. Let's consider an example that inserts the current date.
+
+------------------- SNIP -------------------
+snippet today
+Today is the `date +%d.%m.%y`.
+endsnippet
+------------------- SNAP -------------------
+
+today<tab> ->
+Today is the 15.07.09.
+
+Another example doing the same using perl
+------------------- SNIP -------------------
+snippet today
+Today is `#!/usr/bin/perl
+@a = localtime(); print $a[3] . '.' . $a[4] . '.' . ($a[5]+1900);`.
+endsnippet
+------------------- SNAP -------------------
+today<tab> ->
+Today is 15.6.2009.
+
+ 4.3.2 VimScript:                                         *UltiSnips-vimscript*
+
+You can also use VimScript (also sometimes called VimL) in interpolation. This
+works very much the same as interpolation of shellcode, expect that it must be
+started by using `!v `. Let's consider a simple example, that counts the
+indent of the current line:
+
+------------------- SNIP -------------------
+snippet indent
+Indent is: `!v indent(".")`.
+endsnippet
+------------------- SNAP -------------------
+    (note the 4 spaces in front): indent<tab> ->
+    (note the 4 spaces in front): Indent is: 4.
+
+ 4.3.3 Python:                                               *UltiSnips-python*
+
+By far the most powerful interpolation is by using python code. The syntax is
+similar to the one for Vimscript, but in python code the value of the python
+variable "res" is inserting at the position of the code. Also, the code is
+inside a `!p ` block.  Python code gets some special variables defined which
+can be used: >
+   
+   fn   - The current filename
+   path - The complete path to the current file
+   t    - The values of the placeholders, t[1] -> current text of ${1} and so on
+
+Also, the re and os modules are already imported inside the snippet code. This
+allows for very flexible snippets. For example, the following snippet mirrors
+the first Tab Stops value on the same line in uppercase and right aligned:
+
+------------------- SNIP -------------------
+snippet wow
+${1:Text}`!p res = (75-2*len(t[1]))*' '+t[1].upper()` 
+endsnippet
+------------------- SNAP -------------------
+wow<tab>Hello World ->
+Hello World                                                     HELLO WORLD 
+
+4.4 Tab Stops and Placeholders  *UltiSnips-tabstops* *UltiSnips-placeholders*
+------------------------------
+
+Very often, it is convenient to quickly add some text snippet and jump on to
+the next point of interest. This is were tabstops come in:
+
+------------------- SNIP -------------------
+snippet jump
+I $1 I was a $2.
+$0
+endsnippet
+------------------- SNAP -------------------
+jump<tab>wish<c-j>hunter<c-j>more text ->
+I wish I was a hunter.
+more text
+
+You can use <c-j> and <c-k> to jump to the next tab or the previous. <Tab> was
+not used for jumping forward because many people (like myself) use <tab> also
+for completion. $0 is a special tab: This is the last tab in the snippet, no
+matter how many tabs were defined before. 
+
+Most of the time it is more useful to have some default text for a tabstop and
+sometimes it is also useful to have a tab stop in a tab stop. Consider the
+next example which could be a real life scenario from a HTML snippet:
+
+------------------- SNIP -------------------
+snippet a
+<a href="$1"${2: class="${3:link}"}>
+    $0
+</a>
+endsnippet
+------------------- SNAP -------------------
+
+Here, $1 marks the first tabstop; it is assumed that you always want to add a
+url as href. After entering it you jump to $2 which has the default text '
+class="link"'. Now, you can either hit backspace, because you do not want to
+enter a class attribute for this tag or you hit <c-j> to change the class name
+(which is tab stop $3). When you are satisfied with the first line you hit
+<c-j> again to finish this snippet and contiue inside the anchor.
+
+a<tab>http://www.google.com<c-j><BS><c-j>hi ->
+<a href="http://www.google.com">
+	hi
+</a>
+
+a<tab>http://www.google.com<c-j><c-j>visited<c-j>hi ->
+<a href="http://www.google.com" class="visited">
+	hi
+</a>
+
+Default tab stop text can also contain mirrors, transformations or
+interpolation. 
+
+4.6 Mirrors                                               *UltiSnips-mirrors*
+-----------
+
+TODO
+
+4.7 Transformations                               *UltiSnips-transformations*
+-------------------
+
+TODO
+
+=============================================================================
+5. ROADMAP                                                *UltiSnips-roadmap*
+
+TODO
+
+=============================================================================
+6. HELPING OUT                                            *UltiSnips-helping*
+
+TODO
 
 =============================================================================
 7. CONTACT                                                *UltiSnips-contact*
@@ -91,5 +301,8 @@ To Update an installation, simply pull the latest revision: >
 You can reach me at SirVer -AT- gmx -ADOT- de. You can find the launchpad
 project for UltiSnips at https://launchpad.net/ultisnips/, there is also the
 bug tracker. 
+
+This project aims to be the one-for-all solution for Snippets for Vim. If you
+miss a feature or find a bug, please contact me or file a support ticket.
 
 vim:tw=78:ts=8:ft=help:norl:
