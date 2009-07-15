@@ -502,14 +502,13 @@ class TextObject(object):
         if no in self._tabstops:
             return self._tabstops[no]
         for c in self._childs:
-            if c == requester:
+            if c is requester:
                 continue
 
             rv = c._get_tabstop(self, no)
             if rv is not None:
                 return rv
-
-        if self._parent and requester != self._parent:
+        if self._parent and requester is not self._parent:
             return self._parent._get_tabstop(self, no)
 
     def _add_child(self,c):
@@ -643,7 +642,6 @@ class PythonCode(TextObject):
         }
 
         exec self._code in d
-
         self.current_text = str(d["res"])
 
 
@@ -706,7 +704,7 @@ class SnippetInstance(TextObject):
         if no in self._tabstops:
             return self._tabstops[no]
         for c in self._childs:
-            if c == requester:
+            if c is requester:
                 continue
 
             rv = c._get_tabstop(self, no)

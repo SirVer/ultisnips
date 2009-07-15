@@ -361,6 +361,7 @@ class TabStop_Shell_TextInNextLine(_VimTest):
     keys = "test" + EX + "and more"
     wanted = "hi hallo\nWeiterand more"
 class TabStop_Shell_InDefValue_Leave(_VimTest):
+    sleeptime = 0.05 # Do this very slowly
     snippets = ("test", "Hallo ${1:now `echo fromecho`} end")
     keys = "test" + EX + JF + "and more"
     wanted = "Hallo now fromecho endand more"
@@ -388,6 +389,10 @@ class TabStop_PythonCode_ReferencePlaceholder(_VimTest):
     snippets = ("test", """${1:hi} `!p res = t[1]+".blah"` End""")
     keys = "test" + EX + "ho"
     wanted = "ho ho.blah End"
+class TabStop_PythonCode_ReferencePlaceholderBefore(_VimTest):
+    snippets = ("test", """`!p res = len(t[1])*"#"`\n${1:some text}""")
+    keys = "test" + EX + "Hallo Welt"
+    wanted = "##########\nHallo Welt"
 
 ###########################
 # VimScript Interpolation #
@@ -751,6 +756,7 @@ class ProperIndenting_AutoIndentAndNewline_ECR(_VimTest):
     def _options_off(self):
         self.send(":set noautoindent\n")
         _VimTest.tearDown(self)
+
 
 ######################
 # SELECTING MULTIPLE #
