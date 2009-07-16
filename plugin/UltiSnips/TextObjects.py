@@ -13,8 +13,6 @@ from UltiSnips.Geometry import Span, Position
 
 __all__ = [ "Mirror", "Transformation", "SnippetInstance", "StartMarker" ]
 
-from UltiSnips.debug import debug
-
 ###########################################################################
 #                              Helper class                               #
 ###########################################################################
@@ -401,7 +399,6 @@ class TextObject(object):
     # Public functions #
     ####################
     def update(self):
-        debug("Updating children")
         for idx,c in enumerate(self._childs):
             oldend = Position(c.end.line, c.end.col)
 
@@ -410,20 +407,13 @@ class TextObject(object):
             moved_lines = new_end.line - oldend.line
             moved_cols = new_end.col - oldend.col
 
-            debug("    self: %s, c: %s" % (self, c))
-            debug("    c.current_text: %s" % repr(c.current_text))
-            debug("    b4: self.current_text: %s" % repr(self.current_text))
-
-            debug("    c.start: %s, oldend: %s, new_end: %s" % (c.start, oldend, new_end))
             self._current_text.replace_text(c.start, oldend, c._current_text)
-            debug("    aft self.current_text: %s" % repr(self.current_text))
 
             self._move_textobjects_behind(c.start, oldend, moved_lines,
                         moved_cols, idx)
 
         self._do_update()
 
-        debug("after update: self: %s, repr(self._current_text): %s" % (self, repr(self._current_text)))
         new_end = self._current_text.calc_end(self._start)
 
         self._end = new_end
@@ -694,7 +684,6 @@ class SnippetInstance(TextObject):
         _TOParser(self, initial_text).parse()
 
         # Check if we have a zero Tab, if not, add one at the end
-        debug("type(parent): %s" % (type(parent)))
         if isinstance(parent, TabStop):
             if not parent.no == 0:
                 # We are recursively called, if we have a zero tab, remove it.
@@ -763,7 +752,6 @@ class SnippetInstance(TextObject):
                 self._cts, ts = res
                 return ts
 
-        debug("self._cts: %s, self: %s" % (self._cts, self))
         return self._tabstops[self._cts]
 
 

@@ -11,8 +11,6 @@ from UltiSnips.Geometry import Position
 from UltiSnips.TextObjects import *
 from UltiSnips.Buffer import VimBuffer
 
-from UltiSnips.debug import debug
-
 class Snippet(object):
     _INDENT = re.compile(r"^[ \t]*")
 
@@ -181,10 +179,8 @@ class SnippetManager(object):
 
     def jump(self, backwards = False):
         if self._cs:
-            debug("jump: self._cs: %s" % (self._cs))
             self._expect_move_wo_change = True
             self._ctab = self._cs.select_next_tab(backwards)
-            debug("      self._ctab: %s" % (self._ctab))
             if self._ctab:
                 self._vstate.select_span(self._ctab.abs_span)
                 self._span_selected = self._ctab.abs_span
@@ -221,12 +217,10 @@ class SnippetManager(object):
         before,after = line[:col], line[col:]
 
         word = before.split()[-1]
-        debug("word: %s" % (word))
         snippets = []
         if len(ft):
             snippets += self._find_snippets(ft, word)
         snippets += self._find_snippets("all", word)
-        debug("snippets: %s" % (snippets))
 
         if not len(snippets):
             # No snippet found
@@ -253,18 +247,24 @@ class SnippetManager(object):
             pos = self._vstate.pos
             p_start = self._ctab.abs_start
 
-            debug("    p_start: %s" % (p_start))
             if pos.line == p_start.line:
                 end = Position(0, pos.col - p_start.col)
             else:
                 end = Position(pos.line - p_start.line, pos.col)
             start = Position(end.line, end.col - len(snippet.trigger))
 
-            debug("    pos: %s" % (pos))
-            debug("    start: %s, end: %s" % (start, end))
+            # TODO: very much the same as above
+            indent = vim.current.line[:pos.col - len(snippet.trigger)]
+            v = snippet.value
+            if indent.strip(" \n") == "":
+                lines = v.splitlines()
+                v = lines[0]
+                if len(lines) > 1:
+                    v += os.linesep + \
+                            os.linesep.join([indent + l for l in lines[1:]])
 
             # Launch this snippet as a child of the current snippet
-            si = SnippetInstance(self._ctab, snippet.value, start, end)
+            si = SnippetInstance(self._ctab, v, start, end)
 
             self._update_vim_buffer()
 
@@ -310,8 +310,6 @@ class SnippetManager(object):
 
         # Did we leave the snippet with this movement?
         if self._cs and not (self._vstate.pos in self._cs.abs_span):
-            debug("popping: self._cs: %s" % (self._cs))
-            debug("         self._csni: %s" % (self._csnippets))
             self._csnippets.pop()
 
             self._reinit()

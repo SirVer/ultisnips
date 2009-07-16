@@ -518,15 +518,23 @@ class RecTabStops_InNewlineInTabstopNotAtBeginOfLine_ECR(_VimTest):
             JF + "three" + JF + "end"
     wanted = "[ hello\nhello again [ hi  two ]  three ]end"
 
-# TODO: keep correct indent inside tabstop at expansion
-# TODO: especially if last tabstop is zero
-# TODO: also when it is not zero
 class RecTabStops_InNewlineMultiline_ECR(_VimTest):
     snippets = ("m", "M START\n$0\nM END")
     keys = "m" + EX + "m" + EX
     wanted = "M START\nM START\n\nM END\nM END"
-
-print "Recursive Tabstops: TODO: this will still take some time"
+class RecTabStops_InNewlineManualIndent_ECR(_VimTest):
+    snippets = ("m", "M START\n$0\nM END")
+    keys = "m" + EX + "    m" + EX + "hi"
+    wanted = "M START\n    M START\n    hi\n    M END\nM END"
+class RecTabStops_InNewlineMultilineWithIndent_ECR(_VimTest):
+    snippets = ("m", "M START\n    $0\nM END")
+    keys = "m" + EX + "m" + EX + "hi"
+    wanted = "M START\n    M START\n        hi\n    M END\nM END"
+class RecTabStops_InNewlineMultilineWithNonZeroTS_ECR(_VimTest):
+    snippets = ("m", "M START\n    $1\nM END -> $0")
+    keys = "m" + EX + "m" + EX + "hi" + JF + "hallo"
+    wanted = "M START\n    M START\n        hi\n    M END -> \n" \
+        "M END -> hallo"
 
 class RecTabStops_BarelyNotLeavingInner_ECR(_VimTest):
     snippets = (
