@@ -418,17 +418,15 @@ class TabStop_VimScriptInterpolation_SimpleExample(_VimTest):
 # TODO: pasting with <C-R> while mirroring, also multiline
 # TODO: expandtab and therelikes
 # TODO: Multiline text pasting
-#
-#
+
+
 print "Recursive Tabstops: TODO: this will still take some time"
-# TODO: recursive, not at beginning of TS
-# TODO: recursive, not at beginning of TS not at beginning of LINE
-# TODO: recursive, not at beginning on same line as parent tabstop
 # TODO: leaving all nested snippets at onec
 # TODO: only leaving one nested snippet
-# TODO: Recursive inner without any TS
-# TODO: Mirror of recursive
-#
+
+###############################
+# Recursive (Nested) Snippets #
+###############################
 class RecTabStops_SimpleCase_ExceptCorrectResult(_VimTest):
     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
     keys = "m" + EX + "m" + EX + "hello" + JF + "world" + JF + "end"
@@ -442,9 +440,120 @@ class RecTabStops_SimpleCaseLeaveFirstSecond_ExceptCorrectResult(_VimTest):
     keys = "m" + EX + "m" + EX + "hello" + JF + JF + "world" + JF + "end"
     wanted = "[ [ hello  sec ]  world ]end"
 
-# ###########
-# # MIRRORS #
-# ###########
+class RecTabStops_InnerWOTabStop_ECR(_VimTest):
+    snippets = (
+        ("m1", "Just some Text"),
+        ("m", "[ ${1:first}  ${2:sec} ]"),
+    )
+    keys = "m" + EX + "m1" + EX + "hi" + JF + "two" + JF + "end"
+    wanted = "[ Just some Texthi  two ]end"
+class RecTabStops_InnerWOTabStopTwiceDirectly_ECR(_VimTest):
+    snippets = (
+        ("m1", "JST"),
+        ("m", "[ ${1:first}  ${2:sec} ]"),
+    )
+    keys = "m" + EX + "m1" + EX + " m1" + EX + "hi" + JF + "two" + JF + "end"
+    wanted = "[ JST JSThi  two ]end"
+class RecTabStops_InnerWOTabStopTwice_ECR(_VimTest):
+    snippets = (
+        ("m1", "JST"),
+        ("m", "[ ${1:first}  ${2:sec} ]"),
+    )
+    keys = "m" + EX + "m1" + EX + JF + "m1" + EX + "hi" + JF + "end"
+    wanted = "[ JST  JSThi ]end"
+class RecTabStops_OuterOnlyWithZeroTS_ECR(_VimTest):
+    snippets = (
+        ("m", "A $0 B"),
+        ("m1", "C $1 D $0 E"),
+    )
+    keys = "m" + EX + "m1" + EX + "CD" + JF + "DE"
+    wanted = "A C CD D DE E B"
+class RecTabStops_OuterOnlyWithZero_ECR(_VimTest):
+    snippets = (
+        ("m", "A $0 B"),
+        ("m1", "C $1 D $0 E"),
+    )
+    keys = "m" + EX + "m1" + EX + "CD" + JF + "DE"
+    wanted = "A C CD D DE E B"
+class RecTabStops_ExpandedInZeroTS_ECR(_VimTest):
+    snippets = (
+        ("m", "A $0 B $1"),
+        ("m1", "C $1 D $0 E"),
+    )
+    keys = "m" + EX + "hi" + JF + "m1" + EX + "CD" + JF + "DE"
+    wanted = "A C CD D DE E B hi"
+class RecTabStops_ExpandedInZeroTSTwice_ECR(_VimTest):
+    snippets = (
+        ("m", "A $0 B $1"),
+        ("m1", "C $1 D $0 E"),
+    )
+    keys = "m" + EX + "hi" + JF + "m" + EX + "again" + JF + "m1" + \
+            EX + "CD" + JF + "DE"
+    wanted = "A A C CD D DE E B again B hi"
+class RecTabStops_ExpandedInZeroTSSecondTimeIgnoreZTS_ECR(_VimTest):
+    snippets = (
+        ("m", "A $0 B $1"),
+        ("m1", "C $1 D $0 E"),
+    )
+    keys = "m" + EX + "hi" + JF + "m" + EX + "m1" + EX + "CD" + JF + "DE"
+    wanted = "A A DE B C CD D  E B hi"
+
+class RecTabStops_MirrorInnerSnippet_ECR(_VimTest):
+    snippets = (
+        ("m", "[ $1 $2 ] $1"),
+        ("m1", "ASnip $1 ASnip $2 ASnip"),
+    )
+    keys = "m" + EX + "m1" + EX + "Hallo" + JF + "Hi" + JF + "two" + JF + "end"
+    wanted = "[ ASnip Hallo ASnip Hi ASnip two ] ASnip Hallo ASnip Hi ASnipend"
+
+class RecTabStops_NotAtBeginningOfTS_ExceptCorrectResult(_VimTest):
+    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
+    keys = "m" + EX + "hello m" + EX + "hi" + JF + "two" + JF + "three" + \
+            JF + "end"
+    wanted = "[ hello [ hi  two ]  three ]end"
+class RecTabStops_InNewlineInTabstop_ExceptCorrectResult(_VimTest):
+    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
+    keys = "m" + EX + "hello\nm" + EX + "hi" + JF + "two" + JF + "three" + \
+            JF + "end"
+    wanted = "[ hello\n[ hi  two ]  three ]end"
+class RecTabStops_InNewlineInTabstopNotAtBeginOfLine_ECR(_VimTest):
+    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
+    keys = "m" + EX + "hello\nhello again m" + EX + "hi" + JF + "two" + \
+            JF + "three" + JF + "end"
+    wanted = "[ hello\nhello again [ hi  two ]  three ]end"
+
+# TODO: keep correct indent inside tabstop at expansion
+# TODO: especially if last tabstop is zero
+# TODO: also when it is not zero
+# class RecTabStops_InNewlineMultiline_ECR(_VimTest):
+#     snippets = ("m", "M START\n   $0\nM END")
+#     keys = "m" + EX + "m" + EX
+#     wanted = "M START\n M START\n"
+
+
+
+class RecTabStops_IgnoreZeroTS_ECR(_VimTest):
+    snippets = (
+        ("m1", "[ ${1:first} $0 ${2:sec} ]"),
+        ("m", "[ ${1:first} ${2:sec} ]"),
+    )
+    keys = "m" + EX + "m1" + EX + "hi" + JF + "two" + \
+            JF + "three" + JF + "end"
+    wanted = "[ [ hi  two ] three ]end"
+class RecTabStops_MirroredZeroTS_ECR(_VimTest):
+    snippets = (
+        ("m1", "[ ${1:first} ${0:Year, some default text} $0 ${2:sec} ]"),
+        ("m", "[ ${1:first} ${2:sec} ]"),
+    )
+    keys = "m" + EX + "m1" + EX + "hi" + JF + "two" + \
+            JF + "three" + JF + "end"
+    wanted = "[ [ hi   two ] three ]end"
+
+
+
+###########
+# MIRRORS #
+###########
 class TextTabStopTextAfterTab_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 Hinten\n$1")
     keys = "test" + EX + "hallo"

@@ -215,9 +215,10 @@ class _TOParser(object):
 
         start, end = self._get_start_end(self._v,start_pos,end_pos)
 
-        ts = TabStop(self._p, start, end, def_text)
+        no = int(m.group(1))
+        ts = TabStop(no, self._p, start, end, def_text)
 
-        self._p._add_tabstop(int(m.group(1)),ts)
+        self._p._add_tabstop(no,ts)
 
         self._overwrite_area(start_pos, end_pos)
 
@@ -267,7 +268,7 @@ class _TOParser(object):
         if ts is not None:
             rv = Mirror(self._p, ts, start, end)
         else:
-            rv = TabStop(self._p, start, end)
+            rv = TabStop(no, self._p, start, end)
             self._p._add_tabstop(no,rv)
 
         self._overwrite_area(*m.span())
@@ -654,8 +655,13 @@ class TabStop(TextObject):
     This is the most important TextObject. A TabStop is were the cursor
     comes to rest when the user taps through the Snippet.
     """
-    def __init__(self, parent, start, end, default_text = ""):
+    def __init__(self, no, parent, start, end, default_text = ""):
         TextObject.__init__(self, parent, start, end, default_text)
+        self._no = no
+
+    def no(self):
+        return self._no
+    no = property(no)
 
     def __repr__(self):
         return "TabStop(%s -> %s, %s)" % (self._start, self._end,
@@ -684,11 +690,11 @@ class SnippetInstance(TextObject):
 
         # Check if we have a zero Tab, if not, add one at the end
         debug("type(parent): %s" % (type(parent)))
-        if not isinstance(parent, StartMarker):
-            # We are recursively called, if we have a zero tab, remove
-            # it. This might be fatal if the zero tab is somehow mirrored
-            # TODO: This needs doing
-            pass
+        if isinstance(parent, TabStop) and not parent.no == 0:
+            # We are recursively called, if we have a zero tab, remove it.
+            if 0 in self._tabstops:
+                self._tabstops[0].current_text = ""
+                del self._tabstops[0]
         elif 0 not in self._tabstops:
             delta = self._end - self._start
             col = self.end.col
@@ -696,7 +702,7 @@ class SnippetInstance(TextObject):
                 col -= self.start.col
             start = Position(delta.line, col)
             end = Position(delta.line, col)
-            ts = TabStop(self, start, end, "")
+            ts = TabStop(0, self, start, end, "")
             self._add_tabstop(0,ts)
 
             self.update()
@@ -704,6 +710,9 @@ class SnippetInstance(TextObject):
     def __repr__(self):
         return "SnippetInstance(%s -> %s)" % (self._start, self._end)
 
+    def has_tabs(self):
+        return len(self._tabstops)
+    has_tabs = property(has_tabs)
 
     def _get_tabstop(self, requester, no):
         # SnippetInstances are completly self contained,

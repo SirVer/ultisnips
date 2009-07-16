@@ -257,18 +257,19 @@ class SnippetManager(object):
 
             debug("    pos: %s" % (pos))
             debug("    start: %s, end: %s" % (start, end))
-            
+
             # Launch this snippet as a child of the current snippet
             si = SnippetInstance(self._ctab, snippet.value, start, end)
-            
+
             self._cs.update()
             self._update_vim_buffer()
 
-            self._csnippets.append(si)
-            self._ctab = si.select_next_tab()
-            if self._ctab is not None:
-                self._vstate.select_span(self._ctab.abs_span)
-                self._span_selected = self._ctab.abs_span
+            if si.has_tabs:
+                self._csnippets.append(si)
+                self._ctab = si.select_next_tab()
+                if self._ctab is not None:
+                    self._vstate.select_span(self._ctab.abs_span)
+                    self._span_selected = self._ctab.abs_span
         else:
             text_before = before.rstrip()[:-len(word)]
             self._vb = VimBuffer(text_before, after)
