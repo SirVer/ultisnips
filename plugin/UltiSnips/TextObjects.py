@@ -626,7 +626,7 @@ class PythonCode(TextObject):
         code = code.replace("\\`", "`")
 
         # Add Some convenience to the code
-        self._code = "import re, os\n" + code.strip()
+        self._code = "import re, os, vim\n" + code.strip()
 
         TextObject.__init__(self, parent, start, end, "")
 
