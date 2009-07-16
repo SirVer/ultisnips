@@ -144,8 +144,6 @@ class SimpleExpandNewLineAndBackspae_ExceptCorrectResult(_SimpleExpands):
     def _options_off(self):
         self.send(":set backspace=\n")
 
-
-
 class SimpleExpandTypeAfterExpand_ExceptCorrectResult(_SimpleExpands):
     keys = "hallo" + EX + "and again"
     wanted = "Hallo Welt!and again"
@@ -417,6 +415,8 @@ class TabStop_VimScriptInterpolation_SimpleExample(_VimTest):
     keys = "    test" + EX
     wanted = "    hi 4 End"
 
+# TODO: pasting with <C-R> while mirroring, also multiline
+# TODO: expandtab and therelikes
 # TODO: Multiline text pasting
 print "Recursive Tabstops: TODO: this will still take some time"
 # class RecTabStops_SimpleCase_ExceptCorrectResult(_VimTest):
@@ -428,7 +428,6 @@ print "Recursive Tabstops: TODO: this will still take some time"
 #     keys = "m" + EX + "m" + JF + "hello\tworld\t"
 #     wanted = "[ [ hello  world ]  sec ]"
 
-# # TODO: pasting with <C-R> while mirroring, also multiline
 # ###########
 # # MIRRORS #
 # ###########
@@ -704,8 +703,6 @@ class CursorMovement_Multiline_ECR(_VimTest):
             "this is something\nvery nice\nnotmore text"
 
 
-# TODO: expandtab and therelikes
-
 ######################
 # INSERT MODE MOVING #
 ######################
@@ -751,8 +748,6 @@ class IMMoving_ExitWhenOutsideBelow_ECR(_VimTest):
             "testhallo\n"
     wanted = "hello tab\nblub this\ntesthallo"
 
-
-# TODO: formatoptions with auto wrapping gives problems inside snippets
 
 ####################
 # PROPER INDENTING #
