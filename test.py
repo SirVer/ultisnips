@@ -418,15 +418,29 @@ class TabStop_VimScriptInterpolation_SimpleExample(_VimTest):
 # TODO: pasting with <C-R> while mirroring, also multiline
 # TODO: expandtab and therelikes
 # TODO: Multiline text pasting
+#
+#
 print "Recursive Tabstops: TODO: this will still take some time"
-# class RecTabStops_SimpleCase_ExceptCorrectResult(_VimTest):
-#     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
-#     keys = "m" + EX + "m" + JF + "hello\tworld\tend"
-#     wanted = "[ [ hello  world ]  end ]"
-# class RecTabStops_SimpleCaseLeaveSecond_ExceptCorrectResult(_VimTest):
-#     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
-#     keys = "m" + EX + "m" + JF + "hello\tworld\t"
-#     wanted = "[ [ hello  world ]  sec ]"
+# TODO: recursive, not at beginning of TS
+# TODO: recursive, not at beginning of TS not at beginning of LINE
+# TODO: recursive, not at beginning on same line as parent tabstop
+# TODO: leaving all nested snippets at onec
+# TODO: only leaving one nested snippet
+# TODO: Recursive inner without any TS
+# TODO: Mirror of recursive
+#
+class RecTabStops_SimpleCase_ExceptCorrectResult(_VimTest):
+    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
+    keys = "m" + EX + "m" + EX + "hello" + JF + "world" + JF + "end"
+    wanted = "[ [ hello  world ]  end ]"
+class RecTabStops_SimpleCaseLeaveSecondSecond_ExceptCorrectResult(_VimTest):
+    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
+    keys = "m" + EX + "m" + EX + "hello" + JF + "world" + JF + JF + "end"
+    wanted = "[ [ hello  world ]  sec ]end"
+class RecTabStops_SimpleCaseLeaveFirstSecond_ExceptCorrectResult(_VimTest):
+    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
+    keys = "m" + EX + "m" + EX + "hello" + JF + JF + "world" + JF + "end"
+    wanted = "[ [ hello  sec ]  world ]end"
 
 # ###########
 # # MIRRORS #

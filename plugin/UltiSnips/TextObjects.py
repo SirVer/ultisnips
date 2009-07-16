@@ -415,6 +415,7 @@ class TextObject(object):
 
         self._do_update()
 
+        debug("after update: self: %s, repr(self._current_text): %s" % (self, repr(self._current_text)))
         new_end = self._current_text.calc_end(self._start)
 
         self._end = new_end
@@ -668,18 +669,27 @@ class SnippetInstance(TextObject):
     also a TextObject because it has a start an end
     """
 
-    def __init__(self, parent, initial_text):
-        start = Position(0,0)
-        end = Position(0,0)
+    # TODO: for beauty sake, start and end should come before initial text
+    def __init__(self, parent, initial_text, start = None, end = None):
+        if start is None:
+            start = Position(0,0)
+        if end is None:
+            end = Position(0,0)
 
         TextObject.__init__(self, parent, start, end, initial_text)
 
         _TOParser(self, initial_text).parse()
 
-        TextObject.update(self)
+        self.update()
 
         # Check if we have a zero Tab, if not, add one at the end
-        if 0 not in self._tabstops:
+        debug("type(parent): %s" % (type(parent)))
+        if not isinstance(parent, StartMarker):
+            # We are recursively called, if we have a zero tab, remove
+            # it. This might be fatal if the zero tab is somehow mirrored
+            # TODO: This needs doing
+            pass
+        elif 0 not in self._tabstops:
             delta = self._end - self._start
             col = self.end.col
             if delta.line == 0:
@@ -689,7 +699,7 @@ class SnippetInstance(TextObject):
             ts = TabStop(self, start, end, "")
             self._add_tabstop(0,ts)
 
-            TextObject.update(self)
+            self.update()
 
     def __repr__(self):
         return "SnippetInstance(%s -> %s)" % (self._start, self._end)
@@ -730,10 +740,13 @@ class SnippetInstance(TextObject):
                 self._cts = None
                 if 0 in self._tabstops:
                     return self._tabstops[0]
+                else:
+                    return None
             else:
                 self._cts, ts = res
                 return ts
 
+        debug("self._cts: %s, self: %s" % (self._cts, self))
         return self._tabstops[self._cts]
 
 

@@ -21,6 +21,10 @@ class Snippet(object):
         self._v = value
         self._d = descr
 
+    def value(self):
+        return self._v
+    value = property(value)
+
     def description(self):
         return self._d
     description = property(description)
@@ -161,9 +165,10 @@ class SnippetManager(object):
 
     def reset(self):
         self._snippets = {}
-        self._csnippet = None
+        self._csnippets = []
         self._ctab = None
         self._span_selected = None
+
 
     def add_snippet(self, trigger, value, descr):
         if "all" not in self._snippets:
@@ -173,14 +178,17 @@ class SnippetManager(object):
         self._snippets["all"][trigger] = l
 
     def jump(self, backwards = False):
-        if self._csnippet:
+        if self._cs:
             self._expect_move_wo_change = True
-            self._ctab = self._csnippet.select_next_tab(backwards)
+            self._ctab = self._cs.select_next_tab(backwards)
             if self._ctab:
                 self._vstate.select_span(self._ctab.abs_span)
                 self._span_selected = self._ctab.abs_span
             else:
-                self._csnippet = None
+                # TODO: pop othermost snippet
+                self._csnippets.pop()
+                if self._cs:
+                    self.jump(backwards)
                 return True
 
             self._vstate.update()
@@ -209,10 +217,12 @@ class SnippetManager(object):
         before,after = line[:col], line[col:]
 
         word = before.split()[-1]
+        debug("word: %s" % (word))
         snippets = []
         if len(ft):
             snippets += self._find_snippets(ft, word)
         snippets += self._find_snippets("all", word)
+        debug("snippets: %s" % (snippets))
 
         if not len(snippets):
             # No snippet found
@@ -234,19 +244,46 @@ class SnippetManager(object):
 
         self._expect_move_wo_change = True
 
-        text_before = before.rstrip()[:-len(word)]
-        self._vb = VimBuffer(text_before, after)
+        if self._cs:
+            # Determine position
+            pos = self._vstate.pos
+            p_start = self._ctab.abs_start
 
-        start = Position(lineno-1, len(text_before))
-        self._csnippet = snippet.launch(text_before, start)
+            if pos.line == p_start.line:
+                end = Position(0, pos.col - p_start.col)
+            else:
+                end = Position(pos.line - p_start.line, pos.col)
+            start = Position(end.line, end.col - len(snippet.trigger))
 
-        self._vb.replace_lines(lineno-1, lineno-1, self._csnippet._current_text)
+            debug("    pos: %s" % (pos))
+            debug("    start: %s, end: %s" % (start, end))
+            
+            # Launch this snippet as a child of the current snippet
+            si = SnippetInstance(self._ctab, snippet.value, start, end)
+            
+            self._cs.update()
+            self._update_vim_buffer()
 
-        # TODO: this code is duplicated above
-        self._ctab = self._csnippet.select_next_tab()
-        if self._ctab is not None:
-            self._vstate.select_span(self._ctab.abs_span)
-            self._span_selected = self._ctab.abs_span
+            self._csnippets.append(si)
+            self._ctab = si.select_next_tab()
+            if self._ctab is not None:
+                self._vstate.select_span(self._ctab.abs_span)
+                self._span_selected = self._ctab.abs_span
+        else:
+            text_before = before.rstrip()[:-len(word)]
+            self._vb = VimBuffer(text_before, after)
+
+            start = Position(lineno-1, len(text_before))
+            self._csnippets.append(snippet.launch(text_before, start))
+
+            self._vb.replace_lines(lineno-1, lineno-1,
+                       self._cs._current_text)
+
+            # TODO: this code is duplicated above
+            self._ctab = self._cs.select_next_tab()
+            if self._ctab is not None:
+                self._vstate.select_span(self._ctab.abs_span)
+                self._span_selected = self._ctab.abs_span
 
         self._vstate.update()
 
@@ -255,7 +292,7 @@ class SnippetManager(object):
     def backspace_while_selected(self):
         # BS was called in select mode
 
-        if self._csnippet and (self._span_selected is not None):
+        if self._cs and (self._span_selected is not None):
             # This only happens when a default value is delted using backspace
             vim.command(r'call feedkeys("i")')
             self._chars_entered('')
@@ -270,8 +307,8 @@ class SnippetManager(object):
             self._ctab = None
 
             # Did we leave the snippet with this movement?
-            if self._csnippet and not \
-               (self._vstate.pos in self._csnippet.abs_span):
+            if self._cs and not \
+               (self._vstate.pos in self._cs.abs_span):
                 self.reset()
 
         if not self._ctab:
@@ -317,7 +354,7 @@ class SnippetManager(object):
 
     def entered_insert_mode(self):
         self._vstate.update()
-        if self._csnippet and self._vstate.has_moved:
+        if self._cs and self._vstate.has_moved:
             self.reset()
 
     ###################################
@@ -343,19 +380,29 @@ class SnippetManager(object):
         self._update_vim_buffer()
 
     def _update_vim_buffer(self, del_more_lines = 0):
-        sline = self._csnippet.abs_start.line
-        dlines = self._csnippet.end.line - self._csnippet.start.line
+        if not len(self._csnippets):
+            return
 
-        self._csnippet.update()
+        s = self._csnippets[0]
+        sline = s.abs_start.line
+        dlines = s.end.line - s.start.line
+
+        s.update()
 
         # Replace
         dlines += self._vstate.moved.line + del_more_lines
         self._vb.replace_lines(sline, sline + dlines,
-                       self._csnippet._current_text)
+                       s._current_text)
         ct_end = self._ctab.abs_end
         vim.current.window.cursor = ct_end.line +1, ct_end.col
 
         self._vstate.update()
+
+    def _cs(self):
+        if not len(self._csnippets):
+            return None
+        return self._csnippets[-1]
+    _cs = property(_cs)
 
     # Loading
     def _load_snippets_from(self, ft, fn):
