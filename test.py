@@ -42,7 +42,7 @@ class _VimTest(unittest.TestCase):
     text_after =  " --- some text after --- "
     wanted = ""
     keys = ""
-    sleeptime = 0.01
+    sleeptime = 0.03
 
     def send(self,s):
         send(s, self.session)
@@ -227,7 +227,7 @@ class TabStopUsingBackspaceToDeleteDefaultValue_ECR(_VimTest):
     keys = "test" + EX + BS
     wanted = "snip  "
 class TabStopUsingBackspaceToDeleteDefaultValueInFirstTab_ECR(_VimTest):
-    sleeptime = 0.05 # Do this very slowly
+    sleeptime = 0.09 # Do this very slowly
     snippets = ("test", "snip ${1/.+/(?0:m1)/} ${2/.+/(?0:m2)/} "
                 "${1:default} ${2:def}")
     keys = "test" + EX + BS + JF + "hi"
@@ -374,7 +374,7 @@ class TabStop_Shell_TextInNextLine(_VimTest):
     keys = "test" + EX + "and more"
     wanted = "hi hallo\nWeiterand more"
 class TabStop_Shell_InDefValue_Leave(_VimTest):
-    sleeptime = 0.05 # Do this very slowly
+    sleeptime = 0.09 # Do this very slowly
     snippets = ("test", "Hallo ${1:now `echo fromecho`} end")
     keys = "test" + EX + JF + "and more"
     wanted = "Hallo now fromecho endand more"
@@ -384,7 +384,7 @@ class TabStop_Shell_InDefValue_Overwrite(_VimTest):
     wanted = "Hallo overwrite endand more"
 
 class TabStop_Shell_ShebangPython(_VimTest):
-    sleeptime = 0.05 # Do this very slowly
+    sleeptime = 0.09 # Do this very slowly
     snippets = ("test", """Hallo ${1:now `#!/usr/bin/env python
 print "Hallo Welt"
 `} end""")
@@ -419,10 +419,6 @@ class TabStop_VimScriptInterpolation_SimpleExample(_VimTest):
 # TODO: expandtab and therelikes
 # TODO: Multiline text pasting
 
-
-print "Recursive Tabstops: TODO: this will still take some time"
-# TODO: leaving all nested snippets at onec
-# TODO: only leaving one nested snippet
 
 ###############################
 # Recursive (Nested) Snippets #
@@ -530,6 +526,36 @@ class RecTabStops_InNewlineInTabstopNotAtBeginOfLine_ECR(_VimTest):
 #     keys = "m" + EX + "m" + EX
 #     wanted = "M START\n M START\n"
 
+print "Recursive Tabstops: TODO: this will still take some time"
+
+class RecTabStops_BarelyNotLeavingInner_ECR(_VimTest):
+    snippets = (
+        ("m", "[ ${1:first} ${2:sec} ]"),
+    )
+    keys = "m" + EX + "m" + EX + "a" + 3*ARR_L + JF + "hallo" + \
+            JF + "world" + JF + "end"
+    wanted = "[ [ a hallo ] world ]end"
+class RecTabStops_LeavingInner_ECR(_VimTest):
+    snippets = (
+        ("m", "[ ${1:first} ${2:sec} ]"),
+    )
+    keys = "m" + EX + "m" + EX + "a" + 4*ARR_L + JF + "hallo" + \
+            JF + "world"
+    wanted = "[ [ a sec ] hallo ]world"
+class RecTabStops_LeavingInnerInner_ECR(_VimTest):
+    snippets = (
+        ("m", "[ ${1:first} ${2:sec} ]"),
+    )
+    keys = "m" + EX + "m" + EX + "m" + EX + "a" + 4*ARR_L + JF + "hallo" + \
+            JF + "world" + JF + "end"
+    wanted = "[ [ [ a sec ] hallo ] world ]end"
+class RecTabStops_LeavingInnerInnerTwo_ECR(_VimTest):
+    snippets = (
+        ("m", "[ ${1:first} ${2:sec} ]"),
+    )
+    keys = "m" + EX + "m" + EX + "m" + EX + "a" + 6*ARR_L + JF + "hallo" + \
+            JF + "end"
+    wanted = "[ [ [ a sec ] sec ] hallo ]end"
 
 
 class RecTabStops_IgnoreZeroTS_ECR(_VimTest):

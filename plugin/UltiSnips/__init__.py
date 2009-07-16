@@ -156,18 +156,20 @@ class VimState(object):
 
 class SnippetManager(object):
     def __init__(self):
+        self._vstate = VimState()
+
         self.reset()
 
-        self._vstate = VimState()
-        self._ctab = None
-
-        self._expect_move_wo_change = False
 
     def reset(self):
         self._snippets = {}
         self._csnippets = []
+        self._reinit()
+
+    def _reinit(self):
         self._ctab = None
         self._span_selected = None
+        self._expect_move_wo_change = False
 
 
     def add_snippet(self, trigger, value, descr):
@@ -179,8 +181,10 @@ class SnippetManager(object):
 
     def jump(self, backwards = False):
         if self._cs:
+            debug("jump: self._cs: %s" % (self._cs))
             self._expect_move_wo_change = True
             self._ctab = self._cs.select_next_tab(backwards)
+            debug("      self._ctab: %s" % (self._ctab))
             if self._ctab:
                 self._vstate.select_span(self._ctab.abs_span)
                 self._span_selected = self._ctab.abs_span
@@ -300,17 +304,25 @@ class SnippetManager(object):
         else:
             vim.command(r'call feedkeys("\<BS>")')
 
+    def _check_if_still_inside_snippet(self):
+        # Cursor moved without input.
+        self._ctab = None
+
+        # Did we leave the snippet with this movement?
+        if self._cs and not (self._vstate.pos in self._cs.abs_span):
+            debug("popping: self._cs: %s" % (self._cs))
+            debug("         self._csni: %s" % (self._csnippets))
+            self._csnippets.pop()
+
+            self._reinit()
+
+            self._check_if_still_inside_snippet()
+
     def cursor_moved(self):
         self._vstate.update()
 
         if not self._vstate.buf_changed and not self._expect_move_wo_change:
-            # Cursor moved without input.
-            self._ctab = None
-
-            # Did we leave the snippet with this movement?
-            if self._cs and not \
-               (self._vstate.pos in self._cs.abs_span):
-                self.reset()
+            self._check_if_still_inside_snippet()
 
         if not self._ctab:
             return
@@ -356,7 +368,8 @@ class SnippetManager(object):
     def entered_insert_mode(self):
         self._vstate.update()
         if self._cs and self._vstate.has_moved:
-            self.reset()
+            self._reinit()
+            self._csnippets = []
 
     ###################################
     # Private/Protect Functions Below #
