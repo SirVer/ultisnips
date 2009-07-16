@@ -9,16 +9,8 @@ function! UltiSnips_ExpandSnippet()
             let SuperTabKey = "\<c-p>"
         endif
     endif
-    
-    if pumvisible() " Update snippet if completion is used, or deal with supertab
-        if exists('SuperTabKey')
-            call feedkeys(SuperTabKey) | return ''
-        endif
-        call feedkeys("\<esc>a", 'n') " Close completion menu
-        call feedkeys("\<tab>") | return ''
-    endif
-
-   " Now, really expand something
+   
+    " Now, really expand something
     py << EOF
 if not UltiSnips_Manager.try_expand():
    vim.command("""if exists('SuperTabKey')

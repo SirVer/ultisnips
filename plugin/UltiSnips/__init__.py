@@ -50,6 +50,7 @@ class VimState(object):
         self._dlines = None
         self._cols = None
         self._dcols = None
+        self._cline = None
         self._lline = None
         self._text_changed = None
 
@@ -83,8 +84,9 @@ class VimState(object):
         # If the length didn't change but we moved a column, check if
         # the char under the cursor has changed (might be one char tab).
         elif self.moved.col == 1:
-            self._text_changed = self._lline != vim.current.buffer[line]
-        self._lline = vim.current.buffer[line]
+            self._text_changed = self._cline != vim.current.buffer[line]
+        self._lline = self._cline
+        self._cline = vim.current.buffer[line]
 
     def select_span(self, r):
         delta = r.end - r.start
@@ -144,6 +146,10 @@ class VimState(object):
         return bool(self._moved.line or self._moved.col)
     has_moved = property(has_moved)
 
+    def last_line(self):
+        return self._lline
+    last_line = property(last_line)
+
 class SnippetManager(object):
     def __init__(self):
         self.reset()
@@ -188,7 +194,6 @@ class SnippetManager(object):
         if "all" not in self._snippets:
             self._load_snippets_for("all")
 
-        self._ctab = None
         self._expect_move_wo_change = False
 
         lineno,col = vim.current.window.cursor
@@ -275,12 +280,26 @@ class SnippetManager(object):
         if self._vstate.buf_changed and self._ctab:
             # Detect a carriage return
             if self._vstate.moved.col <= 0 and self._vstate.moved.line == 1:
+                # Multiple things might have happened: either the user entered
+                # a newline character or pasted some text which means we have
+                # to copy everything he entered on the last line and keep the
+                # indent vim chose for this line.
                 lline = vim.current.buffer[self._vstate.ppos.line]
-                pentered = lline[self._vstate.ppos.col:]
-                
-                this_entered = vim.current.line[:self._vstate.pos.col]
 
-                self._chars_entered(pentered + '\n' + this_entered)
+                # Another thing that might have happened is that a word
+                # wrapped, in this case the last line is shortened and we must
+                # delete what vim deleted there
+                line_was_shortened = len(self._vstate.last_line) > len(lline)
+                user_didnt_enter_newline = len(lline) != self._vstate.ppos.col
+                if line_was_shortened and user_didnt_enter_newline:
+                    cline = vim.current.buffer[self._vstate.pos.line]
+                    self._backspace(len(self._vstate.last_line)-len(lline))
+                    self._chars_entered('\n' + cline, 1)
+                else:
+                    pentered = lline[self._vstate.ppos.col:]
+                    this_entered = vim.current.line[:self._vstate.pos.col]
+
+                    self._chars_entered(pentered + '\n' + this_entered)
             elif self._vstate.moved.line == 0 and self._vstate.moved.col<0:
                 # Some deleting was going on
                 self._backspace(-self._vstate.moved.col)
@@ -305,7 +324,7 @@ class SnippetManager(object):
     # Private/Protect Functions Below #
     ###################################
     # Input Handling
-    def _chars_entered(self, chars):
+    def _chars_entered(self, chars, del_more_lines = 0):
         if (self._span_selected is not None):
             self._ctab.current_text = chars
 
@@ -313,10 +332,10 @@ class SnippetManager(object):
                     self._span_selected.end.line
             self._span_selected = None
 
-            self._update_vim_buffer(moved)
+            self._update_vim_buffer(moved + del_more_lines)
         else:
             self._ctab.current_text += chars
-            self._update_vim_buffer()
+            self._update_vim_buffer(del_more_lines)
 
 
     def _backspace(self, count):

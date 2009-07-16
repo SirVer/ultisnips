@@ -170,6 +170,16 @@ class MultilineExpandTestTyping_ExceptCorrectResult(_VimTest):
     wanted = "Wie Hallo Welt!\nUnd Wie gehtsHuiui! gehts"
     keys = "Wie hallo gehts" + ESC + "bhi" + EX + "Huiui!"
 
+class MultilineExpandWithFormatoptionsOn_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "${1:longer expand}\n$0")
+    keys = "test" + EX + "This is a longer text that should wrap"
+    wanted = "This is a longer\ntext that should\nwrap\n"
+    def _options_on(self):
+        self.send(":set tw=20\n")
+    def _options_off(self):
+        self.send(":set tw=0\n")
+
+
 ############
 # TabStops #
 ############
