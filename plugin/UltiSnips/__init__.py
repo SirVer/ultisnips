@@ -253,6 +253,7 @@ class SnippetManager(object):
             pos = self._vstate.pos
             p_start = self._ctab.abs_start
 
+            debug("    p_start: %s" % (p_start))
             if pos.line == p_start.line:
                 end = Position(0, pos.col - p_start.col)
             else:
@@ -265,7 +266,6 @@ class SnippetManager(object):
             # Launch this snippet as a child of the current snippet
             si = SnippetInstance(self._ctab, snippet.value, start, end)
 
-            self._cs.update()
             self._update_vim_buffer()
 
             if si.has_tabs:

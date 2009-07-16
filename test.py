@@ -521,10 +521,10 @@ class RecTabStops_InNewlineInTabstopNotAtBeginOfLine_ECR(_VimTest):
 # TODO: keep correct indent inside tabstop at expansion
 # TODO: especially if last tabstop is zero
 # TODO: also when it is not zero
-# class RecTabStops_InNewlineMultiline_ECR(_VimTest):
-#     snippets = ("m", "M START\n   $0\nM END")
-#     keys = "m" + EX + "m" + EX
-#     wanted = "M START\n M START\n"
+class RecTabStops_InNewlineMultiline_ECR(_VimTest):
+    snippets = ("m", "M START\n$0\nM END")
+    keys = "m" + EX + "m" + EX
+    wanted = "M START\nM START\n\nM END\nM END"
 
 print "Recursive Tabstops: TODO: this will still take some time"
 

@@ -401,6 +401,7 @@ class TextObject(object):
     # Public functions #
     ####################
     def update(self):
+        debug("Updating children")
         for idx,c in enumerate(self._childs):
             oldend = Position(c.end.line, c.end.col)
 
@@ -409,7 +410,13 @@ class TextObject(object):
             moved_lines = new_end.line - oldend.line
             moved_cols = new_end.col - oldend.col
 
+            debug("    self: %s, c: %s" % (self, c))
+            debug("    c.current_text: %s" % repr(c.current_text))
+            debug("    b4: self.current_text: %s" % repr(self.current_text))
+
+            debug("    c.start: %s, oldend: %s, new_end: %s" % (c.start, oldend, new_end))
             self._current_text.replace_text(c.start, oldend, c._current_text)
+            debug("    aft self.current_text: %s" % repr(self.current_text))
 
             self._move_textobjects_behind(c.start, oldend, moved_lines,
                         moved_cols, idx)
@@ -686,26 +693,27 @@ class SnippetInstance(TextObject):
 
         _TOParser(self, initial_text).parse()
 
-        self.update()
-
         # Check if we have a zero Tab, if not, add one at the end
         debug("type(parent): %s" % (type(parent)))
-        if isinstance(parent, TabStop) and not parent.no == 0:
-            # We are recursively called, if we have a zero tab, remove it.
-            if 0 in self._tabstops:
-                self._tabstops[0].current_text = ""
-                del self._tabstops[0]
-        elif 0 not in self._tabstops:
-            delta = self._end - self._start
-            col = self.end.col
-            if delta.line == 0:
-                col -= self.start.col
-            start = Position(delta.line, col)
-            end = Position(delta.line, col)
-            ts = TabStop(0, self, start, end, "")
-            self._add_tabstop(0,ts)
-
+        if isinstance(parent, TabStop):
+            if not parent.no == 0:
+                # We are recursively called, if we have a zero tab, remove it.
+                if 0 in self._tabstops:
+                    self._tabstops[0].current_text = ""
+                    del self._tabstops[0]
+        else:
             self.update()
+            if 0 not in self._tabstops:
+                delta = self._end - self._start
+                col = self.end.col
+                if delta.line == 0:
+                    col -= self.start.col
+                start = Position(delta.line, col)
+                end = Position(delta.line, col)
+                ts = TabStop(0, self, start, end, "")
+                self._add_tabstop(0,ts)
+
+                self.update()
 
     def __repr__(self):
         return "SnippetInstance(%s -> %s)" % (self._start, self._end)
