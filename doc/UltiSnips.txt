@@ -472,8 +472,8 @@ new snippets, new features or bug reports.
 
 If you like this plugin, please also vote for it on its vim script page. It is
 life changing for me, maybe it is for you too. 
-
-TODO: add link here
+You can find the page here:
+http://www.vim.org/scripts/script.php?script_id=2715
 
 =============================================================================
 7. CONTACT                                                *UltiSnips-contact*
