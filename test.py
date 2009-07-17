@@ -532,6 +532,10 @@ class RecTabStops_InNewlineManualIndent_ECR(_VimTest):
     snippets = ("m", "M START\n$0\nM END")
     keys = "m" + EX + "    m" + EX + "hi"
     wanted = "M START\n    M START\n    hi\n    M END\nM END"
+class RecTabStops_InNewlineManualIndentTextInFront_ECR(_VimTest):
+    snippets = ("m", "M START\n$0\nM END")
+    keys = "m" + EX + "    hallo m" + EX + "hi"
+    wanted = "M START\n    hallo M START\n    hi\n    M END\nM END"
 class RecTabStops_InNewlineMultilineWithIndent_ECR(_VimTest):
     snippets = ("m", "M START\n    $0\nM END")
     keys = "m" + EX + "m" + EX + "hi"

@@ -263,7 +263,8 @@ class SnippetManager(object):
             start = Position(end.line, end.col - len(snippet.trigger))
 
             # TODO: very much the same as above
-            indent = vim.current.line[:pos.col - len(snippet.trigger)]
+            text_before = vim.current.line[:pos.col - len(snippet.trigger)]
+            indent = snippet._INDENT.match(text_before).group(0)
             v = snippet.value
             if indent.strip(" \n") == "":
                 lines = v.splitlines()
