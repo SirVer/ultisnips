@@ -424,6 +424,7 @@ class TabStop_VimScriptInterpolation_SimpleExample(_VimTest):
 # TODO: pasting with <C-R> while mirroring, also multiline
 # TODO: expandtab and therelikes
 # TODO: Multiline text pasting
+# TODO: option to avoid snippet expansion when not only indent in front
 
 
 ###############################

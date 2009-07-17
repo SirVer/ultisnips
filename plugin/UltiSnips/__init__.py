@@ -24,10 +24,6 @@ class Snippet(object):
         return self._overwrites
     overwrites_previous = property(overwrites_previous)
 
-    def value(self):
-        return self._v
-    value = property(value)
-
     def description(self):
         return self._d
     description = property(description)
@@ -36,7 +32,7 @@ class Snippet(object):
         return self._t
     trigger = property(trigger)
 
-    def launch(self, text_before, start):
+    def launch(self, text_before, parent, start, end = None):
         indent = self._INDENT.match(text_before).group(0)
         v = self._v
         if len(indent):
@@ -46,7 +42,10 @@ class Snippet(object):
                 v += os.linesep + \
                         os.linesep.join([indent + l for l in lines[1:]])
 
-        return SnippetInstance(StartMarker(start), v )
+        if parent is None:
+            return SnippetInstance(StartMarker(start), v )
+        else:
+            return SnippetInstance(parent, v, start, end)
 
 class VimState(object):
     def __init__(self):
@@ -190,7 +189,6 @@ class SnippetManager(object):
                 self._vstate.select_span(self._ctab.abs_span)
                 self._span_selected = self._ctab.abs_span
             else:
-                # TODO: pop othermost snippet
                 self._csnippets.pop()
                 if self._cs:
                     self.jump(backwards)
@@ -261,46 +259,26 @@ class SnippetManager(object):
             else:
                 end = Position(pos.line - p_start.line, pos.col)
             start = Position(end.line, end.col - len(snippet.trigger))
-
-            # TODO: very much the same as above
             text_before = vim.current.line[:pos.col - len(snippet.trigger)]
-            indent = snippet._INDENT.match(text_before).group(0)
-            v = snippet.value
-            if indent.strip(" \n") == "":
-                lines = v.splitlines()
-                v = lines[0]
-                if len(lines) > 1:
-                    v += os.linesep + \
-                            os.linesep.join([indent + l for l in lines[1:]])
 
-            # Launch this snippet as a child of the current snippet
-            si = SnippetInstance(self._ctab, v, start, end)
+            si = snippet.launch(text_before, self._ctab, start, end)
 
             self._update_vim_buffer()
 
             if si.has_tabs:
                 self._csnippets.append(si)
-                self._ctab = si.select_next_tab()
-                if self._ctab is not None:
-                    self._vstate.select_span(self._ctab.abs_span)
-                    self._span_selected = self._ctab.abs_span
+                self.jump()
         else:
             text_before = before.rstrip()[:-len(word)]
             self._vb = VimBuffer(text_before, after)
 
             start = Position(lineno-1, len(text_before))
-            self._csnippets.append(snippet.launch(text_before, start))
+            self._csnippets.append(snippet.launch(text_before, None, start))
 
             self._vb.replace_lines(lineno-1, lineno-1,
                        self._cs._current_text)
 
-            # TODO: this code is duplicated above
-            self._ctab = self._cs.select_next_tab()
-            if self._ctab is not None:
-                self._vstate.select_span(self._ctab.abs_span)
-                self._span_selected = self._ctab.abs_span
-
-        self._vstate.update()
+            self.jump()
 
         return True
 
