@@ -446,20 +446,6 @@ insight into which direction development is headed. Please feel free to
 comment on any feature here or if you have any good ideas what is missing
 contact me. 
 
- Snippet options:                                   *UltiSnips-snippet-options*
-
-I have a snippet defined that inserts nice comment boxes in code. But I
-sometime get this expanded in the middle of the line. I therefore want to add
-options to the snippet definition like this: >
-   snippet tab_trigger "Description" option_chars
-
-one option would be 
-   b  - beginning; only whitespaces are allowed in front of this trigger
-
-so when I use box<tab> at the beginning of a line, I get my snippet expanded.
-If I use <box> in the middle of the line, nothing will happen or another
-snippet with the same tab trigger but without this option will be expanded.
-
  Cursor key movement:                           *UltiSnips-cursor-key-movement*
 
 Currently, cursor key movement is not possible in snippets. When you use the 
