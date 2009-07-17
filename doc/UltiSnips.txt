@@ -141,11 +141,23 @@ specified.
 
 The snippets file format is simple. A line starting with # is a comment, each
 snippet starts with a line in the form of: >
-   snippet tab_trigger "description"
+   snippet tab_trigger [ "description" [ options ] ]
 The following lines are the snippets definition; a line starting with >
    endsnippet
 marks the end of the snippet. The trailing newline is chopped from the
-definition.
+definition. In the starting line, the description and options are optional.
+
+The description is only needed when more than one snippet is defined with the
+same tab trigger. The user is then given a choice and the description is
+displayed for the user as helper. 
+
+The options is a word of characters, each turning a specific option for this
+snippet on. The options currently supported are >
+   !   Overwrite - This snippet will overwrite all previously defined
+       snippets with this tab trigger. Default is to let the user choose at
+       expansion which snippet to expand. This option is useful to overwrite
+       bundled tab stops with user defined ones.
+
 
 4.2 Plaintext snippets                         *UltiSnips-plaintext-snippets*
 ----------------------

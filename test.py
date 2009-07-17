@@ -74,13 +74,19 @@ class _VimTest(unittest.TestCase):
         for s in self.snippets:
             sv,content = s[:2]
             descr = ""
-            if len(s) == 3:
-                descr = s[-1]
+            options = ""
+            if len(s) > 2:
+                descr = s[2]
+            if len(s) > 3:
+                options = s[3]
+
             self.send(''':py << EOF
-UltiSnips_Manager.add_snippet("%s","""%s""", "%s")
+UltiSnips_Manager.add_snippet("%s","""%s""", "%s", "%s")
 EOF
-''' % (sv,content.encode("string-escape"), descr.encode("string-escape"))
-            )
+''' % (sv,content.encode("string-escape"), descr.encode("string-escape"),
+      options
+      )
+      )
 
         # Clear the buffer
         self.send("bggVGd")
@@ -937,6 +943,36 @@ class Completion_SimpleExample_ECR(_VimTest):
     wanted = "superkallifragilistik\nsuperkallifragilistik some more " \
             "superkallifragilistik some more"
 
+
+###################
+# SNIPPET OPTIONS #
+###################
+class SnippetOptions_OverwriteExisting_ECR(_VimTest):
+    snippets = (
+     ("test", "${1:Hallo}", "Types Hallo"),
+     ("test", "${1:World}", "Types World"),
+     ("test", "We overwrite", "Overwrite the two", "!"),
+    )
+    keys = "test" + EX
+    wanted = "We overwrite"
+class SnippetOptions_OverwriteTwice_ECR(_VimTest):
+    snippets = (
+        ("test", "${1:Hallo}", "Types Hallo"),
+        ("test", "${1:World}", "Types World"),
+        ("test", "We overwrite", "Overwrite the two", "!"),
+        ("test", "again", "Overwrite again", "!"),
+    )
+    keys = "test" + EX
+    wanted = "again"
+class SnippetOptions_OverwriteThenChoose_ECR(_VimTest):
+    snippets = (
+        ("test", "${1:Hallo}", "Types Hallo"),
+        ("test", "${1:World}", "Types World"),
+        ("test", "We overwrite", "Overwrite the two", "!"),
+        ("test", "No overwrite", "Not overwritten", ""),
+    )
+    keys = "test" + EX + "1\n\n" + "test" + EX + "2\n"
+    wanted = "We overwrite\nNo overwrite"
 
 
 ######################

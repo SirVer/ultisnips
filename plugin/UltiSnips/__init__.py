@@ -14,10 +14,15 @@ from UltiSnips.Buffer import VimBuffer
 class Snippet(object):
     _INDENT = re.compile(r"^[ \t]*")
 
-    def __init__(self,trigger,value, descr):
+    def __init__(self, trigger, value, descr, options):
         self._t = trigger
         self._v = value
         self._d = descr
+        self._overwrites = "!" in options
+
+    def overwrites_previous(self):
+        return self._overwrites
+    overwrites_previous = property(overwrites_previous)
 
     def value(self):
         return self._v
@@ -170,11 +175,11 @@ class SnippetManager(object):
         self._expect_move_wo_change = False
 
 
-    def add_snippet(self, trigger, value, descr):
+    def add_snippet(self, trigger, value, descr, options):
         if "all" not in self._snippets:
             self._snippets["all"] = {}
         l = self._snippets["all"].get(trigger,[])
-        l.append(Snippet(trigger,value, descr))
+        l.append(Snippet(trigger,value, descr, options))
         self._snippets["all"][trigger] = l
 
     def jump(self, backwards = False):
@@ -219,6 +224,12 @@ class SnippetManager(object):
         snippets = []
         for ft in filetypes:
             snippets += self._find_snippets(ft, word)
+
+        # Search if any of the snippets overwrites the previous
+        for idx in range(len(snippets)-1,-1,-1):
+            if snippets[idx].overwrites_previous:
+                snippets = snippets[idx:]
+                break
 
         if not len(snippets):
             # No snippet found
@@ -419,6 +430,7 @@ class SnippetManager(object):
         cs = None
         cv = ""
         cdescr = ""
+        coptions = ""
         for line in open(fn):
             if cs is None and line.startswith("#"):
                 continue
@@ -428,15 +440,15 @@ class SnippetManager(object):
                 if left != -1:
                     right = line.rfind('"')
                     cdescr = line[left+1:right]
+                    coptions = line[right:].strip()
                 continue
             if cs != None:
                 if line.startswith("endsnippet"):
                     cv = cv[:-1] # Chop the last newline
                     l = self._snippets[ft].get(cs,[])
-                    l.append(Snippet(cs,cv,cdescr))
+                    l.append(Snippet(cs,cv,cdescr,coptions))
                     self._snippets[ft][cs] = l
-                    cv = ""
-                    cdescr = ""
+                    cv = cdescr = coptions = ""
                     cs = None
                     continue
                 else:
