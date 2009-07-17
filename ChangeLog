@@ -1,0 +1,6 @@
+trunk:
+  - Added support for ! option. This overwrites previously defined snippets
+    with the same tab trigger ( *UltiSnips-adding-snippets* )
+  - Support for dotted filetype syntax. Now snippets for more than one filetype
+    can be active ( *UltiSnips-adding-snippets* )
+
