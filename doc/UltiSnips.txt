@@ -9,7 +9,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    2.3 Updating                                 |UltiSnips-updating|
 3. Settings                                     |UltiSnips-settings|     
 4. Syntax                                       |UltiSnips-syntax|       
-   4.1 Adding snippets                          |UltiSnips-adding-snippets|
+   4.1 Adding Snippets                          |UltiSnips-adding-snippets|
    4.2 Plaintext snippets                       |UltiSnips-plaintext-snippets|
    4.3 Interpolation                            |UltiSnips-integration|
       4.3.1 Shellcode                           |UltiSnips-shellcode|
@@ -133,6 +133,11 @@ special file is >
    all.snippets
 which contains snippets that are always expanded, no matter what file type is
 defined. For example, I keep mail signatures and date insertion snippets here. 
+
+The dotted file type syntax of vim is supported. For example, for my cpp or
+CUDA files, i keep the file type set to ":set ft=cpp.c" or ":set
+ft=cuda.cpp.c". This activates all snippets for each file type in the order
+specified.
 
 The snippets file format is simple. A line starting with # is a comment, each
 snippet starts with a line in the form of: >

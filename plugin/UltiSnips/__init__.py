@@ -196,11 +196,10 @@ class SnippetManager(object):
         return False
 
     def try_expand(self, backwards = False):
-        ft = vim.eval("&filetype")
-        if len(ft) and ft not in self._snippets:
-            self._load_snippets_for(ft)
-        if "all" not in self._snippets:
-            self._load_snippets_for("all")
+        filetypes = vim.eval("&filetype").split(".") + [ "all" ]
+        for ft in filetypes[::-1]:
+            if len(ft) and ft not in self._snippets:
+                self._load_snippets_for(ft)
 
         self._expect_move_wo_change = False
 
@@ -218,9 +217,8 @@ class SnippetManager(object):
 
         word = before.split()[-1]
         snippets = []
-        if len(ft):
+        for ft in filetypes:
             snippets += self._find_snippets(ft, word)
-        snippets += self._find_snippets("all", word)
 
         if not len(snippets):
             # No snippet found
