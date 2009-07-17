@@ -157,7 +157,11 @@ snippet on. The options currently supported are >
        snippets with this tab trigger. Default is to let the user choose at
        expansion which snippet to expand. This option is useful to overwrite
        bundled tab stops with user defined ones.
-
+   b   Beginning of line - This snippet will only be expanded if you are at
+       the beginning of a line (that is if there are only whitespaces in front
+       of the cursor). Default is to expand snippets at every position, even
+       mitten in the line. Most of my snippets have this option set, it keeps
+       UltiSnips out of the way. 
 
 4.2 Plaintext snippets                         *UltiSnips-plaintext-snippets*
 ----------------------

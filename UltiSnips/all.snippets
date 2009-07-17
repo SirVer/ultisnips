@@ -4,7 +4,7 @@
 ##############
 # NICE BOXES #
 ##############
-snippet box
+snippet box "A nice box with the current comment symbol" b
 `!p
 c = '#'
 cs = vim.eval("&commentstring")
@@ -21,7 +21,7 @@ res = ' ' + c + '\n' + (len(t[1])+4)*c`
 $0
 endsnippet
 
-snippet bbox
+snippet bbox "A nice box over the full width" b
 `!p
 c = '#'
 cs = vim.eval("&commentstring")

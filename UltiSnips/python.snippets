@@ -3,13 +3,13 @@
 ###########################################################################
 
 #! header
-snippet #!
+snippet #! "Shebang header for python scripts" b
 #!/usr/bin/env python
 # encoding: utf-8
 $0
 endsnippet
 
-snippet ifmain "ifmain"
+snippet ifmain "ifmain" b
 if __name__ == '__main__':
     ${1:main()}$0
 endsnippet
@@ -18,7 +18,7 @@ endsnippet
 ##########
 # COMMON #
 ##########
-snippet class
+snippet class "smart class" b
 class ${1:MyClass}(${2:object}):
     """${3:Docstring for $1}"""
 
@@ -33,20 +33,20 @@ snippet .
 self.
 endsnippet
 
-snippet from
+snippet from "from blah import blah" b
 from ${1:module} import ${2:Stuff}
 endsnippet
 
 ##############
 # PROPERTIES #
 ##############
-snippet roprop
+snippet roprop "Read Only Property" b
 @property
 def ${1:property}(self):
     ${2:return self._$1}$0
 endsnippet
 
-snippet rwprop
+snippet rwprop "Read write property" b
 def ${1:property}(self):
     ${2/.+/(?0:""")/}${2:The RW property $1}${2/.+/(?0:"""\n    )/}def fget(self):
         return self._$1$0
@@ -59,23 +59,14 @@ endsnippet
 ##########################
 # Try / Except / Finally #
 ##########################
-snippet try "Try / Except"
+snippet try "Try / Except" b
 try:
     ${1:pass}
 except ${2:Exception}, ${3:e}:
     ${4:raise $3}
 endsnippet
 
-snippet try "Try / Except / Else"
-try:
-    ${1:pass}
-except ${2:Exception}, ${3:e}:
-    ${4:raise $3}
-else:
-    ${5:pass}
-endsnippet
-
-snippet try "Try / Except / Finally"
+snippet try "Try / Except / Else" b
 try:
     ${1:pass}
 except ${2:Exception}, ${3:e}:
@@ -84,7 +75,16 @@ else:
     ${5:pass}
 endsnippet
 
-snippet try "Try / Except / Else / Finally"
+snippet try "Try / Except / Finally" b
+try:
+    ${1:pass}
+except ${2:Exception}, ${3:e}:
+    ${4:raise $3}
+else:
+    ${5:pass}
+endsnippet
+
+snippet try "Try / Except / Else / Finally" b
 try:
     ${1:pass}
 except${2: ${3:Exception}, ${4:e}}:
@@ -98,23 +98,23 @@ endsnippet
 ##############
 # Assertions #
 ##############
-snippet ae
+snippet ae "Assert equal" b
 self.assertEqual(${1:first},${2:second})
 endsnippet
 
-snippet at
+snippet at "Assert True" b
 self.assertTrue(${0:exp})
 endsnippet
 
-snippet af
+snippet af "Assert False" b
 self.assertFalse(${1:expression})
 endsnippet
 
-snippet aae
+snippet aae "Assert almost equal" b
 self.assertAlmostEqual(${1:first},${2:second})
 endsnippet
 
-snippet ar
+snippet ar "Assert raises" b
 self.assertRaises(${1:exception}, ${2:func}${3/.+/, /}${3:arguments})
 endsnippet
 

@@ -18,11 +18,15 @@ class Snippet(object):
         self._t = trigger
         self._v = value
         self._d = descr
-        self._overwrites = "!" in options
+        self._opts = options
 
     def overwrites_previous(self):
-        return self._overwrites
+        return "!" in self._opts
     overwrites_previous = property(overwrites_previous)
+
+    def needs_ws_in_front(self):
+        return "b" in self._opts
+    needs_ws_in_front = property(needs_ws_in_front)
 
     def description(self):
         return self._d
@@ -229,6 +233,11 @@ class SnippetManager(object):
                 snippets = snippets[idx:]
                 break
 
+        # Check if there are any only whitespace in front snippets
+        text_before = before.rstrip()[:-len(word)]
+        if text_before.strip(" \t") != '':
+            snippets = [ s for s in snippets if not s.needs_ws_in_front ]
+
         if not len(snippets):
             # No snippet found
             return False
@@ -259,7 +268,6 @@ class SnippetManager(object):
             else:
                 end = Position(pos.line - p_start.line, pos.col)
             start = Position(end.line, end.col - len(snippet.trigger))
-            text_before = vim.current.line[:pos.col - len(snippet.trigger)]
 
             si = snippet.launch(text_before, self._ctab, start, end)
 
@@ -269,7 +277,6 @@ class SnippetManager(object):
                 self._csnippets.append(si)
                 self.jump()
         else:
-            text_before = before.rstrip()[:-len(word)]
             self._vb = VimBuffer(text_before, after)
 
             start = Position(lineno-1, len(text_before))

@@ -1,4 +1,6 @@
 trunk:
+  - Added support for b option. This only considers a snippet at the beginning
+	 of a line ( *UltiSnips-adding-snippets* )
   - Added support for ! option. This overwrites previously defined snippets
     with the same tab trigger ( *UltiSnips-adding-snippets* )
   - Support for dotted filetype syntax. Now snippets for more than one filetype

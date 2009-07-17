@@ -978,7 +978,32 @@ class SnippetOptions_OverwriteThenChoose_ECR(_VimTest):
     )
     keys = "test" + EX + "1\n\n" + "test" + EX + "2\n"
     wanted = "We overwrite\nNo overwrite"
-
+class SnippetOptions_OnlyExpandWhenWSInFront_Expand(_VimTest):
+    snippets = ("test", "Expand me!", "", "b")
+    keys = "test" + EX
+    wanted = "Expand me!"
+class SnippetOptions_OnlyExpandWhenWSInFront_Expand2(_VimTest):
+    snippets = ("test", "Expand me!", "", "b")
+    keys = "   test" + EX
+    wanted = "   Expand me!"
+class SnippetOptions_OnlyExpandWhenWSInFront_DontExpand(_VimTest):
+    snippets = ("test", "Expand me!", "", "b")
+    keys = "a test" + EX
+    wanted = "a test"
+class SnippetOptions_OnlyExpandWhenWSInFront_OneWithOneWO(_VimTest):
+    snippets = (
+        ("test", "Expand me!", "", "b"),
+        ("test", "not at beginning", "", ""),
+    )
+    keys = "a test" + EX
+    wanted = "a not at beginning"
+class SnippetOptions_OnlyExpandWhenWSInFront_OneWithOneWOChoose(_VimTest):
+    snippets = (
+        ("test", "Expand me!", "", "b"),
+        ("test", "not at beginning", "", ""),
+    )
+    keys = "  test" + EX + "1\n"
+    wanted = "  Expand me!"
 
 ######################
 # SELECTING MULTIPLE #
