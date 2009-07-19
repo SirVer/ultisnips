@@ -101,17 +101,12 @@ class _CleverReplace(object):
         # Replace all $? with capture groups
         tv = self._DOLLAR.subn(lambda m: match.group(int(m.group(1))), tv)[0]
 
-        def _conditional(m):
-            args = m.group(2).split(':')
-
         # Replace CaseFoldings
         tv = self._SIMPLE_CASEFOLDINGS.subn(self._scase_folding, tv)[0]
         tv = self._LONG_CASEFOLDINGS.subn(self._lcase_folding, tv)[0]
         tv = self._replace_conditional(match, tv)
 
-        rv = tv.decode("string-escape")
-
-        return rv
+        return self._unescape(tv.decode("string-escape"))
 
 class _TOParser(object):
     # A simple tabstop with default value
@@ -601,7 +596,7 @@ class Transformation(Mirror):
             if "i" in options:
                 flags |=  re.IGNORECASE
 
-        self._find = re.compile(s, flags)
+        self._find = re.compile(s, flags | re.DOTALL)
         self._replace = _CleverReplace(r)
 
     def _do_update(self):

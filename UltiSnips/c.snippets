@@ -5,10 +5,10 @@ snippet def "#ifndef … #define … #endif"
 endsnippet
 
 snippet inc "#include "" (inc)"
-#include "${1:${TM_FILENAME/\..+$/.h/}}"
+#include "${1:`!p res=fn.split('.')[-2]+'.h'`}"
 endsnippet
 
-snippet Inc "#include &lt;&gt; (Inc)"
+snippet Inc "#include <> (Inc)"
 #include <${1:.h}>
 endsnippet
 
@@ -22,11 +22,11 @@ $0
 endsnippet
 
 snippet beginend "$1.begin(), $1.end() (beginend)"
-${1:v}${1/^.*?(-)?(>)?$/(?2::(?1:>:.))/}begin(), ${1:v}${1/^.*?(-)?(>)?$/(?2::(?1:>:.))/}end()
+${1:v}${1/^.*?(-)?(>)?$/(?2::(?1:>:.))/}begin(), $1${1/^.*?(-)?(>)?$/(?2::(?1:>:.))/}end()
 endsnippet
 
 snippet main "010 main() (main)"
-int main (int argc, char const${TM_C_POINTER: *}argv[])
+int main (int argc, char const *argv[])
 {
 	${0:/* code */}
 	return 0;
@@ -45,13 +45,12 @@ enum ${1:name} { $0 };
 endsnippet
 
 snippet once "Include header once only guard"
-#ifndef ${1:`#!/usr/bin/env ruby -wKU -riconv
-name = ENV["TM_FILENAME"] || "untitled"
-name = Iconv.iconv("ASCII//TRANSLIT", "UTF-8", name).first
-name = name.gsub(/[^a-z0-9]+/i, "_")
-uuid = (rand * 2821109907455).round.to_s(36)
-print "#{name}_#{uuid}".tr("[a-z]", "[A-Z]")
-`}
+#ifndef ${1:`!p
+if not len(cur):
+	import random, string
+	name = re.sub(r'[^A-Za-z0-9]+','_', fn).upper()
+	rand = ''.join(random.sample(string.ascii_letters+string.digits, 8))
+	res = ('%s_%s' % (name,rand)).upper()`}
 #define $1
 
 ${0}
@@ -65,7 +64,11 @@ typedef ${1:int} ${2:MyCustomType};
 endsnippet
 
 snippet cl "class .. (class)"
-class ${1:${TM_FILENAME/(.+)\..+|.*/(?1:\L$1_t:name)/}}
+class ${1:`!p
+if len(fn):
+	res = fn.split(".")[-2].lower()+ '_t'
+else:
+	res = "name"`}
 {
 public:
 	${1/(\w+).*/$1/} (${2:arguments});
@@ -94,7 +97,9 @@ if(${1:/* condition */})
 endsnippet
 
 snippet ns "namespace .. (namespace)"
-namespace${1/.+/ /m}${1:${TM_FILENAME/^((.*?)\..*)?$/(?1:\L$2:my)/}}
+namespace${1/.+/ /m}${1:`!p
+if len(fn): res = fn.split(".")[-2].lower()
+else: res ="name"`}
 {
 	$0
 }${1/.+/ \/* /m}$1${1/.+/ *\/ /m}
@@ -106,7 +111,7 @@ endsnippet
 
 snippet readfile "read file (readF)"
 std::vector<char> v;
-if(FILE${TM_C_POINTER: *}fp = fopen(${1:"filename"}, "r"))
+if(FILE *fp = fopen(${1:"filename"}, "r"))
 {
 	char buf[1024];
 	while(size_t len = fread(buf, 1, sizeof(buf), fp))
@@ -124,13 +129,14 @@ std::vector<${1:char}> v$0;
 endsnippet
 
 snippet st "struct"
-struct ${1:${TM_FILENAME/(.+)\..+|.*/(?1:\L$1_t:name)/}}
+struct ${1:`!p if fn != "": res = fn.split(".")[-2].lower()+"_t"
+else: res = "name"`}
 {
 	${0:/* data */}
 };
 endsnippet
 
-snippet tp "template &lt;typename ..&gt; (template)"
+snippet tp "template <typename ..> (template)"
 template <typename ${1:_InputIter}>
 endsnippet
 

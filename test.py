@@ -412,6 +412,11 @@ class TabStop_PythonCode_ReferencePlaceholderBefore(_VimTest):
     snippets = ("test", """`!p res = len(t[1])*"#"`\n${1:some text}""")
     keys = "test" + EX + "Hallo Welt"
     wanted = "##########\nHallo Welt"
+class TabStop_PythonCode_TransformedBeforeMultiLine(_VimTest):
+    snippets = ("test", """${1/.+/egal/m} ${1:`!p
+res = "Hallo"`} End""")
+    keys = "test" + EX
+    wanted = "egal Hallo End"
 
 ###########################
 # VimScript Interpolation #
@@ -839,7 +844,6 @@ class Transformation_ConditionalInsertRWEllipsis_ECR(_VimTest):
     keys = "test" + EX + "a b  c d e f ghhh h oha"
     wanted = "a b  c d e f ghhh h oha a b  c d e f ghhh h..."
 class Transformation_ConditionalInConditional_ECR(_VimTest):
-    # TODO: here lingers a bug
     snippets = ("test", r"$1 ${1/^.*?(-)?(>)?$/(?2::(?1:>:.))/}")
     keys = "test" + EX + "hallo" + ESC + "$a\n" + \
            "test" + EX + "hallo-" + ESC + "$a\n" + \
