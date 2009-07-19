@@ -1,4 +1,5 @@
 trunk:
+  - Conditional Inserts can now be nested
   - Added support for b option. This only considers a snippet at the beginning
 	 of a line ( *UltiSnips-adding-snippets* )
   - Added support for ! option. This overwrites previously defined snippets

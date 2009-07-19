@@ -838,6 +838,13 @@ class Transformation_ConditionalInsertRWEllipsis_ECR(_VimTest):
     snippets = ("test", r"$1 ${1/(\w+(?:\W+\w+){,7})\W*(.+)?/$1(?2:...)/}")
     keys = "test" + EX + "a b  c d e f ghhh h oha"
     wanted = "a b  c d e f ghhh h oha a b  c d e f ghhh h..."
+class Transformation_ConditionalInConditional_ECR(_VimTest):
+    # TODO: here lingers a bug
+    snippets = ("test", r"$1 ${1/^.*?(-)?(>)?$/(?2::(?1:>:.))/}")
+    keys = "test" + EX + "hallo" + ESC + "$a\n" + \
+           "test" + EX + "hallo-" + ESC + "$a\n" + \
+           "test" + EX + "hallo->"
+    wanted = "hallo .\nhallo- >\nhallo-> "
 
 class Transformation_CINewlines_ECR(_VimTest):
     snippets = ("test", r"$1 ${1/, */\n/}")

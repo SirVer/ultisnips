@@ -240,10 +240,13 @@ can be used: >
    fn   - The current filename
    path - The complete path to the current file
    t    - The values of the placeholders, t[1] -> current text of ${1} and so on
+   cur  - The current text of the placeholder. You can check if this is != ""
+          to make sure that the interpolation is only done once
 
-Also, the re and os modules are already imported inside the snippet code. This
-allows for very flexible snippets. For example, the following snippet mirrors
-the first Tab Stops value on the same line in uppercase and right aligned:
+Also, the vim, re, os, string and random modules are already imported inside
+the snippet code. This allows for very flexible snippets. For example, the
+following snippet mirrors the first Tab Stops value on the same line in
+uppercase and right aligned:
 
 ------------------- SNIP -------------------
 snippet wow
