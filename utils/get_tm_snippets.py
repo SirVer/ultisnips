@@ -4,15 +4,34 @@
 import urllib
 import re
 from xml.etree import ElementTree
+from xml.parsers.expat import ExpatError
+import htmlentitydefs
+
+_UNESCAPE = re.compile(ur'&\w+?;', re.UNICODE)
+def unescape(s):
+    if s is None:
+        return ""
+    def fixup(m):
+        ent = m.group(0)[1:-1]
+        print ent
+        return unichr(htmlentitydefs.name2codepoint[ent])
+    try:
+        return _UNESCAPE.sub(fixup,s.decode("utf-8")).encode("utf-8")
+    except:
+        print s.decode("utf-8")
 
 def parse_content(c):
-    data = ElementTree.fromstring(c)[0]
+    try:
+        data = ElementTree.fromstring(c)[0]
 
-    rv = {}
-    for k,v in zip(data[::2], data[1::2]):
-        rv[k.text] = v.text
+        rv = {}
+        for k,v in zip(data[::2], data[1::2]):
+            rv[k.text] = unescape(v.text)
 
-    return rv
+        return rv
+    except ExpatError:
+        print "   Syntax Error"
+        return None
 
 def fetch_snippets(name):
     base_url = "http://svn.textmate.org/trunk/Bundles/" + name + ".tmbundle/"
@@ -28,11 +47,13 @@ def fetch_snippets(name):
         if name == "..":
             continue
 
-        name = name.rsplit('.', 1)[0] # remove Extension
+        name = unescape(name.rsplit('.', 1)[0]) # remove Extension
         print "Fetching data for Snippet '%s'" % name
         content = urllib.urlopen(snippet_idx + link).read()
 
-        rv.append((name, parse_content(content)))
+        cont = parse_content(content)
+        if cont:
+            rv.append((name, cont))
 
     return rv
 
@@ -44,7 +65,7 @@ def write_snippets(snip_descr, f):
             continue
 
         f.write('snippet %s "%s"\n' % (d["tabTrigger"], name))
-        f.write(d["content"] + "\n")
+        f.write(d["content"].encode("utf-8") + "\n")
         f.write("endsnippet\n\n")
 
 
