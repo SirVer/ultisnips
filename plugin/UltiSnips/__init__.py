@@ -20,6 +20,9 @@ class Snippet(object):
         self._d = descr
         self._opts = options
 
+    def __repr__(self):
+        return "Snippet(%s,%s,%s)" % (self._t,self._d,self._opts)
+
     def overwrites_previous(self):
         return "!" in self._opts
     overwrites_previous = property(overwrites_previous)
@@ -223,15 +226,16 @@ class SnippetManager(object):
         before,after = line[:col], line[col:]
 
         word = before.split()[-1]
-        snippets = []
-        for ft in filetypes:
-            snippets += self._find_snippets(ft, word)
+        found_snippets = []
+        for ft in filetypes[::-1]:
+            found_snippets += self._find_snippets(ft, word)
 
         # Search if any of the snippets overwrites the previous
-        for idx in range(len(snippets)-1,-1,-1):
-            if snippets[idx].overwrites_previous:
-                snippets = snippets[idx:]
-                break
+        snippets = []
+        for s in found_snippets:
+            if s.overwrites_previous:
+                snippets = []
+            snippets.append(s)
 
         # Check if there are any only whitespace in front snippets
         text_before = before.rstrip()[:-len(word)]
