@@ -12,3 +12,8 @@ The prefixes for the file show their origin:
    tm - TextMate: http://svn.textmate.org/trunk/Bundles/
    sm - SnipMate: http://code.google.com/p/snipmate/
 
+All files without a prefix are either original or cleaned up versions; that is
+the snippets inside them are 
+  - not using shell script, only python (so they are cross platform compatible)
+  - not using any feature that UltiSnips doesn't offer; so no text artifacts should appear    while using those
+
