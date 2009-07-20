@@ -1,3 +1,6 @@
+###########################################################################
+#                            TextMate Snippets                            #
+###########################################################################
 snippet ife "Conditional if..else (ife)"
 if ($1) {
 	${2:# body...}
@@ -59,13 +62,11 @@ endsnippet
 snippet class "class"
 package ${1:ClassName};
 
-${2:use base qw(${3:ParentClass});
-
-}sub new {
-	my \$class = shift;
-	\$class = ref \$class if ref \$class;
-	my \$self = bless {}, \$class;
-	\$self;
+${2:use base qw(${3:ParentClass});}${2/.+/\n\n/}sub new {
+	my $class = shift;
+	$class = ref $class if ref $class;
+	my $self = bless {}, $class;
+	$self;
 }
 
 1;
@@ -76,21 +77,21 @@ snippet eval "eval"
 eval {
 	${1:# do something risky...}
 };
-if (\$@) {
+if ($@) {
 	${2:# handle failure...}
 }
 
 endsnippet
 
 snippet for "for"
-for (my \$${1:var} = 0; \$$1 < ${2:expression}; \$$1++) {
+for (my $${1:var} = 0; $$1 < ${2:expression}; $$1++) {
 	${3:# body...}
 }
 
 endsnippet
 
 snippet fore "foreach"
-foreach ${1:my \$${2:x}} (@${3:array}) {
+foreach ${1:my $${2:x}} (@${3:array}) {
 	${4:# body...}
 }
 
@@ -104,8 +105,8 @@ if ($1) {
 endsnippet
 
 snippet slurp "slurp"
-my \$${1:var};
-{ local \$/ = undef; local *FILE; open FILE, "<${2:file}"; \$$1 = <FILE>; close FILE }
+my $${1:var};
+{ local $/ = undef; local *FILE; open FILE, "<${2:file}"; $$1 = <FILE>; close FILE }
 
 endsnippet
 
