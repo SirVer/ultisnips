@@ -47,13 +47,13 @@ def ${1:property}(self):
 endsnippet
 
 snippet rwprop "Read write property" b
-def ${1:property}(self):
+def ${1:property}():
     ${2/.+/(?0:""")/}${2:The RW property $1}${2/.+/(?0:"""\n        )/}def fget(self):
         return self._$1$0
     def fset(self, value):
         self._$1 = value
     return locals()
-$1 = property(**$1)
+$1 = property(**$1())
 endsnippet
 
 ##########################
