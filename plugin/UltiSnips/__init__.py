@@ -11,6 +11,8 @@ from UltiSnips.Geometry import Position
 from UltiSnips.TextObjects import *
 from UltiSnips.Buffer import VimBuffer
 
+from UltiSnips.debug import debug
+
 class Snippet(object):
     _INDENT = re.compile(r"^[ \t]*")
 
@@ -166,20 +168,38 @@ class VimState(object):
 class SnippetManager(object):
     def __init__(self):
         self._vstate = VimState()
+        self._supertab_keys = None
 
         self.reset()
-
 
     def reset(self):
         self._snippets = {}
         self._csnippets = []
         self._reinit()
 
-    def _reinit(self):
-        self._ctab = None
-        self._span_selected = None
-        self._expect_move_wo_change = False
+    def jump_forwards(self):
+        if not self._jump():
+            return self._handle_failure(self.forward_trigger)
 
+    def jump_backwards(self):
+        if not self._jump(True):
+            return self._handle_failure(backward_trigger)
+
+    def expand(self):
+        if not self._try_expand():
+            self._handle_failure(self.expand_trigger)
+    
+    def expand_or_jump(self):
+        """
+        This function is used for people who wants to have the same trigger for
+        expansion and forward jumping. It first tries to expand a snippet, if
+        this fails, it tries to jump forward.
+        """
+        rv = self._try_expand()
+        if not rv:
+            rv = self._jump()
+        if not rv:
+            self._handle_failure(self.expand_trigger)
 
     def add_snippet(self, trigger, value, descr, options):
         if "all" not in self._snippets:
@@ -188,7 +208,94 @@ class SnippetManager(object):
         l.append(Snippet(trigger,value, descr, options))
         self._snippets["all"][trigger] = l
 
-    def jump(self, backwards = False):
+
+    def backspace_while_selected(self):
+        """
+        This is called when backspace was used while a placeholder was selected.
+        """
+        # BS was called in select mode
+
+        if self._cs and (self._span_selected is not None):
+            # This only happens when a default value is delted using backspace
+            vim.command(r'call feedkeys("i")')
+            self._chars_entered('')
+        else:
+            vim.command(r'call feedkeys("\<BS>")')
+
+    def cursor_moved(self):
+        self._vstate.update()
+
+        if not self._vstate.buf_changed and not self._expect_move_wo_change:
+            self._check_if_still_inside_snippet()
+
+        if not self._ctab:
+            return
+
+        if self._vstate.buf_changed and self._ctab:
+            # Detect a carriage return
+            if self._vstate.moved.col <= 0 and self._vstate.moved.line == 1:
+                # Multiple things might have happened: either the user entered
+                # a newline character or pasted some text which means we have
+                # to copy everything he entered on the last line and keep the
+                # indent vim chose for this line.
+                lline = vim.current.buffer[self._vstate.ppos.line]
+
+                # Another thing that might have happened is that a word
+                # wrapped, in this case the last line is shortened and we must
+                # delete what vim deleted there
+                line_was_shortened = len(self._vstate.last_line) > len(lline)
+                user_didnt_enter_newline = len(lline) != self._vstate.ppos.col
+                if line_was_shortened and user_didnt_enter_newline:
+                    cline = vim.current.buffer[self._vstate.pos.line]
+                    self._backspace(len(self._vstate.last_line)-len(lline))
+                    self._chars_entered('\n' + cline, 1)
+                else:
+                    pentered = lline[self._vstate.ppos.col:]
+                    this_entered = vim.current.line[:self._vstate.pos.col]
+
+                    self._chars_entered(pentered + '\n' + this_entered)
+            elif self._vstate.moved.line == 0 and self._vstate.moved.col<0:
+                # Some deleting was going on
+                self._backspace(-self._vstate.moved.col)
+            elif self._vstate.moved.line < 0:
+                # Backspace over line end
+                self._backspace(1)
+            else:
+                line = vim.current.line
+
+                chars = line[self._vstate.pos.col - self._vstate.moved.col:
+                             self._vstate.pos.col]
+                self._chars_entered(chars)
+
+        self._expect_move_wo_change = False
+
+    def entered_insert_mode(self):
+        self._vstate.update()
+        if self._cs and self._vstate.has_moved:
+            self._reinit()
+            self._csnippets = []
+
+    ###################################
+    # Private/Protect Functions Below #
+    ###################################
+    def _reinit(self):
+        self._ctab = None
+        self._span_selected = None
+        self._expect_move_wo_change = False
+
+    def _check_if_still_inside_snippet(self):
+        # Cursor moved without input.
+        self._ctab = None
+
+        # Did we leave the snippet with this movement?
+        if self._cs and not (self._vstate.pos in self._cs.abs_span):
+            self._csnippets.pop()
+
+            self._reinit()
+
+            self._check_if_still_inside_snippet()
+    
+    def _jump(self, backwards = False):
         if self._cs:
             self._expect_move_wo_change = True
             self._ctab = self._cs.select_next_tab(backwards)
@@ -198,14 +305,41 @@ class SnippetManager(object):
             else:
                 self._csnippets.pop()
                 if self._cs:
-                    self.jump(backwards)
+                    self._jump(backwards)
                 return True
 
             self._vstate.update()
             return True
         return False
 
-    def try_expand(self, backwards = False):
+
+    def _handle_failure(self, trigger):
+        """
+        Mainly make sure that we play well with SuperTab
+        """
+        feedkey = None
+        if not self._supertab_keys:
+            if vim.eval("exists('g:SuperTabMappingForward')") != "0":
+                self._supertab_keys = (
+                    vim.eval("g:SuperTabMappingForward"),
+                    vim.eval("g:SuperTabMappingBackward"),
+                )
+            else:
+                self._supertab_keys = [ '', '' ]
+
+        for idx, sttrig in enumerate(self._supertab_keys):
+            if trigger.lower() == sttrig.lower():
+                if idx == 0:
+                    feedkey= r"\<c-n>"
+                elif idx == 1:
+                    feedkey = r"\<c-p>"
+                break
+
+        if feedkey:
+            vim.command(r'call feedkeys("%s")' % feedkey)
+
+
+    def _try_expand(self):
         filetypes = vim.eval("&filetype").split(".") + [ "all" ]
         for ft in filetypes[::-1]:
             if len(ft) and ft not in self._snippets:
@@ -279,7 +413,7 @@ class SnippetManager(object):
 
             if si.has_tabs:
                 self._csnippets.append(si)
-                self.jump()
+                self._jump()
         else:
             self._vb = VimBuffer(text_before, after)
 
@@ -289,88 +423,11 @@ class SnippetManager(object):
             self._vb.replace_lines(lineno-1, lineno-1,
                        self._cs._current_text)
 
-            self.jump()
+            self._jump()
 
         return True
 
-    def backspace_while_selected(self):
-        # BS was called in select mode
 
-        if self._cs and (self._span_selected is not None):
-            # This only happens when a default value is delted using backspace
-            vim.command(r'call feedkeys("i")')
-            self._chars_entered('')
-        else:
-            vim.command(r'call feedkeys("\<BS>")')
-
-    def _check_if_still_inside_snippet(self):
-        # Cursor moved without input.
-        self._ctab = None
-
-        # Did we leave the snippet with this movement?
-        if self._cs and not (self._vstate.pos in self._cs.abs_span):
-            self._csnippets.pop()
-
-            self._reinit()
-
-            self._check_if_still_inside_snippet()
-
-    def cursor_moved(self):
-        self._vstate.update()
-
-        if not self._vstate.buf_changed and not self._expect_move_wo_change:
-            self._check_if_still_inside_snippet()
-
-        if not self._ctab:
-            return
-
-        if self._vstate.buf_changed and self._ctab:
-            # Detect a carriage return
-            if self._vstate.moved.col <= 0 and self._vstate.moved.line == 1:
-                # Multiple things might have happened: either the user entered
-                # a newline character or pasted some text which means we have
-                # to copy everything he entered on the last line and keep the
-                # indent vim chose for this line.
-                lline = vim.current.buffer[self._vstate.ppos.line]
-
-                # Another thing that might have happened is that a word
-                # wrapped, in this case the last line is shortened and we must
-                # delete what vim deleted there
-                line_was_shortened = len(self._vstate.last_line) > len(lline)
-                user_didnt_enter_newline = len(lline) != self._vstate.ppos.col
-                if line_was_shortened and user_didnt_enter_newline:
-                    cline = vim.current.buffer[self._vstate.pos.line]
-                    self._backspace(len(self._vstate.last_line)-len(lline))
-                    self._chars_entered('\n' + cline, 1)
-                else:
-                    pentered = lline[self._vstate.ppos.col:]
-                    this_entered = vim.current.line[:self._vstate.pos.col]
-
-                    self._chars_entered(pentered + '\n' + this_entered)
-            elif self._vstate.moved.line == 0 and self._vstate.moved.col<0:
-                # Some deleting was going on
-                self._backspace(-self._vstate.moved.col)
-            elif self._vstate.moved.line < 0:
-                # Backspace over line end
-                self._backspace(1)
-            else:
-                line = vim.current.line
-
-                chars = line[self._vstate.pos.col - self._vstate.moved.col:
-                             self._vstate.pos.col]
-                self._chars_entered(chars)
-
-        self._expect_move_wo_change = False
-
-    def entered_insert_mode(self):
-        self._vstate.update()
-        if self._cs and self._vstate.has_moved:
-            self._reinit()
-            self._csnippets = []
-
-    ###################################
-    # Private/Protect Functions Below #
-    ###################################
     # Input Handling
     def _chars_entered(self, chars, del_more_lines = 0):
         if (self._span_selected is not None):

@@ -1062,24 +1062,13 @@ if __name__ == '__main__':
     test_loader = unittest.TestLoader()
     all_test_suites = test_loader.loadTestsFromModule(__import__("test"))
 
-    # Send some mappings to vim
-    send(":imapclear\n", options.session)
-    send(":smapclear\n", options.session)
+    # Set the options
+    send(""":let g:UltiSnipsExpandTrigger="<tab>"\n""", options.session)
+    send(""":let g:UltiSnipsJumpForwardTrigger="?"\n""", options.session)
+    send(""":let g:UltiSnipsJumpBackwardTrigger="+"\n""", options.session)
 
-    send(":inoremap <Tab> <C-R>=UltiSnips_ExpandSnippet()<cr>\n",
-         options.session)
-    send(":snoremap <Tab> <Esc>:call UltiSnips_ExpandSnippet()<cr>\n",
-         options.session)
-    send(":inoremap + <C-R>=UltiSnips_JumpBackwards()<cr>\n", options.session)
-    send(":snoremap + <Esc>:call UltiSnips_JumpBackwards()<cr>\n",
-         options.session)
-    send(":inoremap ? <C-R>=UltiSnips_JumpForwards()<cr>\n", options.session)
-    send(":snoremap ? <Esc>:call UltiSnips_JumpForwards()<cr>\n",
-         options.session)
-
-    # Mandatory remapping
-    send(":snoremap <BS> <Esc>:py  UltiSnips_Manager." \
-         "backspace_while_selected()<cr>\n", options.session)
+    # Now, source our runtime
+    send(":so plugin/UltiSnips.vim\n", options.session)
 
     # Inform all test case which screen session to use
     suite = unittest.TestSuite()

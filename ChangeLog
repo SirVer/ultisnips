@@ -1,4 +1,7 @@
 trunk:
+  - Made triggers configurable. You can also use the same trigger for
+	 expanding and tabbing. The TextMate configuration <tab> and <s-tab> is now
+	 possible.
   - Conditional Inserts can now be nested
   - Added support for b option. This only considers a snippet at the beginning
 	 of a line ( *UltiSnips-adding-snippets* )
