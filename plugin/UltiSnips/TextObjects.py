@@ -110,17 +110,19 @@ class _CleverReplace(object):
 
 class _TOParser(object):
     # A simple tabstop with default value
-    _TABSTOP = re.compile(r'''\${(\d+)[:}]''')
+    _TABSTOP = re.compile(r'''(?<!\\)\${(\d+)[:}]''')
     # A mirror or a tabstop without default value.
-    _MIRROR_OR_TS = re.compile(r'\$(\d+)')
+    _MIRROR_OR_TS = re.compile(r'(?<!\\)\$(\d+)')
     # A mirror or a tabstop without default value.
-    _TRANSFORMATION = re.compile(r'\${(\d+)/(.*?)/(.*?)/([a-zA-z]*)}')
+    _TRANSFORMATION = re.compile(r'(?<!\\)\${(\d+)/(.*?)/(.*?)/([a-zA-z]*)}')
     # The beginning of a shell code fragment
-    _SHELLCODE = re.compile(r'(?!<\\)`')
+    _SHELLCODE = re.compile(r'(?<!\\)`')
     # The beginning of a python code fragment
-    _PYTHONCODE = re.compile(r'(?!<\\)`!p')
+    _PYTHONCODE = re.compile(r'(?<!\\)`!p')
     # The beginning of a vimL code fragment
-    _VIMCODE = re.compile(r'(?!<\\)`!v')
+    _VIMCODE = re.compile(r'(?<!\\)`!v')
+    # Escaped characters in substrings
+    _UNESCAPE = re.compile(r'\\[`$]')
 
     def __init__(self, parent, val):
         self._v = val
@@ -138,7 +140,33 @@ class _TOParser(object):
         self._parse_shellcode()
         self._parse_transformations()
         self._parse_mirrors_or_ts()
+
+        self._parse_escaped_chars()
+
         self._finish()
+
+    #################
+    # Escaped chars #
+    #################
+    def _parse_escaped_chars(self):
+        m = self._UNESCAPE.search(self._v)
+        while m:
+            self._handle_unescape(m)
+            m = self._UNESCAPE.search(self._v)
+
+        for c in self._childs:
+            c._parse_escaped_chars()
+
+    def _handle_unescape(self, m):
+        start_pos = m.start()
+        end_pos = start_pos + 2
+        char = self._v[start_pos+1]
+
+        start, end = self._get_start_end(self._v,start_pos,end_pos)
+
+        self._overwrite_area(start_pos,end_pos)
+
+        return EscapedChar(self._p, start, end, char)
 
     ##############
     # Shell Code #
@@ -323,6 +351,7 @@ class _TOParser(object):
             if ts is None:
                 raise RuntimeError, "Tabstop %i is not known" % t._ts
             t._ts = ts
+
 
     ####################
     # Helper functions #
@@ -555,6 +584,15 @@ class TextObject(object):
     def _add_tabstop(self, no, ts):
         self._tabstops[no] = ts
 
+class EscapedChar(TextObject):
+    """
+    This class is a escape char like \$. It is handled in a text object
+    to make sure that remaining children are correctly moved after
+    replacing the text.
+
+    This is a base class without functionality just to mark it in the code.
+    """
+    pass
 
 
 class StartMarker(TextObject):

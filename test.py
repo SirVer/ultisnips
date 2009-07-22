@@ -215,6 +215,19 @@ class TabStopNoReplace_ExceptCorrectResult(_VimTest):
     keys = "echo" + EX
     wanted = "echo Hallo"
 
+class TabStop_EscapingCharsBackticks(_VimTest):
+    snippets = ("test", r"snip \` literal")
+    keys = "test" + EX
+    wanted = "snip ` literal"
+class TabStop_EscapingCharsDollars(_VimTest):
+    snippets = ("test", r"snip \$0 $$0 end")
+    keys = "test" + EX + "hi"
+    wanted = "snip $0 $hi end"
+class TabStop_EscapingChars_RealLife(_VimTest):
+    snippets = ("test", r"usage: \`basename \$0\` ${1:args}")
+    keys = "test" + EX + "[ -u -v -d ]"
+    wanted = "usage: `basename $0` [ -u -v -d ]"
+
 class TabStopEscapingWhenSelected_ECR(_VimTest):
     snippets = ("test", "snip ${1:default}")
     keys = "test" + EX + ESC + "0ihi"
@@ -388,6 +401,14 @@ class TabStop_Shell_InDefValue_Overwrite(_VimTest):
     snippets = ("test", "Hallo ${1:now `echo fromecho`} end")
     keys = "test" + EX + "overwrite" + JF + "and more"
     wanted = "Hallo overwrite endand more"
+class TabStop_Shell_TestEscapedChars_Overwrite(_VimTest):
+    snippets = ("test", r"""`echo \`echo "\\$hi"\``""")
+    keys = "test" + EX
+    wanted = "$hi"
+class TabStop_Shell_TestEscapedCharsAndShellVars_Overwrite(_VimTest):
+    snippets = ("test", r"""`hi="blah"; echo \`echo "$hi"\``""")
+    keys = "test" + EX
+    wanted = "blah"
 
 class TabStop_Shell_ShebangPython(_VimTest):
     sleeptime = 0.09 # Do this very slowly
