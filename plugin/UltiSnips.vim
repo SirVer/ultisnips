@@ -10,7 +10,7 @@
 "     $ ./test.py  # launch the testsuite
 " }}}
 
-if exists('did_UltiSnips_vim') || &cp || version < 700
+if exists('did_UltiSnips_vim') || &cp || version < 700 || !has("python")
 	finish
 endif
 
