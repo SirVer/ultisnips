@@ -183,7 +183,7 @@ class SnippetManager(object):
 
     def jump_backwards(self):
         if not self._jump(True):
-            return self._handle_failure(backward_trigger)
+            return self._handle_failure(self.backward_trigger)
 
     def expand(self):
         if not self._try_expand():
