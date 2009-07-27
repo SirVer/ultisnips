@@ -56,6 +56,23 @@ function! UltiSnips_JumpForwards()
  return ""
 endfunction
 
+function! UltiSnips_MapKeys()
+   " Map the keys correctly
+   if g:UltiSnipsExpandTrigger == g:UltiSnipsJumpForwardTrigger
+      exec "inoremap " . g:UltiSnipsExpandTrigger . " <C-R>=UltiSnips_ExpandSnippetOrJump()<cr>"
+      exec "snoremap " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips_ExpandSnippetOrJump()<cr>"
+   else
+      exec "inoremap " . g:UltiSnipsExpandTrigger . " <C-R>=UltiSnips_ExpandSnippet()<cr>"
+      exec "snoremap " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips_ExpandSnippet()<cr>"
+      exec "inoremap " . g:UltiSnipsJumpForwardTrigger  . " <C-R>=UltiSnips_JumpForwards()<cr>"
+      exec "snoremap " . g:UltiSnipsJumpForwardTrigger  . " <Esc>:call UltiSnips_JumpForwards()<cr>"
+   endif
+   exec "inoremap " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=UltiSnips_JumpBackwards()<cr>"
+   exec "snoremap " . g:UltiSnipsJumpBackwardTrigger . " <Esc>:call UltiSnips_JumpBackwards()<cr>"
+
+   " Do not remap this.
+   snoremap <BS> <Esc>:py  UltiSnips_Manager.backspace_while_selected()<cr>
+endf
 " }}}
 
 "" STARTUP CODE {{{
@@ -77,24 +94,10 @@ UltiSnips_Manager.forward_trigger = vim.eval("g:UltiSnipsJumpForwardTrigger")
 UltiSnips_Manager.backward_trigger = vim.eval("g:UltiSnipsJumpBackwardTrigger")
 EOF
 
-" Map the keys correctly
-if g:UltiSnipsExpandTrigger == g:UltiSnipsJumpForwardTrigger
-   exec "inoremap " . g:UltiSnipsExpandTrigger . " <C-R>=UltiSnips_ExpandSnippetOrJump()<cr>"
-   exec "snoremap " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips_ExpandSnippetOrJump()<cr>"
-else
-   exec "inoremap " . g:UltiSnipsExpandTrigger . " <C-R>=UltiSnips_ExpandSnippet()<cr>"
-   exec "snoremap " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips_ExpandSnippet()<cr>"
-   exec "inoremap " . g:UltiSnipsJumpForwardTrigger  . " <C-R>=UltiSnips_JumpForwards()<cr>"
-   exec "snoremap " . g:UltiSnipsJumpForwardTrigger  . " <Esc>:call UltiSnips_JumpForwards()<cr>"
-endif
-exec "inoremap " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=UltiSnips_JumpBackwards()<cr>"
-exec "snoremap " . g:UltiSnipsJumpBackwardTrigger . " <Esc>:call UltiSnips_JumpBackwards()<cr>"
-
-" Do not remap this.
-snoremap <BS> <Esc>:py  UltiSnips_Manager.backspace_while_selected()<cr>
-
 au CursorMovedI * py UltiSnips_Manager.cursor_moved()
 au InsertEnter * py UltiSnips_Manager.entered_insert_mode()
+
+call UltiSnips_MapKeys()
   
 let did_UltiSnips_vim=1
 
