@@ -10,7 +10,6 @@ import vim
 from UltiSnips.Buffer import TextBuffer
 from UltiSnips.Geometry import Span, Position
 
-
 __all__ = [ "Mirror", "Transformation", "SnippetInstance", "StartMarker" ]
 
 ###########################################################################
@@ -124,9 +123,10 @@ class _TOParser(object):
     # Escaped characters in substrings
     _UNESCAPE = re.compile(r'\\[`$]')
 
-    def __init__(self, parent, val):
+    def __init__(self, parent, val, indent):
         self._v = val
         self._p = parent
+        self._indent = indent
 
         self._childs = []
 
@@ -215,7 +215,17 @@ class _TOParser(object):
 
         self._overwrite_area(start_pos,end_pos)
 
-        return PythonCode(self._p, start, end, content)
+        # Strip the indent if any
+        if len(self._indent):
+            lines = content.splitlines()
+            new_content = lines[0] + '\n'
+            new_content += '\n'.join([l[len(self._indent):]
+                        for l in lines[1:]])
+        else:
+            new_content = content
+        new_content = new_content.strip()
+
+        return PythonCode(self._p, start, end, new_content)
 
     #############
     # VimL Code #
@@ -255,7 +265,7 @@ class _TOParser(object):
             m = self._TABSTOP.search(self._v)
 
         for t, def_text in ts:
-            child_parser = _TOParser(t, def_text)
+            child_parser = _TOParser(t, def_text, self._indent)
             child_parser._parse_tabs()
             self._childs.append(child_parser)
 
@@ -700,7 +710,7 @@ class PythonCode(TextObject):
         code = code.replace("\\`", "`")
 
         # Add Some convenience to the code
-        self._code = "import re, os, vim, string, random\n" + code.strip()
+        self._code = "import re, os, vim, string, random\n" + code
 
         TextObject.__init__(self, parent, start, end, "")
 
@@ -752,7 +762,7 @@ class SnippetInstance(TextObject):
     """
 
     # TODO: for beauty sake, start and end should come before initial text
-    def __init__(self, parent, initial_text, start = None, end = None):
+    def __init__(self, parent, indent, initial_text, start = None, end = None):
         if start is None:
             start = Position(0,0)
         if end is None:
@@ -760,7 +770,7 @@ class SnippetInstance(TextObject):
 
         TextObject.__init__(self, parent, start, end, initial_text)
 
-        _TOParser(self, initial_text).parse()
+        _TOParser(self, initial_text, indent).parse()
 
         # Check if we have a zero Tab, if not, add one at the end
         if isinstance(parent, TabStop):

@@ -52,9 +52,9 @@ class Snippet(object):
                         os.linesep.join([indent + l for l in lines[1:]])
 
         if parent is None:
-            return SnippetInstance(StartMarker(start), v )
+            return SnippetInstance(StartMarker(start), indent, v)
         else:
-            return SnippetInstance(parent, v, start, end)
+            return SnippetInstance(parent, indent, v, start, end)
 
 class VimState(object):
     def __init__(self):

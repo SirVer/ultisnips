@@ -421,23 +421,32 @@ print "Hallo Welt"
 ############################
 # PythonCode Interpolation #
 ############################
-class TabStop_PythonCode_SimpleExample(_VimTest):
+class PythonCode_SimpleExample(_VimTest):
     snippets = ("test", """hi `!p res = "Hallo"` End""")
     keys = "test" + EX
     wanted = "hi Hallo End"
-class TabStop_PythonCode_ReferencePlaceholder(_VimTest):
+class PythonCode_ReferencePlaceholder(_VimTest):
     snippets = ("test", """${1:hi} `!p res = t[1]+".blah"` End""")
     keys = "test" + EX + "ho"
     wanted = "ho ho.blah End"
-class TabStop_PythonCode_ReferencePlaceholderBefore(_VimTest):
+class PythonCode_ReferencePlaceholderBefore(_VimTest):
     snippets = ("test", """`!p res = len(t[1])*"#"`\n${1:some text}""")
     keys = "test" + EX + "Hallo Welt"
     wanted = "##########\nHallo Welt"
-class TabStop_PythonCode_TransformedBeforeMultiLine(_VimTest):
+class PythonCode_TransformedBeforeMultiLine(_VimTest):
     snippets = ("test", """${1/.+/egal/m} ${1:`!p
 res = "Hallo"`} End""")
     keys = "test" + EX
     wanted = "egal Hallo End"
+class PythonCode_IndentedMultiline(_VimTest):
+    snippets = ("test", """start `!p a = 1
+b = 2
+if b > a:
+    res = "b isbigger a"
+else:
+    res = "a isbigger b"` end""")
+    keys = "    test" + EX
+    wanted = "    start b isbigger a end"
 
 ###########################
 # VimScript Interpolation #
