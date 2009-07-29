@@ -9,13 +9,13 @@ snippet box "A nice box with the current comment symbol" b
 c = '#'
 cs = vim.eval("&commentstring")
 if len(cs) == 3:
-    c = cs[0]
+	c = cs[0]
 
 res = (len(t[1])+4)*c + '\n' + c + ' '`${1:content}`!p
 c = '#'
 cs = vim.eval("&commentstring")
 if len(cs) == 3:
-    c = cs[0]
+	c = cs[0]
 
 res = ' ' + c + '\n' + (len(t[1])+4)*c`
 $0
@@ -26,14 +26,14 @@ snippet bbox "A nice box over the full width" b
 c = '#'
 cs = vim.eval("&commentstring")
 if len(cs) == 3:
-    c = cs[0]
+	c = cs[0]
 
 res = 75*c + '\n' + c + " "+ (71-len(t[1]))/2*' '
 `${1:content}`!p
 c = '#'
 cs = vim.eval("&commentstring")
 if len(cs) == 3:
-    c = cs[0]
+	c = cs[0]
 
 a = 71-len(t[1]); res = (a/2 + a%2) * " " + " " + c + '\n' + 75*c`
 $0
