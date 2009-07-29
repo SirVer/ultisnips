@@ -1,3 +1,5 @@
+  - UltiSnips now adheres to expandtab and tabstop options of vim
+
 version 1.1:
   - Made triggers configurable. You can also use the same trigger for
 	 expanding and tabbing. The TextMate configuration <tab> and <s-tab> is now

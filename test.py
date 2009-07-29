@@ -457,9 +457,43 @@ class TabStop_VimScriptInterpolation_SimpleExample(_VimTest):
     wanted = "    hi 4 End"
 
 # TODO: pasting with <C-R> while mirroring, also multiline
-# TODO: expandtab and therelikes
+# TODO: check for noexpandtab and indentexpr alone when 
+# there is no tab in the snippet
 # TODO: Multiline text pasting
 # TODO: option to avoid snippet expansion when not only indent in front
+
+#############
+# EXPANDTAB #
+#############
+class _ExpandTabs(_VimTest):
+    def _options_on(self):
+        self.send(":set ts=3\n")
+        self.send(":set expandtab\n")
+    def _options_off(self):
+        self.send(":set ts=8\n")
+        self.send(":set noexpandtab\n")
+
+class RecTabStopsWithExpandtab_SimpleExample_ECR(_ExpandTabs):
+    snippets = ("m", "\tBlaahblah \t\t  ")
+    keys = "m" + EX
+    wanted = "   Blaahblah        "
+
+class RecTabStopsWithExpandtab_SpecialIndentProblem_ECR(_ExpandTabs):
+    snippets = (
+        ("m1", "Something"),
+        ("m", "\t$0"),
+    )
+    keys = "m" + EX + "m1" + EX + '\nHallo'
+    wanted = "   Something\n        Hallo"
+    def _options_on(self):
+        _ExpandTabs._options_on(self)
+        self.send(":set indentkeys=o,O,*<Return>,<>>,{,}\n")
+        self.send(":set indentexpr=8\n")
+    def _options_off(self):
+        _ExpandTabs._options_off(self)
+        self.send(":set indentkeys=\n")
+        self.send(":set indentexpr=\n")
+
 
 
 ###############################
@@ -628,8 +662,6 @@ class RecTabStops_MirroredZeroTS_ECR(_VimTest):
     keys = "m" + EX + "m1" + EX + "hi" + JF + "two" + \
             JF + "three" + JF + "end"
     wanted = "[ [ hi   two ] three ]end"
-
-
 
 ###########
 # MIRRORS #
@@ -977,7 +1009,6 @@ class ProperIndenting_AutoIndentAndNewline_ECR(_VimTest):
         self.send(":set autoindent\n")
     def _options_off(self):
         self.send(":set noautoindent\n")
-        _VimTest.tearDown(self)
 
 ####################
 # COMPLETION TESTS #
