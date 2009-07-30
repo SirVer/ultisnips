@@ -457,8 +457,6 @@ class TabStop_VimScriptInterpolation_SimpleExample(_VimTest):
     wanted = "    hi 4 End"
 
 # TODO: pasting with <C-R> while mirroring, also multiline
-# TODO: check for noexpandtab and indentexpr alone when 
-# there is no tab in the snippet
 # TODO: Multiline text pasting
 # TODO: option to avoid snippet expansion when not only indent in front
 
@@ -476,7 +474,7 @@ class _ExpandTabs(_VimTest):
 class RecTabStopsWithExpandtab_SimpleExample_ECR(_ExpandTabs):
     snippets = ("m", "\tBlaahblah \t\t  ")
     keys = "m" + EX
-    wanted = "   Blaahblah        "
+    wanted = "   Blaahblah         "
 
 class RecTabStopsWithExpandtab_SpecialIndentProblem_ECR(_ExpandTabs):
     snippets = (
