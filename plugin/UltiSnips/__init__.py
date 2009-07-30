@@ -51,7 +51,10 @@ class Snippet(object):
 
         if vim.eval("&expandtab") == '1':
             ts = int(vim.eval("&ts"))
-            v = v.expandtabs(ts)
+            # expandtabs will not work for us, we have to replace all tabstops
+            # so that indent is right at least. tabs in the middle of the line
+            # will not be expanded correctly
+            v = v.replace('\t', ts*" ")
 
         if parent is None:
             return SnippetInstance(StartMarker(start), indent, v)
