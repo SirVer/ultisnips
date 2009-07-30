@@ -18,7 +18,7 @@ def unescape(s):
     try:
         return _UNESCAPE.sub(fixup,s.decode("utf-8")).encode("utf-8")
     except:
-        print s.decode("utf-8")
+        print repr(s)
 
 def parse_content(c):
     try:
