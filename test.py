@@ -1078,16 +1078,24 @@ class SnippetOptions_OnlyExpandWhenWSInFront_OneWithOneWOChoose(_VimTest):
 ######################
 # SELECTING MULTIPLE #
 ######################
-class Multiple_SimpleCaseSelectFirst_ECR(_VimTest):
+class _MultipleMatches(_VimTest):
     snippets = ( ("test", "Case1", "This is Case 1"),
                  ("test", "Case2", "This is Case 2") )
+class Multiple_SimpleCaseSelectFirst_ECR(_MultipleMatches):
     keys = "test" + EX + "1\n"
     wanted = "Case1"
-class Multiple_SimpleCaseSelectSecond_ECR(_VimTest):
-    snippets = ( ("test", "Case1", "This is Case 1"),
-                 ("test", "Case2", "This is Case 2") )
+class Multiple_SimpleCaseSelectSecond_ECR(_MultipleMatches):
     keys = "test" + EX + "2\n"
     wanted = "Case2"
+class Multiple_SimpleCaseSelectTooHigh_ESelectLast(_MultipleMatches):
+    keys = "test" + EX + "5\n"
+    wanted = "Case2"
+class Multiple_SimpleCaseSelectZero_EEscape(_MultipleMatches):
+    keys = "test" + EX + "0\n" + "hi"
+    wanted = "testhi"
+class Multiple_SimpleCaseEscapeOut_ECR(_MultipleMatches):
+    keys = "test" + EX + ESC + "hi"
+    wanted = "testhi"
 
 ###########################################################################
 #                               END OF TEST                               #

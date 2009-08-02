@@ -404,9 +404,11 @@ class SnippetManager(object):
             )
 
             rv = vim.eval("inputlist(%s)" % display)
-            if rv is None:
+            if rv is None or rv == '0':
                 return True
             rv = int(rv)
+            if rv > len(snippets):
+                rv = len(snippets)
             snippet = snippets[rv-1]
 
         self._expect_move_wo_change = True
