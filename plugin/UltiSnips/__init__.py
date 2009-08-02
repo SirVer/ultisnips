@@ -11,6 +11,20 @@ from UltiSnips.Geometry import Position
 from UltiSnips.TextObjects import *
 from UltiSnips.Buffer import VimBuffer
 
+class _SnippetDictionary(dict):
+    def __init__(self, *args, **kwargs):
+        dict.__init__(self, *args, **kwargs)
+
+        self._extends = []
+
+    def extends():
+        def fget(self):
+            return self._extends
+        def fset(self, value):
+            self._extends = value
+        return locals()
+    extends = property(**extends())
+
 class _SnippetsFileParser(object):
     def __init__(self, ft, fn, snip_manager):
         self._sm = snip_manager
@@ -45,6 +59,10 @@ class _SnippetsFileParser(object):
             self._idx += 1
 
     def parse(self):
+        if self._lines[0].startswith("extends"):
+            self._sm.add_extending_info(self._ft,
+                [ p.strip() for p in self._lines[0][7:].split(',') ])
+
         while self._idx < len(self._lines):
             line = self._lines[self._idx]
 
@@ -253,10 +271,20 @@ class SnippetManager(object):
 
     def add_snippet(self, trigger, value, descr, options, ft = "all"):
         if ft not in self._snippets:
-            self._snippets[ft] = {}
+            self._snippets[ft] = _SnippetDictionary()
         l = self._snippets[ft].get(trigger,[])
         l.append(Snippet(trigger, value, descr, options))
         self._snippets[ft][trigger] = l
+
+    def add_extending_info(self, ft, parents):
+        if ft not in self._snippets:
+            self._snippets[ft] = _SnippetDictionary()
+        sd = self._snippets[ft]
+        for p in parents:
+            if p in sd.extends:
+                continue
+
+            sd.extends.append(p)
 
 
     def backspace_while_selected(self):
@@ -535,36 +563,8 @@ class SnippetManager(object):
     _cs = property(_cs)
 
     # Loading
-    def _load_snippets_from(self, ft, fn):
-        cs = None
-        cv = ""
-        cdescr = ""
-        coptions = ""
-        for line in open(fn):
-            if cs is None and line.startswith("#"):
-                continue
-            if line.startswith("snippet"):
-                cs = line.split()[1]
-                left = line.find('"')
-                if left != -1:
-                    right = line.rfind('"')
-                    cdescr = line[left+1:right]
-                    coptions = line[right:].strip()
-                continue
-            if cs != None:
-                if line.startswith("endsnippet"):
-                    cv = cv[:-1] # Chop the last newline
-                    l = self._snippets[ft].get(cs,[])
-                    l.append(Snippet(cs,cv,cdescr,coptions))
-                    self._snippets[ft][cs] = l
-                    cv = cdescr = coptions = ""
-                    cs = None
-                    continue
-                else:
-                    cv += line
-
     def _load_snippets_for(self, ft):
-        self._snippets[ft] = {}
+        self._snippets[ft] = _SnippetDictionary()
         for p in vim.eval("&runtimepath").split(',')[::-1]:
             pattern = p + os.path.sep + "UltiSnips" + os.path.sep + \
                     "*%s.snippets" % ft
@@ -572,13 +572,20 @@ class SnippetManager(object):
             for fn in glob.glob(pattern):
                 _SnippetsFileParser(ft, fn, self).parse()
 
+        # Now load for the parents
+        for p in self._snippets[ft].extends:
+            if p not in self._snippets:
+                self._load_snippets_for(p)
 
     def _find_snippets(self, ft, trigger):
         snips = self._snippets.get(ft,None)
         if not snips:
             return []
 
-        return snips.get(trigger, [])
+        parent_results = reduce( lambda a,b: a+b,
+            [ self._find_snippets(p, trigger) for p in snips.extends ], [])
+
+        return parent_results + snips.get(trigger, [])
 
 
 UltiSnips_Manager = SnippetManager()

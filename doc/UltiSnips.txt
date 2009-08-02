@@ -145,6 +145,13 @@ CUDA files, i keep the file type set to ":set ft=cpp.c" or ":set
 ft=cuda.cpp.c". This activates all snippets for each file type in the order
 specified.
 
+As an alternative, the first line of each snippet file can look like this: >
+   extends ft1, ft2, ft3
+For example, the first line in cpp.snippets looks like this: >
+   extends c
+This means, first check all triggers for c, then add the triggers from this
+file. This is a convenient way to add more special cases to more general ones.
+
 The snippets file format is simple. A line starting with # is a comment, each
 snippet starts with a line in the form of: >
    snippet tab_trigger [ "description" [ options ] ]

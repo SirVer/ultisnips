@@ -1,3 +1,6 @@
+  - extends keyword is now supported on the first line of snippet files. This makes it easy to
+	 define special cases, for example cpp extends c: a cpp trigger is useless
+	 in c, but a c trigger is valuable for cpp. 
   - UltiSnips now adheres to expandtab and tabstop options of vim
 
 version 1.1:
