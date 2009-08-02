@@ -11,6 +11,51 @@ from UltiSnips.Geometry import Position
 from UltiSnips.TextObjects import *
 from UltiSnips.Buffer import VimBuffer
 
+class _SnippetsFileParser(object):
+    def __init__(self, ft, fn, snip_manager):
+        self._sm = snip_manager
+        self._ft = ft
+        self._lines = open(fn).readlines()
+
+        self._idx = 0
+
+    def _parse_snippet(self):
+        line = self._lines[self._idx]
+
+        cdescr = ""
+        coptions = ""
+
+        cs = line.split()[1]
+        left = line.find('"')
+        if left != -1:
+            right = line.rfind('"')
+            cdescr = line[left+1:right]
+            coptions = line[right:].strip()
+
+        self._idx += 1
+        cv = ""
+        while 1:
+            line = self._lines[self._idx]
+            if line.startswith("endsnippet"):
+                cv = cv[:-1] # Chop the last newline
+                self._sm.add_snippet(cs, cv, cdescr, coptions, self._ft)
+                break
+
+            cv += line
+            self._idx += 1
+
+    def parse(self):
+        while self._idx < len(self._lines):
+            line = self._lines[self._idx]
+
+            if not line.startswith('#'):
+                if line.startswith("snippet"):
+                    self._parse_snippet()
+
+            self._idx += 1
+
+
+
 class Snippet(object):
     _INDENT = re.compile(r"^[ \t]*")
 
@@ -206,12 +251,12 @@ class SnippetManager(object):
         if not rv:
             self._handle_failure(self.expand_trigger)
 
-    def add_snippet(self, trigger, value, descr, options):
-        if "all" not in self._snippets:
-            self._snippets["all"] = {}
-        l = self._snippets["all"].get(trigger,[])
-        l.append(Snippet(trigger,value, descr, options))
-        self._snippets["all"][trigger] = l
+    def add_snippet(self, trigger, value, descr, options, ft = "all"):
+        if ft not in self._snippets:
+            self._snippets[ft] = {}
+        l = self._snippets[ft].get(trigger,[])
+        l.append(Snippet(trigger, value, descr, options))
+        self._snippets[ft][trigger] = l
 
 
     def backspace_while_selected(self):
@@ -525,8 +570,7 @@ class SnippetManager(object):
                     "*%s.snippets" % ft
 
             for fn in glob.glob(pattern):
-                self._load_snippets_from(ft, fn)
-
+                _SnippetsFileParser(ft, fn, self).parse()
 
 
     def _find_snippets(self, ft, trigger):
