@@ -476,13 +476,18 @@ class SnippetManager(object):
                 ]
             )
 
-            rv = vim.eval("inputlist(%s)" % display)
-            if rv is None or rv == '0':
-                return True
-            rv = int(rv)
-            if rv > len(snippets):
-                rv = len(snippets)
-            snippet = snippets[rv-1]
+            try:
+                rv = vim.eval("inputlist(%s)" % display)
+                if rv is None or rv == '0':
+                    return True
+                rv = int(rv)
+                if rv > len(snippets):
+                    rv = len(snippets)
+                snippet = snippets[rv-1]
+            except vim.error, e:
+                if str(e) == 'invalid expression':
+                    return True
+                raise
 
         self._expect_move_wo_change = True
 
