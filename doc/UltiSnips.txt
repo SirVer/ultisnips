@@ -23,6 +23,9 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
 5. Roadmap                                      |UltiSnips-roadmap|      
 6. Helping out                                  |UltiSnips-helping|      
 7. Contact                                      |UltiSnips-contact|      
+8. Contributors                                 |UltiSnips-contributors|
+   8.1 Patches & Coding                         |UltiSnips-contricoding|
+   8.2 Snippets                                 |UltiSnips-contrisnippets|
 
 For Vim version 7.0 or later.
 This plugin only works if 'compatible' is not set.
@@ -501,4 +504,24 @@ bug tracker.
 This project aims to be the one-for-all solution for Snippets for Vim. If you
 miss a feature or find a bug, please contact me or file a support ticket.
 
+=============================================================================
+8. CONTRIBUTORS                                      *UltiSnips-contributors*
+
+UltiSnips is mainly developed by SirVer (Holger Rapp). The following
+individuals have contributed code to UltiSnips. In order of apperance.
+
+8.1 Patches & Coding                                 *UltiSnips-contricoding*
+--------------------
+
+JCEB - Jan Christoph Ebersbach
+
+8.2 Snippets                                       *UltiSnips-contrisnippets*
+------------
+
+Be the first!
+
+
+
+
 vim:tw=78:ts=8:ft=help:norl:
+
