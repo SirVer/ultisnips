@@ -106,7 +106,7 @@ class Snippet(object):
     needs_ws_in_front = property(needs_ws_in_front)
 
     def description(self):
-        return self._d
+        return "(%s) %s" % (self._t, self._d).strip()
     description = property(description)
 
     def trigger(self):
