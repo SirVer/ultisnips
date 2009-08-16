@@ -106,7 +106,7 @@ class Snippet(object):
     needs_ws_in_front = property(needs_ws_in_front)
 
     def description(self):
-        return "(%s) %s" % (self._t, self._d).strip()
+        return ("(%s) %s" % (self._t, self._d)).strip()
     description = property(description)
 
     def trigger(self):
@@ -267,6 +267,9 @@ class SnippetManager(object):
     def expand(self):
         if not self._try_expand():
             self._handle_failure(self.expand_trigger)
+
+    def list_snippets(self):
+        vim.command(r'call feedkeys("HalloWelt")')
 
     def expand_or_jump(self):
         """

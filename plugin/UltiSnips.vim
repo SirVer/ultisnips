@@ -22,10 +22,16 @@ if !exists("g:UltiSnipsExpandTrigger")
  let g:UltiSnipsExpandTrigger = "<tab>"
 endif
 
+" The trigger used to display all triggers that could possible 
+" match in the current position.
+if !exists("g:UltiSnipsListSnippets")
+let g:UltiSnipsListSnippets = "<c-tab>"
+endif
+
 " The trigger used to jump forward to the next placeholder. 
 " NOTE: expansion and forward jumping can, but needn't be the same trigger
 if !exists("g:UltiSnipsJumpForwardTrigger")
- let g:UltiSnipsJumpForwardTrigger = "<c-j>"
+let g:UltiSnipsJumpForwardTrigger = "<c-j>"
 endif
 
 " The trigger to jump backward inside a snippet
@@ -43,6 +49,11 @@ endfunction
 
 function! UltiSnips_ExpandSnippetOrJump()
  py UltiSnips_Manager.expand_or_jump()
+ return ""
+endfunction
+
+function! UltiSnips_ListSnippets()
+ py UltiSnips_Manager.list_snippets()
  return ""
 endfunction
 
@@ -69,6 +80,8 @@ function! UltiSnips_MapKeys()
    endif
    exec "inoremap " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=UltiSnips_JumpBackwards()<cr>"
    exec "snoremap " . g:UltiSnipsJumpBackwardTrigger . " <Esc>:call UltiSnips_JumpBackwards()<cr>"
+   exec "inoremap " . g:UltiSnipsListSnippets . " <C-R>=UltiSnips_ListSnippets()<cr>"
+   exec "snoremap " . g:UltiSnipsListSnippets . " <Esc>:call UltiSnips_ListSnippets()<cr>"
 
    " Do not remap this.
    snoremap <BS> <Esc>:py  UltiSnips_Manager.backspace_while_selected()<cr>

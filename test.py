@@ -18,6 +18,7 @@ ARR_D = '\x1bOB'
 # Defined Constants
 JF = "?" # Jump forwards
 JB = "+" # Jump backwards
+LS = "@" # List snippets
 EX = "\t" # EXPAND
 
 # Some VIM functions
@@ -1192,6 +1193,7 @@ if __name__ == '__main__':
     send(""":let g:UltiSnipsExpandTrigger="<tab>"\n""", options.session)
     send(""":let g:UltiSnipsJumpForwardTrigger="?"\n""", options.session)
     send(""":let g:UltiSnipsJumpBackwardTrigger="+"\n""", options.session)
+    send(""":let g:UltiSnipsListSnippets="@"\n""", options.session)
 
     # Now, source our runtime
     send(":so plugin/UltiSnips.vim\n", options.session)
