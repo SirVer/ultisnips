@@ -11,23 +11,17 @@ from UltiSnips.Geometry import Position
 from UltiSnips.TextObjects import *
 from UltiSnips.Buffer import VimBuffer
 
-# TODO: it doesn't make sense to have
-# this as a baseclass of a dict, since we have
-# to run through all snippets anyway
-class _SnippetDictionary(dict):
+class _SnippetDictionary(object):
     def __init__(self, *args, **kwargs):
-        dict.__init__(self, *args, **kwargs)
-
+        self._snippets = []
         self._extends = []
+
+    def add_snippet(self, s):
+        self._snippets.append(s)
 
     def get_matching_snippets(self, trigger):
         """Returns all snippets matching the given trigger."""
-        rv = []
-        for l in self.values():
-            for snip in l:
-                if snip.matches(trigger):
-                    rv.append(snip)
-        return rv
+        return [ s for s in self._snippets if s.matches(trigger) ]
 
     def extends():
         def fget(self):
@@ -289,9 +283,9 @@ class SnippetManager(object):
     def add_snippet(self, trigger, value, descr, options, ft = "all"):
         if ft not in self._snippets:
             self._snippets[ft] = _SnippetDictionary()
-        l = self._snippets[ft].get(trigger,[])
-        l.append(Snippet(trigger, value, descr, options))
-        self._snippets[ft][trigger] = l
+        l = self._snippets[ft].add_snippet(
+            Snippet(trigger, value, descr, options)
+        )
 
     def add_extending_info(self, ft, parents):
         if ft not in self._snippets:
