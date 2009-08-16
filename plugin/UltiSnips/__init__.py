@@ -19,9 +19,12 @@ class _SnippetDictionary(object):
     def add_snippet(self, s):
         self._snippets.append(s)
 
-    def get_matching_snippets(self, trigger):
+    def get_matching_snippets(self, trigger, potentially):
         """Returns all snippets matching the given trigger."""
-        return [ s for s in self._snippets if s.matches(trigger) ]
+        if not potentially:
+            return [ s for s in self._snippets if s.matches(trigger) ]
+        else:
+            return [ s for s in self._snippets if s.could_match(trigger) ]
 
     def extends():
         def fget(self):
@@ -96,6 +99,11 @@ class Snippet(object):
         if "i" not in self._opts:
             return trigger == self._t
         return trigger.endswith(self._t)
+
+    def could_match(self, trigger):
+        # it i hard to define when a inword snippet could match
+        # therefore we do not specially look for it
+        return self._t.startswith(trigger)
 
     def overwrites_previous(self):
         return "!" in self._opts
@@ -269,7 +277,80 @@ class SnippetManager(object):
             self._handle_failure(self.expand_trigger)
 
     def list_snippets(self):
-        vim.command(r'call feedkeys("HalloWelt")')
+        filetypes = self._ensure_snippets_loaded()
+
+        # TODO: this code is duplicated below
+        filetypes = vim.eval("&filetype").split(".") + [ "all" ]
+        lineno,col = vim.current.window.cursor
+
+        line = vim.current.line
+        before,after = line[:col], line[col:]
+
+        word = ''
+        if len(before):
+            word = before.split()[-1]
+
+        found_snippets = []
+        for ft in filetypes[::-1]:
+            found_snippets += self._find_snippets(ft, word, True)
+
+        if len(found_snippets) == 0:
+            return True
+
+        display = [ "%i %s" % (idx+1,s.description)
+                   for idx,s in enumerate(found_snippets) ]
+
+        # TODO: this code is also mirrored below
+        try:
+            rv = vim.eval("inputlist(%s)" % display)
+            if rv is None or rv == '0':
+                return True
+            rv = int(rv)
+            if rv > len(found_snippets):
+                rv = len(found_snippets)
+            snippet = found_snippets[rv-1]
+        except vim.error, e:
+            if str(e) == 'invalid expression':
+                return True
+            raise
+
+        # TODO: even more code duplicated below
+        # Adjust before, maybe the trigger is not the complete word
+        text_before = before.rstrip()[:-len(word)]
+        text_before += word[:-len(snippet.trigger)]
+
+        self._expect_move_wo_change = True
+        if self._cs:
+            # Determine position
+            pos = self._vstate.pos
+            p_start = self._ctab.abs_start
+
+            if pos.line == p_start.line:
+                end = Position(0, pos.col - p_start.col)
+            else:
+                end = Position(pos.line - p_start.line, pos.col)
+            start = Position(end.line, end.col - len(snippet.trigger))
+
+            si = snippet.launch(text_before, self._ctab, start, end)
+
+            self._update_vim_buffer()
+
+            if si.has_tabs:
+                self._csnippets.append(si)
+                self._jump()
+        else:
+            self._vb = VimBuffer(text_before, after)
+
+            start = Position(lineno-1, len(text_before))
+            self._csnippets.append(snippet.launch(text_before, None, start))
+
+            self._vb.replace_lines(lineno-1, lineno-1,
+                       self._cs._current_text)
+
+            self._jump()
+
+        return True
+
 
     def expand_or_jump(self):
         """
@@ -440,12 +521,16 @@ class SnippetManager(object):
         if feedkey:
             vim.command(r'call feedkeys("%s")' % feedkey)
 
-
-    def _try_expand(self):
+    def _ensure_snippets_loaded(self):
         filetypes = vim.eval("&filetype").split(".") + [ "all" ]
         for ft in filetypes[::-1]:
             if len(ft) and ft not in self._snippets:
                 self._load_snippets_for(ft)
+
+        return filetypes
+
+    def _try_expand(self):
+        filetypes = self._ensure_snippets_loaded()
 
         self._expect_move_wo_change = False
 
@@ -507,7 +592,6 @@ class SnippetManager(object):
         text_before += word[:-len(snippet.trigger)]
 
         self._expect_move_wo_change = True
-
         if self._cs:
             # Determine position
             pos = self._vstate.pos
@@ -599,15 +683,26 @@ class SnippetManager(object):
             if p not in self._snippets:
                 self._load_snippets_for(p)
 
-    def _find_snippets(self, ft, trigger):
+    def _find_snippets(self, ft, trigger, potentially = False):
+        """
+        Find snippets matching trigger
+
+        ft          - file type to search
+        trigger     - trigger to match against
+        potentially - also returns snippets that could potentially match; that
+                      is which triggers start with the current trigger
+        """
+
         snips = self._snippets.get(ft,None)
         if not snips:
             return []
 
         parent_results = reduce( lambda a,b: a+b,
-            [ self._find_snippets(p, trigger) for p in snips.extends ], [])
+            [ self._find_snippets(p, trigger, potentially)
+                for p in snips.extends ], [])
 
-        return parent_results + snips.get_matching_snippets(trigger)
+        return parent_results + snips.get_matching_snippets(
+            trigger, potentially)
 
 
 UltiSnips_Manager = SnippetManager()

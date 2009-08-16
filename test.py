@@ -1157,6 +1157,26 @@ class Multiple_ManySnippetsOneTrigger_ECR(_VimTest):
     keys = "test" + EX + ESC + ESC + "ahi"
     wanted = "testhi"
 
+
+##################################
+# LIST OF ALL AVAILABLE SNIPPETS #
+##################################
+class _ListAllSnippets(_VimTest):
+    snippets = ( ("testblah", "BLAAH", "Say BLAH"),
+                 ("test", "TEST ONE", "Say tst one"),
+                 ("aloha", "OHEEEE",   "Say OHEE"),
+               )
+
+class ListAllAvailable_NothingTyped_ExceptCorrectResult(_ListAllSnippets):
+    keys = "" + LS + "3\n"
+    wanted = "OHEEEE"
+class ListAllAvailable_testtyped_ExceptCorrectResult(_ListAllSnippets):
+    keys = "hallo test" + LS + "1\n"
+    wanted = "hallo BLAAH"
+class ListAllAvailable_testtypedSecondOpt_ExceptCorrectResult(_ListAllSnippets):
+    keys = "hallo test" + LS + "2\n"
+    wanted = "hallo TEST ONE"
+
 ###########################################################################
 #                               END OF TEST                               #
 ###########################################################################

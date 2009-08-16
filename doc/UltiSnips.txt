@@ -110,8 +110,10 @@ To Update an installation, simply pull the latest revision: >
 3. SETTINGS                                              *UltiSnips-settings*
 
 You can freely define the keys used to expand a snippet and jump forward and
-backwards in it. The variables with the default values are: >
+backwards in it. There is also a key to list all snippets available for the
+current expand situation. The variables with the default values are: >
    g:UltiSnipsExpandTrigger               <tab>
+   g:UltiSnipsListSnippets                <c-tab>
    g:UltiSnipsJumpForwardTrigger          <c-j>
    g:UltiSnipsJumpBackwardTrigger         <c-k>
 
