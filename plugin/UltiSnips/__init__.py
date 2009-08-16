@@ -11,11 +11,23 @@ from UltiSnips.Geometry import Position
 from UltiSnips.TextObjects import *
 from UltiSnips.Buffer import VimBuffer
 
+# TODO: it doesn't make sense to have
+# this as a baseclass of a dict, since we have
+# to run through all snippets anyway
 class _SnippetDictionary(dict):
     def __init__(self, *args, **kwargs):
         dict.__init__(self, *args, **kwargs)
 
         self._extends = []
+
+    def get_matching_snippets(self, trigger):
+        """Returns all snippets matching the given trigger."""
+        rv = []
+        for l in self.values():
+            for snip in l:
+                if snip.matches(trigger):
+                    rv.append(snip)
+        return rv
 
     def extends():
         def fget(self):
@@ -85,6 +97,11 @@ class Snippet(object):
 
     def __repr__(self):
         return "Snippet(%s,%s,%s)" % (self._t,self._d,self._opts)
+
+    def matches(self, trigger):
+        if "i" not in self._opts:
+            return trigger == self._t
+        return trigger.endswith(self._t)
 
     def overwrites_previous(self):
         return "!" in self._opts
@@ -489,6 +506,9 @@ class SnippetManager(object):
                     return True
                 raise
 
+        # Adjust before, maybe the trigger is not the complete word
+        text_before += word[:-len(snippet.trigger)]
+
         self._expect_move_wo_change = True
 
         if self._cs:
@@ -590,7 +610,7 @@ class SnippetManager(object):
         parent_results = reduce( lambda a,b: a+b,
             [ self._find_snippets(p, trigger) for p in snips.extends ], [])
 
-        return parent_results + snips.get(trigger, [])
+        return parent_results + snips.get_matching_snippets(trigger)
 
 
 UltiSnips_Manager = SnippetManager()

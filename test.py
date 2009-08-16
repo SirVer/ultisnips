@@ -1075,6 +1075,30 @@ class SnippetOptions_OnlyExpandWhenWSInFront_OneWithOneWOChoose(_VimTest):
     keys = "  test" + EX + "1\n"
     wanted = "  Expand me!"
 
+
+class SnippetOptions_ExpandInwordSnippets_SimpleExpand(_VimTest):
+    snippets = (("test", "Expand me!", "", "i"), )
+    keys = "atest" + EX
+    wanted = "aExpand me!"
+class SnippetOptions_ExpandInwordSnippets_ExpandSingle(_VimTest):
+    snippets = (("test", "Expand me!", "", "i"), )
+    keys = "test" + EX
+    wanted = "Expand me!"
+class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand(_VimTest):
+    snippets = (("test", "Expand me!", "", "i"), )
+    keys = "$test" + EX
+    wanted = "$Expand me!"
+class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand2(_VimTest):
+    snippets = (("test", "Expand me!", "", "i"), )
+    keys = "-test" + EX
+    wanted = "-Expand me!"
+class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand3(_VimTest):
+    snippets = (("test", "Expand me!", "", "i"), )
+    keys = "ätest" + EX
+    wanted = "äExpand me!"
+
+
+
 ######################
 # SELECTING MULTIPLE #
 ######################
