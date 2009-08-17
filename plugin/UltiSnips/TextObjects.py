@@ -65,7 +65,7 @@ class _CleverReplace(object):
                 elif c == ')':
                     if v[idx-1] != '\\':
                         bracks_open -= 1
-                elif c == ':' and not bracks_open:
+                elif c == ':' and not bracks_open and not v[idx-1] == '\\':
                     args.append(carg)
                     carg = ""
                     continue
