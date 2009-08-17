@@ -583,6 +583,7 @@ class RecTabStops_NotAtBeginningOfTS_ExceptCorrectResult(_VimTest):
             JF + "end"
     wanted = "[ hello [ hi  two ]  three ]end"
 class RecTabStops_InNewlineInTabstop_ExceptCorrectResult(_VimTest):
+    sleeptime = 0.09 # Do this very slowly
     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
     keys = "m" + EX + "hello\nm" + EX + "hi" + JF + "two" + JF + "three" + \
             JF + "end"
