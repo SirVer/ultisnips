@@ -96,14 +96,42 @@ class Snippet(object):
         return "Snippet(%s,%s,%s)" % (self._t,self._d,self._opts)
 
     def matches(self, trigger):
-        if "i" not in self._opts:
-            return trigger == self._t
-        return trigger.endswith(self._t)
+        # If user supplies both "w" and "i", it should perhaps be an
+        # error, but if permitted it seems that "w" should take precedence
+        # (since matching at word boundary and within a word == matching at word
+        # boundary).
+        if "w" in self._opts:
+            trigger_len = len(self._t)
+            trigger_prefix = trigger[:-trigger_len]
+            trigger_suffix = trigger[-trigger_len:]
+            match = (trigger_suffix == self._t)
+            if match and trigger_prefix:
+                # Require a word boundary between prefix and suffix.
+                boundaryChars = trigger_prefix[-1:] + trigger_suffix[:1]
+                match = re.match(r'.\b.', boundaryChars)
+        elif "i" in self._opts:
+            match = trigger.endswith(self._t)
+        else:
+            match = (trigger == self._t)
+        return match
 
     def could_match(self, trigger):
-        # it i hard to define when a inword snippet could match
-        # therefore we do not specially look for it
-        return self._t.startswith(trigger)
+        if "w" in self._opts:
+            # Trim non-empty prefix up to word boundary, if present.
+            trigger_suffix = re.sub(r'^.+\b(.+)$', r'\1', trigger)
+            match = self._t.startswith(trigger_suffix)
+
+            # TODO: list_snippets() function cannot handle partial-trigger
+            # matches yet, so for now fail if we trimmed the prefix.
+            if trigger_suffix != trigger:
+                match = False
+        elif "i" in self._opts:
+            # TODO: It is hard to define when a inword snippet could match,
+            # therefore we check only for full-word trigger.
+            match = self._t.startswith(trigger)
+        else:
+            match = self._t.startswith(trigger)
+        return match
 
     def overwrites_previous(self):
         return "!" in self._opts

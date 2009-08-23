@@ -1099,6 +1099,28 @@ class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand3(_VimTest):
     keys = "ätest" + EX
     wanted = "äExpand me!"
 
+class _SnippetOptions_ExpandWordSnippets(_VimTest):
+    snippets = (("test", "Expand me!", "", "w"), )
+class SnippetOptions_ExpandWordSnippets_NormalExpand(
+        _SnippetOptions_ExpandWordSnippets):
+    keys = "test" + EX
+    wanted = "Expand me!"
+class SnippetOptions_ExpandWordSnippets_NoExpand(
+    _SnippetOptions_ExpandWordSnippets):
+    keys = "atest" + EX
+    wanted = "atest"
+class SnippetOptions_ExpandWordSnippets_ExpandSuffix(
+    _SnippetOptions_ExpandWordSnippets):
+    keys = "a-test" + EX
+    wanted = "a-Expand me!"
+class SnippetOptions_ExpandWordSnippets_ExpandSuffix2(
+    _SnippetOptions_ExpandWordSnippets):
+    keys = "a(test" + EX
+    wanted = "a(Expand me!"
+class SnippetOptions_ExpandWordSnippets_ExpandSuffix3(
+    _SnippetOptions_ExpandWordSnippets):
+    keys = "[[test" + EX
+    wanted = "[[Expand me!"
 
 
 ######################
