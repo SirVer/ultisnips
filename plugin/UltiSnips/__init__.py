@@ -500,7 +500,11 @@ class SnippetManager(object):
         """
         Mainly make sure that we play well with SuperTab
         """
-        feedkey = None
+        if trigger.lower() == "<tab>":
+            feedkey = "\\" + trigger
+        else:
+            feedkey = None
+        mode = "n"
         if not self._supertab_keys:
             if vim.eval("exists('g:SuperTabMappingForward')") != "0":
                 self._supertab_keys = (
@@ -516,10 +520,12 @@ class SnippetManager(object):
                     feedkey= r"\<c-n>"
                 elif idx == 1:
                     feedkey = r"\<c-p>"
+                # Use remap mode so SuperTab mappings will be invoked.
+                mode = "m"
                 break
 
         if feedkey:
-            vim.command(r'call feedkeys("%s")' % feedkey)
+            vim.command(r'call feedkeys("%s", "%s")' % (feedkey, mode))
 
     def _ensure_snippets_loaded(self):
         filetypes = vim.eval("&filetype").split(".") + [ "all" ]
