@@ -479,22 +479,25 @@ class SnippetManager(object):
             self._check_if_still_inside_snippet()
 
     def _jump(self, backwards = False):
+        jumped = False
         if self._cs:
             self._expect_move_wo_change = True
             self._ctab = self._cs.select_next_tab(backwards)
             if self._ctab:
                 self._vstate.select_span(self._ctab.abs_span)
                 self._span_selected = self._ctab.abs_span
+                jumped = True
+                if self._ctab.no == 0:
+                    self._ctab = None
+                    self._csnippets.pop()
+                self._vstate.update()
             else:
+                # This really shouldn't happen, because a snippet should
+                # have been popped when its final tabstop was used.
+                # Cleanup by removing current snippet and recursing.
                 self._csnippets.pop()
-                if self._cs:
-                    self._jump(backwards)
-                return True
-
-            self._vstate.update()
-            return True
-        return False
-
+                jumped = self._jump(backwards)
+        return jumped
 
     def _handle_failure(self, trigger):
         """

@@ -163,6 +163,11 @@ class DoNotExpandAfterSpace_ExceptCorrectResult(_SimpleExpands):
     keys = "hallo " + EX
     wanted = "hallo "
 
+class ExitSnippetModeAfterTabstopZero(_VimTest):
+    snippets = ("test", "SimpleText")
+    keys = "test" + EX + EX
+    wanted = "SimpleText" + EX
+
 class ExpandInTheMiddleOfLine_ExceptCorrectResult(_SimpleExpands):
     keys = "Wie hallo gehts" + ESC + "bhi" + EX
     wanted = "Wie Hallo Welt! gehts"
@@ -261,12 +266,10 @@ class TabStopUsingBackspaceToDeleteDefaultValueTypeSomethingThen_ECR(_VimTest):
     snippets = ("test", "snip ${1/.+/(?0:matched)/} ${1:default}")
     keys = "test" + EX + BS + "hallo"
     wanted = "snip matched hallo"
-
 class TabStopWithOneChar_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "nothing ${1:i} hups")
     keys = "hallo" + EX + "ship"
     wanted = "nothing ship hups"
-
 class TabStopTestJumping_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo ${2:End} mitte ${1:Beginning}")
     keys = "hallo" + EX + JF + "Test" + JF + "Hi"
