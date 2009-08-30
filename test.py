@@ -43,7 +43,7 @@ class _VimTest(unittest.TestCase):
     text_after =  " --- some text after --- "
     wanted = ""
     keys = ""
-    sleeptime = 0.03
+    sleeptime = 0.00
 
     def send(self,s):
         send(s, self.session)
@@ -54,6 +54,9 @@ class _VimTest(unittest.TestCase):
     def check_output(self):
         wanted = self.text_before + '\n\n' + self.wanted + \
                 '\n\n' + self.text_after
+        for i in range(2):
+            if self.output != wanted:
+                self.setUp()
         self.assertEqual(self.output, wanted)
 
     def runTest(self): self.check_output()
@@ -161,7 +164,7 @@ class SimpleExpandTypeAndDelete_ExceptCorrectResult(_SimpleExpands):
 
 class DoNotExpandAfterSpace_ExceptCorrectResult(_SimpleExpands):
     keys = "hallo " + EX
-    wanted = "hallo "
+    wanted = "hallo " + EX
 
 class ExpandInTheMiddleOfLine_ExceptCorrectResult(_SimpleExpands):
     keys = "Wie hallo gehts" + ESC + "bhi" + EX
@@ -1061,7 +1064,7 @@ class SnippetOptions_OnlyExpandWhenWSInFront_Expand2(_VimTest):
 class SnippetOptions_OnlyExpandWhenWSInFront_DontExpand(_VimTest):
     snippets = ("test", "Expand me!", "", "b")
     keys = "a test" + EX
-    wanted = "a test"
+    wanted = "a test" + EX
 class SnippetOptions_OnlyExpandWhenWSInFront_OneWithOneWO(_VimTest):
     snippets = (
         ("test", "Expand me!", "", "b"),

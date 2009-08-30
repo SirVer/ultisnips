@@ -519,6 +519,7 @@ individuals have contributed code to UltiSnips. In order of apperance.
 --------------------
 
 JCEB - Jan Christoph Ebersbach
+Michael Henry
 
 8.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------
