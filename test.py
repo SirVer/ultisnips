@@ -166,6 +166,11 @@ class DoNotExpandAfterSpace_ExceptCorrectResult(_SimpleExpands):
     keys = "hallo " + EX
     wanted = "hallo " + EX
 
+class ExitSnippetModeAfterTabstopZero(_VimTest):
+    snippets = ("test", "SimpleText")
+    keys = "test" + EX + EX
+    wanted = "SimpleText" + EX
+
 class ExpandInTheMiddleOfLine_ExceptCorrectResult(_SimpleExpands):
     keys = "Wie hallo gehts" + ESC + "bhi" + EX
     wanted = "Wie Hallo Welt! gehts"
