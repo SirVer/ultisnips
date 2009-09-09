@@ -114,7 +114,6 @@ class _SnippetsFileParser(object):
     def parse(self):
         while self._line():
             head, tail = self._line_head_tail()
-            print "head, tail=%r, %r" % (head, tail)
             if head == "extends":
                 if tail:
                     self._sm.add_extending_info(self._ft,
