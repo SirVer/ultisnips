@@ -11,6 +11,10 @@ from UltiSnips.Geometry import Position
 from UltiSnips.TextObjects import *
 from UltiSnips.Buffer import VimBuffer
 
+def vim_quote(s):
+    """Quote string s as Vim literal string."""
+    return "'" + s.replace("'", "''") + "'"
+
 class _SnippetDictionary(object):
     def __init__(self, *args, **kwargs):
         self._snippets = []
@@ -26,6 +30,17 @@ class _SnippetDictionary(object):
         else:
             return [ s for s in self._snippets if s.could_match(trigger) ]
 
+    def clear_snippets(self, triggers=[]):
+        """Remove all snippets that match each trigger in triggers.
+            When triggers is empty, removes all snippets.
+        """
+        if triggers:
+            for t in triggers:
+                for s in self.get_matching_snippets(t, potentially=False):
+                    self._snippets.remove(s)
+        else:
+            self._snippets = []
+
     def extends():
         def fget(self):
             return self._extends
@@ -35,15 +50,45 @@ class _SnippetDictionary(object):
     extends = property(**extends())
 
 class _SnippetsFileParser(object):
-    def __init__(self, ft, fn, snip_manager):
+    def __init__(self, ft, fn, snip_manager, file_data=None):
         self._sm = snip_manager
         self._ft = ft
-        self._lines = open(fn).readlines()
+        self._fn = fn
+        if file_data is None:
+            self._lines = open(fn).readlines()
+        else:
+            self._lines = file_data.splitlines(True)
 
         self._idx = 0
 
+    def _error(self, msg):
+        fn = vim.eval("""fnamemodify(%s, ":~:.")""" % vim_quote(self._fn))
+        self._sm._error("%s in %s(%d)" % (msg, fn, self._idx + 1))
+
+    def _line(self):
+        if self._idx < len(self._lines):
+            line = self._lines[self._idx]
+        else:
+            line = ""
+        return line
+
+    def _line_head_tail(self):
+        parts = re.split(r"\s+", self._line().rstrip(), maxsplit=1)
+        parts.append('')
+        return parts[:2]
+
+    def _line_head(self):
+        return self._line_head_tail()[0]
+
+    def _line_tail(self):
+        return self._line_head_tail()[1]
+
+    def _goto_next_line(self):
+        self._idx += 1
+        return self._line()
+
     def _parse_snippet(self):
-        line = self._lines[self._idx]
+        line = self._line()
 
         cdescr = ""
         coptions = ""
@@ -55,31 +100,35 @@ class _SnippetsFileParser(object):
             cdescr = line[left+1:right]
             coptions = line[right:].strip()
 
-        self._idx += 1
         cv = ""
-        while 1:
-            line = self._lines[self._idx]
-            if line.startswith("endsnippet"):
+        while self._goto_next_line():
+            line = self._line()
+            if line.rstrip() == "endsnippet":
                 cv = cv[:-1] # Chop the last newline
                 self._sm.add_snippet(cs, cv, cdescr, coptions, self._ft)
                 break
-
             cv += line
-            self._idx += 1
+        else:
+            self._error("Missing 'endsnippet' for %r" % cs)
 
     def parse(self):
-        if self._lines[0].startswith("extends"):
-            self._sm.add_extending_info(self._ft,
-                [ p.strip() for p in self._lines[0][7:].split(',') ])
-
-        while self._idx < len(self._lines):
-            line = self._lines[self._idx]
-
-            if not line.startswith('#'):
-                if line.startswith("snippet"):
-                    self._parse_snippet()
-
-            self._idx += 1
+        while self._line():
+            head, tail = self._line_head_tail()
+            print "head, tail=%r, %r" % (head, tail)
+            if head == "extends":
+                if tail:
+                    self._sm.add_extending_info(self._ft,
+                        [ p.strip() for p in tail.split(',') ])
+                else:
+                    self._error("'extends' without file types")
+            elif head == "snippet":
+                self._parse_snippet()
+            elif head == "clearsnippets":
+                self._sm.clear_snippets(tail.split(), self._ft)
+            elif head and not head.startswith('#'):
+                self._error("Invalid line %r" % self._line().rstrip())
+                break
+            self._goto_next_line()
 
 
 
@@ -287,7 +336,8 @@ class SnippetManager(object):
 
         self.reset()
 
-    def reset(self):
+    def reset(self, test_error=False):
+        self._test_error = test_error
         self._snippets = {}
         self._csnippets = []
         self._reinit()
@@ -399,6 +449,10 @@ class SnippetManager(object):
             Snippet(trigger, value, descr, options)
         )
 
+    def clear_snippets(self, triggers = [], ft = "all"):
+        if ft in self._snippets:
+            self._snippets[ft].clear_snippets(triggers)
+
     def add_extending_info(self, ft, parents):
         if ft not in self._snippets:
             self._snippets[ft] = _SnippetDictionary()
@@ -489,6 +543,21 @@ class SnippetManager(object):
     ###################################
     # Private/Protect Functions Below #
     ###################################
+    def _error(self, msg):
+        msg = vim_quote("UltiSnips: " + msg)
+        if self._test_error:
+            msg = msg.replace('"', r'\"')
+            msg = msg.replace('|', r'\|')
+            vim.command("let saved_pos=getpos('.')")
+            vim.command("$:put =%s" % msg)
+            vim.command("call setpos('.', saved_pos)")
+        elif False:
+            vim.command("echohl WarningMsg")
+            vim.command("echomsg %s" % msg)
+            vim.command("echohl None")
+        else:
+            vim.command("echoerr %s" % msg)
+
     def _reinit(self):
         self._ctab = None
         self._span_selected = None
@@ -705,6 +774,9 @@ class SnippetManager(object):
         return self._csnippets[-1]
     _cs = property(_cs)
 
+    def _parse_snippets(self, ft, fn, file_data=None):
+        _SnippetsFileParser(ft, fn, self, file_data).parse()
+
     # Loading
     def _load_snippets_for(self, ft):
         self._snippets[ft] = _SnippetDictionary()
@@ -713,7 +785,7 @@ class SnippetManager(object):
                     "*%s.snippets" % ft
 
             for fn in glob.glob(pattern):
-                _SnippetsFileParser(ft, fn, self).parse()
+                self._parse_snippets(ft, fn)
 
         # Now load for the parents
         for p in self._snippets[ft].extends:

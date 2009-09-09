@@ -4,14 +4,12 @@
 " Last Modified: July 21, 2009
 "
 " Testing Info: {{{
-"   Running vim + ultisnips with the absolute bar minimum settings inside a   screen session:
-"     $ screen -S vim
-"     $ vim -u NONE -U NONE -c ':set nocompatible' -c ':set runtimepath+=.'
-"     $ ./test.py  # launch the testsuite
+"   See directions at the top of the test.py script located one 
+"   directory above this file.
 " }}}
 
 if exists('did_UltiSnips_vim') || &cp || version < 700 || !has("python")
-	finish
+    finish
 endif
 
 " Global Variables {{{
