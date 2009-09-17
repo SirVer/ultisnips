@@ -11,6 +11,13 @@ from UltiSnips.Geometry import Position
 from UltiSnips.TextObjects import *
 from UltiSnips.Buffer import VimBuffer
 
+# The following lines silence DeprecationWarnings. They are raised
+# by python2.6 for vim.error (which is a string that is used as an exception,
+# which is deprecated since 2.5 and will no longer work in 2.7. Let's hope
+# vim gets this fixed before)
+import warnings
+warnings.filterwarnings("ignore")
+
 class _SnippetDictionary(object):
     def __init__(self, *args, **kwargs):
         self._snippets = []
@@ -337,7 +344,7 @@ class SnippetManager(object):
             if rv > len(found_snippets):
                 rv = len(found_snippets)
             snippet = found_snippets[rv-1]
-        except vim.error, e:
+        except: # vim.error, e:
             if str(e) == 'invalid expression':
                 return True
             raise

@@ -1185,7 +1185,7 @@ class Multiple_ManySnippetsOneTrigger_ECR(_VimTest):
         ("test", "Case28", "This is Case 28"),
         ("test", "Case29", "This is Case 29"),
     ) # }}}
-    keys = "test" + EX + ESC + ESC + "ahi"
+    keys = "test" + EX + " " + ESC + ESC + "ahi"
     wanted = "testhi"
 
 
