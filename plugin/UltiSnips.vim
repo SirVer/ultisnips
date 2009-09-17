@@ -25,13 +25,13 @@ endif
 " The trigger used to display all triggers that could possible 
 " match in the current position.
 if !exists("g:UltiSnipsListSnippets")
-let g:UltiSnipsListSnippets = "<c-tab>"
+ let g:UltiSnipsListSnippets = "<c-tab>"
 endif
 
 " The trigger used to jump forward to the next placeholder. 
 " NOTE: expansion and forward jumping can, but needn't be the same trigger
 if !exists("g:UltiSnipsJumpForwardTrigger")
-let g:UltiSnipsJumpForwardTrigger = "<c-j>"
+ let g:UltiSnipsJumpForwardTrigger = "<c-j>"
 endif
 
 " The trigger to jump backward inside a snippet
@@ -70,21 +70,21 @@ endfunction
 function! UltiSnips_MapKeys()
    " Map the keys correctly
    if g:UltiSnipsExpandTrigger == g:UltiSnipsJumpForwardTrigger
-      exec "inoremap " . g:UltiSnipsExpandTrigger . " <C-R>=UltiSnips_ExpandSnippetOrJump()<cr>"
-      exec "snoremap " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips_ExpandSnippetOrJump()<cr>"
+      exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=UltiSnips_ExpandSnippetOrJump()<cr>"
+      exec "snoremap <silent> " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips_ExpandSnippetOrJump()<cr>"
    else
-      exec "inoremap " . g:UltiSnipsExpandTrigger . " <C-R>=UltiSnips_ExpandSnippet()<cr>"
-      exec "snoremap " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips_ExpandSnippet()<cr>"
-      exec "inoremap " . g:UltiSnipsJumpForwardTrigger  . " <C-R>=UltiSnips_JumpForwards()<cr>"
-      exec "snoremap " . g:UltiSnipsJumpForwardTrigger  . " <Esc>:call UltiSnips_JumpForwards()<cr>"
+      exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=UltiSnips_ExpandSnippet()<cr>"
+      exec "snoremap <silent> " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips_ExpandSnippet()<cr>"
+      exec "inoremap <silent> " . g:UltiSnipsJumpForwardTrigger  . " <C-R>=UltiSnips_JumpForwards()<cr>"
+      exec "snoremap <silent> " . g:UltiSnipsJumpForwardTrigger  . " <Esc>:call UltiSnips_JumpForwards()<cr>"
    endif
-   exec "inoremap " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=UltiSnips_JumpBackwards()<cr>"
-   exec "snoremap " . g:UltiSnipsJumpBackwardTrigger . " <Esc>:call UltiSnips_JumpBackwards()<cr>"
-   exec "inoremap " . g:UltiSnipsListSnippets . " <C-R>=UltiSnips_ListSnippets()<cr>"
-   exec "snoremap " . g:UltiSnipsListSnippets . " <Esc>:call UltiSnips_ListSnippets()<cr>"
+   exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=UltiSnips_JumpBackwards()<cr>"
+   exec "snoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <Esc>:call UltiSnips_JumpBackwards()<cr>"
+   exec "inoremap <silent> " . g:UltiSnipsListSnippets . " <C-R>=UltiSnips_ListSnippets()<cr>"
+   exec "snoremap <silent> " . g:UltiSnipsListSnippets . " <Esc>:call UltiSnips_ListSnippets()<cr>"
 
    " Do not remap this.
-   snoremap <BS> <Esc>:py  UltiSnips_Manager.backspace_while_selected()<cr>
+   snoremap <silent> <BS> <Esc>:py  UltiSnips_Manager.backspace_while_selected()<cr>
 endf
 " }}}
 
