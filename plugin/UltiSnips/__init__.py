@@ -15,8 +15,10 @@ from UltiSnips.Buffer import VimBuffer
 # by python2.6 for vim.error (which is a string that is used as an exception,
 # which is deprecated since 2.5 and will no longer work in 2.7. Let's hope
 # vim gets this fixed before)
-import warnings
-warnings.filterwarnings("ignore")
+import sys
+if sys.version_info[:2] >= (2,6):
+    import warnings
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 class _SnippetDictionary(object):
     def __init__(self, *args, **kwargs):
