@@ -20,6 +20,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    4.7 Transformations                          |UltiSnips-transformations|
       4.7.1 Replacement String                  |UltiSnips-replacement-string|
       4.7.2 Demos                               |UltiSnips-demos|
+   4.8 Clearing snippets                        |UltiSnips-clearing-snippets|
 5. Roadmap                                      |UltiSnips-roadmap|      
 6. Helping out                                  |UltiSnips-helping|      
 7. Contact                                      |UltiSnips-contact|      
@@ -150,12 +151,13 @@ CUDA files, i keep the file type set to ":set ft=cpp.c" or ":set
 ft=cuda.cpp.c". This activates all snippets for each file type in the order
 specified.
 
-As an alternative, the first line of each snippet file can look like this: >
+As an alternative, a snippet file may contain a line that looks like this: >
    extends ft1, ft2, ft3
 For example, the first line in cpp.snippets looks like this: >
    extends c
 This means, first check all triggers for c, then add the triggers from this
 file. This is a convenient way to add more special cases to more general ones.
+Multiple "extends" lines are permitted throughout the snippets file.
 
 The snippets file format is simple. A line starting with # is a comment, each
 snippet starts with a line in the form of: >
@@ -466,6 +468,32 @@ printf("A is: %s\n", A); // End of line
 
 There are many more examples of what can be done with transformations in the
 bundled snippets.
+
+ 4.8 Clearing snippets                          *UltiSnips-clearing-snippets*
+
+To remove snippets for the current file type, use the "clearsnippets"
+directive:
+------------------- SNIP -------------------
+clearsnippets
+------------------- SNAP -------------------
+
+Without arguments, "clearsnippets" removes all snippets defined so far for the
+current file type.  UltiSnips travels in reverse along the 'runtimepath', so
+"clearsnippets" removes snippet definitions appearing later in the
+'runtimepath' than the ".snippets" file in which it's encountered.
+
+Instead of clearing all snippets for the current file type, one or more
+individual snippets may be cleared by specifying a space-separated list of
+their triggers, e.g.:
+
+------------------- SNIP -------------------
+clearsnippets trigger1 trigger2
+------------------- SNAP -------------------
+
+This is useful if you only want to override a few triggers or all triggers
+that came with UltiSnips with your own definitions. Note that you can
+overwrite individual triggers when redefining them using the '!' option
+(see *UltiSnips-adding-snippets* for the options).
 
 =============================================================================
 5. ROADMAP                                                *UltiSnips-roadmap*

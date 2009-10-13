@@ -1,11 +1,34 @@
 #!/usr/bin/env python
 # encoding: utf-8
 #
+# To execute this test requires two terminals, one for running Vim and one
+# for executing the test script.  Both terminals should have their current
+# working directories set to this directory (the one containing this test.py
+# script).
+#
+# In one terminal, launch a GNU ``screen`` session named ``vim``:
+#   $ screen -S vim
+#
+# Within this new session, launch Vim with the absolute bare minimum settings
+# to ensure a consistent test environment:
+#  $ vim -u NONE
+#
+# The '-u NONE' disables normal .vimrc and .gvimrc processing (note
+# that '-u NONE' implies '-U NONE').
+#
+# All other settings are configured by the test script.
+#
+# Now, from another terminal, launch the testsuite:
+#    $ ./test.py
+# 
+# The testsuite will use ``screen`` to inject commands into the Vim under test,
+# and will compare the resulting output to expected results.
 
 import os
 import tempfile
 import unittest
 import time
+from textwrap import dedent
 
 # Some constants for better reading
 BS = '\x7f'
@@ -26,7 +49,8 @@ COMPL_KW = chr(24)+chr(14)
 COMPL_ACCEPT = chr(25)
 
 def send(s,session):
-    os.system("screen -x %s -X stuff '%s'" % (session,s))
+    s = s.replace("'", r"'\''")
+    os.system("screen -x %s -X stuff '%s'" % (session, s))
 
 def type(str, session, sleeptime):
     """
@@ -39,8 +63,10 @@ def type(str, session, sleeptime):
 
 class _VimTest(unittest.TestCase):
     snippets = ("dummy", "donotdefine")
+    snippets_test_file = ("", "", "")  # file type, file name, file content
     text_before = " --- some text before --- "
     text_after =  " --- some text after --- "
+    expected_error = ""
     wanted = ""
     keys = ""
     sleeptime = 0.00
@@ -48,13 +74,18 @@ class _VimTest(unittest.TestCase):
     def send(self,s):
         send(s, self.session)
 
+    def send_py(self,s):
+        self.send(":py << EOF\n%s\nEOF\n" % s)
+
     def type(self,s):
         type(s, self.session, self.sleeptime)
 
     def check_output(self):
         wanted = self.text_before + '\n\n' + self.wanted + \
                 '\n\n' + self.text_after
-        for i in range(2):
+        if self.expected_error:
+            wanted = wanted + "\n" + self.expected_error
+        for i in range(4):
             if self.output != wanted:
                 self.setUp()
         self.assertEqual(self.output, wanted)
@@ -70,7 +101,10 @@ class _VimTest(unittest.TestCase):
     def setUp(self):
         self.send(ESC)
 
-        self.send(":py UltiSnips_Manager.reset()\n")
+        self.send(":py UltiSnips_Manager.reset(test_error=True)\n")
+
+        # Clear the buffer
+        self.send("bggVGd")
 
         if not isinstance(self.snippets[0],tuple):
             self.snippets = ( self.snippets, )
@@ -84,16 +118,13 @@ class _VimTest(unittest.TestCase):
             if len(s) > 3:
                 options = s[3]
 
-            self.send(''':py << EOF
-UltiSnips_Manager.add_snippet("%s","""%s""", "%s", "%s")
-EOF
-''' % (sv,content.encode("string-escape"), descr.encode("string-escape"),
-      options
-      )
-      )
+            self.send_py("UltiSnips_Manager.add_snippet(%r, %r, %r, %r)" %
+                (sv, content, descr, options))
 
-        # Clear the buffer
-        self.send("bggVGd")
+        ft, fn, file_data = self.snippets_test_file
+        if ft:
+            self.send_py("UltiSnips_Manager._parse_snippets(%r, %r, %r)" %
+                (ft, fn, dedent(file_data + '\n')))
 
         if not self.interrupt:
             # Enter insert mode
@@ -1209,6 +1240,92 @@ class ListAllAvailable_testtypedSecondOpt_ExceptCorrectResult(_ListAllSnippets):
     keys = "hallo test" + LS + "2\n"
     wanted = "hallo TEST ONE"
 
+#########################
+# SNIPPETS FILE PARSING #
+#########################
+
+class ParseSnippets_SimpleSnippet(_VimTest):
+    snippets_test_file = ("all", "test_file", r"""
+        snippet testsnip "Test Snippet" b!
+        This is a test snippet!
+        endsnippet
+        """)
+    keys = "testsnip" + EX
+    wanted = "This is a test snippet!"
+
+class ParseSnippets_MissingEndSnippet(_VimTest):
+    snippets_test_file = ("all", "test_file", r"""
+        snippet testsnip "Test Snippet" b!
+        This is a test snippet!
+        """)
+    keys = "testsnip" + EX
+    wanted = "testsnip" + EX
+    expected_error = dedent("""
+        UltiSnips: Missing 'endsnippet' for 'testsnip' in test_file(5)
+        """).strip()
+
+class ParseSnippets_UnknownDirective(_VimTest):
+    snippets_test_file = ("all", "test_file", r"""
+        unknown directive
+        """)
+    keys = "testsnip" + EX
+    wanted = "testsnip" + EX
+    expected_error = dedent("""
+        UltiSnips: Invalid line 'unknown directive' in test_file(2)
+        """).strip()
+
+class ParseSnippets_ExtendsWithoutFiletype(_VimTest):
+    snippets_test_file = ("all", "test_file", r"""
+        extends
+        """)
+    keys = "testsnip" + EX
+    wanted = "testsnip" + EX
+    expected_error = dedent("""
+        UltiSnips: 'extends' without file types in test_file(2)
+        """).strip()
+
+class ParseSnippets_ClearAll(_VimTest):
+    snippets_test_file = ("all", "test_file", r"""
+        snippet testsnip "Test snippet"
+        This is a test.
+        endsnippet
+
+        clearsnippets
+        """)
+    keys = "testsnip" + EX
+    wanted = "testsnip" + EX
+
+class ParseSnippets_ClearOne(_VimTest):
+    snippets_test_file = ("all", "test_file", r"""
+        snippet testsnip "Test snippet"
+        This is a test.
+        endsnippet
+
+        snippet toclear "Snippet to clear"
+        Do not expand.
+        endsnippet
+
+        clearsnippets toclear
+        """)
+    keys = "toclear" + EX + "\n" + "testsnip" + EX
+    wanted = "toclear" + EX + "\n" + "This is a test."
+
+class ParseSnippets_ClearTwo(_VimTest):
+    snippets_test_file = ("all", "test_file", r"""
+        snippet testsnip "Test snippet"
+        This is a test.
+        endsnippet
+
+        snippet toclear "Snippet to clear"
+        Do not expand.
+        endsnippet
+
+        clearsnippets testsnip toclear
+        """)
+    keys = "toclear" + EX + "\n" + "testsnip" + EX
+    wanted = "toclear" + EX + "\n" + "testsnip" + EX
+
+
 ###########################################################################
 #                               END OF TEST                               #
 ###########################################################################
@@ -1240,6 +1357,13 @@ if __name__ == '__main__':
     # The next line doesn't work in python 2.3
     test_loader = unittest.TestLoader()
     all_test_suites = test_loader.loadTestsFromModule(__import__("test"))
+
+    # Ensure we are not running in VI-compatible mode.
+    send(""":set nocompatible\n""", options.session)
+
+    # Ensure runtimepath includes only Vim's own runtime files
+    # and those of the UltiSnips directory under test ('.').
+    send(""":set runtimepath=$VIMRUNTIME,.\n""", options.session)
 
     # Set the options
     send(""":let g:UltiSnipsExpandTrigger="<tab>"\n""", options.session)
