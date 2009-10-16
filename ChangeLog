@@ -1,3 +1,4 @@
+  - added support for clearsnippets command *UltiSnips-clearing-snippets*
   - added support for option w which is a little more strict than i.
   - added support for listing of valid triggers. Defaults to <c-tab>.
   - added support for option i (inword expansion)
