@@ -1,0 +1,33 @@
+
+
+snippet part "Part" b
+`!p res=len(t[1])*'*'`
+${1:Part name}
+`!p res=len(t[1])*'*'`
+
+$0
+endsnippet
+
+snippet sec "Section" b
+${1:Section name}
+`!p res=len(t[1])*'='`
+
+$0
+endsnippet
+
+snippet ssec "Subsection" b
+${1:Section name}
+`!p res=len(t[1])*'-'`
+
+$0
+endsnippet
+
+snippet sssec "Subsubsection" b
+${1:Section name}
+`!p res=len(t[1])*'^'`
+
+$0
+endsnippet
+
+
+
