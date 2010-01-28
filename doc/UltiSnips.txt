@@ -493,7 +493,7 @@ clearsnippets trigger1 trigger2
 This is useful if you only want to override a few triggers or all triggers
 that came with UltiSnips with your own definitions. Note that you can
 overwrite individual triggers when redefining them using the '!' option
-(see *UltiSnips-adding-snippets* for the options).
+(see |UltiSnips-adding-snippets| for the options).
 
 =============================================================================
 5. ROADMAP                                                *UltiSnips-roadmap*
