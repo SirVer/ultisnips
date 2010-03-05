@@ -558,8 +558,7 @@ Michael Henry
 8.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------
 
-Be the first!
-
+Alec Thomas (Python, smart def)
 
 
 

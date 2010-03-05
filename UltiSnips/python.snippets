@@ -29,6 +29,17 @@ ${4/.+/(?0:\n)/}${4/(\A\s*,\s*\Z)|,?\s*([A-Za-z_][A-Za-z0-9_]*)\s*(=[^,]*)?(,\s*
 ${2/object$|(.+)/(?1:		$0.__init__\(self\)\n\n)/}${4/(\A\s*,\s*\Z)|,?\s*([A-Za-z_][A-Za-z0-9_]*)\s*(=[^,]*)?(,\s*|$)/(?2:		self._$2 = $2\n)/g}
 endsnippet
 
+snippet def "smart def" b
+def ${1:function}(${2/([^,])?(.*)/(?1:)/}${2:arg}):
+    """${3:Docstring for $1}
+${2/.+/(?0:\n)/}${2/(\A\s*,\s*\Z)|,?\s*([A-Za-z_][A-Za-z0-9_]*)\s*(=[^,]*)?(,\s*|$)/    :param $2: description\n/g}
+    :returns: description
+    """
+    ${0:pass}
+
+endsnippet
+
+
 snippet . "self." i
 self.
 endsnippet
