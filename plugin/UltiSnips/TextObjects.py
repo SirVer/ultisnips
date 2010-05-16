@@ -225,7 +225,7 @@ class _TOParser(object):
             new_content = content
         new_content = new_content.strip()
 
-        return PythonCode(self._p, start, end, new_content)
+        return PythonCode(self._p, start, end, new_content, self._indent)
 
     #############
     # VimL Code #
@@ -705,12 +705,13 @@ class _Tabs(object):
         return ts.current_text
 
 class PythonCode(TextObject):
-    def __init__(self, parent, start, end, code):
+    def __init__(self, parent, start, end, code, indent=0):
 
         code = code.replace("\\`", "`")
 
         # Add Some convenience to the code
         self._code = "import re, os, vim, string, random\n" + code
+        self._indent = indent
 
         TextObject.__init__(self, parent, start, end, "")
 
@@ -727,6 +728,7 @@ class PythonCode(TextObject):
             'path': path,
             'cur': ct,
             'res': ct,
+            'initial_indent': self._indent
         }
 
         exec self._code in d
