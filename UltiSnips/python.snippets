@@ -29,7 +29,7 @@ ts = '\t'
 if vim.eval("&expandtab") == 1:
     ts = " " * int(vim.eval("&ts"))
 
-indent = initial_indent + ts * 2
+indent = ind + ts * 2
 args = [arg.split('=')[0].strip() for arg in t[4].split(',') if arg]
 args = [arg for arg in args if arg and arg != "self"]
 
@@ -64,7 +64,7 @@ args = [arg for arg in args if arg and arg != "self"]
 
 if args:
     res += '\n'
-indent = initial_indent + ts
+indent = ind + ts
 for arg in args:
     res += indent + ":%s: description\n" % arg
 `

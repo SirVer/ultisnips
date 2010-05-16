@@ -728,7 +728,7 @@ class PythonCode(TextObject):
             'path': path,
             'cur': ct,
             'res': ct,
-            'initial_indent': self._indent
+            'ind': self._indent
         }
 
         exec self._code in d
