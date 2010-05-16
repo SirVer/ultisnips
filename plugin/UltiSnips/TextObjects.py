@@ -704,6 +704,64 @@ class _Tabs(object):
             return ""
         return ts.current_text
 
+class PythonResult(object):
+    """ Provides easy access to indentation, etc
+    for python snippets. """
+
+    def __init__(self, initial_indent):
+        self._initial_indent = initial_indent
+        self._shift = int(vim.eval("&sw"))
+        self.clear()
+
+    def shift(self, amount=1):
+        """ Shifts the indentation level.
+
+        :amount: the amount by which to shift.
+        """
+        self.indent += " " * self._shift * amount
+
+    def unshift(self, amount=1):
+        """ Unshift the indentation level.
+    
+    	:amount: the amount by which to unshift.
+        """
+        by = -self._shift * amount
+        try:
+            self.indent = self.indent[:by]
+        except IndexError:
+            indent = ""
+      
+    def result(self):
+        if vim.eval("&expandtab") == 0:
+            ts = int(vim.eval("&ts"))
+            for line in self.lines:
+                line[0] = line[0].replace(" " * ts, '\t')
+        return os.linesep.join([ind + line for ind, line in self.lines])
+
+
+    def write_line(self, line="", indent=None):
+        """ Adds a line to the result.
+    
+    	:line: the text to add
+    	:indent: the indentation to have at the beginning
+        """
+        if indent == None:
+            indent = self.indent
+        if len(self.lines) == 0:
+            # Deal with special case: first line is handled already
+            try:
+                indent = indent[len(self._initial_indent):]
+            except IndexError:
+                indent = ""
+        self.lines.append((indent, line))
+
+    def clear(self):
+        """ Clears the result.
+        """
+        self.lines = []
+        self.indent = self._initial_indent
+        
+
 class PythonCode(TextObject):
     def __init__(self, parent, start, end, code, indent=0):
 
@@ -711,7 +769,7 @@ class PythonCode(TextObject):
 
         # Add Some convenience to the code
         self._code = "import re, os, vim, string, random\n" + code
-        self._indent = indent
+        self._res = PythonResult(indent)
 
         TextObject.__init__(self, parent, start, end, "")
 
@@ -727,12 +785,11 @@ class PythonCode(TextObject):
             'fn': fn,
             'path': path,
             'cur': ct,
-            'res': ct,
-            'ind': self._indent
+            'res': self._res,
         }
 
         exec self._code in d
-        self.current_text = str(d["res"])
+        self.current_text = str(self._res.result())
 
 
     def __repr__(self):

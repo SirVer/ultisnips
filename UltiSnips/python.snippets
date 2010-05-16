@@ -24,29 +24,26 @@ class ${1:MyClass}(${2:object}):
 
 	def __init__(self$4):
 		""" ${5:TODO: Fill me in}
-`!p res = ""
-ts = '\t'
-if vim.eval("&expandtab") == 1:
-    ts = " " * int(vim.eval("&ts"))
+`!p
+res.clear()
+res.shift(2)
 
-indent = ind + ts * 2
 args = [arg.split('=')[0].strip() for arg in t[4].split(',') if arg]
 args = [arg for arg in args if arg and arg != "self"]
 
 if args:
-    res += '\n'
+    res.write_line()
 
-for i, arg in enumerate(args):
-    res += indent
-    res += ":%s: description\n" % arg
+for arg in args:
+    res.write_line(":%s: description" % arg)
 
-res += indent + '"""\n'
+res.write_line('"""')
+
 if t[2] != "object":
-    res += indent + t[2] + ".__init__(self)\n\n"
+    res.write_line(t[2] + ".__init__(self)\n")
 
-for i, arg in enumerate(args):
-    res += indent
-    res += "self._%s = %s\n" % (arg, arg)
+for arg in args:
+    res.write_line("self._%s = %s\n" % (arg, arg))
 `
 		$0
 endsnippet
@@ -54,19 +51,18 @@ endsnippet
 snippet def "smart def" b
 def ${1:function}(${2:self}):
     """ ${3:TODO: Docstring for $1}
-`!p res = ""
-ts = '\t'
-if vim.eval("&expandtab") == 1:
-    ts = " " * int(vim.eval("&ts"))
+`!p
+res.clear()
 
 args = [arg.split('=')[0].strip() for arg in t[2].split(',') if arg.strip()]
 args = [arg for arg in args if arg and arg != "self"]
 
 if args:
-    res += '\n'
-indent = ind + ts
+    res.write_line()
+
+res.shift()
 for arg in args:
-    res += indent + ":%s: description\n" % arg
+    res.write_line(":%s: description" % arg)
 `
     :returns: description
     """
