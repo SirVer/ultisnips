@@ -197,7 +197,6 @@ class _TOParser(object):
     ###############
     def _parse_pythoncode(self):
         m = self._PYTHONCODE.search(self._v)
-        print "sea: %s" % m
         while m:
             self._handle_pythoncode(m)
             m = self._PYTHONCODE.search(self._v)
