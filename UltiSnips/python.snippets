@@ -20,30 +20,34 @@ endsnippet
 ##########
 snippet class "smart class" b
 class ${1:MyClass}(${2:object}):
-	""" ${3:Docstring for $1} """
+	""" ${3:Docstring for $1 }"""
 
 	def __init__(self$4):
-		""" ${5:TODO: Fill me in}
-`!p
-res.clear()
-res.shift(2)
+		""" ${5:TODO: Fill me in}`!p
+res = ""
+print "test"
+snip.reset_indent()
+snip.shift(2)
 
 args = [arg.split('=')[0].strip() for arg in t[4].split(',') if arg]
 args = [arg for arg in args if arg and arg != "self"]
 
 if args:
-    res.write_line()
+    res += snip.mkline('\n')
 
 for arg in args:
-    res.write_line(":%s: description" % arg)
+    res += snip.mkline(":%s: description" % arg)
 
-res.write_line('"""')
+if args:
+    res += snip.mkline('"""')
+else:
+    res += snip.mkline(' """', '')
 
 if t[2] != "object":
-    res.write_line(t[2] + ".__init__(self)\n")
+    res += snip.mkline(t[2] + ".__init__(self)\n")
 
 for arg in args:
-    res.write_line("self._%s = %s\n" % (arg, arg))
+    res += snip.mkline("self._%s = %s" % (arg, arg))
 `
 		$0
 endsnippet
@@ -51,18 +55,19 @@ endsnippet
 snippet def "smart def" b
 def ${1:function}(${2:self}):
     """ ${3:TODO: Docstring for $1}
-`!p
-res.clear()
+`!p res = ""
+snip.reset_indent()
 
 args = [arg.split('=')[0].strip() for arg in t[2].split(',') if arg.strip()]
 args = [arg for arg in args if arg and arg != "self"]
 
 if args:
-    res.write_line()
+    res += snip.mkline()
 
-res.shift()
+snip.shift()
 for arg in args:
-    res.write_line(":%s: description" % arg)
+    res += snip.mkline(":%s: description" % arg)
+
 `
     :returns: description
     """

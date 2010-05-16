@@ -271,7 +271,28 @@ can be used: >
    t    - The values of the placeholders, t[1] -> current text of ${1} and so on
    cur  - The current text of the placeholder. You can check if this is != ""
           to make sure that the interpolation is only done once
-   ind  - The indentation text appearing before the first line of the snippet
+   snip - Provides easy indentation handling, and snippet-local variables.
+
+The snip variable provides four methods >
+
+    snip.mkline(line="", indent=None):
+        Returns a line ready to be appended to the result. If indent
+        is None, then mkline prepends spaces and/or tabs appropriate to the
+        current tabstop and expandtab variables.
+    
+    snip.shift(amount=1):
+        Shifts the default indentatation level used by mkline right by the
+        number of spaces defined by shiftwidth, 'amount' times.
+
+    snip.unshift(amount=1):
+        Shifts the default indentatation level used by mkline left by the
+        number of spaces defined by shiftwidth, 'amount' times.
+
+    snip.reset_indent():
+        Resets the indentation level to its initial value.
+
+The snip variable also acts as dictionary which can be accessed by any of the
+python code in the snippet.
 
 Also, the vim, re, os, string and random modules are already imported inside
 the snippet code. This allows for very flexible snippets. For example, the

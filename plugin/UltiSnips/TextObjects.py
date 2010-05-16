@@ -197,6 +197,7 @@ class _TOParser(object):
     ###############
     def _parse_pythoncode(self):
         m = self._PYTHONCODE.search(self._v)
+        print "sea: %s" % m
         while m:
             self._handle_pythoncode(m)
             m = self._PYTHONCODE.search(self._v)
@@ -704,14 +705,25 @@ class _Tabs(object):
             return ""
         return ts.current_text
 
-class PythonResult(object):
-    """ Provides easy access to indentation, etc
-    for python snippets. """
+class SnippetUtil(object):
+    """ Provides easy access to indentation, and
+    snippet-local variables, which can be accessed by
+    any PythonCode object in the snippet.
+    """
 
-    def __init__(self, initial_indent):
+    def __init__(self, initial_indent, snippet=None):
         self._initial_indent = initial_indent
+        if snippet:
+            self._locals = snippet.locals
+        else:
+            self._locals = {}
+
         self._shift = int(vim.eval("&sw"))
-        self.clear()
+        self._et = (vim.eval("&expandtab") == "1")
+        self._ts = int(vim.eval("&ts"))
+
+        self._first = True # hack to make first line work right
+        self.reset_indent()
 
     def shift(self, amount=1):
         """ Shifts the indentation level.
@@ -730,36 +742,41 @@ class PythonResult(object):
             self.indent = self.indent[:by]
         except IndexError:
             indent = ""
-      
-    def result(self):
-        if vim.eval("&expandtab") == 0:
-            ts = int(vim.eval("&ts"))
-            for line in self.lines:
-                line[0] = line[0].replace(" " * ts, '\t')
-        return os.linesep.join([ind + line for ind, line in self.lines])
 
-
-    def write_line(self, line="", indent=None):
-        """ Adds a line to the result.
+    def mkline(self, line="", indent=None):
+        """ Gets a properly set up line.
     
     	:line: the text to add
     	:indent: the indentation to have at the beginning
+                 if None, it uses the default amount
         """
         if indent == None:
             indent = self.indent
-        if len(self.lines) == 0:
-            # Deal with special case: first line is handled already
-            try:
-                indent = indent[len(self._initial_indent):]
-            except IndexError:
-                indent = ""
-        self.lines.append((indent, line))
+            # this deals with the fact that the first line is
+            # already properly indented
+            if self._first:
+                try:
+                    indent = indent[len(self._initial_indent):]
+                except IndexError:
+                    indent = ""
+        self._first = False
 
-    def clear(self):
-        """ Clears the result.
-        """
-        self.lines = []
+        if not self._et:
+            indent = indent.replace(" " * self._ts, '\t')
+        return indent + line + '\n'
+
+    def reset_indent(self):
+        """ Clears the indentation. """
         self.indent = self._initial_indent
+        self._first = True
+
+    def __getitem__(self, key):
+        """ Gets an item from the snippet. """
+        return self._locals[key]
+
+    def __setitem__(self, key, value):
+        """ Sets an item in the snippet locals. """
+        self._locals[key] = value
         
 
 class PythonCode(TextObject):
@@ -768,10 +785,18 @@ class PythonCode(TextObject):
         code = code.replace("\\`", "`")
 
         # Add Some convenience to the code
+        snippet = parent
+        while snippet and not isinstance(snippet, SnippetInstance):
+            try:
+                snippet = snippet._parent
+            except AttributeError:
+                snippet = None
+
         self._code = "import re, os, vim, string, random\n" + code
-        self._res = PythonResult(indent)
+        self._snip = SnippetUtil(indent, snippet)
 
         TextObject.__init__(self, parent, start, end, "")
+
 
     def _do_update(self):
         path = vim.eval('expand("%")')
@@ -785,11 +810,12 @@ class PythonCode(TextObject):
             'fn': fn,
             'path': path,
             'cur': ct,
-            'res': self._res,
+            'res': ct,
+            'snip' : self._snip,
         }
 
         exec self._code in d
-        self.current_text = str(self._res.result())
+        self.current_text = str(d["res"])
 
 
     def __repr__(self):
@@ -826,6 +852,8 @@ class SnippetInstance(TextObject):
             start = Position(0,0)
         if end is None:
             end = Position(0,0)
+
+        self.locals = {}
 
         TextObject.__init__(self, parent, start, end, initial_text)
 
