@@ -238,15 +238,15 @@ endsnippet
 
 snippet movie "Embed QT movie (movie)" b
 <object width="$2" height="$3" classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" codebase="http://www.apple.com/qtactivex/qtplugin.cab">
-	<param name="src" value="$1"`!p if vim.eval("&filetype").startswith("x"): res = '/'`>
-	<param name="controller" value="$4"`!p if vim.eval("&filetype").startswith("x"): res = '/'`>
-	<param name="autoplay" value="$5"`!p if vim.eval("&filetype").startswith("x"): res = '/'`>
+	<param name="src" value="$1"`!p snip['xhtml'] =  vim.eval("&filetype").startswith("x") and "/" or ""; res = snip['xhtml']`>
+	<param name="controller" value="$4"`!p res = snip['xhtml']`>
+	<param name="autoplay" value="$5"`!p res = snip['xhtml']`>
 	<embed src="${1:movie.mov}"
 		width="${2:320}" height="${3:240}"
 		controller="${4:true}" autoplay="${5:true}"
 		scale="tofit" cache="true"
 		pluginspage="http://www.apple.com/quicktime/download/"
-	`!p if vim.eval("&filetype").startswith("x"): res = '/'`>
+	`!p res = snip['xhtml']`>
 </object>
 endsnippet
 
