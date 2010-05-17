@@ -783,16 +783,17 @@ class PythonCode(TextObject):
 
         code = code.replace("\\`", "`")
 
-        # Add Some convenience to the code
+        # Find our containing snippet for snippet local data
         snippet = parent
         while snippet and not isinstance(snippet, SnippetInstance):
             try:
                 snippet = snippet._parent
             except AttributeError:
                 snippet = None
-
-        self._code = "import re, os, vim, string, random\n" + code
         self._snip = SnippetUtil(indent, snippet)
+
+        # Add Some convenience to the code
+        self._code = "import re, os, vim, string, random\n" + code
 
         TextObject.__init__(self, parent, start, end, "")
 
