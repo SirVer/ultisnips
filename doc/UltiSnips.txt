@@ -576,11 +576,13 @@ individuals have contributed code to UltiSnips. In order of apperance.
 
 JCEB - Jan Christoph Ebersbach
 Michael Henry
+Ryan Wooden
 
 8.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------
 
 Alec Thomas (Python, smart def)
+Ryan Wooden
 
 
 
