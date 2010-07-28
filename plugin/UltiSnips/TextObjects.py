@@ -710,18 +710,34 @@ class SnippetUtil(object):
     any PythonCode object in the snippet.
     """
 
-    def __init__(self, initial_indent, snippet=None):
+    def __init__(self, initial_indent, cur="", snippet=None):
         self._initial_indent = initial_indent
         if snippet:
             self._locals = snippet.locals
         else:
             self._locals = {}
 
-        self._shift = int(vim.eval("&sw"))
-        self._et = (vim.eval("&expandtab") == "1")
-        self._ts = int(vim.eval("&ts"))
+        # allow use of class outside of vim for testing
+        if 'vim' in globals():
+            self._shift = int(vim.eval("&sw"))
+            self._et = (vim.eval("&expandtab") == "1")
+            self._ts = int(vim.eval("&ts"))
+        else:
+            self._shift = 4
+            self._et = True
+            self._ts = 4
 
+        self._reset(cur)
+
+    def _reset(self, cur):
+        """ Gets the snippet ready for another update.
+
+        :cur: the new value for c.
+        """
         self._first = True # hack to make first line work right
+        self._c = cur
+        self._rv = cur
+        self._changed = False
         self.reset_indent()
 
     def shift(self, amount=1):
@@ -742,12 +758,13 @@ class SnippetUtil(object):
         except IndexError:
             indent = ""
 
-    def mkline(self, line="", indent=None):
-        """ Gets a properly set up line.
+    def mkline(self, line="", indent=None, append=True):
+        """ Appends a properly set up line to res, and returns it.
     
     	:line: the text to add
     	:indent: the indentation to have at the beginning
                  if None, it uses the default amount
+        :append: if true, then append the line to rv.
         """
         if indent == None:
             indent = self.indent
@@ -758,24 +775,66 @@ class SnippetUtil(object):
                     indent = indent[len(self._initial_indent):]
                 except IndexError:
                     indent = ""
+            if not self._et:
+                indent = indent.replace(" " * self._ts, '\t')
         self._first = False
 
-        if not self._et:
-            indent = indent.replace(" " * self._ts, '\t')
-        return indent + line + '\n'
+
+        line = indent + line + '\n'
+        if append:
+            self.rv += line
+        return line
 
     def reset_indent(self):
         """ Clears the indentation. """
         self.indent = self._initial_indent
-        self._first = True
 
-    def __getitem__(self, key):
-        """ Gets an item from the snippet. """
-        return self._locals[key]
+    @property
+    def rv(self):
+        """ The return value.
+        This is a list of lines to insert at the
+        location of the placeholder.
 
-    def __setitem__(self, key, value):
-        """ Sets an item in the snippet locals. """
-        self._locals[key] = value
+        Depreciates res.
+        """
+        return self._rv
+
+    @rv.setter
+    def rv(self, value):
+        self._changed = True
+        self._rv = value
+
+    @property
+    def _rv_changed(self):
+        """ True if rv has changed. """
+        return self._changed
+    
+    @property
+    def c(self):
+        """ The current text of the placeholder.
+
+        Depreciates cur.
+        """
+        return self._c
+
+    @property
+    def locals(self):
+        """ Provides snippet local variables. """
+        return self._locals
+
+    # Syntatic sugar
+    def __add__(self, value):
+        """ Appends the given line to rv using mkline. """
+        self.mkline(value)
+        return self
+
+    def __lshift__(self, other):
+        """ Same as unshift. """
+        self.unshift(other)
+
+    def __rshift__(self, other):
+        """ Same as shift. """
+        self.shift(other)
         
 
 class PythonCode(TextObject):
@@ -805,6 +864,7 @@ class PythonCode(TextObject):
         fn = os.path.basename(path)
 
         ct = self.current_text
+        self._snip._reset(ct)
         d = {
             't': _Tabs(self),
             'fn': fn,
@@ -815,8 +875,11 @@ class PythonCode(TextObject):
         }
 
         exec self._code in d
-        self.current_text = str(d["res"])
 
+        if self._snip._rv_changed:
+            self.current_text = self._snip.rv
+        else:
+            self.current_text = str(d["res"])
 
     def __repr__(self):
         return "PythonCode(%s -> %s)" % (self._start, self._end)
