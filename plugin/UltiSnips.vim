@@ -40,12 +40,23 @@ endif
 " }}}
 
 "" FUNCTIONS {{{
+function! CompensateForPUM()
+  """ The CursorMovedI event is not triggered while the popup-menu is visible,
+  """ and it's by this event that UltiSnips updates its vim-state. The fix is
+  """ to explicitly check for the presence of the popup menu, and update
+  """ the vim-state accordingly.
+ if pumvisible()
+    py UltiSnips_Manager.cursor_moved()
+ endif
+endfunction
+
 function! UltiSnips_ExpandSnippet()
  py UltiSnips_Manager.expand()
  return ""
 endfunction
 
 function! UltiSnips_ExpandSnippetOrJump()
+ call CompensateForPUM()
  py UltiSnips_Manager.expand_or_jump()
  return ""
 endfunction
@@ -56,11 +67,13 @@ function! UltiSnips_ListSnippets()
 endfunction
 
 function! UltiSnips_JumpBackwards()
+ call CompensateForPUM()
  py UltiSnips_Manager.jump_backwards()
  return ""
 endfunction
 
 function! UltiSnips_JumpForwards()
+ call CompensateForPUM()
  py UltiSnips_Manager.jump_forwards()
  return ""
 endfunction

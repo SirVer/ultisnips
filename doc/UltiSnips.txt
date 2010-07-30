@@ -594,15 +594,20 @@ individuals have contributed code to UltiSnips. In order of apperance.
 8.1 Patches & Coding                                 *UltiSnips-contricoding*
 --------------------
 
-JCEB - Jan Christoph Ebersbach
-Michael Henry
-Ryan Wooden
+Contributers are listed in chronological order:
+
+   JCEB - Jan Christoph Ebersbach
+   Michael Henry
+   Chris Chambers
+    Ryan Wooden
 
 8.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------
 
-Alec Thomas (Python, smart def)
-Ryan Wooden
+Contributers are listed in chronological order:
+
+   Alec Thomas (Python, smart def)
+    Ryan Wooden
 
 
 
