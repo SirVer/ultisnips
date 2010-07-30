@@ -711,21 +711,17 @@ class SnippetUtil(object):
     """
 
     def __init__(self, initial_indent, cur="", snippet=None):
-        self._initial_indent = initial_indent
         if snippet:
             self._locals = snippet.locals
         else:
             self._locals = {}
 
-        # allow use of class outside of vim for testing
-        if 'vim' in globals():
-            self._shift = int(vim.eval("&sw"))
-            self._et = (vim.eval("&expandtab") == "1")
-            self._ts = int(vim.eval("&ts"))
-        else:
-            self._shift = 4
-            self._et = True
-            self._ts = 4
+        self._sw = int(vim.eval("&sw"))
+        self._sts = int(vim.eval("&sts"))
+        self._et = (vim.eval("&expandtab") == "1")
+        self._ts = int(vim.eval("&ts"))
+
+        self._initial_indent = self._indent_to_spaces(initial_indent)
 
         self._reset(cur)
 
@@ -734,7 +730,6 @@ class SnippetUtil(object):
 
         :cur: the new value for c.
         """
-        self._first = True # hack to make first line work right
         self._c = cur
         self._rv = cur
         self._changed = False
@@ -742,48 +737,61 @@ class SnippetUtil(object):
 
     def shift(self, amount=1):
         """ Shifts the indentation level.
+        Note that this uses the shiftwidth because thats what code
+        formatters use.
 
         :amount: the amount by which to shift.
         """
-        self.indent += " " * self._shift * amount
+        self.indent += " " * self._sw * amount
 
     def unshift(self, amount=1):
         """ Unshift the indentation level.
+        Note that this uses the shiftwidth because thats what code
+        formatters use.
     
     	:amount: the amount by which to unshift.
         """
-        by = -self._shift * amount
+        by = -self._sw * amount
         try:
             self.indent = self.indent[:by]
         except IndexError:
             indent = ""
 
-    def mkline(self, line="", indent=None, append=True):
-        """ Appends a properly set up line to res, and returns it.
+    def _indent_to_spaces(self, indent):
+        """ converts indentation to spaces. """
+        indent = indent.replace(" " * self._ts, "\t")
+        right = (len(indent) - len(indent.rstrip(" "))) * " "
+        indent = indent.replace(" ", "")
+        indent = indent.replace('\t', " " * self._ts)
+        return indent + right
+
+    def _spaces_to_indent(self, indent):
+        """ Converts spaces to proper indentation respecting
+        et, ts, etc.
+        """
+        if not self._et:
+            indent = indent.replace(" " * self._ts, '\t')
+        return indent
+
+    def mkline(self, line="", indent=None):
+        """ Creates a properly set up line.
     
     	:line: the text to add
     	:indent: the indentation to have at the beginning
                  if None, it uses the default amount
-        :append: if true, then append the line to rv.
         """
         if indent == None:
             indent = self.indent
             # this deals with the fact that the first line is
             # already properly indented
-            if self._first:
+            if '\n' not in self._rv:
                 try:
                     indent = indent[len(self._initial_indent):]
                 except IndexError:
                     indent = ""
-            if not self._et:
-                indent = indent.replace(" " * self._ts, '\t')
-        self._first = False
+            indent = self._spaces_to_indent(indent)
 
-
-        line = indent + line + '\n'
-        if append:
-            self.rv += line
-        return line
+        return indent + line
 
     def reset_indent(self):
         """ Clears the indentation. """
@@ -822,10 +830,20 @@ class SnippetUtil(object):
         """ Provides snippet local variables. """
         return self._locals
 
+    def opt(self, option, default=None):
+        """ Gets a vim variable. """
+        if vim.eval("exists('%s')" % option) == "1":
+            try:
+                return vim.eval(option)
+            except vim.error:
+                pass
+        return default
+
     # Syntatic sugar
     def __add__(self, value):
         """ Appends the given line to rv using mkline. """
-        self.mkline(value)
+        self.rv += '\n' # handles the first line properly
+        self.rv += self.mkline(value)
         return self
 
     def __lshift__(self, other):
@@ -838,7 +856,7 @@ class SnippetUtil(object):
         
 
 class PythonCode(TextObject):
-    def __init__(self, parent, start, end, code, indent=0):
+    def __init__(self, parent, start, end, code, indent=""):
 
         code = code.replace("\\`", "`")
 
@@ -849,7 +867,7 @@ class PythonCode(TextObject):
                 snippet = snippet._parent
             except AttributeError:
                 snippet = None
-        self._snip = SnippetUtil(indent, snippet)
+        self._snip = SnippetUtil(indent, snippet=snippet)
 
         # Add Some convenience to the code
         self._code = "import re, os, vim, string, random\n" + code
