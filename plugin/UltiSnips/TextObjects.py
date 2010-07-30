@@ -803,7 +803,7 @@ class SnippetUtil(object):
         This is a list of lines to insert at the
         location of the placeholder.
 
-        Depreciates res.
+        Deprecates res.
         """
         return self._rv
 
@@ -821,7 +821,7 @@ class SnippetUtil(object):
     def c(self):
         """ The current text of the placeholder.
 
-        Depreciates cur.
+        Deprecates cur.
         """
         return self._c
 

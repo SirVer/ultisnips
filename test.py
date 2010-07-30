@@ -462,7 +462,7 @@ print "Hallo Welt"
 # PythonCode Interpolation #
 ############################
 
-#### Depricated way ##########
+#### Deprecated way ##########
 class PythonCodeOld_SimpleExample(_VimTest):
     snippets = ("test", """hi `!p res = "Hallo"` End""")
     keys = "test" + EX
