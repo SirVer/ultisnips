@@ -461,24 +461,26 @@ print "Hallo Welt"
 ############################
 # PythonCode Interpolation #
 ############################
-class PythonCode_SimpleExample(_VimTest):
+
+#### Depricated way ##########
+class PythonCodeOld_SimpleExample(_VimTest):
     snippets = ("test", """hi `!p res = "Hallo"` End""")
     keys = "test" + EX
     wanted = "hi Hallo End"
-class PythonCode_ReferencePlaceholder(_VimTest):
+class PythonCodeOld_ReferencePlaceholder(_VimTest):
     snippets = ("test", """${1:hi} `!p res = t[1]+".blah"` End""")
     keys = "test" + EX + "ho"
     wanted = "ho ho.blah End"
-class PythonCode_ReferencePlaceholderBefore(_VimTest):
+class PythonCodeOld_ReferencePlaceholderBefore(_VimTest):
     snippets = ("test", """`!p res = len(t[1])*"#"`\n${1:some text}""")
     keys = "test" + EX + "Hallo Welt"
     wanted = "##########\nHallo Welt"
-class PythonCode_TransformedBeforeMultiLine(_VimTest):
+class PythonCodeOld_TransformedBeforeMultiLine(_VimTest):
     snippets = ("test", """${1/.+/egal/m} ${1:`!p
 res = "Hallo"`} End""")
     keys = "test" + EX
     wanted = "egal Hallo End"
-class PythonCode_IndentedMultiline(_VimTest):
+class PythonCodeOld_IndentedMultiline(_VimTest):
     snippets = ("test", """start `!p a = 1
 b = 2
 if b > a:
@@ -487,6 +489,267 @@ else:
     res = "a isbigger b"` end""")
     keys = "    test" + EX
     wanted = "    start b isbigger a end"
+
+#### New way ##########
+
+class PythonCode_UseNewOverOld(_VimTest):
+    snippets = ("test", """hi `!p res = "Old"
+snip.rv = "New"` End""")
+    keys = "test" + EX
+    wanted = "hi New End"
+
+class PythonCode_SimpleExample(_VimTest):
+    snippets = ("test", """hi `!p snip.rv = "Hallo"` End""")
+    keys = "test" + EX
+    wanted = "hi Hallo End"
+
+class PythonCode_ReferencePlaceholder(_VimTest):
+    snippets = ("test", """${1:hi} `!p snip.rv = t[1]+".blah"` End""")
+    keys = "test" + EX + "ho"
+    wanted = "ho ho.blah End"
+
+class PythonCode_ReferencePlaceholderBefore(_VimTest):
+    snippets = ("test", """`!p snip.rv = len(t[1])*"#"`\n${1:some text}""")
+    keys = "test" + EX + "Hallo Welt"
+    wanted = "##########\nHallo Welt"
+
+class PythonCode_TransformedBeforeMultiLine(_VimTest):
+    snippets = ("test", """${1/.+/egal/m} ${1:`!p
+snip.rv = "Hallo"`} End""")
+    keys = "test" + EX
+    wanted = "egal Hallo End"
+
+class PythonCode_MultilineIndented(_VimTest):
+    snippets = ("test", """start `!p a = 1
+b = 2
+if b > a:
+    snip.rv = "b isbigger a"
+else:
+    snip.rv = "a isbigger b"` end""")
+    keys = "    test" + EX
+    wanted = "    start b isbigger a end"
+
+class PythonCode_SimpleAppend(_VimTest):
+    snippets = ("test", """hi `!p snip.rv = "Hallo1"
+snip += "Hallo2"` End""")
+    keys = "test" + EX
+    wanted = "hi Hallo1\nHallo2 End"
+
+class PythonCode_MultiAppend(_VimTest):
+    snippets = ("test", """hi `!p snip.rv = "Hallo1"
+snip += "Hallo2"
+snip += "Hallo3"` End""")
+    keys = "test" + EX
+    wanted = "hi Hallo1\nHallo2\nHallo3 End"
+
+class PythonCode_MultiAppend(_VimTest):
+    snippets = ("test", """hi `!p snip.rv = "Hallo1"
+snip += "Hallo2"
+snip += "Hallo3"` End""")
+    keys = "test" + EX
+    wanted = "hi Hallo1\nHallo2\nHallo3 End"
+
+class PythonCode_MultiAppendSimpleIndent(_VimTest):
+    snippets = ("test", """hi
+`!p snip.rv="Hallo1"
+snip += "Hallo2"
+snip += "Hallo3"`
+End""")
+    keys = """
+    test""" + EX
+    wanted = """
+    hi
+    Hallo1
+    Hallo2
+    Hallo3
+    End"""
+
+class PythonCode_SimpleMkline(_VimTest):
+    snippets = ("test", r"""hi
+`!p snip.rv="Hallo1\n"
+snip.rv += snip.mkline("Hallo2") + "\n"
+snip.rv += snip.mkline("Hallo3")`
+End""")
+    keys = """
+    test""" + EX
+    wanted = """
+    hi
+    Hallo1
+    Hallo2
+    Hallo3
+    End"""
+
+class PythonCode_MultiAppendShift(_VimTest):
+    snippets = ("test", r"""hi
+`!p snip.rv="i1"
+snip += "i1"
+snip >> 1
+snip += "i2"
+snip << 2
+snip += "i0"
+snip >> 3
+snip += "i3"`
+End""")
+    keys = """
+	test""" + EX
+    wanted = """
+	hi
+	i1
+	i1
+		i2
+i0
+			i3
+	End"""
+
+class PythonCode_MultiAppendShiftMethods(_VimTest):
+    snippets = ("test", r"""hi
+`!p snip.rv="i1\n"
+snip.rv += snip.mkline("i1\n")
+snip.shift(1)
+snip.rv += snip.mkline("i2\n")
+snip.unshift(2)
+snip.rv += snip.mkline("i0\n")
+snip.shift(3)
+snip.rv += snip.mkline("i3")`
+End""")
+    keys = """
+	test""" + EX
+    wanted = """
+	hi
+	i1
+	i1
+		i2
+i0
+			i3
+	End"""
+
+
+class PythonCode_ResetIndent(_VimTest):
+    snippets = ("test", r"""hi
+`!p snip.rv="i1"
+snip >> 1
+snip += "i2"
+snip.reset_indent()
+snip += "i1"
+snip << 1
+snip += "i0"
+snip.reset_indent()
+snip += "i1"`
+End""")
+    keys = """
+	test""" + EX
+    wanted = """
+	hi
+	i1
+		i2
+	i1
+i0
+	i1
+	End"""
+
+# TODO
+# Different mixes of ts, et, sts, sw
+class PythonCode_IndentEtSw(_VimTest):
+    def _options_on(self):
+        self.send(":set sw=3\n")
+        self.send(":set expandtab\n")
+    def _options_off(self):
+        self.send(":set sw=8\n")
+        self.send(":set noexpandtab\n")
+    snippets = ("test", r"""hi
+`!p snip.rv = "i1"
+snip >> 1
+snip += "i2"
+snip << 2
+snip += "i0"
+snip >> 1
+snip += "i1"
+`
+End""")
+    keys = """   test""" + EX
+    wanted = """   hi
+   i1
+      i2
+i0
+   i1
+   End"""
+
+class PythonCode_IndentEtSwOffset(_VimTest):
+    def _options_on(self):
+        self.send(":set sw=3\n")
+        self.send(":set expandtab\n")
+    def _options_off(self):
+        self.send(":set sw=8\n")
+        self.send(":set noexpandtab\n")
+    snippets = ("test", r"""hi
+`!p snip.rv = "i1"
+snip >> 1
+snip += "i2"
+snip << 2
+snip += "i0"
+snip >> 1
+snip += "i1"
+`
+End""")
+    keys = """    test""" + EX
+    wanted = """    hi
+    i1
+       i2
+ i0
+    i1
+    End"""
+
+class PythonCode_IndentNoetSwTs(_VimTest):
+    def _options_on(self):
+        self.send(":set sw=3\n")
+        self.send(":set ts=4\n")
+    def _options_off(self):
+        self.send(":set sw=8\n")
+        self.send(":set ts=8\n")
+    snippets = ("test", r"""hi
+`!p snip.rv = "i1"
+snip >> 1
+snip += "i2"
+snip << 2
+snip += "i0"
+snip >> 1
+snip += "i1"
+`
+End""")
+    keys = """   test""" + EX
+    wanted = """   hi
+   i1
+\t  i2
+i0
+   i1
+   End"""
+
+# Test using 'opt'
+class PythonCode_OptExists(_VimTest):
+    def _options_on(self):
+        self.send(':let g:UStest="yes"\n')
+    def _options_off(self):
+        self.send(":unlet g:UStest\n")
+    snippets = ("test", r"""hi `!p snip.rv = snip.opt("g:UStest") or "no"` End""")
+    keys = """test""" + EX
+    wanted = """hi yes End"""
+
+class PythonCode_OptNoExists(_VimTest):
+    snippets = ("test", r"""hi `!p snip.rv = snip.opt("g:UStest") or "no"` End""")
+    keys = """test""" + EX
+    wanted = """hi no End"""
+
+# locals
+class PythonCode_Locals(_VimTest):
+    snippets = ("test", r"""hi `!p snip.locals["a"] = "test"
+snip.rv = "nothing"` `!p snip.rv = snip.locals["a"]
+` End""")
+    keys = """test""" + EX
+    wanted = """hi nothing test End"""
+
+
+
+
 
 ###########################
 # VimScript Interpolation #
