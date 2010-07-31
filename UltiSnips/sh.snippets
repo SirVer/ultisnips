@@ -13,9 +13,9 @@ snippet !env "#!/usr/bin/env (!env)"
 endsnippet
 
 snippet temp "Tempfile"
-${1:TMPFILE}="$(mktemp -t ${2:`!p res = re.sub(r'[^a-zA-Z]', '_', fn)
-if not len(res):
-	res = "untitled"`})"
+${1:TMPFILE}="$(mktemp -t ${2:`!p
+snip.rv = re.sub(r'[^a-zA-Z]', '_', snip.fn) or "untitled"
+`})"
 ${3:${4/(.+)/trap "/}${4:rm -f '$${1/.*\s//}'}${4/(.+)/" 0               # EXIT\n/}${5/(.+)/trap "/}${5:rm -f '$${1/.*\s//}'; exit 1}${5/(.+)/" 2       # INT\n/}${6/(.+)/trap "/}${6:rm -f '$${1/.*\s//}'; exit 1}${6/(.+)/" 1 15    # HUP TERM\n/}}
 
 endsnippet

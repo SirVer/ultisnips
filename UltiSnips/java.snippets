@@ -27,10 +27,8 @@ catch (${1:Exception} ${2:e}) {
 endsnippet
 
 snippet cl "class" b
-class ${1:`!p if len(fn):
-	res = fn.split('.')[-2]
-else:
-	res = "untitled"`} ${2:extends ${3:Parent} }${4:implements ${5:Interface} }{
+class ${1:`!p
+snip.rv = snip.basename or "untitled"`} ${2:extends ${3:Parent} }${4:implements ${5:Interface} }{
 	$0
 }
 endsnippet
@@ -92,10 +90,7 @@ import
 endsnippet
 
 snippet in "interface" b
-interface ${1:`!p if len(fn):
-	res = fn.split('.')[-2]
-else:
-	res = "untitled"`} ${2:extends ${3:Parent} }{
+interface ${1:`!p snip.rv = snip.basename or "untitled"`} ${2:extends ${3:Parent} }{
 	$0
 }
 endsnippet
@@ -176,10 +171,7 @@ synchronized
 endsnippet
 
 snippet tc "test case"
-public class ${1:`!p if len(fn):
-	res = fn.split('.')[-2]
-else:
-	res = "untitled"`} extends ${2:TestCase} {
+public class ${1:`!p snip.rv = snip.basename or "untitled"`} extends ${2:TestCase} {
 	$0
 }
 endsnippet

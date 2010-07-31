@@ -112,12 +112,12 @@ endsnippet
 # HTML TAGS #
 #############
 snippet input "Input with Label"
-<label for="${2:${1/[[:alpha:]]+|( )/(?1:_:\L$0)/g}}">$1</label><input type="${3:text/submit/hidden/button}" name="${4:$2}" value="$5"${6: id="${7:$2}"}`!p if vim.eval("&filetype").startswith("x"): res = '/'`>
+<label for="${2:${1/[[:alpha:]]+|( )/(?1:_:\L$0)/g}}">$1</label><input type="${3:text/submit/hidden/button}" name="${4:$2}" value="$5"${6: id="${7:$2}"}`!p if snip.ft.startswith("x"): snip.rv = '/'`>
 
 endsnippet
 
 snippet input "XHTML   <input>"
-<input type="${1:text/submit/hidden/button}" name="${2:some_name}" value="$3"${4: id="${5:$2}"}`!p if vim.eval("&filetype").startswith("x"): res = '/'`>
+<input type="${1:text/submit/hidden/button}" name="${2:some_name}" value="$3"${4: id="${5:$2}"}`!p if snip.ft.startswith("x"): snip.rv = '/'`>
 endsnippet
 
 
@@ -143,15 +143,12 @@ snippet mailto "XHTML <a mailto: >"
 endsnippet
 
 snippet base "XHTML <base>"
-<base href="$1"${2: target="$3"}`!p if vim.eval("&filetype").startswith("x"): res = '/'`>
+<base href="$1"${2: target="$3"}`!p if snip.ft.startswith("x"): snip.rv = '/'`>
 endsnippet
 
 snippet body "XHTML <body>"
 <body id="${1:`!p
-if len(fn):
-	res = "Hallo"
-else:
-	res = "Nothin"
+snip.rv = snip.fn and 'Hallo' or 'Nothin'
 `}"${2: onload="$3"}>
 	$0
 </body>
@@ -164,14 +161,12 @@ snippet div "XHTML <div>"
 endsnippet
 
 snippet form "XHTML <form>"
-<form action="${1:`!p if len(fn):
-	res = fn.split('.')[-2]
-else:
-	res = "unnamed"
-res += '_submit'`}" method="${2:get}" accept-charset="utf-8">
+<form action="${1:`!p
+snip.rv = (snip.basename or 'unnamed') + '_submit'
+`}" method="${2:get}" accept-charset="utf-8">
 	$0
 
-	<p><input type="submit" value="Continue →"`!p if vim.eval("&filetype").startswith("x"): res = '/'`></p>
+	<p><input type="submit" value="Continue →"`!p if snip.ft.startswith("x"): snip.rv = '/'`></p>
 </form>
 endsnippet
 
@@ -181,21 +176,18 @@ endsnippet
 
 snippet head "XHTML <head>"
 <head>
-	<meta http-equiv="Content-type" content="text/html; charset=utf-8"`!p if vim.eval("&filetype").startswith("x"): res = '/'`>
-	<title>${1:`!p if len(fn):
-	res = fn.split('.')[-2]
-else:
-	res = "Page Title"`}</title>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8"`!p if snip.ft.startswith("x"): snip.rv = '/'`>
+	<title>${1:`!p snip.rv = snip.basename or "Page Title"`}</title>
 	$0
 </head>
 endsnippet
 
 snippet link "XHTML <link>"
-<link rel="${1:stylesheet}" href="${2:/css/master.css}" type="text/css" media="${3:screen}" title="${4:no title}" charset="${5:utf-8}"`!p if vim.eval("&filetype").startswith("x"): res = '/'`>
+<link rel="${1:stylesheet}" href="${2:/css/master.css}" type="text/css" media="${3:screen}" title="${4:no title}" charset="${5:utf-8}"`!p if snip.ft.startswith("x"): snip.rv = '/'`>
 endsnippet
 
 snippet meta "XHTML <meta>"
-<meta name="${1:name}" content="${2:content}"`!p if vim.eval("&filetype").startswith("x"): res = '/'`>
+<meta name="${1:name}" content="${2:content}"`!p if snip.ft.startswith("x"): snip.rv = '/'`>
 endsnippet
 
 snippet scriptsrc "XHTML <script src...>"
@@ -222,10 +214,7 @@ snippet table "XHTML <table>"
 endsnippet
 
 snippet title "XHTML <title>"
-<title>${1:`!p if len(fn):
-	res = fn.split('.')[-2]
-else:
-	res = "Page Title"`}</title>
+<title>${1:`!p snip.rv = snip.basename or "Page Title"`}</title>
 endsnippet
 
 snippet fieldset "Fieldset"
@@ -238,15 +227,15 @@ endsnippet
 
 snippet movie "Embed QT movie (movie)" b
 <object width="$2" height="$3" classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" codebase="http://www.apple.com/qtactivex/qtplugin.cab">
-	<param name="src" value="$1"`!p snip['xhtml'] =  vim.eval("&filetype").startswith("x") and "/" or ""; res = snip['xhtml']`>
-	<param name="controller" value="$4"`!p res = snip['xhtml']`>
-	<param name="autoplay" value="$5"`!p res = snip['xhtml']`>
+	<param name="src" value="$1"`!p snip.locals['xhtml'] =  snip.ft.startswith("x") and "/" or ""; snip.rv = snip.locals['xhtml']`>
+	<param name="controller" value="$4"`!p snip.rv = snip.locals['xhtml']`>
+	<param name="autoplay" value="$5"`!p snip.rv = snip.locals['xhtml']`>
 	<embed src="${1:movie.mov}"
 		width="${2:320}" height="${3:240}"
 		controller="${4:true}" autoplay="${5:true}"
 		scale="tofit" cache="true"
 		pluginspage="http://www.apple.com/quicktime/download/"
-	`!p res = snip['xhtml']`>
+	`!p snip.rv = snip.locals['xhtml']`>
 </object>
 endsnippet
 

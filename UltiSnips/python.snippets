@@ -24,52 +24,52 @@ class ${1:MyClass}(${2:object}):
 
 	def __init__(self$4):
 		""" ${5:TODO: Fill me in}`!p
-res = ""
-snip.reset_indent()
-snip.shift(2)
+snip.rv = ""
+snip >> 2
 
 args = [arg.split('=')[0].strip() for arg in t[4].split(',') if arg]
 args = [arg for arg in args if arg and arg != "self"]
 
 if args:
-    res += snip.mkline('\n')
+    snip += ""
 
 for arg in args:
-    res += snip.mkline(":%s: description" % arg)
+    snip += ":%s: description" % arg
 
 if args:
-    res += snip.mkline('"""')
+    snip += '"""'
 else:
-    res += snip.mkline(' """', '')
+    snip.rv += ' """'
 
-if t[2] != "object":
-    res += snip.mkline(t[2] + ".__init__(self)\n")
+for sup in t[2].split(","):
+    sup = sup.strip()
+    snip += sup + ".__init__(self)"
 
 for arg in args:
-    res += snip.mkline("self._%s = %s" % (arg, arg))
+    snip += "self._%s = %s" % (arg, arg)
 `
 		$0
 endsnippet
 
 snippet def "smart def" b
 def ${1:function}(${2:self}):
-    """ ${3:TODO: Docstring for $1}
-`!p res = ""
-snip.reset_indent()
+    """ ${3:TODO: Docstring for $1}`!p
+snip.rv = ""
+snip >> 1
 
-args = [arg.split('=')[0].strip() for arg in t[2].split(',') if arg.strip()]
+args = [arg.split('=')[0].strip() for arg in t[2].split(',') if arg]
 args = [arg for arg in args if arg and arg != "self"]
 
 if args:
-    res += snip.mkline()
+    snip += ""
 
-snip.shift()
 for arg in args:
-    res += snip.mkline(":%s: description" % arg)
+    snip += ":%s: description" % arg
 
-`
-    :returns: description
-    """
+`${4:
+
+    :returns: ${5:description}
+    }"""
     ${0:pass}
 
 endsnippet
