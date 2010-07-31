@@ -29,7 +29,6 @@ class ${1:MyClass}(${2:object}):
 
 	def __init__(self$4):
 		""" ${5:TODO: Fill me in}`!p
-snip.rv = ""
 snip >> 2
 
 args = [arg.split('=')[0].strip() for arg in t[4].split(',') if arg]
@@ -63,7 +62,6 @@ endsnippet
 snippet def "smart def" b
 def ${1:function}(${2:self}):
     """ ${3:TODO: Docstring for $1}`!p
-snip.rv = ""
 snip >> 1
 
 args = [arg.split('=')[0].strip() for arg in t[2].split(',') if arg]

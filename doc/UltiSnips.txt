@@ -269,9 +269,6 @@ which can be used: >
    fn   - The current filename
    path - The complete path to the current file
    t    - The values of the placeholders, t[1] -> current text of ${1} and so on
-   cur  - The current text of the placeholder. You can check if this is != ""
-          to make sure that the interpolation is only done once.
-          Note: this is deprecated in favor of snip.c
    snip - Provides easy indentation handling, and snippet-local variables.
 
 The snip object provides the following methods: >
@@ -302,9 +299,14 @@ The snip object provides some properties as well: >
         Is a dictionary which is available to any python block inside the
         snippet.
 
-    snip.rv and snip.c:
-        snip.rv is the text that will fill this python block's position, and
-        snip.c is the text currently in it.
+    snip.rv:
+        the text that will fill this python block's position, it always starts
+        out as an empty string. This deprecates the "res" variable.
+
+    snip.c:
+        the text currently in the python block's position in the snippet
+        in it. You can check if snip.c is != "" to make sure that the
+        interpolation is only done once. This deprecates the "cur" variable.
 
     snip.fn:
         the current filename.

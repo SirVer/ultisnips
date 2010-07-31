@@ -731,7 +731,7 @@ class SnippetUtil(object):
         :cur: the new value for c.
         """
         self._c = cur
-        self._rv = cur
+        self._rv = ""
         self._changed = False
         self.reset_indent()
 
