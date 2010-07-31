@@ -18,6 +18,11 @@ endsnippet
 ##########
 # COMMON #
 ##########
+
+# The smart def and smart class snippets use a global option called
+# "g:ultisnips_python_style" which, if set to "doxygen" will use doxygen
+# style comments in docstrings.
+
 snippet class "smart class" b
 class ${1:MyClass}(${2:object}):
 	""" ${3:Docstring for $1 }"""
@@ -34,7 +39,11 @@ if args:
     snip += ""
 
 for arg in args:
-    snip += ":%s: description" % arg
+    style = snip.opt("g:ultisnips_python_style", "normal")
+    if style == "doxygen":
+        snip += "@param %s TODO" % arg
+    else:
+        snip += ":%s: TODO" % arg
 
 if args:
     snip += '"""'
@@ -63,12 +72,21 @@ args = [arg for arg in args if arg and arg != "self"]
 if args:
     snip += ""
 
+snip.locals["style"] = style = snip.opt("g:ultisnips_python_style", "normal")
 for arg in args:
-    snip += ":%s: description" % arg
+    if style == "doxygen":
+        snip += "@param %s TODO" % arg
+    else:
+        snip += ":%s: TODO" % arg
 
 `${4:
 
-    :returns: ${5:description}
+    `!p
+style = snip.locals["style"]
+if style == "doxygen":
+    snip.rv = "@return"
+else:
+    snip.rv = ":returns:"` ${5:TODO}
     }"""
     ${0:pass}
 
