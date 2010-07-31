@@ -797,6 +797,23 @@ class SnippetUtil(object):
         """ Clears the indentation. """
         self.indent = self._initial_indent
 
+    # Utility methods
+    @property
+    def fn(self):
+        """ The filename. """
+        return vim.eval('expand("%:t")') or ""
+
+    @property
+    def basename(self):
+        """ The filename without extension. """
+        return vim.eval('expand("%:t:r")') or ""
+
+    @property
+    def ft(self):
+        """ The filetype. """
+        return self.opt("&filetype", "")
+
+    # Necessary stuff
     @property
     def rv(self):
         """ The return value.

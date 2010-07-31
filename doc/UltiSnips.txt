@@ -274,7 +274,7 @@ which can be used: >
           Note: this is deprecated in favor of snip.c
    snip - Provides easy indentation handling, and snippet-local variables.
 
-The snip variable provides the following methods >
+The snip object provides the following methods: >
 
     snip.mkline(line="", indent=None):
         Returns a line ready to be appended to the result. If indent
@@ -292,19 +292,30 @@ The snip variable provides the following methods >
     snip.reset_indent():
         Resets the indentation level to its initial value.
     
-    snip.locals:
-        Is a dictionary which is available to any python block inside the
-        snippet.
-
     snip.opt(var, default):
         Checks if the vim variable "var" has been set, if so, it returns it,
         otherwise it returns "default".
+
+The snip object provides some properties as well: >
+
+    snip.locals:
+        Is a dictionary which is available to any python block inside the
+        snippet.
 
     snip.rv and snip.c:
         snip.rv is the text that will fill this python block's position, and
         snip.c is the text currently in it.
 
-The snip variable also provides some operators to make python snippets
+    snip.fn:
+        the current filename.
+
+    snip.basename:
+        the current filename without it's extension.
+
+    snip.ft:
+        the current filetype.
+
+The snip object also provides some operators to make python snippets
 easier: >
 
     snip >> amount:
