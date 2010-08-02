@@ -748,7 +748,7 @@ class SnippetUtil(object):
         """ Unshift the indentation level.
         Note that this uses the shiftwidth because thats what code
         formatters use.
-    
+
     	:amount: the amount by which to unshift.
         """
         by = -self._sw * amount
@@ -775,7 +775,7 @@ class SnippetUtil(object):
 
     def mkline(self, line="", indent=None):
         """ Creates a properly set up line.
-    
+
     	:line: the text to add
     	:indent: the indentation to have at the beginning
                  if None, it uses the default amount
@@ -814,26 +814,26 @@ class SnippetUtil(object):
         return self.opt("&filetype", "")
 
     # Necessary stuff
-    @property
-    def rv(self):
+    def rv():
         """ The return value.
         This is a list of lines to insert at the
         location of the placeholder.
 
         Deprecates res.
         """
-        return self._rv
-
-    @rv.setter
-    def rv(self, value):
-        self._changed = True
-        self._rv = value
+        def fget(self):
+            return self._rv
+        def fset(self, value):
+            self._changed = True
+            self._rv = value
+        return locals()
+    rv = property(**rv())
 
     @property
     def _rv_changed(self):
         """ True if rv has changed. """
         return self._changed
-    
+
     @property
     def c(self):
         """ The current text of the placeholder.
@@ -870,7 +870,7 @@ class SnippetUtil(object):
     def __rshift__(self, other):
         """ Same as shift. """
         self.shift(other)
-        
+
 
 class PythonCode(TextObject):
     def __init__(self, parent, start, end, code, indent=""):
