@@ -17,7 +17,7 @@ endif
 endsnippet
 
 snippet guard
-if exists('${1:did_`!p res=fn.replace('.','_')`}') || &cp${2: || version < 700}
+if exists('${1:did_`!p snip.rv = snip.fn.replace('.','_')`}') || &cp${2: || version < 700}
 	finish
 endif
 let $1 = 1${3}

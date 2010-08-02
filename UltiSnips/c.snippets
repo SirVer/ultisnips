@@ -9,7 +9,7 @@ snippet def "#ifndef … #define … #endif"
 endsnippet
 
 snippet inc "#include "" (inc)"
-#include "${1:`!p res=fn.split('.')[-2]+'.h'`}"
+#include "${1:`!p snip.rv = snip.basename + '.h'`}"
 endsnippet
 
 snippet Inc "#include <> (Inc)"
@@ -46,11 +46,13 @@ endsnippet
 
 snippet once "Include header once only guard"
 #ifndef ${1:`!p
-if not len(cur):
+if not snip.c:
 	import random, string
-	name = re.sub(r'[^A-Za-z0-9]+','_', fn).upper()
+	name = re.sub(r'[^A-Za-z0-9]+','_', snip.fn).upper()
 	rand = ''.join(random.sample(string.ascii_letters+string.digits, 8))
-	res = ('%s_%s' % (name,rand)).upper()`}
+	snip.rv = ('%s_%s' % (name,rand)).upper()
+else:
+    snip.rv = snip.c`}
 #define $1
 
 ${0}
@@ -85,8 +87,7 @@ printf("${1:%s}\n"${1/([^%]|%%)*(%.)?.*/(?2:, :\);)/}$2${1/([^%]|%%)*(%.)?.*/(?2
 endsnippet
 
 snippet st "struct"
-struct ${1:`!p if fn != "": res = fn.split(".")[-2].lower()+"_t"
-else: res = "name"`}
+struct ${1:`!p snip.rv = (snip.basename or "name") + "_t"`}
 {
 	${0:/* data */}
 };

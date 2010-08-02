@@ -8,11 +8,7 @@ ${1:v}${1/^.*?(-)?(>)?$/(?2::(?1:>:.))/}begin(), $1${1/^.*?(-)?(>)?$/(?2::(?1:>:
 endsnippet
 
 snippet cl "class .. (class)"
-class ${1:`!p
-if len(fn):
-	res = fn.split(".")[-2].lower()+ '_t'
-else:
-	res = "name"`}
+class ${1:`!p snip.rv = snip.basename or "name"`}
 {
 public:
 	${1/(\w+).*/$1/} (${2:arguments});
@@ -24,9 +20,7 @@ private:
 endsnippet
 
 snippet ns "namespace .. (namespace)"
-namespace${1/.+/ /m}${1:`!p
-if len(fn): res = fn.split(".")[-2].lower()
-else: res ="name"`}
+namespace${1/.+/ /m}${1:`!p snip.rv = snip.basename or "name"`}
 {
 	$0
 }${1/.+/ \/* /m}$1${1/.+/ *\/ /m}

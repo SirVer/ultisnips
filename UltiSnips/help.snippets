@@ -3,32 +3,33 @@
 snippet sec "Section marker" b
 =============================================================================
 ${1:SECTION}`!p 
-file_start = fn.split('.')[0]
+file_start = snip.fn.split('.')[0]
 sec_name = t[1].strip("1234567890. ").lower().replace(' ', '-')
 
-res = ("*%s-%s*" % (file_start, sec_name)).rjust(77-len(t[1]))`
+snip.rv = ("*%s-%s*" % (file_start, sec_name)).rjust(77-len(t[1]))`
 
 $0
 endsnippet
 
 snippet ssec "Sub section marker" b
 ${1:Subsection}`!p 
-file_start = fn.split('.')[0]
+file_start = snip.fn.split('.')[0]
 sec_name = t[1].strip("1234567890. ").lower().replace(' ', '-')
 sec_title = ("*%s-%s*" % (file_start, sec_name)).rjust(77-len(t[1]))
 
-res = sec_title + "\n" + "-"*len(t[1])`
+snip.rv = sec_title 
+snip += "-"*len(t[1])`
 
 $0
 endsnippet
 
 snippet sssec "Subsub Section marker" b
- ${1:SubSubsection}:`!p 
+${1:SubSubsection}:`!p 
 file_start = fn.split('.')[0]
 sec_name = t[1].strip("1234567890. ").lower().replace(' ', '-')
 sec_title = ("*%s-%s*" % (file_start, sec_name)).rjust(77-len(t[1]))
 
-res = sec_title`
+snip.rv = sec_title`
 
 $0
 endsnippet

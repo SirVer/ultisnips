@@ -10,14 +10,15 @@ c = '#'
 cs = vim.eval("&commentstring")
 if len(cs) == 3:
 	c = cs[0]
+snip.locals["c"] = c
 
-res = (len(t[1])+4)*c + '\n' + c + ' '`${1:content}`!p
-c = '#'
-cs = vim.eval("&commentstring")
-if len(cs) == 3:
-	c = cs[0]
+snip.rv = (len(t[1])+4)*c
+snip.locals["bar"] = snip.rv
+snip += c + ' '`${1:content}`!p
+c = snip.locals["c"]
 
-res = ' ' + c + '\n' + (len(t[1])+4)*c`
+snip.rv = ' ' + c
+snip += snip.locals["bar"]`
 $0
 endsnippet
 
@@ -27,15 +28,17 @@ c = '#'
 cs = vim.eval("&commentstring")
 if len(cs) == 3:
 	c = cs[0]
+snip.locals["c"] = c
+snip.locals["bar"] = 75*c 
 
-res = 75*c + '\n' + c + " "+ (71-len(t[1]))/2*' '
+snip.rv = snip.locals["bar"]
+snip += c + " " + (71-len(t[1]))/2*' '
 `${1:content}`!p
-c = '#'
-cs = vim.eval("&commentstring")
-if len(cs) == 3:
-	c = cs[0]
+c = snip.locals["c"]
 
-a = 71-len(t[1]); res = (a/2 + a%2) * " " + " " + c + '\n' + 75*c`
+a = 71-len(t[1])
+snip.rv = (a/2 + a%2) * " " + " " + c 
+snip += snip.locals["bar"]`
 $0
 endsnippet
 

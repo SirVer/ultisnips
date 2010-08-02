@@ -5,8 +5,8 @@
 # We use a little hack so that the snippet is expanded
 # and parsed correctly
 snippet snip "Snippet definition" !
-`!p res="snippet"` ${1:Tab_trigger} "${2:Description}" ${3:!b}
+`!p snip.rv = "snippet"` ${1:Tab_trigger} "${2:Description}" ${3:!b}
 $0
-`!p res="endsnippet"`
+`!p snip.rv = "endsnippet"`
 endsnippet
 
