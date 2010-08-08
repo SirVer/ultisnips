@@ -148,6 +148,7 @@ class Snippet(object):
         self._v = value
         self._d = descr
         self._opts = options
+        self._matched = ""
 
     def __repr__(self):
         return "Snippet(%s,%s,%s)" % (self._t,self._d,self._opts)
@@ -164,6 +165,7 @@ class Snippet(object):
         # (since matching at word boundary and within a word == matching at word
         # boundary).
         word = self._word_for_line(trigger)
+        self._matched = ""
 
         if trigger and trigger[-1] in string.whitespace:
             return False
@@ -187,6 +189,10 @@ class Snippet(object):
             match = word.endswith(self._t)
         else:
             match = (word == self._t)
+
+        if match and not self._matched:
+            self._matched = self._t
+
         return match
 
     def could_match(self, trigger):
@@ -201,10 +207,10 @@ class Snippet(object):
                 return False
 
         if "w" in self._opts:
-            #TODO update this to use full line..
             # Trim non-empty prefix up to word boundary, if present.
             word_suffix = re.sub(r'^.+\b(.+)$', r'\1', word)
             match = self._t.startswith(word_suffix)
+            self._matched = word_suffix
 
             # TODO: list_snippets() function cannot handle partial-trigger
             # matches yet, so for now fail if we trimmed the prefix.
@@ -216,6 +222,10 @@ class Snippet(object):
             match = self._t.startswith(word)
         else:
             match = self._t.startswith(word)
+
+        if match and not self._matched:
+            self._matched = word
+
         return match
 
     def overwrites_previous(self):
@@ -230,10 +240,9 @@ class Snippet(object):
         return self._t
     trigger = property(trigger)
 
-    def used_trigger(self):
-        #TODO here
-        return self._t
-    used_trigger = property(used_trigger)
+    def matched(self):
+        return self._matched
+    matched = property(matched)
 
     def launch(self, text_before, parent, start, end = None):
         indent = self._INDENT.match(text_before).group(0)
@@ -660,15 +669,9 @@ class SnippetManager(object):
             raise
 
     def _do_snippet(self, snippet, before, after):
-        # TODO: handle this in the snippet ###
         lineno,col = vim.current.window.cursor
         # Adjust before, maybe the trigger is not the complete word
-        word = ''
-        if len(before):
-            word = before.split()[-1]
-        text_before = before.rstrip()[:-len(word)]
-        text_before += word[:-len(snippet.trigger)]
-        ### endTODO ###
+        text_before = before[:-len(snippet.matched)]
 
         self._expect_move_wo_change = True
         if self._cs:
@@ -680,7 +683,7 @@ class SnippetManager(object):
                 end = Position(0, pos.col - p_start.col)
             else:
                 end = Position(pos.line - p_start.line, pos.col)
-            start = Position(end.line, end.col - len(snippet.trigger))
+            start = Position(end.line, end.col - len(snippet.matched))
 
             si = snippet.launch(text_before, self._ctab, start, end)
 
