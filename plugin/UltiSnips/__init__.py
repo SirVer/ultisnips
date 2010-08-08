@@ -165,6 +165,9 @@ class Snippet(object):
         # boundary).
         word = self._word_for_line(trigger)
 
+        if trigger and trigger[-1] in string.whitespace:
+            return False
+
         if "b" in self._opts:
             text_before = trigger.rstrip()[:-len(word)]
             if text_before.strip(" \t") != '':
@@ -188,6 +191,9 @@ class Snippet(object):
 
     def could_match(self, trigger):
         word = self._word_for_line(trigger)
+
+        if trigger and trigger[-1] in string.whitespace:
+            return False
 
         if "b" in self._opts:
             text_before = trigger.rstrip()[:-len(word)]
@@ -216,11 +222,6 @@ class Snippet(object):
         return "!" in self._opts
     overwrites_previous = property(overwrites_previous)
 
-    # TODO: this in matches
-    def needs_ws_in_front(self):
-        return "b" in self._opts
-    needs_ws_in_front = property(needs_ws_in_front)
-
     def description(self):
         return ("(%s) %s" % (self._t, self._d)).strip()
     description = property(description)
@@ -228,6 +229,11 @@ class Snippet(object):
     def trigger(self):
         return self._t
     trigger = property(trigger)
+
+    def used_trigger(self):
+        #TODO here
+        return self._t
+    used_trigger = property(used_trigger)
 
     def launch(self, text_before, parent, start, end = None):
         indent = self._INDENT.match(text_before).group(0)
@@ -388,74 +394,16 @@ class SnippetManager(object):
     def list_snippets(self):
 
         before, after = self._get_before_after()
-
         snippets = self._snips(before, True)
 
-        lineno,col = vim.current.window.cursor
-        filetypes = self._ensure_snippets_loaded()
-
-        word = ''
-        if len(before):
-            word = before.split()[-1]
-
-        found_snippets = []
-        for ft in filetypes[::-1]:
-            found_snippets += self._find_snippets(ft, word, True)
-
-        if len(found_snippets) == 0:
+        if not snippets:
             return True
 
-        display = [ "%i %s" % (idx+1,s.description)
-                   for idx,s in enumerate(found_snippets) ]
+        snippet = self._ask_snippets(snippets)
+        if not snippet:
+            return True
 
-        # TODO: this code is also mirrored below
-        try:
-            rv = vim.eval("inputlist(%s)" % display)
-            if rv is None or rv == '0':
-                return True
-            rv = int(rv)
-            if rv > len(found_snippets):
-                rv = len(found_snippets)
-            snippet = found_snippets[rv-1]
-        except: # vim.error, e:
-            if str(e) == 'invalid expression':
-                return True
-            raise
-
-        # TODO: even more code duplicated below
-        # Adjust before, maybe the trigger is not the complete word
-        text_before = before.rstrip()[:-len(word)]
-        text_before += word[:-len(snippet.trigger)]
-
-        self._expect_move_wo_change = True
-        if self._cs:
-            # Determine position
-            pos = self._vstate.pos
-            p_start = self._ctab.abs_start
-
-            if pos.line == p_start.line:
-                end = Position(0, pos.col - p_start.col)
-            else:
-                end = Position(pos.line - p_start.line, pos.col)
-            start = Position(end.line, end.col - len(snippet.trigger))
-
-            si = snippet.launch(text_before, self._ctab, start, end)
-
-            self._update_vim_buffer()
-
-            if si.has_tabs:
-                self._csnippets.append(si)
-                self._jump()
-        else:
-            self._vb = VimBuffer(text_before, after)
-
-            start = Position(lineno-1, len(text_before))
-            self._csnippets.append(snippet.launch(text_before, None, start))
-
-            self._vb.replace_lines(lineno-1, lineno-1,
-                       self._cs._current_text)
-
-            self._jump()
+        self._do_snippet(snippet, before, after)
 
         return True
 
@@ -669,9 +617,6 @@ class SnippetManager(object):
         lineno,col = vim.current.window.cursor
 
         line = vim.current.line
-        #TODO: don't do this
-        if col > 0 and line[col-1] in string.whitespace:
-            return (None, None)
 
         # Get the word to the left of the current edit position
         before, after = line[:col], line[col:]
