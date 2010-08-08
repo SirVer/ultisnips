@@ -1442,6 +1442,33 @@ class SnippetOptions_ExpandWordSnippets_ExpandSuffix3(
     keys = "[[test" + EX
     wanted = "[[Expand me!"
 
+#################
+# REGEX MATCHES #
+#################
+class SnippetOptions_Regex_Expand(_VimTest):
+    snippets = ("(test)", "Expand me!", "", "r")
+    keys = "test" + EX
+    wanted = "Expand me!"
+class SnippetOptions_Regex_Multiple(_VimTest):
+    snippets = ("(test *)+", "Expand me!", "", "r")
+    keys = "test test test" + EX
+    wanted = "Expand me!"
+
+class _Regex_Self(_VimTest):
+    snippets = (r"((?<=\W)|^)(\.)", "self.", "", "r")
+class SnippetOptions_Regex_Self_Start(_Regex_Self):
+    keys = "." + EX
+    wanted = "self."
+class SnippetOptions_Regex_Self_Space(_Regex_Self):
+    keys = " ." + EX
+    wanted = " self."
+class SnippetOptions_Regex_Self_TextAfter(_Regex_Self):
+    keys = " .a" + EX
+    wanted = " .a" + EX
+class SnippetOptions_Regex_Self_TextBefore(_Regex_Self):
+    keys = "a." + EX
+    wanted = "a." + EX
+
 
 ######################
 # SELECTING MULTIPLE #

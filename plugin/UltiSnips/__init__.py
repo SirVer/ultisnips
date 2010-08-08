@@ -155,20 +155,29 @@ class Snippet(object):
 
     def _word_for_line(self, before):
         word = ''
-        if len(before):
+        if len(before) and before.split():
             word = before.split()[-1]
         return word
+
+    def _re_match(self, trigger):
+        match = re.search(self._t, trigger)
+        if match:
+            if match.end() != len(trigger):
+                match = False
+            else:
+                self._matched = trigger[match.start():match.end()]
+        return match
 
     def matches(self, trigger):
         # If user supplies both "w" and "i", it should perhaps be an
         # error, but if permitted it seems that "w" should take precedence
         # (since matching at word boundary and within a word == matching at word
         # boundary).
-        word = self._word_for_line(trigger)
         self._matched = ""
-
         if trigger and trigger[-1] in string.whitespace:
             return False
+
+        word = self._word_for_line(trigger)
 
         if "b" in self._opts:
             text_before = trigger.rstrip()[:-len(word)]
@@ -176,7 +185,9 @@ class Snippet(object):
                 return False
 
 
-        if "w" in self._opts:
+        if "r" in self._opts:
+            match = self._re_match(trigger)
+        elif "w" in self._opts:
             word_len = len(self._t)
             word_prefix = word[:-word_len]
             word_suffix = word[-word_len:]
@@ -206,7 +217,10 @@ class Snippet(object):
             if text_before.strip(" \t") != '':
                 return False
 
-        if "w" in self._opts:
+        if "r" in self._opts:
+            # Test for full match only
+            match = self._re_match(trigger)
+        elif "w" in self._opts:
             # Trim non-empty prefix up to word boundary, if present.
             word_suffix = re.sub(r'^.+\b(.+)$', r'\1', word)
             match = self._t.startswith(word_suffix)
