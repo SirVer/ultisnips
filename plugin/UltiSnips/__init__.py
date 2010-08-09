@@ -101,20 +101,41 @@ class _SnippetsFileParser(object):
 
         cdescr = ""
         coptions = ""
+        cs = ""
 
-        cs = line.split()[1]
-        left = line.find('"')
-        if left != -1:
-            right = line.rfind('"')
-            cdescr = line[left+1:right]
-            coptions = line[right:].strip()
+        snip = line.split()[0]
+        if snip != "snippet":
+            self._error("Expecting 'snippet' not: %s" % snip)
+
+        remain = line[len(snip):].lstrip()
+        words = remain.split()
+        if len(words) > 2:
+            # second to last word ends with a quote
+            if '"' not in words[-1] and words[-2][-1] == '"':
+                coptions = words[-1]
+                remain = remain[:-len(coptions) - 1].rstrip()
+
+        remain = remain.strip()
+        if len(remain.split()) > 1 and remain[-1] == '"':
+            left = remain[:-1].rfind('"')
+            if left != -1 and left != 0:
+                cdescr, remain = remain[left:], remain[:left]
+
+        cs = remain.strip()
+        if len(cs.split()) > 1 or "r" in coptions:
+            if cs[0] != cs[-1]:
+                self._error("Invalid multiword trigger: '%s'" % cs)
+                cs = ""
+            else:
+                cs = cs[1:-1]
 
         cv = ""
         while self._goto_next_line():
             line = self._line()
             if line.rstrip() == "endsnippet":
                 cv = cv[:-1] # Chop the last newline
-                self._sm.add_snippet(cs, cv, cdescr, coptions, self._ft)
+                if cs:
+                    self._sm.add_snippet(cs, cv, cdescr, coptions, self._ft)
                 break
             cv += line
         else:
@@ -153,11 +174,23 @@ class Snippet(object):
     def __repr__(self):
         return "Snippet(%s,%s,%s)" % (self._t,self._d,self._opts)
 
-    def _word_for_line(self, before):
-        word = ''
-        if len(before) and before.split():
-            word = before.split()[-1]
-        return word
+    def _words_for_line(self, before, num_words=None):
+        words = ''
+        if not len(before):
+            return ''
+
+        if num_words is None:
+            num_words = len(self._t.split())
+
+        word_list = before.split()
+        if len(word_list) <= num_words:
+            return before.strip()
+        else:
+            before_words = before
+            for i in xrange(-1, -(num_words + 1), -1):
+                left = before_words.rfind(word_list[i])
+                before_words = before_words[:left]
+            return before[len(before_words):].strip()
 
     def _re_match(self, trigger):
         match = re.search(self._t, trigger)
@@ -177,68 +210,70 @@ class Snippet(object):
         if trigger and trigger[-1] in string.whitespace:
             return False
 
-        word = self._word_for_line(trigger)
-
-        if "b" in self._opts:
-            text_before = trigger.rstrip()[:-len(word)]
-            if text_before.strip(" \t") != '':
-                return False
-
+        words = self._words_for_line(trigger)
 
         if "r" in self._opts:
             match = self._re_match(trigger)
         elif "w" in self._opts:
-            word_len = len(self._t)
-            word_prefix = word[:-word_len]
-            word_suffix = word[-word_len:]
-            match = (word_suffix == self._t)
-            if match and word_prefix:
+            words_len = len(self._t)
+            words_prefix = words[:-words_len]
+            words_suffix = words[-words_len:]
+            match = (words_suffix == self._t)
+            if match and words_prefix:
                 # Require a word boundary between prefix and suffix.
-                boundaryChars = word_prefix[-1:] + word_suffix[:1]
+                boundaryChars = words_prefix[-1:] + words_suffix[:1]
                 match = re.match(r'.\b.', boundaryChars)
         elif "i" in self._opts:
-            match = word.endswith(self._t)
+            match = words.endswith(self._t)
         else:
-            match = (word == self._t)
+            match = (words == self._t)
 
         if match and not self._matched:
             self._matched = self._t
 
+        if "b" in self._opts and match:
+            text_before = trigger.rstrip()[:-len(self._matched)]
+            if text_before.strip(" \t") != '':
+                self._matched = ""
+                return False
+
         return match
 
     def could_match(self, trigger):
-        word = self._word_for_line(trigger)
-
+        self._matched = ""
         if trigger and trigger[-1] in string.whitespace:
             return False
 
-        if "b" in self._opts:
-            text_before = trigger.rstrip()[:-len(word)]
-            if text_before.strip(" \t") != '':
-                return False
+        words = self._words_for_line(trigger)
 
         if "r" in self._opts:
             # Test for full match only
             match = self._re_match(trigger)
         elif "w" in self._opts:
             # Trim non-empty prefix up to word boundary, if present.
-            word_suffix = re.sub(r'^.+\b(.+)$', r'\1', word)
-            match = self._t.startswith(word_suffix)
-            self._matched = word_suffix
+            words_suffix = re.sub(r'^.+\b(.+)$', r'\1', words)
+            match = self._t.startswith(words_suffix)
+            self._matched = words_suffix
 
             # TODO: list_snippets() function cannot handle partial-trigger
             # matches yet, so for now fail if we trimmed the prefix.
-            if word_suffix != word:
+            if words_suffix != words:
                 match = False
         elif "i" in self._opts:
             # TODO: It is hard to define when a inword snippet could match,
             # therefore we check only for full-word trigger.
-            match = self._t.startswith(word)
+            match = self._t.startswith(words)
         else:
-            match = self._t.startswith(word)
+            match = self._t.startswith(words)
 
         if match and not self._matched:
-            self._matched = word
+            self._matched = words
+
+        if "b" in self._opts and match:
+            text_before = trigger.rstrip()[:-len(self._matched)]
+            if text_before.strip(" \t") != '':
+                self._matched = ""
+                return False
 
         return match
 

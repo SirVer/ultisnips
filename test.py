@@ -647,8 +647,6 @@ i0
 	i1
 	End"""
 
-# TODO
-# Different mixes of ts, et, sts, sw
 class PythonCode_IndentEtSw(_VimTest):
     def _options_on(self):
         self.send(":set sw=3\n")
@@ -1469,6 +1467,74 @@ class SnippetOptions_Regex_Self_TextBefore(_Regex_Self):
     keys = "a." + EX
     wanted = "a." + EX
 
+#######################
+# MULTI-WORD SNIPPETS #
+#######################
+
+class MultiWordSnippet_Simple(_VimTest):
+    snippets = ("test me", "Expand me!")
+    keys = "test me" + EX
+    wanted = "Expand me!"
+
+class MultiWord_SnippetOptions_OverwriteExisting_ECR(_VimTest):
+    snippets = (
+     ("test me", "${1:Hallo}", "Types Hallo"),
+     ("test me", "${1:World}", "Types World"),
+     ("test me", "We overwrite", "Overwrite the two", "!"),
+    )
+    keys = "test me" + EX
+    wanted = "We overwrite"
+class MultiWord_SnippetOptions_OnlyExpandWhenWSInFront_Expand(_VimTest):
+    snippets = ("test it", "Expand me!", "", "b")
+    keys = "test it" + EX
+    wanted = "Expand me!"
+class MultiWord_SnippetOptions_OnlyExpandWhenWSInFront_Expand2(_VimTest):
+    snippets = ("test it", "Expand me!", "", "b")
+    keys = "   test it" + EX
+    wanted = "   Expand me!"
+class MultiWord_SnippetOptions_OnlyExpandWhenWSInFront_DontExpand(_VimTest):
+    snippets = ("test it", "Expand me!", "", "b")
+    keys = "a test it" + EX
+    wanted = "a test it" + EX
+class MultiWord_SnippetOptions_OnlyExpandWhenWSInFront_OneWithOneWO(_VimTest):
+    snippets = (
+        ("test it", "Expand me!", "", "b"),
+        ("test it", "not at beginning", "", ""),
+    )
+    keys = "a test it" + EX
+    wanted = "a not at beginning"
+class MultiWord_SnippetOptions_OnlyExpandWhenWSInFront_OneWithOneWOChoose(_VimTest):
+    snippets = (
+        ("test it", "Expand me!", "", "b"),
+        ("test it", "not at beginning", "", ""),
+    )
+    keys = "  test it" + EX + "1\n"
+    wanted = "  Expand me!"
+
+
+class MultiWord_SnippetOptions_ExpandInwordSnippets_SimpleExpand(_VimTest):
+    snippets = (("test it", "Expand me!", "", "i"), )
+    keys = "atest it" + EX
+    wanted = "aExpand me!"
+class MultiWord_SnippetOptions_ExpandInwordSnippets_ExpandSingle(_VimTest):
+    snippets = (("test it", "Expand me!", "", "i"), )
+    keys = "test it" + EX
+    wanted = "Expand me!"
+
+class _MultiWord_SnippetOptions_ExpandWordSnippets(_VimTest):
+    snippets = (("test it", "Expand me!", "", "w"), )
+class MultiWord_SnippetOptions_ExpandWordSnippets_NormalExpand(
+        _MultiWord_SnippetOptions_ExpandWordSnippets):
+    keys = "test it" + EX
+    wanted = "Expand me!"
+class MultiWord_SnippetOptions_ExpandWordSnippets_NoExpand(
+    _MultiWord_SnippetOptions_ExpandWordSnippets):
+    keys = "atest it" + EX
+    wanted = "atest it" + EX
+class MultiWord_SnippetOptions_ExpandWordSnippets_ExpandSuffix(
+    _MultiWord_SnippetOptions_ExpandWordSnippets):
+    keys = "a-test it" + EX
+    wanted = "a-Expand me!"
 
 ######################
 # SELECTING MULTIPLE #
@@ -1632,6 +1698,88 @@ class ParseSnippets_ClearTwo(_VimTest):
         """)
     keys = "toclear" + EX + "\n" + "testsnip" + EX
     wanted = "toclear" + EX + "\n" + "testsnip" + EX
+
+
+class _ParseSnippets_MultiWord(_VimTest):
+    snippets_test_file = ("all", "test_file", r"""
+        snippet /test snip/
+        This is a test.
+        endsnippet
+
+        snippet !snip test! "Another snippet"
+        This is another test.
+        endsnippet
+
+        snippet "snippet test" "Another snippet" b
+        This is yet another test.
+        endsnippet
+        """)
+class ParseSnippets_MultiWord_Simple(_ParseSnippets_MultiWord):
+    keys = "test snip" + EX
+    wanted = "This is a test."
+class ParseSnippets_MultiWord_Description(_ParseSnippets_MultiWord):
+    keys = "snip test" + EX
+    wanted = "This is another test."
+class ParseSnippets_MultiWord_Description_Option(_ParseSnippets_MultiWord):
+    keys = "snippet test" + EX
+    wanted = "This is yet another test."
+
+class _ParseSnippets_MultiWord_RE(_VimTest):
+    snippets_test_file = ("all", "test_file", r"""
+        snippet /[d-f]+/ "" r
+        az test
+        endsnippet
+
+        snippet !^(foo|bar)$! "" r
+        foo-bar test
+        endsnippet
+
+        snippet "(test ?)+" "" r
+        re-test
+        endsnippet
+        """)
+class ParseSnippets_MultiWord_RE1(_ParseSnippets_MultiWord_RE):
+    keys = "abc def" + EX
+    wanted = "abc az test"
+class ParseSnippets_MultiWord_RE2(_ParseSnippets_MultiWord_RE):
+    keys = "foo" + EX + " bar" + EX + "\nbar" + EX
+    wanted = "foo-bar test bar\t\nfoo-bar test"
+class ParseSnippets_MultiWord_RE3(_ParseSnippets_MultiWord_RE):
+    keys = "test test test" + EX
+    wanted = "re-test"
+
+class ParseSnippets_MultiWord_Quotes(_VimTest):
+    snippets_test_file = ("all", "test_file", r"""
+        snippet "test snip"
+        This is a test.
+        endsnippet
+        """)
+    keys = "test snip" + EX
+    wanted = "This is a test."
+
+class ParseSnippets_MultiWord_NoContainer(_VimTest):
+    snippets_test_file = ("all", "test_file", r"""
+        snippet test snip
+        This is a test.
+        endsnippet
+        """)
+    keys = "test snip" + EX
+    wanted = keys
+    expected_error = dedent("""
+        UltiSnips: Invalid multiword trigger: 'test snip' in test_file(2)
+        """).strip()
+
+class ParseSnippets_MultiWord_UnmatchedContainer(_VimTest):
+    snippets_test_file = ("all", "test_file", r"""
+        snippet !inv snip/
+        This is a test.
+        endsnippet
+        """)
+    keys = "inv snip" + EX
+    wanted = keys
+    expected_error = dedent("""
+        UltiSnips: Invalid multiword trigger: '!inv snip/' in test_file(2)
+        """).strip()
 
 
 ###########################################################################
