@@ -1768,6 +1768,14 @@ class ParseSnippets_MultiWord_Quotes(_VimTest):
         """)
     keys = "test snip" + EX
     wanted = "This is a test."
+class ParseSnippets_MultiWord_WithQuotes(_VimTest):
+    snippets_test_file = ("all", "test_file", r"""
+        snippet !"test snip"!
+        This is a test.
+        endsnippet
+        """)
+    keys = '"test snip"' + EX
+    wanted = "This is a test."
 
 class ParseSnippets_MultiWord_NoContainer(_VimTest):
     snippets_test_file = ("all", "test_file", r"""
