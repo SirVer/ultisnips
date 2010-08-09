@@ -103,10 +103,12 @@ class _SnippetsFileParser(object):
         coptions = ""
         cs = ""
 
+        # Ensure this is a snippet
         snip = line.split()[0]
         if snip != "snippet":
             self._error("Expecting 'snippet' not: %s" % snip)
 
+        # Get and strip options if they exist
         remain = line[len(snip):].lstrip()
         words = remain.split()
         if len(words) > 2:
@@ -115,12 +117,14 @@ class _SnippetsFileParser(object):
                 coptions = words[-1]
                 remain = remain[:-len(coptions) - 1].rstrip()
 
+        # Get and strip description if it exists
         remain = remain.strip()
         if len(remain.split()) > 1 and remain[-1] == '"':
             left = remain[:-1].rfind('"')
             if left != -1 and left != 0:
                 cdescr, remain = remain[left:], remain[:left]
 
+        # The rest is the trigger
         cs = remain.strip()
         if len(cs.split()) > 1 or "r" in coptions:
             if cs[0] != cs[-1]:
@@ -176,6 +180,10 @@ class Snippet(object):
         return "Snippet(%s,%s,%s)" % (self._t,self._d,self._opts)
 
     def _words_for_line(self, before, num_words=None):
+        """ Gets the final num_words words from before.
+        If num_words is None, then use the number of words in
+        the trigger.
+        """
         words = ''
         if not len(before):
             return ''
@@ -194,6 +202,9 @@ class Snippet(object):
             return before[len(before_words):].strip()
 
     def _re_match(self, trigger):
+        """ Test if a the current regex trigger matches
+        `trigger`. If so, set _last_re and _matched.
+        """
         match = re.search(self._t, trigger)
         if match:
             if match.end() != len(trigger):
@@ -212,6 +223,8 @@ class Snippet(object):
         # (since matching at word boundary and within a word == matching at word
         # boundary).
         self._matched = ""
+
+        # Don't expand on whitespace
         if trigger and trigger[-1] in string.whitespace:
             return False
 
@@ -233,9 +246,11 @@ class Snippet(object):
         else:
             match = (words == self._t)
 
+        # By default, we match the whole trigger
         if match and not self._matched:
             self._matched = self._t
 
+        # Ensure the match was on a word boundry if needed
         if "b" in self._opts and match:
             text_before = trigger.rstrip()[:-len(self._matched)]
             if text_before.strip(" \t") != '':
@@ -246,6 +261,8 @@ class Snippet(object):
 
     def could_match(self, trigger):
         self._matched = ""
+
+        # Don't expand on whitespace
         if trigger and trigger[-1] in string.whitespace:
             return False
 
@@ -271,9 +288,11 @@ class Snippet(object):
         else:
             match = self._t.startswith(words)
 
+        # By default, we match the words from the trigger
         if match and not self._matched:
             self._matched = words
 
+        # Ensure the match was on a word boundry if needed
         if "b" in self._opts and match:
             text_before = trigger.rstrip()[:-len(self._matched)]
             if text_before.strip(" \t") != '':
@@ -295,6 +314,7 @@ class Snippet(object):
     trigger = property(trigger)
 
     def matched(self):
+        """ The last text that was matched. """
         return self._matched
     matched = property(matched)
 
@@ -457,7 +477,6 @@ class SnippetManager(object):
             self._handle_failure(self.expand_trigger)
 
     def list_snippets(self):
-
         before, after = self._get_before_after()
         snippets = self._snips(before, True)
 
@@ -679,6 +698,9 @@ class SnippetManager(object):
         return filetypes
 
     def _get_before_after(self):
+        """ Returns the text before and after the cursor as a
+        tuple.
+        """
         lineno,col = vim.current.window.cursor
 
         line = vim.current.line
@@ -689,6 +711,10 @@ class SnippetManager(object):
         return before, after
 
     def _snips(self, before, possible):
+        """ Returns all the snippets for the given text
+        before the cursor. If possible is True, then get all
+        possible matches.
+        """
         filetypes = self._ensure_snippets_loaded()
 
         found_snippets = []
@@ -705,6 +731,9 @@ class SnippetManager(object):
         return snippets
 
     def _ask_snippets(self, snippets):
+        """ Given a list of snippets, ask the user which one they
+        want to use, and return it.
+        """
         display = repr(
             [ "%i: %s" % (i+1,s.description) for i,s in
              enumerate(snippets)
@@ -725,6 +754,10 @@ class SnippetManager(object):
             raise
 
     def _do_snippet(self, snippet, before, after):
+        """ Expands the given snippet, and handles everything
+        that needs to be done with it. 'before' and 'after' should
+        come from _get_before_after.
+        """
         lineno,col = vim.current.window.cursor
         # Adjust before, maybe the trigger is not the complete word
         text_before = before[:-len(snippet.matched)]
