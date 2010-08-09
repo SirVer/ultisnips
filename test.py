@@ -1467,6 +1467,18 @@ class SnippetOptions_Regex_Self_TextBefore(_Regex_Self):
     keys = "a." + EX
     wanted = "a." + EX
 
+class SnippetOptions_Regex_PythonBlockMatch(_VimTest):
+    snippets = (r"([abc]+)([def]+)", r"""`!p m = snip.locals["match"]
+snip.rv += m.group(2)
+snip.rv += m.group(1)
+`""", "", "r")
+    keys = "test cabfed" + EX
+    wanted = "test fedcab"
+class SnippetOptions_Regex_PythonBlockNoMatch(_VimTest):
+    snippets = (r"cabfed", r"""`!p snip.rv =  snip.locals["match"] or "No match"`""")
+    keys = "test cabfed" + EX
+    wanted = "test No match"
+
 #######################
 # MULTI-WORD SNIPPETS #
 #######################

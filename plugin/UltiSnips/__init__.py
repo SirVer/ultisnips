@@ -170,6 +170,7 @@ class Snippet(object):
         self._d = descr
         self._opts = options
         self._matched = ""
+        self._last_re = None
 
     def __repr__(self):
         return "Snippet(%s,%s,%s)" % (self._t,self._d,self._opts)
@@ -199,6 +200,10 @@ class Snippet(object):
                 match = False
             else:
                 self._matched = trigger[match.start():match.end()]
+        if match:
+            self._last_re = match
+        else:
+            self._last_re = None
         return match
 
     def matches(self, trigger):
@@ -311,9 +316,11 @@ class Snippet(object):
             v = v.replace('\t', ts*" ")
 
         if parent is None:
-            return SnippetInstance(StartMarker(start), indent, v)
+            return SnippetInstance(StartMarker(start), indent,
+                    v, last_re = self._last_re)
         else:
-            return SnippetInstance(parent, indent, v, start, end)
+            return SnippetInstance(parent, indent, v, start,
+                    end, last_re = self._last_re)
 
 class VimState(object):
     def __init__(self):
