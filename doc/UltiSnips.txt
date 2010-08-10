@@ -167,6 +167,13 @@ The following lines are the snippets definition; a line starting with >
 marks the end of the snippet. The trailing newline is chopped from the
 definition. In the starting line, the description and options are optional.
 
+If you want to use a multi-word trigger, you can surround the trigger with any
+single character on each side. eg. >
+    snippet "tab trigger" [ "description" [ options ] ]
+or >
+    snippet !"tab trigger"! [ "description" [ options ] ]
+if you actually want to include the double-quote characters in the trigger.
+
 The description is only needed when more than one snippet is defined with the
 same tab trigger. The user is then given a choice and the description is
 displayed for the user as helper. 
@@ -191,6 +198,11 @@ snippet on. The options currently supported are >
        underscore character ('_').  This enables expansion of a trigger that
        adjoins punctuation (for example) without expanding suffixes of larger
        words.
+   r   Regular expression - This uses a python regular expression for the
+       match. The regular expression MUST be surrounded like a multi-word
+       trigger (see above) even if it doesn't have any spaces. The resulting
+       match is also passed to any python code blocks in your snippet
+       definition in the as "snips.local['match']".
 
 4.2 Plaintext snippets                         *UltiSnips-plaintext-snippets*
 ----------------------
@@ -612,7 +624,7 @@ Contributers are listed in chronological order:
    JCEB - Jan Christoph Ebersbach
    Michael Henry
    Chris Chambers
-    Ryan Wooden
+   Ryan Wooden
 
 8.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------
@@ -620,7 +632,7 @@ Contributers are listed in chronological order:
 Contributers are listed in chronological order:
 
    Alec Thomas (Python, smart def)
-    Ryan Wooden
+   Ryan Wooden
 
 
 

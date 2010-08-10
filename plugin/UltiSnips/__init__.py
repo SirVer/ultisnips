@@ -101,20 +101,45 @@ class _SnippetsFileParser(object):
 
         cdescr = ""
         coptions = ""
+        cs = ""
 
-        cs = line.split()[1]
-        left = line.find('"')
-        if left != -1:
-            right = line.rfind('"')
-            cdescr = line[left+1:right]
-            coptions = line[right:].strip()
+        # Ensure this is a snippet
+        snip = line.split()[0]
+        if snip != "snippet":
+            self._error("Expecting 'snippet' not: %s" % snip)
+
+        # Get and strip options if they exist
+        remain = line[len(snip):].lstrip()
+        words = remain.split()
+        if len(words) > 2:
+            # second to last word ends with a quote
+            if '"' not in words[-1] and words[-2][-1] == '"':
+                coptions = words[-1]
+                remain = remain[:-len(coptions) - 1].rstrip()
+
+        # Get and strip description if it exists
+        remain = remain.strip()
+        if len(remain.split()) > 1 and remain[-1] == '"':
+            left = remain[:-1].rfind('"')
+            if left != -1 and left != 0:
+                cdescr, remain = remain[left:], remain[:left]
+
+        # The rest is the trigger
+        cs = remain.strip()
+        if len(cs.split()) > 1 or "r" in coptions:
+            if cs[0] != cs[-1]:
+                self._error("Invalid multiword trigger: '%s'" % cs)
+                cs = ""
+            else:
+                cs = cs[1:-1]
 
         cv = ""
         while self._goto_next_line():
             line = self._line()
             if line.rstrip() == "endsnippet":
                 cv = cv[:-1] # Chop the last newline
-                self._sm.add_snippet(cs, cv, cdescr, coptions, self._ft)
+                if cs:
+                    self._sm.add_snippet(cs, cv, cdescr, coptions, self._ft)
                 break
             cv += line
         else:
@@ -148,55 +173,137 @@ class Snippet(object):
         self._v = value
         self._d = descr
         self._opts = options
+        self._matched = ""
+        self._last_re = None
 
     def __repr__(self):
         return "Snippet(%s,%s,%s)" % (self._t,self._d,self._opts)
+
+    def _words_for_line(self, before, num_words=None):
+        """ Gets the final num_words words from before.
+        If num_words is None, then use the number of words in
+        the trigger.
+        """
+        words = ''
+        if not len(before):
+            return ''
+
+        if num_words is None:
+            num_words = len(self._t.split())
+
+        word_list = before.split()
+        if len(word_list) <= num_words:
+            return before.strip()
+        else:
+            before_words = before
+            for i in xrange(-1, -(num_words + 1), -1):
+                left = before_words.rfind(word_list[i])
+                before_words = before_words[:left]
+            return before[len(before_words):].strip()
+
+    def _re_match(self, trigger):
+        """ Test if a the current regex trigger matches
+        `trigger`. If so, set _last_re and _matched.
+        """
+        match = re.search(self._t, trigger)
+        if match:
+            if match.end() != len(trigger):
+                match = False
+            else:
+                self._matched = trigger[match.start():match.end()]
+        if match:
+            self._last_re = match
+        else:
+            self._last_re = None
+        return match
 
     def matches(self, trigger):
         # If user supplies both "w" and "i", it should perhaps be an
         # error, but if permitted it seems that "w" should take precedence
         # (since matching at word boundary and within a word == matching at word
         # boundary).
-        if "w" in self._opts:
-            trigger_len = len(self._t)
-            trigger_prefix = trigger[:-trigger_len]
-            trigger_suffix = trigger[-trigger_len:]
-            match = (trigger_suffix == self._t)
-            if match and trigger_prefix:
+        self._matched = ""
+
+        # Don't expand on whitespace
+        if trigger and trigger[-1] in string.whitespace:
+            return False
+
+        words = self._words_for_line(trigger)
+
+        if "r" in self._opts:
+            match = self._re_match(trigger)
+        elif "w" in self._opts:
+            words_len = len(self._t)
+            words_prefix = words[:-words_len]
+            words_suffix = words[-words_len:]
+            match = (words_suffix == self._t)
+            if match and words_prefix:
                 # Require a word boundary between prefix and suffix.
-                boundaryChars = trigger_prefix[-1:] + trigger_suffix[:1]
+                boundaryChars = words_prefix[-1:] + words_suffix[:1]
                 match = re.match(r'.\b.', boundaryChars)
         elif "i" in self._opts:
-            match = trigger.endswith(self._t)
+            match = words.endswith(self._t)
         else:
-            match = (trigger == self._t)
+            match = (words == self._t)
+
+        # By default, we match the whole trigger
+        if match and not self._matched:
+            self._matched = self._t
+
+        # Ensure the match was on a word boundry if needed
+        if "b" in self._opts and match:
+            text_before = trigger.rstrip()[:-len(self._matched)]
+            if text_before.strip(" \t") != '':
+                self._matched = ""
+                return False
+
         return match
 
     def could_match(self, trigger):
-        if "w" in self._opts:
+        self._matched = ""
+
+        # Don't expand on whitespace
+        if trigger and trigger[-1] in string.whitespace:
+            return False
+
+        words = self._words_for_line(trigger)
+
+        if "r" in self._opts:
+            # Test for full match only
+            match = self._re_match(trigger)
+        elif "w" in self._opts:
             # Trim non-empty prefix up to word boundary, if present.
-            trigger_suffix = re.sub(r'^.+\b(.+)$', r'\1', trigger)
-            match = self._t.startswith(trigger_suffix)
+            words_suffix = re.sub(r'^.+\b(.+)$', r'\1', words)
+            match = self._t.startswith(words_suffix)
+            self._matched = words_suffix
 
             # TODO: list_snippets() function cannot handle partial-trigger
             # matches yet, so for now fail if we trimmed the prefix.
-            if trigger_suffix != trigger:
+            if words_suffix != words:
                 match = False
         elif "i" in self._opts:
             # TODO: It is hard to define when a inword snippet could match,
             # therefore we check only for full-word trigger.
-            match = self._t.startswith(trigger)
+            match = self._t.startswith(words)
         else:
-            match = self._t.startswith(trigger)
+            match = self._t.startswith(words)
+
+        # By default, we match the words from the trigger
+        if match and not self._matched:
+            self._matched = words
+
+        # Ensure the match was on a word boundry if needed
+        if "b" in self._opts and match:
+            text_before = trigger.rstrip()[:-len(self._matched)]
+            if text_before.strip(" \t") != '':
+                self._matched = ""
+                return False
+
         return match
 
     def overwrites_previous(self):
         return "!" in self._opts
     overwrites_previous = property(overwrites_previous)
-
-    def needs_ws_in_front(self):
-        return "b" in self._opts
-    needs_ws_in_front = property(needs_ws_in_front)
 
     def description(self):
         return ("(%s) %s" % (self._t, self._d)).strip()
@@ -205,6 +312,11 @@ class Snippet(object):
     def trigger(self):
         return self._t
     trigger = property(trigger)
+
+    def matched(self):
+        """ The last text that was matched. """
+        return self._matched
+    matched = property(matched)
 
     def launch(self, text_before, parent, start, end = None):
         indent = self._INDENT.match(text_before).group(0)
@@ -224,9 +336,11 @@ class Snippet(object):
             v = v.replace('\t', ts*" ")
 
         if parent is None:
-            return SnippetInstance(StartMarker(start), indent, v)
+            return SnippetInstance(StartMarker(start), indent,
+                    v, last_re = self._last_re)
         else:
-            return SnippetInstance(parent, indent, v, start, end)
+            return SnippetInstance(parent, indent, v, start,
+                    end, last_re = self._last_re)
 
 class VimState(object):
     def __init__(self):
@@ -363,77 +477,17 @@ class SnippetManager(object):
             self._handle_failure(self.expand_trigger)
 
     def list_snippets(self):
-        filetypes = self._ensure_snippets_loaded()
+        before, after = self._get_before_after()
+        snippets = self._snips(before, True)
 
-        # TODO: this code is duplicated below
-        filetypes = vim.eval("&filetype").split(".") + [ "all" ]
-        lineno,col = vim.current.window.cursor
-
-        line = vim.current.line
-        before,after = line[:col], line[col:]
-
-        word = ''
-        if len(before):
-            word = before.split()[-1]
-
-        found_snippets = []
-        for ft in filetypes[::-1]:
-            found_snippets += self._find_snippets(ft, word, True)
-
-        if len(found_snippets) == 0:
+        if not snippets:
             return True
 
-        display = [ "%i %s" % (idx+1,s.description)
-                   for idx,s in enumerate(found_snippets) ]
+        snippet = self._ask_snippets(snippets)
+        if not snippet:
+            return True
 
-        # TODO: this code is also mirrored below
-        try:
-            rv = vim.eval("inputlist(%s)" % display)
-            if rv is None or rv == '0':
-                return True
-            rv = int(rv)
-            if rv > len(found_snippets):
-                rv = len(found_snippets)
-            snippet = found_snippets[rv-1]
-        except: # vim.error, e:
-            if str(e) == 'invalid expression':
-                return True
-            raise
-
-        # TODO: even more code duplicated below
-        # Adjust before, maybe the trigger is not the complete word
-        text_before = before.rstrip()[:-len(word)]
-        text_before += word[:-len(snippet.trigger)]
-
-        self._expect_move_wo_change = True
-        if self._cs:
-            # Determine position
-            pos = self._vstate.pos
-            p_start = self._ctab.abs_start
-
-            if pos.line == p_start.line:
-                end = Position(0, pos.col - p_start.col)
-            else:
-                end = Position(pos.line - p_start.line, pos.col)
-            start = Position(end.line, end.col - len(snippet.trigger))
-
-            si = snippet.launch(text_before, self._ctab, start, end)
-
-            self._update_vim_buffer()
-
-            if si.has_tabs:
-                self._csnippets.append(si)
-                self._jump()
-        else:
-            self._vb = VimBuffer(text_before, after)
-
-            start = Position(lineno-1, len(text_before))
-            self._csnippets.append(snippet.launch(text_before, None, start))
-
-            self._vb.replace_lines(lineno-1, lineno-1,
-                       self._cs._current_text)
-
-            self._jump()
+        self._do_snippet(snippet, before, after)
 
         return True
 
@@ -643,27 +697,29 @@ class SnippetManager(object):
 
         return filetypes
 
-    def _try_expand(self):
-        filetypes = self._ensure_snippets_loaded()
-
-        self._expect_move_wo_change = False
-
+    def _get_before_after(self):
+        """ Returns the text before and after the cursor as a
+        tuple.
+        """
         lineno,col = vim.current.window.cursor
-        if col == 0:
-            return False
 
         line = vim.current.line
 
-        if col > 0 and line[col-1] in string.whitespace:
-            return False
-
         # Get the word to the left of the current edit position
-        before,after = line[:col], line[col:]
+        before, after = line[:col], line[col:]
 
-        word = before.split()[-1]
+        return before, after
+
+    def _snips(self, before, possible):
+        """ Returns all the snippets for the given text
+        before the cursor. If possible is True, then get all
+        possible matches.
+        """
+        filetypes = self._ensure_snippets_loaded()
+
         found_snippets = []
         for ft in filetypes[::-1]:
-            found_snippets += self._find_snippets(ft, word)
+            found_snippets += self._find_snippets(ft, before, possible)
 
         # Search if any of the snippets overwrites the previous
         snippets = []
@@ -672,38 +728,39 @@ class SnippetManager(object):
                 snippets = []
             snippets.append(s)
 
-        # Check if there are any only whitespace in front snippets
-        text_before = before.rstrip()[:-len(word)]
-        if text_before.strip(" \t") != '':
-            snippets = [ s for s in snippets if not s.needs_ws_in_front ]
+        return snippets
 
-        if not len(snippets):
-            # No snippet found
-            return False
-        elif len(snippets) == 1:
-            snippet, = snippets
-        else:
-            display = repr(
-                [ "%i: %s" % (i+1,s.description) for i,s in
-                 enumerate(snippets)
-                ]
-            )
+    def _ask_snippets(self, snippets):
+        """ Given a list of snippets, ask the user which one they
+        want to use, and return it.
+        """
+        display = repr(
+            [ "%i: %s" % (i+1,s.description) for i,s in
+             enumerate(snippets)
+            ]
+        )
 
-            try:
-                rv = vim.eval("inputlist(%s)" % display)
-                if rv is None or rv == '0':
-                    return True
-                rv = int(rv)
-                if rv > len(snippets):
-                    rv = len(snippets)
-                snippet = snippets[rv-1]
-            except vim.error, e:
-                if str(e) == 'invalid expression':
-                    return True
-                raise
+        try:
+            rv = vim.eval("inputlist(%s)" % display)
+            if rv is None or rv == '0':
+                return None
+            rv = int(rv)
+            if rv > len(snippets):
+                rv = len(snippets)
+            return snippets[rv-1]
+        except vim.error, e:
+            if str(e) == 'invalid expression':
+                return None
+            raise
 
+    def _do_snippet(self, snippet, before, after):
+        """ Expands the given snippet, and handles everything
+        that needs to be done with it. 'before' and 'after' should
+        come from _get_before_after.
+        """
+        lineno,col = vim.current.window.cursor
         # Adjust before, maybe the trigger is not the complete word
-        text_before += word[:-len(snippet.trigger)]
+        text_before = before[:-len(snippet.matched)]
 
         self._expect_move_wo_change = True
         if self._cs:
@@ -715,7 +772,7 @@ class SnippetManager(object):
                 end = Position(0, pos.col - p_start.col)
             else:
                 end = Position(pos.line - p_start.line, pos.col)
-            start = Position(end.line, end.col - len(snippet.trigger))
+            start = Position(end.line, end.col - len(snippet.matched))
 
             si = snippet.launch(text_before, self._ctab, start, end)
 
@@ -734,6 +791,26 @@ class SnippetManager(object):
                        self._cs._current_text)
 
             self._jump()
+
+    def _try_expand(self):
+        self._expect_move_wo_change = False
+
+        before, after = self._get_before_after()
+        if not before:
+            return False
+        snippets = self._snips(before, False)
+
+        if not snippets:
+            # No snippet found
+            return False
+        elif len(snippets) == 1:
+            snippet = snippets[0]
+        else:
+            snippet = self._ask_snippets(snippets)
+            if not snippet:
+                return True
+
+        self._do_snippet(snippet, before, after)
 
         return True
 

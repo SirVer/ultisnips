@@ -945,13 +945,13 @@ class SnippetInstance(TextObject):
     """
 
     # TODO: for beauty sake, start and end should come before initial text
-    def __init__(self, parent, indent, initial_text, start = None, end = None):
+    def __init__(self, parent, indent, initial_text, start = None, end = None, last_re = None):
         if start is None:
             start = Position(0,0)
         if end is None:
             end = Position(0,0)
 
-        self.locals = {}
+        self.locals = {"match" : last_re}
 
         TextObject.__init__(self, parent, start, end, initial_text)
 

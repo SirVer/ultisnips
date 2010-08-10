@@ -62,6 +62,7 @@ endsnippet
 snippet def "smart def" b
 def ${1:function}(${2:self}):
     """ ${3:TODO: Docstring for $1}`!p
+snip.rv = "" # Force update
 snip >> 1
 
 args = [arg.split('=')[0].strip() for arg in t[2].split(',') if arg]
@@ -80,6 +81,7 @@ for arg in args:
 `${4:
 
     `!p
+snip.rv = "" # Force update
 style = snip.locals["style"]
 if style == "doxygen":
     snip.rv = "@return"
@@ -91,7 +93,8 @@ else:
 endsnippet
 
 
-snippet . "self." i
+# doesn't expand when there is a word in front
+snippet /(^|(?<=\W))\./ "self." r
 self.
 endsnippet
 
