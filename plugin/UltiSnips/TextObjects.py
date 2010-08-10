@@ -749,7 +749,7 @@ class SnippetUtil(object):
         Note that this uses the shiftwidth because thats what code
         formatters use.
 
-    	:amount: the amount by which to unshift.
+        :amount: the amount by which to unshift.
         """
         by = -self._sw * amount
         try:
@@ -776,8 +776,8 @@ class SnippetUtil(object):
     def mkline(self, line="", indent=None):
         """ Creates a properly set up line.
 
-    	:line: the text to add
-    	:indent: the indentation to have at the beginning
+        :line: the text to add
+        :indent: the indentation to have at the beginning
                  if None, it uses the default amount
         """
         if indent == None:
