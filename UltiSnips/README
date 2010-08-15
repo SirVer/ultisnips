@@ -4,16 +4,13 @@ Standing On The Shoulders of Giants
 ===================================
 
 The snippets have been collected from various other project which I want to
-express my gratitude for. Not all files have been reviewed for 100%
-compatibility with UltiSnips, but bugs will be fixed over time. 
+express my gratitude for. My main source for inspiration where the following
+two projects:
 
-The prefixes for the file show their origin:
+   TextMate: http://svn.textmate.org/trunk/Bundles/
+   SnipMate: http://code.google.com/p/snipmate/
 
-   tm - TextMate: http://svn.textmate.org/trunk/Bundles/
-   sm - SnipMate: http://code.google.com/p/snipmate/
-
-All files without a prefix are either original or cleaned up versions; that is
-the snippets inside them are 
+All snippets from those sources were copied and cleaned up, so that they are 
   - not using shell script, only python (so they are cross platform compatible)
-  - not using any feature that UltiSnips doesn't offer; so no text artifacts should appear    while using those
+  - not using any feature that UltiSnips doesn't offer
 
