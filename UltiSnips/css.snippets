@@ -1,3 +1,7 @@
+###########################################################################
+#                    Most of these came from TextMate                     #
+###########################################################################
+
 snippet ! "!important CSS (!)"
 ${1:!important}
 endsnippet
@@ -172,11 +176,6 @@ snippet display "display: table-types (display)"
 display: ${1:table/inline-table/table-row-group/table-header-group/table-footer-group/table-row/table-column-group/table-column/table-cell/table-caption};$0
 endsnippet
 
-snippet background "filter: AlphaImageLoader [for IE PNGs] (background)"
-${3:background-image: none;
-}filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='${1:${TM_SELECTED_TEXT:/images/transparent.png}}', sizingMethod='${2:image/scale/crop}');
-endsnippet
-
 snippet float "float: left:right:none (float)"
 float: ${1:left/right/none};$0
 endsnippet
@@ -283,12 +282,6 @@ endsnippet
 
 snippet marker "marker-offset: length (marker)"
 marker-offset: ${1:10px};$0
-endsnippet
-
-snippet opacity "opacity: [for Safari, FF and IE] (opacity)"
-opacity: ${1:0.5};${100:
-}-moz-opacity: ${1:0.5};${100:
-}filter:alpha(opacity=${2:${1/(1?)0?\.(.*)/$1$2/}${1/^\d*\.\d\d+$|^\d*$|(^\d\.\d$)/(?1:0)/}});$0
 endsnippet
 
 snippet overflow "overflow: type (overflow)"
