@@ -20,7 +20,7 @@
 #
 # Now, from another terminal, launch the testsuite:
 #    $ ./test.py
-# 
+#
 # The testsuite will use ``screen`` to inject commands into the Vim under test,
 # and will compare the resulting output to expected results.
 
@@ -106,7 +106,7 @@ class _VimTest(unittest.TestCase):
         # Clear the buffer
         self.send("bggVGd")
 
-        if not isinstance(self.snippets[0],tuple):
+        if len(self.snippets) and not isinstance(self.snippets[0],tuple):
             self.snippets = ( self.snippets, )
 
         for s in self.snippets:
@@ -1625,6 +1625,10 @@ class ListAllAvailable_testtyped_ExceptCorrectResult(_ListAllSnippets):
 class ListAllAvailable_testtypedSecondOpt_ExceptCorrectResult(_ListAllSnippets):
     keys = "hallo test" + LS + "2\n"
     wanted = "hallo TEST ONE"
+
+class ListAllAvailable_NonDefined_NoExceptionShouldBeRaised(_ListAllSnippets):
+    keys = "hallo qualle" + LS + "Hi"
+    wanted = "hallo qualleHi"
 
 #########################
 # SNIPPETS FILE PARSING #
