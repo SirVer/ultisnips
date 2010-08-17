@@ -63,6 +63,7 @@ class _SnippetsFileParser(object):
         self._sm = snip_manager
         self._ft = ft
         self._fn = fn
+        self._globals = {}
         if file_data is None:
             self._lines = open(fn).readlines()
         else:
@@ -96,17 +97,17 @@ class _SnippetsFileParser(object):
         self._idx += 1
         return self._line()
 
-    def _parse_snippet(self):
-        line = self._line()
-
+    def _parse_first(self, line):
+        """ Parses the first line of the snippet definition. Returns the
+        snippet type, trigger, description, and options in a tuple in that
+        order.
+        """
         cdescr = ""
         coptions = ""
         cs = ""
 
         # Ensure this is a snippet
         snip = line.split()[0]
-        if snip != "snippet":
-            self._error("Expecting 'snippet' not: %s" % snip)
 
         # Get and strip options if they exist
         remain = line[len(snip):].lstrip()
@@ -133,17 +134,37 @@ class _SnippetsFileParser(object):
             else:
                 cs = cs[1:-1]
 
+        return (snip, cs, cdescr, coptions)
+    
+    def _parse_snippet(self):
+        line = self._line()
+
+        (snip, trig, desc, opts) = self._parse_first(line)
+        end = "end" + snip
         cv = ""
+
         while self._goto_next_line():
             line = self._line()
-            if line.rstrip() == "endsnippet":
+            if line.rstrip() == end:
                 cv = cv[:-1] # Chop the last newline
-                if cs:
-                    self._sm.add_snippet(cs, cv, cdescr, coptions, self._ft)
                 break
             cv += line
         else:
-            self._error("Missing 'endsnippet' for %r" % cs)
+            self._error("Missing 'endsnippet' for %r" % trig)
+            return None
+
+        if not trig:
+            # there was an error
+            return None
+        elif snip == "global":
+            # add snippet contents to file globals
+            if trig not in self._globals:
+                self._globals[trig] = []
+            self._globals[trig].append(cv)
+        elif snip == "snippet":
+            self._sm.add_snippet(trig, cv, desc, opts, self._ft, self._globals)
+        else:
+            self._error("Invalid snippet type: '%s'" % snip)
 
     def parse(self):
         while self._line():
@@ -154,7 +175,7 @@ class _SnippetsFileParser(object):
                         [ p.strip() for p in tail.split(',') ])
                 else:
                     self._error("'extends' without file types")
-            elif head == "snippet":
+            elif head in ("snippet", "global"):
                 self._parse_snippet()
             elif head == "clearsnippets":
                 self._sm.clear_snippets(tail.split(), self._ft)
@@ -168,13 +189,14 @@ class _SnippetsFileParser(object):
 class Snippet(object):
     _INDENT = re.compile(r"^[ \t]*")
 
-    def __init__(self, trigger, value, descr, options):
+    def __init__(self, trigger, value, descr, options, globals):
         self._t = trigger
         self._v = value
         self._d = descr
         self._opts = options
         self._matched = ""
         self._last_re = None
+        self._globals = globals
 
     def __repr__(self):
         return "Snippet(%s,%s,%s)" % (self._t,self._d,self._opts)
@@ -337,10 +359,10 @@ class Snippet(object):
 
         if parent is None:
             return SnippetInstance(StartMarker(start), indent,
-                    v, last_re = self._last_re)
+                    v, last_re = self._last_re, globals = self._globals)
         else:
             return SnippetInstance(parent, indent, v, start,
-                    end, last_re = self._last_re)
+                    end, last_re = self._last_re, globals = self._globals)
 
 class VimState(object):
     def __init__(self):
@@ -504,11 +526,11 @@ class SnippetManager(object):
         if not rv:
             self._handle_failure(self.expand_trigger)
 
-    def add_snippet(self, trigger, value, descr, options, ft = "all"):
+    def add_snippet(self, trigger, value, descr, options, ft = "all", globals = None):
         if ft not in self._snippets:
             self._snippets[ft] = _SnippetDictionary()
         l = self._snippets[ft].add_snippet(
-            Snippet(trigger, value, descr, options)
+            Snippet(trigger, value, descr, options, globals or {})
         )
 
     def clear_snippets(self, triggers = [], ft = "all"):

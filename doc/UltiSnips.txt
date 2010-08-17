@@ -15,6 +15,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       4.3.1 Shellcode                           |UltiSnips-shellcode|
       4.3.2 VimScript                           |UltiSnips-vimscript|
       4.3.3 Python                              |UltiSnips-python|
+      4.3.4 Global Snippets                     |UltiSnips-globals|
    4.4 Tab Stops and Placeholders               |UltiSnips-tabstops|
    4.6 Mirrors                                  |UltiSnips-mirrors|
    4.7 Transformations                          |UltiSnips-transformations|
@@ -202,7 +203,7 @@ snippet on. The options currently supported are >
        match. The regular expression MUST be surrounded like a multi-word
        trigger (see above) even if it doesn't have any spaces. The resulting
        match is also passed to any python code blocks in your snippet
-       definition in the as "snips.local['match']".
+       definition as the local variable "match".
 
 4.2 Plaintext snippets                         *UltiSnips-plaintext-snippets*
 ----------------------
@@ -281,7 +282,7 @@ which can be used: >
    fn   - The current filename
    path - The complete path to the current file
    t    - The values of the placeholders, t[1] -> current text of ${1} and so on
-   snip - Provides easy indentation handling, and snippet-local variables.
+   snip - Provides easy indentation handling.
 
 The snip object provides the following methods: >
 
@@ -306,10 +307,6 @@ The snip object provides the following methods: >
         otherwise it returns "default".
 
 The snip object provides some properties as well: >
-
-    snip.locals:
-        Is a dictionary which is available to any python block inside the
-        snippet.
 
     snip.rv:
         the text that will fill this python block's position, it always starts
@@ -339,6 +336,7 @@ easier: >
     snip += line:
         is equivalent to "snip.rv += '\n' + snip.mkline(line)"
 
+Any variables set in a python block can be used in any following blocks.
 Also, the vim, re, os, string and random modules are already imported inside
 the snippet code. This allows for very flexible snippets. For example, the
 following snippet mirrors the first Tab Stops value on the same line in
@@ -351,6 +349,29 @@ endsnippet
 ------------------- SNAP -------------------
 wow<tab>Hello World ->
 Hello World                                                     HELLO WORLD 
+
+ 4.3.4 Global Snippets:                                   *UltiSnips-globals*
+
+Global snippets provide a way to take common code out of snippets. Currently,
+only python code is supported. The result of executing the contents of the
+snippet is put into the globals of each python block in the snippet file. To
+create a global snippet, you use the keyword "global" in place of "snippet",
+and for python code, you use "!p" for the trigger, for example, the following
+is identical to the previous example, except that "upper_right" can be reused:
+
+------------------- SNIP -------------------
+global !p
+def upper_right(inp):
+    return (75 - 2 * len(inp))*' ' + inp.upper()
+endglobal
+
+snippet wow
+${1:Text}`!p snip.rv = upper_right(t[1])` 
+endsnippet
+------------------- SNAP -------------------
+wow<tab>Hello World ->
+Hello World                                                     HELLO WORLD 
+
 
 4.4 Tab Stops and Placeholders  *UltiSnips-tabstops* *UltiSnips-placeholders*
 ------------------------------

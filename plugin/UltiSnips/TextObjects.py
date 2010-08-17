@@ -705,17 +705,10 @@ class _Tabs(object):
         return ts.current_text
 
 class SnippetUtil(object):
-    """ Provides easy access to indentation, and
-    snippet-local variables, which can be accessed by
-    any PythonCode object in the snippet.
+    """ Provides easy access to indentation, etc.
     """
 
-    def __init__(self, initial_indent, cur="", snippet=None):
-        if snippet:
-            self._locals = snippet.locals
-        else:
-            self._locals = {}
-
+    def __init__(self, initial_indent, cur=""):
         self._sw = int(vim.eval("&sw"))
         self._sts = int(vim.eval("&sts"))
         self._et = (vim.eval("&expandtab") == "1")
@@ -842,11 +835,6 @@ class SnippetUtil(object):
         """
         return self._c
 
-    @property
-    def locals(self):
-        """ Provides snippet local variables. """
-        return self._locals
-
     def opt(self, option, default=None):
         """ Gets a vim variable. """
         if vim.eval("exists('%s')" % option) == "1":
@@ -884,7 +872,12 @@ class PythonCode(TextObject):
                 snippet = snippet._parent
             except AttributeError:
                 snippet = None
-        self._snip = SnippetUtil(indent, snippet=snippet)
+        self._snip = SnippetUtil(indent)
+        self._locals = snippet.locals
+
+        self._globals = {}
+        globals = snippet.globals.get("!p", [])
+        exec "\n".join(globals) in self._globals
 
         # Add Some convenience to the code
         self._code = "import re, os, vim, string, random\n" + code
@@ -900,21 +893,23 @@ class PythonCode(TextObject):
 
         ct = self.current_text
         self._snip._reset(ct)
-        d = {
+        local_d = self._locals
+
+        local_d.update({
             't': _Tabs(self),
             'fn': fn,
             'path': path,
             'cur': ct,
             'res': ct,
             'snip' : self._snip,
-        }
+        })
 
-        exec self._code in d
+        exec self._code in self._globals, local_d
 
         if self._snip._rv_changed:
             self.current_text = self._snip.rv
         else:
-            self.current_text = str(d["res"])
+            self.current_text = str(local_d["res"])
 
     def __repr__(self):
         return "PythonCode(%s -> %s)" % (self._start, self._end)
@@ -945,13 +940,14 @@ class SnippetInstance(TextObject):
     """
 
     # TODO: for beauty sake, start and end should come before initial text
-    def __init__(self, parent, indent, initial_text, start = None, end = None, last_re = None):
+    def __init__(self, parent, indent, initial_text, start = None, end = None, last_re = None, globals = None):
         if start is None:
             start = Position(0,0)
         if end is None:
             end = Position(0,0)
 
         self.locals = {"match" : last_re}
+        self.globals = globals
 
         TextObject.__init__(self, parent, start, end, initial_text)
 
