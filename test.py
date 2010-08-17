@@ -739,8 +739,8 @@ class PythonCode_OptNoExists(_VimTest):
 
 # locals
 class PythonCode_Locals(_VimTest):
-    snippets = ("test", r"""hi `!p snip.locals["a"] = "test"
-snip.rv = "nothing"` `!p snip.rv = snip.locals["a"]
+    snippets = ("test", r"""hi `!p a = "test"
+snip.rv = "nothing"` `!p snip.rv = a
 ` End""")
     keys = """test""" + EX
     wanted = """hi nothing test End"""
@@ -1468,14 +1468,14 @@ class SnippetOptions_Regex_Self_TextBefore(_Regex_Self):
     wanted = "a." + EX
 
 class SnippetOptions_Regex_PythonBlockMatch(_VimTest):
-    snippets = (r"([abc]+)([def]+)", r"""`!p m = snip.locals["match"]
+    snippets = (r"([abc]+)([def]+)", r"""`!p m = match
 snip.rv += m.group(2)
 snip.rv += m.group(1)
 `""", "", "r")
     keys = "test cabfed" + EX
     wanted = "test fedcab"
 class SnippetOptions_Regex_PythonBlockNoMatch(_VimTest):
-    snippets = (r"cabfed", r"""`!p snip.rv =  snip.locals["match"] or "No match"`""")
+    snippets = (r"cabfed", r"""`!p snip.rv =  match or "No match"`""")
     keys = "test cabfed" + EX
     wanted = "test No match"
 
@@ -1804,6 +1804,39 @@ class ParseSnippets_MultiWord_UnmatchedContainer(_VimTest):
     expected_error = dedent("""
         UltiSnips: Invalid multiword trigger: '!inv snip/' in test_file(2)
         """).strip()
+
+class ParseSnippets_Global_Python(_VimTest):
+    snippets_test_file = ("all", "test_file", r"""
+        global !p
+        def tex(ins):
+            return "a " + ins + " b"
+        endsnippet
+
+        snippet ab
+        x `!p snip.rv = tex("bob")` y
+        endsnippet
+
+        snippet ac
+        x `!p snip.rv = tex("jon")` y
+        endsnippet
+        """)
+    keys = "ab" + EX + "\nac" + EX
+    wanted = "x a bob b y\nx a jon b y"
+
+class ParseSnippets_Global_Local_Python(_VimTest):
+    snippets_test_file = ("all", "test_file", r"""
+global !p
+def tex(ins):
+    return "a " + ins + " b"
+endsnippet
+
+snippet ab
+x `!p first = tex("bob")
+snip.rv = "first"` `!p snip.rv = first` y
+endsnippet
+        """)
+    keys = "ab" + EX
+    wanted = "x first a bob b y"
 
 
 ###########################################################################
