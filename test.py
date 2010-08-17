@@ -87,6 +87,8 @@ class _VimTest(unittest.TestCase):
             wanted = wanted + "\n" + self.expected_error
         for i in range(4):
             if self.output != wanted:
+                # Redo this, but slower
+                self.sleeptime += 0.02
                 self.setUp()
         self.assertEqual(self.output, wanted)
 
