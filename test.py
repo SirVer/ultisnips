@@ -1810,7 +1810,7 @@ class ParseSnippets_Global_Python(_VimTest):
         global !p
         def tex(ins):
             return "a " + ins + " b"
-        endsnippet
+        endglobal
 
         snippet ab
         x `!p snip.rv = tex("bob")` y
@@ -1828,7 +1828,7 @@ class ParseSnippets_Global_Local_Python(_VimTest):
 global !p
 def tex(ins):
     return "a " + ins + " b"
-endsnippet
+endglobal
 
 snippet ab
 x `!p first = tex("bob")

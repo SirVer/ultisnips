@@ -140,23 +140,24 @@ class _SnippetsFileParser(object):
         line = self._line()
 
         (snip, trig, desc, opts) = self._parse_first(line)
-
-        if not trig:
-            self._error("Missing trigger for snippet")
-            return None
-
+        end = "end" + snip
         cv = ""
+
         while self._goto_next_line():
             line = self._line()
-            if line.rstrip() == "endsnippet":
+            if line.rstrip() == end:
                 cv = cv[:-1] # Chop the last newline
                 break
             cv += line
         else:
             self._error("Missing 'endsnippet' for %r" % trig)
+            return None
 
-
-        if snip == "global":
+        if not trig:
+            # there was an error
+            return None
+        elif snip == "global":
+            # add snippet contents to file globals
             if trig not in self._globals:
                 self._globals[trig] = []
             self._globals[trig].append(cv)
@@ -529,7 +530,7 @@ class SnippetManager(object):
         if ft not in self._snippets:
             self._snippets[ft] = _SnippetDictionary()
         l = self._snippets[ft].add_snippet(
-            Snippet(trigger, value, descr, options, globals or [])
+            Snippet(trigger, value, descr, options, globals or {})
         )
 
     def clear_snippets(self, triggers = [], ft = "all"):
