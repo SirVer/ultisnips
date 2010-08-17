@@ -23,26 +23,33 @@ endsnippet
 # "g:ultisnips_python_style" which, if set to "doxygen" will use doxygen
 # style comments in docstrings.
 
+global !p
+def get_args(arglist, snip):
+    args = [arg.split('=')[0].strip() for arg in arglist.split(',') if arg]
+    args = [arg for arg in args if arg and arg != "self"]
+
+    if args:
+        snip += ""
+
+    for arg in args:
+        style = snip.opt("g:ultisnips_python_style", "normal")
+        if style == "doxygen":
+            snip += "@param %s TODO" % arg
+        else:
+            snip += ":%s: TODO" % arg
+    return args
+endglobal
+
 snippet class "smart class" b
 class ${1:MyClass}(${2:object}):
 	""" ${3:Docstring for $1 }"""
 
 	def __init__(self$4):
 		""" ${5:TODO: Fill me in}`!p
+snip.rv = ""
 snip >> 2
 
-args = [arg.split('=')[0].strip() for arg in t[4].split(',') if arg]
-args = [arg for arg in args if arg and arg != "self"]
-
-if args:
-    snip += ""
-
-for arg in args:
-    style = snip.opt("g:ultisnips_python_style", "normal")
-    if style == "doxygen":
-        snip += "@param %s TODO" % arg
-    else:
-        snip += ":%s: TODO" % arg
+args = get_args(t[4], snip)
 
 if args:
     snip += '"""'
@@ -65,24 +72,14 @@ def ${1:function}(${2:self}):
 snip.rv = "" # Force update
 snip >> 1
 
-args = [arg.split('=')[0].strip() for arg in t[2].split(',') if arg]
-args = [arg for arg in args if arg and arg != "self"]
-
-if args:
-    snip += ""
-
-snip.locals["style"] = style = snip.opt("g:ultisnips_python_style", "normal")
-for arg in args:
-    if style == "doxygen":
-        snip += "@param %s TODO" % arg
-    else:
-        snip += ":%s: TODO" % arg
+args = get_args(t[2], snip)
 
 `${4:
 
     `!p
 snip.rv = "" # Force update
-style = snip.locals["style"]
+style = snip.opt("g:ultisnips_python_style", "normal")
+
 if style == "doxygen":
     snip.rv = "@return"
 else:

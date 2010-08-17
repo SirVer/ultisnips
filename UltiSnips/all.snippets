@@ -4,41 +4,40 @@
 ##############
 # NICE BOXES #
 ##############
+global !p
+def cs(snip):
+    c = '#'
+    cs = snip.opt("&commentstring")
+    if len(cs) == 3:
+        c = cs[0]
+    return c
+endglobal
+
 snippet box "A nice box with the current comment symbol" b
 `!p
-c = '#'
-cs = vim.eval("&commentstring")
-if len(cs) == 3:
-	c = cs[0]
-snip.locals["c"] = c
+c = cs(snip)
 
 snip.rv = (len(t[1])+4)*c
-snip.locals["bar"] = snip.rv
+bar = snip.rv
 snip += c + ' '`${1:content}`!p
-c = snip.locals["c"]
 
 snip.rv = ' ' + c
-snip += snip.locals["bar"]`
+snip += bar`
 $0
 endsnippet
 
 snippet bbox "A nice box over the full width" b
 `!p
-c = '#'
-cs = vim.eval("&commentstring")
-if len(cs) == 3:
-	c = cs[0]
-snip.locals["c"] = c
-snip.locals["bar"] = 75*c 
+c = cs(snip)
+bar = 75*c 
 
-snip.rv = snip.locals["bar"]
+snip.rv = bar
 snip += c + " " + (71-len(t[1]))/2*' '
 `${1:content}`!p
-c = snip.locals["c"]
 
 a = 71-len(t[1])
 snip.rv = (a/2 + a%2) * " " + " " + c 
-snip += snip.locals["bar"]`
+snip += bar`
 $0
 endsnippet
 
