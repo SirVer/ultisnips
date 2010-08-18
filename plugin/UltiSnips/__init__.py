@@ -24,6 +24,10 @@ def _vim_quote(s):
     """Quote string s as Vim literal string."""
     return "'" + s.replace("'", "''") + "'"
 
+def feedkeys(s, mode='n'):
+    """Wrapper around vim's feedkeys that cares for langmap mappings"""
+    vim.command(r'call feedkeys("%s", "%s")' % (s, mode))
+
 class _SnippetDictionary(object):
     def __init__(self, *args, **kwargs):
         self._snippets = []
@@ -419,9 +423,9 @@ class VimState(object):
 
         if delta.line == delta.col == 0:
             if col == 0 or vim.eval("mode()") != 'i':
-                vim.command(r'call feedkeys("\<Esc>i")')
+                feedkeys(r"\<Esc>i")
             else:
-                vim.command(r'call feedkeys("\<Esc>a")')
+                feedkeys(r"\<Esc>a")
         else:
             if delta.line:
                 move_lines = "%ij" % delta.line
@@ -443,7 +447,7 @@ class VimState(object):
                 do_select = "%ih" % (-delta.col+1)
 
 
-            vim.command(r'call feedkeys("\<Esc>%sv%s%s\<c-g>")' %
+            feedkeys(r"\<Esc>%sv%s%s\<c-g>" %
                 (move_one_right, move_lines, do_select))
 
 
@@ -556,10 +560,10 @@ class SnippetManager(object):
 
         if self._cs and (self._span_selected is not None):
             # This only happens when a default value is delted using backspace
-            vim.command(r'call feedkeys("i")')
+            feedkeys(r"i")
             self._chars_entered('')
         else:
-            vim.command(r'call feedkeys("\<BS>")')
+            feedkeys(r"\<BS>")
 
     def cursor_moved(self):
         self._vstate.update()
@@ -709,7 +713,7 @@ class SnippetManager(object):
                 break
 
         if feedkey:
-            vim.command(r'call feedkeys("%s", "%s")' % (feedkey, mode))
+            feedkeys(feedkey, mode)
 
     def _ensure_snippets_loaded(self):
         filetypes = vim.eval("&filetype").split(".") + [ "all" ]
