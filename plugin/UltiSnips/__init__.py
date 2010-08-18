@@ -139,7 +139,7 @@ class _SnippetsFileParser(object):
                 cs = cs[1:-1]
 
         return (snip, cs, cdescr, coptions)
-    
+
     def _parse_snippet(self):
         line = self._line()
 
@@ -446,9 +446,30 @@ class VimState(object):
             else:
                 do_select = "%ih" % (-delta.col+1)
 
+            def unmap(s):
+                from_chars, to_chars = "", ""
+                for c in vim.eval("&langmap").split(','):
+                    if ";" in c:
+                        a,b = c.split(';')
+                        from_chars += a
+                        to_chars += b
+                    else:
+                        from_chars += c[::2]
+                        to_chars += c[1::2]
 
-            feedkeys(r"\<Esc>%sv%s%s\<c-g>" %
-                (move_one_right, move_lines, do_select))
+                rv = ""
+                for c in s:
+                    if c not in from_chars:
+                        rv += c
+                        continue
+                    if c not in to_chars:
+                        raise RuntimeError, "langmap overwrite %s" % c
+                    rv += from_chars[to_chars.index(c)]
+
+                return rv
+
+            feedkeys(unmap(r"\<Esc>%sv%s%s\<c-g>" %
+                (move_one_right, move_lines, do_select)))
 
 
     def buf_changed(self):
