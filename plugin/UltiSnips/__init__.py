@@ -24,6 +24,10 @@ def _vim_quote(s):
     """Quote string s as Vim literal string."""
     return "'" + s.replace("'", "''") + "'"
 
+def feedkeys(s, mode='n'):
+    """Wrapper around vim's feedkeys function. Mainly for convenience."""
+    vim.command(r'call feedkeys("%s", "%s")' % (s, mode))
+
 class _SnippetDictionary(object):
     def __init__(self, *args, **kwargs):
         self._snippets = []
@@ -135,7 +139,7 @@ class _SnippetsFileParser(object):
                 cs = cs[1:-1]
 
         return (snip, cs, cdescr, coptions)
-    
+
     def _parse_snippet(self):
         line = self._line()
 
@@ -364,6 +368,44 @@ class Snippet(object):
             return SnippetInstance(parent, indent, v, start,
                     end, last_re = self._last_re, globals = self._globals)
 
+class LangMapTranslator(object):
+    """
+    This object cares for the vim langmap option and basically reverses
+    the mappings. This was the only solution to get UltiSnips to work
+    nicely with langmap; other stuff I tried was using inoremap movement
+    commands and caching and restoring the langmap option.
+
+    Note that this will not work if the langmap overwrites a character
+    completely, for example if 'j' is remapped, but nothing is mapped
+    back to 'j', then moving one line down is no longer possible and
+    UltiSnips will fail.
+    """
+    _maps = {}
+
+    def _create_translation(self, langmap):
+        from_chars, to_chars = "", ""
+        for c in langmap.split(','):
+            if ";" in c:
+                a,b = c.split(';')
+                from_chars += a
+                to_chars += b
+            else:
+                from_chars += c[::2]
+                to_chars += c[1::2]
+
+        self._maps[langmap] = string.maketrans(to_chars, from_chars)
+
+    def translate(self, s):
+        langmap = vim.eval("&langmap").strip()
+        if langmap == "":
+            return s
+
+        if langmap not in self._maps:
+            self._create_translation(langmap)
+
+        return s.translate(self._maps[langmap])
+
+
 class VimState(object):
     def __init__(self):
         self._abs_pos = None
@@ -419,9 +461,9 @@ class VimState(object):
 
         if delta.line == delta.col == 0:
             if col == 0 or vim.eval("mode()") != 'i':
-                vim.command(r'call feedkeys("\<Esc>i")')
+                feedkeys(r"\<Esc>i")
             else:
-                vim.command(r'call feedkeys("\<Esc>a")')
+                feedkeys(r"\<Esc>a")
         else:
             if delta.line:
                 move_lines = "%ij" % delta.line
@@ -442,9 +484,11 @@ class VimState(object):
             else:
                 do_select = "%ih" % (-delta.col+1)
 
+            move_cmd = LangMapTranslator().translate(
+                r"\<Esc>%sv%s%s\<c-g>" % (move_one_right, move_lines, do_select)
+            )
 
-            vim.command(r'call feedkeys("\<Esc>%sv%s%s\<c-g>")' %
-                (move_one_right, move_lines, do_select))
+            feedkeys(move_cmd)
 
 
     def buf_changed(self):
@@ -556,10 +600,10 @@ class SnippetManager(object):
 
         if self._cs and (self._span_selected is not None):
             # This only happens when a default value is delted using backspace
-            vim.command(r'call feedkeys("i")')
+            feedkeys(r"i")
             self._chars_entered('')
         else:
-            vim.command(r'call feedkeys("\<BS>")')
+            feedkeys(r"\<BS>")
 
     def cursor_moved(self):
         self._vstate.update()
@@ -709,7 +753,7 @@ class SnippetManager(object):
                 break
 
         if feedkey:
-            vim.command(r'call feedkeys("%s", "%s")' % (feedkey, mode))
+            feedkeys(feedkey, mode)
 
     def _ensure_snippets_loaded(self):
         filetypes = vim.eval("&filetype").split(".") + [ "all" ]

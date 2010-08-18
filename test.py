@@ -1842,6 +1842,26 @@ endsnippet
 
 
 ###########################################################################
+#                           Test for bug 501727                           #
+###########################################################################
+class TestNonEmptyLangmap_ExceptCorrectResult(_VimTest):
+    snippets = ("testme",
+"""my snipped ${1:some_default}
+and a mirror: $1
+$2...$3
+$0""")
+    keys = "testme" + EX + "hi1" + JF + "hi2" + JF + "hi3" + JF + "hi4"
+    wanted ="""my snipped hi1
+and a mirror: hi1
+hi2...hi3
+hi4"""
+
+    def _options_on(self):
+        self.send(":set langmap=dj,rk,nl,ln,jd,kr,DJ,RK,NL,LN,JD,KR\n")
+    def _options_off(self):
+        self.send(":set langmap=\n")
+
+###########################################################################
 #                               END OF TEST                               #
 ###########################################################################
 if __name__ == '__main__':
