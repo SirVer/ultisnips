@@ -1841,9 +1841,9 @@ endsnippet
     wanted = "x first a bob b y"
 
 
-###########################################################################
-#                           Test for bug 501727                           #
-###########################################################################
+#######################
+# Test for bug 501727 #
+#######################
 class TestNonEmptyLangmap_ExceptCorrectResult(_VimTest):
     snippets = ("testme",
 """my snipped ${1:some_default}
@@ -1860,6 +1860,73 @@ hi4"""
         self.send(":set langmap=dj,rk,nl,ln,jd,kr,DJ,RK,NL,LN,JD,KR\n")
     def _options_off(self):
         self.send(":set langmap=\n")
+
+########################
+# Tests for bug 616315 #
+########################
+# class TrailingNewline_TabStop_JustNL(_VimTest):
+#     snippets = ("test", r"""
+# x${1:
+# }
+# $2""")
+#     keys = "test" + EX + "j" + JF + "k"
+#     wanted = """
+# xj
+# k"""
+
+# TODO: comment these in again
+# class TrailingNewline_TabStop_EndNL(_VimTest):
+#     snippets = ("test", r"""
+# x${1:a
+# }
+# $2""")
+#     keys = "test" + EX + "j" + JF + "k"
+#     wanted = """
+# xj
+# k"""
+
+# class TrailingNewline_TabStop_StartNL(_VimTest):
+#     snippets = ("test", r"""
+# x${1:
+# a}
+# $2""")
+#     keys = "test" + EX + "j" + JF + "k"
+#     wanted = """
+# xj
+# k"""
+#
+# class TrailingNewline_TabStop_EndStartNL(_VimTest):
+#     snippets = ("test", r"""
+# x${1:
+# a
+# }
+# $2""")
+#     keys = "test" + EX + "j" + JF + "k"
+#     wanted = """
+# xj
+# k"""
+#
+class TrailingNewline_TabStop_NotEndStartNL(_VimTest):
+    snippets = ("test", r"""
+x${1:a
+a}
+$2""")
+    keys = "test" + EX + "j" + JF + "k"
+    wanted = """
+xj
+k"""
+
+# class TrailingNewline_TabStop_ExtraNL_ShouldFail(_VimTest):
+#     snippets = ("test", r"""
+# x${1:a
+# a}
+# $2
+# """)
+#     keys = "test" + EX + "j" + JF + "k"
+#     wanted = """
+# xj
+# k"""
+
 
 ###########################################################################
 #                               END OF TEST                               #
