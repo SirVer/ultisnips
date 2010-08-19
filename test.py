@@ -1864,48 +1864,57 @@ hi4"""
 ########################
 # Tests for bug 616315 #
 ########################
-# class TrailingNewline_TabStop_JustNL(_VimTest):
-#     snippets = ("test", r"""
-# x${1:
-# }
-# $2""")
-#     keys = "test" + EX + "j" + JF + "k"
-#     wanted = """
-# xj
-# k"""
+class TrailingNewline_TabStop_NLInsideStuffBehind(_VimTest):
+    snippets = ("test", r"""
+x${1:
+}<-behind1
+$2<-behind2""")
+    keys = "test" + EX + "j" + JF + "k"
+    wanted = """
+xj<-behind1
+k<-behind2"""
 
-# TODO: comment these in again
-# class TrailingNewline_TabStop_EndNL(_VimTest):
-#     snippets = ("test", r"""
-# x${1:a
-# }
-# $2""")
-#     keys = "test" + EX + "j" + JF + "k"
-#     wanted = """
-# xj
-# k"""
+class TrailingNewline_TabStop_JustNL(_VimTest):
+    snippets = ("test", r"""
+x${1:
+}
+$2""")
+    keys = "test" + EX + "j" + JF + "k"
+    wanted = """
+xj
+k"""
 
-# class TrailingNewline_TabStop_StartNL(_VimTest):
-#     snippets = ("test", r"""
-# x${1:
-# a}
-# $2""")
-#     keys = "test" + EX + "j" + JF + "k"
-#     wanted = """
-# xj
-# k"""
-#
-# class TrailingNewline_TabStop_EndStartNL(_VimTest):
-#     snippets = ("test", r"""
-# x${1:
-# a
-# }
-# $2""")
-#     keys = "test" + EX + "j" + JF + "k"
-#     wanted = """
-# xj
-# k"""
-#
+class TrailingNewline_TabStop_EndNL(_VimTest):
+    snippets = ("test", r"""
+x${1:a
+}
+$2""")
+    keys = "test" + EX + "j" + JF + "k"
+    wanted = """
+xj
+k"""
+
+class TrailingNewline_TabStop_StartNL(_VimTest):
+    snippets = ("test", r"""
+x${1:
+a}
+$2""")
+    keys = "test" + EX + "j" + JF + "k"
+    wanted = """
+xj
+k"""
+
+class TrailingNewline_TabStop_EndStartNL(_VimTest):
+    snippets = ("test", r"""
+x${1:
+a
+}
+$2""")
+    keys = "test" + EX + "j" + JF + "k"
+    wanted = """
+xj
+k"""
+
 class TrailingNewline_TabStop_NotEndStartNL(_VimTest):
     snippets = ("test", r"""
 x${1:a
@@ -1916,16 +1925,17 @@ $2""")
 xj
 k"""
 
-# class TrailingNewline_TabStop_ExtraNL_ShouldFail(_VimTest):
-#     snippets = ("test", r"""
-# x${1:a
-# a}
-# $2
-# """)
-#     keys = "test" + EX + "j" + JF + "k"
-#     wanted = """
-# xj
-# k"""
+class TrailingNewline_TabStop_ExtraNL_ECR(_VimTest):
+    snippets = ("test", r"""
+x${1:a
+a}
+$2
+""")
+    keys = "test" + EX + "j" + JF + "k"
+    wanted = """
+xj
+k
+"""
 
 
 ###########################################################################

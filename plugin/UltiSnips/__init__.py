@@ -28,6 +28,9 @@ def feedkeys(s, mode='n'):
     """Wrapper around vim's feedkeys function. Mainly for convenience."""
     vim.command(r'call feedkeys("%s", "%s")' % (s, mode))
 
+# TODO: remove this again
+from debug import debug
+
 class _SnippetDictionary(object):
     def __init__(self, *args, **kwargs):
         self._snippets = []
@@ -457,7 +460,20 @@ class VimState(object):
         delta = r.end - r.start
         lineno, col = r.start.line, r.start.col
 
+        debug("col: %s, vim.current.buffer[lineno: '%s'" % (col, vim.current.buffer[lineno]))
+        # TODO: document hack
+        if col >= len(vim.current.buffer[lineno]):
+            vim.current.buffer[lineno] += " "
+        if r.end.col >= len(vim.current.buffer[r.end.line]):
+            vim.current.buffer[r.end.line] += " "
+
+        debug("col: %s, vim.current.buffer[lineno: '%s'" % (col, vim.current.buffer[lineno]))
+
         vim.current.window.cursor = lineno + 1, col
+
+        debug("r.start: %s" % (r.start))
+        debug("r.end: %s" % (r.end))
+        debug("delta: %s" % (delta))
 
         if delta.line == delta.col == 0:
             if col == 0 or vim.eval("mode()") != 'i':
@@ -489,6 +505,7 @@ class VimState(object):
             move_cmd = LangMapTranslator().translate(
                 r"\<Esc>%sv%s%s\<c-g>" % (move_one_right, move_lines, do_select)
             )
+            debug("move_cmd: %s" % (move_cmd))
 
             feedkeys(move_cmd)
 
