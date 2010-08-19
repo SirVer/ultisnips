@@ -477,12 +477,14 @@ class VimState(object):
             else:
                 move_one_right = ""
 
-            if 0 <= delta.col <= 1:
-                do_select = ""
-            elif delta.col > 0:
-                do_select = "%il" % (delta.col-1)
+            # After moving to the correct line, we go back to column 0
+            # and select right from there. Note that the we have to select
+            # one column less since vim's visual selection is including the
+            # ending while Python slicing is excluding the ending.
+            if r.end.col > 1:
+                do_select = "0%il" % (r.end.col-1)
             else:
-                do_select = "%ih" % (-delta.col+1)
+                do_select = "0"
 
             move_cmd = LangMapTranslator().translate(
                 r"\<Esc>%sv%s%s\<c-g>" % (move_one_right, move_lines, do_select)
@@ -630,8 +632,8 @@ class SnippetManager(object):
 
                 # Another thing that might have happened is that vim has
                 # adjusted the indent of the last line and therefore the line
-                # effectivly got longer. This means a newline was entered and
-                # we quite definitivly do not want the indent that vim added
+                # effectively got longer. This means a newline was entered and
+                # we quite definitively do not want the indent that vim added
                 line_was_lengthened = len(lline) > len(self._vstate.last_line)
 
                 user_didnt_enter_newline = len(lline) != self._vstate.ppos.col
