@@ -28,9 +28,6 @@ def feedkeys(s, mode='n'):
     """Wrapper around vim's feedkeys function. Mainly for convenience."""
     vim.command(r'call feedkeys("%s", "%s")' % (s, mode))
 
-# TODO: remove this again
-from debug import debug
-
 class _SnippetDictionary(object):
     def __init__(self, *args, **kwargs):
         self._snippets = []
@@ -460,20 +457,7 @@ class VimState(object):
         delta = r.end - r.start
         lineno, col = r.start.line, r.start.col
 
-        debug("col: %s, vim.current.buffer[lineno: '%s'" % (col, vim.current.buffer[lineno]))
-        # TODO: document hack
-        if col >= len(vim.current.buffer[lineno]):
-            vim.current.buffer[lineno] += " "
-        if r.end.col >= len(vim.current.buffer[r.end.line]):
-            vim.current.buffer[r.end.line] += " "
-
-        debug("col: %s, vim.current.buffer[lineno: '%s'" % (col, vim.current.buffer[lineno]))
-
         vim.current.window.cursor = lineno + 1, col
-
-        debug("r.start: %s" % (r.start))
-        debug("r.end: %s" % (r.end))
-        debug("delta: %s" % (delta))
 
         if delta.line == delta.col == 0:
             if col == 0 or vim.eval("mode()") != 'i':
@@ -481,6 +465,17 @@ class VimState(object):
             else:
                 feedkeys(r"\<Esc>a")
         else:
+            # If a tabstop immediately starts with a newline, the selection
+            # must start after the last character in the current line. But if
+            # we are in insert mode and <Esc> out of it, we cannot go past the
+            # last character with move_one_right and therefore cannot
+            # visual-select this newline. We have to hack around this by adding
+            # an extra space which we can select.  Note that this problem could
+            # be circumvent by selecting the tab backwards (that is starting
+            # at the end); one would not need to modify the line for this.
+            if col >= len(vim.current.buffer[lineno]):
+                vim.current.buffer[lineno] += " "
+
             if delta.line:
                 move_lines = "%ij" % delta.line
             else:
@@ -497,7 +492,11 @@ class VimState(object):
             # and select right from there. Note that the we have to select
             # one column less since vim's visual selection is including the
             # ending while Python slicing is excluding the ending.
-            if r.end.col > 1:
+            if r.end.col == 0 and not len(vim.current.buffer[r.end.line]):
+                # Selecting should end on an empty line -> Select the previous
+                # line till its end
+                do_select = "k$"
+            elif r.end.col > 1:
                 do_select = "0%il" % (r.end.col-1)
             else:
                 do_select = "0"
@@ -505,7 +504,6 @@ class VimState(object):
             move_cmd = LangMapTranslator().translate(
                 r"\<Esc>%sv%s%s\<c-g>" % (move_one_right, move_lines, do_select)
             )
-            debug("move_cmd: %s" % (move_cmd))
 
             feedkeys(move_cmd)
 
