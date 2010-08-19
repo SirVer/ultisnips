@@ -1,3 +1,11 @@
+version 1.2:
+  - many bugs were fixed
+  - all shipped snippets are now fully compatible with UltiSnips
+  - added support for global snippets which enhance python interpolation even
+    more *UltiSnips-globals*
+  - added support for multi word and regular expression triggers. Very
+    powerful in combination with python interpolation.
+  - Python interpolation became much more powerful *UltiSnips-python* 
   - added support for clearsnippets command *UltiSnips-clearing-snippets*
   - added support for option w which is a little more strict than i.
   - added support for listing of valid triggers. Defaults to <c-tab>.
