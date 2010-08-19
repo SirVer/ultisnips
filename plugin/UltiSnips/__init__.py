@@ -465,6 +465,17 @@ class VimState(object):
             else:
                 feedkeys(r"\<Esc>a")
         else:
+            # If a tabstop immediately starts with a newline, the selection
+            # must start after the last character in the current line. But if
+            # we are in insert mode and <Esc> out of it, we cannot go past the
+            # last character with move_one_right and therefore cannot
+            # visual-select this newline. We have to hack around this by adding
+            # an extra space which we can select.  Note that this problem could
+            # be circumvent by selecting the tab backwards (that is starting
+            # at the end); one would not need to modify the line for this.
+            if col >= len(vim.current.buffer[lineno]):
+                vim.current.buffer[lineno] += " "
+
             if delta.line:
                 move_lines = "%ij" % delta.line
             else:
@@ -477,12 +488,18 @@ class VimState(object):
             else:
                 move_one_right = ""
 
-            if 0 <= delta.col <= 1:
-                do_select = ""
-            elif delta.col > 0:
-                do_select = "%il" % (delta.col-1)
+            # After moving to the correct line, we go back to column 0
+            # and select right from there. Note that the we have to select
+            # one column less since vim's visual selection is including the
+            # ending while Python slicing is excluding the ending.
+            if r.end.col == 0 and not len(vim.current.buffer[r.end.line]):
+                # Selecting should end on an empty line -> Select the previous
+                # line till its end
+                do_select = "k$"
+            elif r.end.col > 1:
+                do_select = "0%il" % (r.end.col-1)
             else:
-                do_select = "%ih" % (-delta.col+1)
+                do_select = "0"
 
             move_cmd = LangMapTranslator().translate(
                 r"\<Esc>%sv%s%s\<c-g>" % (move_one_right, move_lines, do_select)
@@ -630,8 +647,8 @@ class SnippetManager(object):
 
                 # Another thing that might have happened is that vim has
                 # adjusted the indent of the last line and therefore the line
-                # effectivly got longer. This means a newline was entered and
-                # we quite definitivly do not want the indent that vim added
+                # effectively got longer. This means a newline was entered and
+                # we quite definitively do not want the indent that vim added
                 line_was_lengthened = len(lline) > len(self._vstate.last_line)
 
                 user_didnt_enter_newline = len(lline) != self._vstate.ppos.col
