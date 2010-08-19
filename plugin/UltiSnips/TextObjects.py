@@ -939,7 +939,6 @@ class SnippetInstance(TextObject):
     also a TextObject because it has a start an end
     """
 
-    # TODO: for beauty sake, start and end should come before initial text
     def __init__(self, parent, indent, initial_text, start = None, end = None, last_re = None, globals = None):
         if start is None:
             start = Position(0,0)
@@ -982,20 +981,14 @@ class SnippetInstance(TextObject):
     has_tabs = property(has_tabs)
 
     def _get_tabstop(self, requester, no):
-        # SnippetInstances are completly self contained,
-        # therefore, we do not need to ask our parent
-        # for Tabstops
-        # TODO: otherwise, this code is identical to
-        # TextObject._get_tabstop
-        if no in self._tabstops:
-            return self._tabstops[no]
-        for c in self._childs:
-            if c is requester:
-                continue
+        # SnippetInstances are completely self contained, therefore, we do not
+        # need to ask our parent for Tabstops
+        p = self._parent
+        self._parent = None
+        rv = TextObject._get_tabstop(self, requester, no)
+        self._parent = p
 
-            rv = c._get_tabstop(self, no)
-            if rv is not None:
-                return rv
+        return rv
 
     def select_next_tab(self, backwards = False):
         if self._cts is None:

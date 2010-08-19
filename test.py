@@ -759,10 +759,6 @@ class TabStop_VimScriptInterpolation_SimpleExample(_VimTest):
     keys = "    test" + EX
     wanted = "    hi 4 End"
 
-# TODO: pasting with <C-R> while mirroring, also multiline
-# TODO: Multiline text pasting
-# TODO: option to avoid snippet expansion when not only indent in front
-
 #############
 # EXPANDTAB #
 #############
