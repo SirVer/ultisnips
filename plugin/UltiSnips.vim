@@ -37,6 +37,16 @@ if !exists("g:UltiSnipsJumpBackwardTrigger")
  let g:UltiSnipsJumpBackwardTrigger = "<c-k>"
 endif
 
+" Should UltiSnips unmap select mode mappings automagically?
+if !exists("g:UltiSnipsRemoveSelectModeMappings")
+   let g:UltiSnipsRemoveSelectModeMappings = 1
+end
+
+" If UltiSnips should remove Mappings, which should be ignored
+if !exists("g:UltiSnipsMappingsToIgnore")
+   let g:UltiSnipsMappingsToIgnore = []
+endif
+
 " }}}
 
 "" FUNCTIONS {{{

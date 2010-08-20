@@ -405,7 +405,6 @@ class LangMapTranslator(object):
 
         return s.translate(self._maps[langmap])
 
-
 class VimState(object):
     def __init__(self):
         self._abs_pos = None
@@ -454,6 +453,8 @@ class VimState(object):
         self._cline = vim.current.buffer[line]
 
     def select_span(self, r):
+        self._unmap_select_mode_mapping()
+
         delta = r.end - r.start
         lineno, col = r.start.line, r.start.col
 
@@ -533,6 +534,60 @@ class VimState(object):
     def last_line(self):
         return self._lline
     last_line = property(last_line)
+
+    ###########################
+    # Private functions below #
+    ###########################
+    def _unmap_select_mode_mapping(self):
+        """This function unmaps select mode mappings if so wished by the user.
+        Removes select mode mappings that can actually be typed by the user
+        (ie, ignores things like <Plug>).
+        """
+        if int(vim.eval("g:UltiSnipsRemoveSelectModeMappings")):
+            ignores = vim.eval("g:UltiSnipsMappingsToIgnore") + ['UltiSnips']
+
+            for option in ("<buffer>", ""):
+                # Put all smaps into a var, and then read the var
+                vim.command(r"redir => _tmp_smaps | silent smap %s " % option +
+                            "| redir END")
+
+                # Check if any mappings where found
+                all_maps = filter(len, vim.eval(r"_tmp_smaps").splitlines())
+                if (len(all_maps) == 1 and
+                    all_maps[0][0] not in " sv"):
+                        # "No maps found". String could be localized. Hopefully
+                        # it doesn't start with any of these letters in any
+                        # language
+                        continue
+
+                # Only keep mappings that should not be ignored
+                maps = [m for m in all_maps if
+                            not any(i in m for i in ignores) and len(m.strip())]
+
+                for m in maps:
+                    # Some mappings have their modes listed
+                    trig = m.split()
+                    if m[0] == " ":
+                        trig = trig[0]
+                    else:
+                        trig = trig[1]
+
+                    # The bar separates commands
+                    if trig[-1] == "|":
+                        trig = trig[:-1] + "<Bar>"
+
+                    # Special ones
+                    if trig[0] == "<":
+                        add = False
+                        # Only allow these
+                        for valid in ["Tab", "NL", "CR", "C-Tab", "BS"]:
+                            if trig == "<%s>" % valid:
+                                add = True
+                        if not add:
+                            continue
+
+                    # Actually unmap it
+                    vim.command("sunmap %s %s" % (option,trig))
 
 class SnippetManager(object):
     def __init__(self):

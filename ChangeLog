@@ -1,5 +1,7 @@
 version 1.2:
   - many bugs were fixed
+  - smode mappings for printable characters are now removed before expanding a
+    snippet. This is configurable. *UltiSnips-warning-smappings*
   - all shipped snippets are now fully compatible with UltiSnips
   - added support for global snippets which enhance python interpolation even
     more *UltiSnips-globals*
