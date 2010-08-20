@@ -22,10 +22,9 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       4.7.1 Replacement String                  |UltiSnips-replacement-string|
       4.7.2 Demos                               |UltiSnips-demos|
    4.8 Clearing snippets                        |UltiSnips-clearing-snippets|
-5. Roadmap                                      |UltiSnips-roadmap|      
-6. Helping out                                  |UltiSnips-helping|      
-7. Contact                                      |UltiSnips-contact|      
-8. Contributors                                 |UltiSnips-contributors|
+5. Helping out                                  |UltiSnips-helping|      
+6. Contact                                      |UltiSnips-contact|      
+7. Contributors                                 |UltiSnips-contributors|
    8.1 Patches & Coding                         |UltiSnips-contricoding|
    8.2 Snippets                                 |UltiSnips-contrisnippets|
 
@@ -584,33 +583,7 @@ overwrite individual triggers when redefining them using the '!' option
 (see |UltiSnips-adding-snippets| for the options).
 
 =============================================================================
-5. ROADMAP                                                *UltiSnips-roadmap*
-
-UltiSnips is useful as it is now; but I plan to add more features. I use this
-section as a brain storming of what should come in the future to provide some
-insight into which direction development is headed. Please feel free to
-comment on any feature here or if you have any good ideas what is missing
-contact me. 
-
- Cursor key movement:                           *UltiSnips-cursor-key-movement*
-
-Currently, cursor key movement is not possible in snippets. When you use the 
-cursors, you need to use <c-j> or <c-k> to jump to the next tab stop again
-before anything gets updated. This is a bit annoying and I want to make cursor
-keys work. 
-
- Escaping:                                                 *UltiSnips-escaping*
-
-Leaving to normal mode leaves snippet expansion currently. This shouldn't
-happen. This is related to Cursor key movement. 
-
- Jumping back from TS zero:               *UltiSnips-jumping-back-from-ts-zero*
-
-Currently, jumping back from $0 with <c-k> doesn't work. This is really not
-necessary and should be fixed.
-
-=============================================================================
-6. HELPING OUT                                            *UltiSnips-helping*
+5. HELPING OUT                                            *UltiSnips-helping*
 
 UltiSnips needs the help of a vibrant vim community to make it more useful
 tomorrow than it is today. Please consider joining this effort by providing
@@ -622,7 +595,7 @@ You can find the page here:
 http://www.vim.org/scripts/script.php?script_id=2715
 
 =============================================================================
-7. CONTACT                                                *UltiSnips-contact*
+6. CONTACT                                                *UltiSnips-contact*
 
 You can reach me at SirVer -AT- gmx -ADOT- de. You can find the launchpad
 project for UltiSnips at https://launchpad.net/ultisnips/, there is also the
@@ -632,12 +605,12 @@ This project aims to be the one-for-all solution for Snippets for Vim. If you
 miss a feature or find a bug, please contact me or file a support ticket.
 
 =============================================================================
-8. CONTRIBUTORS                                      *UltiSnips-contributors*
+7. CONTRIBUTORS                                      *UltiSnips-contributors*
 
 UltiSnips is mainly developed by SirVer (Holger Rapp). The following
 individuals have contributed code to UltiSnips. In order of apperance.
 
-8.1 Patches & Coding                                 *UltiSnips-contricoding*
+7.1 Patches & Coding                                 *UltiSnips-contricoding*
 --------------------
 
 Contributers are listed in chronological order:
@@ -647,7 +620,7 @@ Contributers are listed in chronological order:
    Chris Chambers
    Ryan Wooden
 
-8.2 Snippets                                       *UltiSnips-contrisnippets*
+7.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------
 
 Contributers are listed in chronological order:
