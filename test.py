@@ -1933,6 +1933,73 @@ xj
 k
 """
 
+#######################
+# Test for bug 427298 #
+#######################
+class _SelectModeMappings(_VimTest):
+    snippets = ("test", "${1:World}")
+    keys = "test" + EX + "Hello"
+    wanted = "Hello"
+    maps = ("", "")
+    buffer_maps = ("", "")
+    do_unmapping = True
+    ignores = []
+
+    def _options_on(self):
+        self.send(":let g:UltiSnipsRemoveSelectModeMappings=%i\n" %
+                  int(self.do_unmapping))
+        self.send(":let g:UltiSnipsMappingsToIgnore=%s\n" %
+                  repr(self.ignores))
+
+        if not isinstance(self.maps[0], tuple):
+            self.maps = (self.maps,)
+        if not isinstance(self.buffer_maps[0], tuple):
+            self.buffer_maps = (self.buffer_maps,)
+
+        for key, m in self.maps:
+            if not len(key): continue
+            self.send(":smap %s %s\n" % (key,m))
+        for key, m in self.buffer_maps:
+            if not len(key): continue
+            self.send(":smap <buffer> %s %s\n" % (key,m))
+
+    def _options_off(self):
+        for key, m in self.maps:
+            if not len(key): continue
+            self.send(":sunmap %s\n" % key)
+        for key, m in self.buffer_maps:
+            if not len(key): continue
+            self.send(":sunmap <buffer> %s\n" % key)
+
+        self.send(":let g:UltiSnipsRemoveSelectModeMappings=1\n")
+        self.send(":let g:UltiSnipsMappingsToIgnore= []\n")
+
+class SelectModeMappings_RemoveBeforeSelecting_ECR(_SelectModeMappings):
+    maps = ("H", "x")
+    wanted = "Hello"
+class SelectModeMappings_DisableRemoveBeforeSelecting_ECR(_SelectModeMappings):
+    do_unmapping = False
+    maps = ("H", "x")
+    wanted = "xello"
+class SelectModeMappings_IgnoreMappings_ECR(_SelectModeMappings):
+    ignores = ["e"]
+    maps = ("H", "x"), ("e", "l")
+    wanted = "Hello"
+class SelectModeMappings_IgnoreMappings1_ECR(_SelectModeMappings):
+    ignores = ["H"]
+    maps = ("H", "x"), ("e", "l")
+    wanted = "xello"
+class SelectModeMappings_IgnoreMappings2_ECR(_SelectModeMappings):
+    ignores = ["e", "H"]
+    maps = ("e", "l"), ("H", "x")
+    wanted = "xello"
+class SelectModeMappings_BufferLocalMappings_ECR(_SelectModeMappings):
+    buffer_maps = ("H", "blah")
+    wanted = "Hello"
+
+
+
+
 
 ###########################################################################
 #                               END OF TEST                               #
