@@ -8,9 +8,10 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    2.2 Deinstallation                           |UltiSnips-deinstallation|
    2.3 Updating                                 |UltiSnips-updating|
 3. Settings                                     |UltiSnips-settings|
+   3.1 Warning About Select Mode Mappings       |UltiSnips-warning-smappings|
 4. Syntax                                       |UltiSnips-syntax|
    4.1 Adding Snippets                          |UltiSnips-adding-snippets|
-   4.2 Plaintext snippets                       |UltiSnips-plaintext-snippets|
+   4.2 Plaintext Snippets                       |UltiSnips-plaintext-snippets|
    4.3 Interpolation                            |UltiSnips-integration|
       4.3.1 Shellcode                           |UltiSnips-shellcode|
       4.3.2 VimScript                           |UltiSnips-vimscript|
@@ -126,6 +127,31 @@ you vimrc: >
    let g:UltiSnipsJumpForwardTrigger="<tab>"
    let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 
+3.1 Warning About Select Mode Mappings          *UltiSnips-warning-smappings*
+--------------------------------------
+
+The help for vim's *mapmode-s* states: >
+   NOTE: Mapping a printable character in Select mode may confuse the user.
+   It's better to explicitly use :xmap and :smap for printable characters.  Or
+   use :sunmap after defining the mapping.
+
+But most vim plugins (even the ones shipped with vim) do not adhere to this.
+As UltiSnips uses select mode to mark tabstops in snippets for overwriting
+these wrong mappings get in the way. UltiSnips therefore defaults to
+*:sunmap* all mappings for printable characters in select mode. It will not
+touch any other mappings, especially not normal, insert or visual mode
+mappings.
+
+If this behaviour is not desired, you can disable it via >
+   let g:UltiSnipsRemoveSelectModeMappings = 0
+
+If you want to keep certain mappings, you can modify the list of ignores for
+this feature. For example >
+   let g:UltiSnipsMappingsToIgnore = [ "somePlugin", "otherPlugin" ]
+
+will not unmap any mapping that contains the string "somePlugin" or
+"otherPlugin" in its complete definition as listed by *:smap* .
+
 =============================================================================
 4. SYNTAX                                                  *UltiSnips-syntax*
 
@@ -205,7 +231,7 @@ snippet on. The options currently supported are >
        match is also passed to any python code blocks in your snippet
        definition as the local variable "match".
 
-4.2 Plaintext snippets                         *UltiSnips-plaintext-snippets*
+4.2 Plaintext Snippets                         *UltiSnips-plaintext-snippets*
 ----------------------
 
 Lets start with a simple example. Add this to your all snippets file: >
