@@ -2,13 +2,13 @@
 
 UltiSnips                                      *snippet* *snippets* *UltiSnips*
 
-1. Description                                  |UltiSnips-description|  
-2. Installation and Updating                    |UltiSnips-installnupgrade| 
+1. Description                                  |UltiSnips-description|
+2. Installation and Updating                    |UltiSnips-installnupgrade|
    2.1 Installation                             |UltiSnips-installation|
    2.2 Deinstallation                           |UltiSnips-deinstallation|
    2.3 Updating                                 |UltiSnips-updating|
-3. Settings                                     |UltiSnips-settings|     
-4. Syntax                                       |UltiSnips-syntax|       
+3. Settings                                     |UltiSnips-settings|
+4. Syntax                                       |UltiSnips-syntax|
    4.1 Adding Snippets                          |UltiSnips-adding-snippets|
    4.2 Plaintext snippets                       |UltiSnips-plaintext-snippets|
    4.3 Interpolation                            |UltiSnips-integration|
@@ -22,9 +22,9 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       4.7.1 Replacement String                  |UltiSnips-replacement-string|
       4.7.2 Demos                               |UltiSnips-demos|
    4.8 Clearing snippets                        |UltiSnips-clearing-snippets|
-5. Roadmap                                      |UltiSnips-roadmap|      
-6. Helping out                                  |UltiSnips-helping|      
-7. Contact                                      |UltiSnips-contact|      
+5. Roadmap                                      |UltiSnips-roadmap|
+6. Helping out                                  |UltiSnips-helping|
+7. Contact                                      |UltiSnips-contact|
 8. Contributors                                 |UltiSnips-contributors|
    8.1 Patches & Coding                         |UltiSnips-contricoding|
    8.2 Snippets                                 |UltiSnips-contrisnippets|
@@ -33,7 +33,7 @@ For Vim version 7.0 or later.
 This plugin only works if 'compatible' is not set.
 {Vi does not have any of these features}
 
-This plugin needs Python support compiled into Vim. 
+This plugin needs Python support compiled into Vim.
 
 =============================================================================
 DESCRIPTION                                           *UltiSnips-description*
@@ -46,7 +46,7 @@ signatures and to insert the current date or time into the text while typing.
 
 UltiSnips is an implementation that is developed with in the philosophy of TDD
 (Test driven development). This guarantees that features do not disappear and
-bugs do not reappear after they have been fixed once. 
+bugs do not reappear after they have been fixed once.
 
  Acknowledgments:                                 *UltiSnips-acknowledgments*
 
@@ -65,9 +65,9 @@ his snippets.
 
 UltiSnips has only been tested on Mac OS X and Linux. Like TextMates Snippets
 it also relies heavily on shell integration, therefore Windows users will have
-only a part of the functionality. 
+only a part of the functionality.
 
-To use UltiSnips, you need a python enabled Vim 7. You have python if 
+To use UltiSnips, you need a python enabled Vim 7. You have python if
    :echo has("python")
 yields '1'.
 
@@ -106,7 +106,7 @@ remove the line: >
 
 To Update an installation, simply pull the latest revision: >
    $ cd ~/.vim/ultisnips_rep
-   $ bzr pull 
+   $ bzr pull
 
 =============================================================================
 3. SETTINGS                                              *UltiSnips-settings*
@@ -122,15 +122,15 @@ current expand situation. The variables with the default values are: >
 It is possible to set the Expand and Forward trigger to the same value. You
 can get a more TextMate like configuration by adding the next three lines to
 you vimrc: >
-   let g:UltiSnipsExpandTrigger="<tab>" 
-   let g:UltiSnipsJumpForwardTrigger="<tab>" 
-   let g:UltiSnipsJumpBackwardTrigger="<s-tab>" 
+   let g:UltiSnipsExpandTrigger="<tab>"
+   let g:UltiSnipsJumpForwardTrigger="<tab>"
+   let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 
 =============================================================================
 4. SYNTAX                                                  *UltiSnips-syntax*
 
 This chapter describes where to add new snippets and how to write them. I'll
-provide many examples to make things clearer. 
+provide many examples to make things clearer.
 
 4.1 Adding Snippets                               *UltiSnips-adding-snippets*
 -------------------
@@ -145,7 +145,7 @@ These files contain the snippet definitions for the various file types. A
 special file is >
    all.snippets
 which contains snippets that are always expanded, no matter what file type is
-defined. For example, I keep mail signatures and date insertion snippets here. 
+defined. For example, I keep mail signatures and date insertion snippets here.
 
 The dotted file type syntax of vim is supported. For example, for my cpp or
 CUDA files, i keep the file type set to ":set ft=cpp.c" or ":set
@@ -177,7 +177,7 @@ if you actually want to include the double-quote characters in the trigger.
 
 The description is only needed when more than one snippet is defined with the
 same tab trigger. The user is then given a choice and the description is
-displayed for the user as helper. 
+displayed for the user as helper.
 
 The options is a word of characters, each turning a specific option for this
 snippet on. The options currently supported are >
@@ -189,7 +189,7 @@ snippet on. The options currently supported are >
        the beginning of a line (that is if there are only whitespaces in front
        of the cursor). Default is to expand snippets at every position, even
        mitten in the line. Most of my snippets have this option set, it keeps
-       UltiSnips out of the way. 
+       UltiSnips out of the way.
    i   Inword expansion - Normally, triggers need whitespace before them to be
        expanded. With this option, triggers are also expanded in the middle of
        a word.
@@ -278,7 +278,7 @@ similar to the one for Vimscript, but in python code the value of the property
 "rv" on the "snip" object is inserted at the position of the code. Also, the
 code is inside a `!p ` block.  Python code gets some special variables defined
 which can be used: >
-   
+
    fn   - The current filename
    path - The complete path to the current file
    t    - The values of the placeholders, t[1] -> current text of ${1} and so on
@@ -290,7 +290,7 @@ The snip object provides the following methods: >
         Returns a line ready to be appended to the result. If indent
         is None, then mkline prepends spaces and/or tabs appropriate to the
         current tabstop and expandtab variables.
-    
+
     snip.shift(amount=1):
         Shifts the default indentation level used by mkline right by the
         number of spaces defined by shiftwidth, 'amount' times.
@@ -301,7 +301,7 @@ The snip object provides the following methods: >
 
     snip.reset_indent():
         Resets the indentation level to its initial value.
-    
+
     snip.opt(var, default):
         Checks if the vim variable "var" has been set, if so, it returns it,
         otherwise it returns "default".
@@ -344,11 +344,11 @@ uppercase and right aligned:
 
 ------------------- SNIP -------------------
 snippet wow
-${1:Text}`!p snip.rv = (75-2*len(t[1]))*' '+t[1].upper()` 
+${1:Text}`!p snip.rv = (75-2*len(t[1]))*' '+t[1].upper()`
 endsnippet
 ------------------- SNAP -------------------
 wow<tab>Hello World ->
-Hello World                                                     HELLO WORLD 
+Hello World                                                     HELLO WORLD
 
  4.3.4 Global Snippets:                                   *UltiSnips-globals*
 
@@ -366,11 +366,11 @@ def upper_right(inp):
 endglobal
 
 snippet wow
-${1:Text}`!p snip.rv = upper_right(t[1])` 
+${1:Text}`!p snip.rv = upper_right(t[1])`
 endsnippet
 ------------------- SNAP -------------------
 wow<tab>Hello World ->
-Hello World                                                     HELLO WORLD 
+Hello World                                                     HELLO WORLD
 
 
 4.4 Tab Stops and Placeholders  *UltiSnips-tabstops* *UltiSnips-placeholders*
@@ -392,7 +392,7 @@ more text
 You can use <c-j> and <c-k> to jump to the next tab or the previous. <Tab> was
 not used for jumping forward because many people (like myself) use <tab> also
 for completion. $0 is a special tab: This is the last tab in the snippet, no
-matter how many tabs were defined before. 
+matter how many tabs were defined before.
 
 Most of the time it is more useful to have some default text for a tabstop and
 sometimes it is also useful to have a tab stop in a tab stop. Consider the
@@ -424,7 +424,7 @@ a<tab>http://www.google.com<c-j><c-j>visited<c-j>hi ->
 </a>
 
 Default tab stop text can also contain mirrors, transformations or
-interpolation. 
+interpolation.
 
 4.6 Mirrors                                               *UltiSnips-mirrors*
 -----------
@@ -441,7 +441,7 @@ endsnippet
 ------------------- SNAP -------------------
 env<tab>itemize ->
 \begin{itemize}
-    
+
 \end{itemize}
 
 Another typical example is #ifndef block in C code:
@@ -463,13 +463,13 @@ ifndef<tab>WIN32 ->
 -------------------
 
 A complete description of the features follows, the chapter closes with some
-demos, because this feature is rather mighty and hard to understand. 
+demos, because this feature is rather mighty and hard to understand.
 
 Transformations are like mirrors. But instead of just verbatim copying text
 from the original tab stop, a regular expression is matched to the content of
 the referenced tab stop and a transformation is then applied to the matched
 pattern. UltiSnips follows the syntax and features of TextMate very closely
-here. 
+here.
 
 A Transformation has the syntax >
    ${<tab stop no/regular expression/replacement/options}
@@ -486,7 +486,7 @@ The options can be any combination of >
         just the first
 
 Regular expressions are not handled here. Python regular expressions are used
-internally, so the reference for matching is the re module of python: 
+internally, so the reference for matching is the re module of python:
    http://docs.python.org/library/re.html
 
 The replacement string is using a own syntax and is handled in the next paragraph.
@@ -496,7 +496,7 @@ The replacement string is using a own syntax and is handled in the next paragrap
 The replacement string can contain $no variables to reference matched groups
 in the regular expression, $0 is special and yields the whole match. The
 replacement string can also contain special escape sequences: >
-   \u   - Uppercase next letter; 
+   \u   - Uppercase next letter;
    \l   - Lowercase next letter
    \U   - Uppercase everything till the next \E
    \L   - Lowercase everything till the next \E
@@ -509,7 +509,7 @@ replacements with the following syntax (?no:text:other text). This reads as
 follows: if the group $no has matched, insert "text", otherwise insert "other
 text". "other text" could be skipped and would default to "", that is the
 empty string. This is a very powerful feature to add optional text into
-snippets. 
+snippets.
 
  4.7.2 Demos:                                                 *UltiSnips-demos*
 
@@ -590,19 +590,19 @@ UltiSnips is useful as it is now; but I plan to add more features. I use this
 section as a brain storming of what should come in the future to provide some
 insight into which direction development is headed. Please feel free to
 comment on any feature here or if you have any good ideas what is missing
-contact me. 
+contact me.
 
  Cursor key movement:                           *UltiSnips-cursor-key-movement*
 
-Currently, cursor key movement is not possible in snippets. When you use the 
+Currently, cursor key movement is not possible in snippets. When you use the
 cursors, you need to use <c-j> or <c-k> to jump to the next tab stop again
 before anything gets updated. This is a bit annoying and I want to make cursor
-keys work. 
+keys work.
 
  Escaping:                                                 *UltiSnips-escaping*
 
 Leaving to normal mode leaves snippet expansion currently. This shouldn't
-happen. This is related to Cursor key movement. 
+happen. This is related to Cursor key movement.
 
  Jumping back from TS zero:               *UltiSnips-jumping-back-from-ts-zero*
 
@@ -614,10 +614,10 @@ necessary and should be fixed.
 
 UltiSnips needs the help of a vibrant vim community to make it more useful
 tomorrow than it is today. Please consider joining this effort by providing
-new snippets, new features or bug reports. 
+new snippets, new features or bug reports.
 
 If you like this plugin, please also vote for it on its vim script page. It is
-life changing for me, maybe it is for you too. 
+life changing for me, maybe it is for you too.
 You can find the page here:
 http://www.vim.org/scripts/script.php?script_id=2715
 
@@ -626,7 +626,7 @@ http://www.vim.org/scripts/script.php?script_id=2715
 
 You can reach me at SirVer -AT- gmx -ADOT- de. You can find the launchpad
 project for UltiSnips at https://launchpad.net/ultisnips/, there is also the
-bug tracker. 
+bug tracker.
 
 This project aims to be the one-for-all solution for Snippets for Vim. If you
 miss a feature or find a bug, please contact me or file a support ticket.
