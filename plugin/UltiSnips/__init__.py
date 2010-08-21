@@ -666,12 +666,14 @@ class SnippetManager(object):
 
     def backspace_while_selected(self):
         """
-        This is called when backspace was used while a placeholder was selected.
+        This is called when backspace was pressed while vim was in select
+        mode. For us this might mean that a TabStop was selected and it's
+        content should be deleted.
         """
-        # BS was called in select mode
-
         if self._cs and (self._span_selected is not None):
-            # This only happens when a default value is delted using backspace
+            # This only happens when a default value is delted using backspace.
+            # This does not change the buffer at all, only moves the cursor.
+            self._vstate.update()
             feedkeys(r"i")
             self._chars_entered('')
         else:
@@ -958,8 +960,12 @@ class SnippetManager(object):
         if (self._span_selected is not None):
             self._ctab.current_text = chars
 
-            moved = self._span_selected.start.line - \
-                    self._span_selected.end.line
+            moved = 0
+            # If this edit changed the buffer in any ways we might have to
+            # delete more or less lines, according how the cursors has moved
+            if self._vstate.buf_changed:
+                moved = self._span_selected.start.line - \
+                        self._span_selected.end.line
             self._span_selected = None
 
             self._update_vim_buffer(moved + del_more_lines)
@@ -983,7 +989,9 @@ class SnippetManager(object):
         s.update()
 
         # Replace
-        dlines += self._vstate.moved.line + del_more_lines
+        if self._vstate.buf_changed:
+            dlines += self._vstate.moved.line
+        dlines += del_more_lines
         self._vb.replace_lines(sline, sline + dlines,
                        s._current_text)
         ct_end = self._ctab.abs_end
