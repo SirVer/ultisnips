@@ -1933,6 +1933,39 @@ xj
 k
 """
 
+class _MultiLineDefault(_VimTest):
+    snippets = ("test", r"""
+x${1:a
+b
+c
+d
+e
+f}
+$2""")
+
+class MultiLineDefault_Jump(_MultiLineDefault):
+    keys = "test" + EX + JF + "y"
+    wanted = """
+xa
+b
+c
+d
+e
+f
+y"""
+
+class MultiLineDefault_Type(_MultiLineDefault):
+    keys = "test" + EX + "z" + JF + "y"
+    wanted = """
+xz
+y"""
+
+class MultiLineDefault_BS(_MultiLineDefault):
+    keys = "test" + EX + BS + JF + "y"
+    wanted = """
+x
+y"""
+
 #######################
 # Test for bug 427298 #
 #######################
