@@ -2052,9 +2052,9 @@ if __name__ == '__main__':
             help="send commands to screen session SESSION [%default]")
         p.add_option("-i", "--interrupt", dest="interrupt",
             action="store_true",
-            help="Stop after defining the snippet. This allows the user" \
-             "to interactively test the snippet in vim. You must give exactly" \
-            "one test case on the cmdline. The test will always fail."
+            help="Stop after defining the snippet. This allows the user " \
+             "to interactively test the snippet in vim. You must give " \
+             "exactly one test case on the cmdline. The test will always fail."
         )
 
         o, args = p.parse_args()
