@@ -47,7 +47,54 @@ if !exists("g:UltiSnipsMappingsToIgnore")
    let g:UltiSnipsMappingsToIgnore = []
 endif
 
+" UltiSnipsEdit will use this variable to decide if a new window
+" is opened when editing. default is "normal", allowed are also
+" "vertical", "horizontal"
+if !exists("g:UltiSnipsEditSplit")
+   let g:UltiSnipsEditSplit = 'normal'
+endif
+
 " }}}
+
+"" Global Commands {{{
+
+" reset/reload snippets
+command! -nargs=0 UltiSnipsReset :py UltiSnips_Manager.reset()
+
+function! UltiSnipsEdit(...)
+	if a:0 == 1 && a:1 != ''
+		let type = a:1
+	elseif &filetype != ''
+		let type = split(&filetype, '\.')[0]
+	else
+		let type = 'all'
+	endif
+
+	if exists('g:UltiSnipsSnippetsDir')
+		let mode = 'e'
+		if exists('g:UltiSnipsEditSplit')
+			if g:UltiSnipsEditSplit == 'vertical'
+				let mode = 'vs'
+			elseif g:UltiSnipsEditSplit == 'horizontal'
+				let mode = 'sp'
+			endif
+		endif
+		exe ':'.mode.' '.g:UltiSnipsSnippetsDir.'/'.type.'.snippets'
+	else
+		for dir in split(&runtimepath, ',')
+			if isdirectory(dir.'/UltiSnips')
+				let g:UltiSnipsSnippetsDir = dir.'/UltiSnips'
+				call UltiSnipsEdit(type)
+				break
+			endif
+		endfor
+	endif
+endfunction
+
+" edit snippets, default of current file type or the specified type
+command! -nargs=? UltiSnipsEdit :call UltiSnipsEdit(<q-args>)
+
+"" }}}
 
 "" FUNCTIONS {{{
 function! CompensateForPUM()

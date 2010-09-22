@@ -7,8 +7,10 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    2.1 Installation                             |UltiSnips-installation|
    2.2 Deinstallation                           |UltiSnips-deinstallation|
    2.3 Updating                                 |UltiSnips-updating|
-3. Settings                                     |UltiSnips-settings|
-   3.1 Warning About Select Mode Mappings       |UltiSnips-warning-smappings|
+3. Settings & Commands                          |UltiSnips-settings|
+   3.1 Commands                                 |UltiSnips-commands|
+   3.2 Global Variables                         |UltiSnips-global-variables|
+   3.3 Warning About Select Mode Mappings       |UltiSnips-warning-smappings|
 4. Syntax                                       |UltiSnips-syntax|
    4.1 Adding Snippets                          |UltiSnips-adding-snippets|
    4.2 Plaintext Snippets                       |UltiSnips-plaintext-snippets|
@@ -111,6 +113,24 @@ To Update an installation, simply pull the latest revision: >
 =============================================================================
 3. SETTINGS                                              *UltiSnips-settings*
 
+3.1 Commands                                             *UltiSnips-commands*
+------------
+
+UltiSnips defines two Commands, the first one is UltiSnipsReset, which will
+reload the snippets definitions and is useful while you are tweaking a
+snippet.
+UltiSnipsEdit is the second one. It opens your private snippet definition file
+for the current filetype. You can easily open them manually of course, this is
+just a shortcut. There is also a variable called: >
+
+   g:UltiSnipsEditSplit 
+
+which can be set to "normal", "horizontal" or "vertical" that defines if a new
+window should be opened for the edit.
+
+3.2 Global Variables                             *UltiSnips-global-variables*
+--------------------
+
 You can freely define the keys used to expand a snippet and jump forward and
 backwards in it. There is also a key to list all snippets available for the
 current expand situation. The variables with the default values are: >
@@ -126,7 +146,8 @@ you vimrc: >
    let g:UltiSnipsJumpForwardTrigger="<tab>"
    let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 
-3.1 Warning About Select Mode Mappings          *UltiSnips-warning-smappings*
+
+3.3 Warning About Select Mode Mappings          *UltiSnips-warning-smappings*
 --------------------------------------
 
 The help for vim's *mapmode-s* states: >
