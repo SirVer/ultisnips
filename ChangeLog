@@ -1,3 +1,6 @@
+trunk:
+  - Added UltiSnipsReset and UltiSnipsEdit (Idea by JCEB)
+
 version 1.2:
   - many bugs were fixed
   - smode mappings for printable characters are now removed before expanding a
