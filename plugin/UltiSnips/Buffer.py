@@ -51,8 +51,6 @@ class TextBuffer(Buffer):
     def __str__(self):
         return '\n'.join(self._lines)
 
-from debug import debug
-
 class VimBuffer(Buffer):
     def __init__(self, before, after):
         self._bf = before
