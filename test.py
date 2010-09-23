@@ -2030,6 +2030,24 @@ class SelectModeMappings_BufferLocalMappings_ECR(_SelectModeMappings):
     buffer_maps = ("H", "blah")
     wanted = "Hello"
 
+####################
+# Folding problems #
+####################
+class FoldingEnabled_SnippetWithFold_ExpectNoFolding(_VimTest):
+    def _options_on(self):
+        self.send(":set foldlevel=0\n")
+        self.send(":set foldmethod=marker\n")
+    def _options_off(self):
+        self.send(":set foldlevel=0\n")
+        self.send(":set foldmethod=manual\n")
+
+    snippets = ("test", r"""Hello {{{
+${1:Welt} }}}""")
+    keys = "test" + EX + "Ball"
+    wanted = """Hello {{{
+Ball }}}"""
+
+
 
 
 

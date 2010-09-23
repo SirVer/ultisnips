@@ -51,6 +51,8 @@ class TextBuffer(Buffer):
     def __str__(self):
         return '\n'.join(self._lines)
 
+from debug import debug
+
 class VimBuffer(Buffer):
     def __init__(self, before, after):
         self._bf = before
@@ -62,6 +64,11 @@ class VimBuffer(Buffer):
             vim.current.buffer[a.start:a.stop] = b
         else:
             vim.current.buffer[a] = b
+
+        # Open any folds this might have created
+        vim.current.window.cursor = a.start + 1, 0
+        vim.command("normal zv")
+
     def __repr__(self):
         return "VimBuffer()"
 
