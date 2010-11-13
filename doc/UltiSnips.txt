@@ -666,6 +666,7 @@ Contributers are listed in chronological order:
    Michael Henry
    Chris Chambers
    Ryan Wooden
+   rupa - Rupa Deadwyler
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------
