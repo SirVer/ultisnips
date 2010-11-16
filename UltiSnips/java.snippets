@@ -1,6 +1,19 @@
 ###########################################################################
 #                            TEXTMATE SNIPPETS                            #
 ###########################################################################
+
+# Many of the snippets here use a global option called
+# "g:ultisnips_java_brace_style" which, if set to "nl" will put a newline
+# before '{' braces.
+
+global !p
+def nl(snip):
+    if snip.opt("g:ultisnips_java_brace_style", "") == "nl":
+        snip += ""
+    else:
+        snip.rv += " "
+endglobal
+
 snippet ab "abstract" b
 abstract 
 endsnippet
@@ -21,7 +34,7 @@ $0
 endsnippet
 
 snippet ca "catch" b
-catch (${1:Exception} ${2:e}) {
+catch (${1:Exception} ${2:e})`!p nl(snip)`{
 	$0
 }
 endsnippet
@@ -47,13 +60,13 @@ default:
 endsnippet
 
 snippet elif "else if" b
-else if ($1) {
+else if ($1)`!p nl(snip)`{
 	$0
 }
 endsnippet
 
-snippet el "else" b
-else {
+snippet /el(se)?/ "else" br
+else`!p nl(snip)`{
 	$0
 }
 endsnippet
@@ -63,19 +76,19 @@ final
 endsnippet
 
 snippet fore "for (each)" b
-for ($1 : $2) {
+for ($1 : $2)`!p nl(snip)`{
 	$0
 }
 endsnippet
 
 snippet for "for" b
-for ($1; $2; $3) {
+for ($1; $2; $3)`!p nl(snip)`{
 	$0
 }
 endsnippet
 
 snippet if "if" b
-if ($1) {
+if ($1)`!p nl(snip)`{
 	$0
 }
 endsnippet
@@ -99,7 +112,7 @@ snippet j.b "java_beans_" i
 java.beans.
 endsnippet
 
-snippet j.i "java_io" i 
+snippet j.i "java_io" i
 java.io.
 endsnippet
 
@@ -116,7 +129,7 @@ java.util.
 endsnippet
 
 snippet main "method (main)" b
-public static void main(String[] args) {
+public static void main(String[] args)`!p nl(snip)`{
 	$0
 }
 endsnippet
@@ -156,12 +169,12 @@ snippet re "return" b
 return 
 endsnippet
 
-snippet st "static" 
+snippet st "static"
 static 
 endsnippet
 
 snippet sw "switch" b
-switch ($1) {
+switch ($1)`!p nl(snip)`{
 	$0
 }
 endsnippet
@@ -171,13 +184,13 @@ synchronized
 endsnippet
 
 snippet tc "test case"
-public class ${1:`!p snip.rv = snip.basename or "untitled"`} extends ${2:TestCase} {
+public class ${1:`!p snip.rv = snip.basename or "untitled"`} extends ${2:TestCase}`!p nl(snip)`{
 	$0
 }
 endsnippet
 
 snippet t "test" b
-public void test${1:Name}() throws Exception {
+public void test${1:Name}() throws Exception`!p nl(snip)`{
 	$0
 }
 endsnippet
@@ -191,7 +204,7 @@ ${1:String} ${2:var}${3: = ${0:null}};
 endsnippet
 
 snippet wh "while" b
-while ($1) {
+while ($1)`!p nl(snip)`{
 	$0
 }
 endsnippet
