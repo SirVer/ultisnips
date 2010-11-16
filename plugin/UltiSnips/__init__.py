@@ -114,7 +114,7 @@ class _SnippetsFileParser(object):
         snip = line.split()[0]
 
         # Get and strip options if they exist
-        remain = line[len(snip):].lstrip()
+        remain = line[len(snip):].strip()
         words = remain.split()
         if len(words) > 2:
             # second to last word ends with a quote
