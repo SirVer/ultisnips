@@ -359,7 +359,7 @@ class Snippet(object):
                 line_ind = ""
             else:
                 line_ind = indent
-            line_ind += tabs * self._util.tab * " "
+            line_ind += tabs * self._util.ind_len * " "
             line_ind = self._util.indent_to_spaces(line_ind)
             line_ind = self._util.spaces_to_indent(line_ind)
             v.append(line_ind + line[tabs:])

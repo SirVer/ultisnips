@@ -17,11 +17,21 @@ class IndentUtil(object):
         self.et = (vim.eval("&expandtab") == "1")
         self.ts = int(vim.eval("&ts"))
 
-        self.tab = self.sts or self.ts
+        # The amount added when pressing tab in insert mode
+        self.ind_len = self.sts or self.ts
+
+    def _strip_tabs(self, indent, ts):
+        new_ind = []
+        for ch in indent:
+            if ch == '\t':
+                new_ind.append(" " * (ts - (len(new_ind) % ts)))
+            else:
+                new_ind.append(ch)
+        return "".join(new_ind)
 
     def indent_to_spaces(self, indent):
         """ Converts indentation to spaces respecting vim settings. """
-        indent = indent.replace(" " * self.ts, "\t")
+        indent = self._strip_tabs(indent, self.ts)
         right = (len(indent) - len(indent.rstrip(" "))) * " "
         indent = indent.replace(" ", "")
         indent = indent.replace('\t', " " * self.ts)
