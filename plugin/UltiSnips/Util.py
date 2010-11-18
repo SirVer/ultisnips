@@ -17,6 +17,8 @@ class IndentUtil(object):
         self.et = (vim.eval("&expandtab") == "1")
         self.ts = int(vim.eval("&ts"))
 
+        self.tab = self.sts or self.ts
+
     def indent_to_spaces(self, indent):
         """ Converts indentation to spaces respecting vim settings. """
         indent = indent.replace(" " * self.ts, "\t")
