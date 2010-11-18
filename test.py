@@ -765,15 +765,17 @@ class TabStop_VimScriptInterpolation_SimpleExample(_VimTest):
 class _ExpandTabs(_VimTest):
     def _options_on(self):
         self.send(":set ts=3\n")
+        self.send(":set sw=3\n")
         self.send(":set expandtab\n")
     def _options_off(self):
         self.send(":set ts=8\n")
+        self.send(":set sw=8\n")
         self.send(":set noexpandtab\n")
 
 class RecTabStopsWithExpandtab_SimpleExample_ECR(_ExpandTabs):
     snippets = ("m", "\tBlaahblah \t\t  ")
     keys = "m" + EX
-    wanted = "   Blaahblah         "
+    wanted = "   Blaahblah \t\t  "
 
 class RecTabStopsWithExpandtab_SpecialIndentProblem_ECR(_ExpandTabs):
     snippets = (
