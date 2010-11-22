@@ -250,6 +250,11 @@ snippet on. The options currently supported are >
        trigger (see above) even if it doesn't have any spaces. The resulting
        match is also passed to any python code blocks in your snippet
        definition as the local variable "match".
+   t   Don't expand tabs - By default, UltiSnips tries to expand leading tabs
+       in a snippet to match the results of automatic indentation. If this
+       option is set, UltiSnips will not try to do this expansion, and will
+       leave the tabs alone. This can be useful for snippets dealing with
+       tab delimited formats, etc..
 
 4.2 Plaintext Snippets                         *UltiSnips-plaintext-snippets*
 ----------------------

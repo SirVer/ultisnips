@@ -1438,6 +1438,79 @@ class SnippetOptions_ExpandWordSnippets_ExpandSuffix3(
     keys = "[[test" + EX
     wanted = "[[Expand me!"
 
+####################
+# NO TAB EXPANSION #
+####################
+class _No_Tab_Expand(_VimTest):
+    snippets = ("test", "\t\tExpand\tme!\t", "", "t")
+
+class No_Tab_Expand_Simple(_No_Tab_Expand):
+    keys = "test" + EX
+    wanted = "\t\tExpand\tme!\t"
+
+class No_Tab_Expand_Leading_Spaces(_No_Tab_Expand):
+    keys = "  test" + EX
+    wanted = "  \t\tExpand\tme!\t"
+
+class No_Tab_Expand_Leading_Tabs(_No_Tab_Expand):
+    keys = "\ttest" + EX
+    wanted = "\t\t\tExpand\tme!\t"
+
+class No_Tab_Expand_No_TS(_No_Tab_Expand):
+    def _options_on(self):
+        self.send(":set sw=3\n")
+        self.send(":set sts=3\n")
+    def _options_off(self):
+        self.send(":set sw=8\n")
+        self.send(":set sts=0\n")
+    keys = "test" + EX
+    wanted = "\t\tExpand\tme!\t"
+
+class No_Tab_Expand_ET(_No_Tab_Expand):
+    def _options_on(self):
+        self.send(":set sw=3\n")
+        self.send(":set expandtab\n")
+    def _options_off(self):
+        self.send(":set sw=8\n")
+        self.send(":set noexpandtab\n")
+    keys = "test" + EX
+    wanted = "\t\tExpand\tme!\t"
+
+class No_Tab_Expand_ET_Leading_Spaces(_No_Tab_Expand):
+    def _options_on(self):
+        self.send(":set sw=3\n")
+        self.send(":set expandtab\n")
+    def _options_off(self):
+        self.send(":set sw=8\n")
+        self.send(":set noexpandtab\n")
+    keys = "  test" + EX
+    wanted = "  \t\tExpand\tme!\t"
+
+class No_Tab_Expand_ET_SW(_No_Tab_Expand):
+    def _options_on(self):
+        self.send(":set sw=8\n")
+        self.send(":set expandtab\n")
+    def _options_off(self):
+        self.send(":set sw=8\n")
+        self.send(":set noexpandtab\n")
+    keys = "test" + EX
+    wanted = "\t\tExpand\tme!\t"
+
+class No_Tab_Expand_ET_SW_TS(_No_Tab_Expand):
+    def _options_on(self):
+        self.send(":set sw=3\n")
+        self.send(":set sts=3\n")
+        self.send(":set ts=3\n")
+        self.send(":set expandtab\n")
+    def _options_off(self):
+        self.send(":set sw=8\n")
+        self.send(":set ts=8\n")
+        self.send(":set sts=0\n")
+        self.send(":set noexpandtab\n")
+    keys = "test" + EX
+    wanted = "\t\tExpand\tme!\t"
+
+
 #################
 # REGEX MATCHES #
 #################
