@@ -68,7 +68,7 @@ endsnippet
 
 snippet def "smart def" b
 def ${1:function}(${2:self}):
-    """ ${3:TODO: Docstring for $1}`!p
+	""" ${3:TODO: Docstring for $1}`!p
 snip.rv = "" # Force update
 snip >> 1
 
@@ -76,7 +76,7 @@ args = get_args(t[2], snip)
 
 `${4:
 
-    `!p
+	`!p
 snip.rv = "" # Force update
 style = snip.opt("g:ultisnips_python_style", "normal")
 
@@ -85,7 +85,7 @@ if style == "doxygen":
 else:
     snip.rv = ":returns:"` ${5:TODO}
     }"""
-    ${0:pass}
+	${0:pass}
 
 endsnippet
 

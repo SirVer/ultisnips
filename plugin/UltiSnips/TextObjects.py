@@ -7,6 +7,7 @@ import stat
 import tempfile
 import vim
 
+from UltiSnips.Util import IndentUtil
 from UltiSnips.Buffer import TextBuffer
 from UltiSnips.Geometry import Span, Position
 
@@ -709,12 +710,9 @@ class SnippetUtil(object):
     """
 
     def __init__(self, initial_indent, cur=""):
-        self._sw = int(vim.eval("&sw"))
-        self._sts = int(vim.eval("&sts"))
-        self._et = (vim.eval("&expandtab") == "1")
-        self._ts = int(vim.eval("&ts"))
+        self._ind = IndentUtil()
 
-        self._initial_indent = self._indent_to_spaces(initial_indent)
+        self._initial_indent = self._ind.indent_to_spaces(initial_indent)
 
         self._reset(cur)
 
@@ -723,6 +721,7 @@ class SnippetUtil(object):
 
         :cur: the new value for c.
         """
+        self._ind.reset()
         self._c = cur
         self._rv = ""
         self._changed = False
@@ -735,7 +734,7 @@ class SnippetUtil(object):
 
         :amount: the amount by which to shift.
         """
-        self.indent += " " * self._sw * amount
+        self.indent += " " * self._ind.sw * amount
 
     def unshift(self, amount=1):
         """ Unshift the indentation level.
@@ -744,27 +743,11 @@ class SnippetUtil(object):
 
         :amount: the amount by which to unshift.
         """
-        by = -self._sw * amount
+        by = -self._ind.sw * amount
         try:
             self.indent = self.indent[:by]
         except IndexError:
             indent = ""
-
-    def _indent_to_spaces(self, indent):
-        """ converts indentation to spaces. """
-        indent = indent.replace(" " * self._ts, "\t")
-        right = (len(indent) - len(indent.rstrip(" "))) * " "
-        indent = indent.replace(" ", "")
-        indent = indent.replace('\t', " " * self._ts)
-        return indent + right
-
-    def _spaces_to_indent(self, indent):
-        """ Converts spaces to proper indentation respecting
-        et, ts, etc.
-        """
-        if not self._et:
-            indent = indent.replace(" " * self._ts, '\t')
-        return indent
 
     def mkline(self, line="", indent=None):
         """ Creates a properly set up line.
@@ -782,7 +765,7 @@ class SnippetUtil(object):
                     indent = indent[len(self._initial_indent):]
                 except IndexError:
                     indent = ""
-            indent = self._spaces_to_indent(indent)
+            indent = self._ind.spaces_to_indent(indent)
 
         return indent + line
 

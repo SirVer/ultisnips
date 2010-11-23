@@ -10,6 +10,7 @@ import vim
 from UltiSnips.Geometry import Position
 from UltiSnips.TextObjects import *
 from UltiSnips.Buffer import VimBuffer
+from UltiSnips.Util import IndentUtil
 
 # The following lines silence DeprecationWarnings. They are raised
 # by python2.6 for vim.error (which is a string that is used as an exception,
@@ -192,6 +193,7 @@ class _SnippetsFileParser(object):
 
 class Snippet(object):
     _INDENT = re.compile(r"^[ \t]*")
+    _TABS = re.compile(r"^\t*")
 
     def __init__(self, trigger, value, descr, options, globals):
         self._t = trigger
@@ -201,6 +203,7 @@ class Snippet(object):
         self._matched = ""
         self._last_re = None
         self._globals = globals
+        self._util = IndentUtil()
 
     def __repr__(self):
         return "Snippet(%s,%s,%s)" % (self._t,self._d,self._opts)
@@ -346,20 +349,26 @@ class Snippet(object):
 
     def launch(self, text_before, parent, start, end = None):
         indent = self._INDENT.match(text_before).group(0)
-        v = self._v
-        if len(indent):
-            lines = self._v.splitlines()
-            v = lines[0]
-            if len(lines) > 1:
-                v += os.linesep + \
-                        os.linesep.join([indent + l for l in lines[1:]])
+        lines = (self._v + "\n").splitlines()
+        self._util.reset()
 
-        if vim.eval("&expandtab") == '1':
-            ts = int(vim.eval("&ts"))
-            # expandtabs will not work for us, we have to replace all tabstops
-            # so that indent is right at least. tabs in the middle of the line
-            # will not be expanded correctly
-            v = v.replace('\t', ts*" ")
+        v = []
+        for line_num, line in enumerate(lines[0:]):
+            if "t" in self._opts:
+                tabs = 0
+            else:
+                tabs = len(self._TABS.match(line).group(0))
+
+            if line_num == 0:
+                line_ind = ""
+            else:
+                line_ind = indent
+
+            line_ind += tabs * self._util.sw * " "
+            line_ind = self._util.indent_to_spaces(line_ind)
+            line_ind = self._util.spaces_to_indent(line_ind)
+            v.append(line_ind + line[tabs:])
+        v = os.linesep.join(v)
 
         if parent is None:
             return SnippetInstance(StartMarker(start), indent,
