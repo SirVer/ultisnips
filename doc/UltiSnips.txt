@@ -680,6 +680,7 @@ Contributers are listed in chronological order:
 
    Alec Thomas (Python, smart def)
    Ryan Wooden
+   Ches Martin
 
 
 
