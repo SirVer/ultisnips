@@ -234,17 +234,15 @@ class Snippet(object):
         """ Test if a the current regex trigger matches
         `trigger`. If so, set _last_re and _matched.
         """
-        match = re.search(self._t, trigger)
-        if match:
+        for match in re.finditer(self._t, trigger):
             if match.end() != len(trigger):
-                match = False
+                continue
             else:
                 self._matched = trigger[match.start():match.end()]
-        if match:
+
             self._last_re = match
-        else:
-            self._last_re = None
-        return match
+            return match
+        return False
 
     def matches(self, trigger):
         # If user supplies both "w" and "i", it should perhaps be an
