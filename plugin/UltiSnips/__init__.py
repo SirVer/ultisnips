@@ -656,6 +656,16 @@ class SnippetManager(object):
             Snippet(trigger, value, descr, options, globals or {})
         )
 
+    def expand_anon(self, value, trigger="", descr="", options="", globals=None):
+        if globals is None:
+            globals = {}
+
+        before, after = self._get_before_after()
+        snip = Snippet(trigger, value, descr, options, globals)
+
+        if snip.matches(before):
+            self._do_snippet(snip, before, after)
+
     def clear_snippets(self, triggers = [], ft = "all"):
         if ft in self._snippets:
             self._snippets[ft].clear_snippets(triggers)
@@ -907,7 +917,10 @@ class SnippetManager(object):
         """
         lineno,col = vim.current.window.cursor
         # Adjust before, maybe the trigger is not the complete word
-        text_before = before[:-len(snippet.matched)]
+
+        text_before = before
+        if snippet.matched:
+            text_before = before[:-len(snippet.matched)]
 
         self._expect_move_wo_change = True
         if self._cs:
