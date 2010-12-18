@@ -1753,6 +1753,11 @@ class Anon_Trigger_Simple(_AnonBase):
     keys = "abc" + EA
     wanted = "simple expand"
 
+class Anon_Trigger_Twice(_AnonBase):
+    args = '"simple expand", "abc"'
+    keys = "abc" + EA + "\nabc" + EX
+    wanted = "simple expand\nabc" + EX
+
 class Anon_Trigger_Opts(_AnonBase):
     args = '"simple expand", ".*abc", "desc", "r"'
     keys = "blah blah abc" + EA
