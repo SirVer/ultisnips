@@ -1550,6 +1550,23 @@ class SnippetOptions_Regex_PythonBlockNoMatch(_VimTest):
     keys = "test cabfed" + EX
     wanted = "test No match"
 
+# Tests for Bug #691575
+class SnippetOptions_Regex_SameLine_Long_End(_VimTest):
+    snippets = ("(test.*)", "Expand me!", "", "r")
+    keys = "test test abc" + EX
+    wanted = "Expand me!"
+
+class SnippetOptions_Regex_SameLine_Long_Start(_VimTest):
+    snippets = ("(.*test)", "Expand me!", "", "r")
+    keys = "abc test test" + EX
+    wanted = "Expand me!"
+
+class SnippetOptions_Regex_SameLine_Simple(_VimTest):
+    snippets = ("(test)", "Expand me!", "", "r")
+    keys = "abc test test" + EX
+    wanted = "abc test Expand me!"
+
+
 #######################
 # MULTI-WORD SNIPPETS #
 #######################
