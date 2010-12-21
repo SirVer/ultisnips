@@ -11,6 +11,9 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    3.1 Commands                                 |UltiSnips-commands|
    3.2 Global Variables                         |UltiSnips-global-variables|
    3.3 Warning About Select Mode Mappings       |UltiSnips-warning-smappings|
+   3.4 Functions                                |UltiSnips-functions|
+      3.4.1 UltiSnips_AddSnippet                |UltiSnips_AddSnippet|
+      3.4.2 UltiSnips_Anon                      |UltiSnips_Anon|
 4. Syntax                                       |UltiSnips-syntax|
    4.1 Adding Snippets                          |UltiSnips-adding-snippets|
    4.2 Plaintext Snippets                       |UltiSnips-plaintext-snippets|
@@ -171,6 +174,33 @@ this feature. For example >
 
 will not unmap any mapping that contains the string "somePlugin" or
 "otherPlugin" in its complete definition as listed by *:smap* .
+
+
+3.4 Functions                                           *UltiSnips-functions*
+-------------
+
+Ultisnips provides two functions for extending core functionality.
+
+ 3.4.1 UltiSnips_AddSnippet                            *UltiSnips_AddSnippet*
+
+The first function is UltiSnips_AddSnippet(trigger, value, description,
+options, ...) which adds a new snippet to the current list of snippets with
+the provided trigger, value, description, and options, see |UltiSnips-syntax|
+for details on the meaning of those. All of the arguments are strings. You can
+also specify the filetype for the new snippet with the final optional
+argument.
+
+ 3.4.2 UltiSnips_Anon                                        *UltiSnips_Anon*
+
+The second function is UltiSnips_Anon(value, ...), which expands an anonymous
+Snippet. The snippet that gets expanded doesn't get added to the global list
+of snippets, so it can't be expanded a second time unless the function is
+called again. The value argument is the same as |UltiSnips_AddSnippet|. There
+are also optional arguments, which are 1) the trigger, 2) the description of
+the snippet, and 3) the options. All of the optional arguments are the same as
+the |UltiSnips_AddSnippet| function. The description is unused right now,
+whereas the trigger and options can change the way the snippet expands.
+
 
 =============================================================================
 4. SYNTAX                                                  *UltiSnips-syntax*
