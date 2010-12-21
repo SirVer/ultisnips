@@ -43,6 +43,7 @@ JF = "?" # Jump forwards
 JB = "+" # Jump backwards
 LS = "@" # List snippets
 EX = "\t" # EXPAND
+EA = "#" # Expand anonymous
 
 # Some VIM functions
 COMPL_KW = chr(24)+chr(14)
@@ -1717,6 +1718,72 @@ class ListAllAvailable_testtypedSecondOpt_ExceptCorrectResult(_ListAllSnippets):
 class ListAllAvailable_NonDefined_NoExceptionShouldBeRaised(_ListAllSnippets):
     keys = "hallo qualle" + LS + "Hi"
     wanted = "hallo qualleHi"
+
+
+#######################
+# ANONYMOUS EXPANSION #
+#######################
+
+class _AnonBase(_VimTest):
+    args = ""
+    def _options_on(self):
+        self.send(":inoremap <silent> " + EA + ' <C-R>=UltiSnips_Anon('
+                + self.args + ')<cr>\n')
+    def _options_off(self):
+        self.send(":iunmap <silent> " + EA + ' <C-R>=UltiSnips_Anon('
+                + self.args + ')<cr>\n')
+
+class Anon_NoTrigger_Simple(_AnonBase):
+    args = '"simple expand"'
+    keys = "abc" + EA
+    wanted = "abcsimple expand"
+
+class Anon_NoTrigger_Multi(_AnonBase):
+    args = '"simple $1 expand $1 $0"'
+    keys = "abc" + EA + "123" + JF + "456"
+    wanted = "abcsimple 123 expand 123 456"
+
+class Anon_Trigger_Multi(_AnonBase):
+    args = '"simple $1 expand $1 $0", "abc"'
+    keys = "123 abc" + EA + "123" + JF + "456"
+    wanted = "123 simple 123 expand 123 456"
+
+class Anon_Trigger_Simple(_AnonBase):
+    args = '"simple expand", "abc"'
+    keys = "abc" + EA
+    wanted = "simple expand"
+
+class Anon_Trigger_Twice(_AnonBase):
+    args = '"simple expand", "abc"'
+    keys = "abc" + EA + "\nabc" + EX
+    wanted = "simple expand\nabc" + EX
+
+class Anon_Trigger_Opts(_AnonBase):
+    args = '"simple expand", ".*abc", "desc", "r"'
+    keys = "blah blah abc" + EA
+    wanted = "simple expand"
+
+
+########################
+# ADD SNIPPET FUNCTION #
+########################
+
+class _AddFuncBase(_VimTest):
+    args = ""
+    def _options_on(self):
+        self.send(":call UltiSnips_AddSnippet("
+                + self.args + ')\n')
+
+class AddFunc_Simple(_AddFuncBase):
+    args = '"test", "simple expand", "desc", ""'
+    keys = "abc test" + EX
+    wanted = "abc simple expand"
+
+class AddFunc_Opt(_AddFuncBase):
+    args = '".*test", "simple expand", "desc", "r"'
+    keys = "abc test" + EX
+    wanted = "simple expand"
+
 
 #########################
 # SNIPPETS FILE PARSING #

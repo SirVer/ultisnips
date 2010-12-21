@@ -135,6 +135,32 @@ function! UltiSnips_JumpForwards()
  return ""
 endfunction
 
+function! UltiSnips_AddSnippet(trigger, value, descr, options, ...)
+ " Takes the same arguments as SnippetManager.add_snippet:
+ " (trigger, value, descr, options, ft = "all", globals = None)
+py << EOB
+args = vim.eval("a:000")
+trigger = vim.eval("a:trigger")
+value = vim.eval("a:value")
+descr = vim.eval("a:descr")
+options = vim.eval("a:options")
+
+UltiSnips_Manager.add_snippet(trigger, value, descr, options, *args)
+EOB
+ return ""
+endfunction
+
+function! UltiSnips_Anon(value, ...)
+ " Takes the same arguments as SnippetManager.expand_anon:
+ " (value, trigger="", descr="", options="", globals = None)
+py << EOB
+args = vim.eval("a:000")
+value = vim.eval("a:value")
+UltiSnips_Manager.expand_anon(value, *args)
+EOB
+ return ""
+endfunction
+
 function! UltiSnips_MapKeys()
    " Map the keys correctly
    if g:UltiSnipsExpandTrigger == g:UltiSnipsJumpForwardTrigger
