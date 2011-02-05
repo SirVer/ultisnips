@@ -665,6 +665,9 @@ class SnippetManager(object):
 
         if snip.matches(before):
             self._do_snippet(snip, before, after)
+            return True
+        else:
+            return False
 
     def clear_snippets(self, triggers = [], ft = "all"):
         if ft in self._snippets:
