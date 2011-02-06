@@ -188,12 +188,8 @@ endf
 python << EOF
 import vim, os, sys
 
-for p in vim.eval("&runtimepath").split(','):
-   dname = p + os.path.sep + "plugin"
-   if os.path.exists(dname + os.path.sep + "UltiSnips"):
-      if dname not in sys.path:
-         sys.path.append(dname)
-      break
+new_path = vim.eval('expand("<sfile>:h")')
+sys.path.append(new_path)
 
 from UltiSnips import UltiSnips_Manager
 UltiSnips_Manager.expand_trigger = vim.eval("g:UltiSnipsExpandTrigger")
