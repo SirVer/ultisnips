@@ -1,4 +1,14 @@
-trunk:
+version 1.3:
+  - Erlang snippets (g0rdin)
+  - Other VimScripts can now define and immediately expand anonymous snippets
+    ( *UltiSnips_Anon* ) (Ryan Wooden)
+  - Other VimScripts can now define new snippets via a function
+    ( *UltiSnips_AddSnippet* ) (Ryan Wooden)
+  - New Snippets for eruby and rails (Ches Martin).
+  - A new Option 't' has been added to snippets that avoid expanding tabstops.
+    Be also more consistent with how indenting is handled. (Ryan Wooden)
+  - Added a ftplugin script for .snippets files. Syntax highlighting still
+    missing. (Rupa Deadwyler)
   - Added UltiSnipsReset and UltiSnipsEdit (Idea by JCEB)
 
 version 1.2:
@@ -16,17 +26,17 @@ version 1.2:
   - added support for listing of valid triggers. Defaults to <c-tab>.
   - added support for option i (inword expansion)
   - extends keyword is now supported on the first line of snippet files. This makes it easy to
-	 define special cases, for example cpp extends c: a cpp trigger is useless
-	 in c, but a c trigger is valuable for cpp. 
+    define special cases, for example cpp extends c: a cpp trigger is useless
+    in c, but a c trigger is valuable for cpp. 
   - UltiSnips now adheres to expandtab and tabstop options of vim
 
 version 1.1:
   - Made triggers configurable. You can also use the same trigger for
-	 expanding and tabbing. The TextMate configuration <tab> and <s-tab> is now
-	 possible.
+    expanding and tabbing. The TextMate configuration <tab> and <s-tab> is now
+    possible.
   - Conditional Inserts can now be nested
   - Added support for b option. This only considers a snippet at the beginning
-	 of a line ( *UltiSnips-adding-snippets* )
+    of a line ( *UltiSnips-adding-snippets* )
   - Added support for ! option. This overwrites previously defined snippets
     with the same tab trigger ( *UltiSnips-adding-snippets* )
   - Support for dotted filetype syntax. Now snippets for more than one filetype
