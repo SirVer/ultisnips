@@ -560,8 +560,7 @@ class VimState(object):
 
                 # Check if any mappings where found
                 all_maps = filter(len, vim.eval(r"_tmp_smaps").splitlines())
-                if (len(all_maps) == 1 and
-                    all_maps[0][0] not in " sv"):
+                if (len(all_maps) == 1 and all_maps[0][0] not in " sv"):
                         # "No maps found". String could be localized. Hopefully
                         # it doesn't start with any of these letters in any
                         # language
@@ -572,12 +571,9 @@ class VimState(object):
                             not any(i in m for i in ignores) and len(m.strip())]
 
                 for m in maps:
-                    # Some mappings have their modes listed
-                    trig = m.split()
-                    if m[0] == " ":
-                        trig = trig[0]
-                    else:
-                        trig = trig[1]
+                    # The first three chars are the modes, that might be listed.
+                    # We are not interested in them here.
+                    trig = m[3:].split()[0]
 
                     # The bar separates commands
                     if trig[-1] == "|":
