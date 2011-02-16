@@ -11,6 +11,7 @@ from UltiSnips.Geometry import Position
 from UltiSnips.TextObjects import *
 from UltiSnips.Buffer import VimBuffer
 from UltiSnips.Util import IndentUtil
+from UltiSnips.Langmap import LangMapTranslator
 
 # The following lines silence DeprecationWarnings. They are raised
 # by python2.6 for vim.error (which is a string that is used as an exception,
@@ -374,43 +375,6 @@ class Snippet(object):
         else:
             return SnippetInstance(parent, indent, v, start,
                     end, last_re = self._last_re, globals = self._globals)
-
-class LangMapTranslator(object):
-    """
-    This object cares for the vim langmap option and basically reverses
-    the mappings. This was the only solution to get UltiSnips to work
-    nicely with langmap; other stuff I tried was using inoremap movement
-    commands and caching and restoring the langmap option.
-
-    Note that this will not work if the langmap overwrites a character
-    completely, for example if 'j' is remapped, but nothing is mapped
-    back to 'j', then moving one line down is no longer possible and
-    UltiSnips will fail.
-    """
-    _maps = {}
-
-    def _create_translation(self, langmap):
-        from_chars, to_chars = "", ""
-        for c in langmap.split(','):
-            if ";" in c:
-                a,b = c.split(';')
-                from_chars += a
-                to_chars += b
-            else:
-                from_chars += c[::2]
-                to_chars += c[1::2]
-
-        self._maps[langmap] = string.maketrans(to_chars, from_chars)
-
-    def translate(self, s):
-        langmap = vim.eval("&langmap").strip()
-        if langmap == "":
-            return s
-
-        if langmap not in self._maps:
-            self._create_translation(langmap)
-
-        return s.translate(self._maps[langmap])
 
 class VimState(object):
     def __init__(self):
