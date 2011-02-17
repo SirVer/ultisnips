@@ -14,3 +14,8 @@ All snippets from those sources were copied and cleaned up, so that they are
   - not using shell script, only python (so they are cross platform compatible)
   - not using any feature that UltiSnips doesn't offer
 
+UltiSnips has seen contributions by various individuals. Those contributions
+have been merged into this collection seamlessly and without further comments.
+
+-- vim:ft=rst:nospell:
+
