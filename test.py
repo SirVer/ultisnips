@@ -226,6 +226,43 @@ class MultilineExpandWithFormatoptionsOn_ExceptCorrectResult(_VimTest):
     def _options_off(self):
         self.send(":set tw=0\n")
 
+class MultilineExpandWithFormatoptionsOnTextAfter_ExceptCorrectResult(_VimTest):
+    """Testcase for lp:719998"""
+    snippets = ("test", "${1:longer expand}after\nstart$1end")
+    keys = ("test" + EX + "This is a longer snippet that should wrap properly "
+            "and the mirror below should work as well")
+    wanted = \
+"""This is a longer
+snippet that should
+wrap properly and
+the mirror below
+should work as wellafter
+startThis is a longer
+snippet that should
+wrap properly and
+the mirror below
+should work as wellend"""
+    def _options_on(self):
+        self.send(":set tw=20\n")
+    def _options_off(self):
+        self.send(":set tw=0\n")
+
+class MultilineExpandWithFormatoptionsWrapOnLongWord_ExceptCorrectResult(_VimTest):
+    """Testcase for lp:719998"""
+    snippets = ("test", "${1:longer expand}after\nstart$1end")
+    keys = ("test" + EX + "This is a longersnippet that should wrap properly")
+    wanted = \
+"""This is a
+longersnippet that
+should wrap properlyafter
+startThis is a
+longersnippet that
+should wrap properlyend"""
+
+    def _options_on(self):
+        self.send(":set tw=20\n")
+    def _options_off(self):
+        self.send(":set tw=0\n")
 
 ############
 # TabStops #
