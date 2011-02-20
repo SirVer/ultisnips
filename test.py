@@ -2300,7 +2300,7 @@ if __name__ == '__main__':
 
     # Now, source our runtime
     send(":so plugin/UltiSnips.vim\n", options.session)
-    time.sleep(.4) # Parsing and intializing UltiSnips takes a while.
+    time.sleep(2) # Parsing and initializing UltiSnips takes a while.
 
     # Inform all test case which screen session to use
     suite = unittest.TestSuite()
