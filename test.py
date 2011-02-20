@@ -1775,8 +1775,7 @@ class _AnonBase(_VimTest):
         self.send(":inoremap <silent> " + EA + ' <C-R>=UltiSnips_Anon('
                 + self.args + ')<cr>\n')
     def _options_off(self):
-        self.send(":iunmap <silent> " + EA + ' <C-R>=UltiSnips_Anon('
-                + self.args + ')<cr>\n')
+        self.send(":iunmap <silent> " + EA + '\n')
 
 class Anon_NoTrigger_Simple(_AnonBase):
     args = '"simple expand"'
