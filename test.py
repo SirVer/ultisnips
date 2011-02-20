@@ -217,6 +217,23 @@ class MultilineExpandTestTyping_ExceptCorrectResult(_VimTest):
     wanted = "Wie Hallo Welt!\nUnd Wie gehtsHuiui! gehts"
     keys = "Wie hallo gehts" + ESC + "bhi" + EX + "Huiui!"
 
+
+class MultilineExpandWithFormatoptionsOnTextBeforeAndAfter_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "Before${1:longer expand}After\nstart$1end")
+    keys = "test" + EX + "This is a longer text that should wrap"
+    wanted = \
+"""BeforeThis is a
+longer text that
+should wrapAfter
+startThis is a
+longer text that
+should wrapend"""
+
+    def _options_on(self):
+        self.send(":set tw=20\n")
+    def _options_off(self):
+        self.send(":set tw=0\n")
+
 class MultilineExpandWithFormatoptionsOn_ExceptCorrectResult(_VimTest):
     snippets = ("test", "${1:longer expand}\n$0")
     keys = "test" + EX + "This is a longer text that should wrap"
