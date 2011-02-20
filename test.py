@@ -71,6 +71,7 @@ class _VimTest(unittest.TestCase):
     wanted = ""
     keys = ""
     sleeptime = 0.00
+    output = None
 
     def send(self,s):
         send(s, self.session)
