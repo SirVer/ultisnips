@@ -217,8 +217,21 @@ class MultilineExpandTestTyping_ExceptCorrectResult(_VimTest):
     wanted = "Wie Hallo Welt!\nUnd Wie gehtsHuiui! gehts"
     keys = "Wie hallo gehts" + ESC + "bhi" + EX + "Huiui!"
 
+########################
+# Format options tests #
+########################
+class _FormatoptionsBase(_VimTest):
+    def _options_on(self):
+        self.send(":set tw=20\n")
+    def _options_off(self):
+        self.send(":set tw=0\n")
 
-class MultilineExpandWithFormatoptionsOnTextBeforeAndAfter_ExceptCorrectResult(_VimTest):
+class FOSimple_ExceptCorrectResult(_FormatoptionsBase):
+    snippets = ("test", "${1:longer expand}\n$0")
+    keys = "test" + EX + "This is a longer text that should wrap"
+    wanted = "This is a longer\ntext that should\nwrap\n"
+
+class FOTextBeforeAndAfter_ExceptCorrectResult(_FormatoptionsBase):
     snippets = ("test", "Before${1:longer expand}After\nstart$1end")
     keys = "test" + EX + "This is a longer text that should wrap"
     wanted = \
@@ -229,21 +242,8 @@ startThis is a
 longer text that
 should wrapend"""
 
-    def _options_on(self):
-        self.send(":set tw=20\n")
-    def _options_off(self):
-        self.send(":set tw=0\n")
 
-class MultilineExpandWithFormatoptionsOn_ExceptCorrectResult(_VimTest):
-    snippets = ("test", "${1:longer expand}\n$0")
-    keys = "test" + EX + "This is a longer text that should wrap"
-    wanted = "This is a longer\ntext that should\nwrap\n"
-    def _options_on(self):
-        self.send(":set tw=20\n")
-    def _options_off(self):
-        self.send(":set tw=0\n")
-
-class MultilineExpandWithFormatoptionsOnTextAfter_ExceptCorrectResult(_VimTest):
+class FOTextAfter_ExceptCorrectResult(_FormatoptionsBase):
     """Testcase for lp:719998"""
     snippets = ("test", "${1:longer expand}after\nstart$1end")
     keys = ("test" + EX + "This is a longer snippet that should wrap properly "
@@ -259,12 +259,8 @@ snippet that should
 wrap properly and
 the mirror below
 should work as wellend"""
-    def _options_on(self):
-        self.send(":set tw=20\n")
-    def _options_off(self):
-        self.send(":set tw=0\n")
 
-class MultilineExpandWithFormatoptionsWrapOnLongWord_ExceptCorrectResult(_VimTest):
+class FOWrapOnLongWord_ExceptCorrectResult(_FormatoptionsBase):
     """Testcase for lp:719998"""
     snippets = ("test", "${1:longer expand}after\nstart$1end")
     keys = ("test" + EX + "This is a longersnippet that should wrap properly")
@@ -275,11 +271,6 @@ should wrap properlyafter
 startThis is a
 longersnippet that
 should wrap properlyend"""
-
-    def _options_on(self):
-        self.send(":set tw=20\n")
-    def _options_off(self):
-        self.send(":set tw=0\n")
 
 ############
 # TabStops #
