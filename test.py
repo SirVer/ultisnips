@@ -28,7 +28,14 @@ import os
 import tempfile
 import unittest
 import time
+import re
+import platform
+
+WIN = platform.system() == "Windows"
+
 from textwrap import dedent
+
+
 
 # Some constants for better reading
 BS = '\x7f'
@@ -37,6 +44,9 @@ ARR_L = '\x1bOD'
 ARR_R = '\x1bOC'
 ARR_U = '\x1bOA'
 ARR_D = '\x1bOB'
+
+# multi-key sequences generating a single key press
+SEQUENCES = [ARR_L, ARR_R, ARR_U, ARR_D]
 
 # Defined Constants
 JF = "?" # Jump forwards
@@ -49,9 +59,74 @@ EA = "#" # Expand anonymous
 COMPL_KW = chr(24)+chr(14)
 COMPL_ACCEPT = chr(25)
 
-def send(s,session):
+
+################ windows ################
+
+if WIN:
+    # import windows specific modules
+    import win32api, win32com, win32con, win32com.client
+    shell = win32com.client.Dispatch("WScript.Shell")
+
+def focus_win(title=None):
+    if not shell.AppActivate(title or "- GVIM"):
+        raise Exception("Failed to switch to GVim window")
+    time.sleep(1)
+
+BRACES = re.compile("([}{])")
+WIN_ESCAPES = ["+", "^", "%", "~", "[", "]", "<", ">", "(", ")"]
+WIN_REPLACES = [
+        (BS, "{BS}"),
+        (ARR_L, "{LEFT}"),
+        (ARR_R, "{RIGHT}"),
+        (ARR_U, "{UP}"),
+        (ARR_D, "{DOWN}"),
+        ("\t", "{TAB}"),
+        ("\n", "~"),
+        (ESC, "{ESC}"),
+        ]
+def convert_keys(keys):
+    keys = BRACES.sub(r"{\1}", keys)
+    for k in WIN_ESCAPES:
+        keys = keys.replace(k, "{%s}" % k)
+    for f, r in WIN_REPLACES:
+        keys = keys.replace(f, r)
+    return keys
+
+SEQ_BUF = []
+def send_win(keys, session):
+    global SEQ_BUF
+    SEQ_BUF.append(keys)
+    seq = "".join(SEQ_BUF)
+
+    for f in SEQUENCES:
+        if f.startswith(seq) and f != seq:
+            return
+    SEQ_BUF = []
+
+    seq_o = seq
+    seq = convert_keys(seq)
+    print "keys: '%s' -> '%s'" % (seq_o, seq.replace("~", "\n"))
+    shell.SendKeys(seq)
+
+################ end windows ################
+
+
+
+
+def send_screen(s,session):
     s = s.replace("'", r"'\''")
     os.system("screen -x %s -X stuff '%s'" % (session, s))
+
+
+def send(s, session):
+    if WIN:
+        send_win(s, session)
+    else:
+        send_screen(s, session)
+
+def focus(title=None):
+    if WIN:
+        focus_win(title=title)
 
 def type(str, session, sleeptime):
     """
@@ -102,6 +177,7 @@ class _VimTest(unittest.TestCase):
         pass
 
     def setUp(self):
+        #focus()
         self.send(ESC)
 
         self.send(":py UltiSnips_Manager.reset(test_error=True)\n")
@@ -2240,6 +2316,8 @@ if __name__ == '__main__':
     # The next line doesn't work in python 2.3
     test_loader = unittest.TestLoader()
     all_test_suites = test_loader.loadTestsFromModule(__import__("test"))
+
+    focus()
 
     # Ensure we are not running in VI-compatible mode.
     send(""":set nocompatible\n""", options.session)
