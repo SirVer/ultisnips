@@ -23,6 +23,7 @@
 #
 # The testsuite will use ``screen`` to inject commands into the Vim under test,
 # and will compare the resulting output to expected results.
+#
 
 import os
 import tempfile
