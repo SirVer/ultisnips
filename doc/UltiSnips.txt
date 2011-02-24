@@ -17,7 +17,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
 4. Syntax                                       |UltiSnips-syntax|
    4.1 Adding Snippets                          |UltiSnips-adding-snippets|
    4.2 Plaintext Snippets                       |UltiSnips-plaintext-snippets|
-   4.3 Interpolation                            |UltiSnips-integration|
+   4.3 Interpolation                            |UltiSnips-interpolation|
       4.3.1 Shellcode                           |UltiSnips-shellcode|
       4.3.2 VimScript                           |UltiSnips-vimscript|
       4.3.3 Python                              |UltiSnips-python|
