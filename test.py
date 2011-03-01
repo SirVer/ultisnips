@@ -162,6 +162,10 @@ class _VimTest(unittest.TestCase):
     sleeptime = 0.00
     output = None
 
+    skip_on_windows = False
+    skip_on_linux = False
+    skip_on_mac = False
+
     def send(self,s):
         send(s, self.session)
 
@@ -191,8 +195,19 @@ class _VimTest(unittest.TestCase):
     def _options_off(self):
         pass
 
+    def _skip(self, reason):
+        if hasattr(self, "skipTest"):
+            self.skipTest(reason)
+
     def setUp(self):
-        #focus()
+        system = platform.system()
+        if self.skip_on_windows and system == "Windows":
+            return self._skip("Running on windows")
+        if self.skip_on_linux and system == "Linux":
+            return self._skip("Running on Linux")
+        if self.skip_on_mac and system == "Darwin":
+            return self._skip("Running on Darwin/Mac")
+
         self.send(ESC)
 
         self.send(":py UltiSnips_Manager.reset(test_error=True)\n")
@@ -564,32 +579,39 @@ class TabStop_Multiline_DelFirstOverwriteSecond_Overwrite(_VimTest):
 # ShellCode Interpolation #
 ###########################
 class TabStop_Shell_SimpleExample(_VimTest):
+    skip_on_windows = True
     snippets = ("test", "hi `echo hallo` you!")
     keys = "test" + EX + "and more"
     wanted = "hi hallo you!and more"
 class TabStop_Shell_TextInNextLine(_VimTest):
+    skip_on_windows = True
     snippets = ("test", "hi `echo hallo`\nWeiter")
     keys = "test" + EX + "and more"
     wanted = "hi hallo\nWeiterand more"
 class TabStop_Shell_InDefValue_Leave(_VimTest):
+    skip_on_windows = True
     sleeptime = 0.09 # Do this very slowly
     snippets = ("test", "Hallo ${1:now `echo fromecho`} end")
     keys = "test" + EX + JF + "and more"
     wanted = "Hallo now fromecho endand more"
 class TabStop_Shell_InDefValue_Overwrite(_VimTest):
+    skip_on_windows = True
     snippets = ("test", "Hallo ${1:now `echo fromecho`} end")
     keys = "test" + EX + "overwrite" + JF + "and more"
     wanted = "Hallo overwrite endand more"
 class TabStop_Shell_TestEscapedChars_Overwrite(_VimTest):
+    skip_on_windows = True
     snippets = ("test", r"""`echo \`echo "\\$hi"\``""")
     keys = "test" + EX
     wanted = "$hi"
 class TabStop_Shell_TestEscapedCharsAndShellVars_Overwrite(_VimTest):
+    skip_on_windows = True
     snippets = ("test", r"""`hi="blah"; echo \`echo "$hi"\``""")
     keys = "test" + EX
     wanted = "blah"
 
 class TabStop_Shell_ShebangPython(_VimTest):
+    skip_on_windows = True
     sleeptime = 0.09 # Do this very slowly
     snippets = ("test", """Hallo ${1:now `#!/usr/bin/env python
 print "Hallo Welt"
