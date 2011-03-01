@@ -65,13 +65,19 @@ COMPL_ACCEPT = chr(25)
 
 if WIN:
     # import windows specific modules
-    import win32api, win32com, win32con, win32com.client
+    import win32com.client, win32gui
     shell = win32com.client.Dispatch("WScript.Shell")
 
 def focus_win(title=None):
     if not shell.AppActivate(title or "- GVIM"):
         raise Exception("Failed to switch to GVim window")
     time.sleep(1)
+
+def is_focused(title=None):
+    cur_title = win32gui.GetWindowText(win32gui.GetForegroundWindow())
+    if (title or "- GVIM") in cur_title:
+        return True
+    return False
 
 BRACES = re.compile("([}{])")
 WIN_ESCAPES = ["+", "^", "%", "~", "[", "]", "<", ">", "(", ")"]
@@ -106,7 +112,14 @@ def send_win(keys, session):
 
     seq_o = seq
     seq = convert_keys(seq)
-    print "keys: '%s' -> '%s'" % (seq_o, seq.replace("~", "\n"))
+
+    if not is_focused():
+        time.sleep(2)
+        focus()
+    if not is_focused():
+        # This is the only way I can find to stop test execution
+        raise KeyboardInterrupt("Failed to focus GVIM")
+
     shell.SendKeys(seq)
 
 ################ end windows ################
