@@ -694,8 +694,12 @@ class SnippetManager(object):
                     this_entered = vim.current.line[:self._vstate.pos.col]
                     self._chars_entered('\n' + cline + this_entered, 1)
                 if line_was_shortened and user_didnt_enter_newline:
-                    self._backspace(len(self._vstate.last_line)-len(lline))
-                    self._chars_entered('\n' + cline, 1)
+                    nchars_deleted_in_lline = self._vstate.ppos.col - len(lline)
+                    self._backspace(nchars_deleted_in_lline)
+                    nchars_wrapped_from_lline_after_cursor = \
+                            len(self._vstate.last_line) - self._vstate.ppos.col
+                    self._chars_entered('\n' + cline
+                        [:len(cline)-nchars_wrapped_from_lline_after_cursor], 1)
                 else:
                     pentered = lline[self._vstate.ppos.col:]
                     this_entered = vim.current.line[:self._vstate.pos.col]
