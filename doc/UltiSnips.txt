@@ -126,10 +126,10 @@ UltiSnipsEdit is the second one. It opens your private snippet definition file
 for the current filetype. You can easily open them manually of course, this is
 just a shortcut. There is also a variable called: >
 
-   g:UltiSnipsEditSplit 
+   g:UltiSnipsEditSplit
 
-which can be set to "normal", "horizontal" or "vertical" that defines if a new
-window should be opened for the edit.
+which can be set to "normal" (default), "horizontal" or "vertical" that
+defines if a new window should be opened for the edit.
 
 3.2 Global Variables                             *UltiSnips-global-variables*
 --------------------
@@ -245,7 +245,7 @@ marks the end of the snippet. The trailing newline is chopped from the
 definition. In the starting line, the description and options are optional.
 
 If you want to use a multi-word trigger, you can surround the trigger with any
-single character on each side. eg. >
+single character on each side. e.g. >
     snippet "tab trigger" [ "description" [ options ] ]
 or >
     snippet !"tab trigger"! [ "description" [ options ] ]
@@ -264,8 +264,8 @@ snippet on. The options currently supported are >
    b   Beginning of line - This snippet will only be expanded if you are at
        the beginning of a line (that is if there are only whitespaces in front
        of the cursor). Default is to expand snippets at every position, even
-       in the middle of a line. Most of my snippets have this option set, it keeps
-       UltiSnips out of the way.
+       in the middle of a line. Most of my snippets have this option set, it
+       keeps UltiSnips out of the way.
    i   Inword expansion - Normally, triggers need whitespace before them to be
        expanded. With this option, triggers are also expanded in the middle of
        a word.
@@ -492,7 +492,7 @@ url as href. After entering it you jump to $2 which has the default text '
 class="link"'. Now, you can either hit backspace, because you do not want to
 enter a class attribute for this tag or you hit <c-j> to change the class name
 (which is tab stop $3). When you are satisfied with the first line you hit
-<c-j> again to finish this snippet and contiue inside the anchor.
+<c-j> again to finish this snippet and continue inside the anchor.
 
 a<tab>http://www.google.com<c-j><BS><c-j>hi ->
 <a href="http://www.google.com">
