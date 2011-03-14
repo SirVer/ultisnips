@@ -1010,7 +1010,7 @@ class SnippetManager(object):
             if p not in self._snippets:
                 self._load_snippets_for(p)
 
-    def _find_snippets(self, ft, trigger, potentially = False):
+    def _find_snippets(self, ft, trigger, potentially = False, seen=None):
         """
         Find snippets matching trigger
 
@@ -1024,9 +1024,17 @@ class SnippetManager(object):
         if not snips:
             return []
 
-        parent_results = reduce( lambda a,b: a+b,
-            [ self._find_snippets(p, trigger, potentially)
-                for p in snips.extends ], [])
+        if not seen:
+            seen = []
+        seen.append(ft)
+
+        parent_results = []
+
+        for p in snips.extends:
+            if p not in seen:
+                seen.append(p)
+                parent_results += self._find_snippets(p, trigger,
+                        potentially, seen)
 
         return parent_results + snips.get_matching_snippets(
             trigger, potentially)
