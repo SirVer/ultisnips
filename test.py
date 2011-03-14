@@ -2290,6 +2290,9 @@ if __name__ == '__main__':
     # Ensure we are not running in VI-compatible mode.
     send(""":set nocompatible\n""", options.session)
 
+    # Do not mess with the X clipboard
+    send(""":set clipboard=""\n""", options.session)
+
     # Ensure runtimepath includes only Vim's own runtime files
     # and those of the UltiSnips directory under test ('.').
     send(""":set runtimepath=$VIMRUNTIME,.\n""", options.session)
