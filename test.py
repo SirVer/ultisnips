@@ -29,7 +29,14 @@ import os
 import tempfile
 import unittest
 import time
+import re
+import platform
+
+WIN = platform.system() == "Windows"
+
 from textwrap import dedent
+
+
 
 # Some constants for better reading
 BS = '\x7f'
@@ -38,6 +45,9 @@ ARR_L = '\x1bOD'
 ARR_R = '\x1bOC'
 ARR_U = '\x1bOA'
 ARR_D = '\x1bOB'
+
+# multi-key sequences generating a single key press
+SEQUENCES = [ARR_L, ARR_R, ARR_U, ARR_D]
 
 # Defined Constants
 JF = "?" # Jump forwards
@@ -50,9 +60,87 @@ EA = "#" # Expand anonymous
 COMPL_KW = chr(24)+chr(14)
 COMPL_ACCEPT = chr(25)
 
-def send(s,session):
+
+################ windows ################
+
+if WIN:
+    # import windows specific modules
+    import win32com.client, win32gui
+    shell = win32com.client.Dispatch("WScript.Shell")
+
+def focus_win(title=None):
+    if not shell.AppActivate(title or "- GVIM"):
+        raise Exception("Failed to switch to GVim window")
+    time.sleep(1)
+
+def is_focused(title=None):
+    cur_title = win32gui.GetWindowText(win32gui.GetForegroundWindow())
+    if (title or "- GVIM") in cur_title:
+        return True
+    return False
+
+BRACES = re.compile("([}{])")
+WIN_ESCAPES = ["+", "^", "%", "~", "[", "]", "<", ">", "(", ")"]
+WIN_REPLACES = [
+        (BS, "{BS}"),
+        (ARR_L, "{LEFT}"),
+        (ARR_R, "{RIGHT}"),
+        (ARR_U, "{UP}"),
+        (ARR_D, "{DOWN}"),
+        ("\t", "{TAB}"),
+        ("\n", "~"),
+        (ESC, "{ESC}"),
+        ]
+def convert_keys(keys):
+    keys = BRACES.sub(r"{\1}", keys)
+    for k in WIN_ESCAPES:
+        keys = keys.replace(k, "{%s}" % k)
+    for f, r in WIN_REPLACES:
+        keys = keys.replace(f, r)
+    return keys
+
+SEQ_BUF = []
+def send_win(keys, session):
+    global SEQ_BUF
+    SEQ_BUF.append(keys)
+    seq = "".join(SEQ_BUF)
+
+    for f in SEQUENCES:
+        if f.startswith(seq) and f != seq:
+            return
+    SEQ_BUF = []
+
+    seq_o = seq
+    seq = convert_keys(seq)
+
+    if not is_focused():
+        time.sleep(2)
+        focus()
+    if not is_focused():
+        # This is the only way I can find to stop test execution
+        raise KeyboardInterrupt("Failed to focus GVIM")
+
+    shell.SendKeys(seq)
+
+################ end windows ################
+
+
+
+
+def send_screen(s,session):
     s = s.replace("'", r"'\''")
     os.system("screen -x %s -X stuff '%s'" % (session, s))
+
+
+def send(s, session):
+    if WIN:
+        send_win(s, session)
+    else:
+        send_screen(s, session)
+
+def focus(title=None):
+    if WIN:
+        focus_win(title=title)
 
 def type(str, session, sleeptime):
     """
@@ -73,6 +161,10 @@ class _VimTest(unittest.TestCase):
     keys = ""
     sleeptime = 0.00
     output = None
+
+    skip_on_windows = False
+    skip_on_linux = False
+    skip_on_mac = False
 
     def send(self,s):
         send(s, self.session)
@@ -103,7 +195,19 @@ class _VimTest(unittest.TestCase):
     def _options_off(self):
         pass
 
+    def _skip(self, reason):
+        if hasattr(self, "skipTest"):
+            self.skipTest(reason)
+
     def setUp(self):
+        system = platform.system()
+        if self.skip_on_windows and system == "Windows":
+            return self._skip("Running on windows")
+        if self.skip_on_linux and system == "Linux":
+            return self._skip("Running on Linux")
+        if self.skip_on_mac and system == "Darwin":
+            return self._skip("Running on Darwin/Mac")
+
         self.send(ESC)
 
         self.send(":py UltiSnips_Manager.reset(test_error=True)\n")
@@ -475,32 +579,39 @@ class TabStop_Multiline_DelFirstOverwriteSecond_Overwrite(_VimTest):
 # ShellCode Interpolation #
 ###########################
 class TabStop_Shell_SimpleExample(_VimTest):
+    skip_on_windows = True
     snippets = ("test", "hi `echo hallo` you!")
     keys = "test" + EX + "and more"
     wanted = "hi hallo you!and more"
 class TabStop_Shell_TextInNextLine(_VimTest):
+    skip_on_windows = True
     snippets = ("test", "hi `echo hallo`\nWeiter")
     keys = "test" + EX + "and more"
     wanted = "hi hallo\nWeiterand more"
 class TabStop_Shell_InDefValue_Leave(_VimTest):
+    skip_on_windows = True
     sleeptime = 0.09 # Do this very slowly
     snippets = ("test", "Hallo ${1:now `echo fromecho`} end")
     keys = "test" + EX + JF + "and more"
     wanted = "Hallo now fromecho endand more"
 class TabStop_Shell_InDefValue_Overwrite(_VimTest):
+    skip_on_windows = True
     snippets = ("test", "Hallo ${1:now `echo fromecho`} end")
     keys = "test" + EX + "overwrite" + JF + "and more"
     wanted = "Hallo overwrite endand more"
 class TabStop_Shell_TestEscapedChars_Overwrite(_VimTest):
+    skip_on_windows = True
     snippets = ("test", r"""`echo \`echo "\\$hi"\``""")
     keys = "test" + EX
     wanted = "$hi"
 class TabStop_Shell_TestEscapedCharsAndShellVars_Overwrite(_VimTest):
+    skip_on_windows = True
     snippets = ("test", r"""`hi="blah"; echo \`echo "$hi"\``""")
     keys = "test" + EX
     wanted = "blah"
 
 class TabStop_Shell_ShebangPython(_VimTest):
+    skip_on_windows = True
     sleeptime = 0.09 # Do this very slowly
     snippets = ("test", """Hallo ${1:now `#!/usr/bin/env python
 print "Hallo Welt"
@@ -2286,6 +2397,8 @@ if __name__ == '__main__':
     # The next line doesn't work in python 2.3
     test_loader = unittest.TestLoader()
     all_test_suites = test_loader.loadTestsFromModule(__import__("test"))
+
+    focus()
 
     # Ensure we are not running in VI-compatible mode.
     send(""":set nocompatible\n""", options.session)
