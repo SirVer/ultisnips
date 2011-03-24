@@ -90,7 +90,13 @@ WIN_REPLACES = [
         ("\t", "{TAB}"),
         ("\n", "~"),
         (ESC, "{ESC}"),
-        ]
+
+        # On my system ` waits for a second keystroke, so `+SPACE = "`".  On
+        # most systems, `+Space = "` ". I work around this, by sending the host
+        # ` as `+_+BS. Awkward, but the only way I found to get this working.
+        ("`", "`_{BS}"),
+        ("´", "´_{BS}"),
+]
 def convert_keys(keys):
     keys = BRACES.sub(r"{\1}", keys)
     for k in WIN_ESCAPES:
@@ -110,7 +116,6 @@ def send_win(keys, session):
             return
     SEQ_BUF = []
 
-    seq_o = seq
     seq = convert_keys(seq)
 
     if not is_focused():
@@ -628,7 +633,7 @@ class PythonCodeOld_SimpleExample(_VimTest):
     snippets = ("test", """hi `!p res = "Hallo"` End""")
     keys = "test" + EX
     wanted = "hi Hallo End"
-class PythonCodeOld_ReferencePlaceholder(_VimTest):
+class PythonCodeOld_ReferencePlaceholderAfter(_VimTest):
     snippets = ("test", """${1:hi} `!p res = t[1]+".blah"` End""")
     keys = "test" + EX + "ho"
     wanted = "ho ho.blah End"
