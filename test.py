@@ -95,7 +95,7 @@ WIN_REPLACES = [
         # most systems, `+Space = "` ". I work around this, by sending the host
         # ` as `+_+BS. Awkward, but the only way I found to get this working.
         ("`", "`_{BS}"),
-        ("´", "´_{BS}"),
+        ("Â´", "Â´_{BS}"),
         ("{^}", "{^}_{BS}"),
 ]
 def convert_keys(keys):
@@ -1579,8 +1579,8 @@ class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand2(_VimTest):
     wanted = "-Expand me!"
 class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand3(_VimTest):
     snippets = (("test", "Expand me!", "", "i"), )
-    keys = "öätest" + EX
-    wanted = "öäExpand me!"
+    keys = "Ã¶Ã¤test" + EX
+    wanted = "Ã¶Ã¤Expand me!"
 
 class _SnippetOptions_ExpandWordSnippets(_VimTest):
     snippets = (("test", "Expand me!", "", "w"), )
