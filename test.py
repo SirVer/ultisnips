@@ -904,6 +904,14 @@ class PythonCode_OptNoExists(_VimTest):
     keys = """test""" + EX
     wanted = """hi no End"""
 
+class PythonCode_IndentProblem(_VimTest):
+    # A test case which is likely related to bug 719649
+    snippets = ("test", r"""hi `!p
+snip.rv = "World"
+` End""")
+    keys = " " * 8 + "test" + EX  # < 8 works.
+    wanted = """hi World End"""
+
 # locals
 class PythonCode_Locals(_VimTest):
     snippets = ("test", r"""hi `!p a = "test"
