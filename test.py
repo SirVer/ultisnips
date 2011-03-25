@@ -39,12 +39,12 @@ from textwrap import dedent
 
 
 # Some constants for better reading
-BS = '\x7f'
-ESC = '\x1b'
-ARR_L = '\x1bOD'
-ARR_R = '\x1bOC'
-ARR_U = '\x1bOA'
-ARR_D = '\x1bOB'
+BS = u'\x7f'
+ESC = u'\x1b'
+ARR_L = u'\x1bOD'
+ARR_R = u'\x1bOC'
+ARR_U = u'\x1bOA'
+ARR_D = u'\x1bOB'
 
 # multi-key sequences generating a single key press
 SEQUENCES = [ARR_L, ARR_R, ARR_U, ARR_D]
@@ -82,26 +82,26 @@ def is_focused(title=None):
 BRACES = re.compile("([}{])")
 WIN_ESCAPES = ["+", "^", "%", "~", "[", "]", "<", ">", "(", ")"]
 WIN_REPLACES = [
-        (BS, "{BS}"),
-        (ARR_L, "{LEFT}"),
-        (ARR_R, "{RIGHT}"),
-        (ARR_U, "{UP}"),
-        (ARR_D, "{DOWN}"),
-        ("\t", "{TAB}"),
-        ("\n", "~"),
-        (ESC, "{ESC}"),
+        (BS, u"{BS}"),
+        (ARR_L, u"{LEFT}"),
+        (ARR_R, u"{RIGHT}"),
+        (ARR_U, u"{UP}"),
+        (ARR_D, u"{DOWN}"),
+        ("\t", u"{TAB}"),
+        ("\n", u"~"),
+        (ESC, u"{ESC}"),
 
         # On my system ` waits for a second keystroke, so `+SPACE = "`".  On
         # most systems, `+Space = "` ". I work around this, by sending the host
         # ` as `+_+BS. Awkward, but the only way I found to get this working.
-        ("`", "`_{BS}"),
-        ("´", "´_{BS}"),
-        ("{^}", "{^}_{BS}"),
+        (u"`", u"`_{BS}"),
+        (u"´", u"´_{BS}"),
+        (u"{^}", u"{^}_{BS}"),
 ]
 def convert_keys(keys):
-    keys = BRACES.sub(r"{\1}", keys)
+    keys = BRACES.sub(ur"{\1}", keys)
     for k in WIN_ESCAPES:
-        keys = keys.replace(k, "{%s}" % k)
+        keys = keys.replace(k, u"{%s}" % k)
     for f, r in WIN_REPLACES:
         keys = keys.replace(f, r)
     return keys
@@ -135,7 +135,7 @@ def send_win(keys, session):
 
 def send_screen(s,session):
     s = s.replace("'", r"'\''")
-    os.system("screen -x %s -X stuff '%s'" % (session, s))
+    os.system((u"screen -x %s -X stuff '%s'" % (session, s)).encode("utf-8"))
 
 
 def send(s, session):
@@ -1579,8 +1579,8 @@ class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand2(_VimTest):
     wanted = "-Expand me!"
 class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand3(_VimTest):
     snippets = (("test", "Expand me!", "", "i"), )
-    keys = "öätest" + EX
-    wanted = "öäExpand me!"
+    keys = u"Ã¤test" + EX
+    wanted = "Ã¤Expand me!"
 
 class _SnippetOptions_ExpandWordSnippets(_VimTest):
     snippets = (("test", "Expand me!", "", "w"), )
@@ -2414,6 +2414,10 @@ if __name__ == '__main__':
     # Do not mess with the X clipboard
     send(""":set clipboard=""\n""", options.session)
 
+    # Set encoding and fileencodings
+    send(""":set encoding=utf-8\n""", options.session)
+    send(""":set fileencoding=utf-8\n""", options.session)
+
     # Ensure runtimepath includes only Vim's own runtime files
     # and those of the UltiSnips directory under test ('.').
     send(""":set runtimepath=$VIMRUNTIME,.\n""", options.session)
@@ -2447,3 +2451,4 @@ if __name__ == '__main__':
         v = 1
     res = unittest.TextTestRunner(verbosity=v).run(suite)
 
+# vim:fileencoding=utf-8:
