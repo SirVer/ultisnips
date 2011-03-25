@@ -96,6 +96,7 @@ WIN_REPLACES = [
         # ` as `+_+BS. Awkward, but the only way I found to get this working.
         ("`", "`_{BS}"),
         ("´", "´_{BS}"),
+        ("{^}", "{^}_{BS}"),
 ]
 def convert_keys(keys):
     keys = BRACES.sub(r"{\1}", keys)
@@ -944,6 +945,8 @@ class RecTabStopsWithExpandtab_SpecialIndentProblem_ECR(_ExpandTabs):
         ("m1", "Something"),
         ("m", "\t$0"),
     )
+    # TODO: Windows indents the Something line after pressing return,
+    # though it shouldn't because it contains a manual indent.
     keys = "m" + EX + "m1" + EX + '\nHallo'
     wanted = "   Something\n        Hallo"
     def _options_on(self):
@@ -1576,8 +1579,8 @@ class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand2(_VimTest):
     wanted = "-Expand me!"
 class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand3(_VimTest):
     snippets = (("test", "Expand me!", "", "i"), )
-    keys = "Ã¤test" + EX
-    wanted = "Ã¤Expand me!"
+    keys = "öätest" + EX
+    wanted = "öäExpand me!"
 
 class _SnippetOptions_ExpandWordSnippets(_VimTest):
     snippets = (("test", "Expand me!", "", "w"), )
