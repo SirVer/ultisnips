@@ -1579,8 +1579,8 @@ class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand2(_VimTest):
     wanted = "-Expand me!"
 class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand3(_VimTest):
     snippets = (("test", "Expand me!", "", "i"), )
-    keys = u"Ã¤test" + EX
-    wanted = "Ã¤Expand me!"
+    keys = u"ßßtest" + EX
+    wanted = "ßßExpand me!"
 
 class _SnippetOptions_ExpandWordSnippets(_VimTest):
     snippets = (("test", "Expand me!", "", "w"), )
