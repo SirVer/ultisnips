@@ -704,6 +704,7 @@ Contributers are listed in chronological order:
    rupa - Rupa Deadwyler
    Timo Schmiade
    blueyed - Daniel Hahler
+   Anthony Jackson
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------
