@@ -670,6 +670,12 @@ class PythonCode_SimpleExample(_VimTest):
     keys = "test" + EX
     wanted = "hi Hallo End"
 
+
+class PythonCode_SimpleExample_ReturnValueIsEmptyString(_VimTest):
+    snippets = ("test", """hi`!p snip.rv = ""`End""")
+    keys = "test" + EX
+    wanted = "hiEnd"
+
 class PythonCode_ReferencePlaceholder(_VimTest):
     snippets = ("test", """${1:hi} `!p snip.rv = t[1]+".blah"` End""")
     keys = "test" + EX + "ho"
