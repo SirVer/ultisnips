@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+from functools import wraps
+import traceback
 import glob
 import os
 import re
 import string
+
 import vim
 
 from UltiSnips.Geometry import Position
@@ -21,6 +24,31 @@ import sys
 if sys.version_info[:2] >= (2,6):
     import warnings
     warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+def _to_scratch_buffer(text):
+    """Create a new scratch buffer with the text given"""
+    vim.command("botright new")
+    vim.command("set ft=text")
+    vim.command("set buftype=nofile")
+
+    vim.buffers[-1][:] = text.splitlines()
+
+def err_to_scratch_buffer(f):
+    @wraps(f)
+    def wrapper(*args, **kwds):
+        try:
+            return f(*args, **kwds)
+        except:
+            s = \
+"""An error occured. This is either a bug in UltiSnips or a bug in a
+snippet definition. If you think this is a bug, please report it to
+https://bugs.launchpad.net/ultisnips/+filebug.
+
+Following is the full stack trace:
+"""
+            s += traceback.format_exc()
+            _to_scratch_buffer(s)
+    return wrapper
 
 def _vim_quote(s):
     """Quote string s as Vim literal string."""
@@ -563,24 +591,29 @@ class SnippetManager(object):
 
         self.reset()
 
+    @err_to_scratch_buffer
     def reset(self, test_error=False):
         self._test_error = test_error
         self._snippets = {}
         self._csnippets = []
         self._reinit()
 
+    @err_to_scratch_buffer
     def jump_forwards(self):
         if not self._jump():
             return self._handle_failure(self.forward_trigger)
 
+    @err_to_scratch_buffer
     def jump_backwards(self):
         if not self._jump(True):
             return self._handle_failure(self.backward_trigger)
 
+    @err_to_scratch_buffer
     def expand(self):
         if not self._try_expand():
             self._handle_failure(self.expand_trigger)
 
+    @err_to_scratch_buffer
     def list_snippets(self):
         before, after = self._get_before_after()
         snippets = self._snips(before, True)
@@ -597,6 +630,7 @@ class SnippetManager(object):
         return True
 
 
+    @err_to_scratch_buffer
     def expand_or_jump(self):
         """
         This function is used for people who wants to have the same trigger for
@@ -609,6 +643,7 @@ class SnippetManager(object):
         if not rv:
             self._handle_failure(self.expand_trigger)
 
+    @err_to_scratch_buffer
     def add_snippet(self, trigger, value, descr, options, ft = "all", globals = None):
         if ft not in self._snippets:
             self._snippets[ft] = _SnippetDictionary()
@@ -616,6 +651,7 @@ class SnippetManager(object):
             Snippet(trigger, value, descr, options, globals or {})
         )
 
+    @err_to_scratch_buffer
     def expand_anon(self, value, trigger="", descr="", options="", globals=None):
         if globals is None:
             globals = {}
@@ -629,10 +665,12 @@ class SnippetManager(object):
         else:
             return False
 
+    @err_to_scratch_buffer
     def clear_snippets(self, triggers = [], ft = "all"):
         if ft in self._snippets:
             self._snippets[ft].clear_snippets(triggers)
 
+    @err_to_scratch_buffer
     def add_extending_info(self, ft, parents):
         if ft not in self._snippets:
             self._snippets[ft] = _SnippetDictionary()
@@ -644,6 +682,7 @@ class SnippetManager(object):
             sd.extends.append(p)
 
 
+    @err_to_scratch_buffer
     def backspace_while_selected(self):
         """
         This is called when backspace was pressed while vim was in select
@@ -659,6 +698,7 @@ class SnippetManager(object):
         else:
             feedkeys(r"\<BS>")
 
+    @err_to_scratch_buffer
     def cursor_moved(self):
         self._vstate.update()
 
@@ -720,6 +760,7 @@ class SnippetManager(object):
 
         self._expect_move_wo_change = False
 
+    @err_to_scratch_buffer
     def entered_insert_mode(self):
         self._vstate.update()
         if self._cs and self._vstate.has_moved:
