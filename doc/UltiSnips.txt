@@ -704,14 +704,14 @@ Contributers are listed in chronological order:
    rupa - Rupa Deadwyler
    Timo Schmiade
    blueyed - Daniel Hahler
-   Anthony Jackson
+   expelledboy - Anthony Jackson
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------
 
 Contributers are listed in chronological order:
 
-   Alec Thomas (Python, smart def)
+   Alec Thomas
    Ryan Wooden
    Ches Martin
    Gordin (g0rdin)
