@@ -959,12 +959,17 @@ class RecTabStopsWithExpandtab_SimpleExample_ECR(_ExpandTabs):
     wanted = "   Blaahblah \t\t  "
 
 class RecTabStopsWithExpandtab_SpecialIndentProblem_ECR(_ExpandTabs):
+    # Windows indents the Something line after pressing return, though it
+    # shouldn't because it contains a manual indent. All other vim versions do
+    # not do this. Windows vim does not interpret the changes made by :py as
+    # changes made 'manually', while the other vim version seem to do so. Since
+    # the fault is not with UltiSnips, we simply skip this test on windows
+    # completely.
+    skip_on_windows = True
     snippets = (
         ("m1", "Something"),
         ("m", "\t$0"),
     )
-    # TODO: Windows indents the Something line after pressing return,
-    # though it shouldn't because it contains a manual indent.
     keys = "m" + EX + "m1" + EX + '\nHallo'
     wanted = "   Something\n        Hallo"
     def _options_on(self):
