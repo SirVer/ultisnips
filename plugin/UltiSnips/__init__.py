@@ -380,20 +380,19 @@ class Snippet(object):
         self._util.reset()
 
         v = []
-        for line_num, line in enumerate(lines[0:]):
+        for line_num, line in enumerate(lines):
             if "t" in self._opts:
                 tabs = 0
             else:
                 tabs = len(self._TABS.match(line).group(0))
 
-            if line_num == 0:
-                line_ind = ""
-            else:
-                line_ind = indent
 
-            line_ind += tabs * self._util.sw * " "
+            line_ind = tabs * self._util.sw * " "
             line_ind = self._util.indent_to_spaces(line_ind)
             line_ind = self._util.spaces_to_indent(line_ind)
+            if line_num != 0:
+                line_ind = indent + line_ind
+
             v.append(line_ind + line[tabs:])
         v = os.linesep.join(v)
 

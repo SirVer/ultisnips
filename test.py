@@ -920,7 +920,7 @@ class PythonCode_IndentProblem(_VimTest):
 snip.rv = "World"
 ` End""")
     keys = " " * 8 + "test" + EX  # < 8 works.
-    wanted = """hi World End"""
+    wanted = """        hi World End"""
 
 # locals
 class PythonCode_Locals(_VimTest):
@@ -1287,7 +1287,7 @@ class TabstopWithMirrorInDefaultOverwrite_ExceptCorrectResult(_VimTest):
 class MirrorRealLifeExample_ExceptCorrectResult(_VimTest):
     snippets = (
         ("for", "for(size_t ${2:i} = 0; $2 < ${1:count}; ${3:++$2})" \
-         "\n{\n" + EX + "${0:/* code */}\n}"),
+         "\n{\n\t${0:/* code */}\n}"),
     )
     keys ="for" + EX + "100" + JF + "avar\b\b\b\ba_variable" + JF + \
             "a_variable *= 2" + JF + "// do nothing"
