@@ -860,7 +860,7 @@ class PythonCode(TextObject):
 
         self._globals = {}
         globals = snippet.globals.get("!p", [])
-        exec "\n".join(globals) in self._globals
+        exec "\n".join(globals).replace("\r\n", "\n") in self._globals
 
         # Add Some convenience to the code
         self._code = "import re, os, vim, string, random\n" + code
@@ -887,6 +887,7 @@ class PythonCode(TextObject):
             'snip' : self._snip,
         })
 
+        self._code = self._code.replace("\r\n", "\n")
         exec self._code in self._globals, local_d
 
         if self._snip._rv_changed:

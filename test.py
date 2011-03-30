@@ -217,7 +217,7 @@ class _VimTest(unittest.TestCase):
         self.send(ESC)
 
         # Close all scratch buffers
-        self.send(":close\n\n")
+        self.send(":silent! close\n")
 
         # Reset UltiSnips
         self.send(":py UltiSnips_Manager.reset(test_error=True)\n")
