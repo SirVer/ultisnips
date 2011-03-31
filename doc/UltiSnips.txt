@@ -17,6 +17,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       3.5.2 UltiSnips_Anon                      |UltiSnips_Anon|
 4. Syntax                                       |UltiSnips-syntax|
    4.1 Adding Snippets                          |UltiSnips-adding-snippets|
+      4.1.1 Character Escaping                  |UltiSnips-character-escaping|
    4.2 Plaintext Snippets                       |UltiSnips-plaintext-snippets|
    4.3 Interpolation                            |UltiSnips-interpolation|
       4.3.1 Shellcode                           |UltiSnips-shellcode|
@@ -307,7 +308,14 @@ snippet on. The options currently supported are >
        in a snippet to match the results of automatic indentation. If this
        option is set, UltiSnips will not try to do this expansion, and will
        leave the tabs alone. This can be useful for snippets dealing with
-       tab delimited formats, etc..
+       tab delimited formats, etc.
+<
+
+ 4.1.1 Character Escaping:                             *UltiSnips-character-escaping*
+
+In the snippet descriptions, various characters have special meaning
+(e.g. '`{$\). If you want to insert any one of these characters literally,
+prepend them with a single backslash (\).
 
 4.2 Plaintext Snippets                         *UltiSnips-plaintext-snippets*
 ----------------------
@@ -323,7 +331,7 @@ endsnippet
 ------------------- SNAP -------------------
 
 Now, restart vim or reset UltiSnips by typing >
-   :py UltiSnips_Manager.reset()
+   :UltiSnipsReset
 
 now try it in insert mode:
 bye<tab> -->
