@@ -54,6 +54,10 @@ if !exists("g:UltiSnipsEditSplit")
    let g:UltiSnipsEditSplit = 'normal'
 endif
 
+" A list of directory names that are searched for snippets. 
+if !exists("g:UltiSnipsSnippetDirectories")
+	let g:UltiSnipsSnippetDirectories = [ "UltiSnips" ]
+endif
 " }}}
 
 "" Global Commands {{{

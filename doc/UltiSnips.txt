@@ -9,11 +9,12 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    2.3 Updating                                 |UltiSnips-updating|
 3. Settings & Commands                          |UltiSnips-settings|
    3.1 Commands                                 |UltiSnips-commands|
-   3.2 Global Variables                         |UltiSnips-global-variables|
-   3.3 Warning About Select Mode Mappings       |UltiSnips-warning-smappings|
-   3.4 Functions                                |UltiSnips-functions|
-      3.4.1 UltiSnips_AddSnippet                |UltiSnips_AddSnippet|
-      3.4.2 UltiSnips_Anon                      |UltiSnips_Anon|
+   3.2 Triggers                                 |UltiSnips-triggers|
+   3.3 Snippet Search Path                      |UltiSnips-snippet-search-path|
+   3.4 Warning About Select Mode Mappings       |UltiSnips-warning-smappings|
+   3.5 Functions                                |UltiSnips-functions|
+      3.5.1 UltiSnips_AddSnippet                |UltiSnips_AddSnippet|
+      3.5.2 UltiSnips_Anon                      |UltiSnips_Anon|
 4. Syntax                                       |UltiSnips-syntax|
    4.1 Adding Snippets                          |UltiSnips-adding-snippets|
    4.2 Plaintext Snippets                       |UltiSnips-plaintext-snippets|
@@ -38,7 +39,7 @@ For Vim version 7.0 or later.
 This plugin only works if 'compatible' is not set.
 {Vi does not have any of these features}
 
-This plugin needs Python support compiled into Vim.
+This plugin needs Python support >= 2.6 compiled into Vim.
 
 =============================================================================
 DESCRIPTION                                           *UltiSnips-description*
@@ -131,8 +132,8 @@ just a shortcut. There is also a variable called: >
 which can be set to "normal" (default), "horizontal" or "vertical" that
 defines if a new window should be opened for the edit.
 
-3.2 Global Variables                             *UltiSnips-global-variables*
---------------------
+3.2 Triggers                                             *UltiSnips-triggers*
+------------
 
 You can freely define the keys used to expand a snippet and jump forward and
 backwards in it. There is also a key to list all snippets available for the
@@ -149,8 +150,28 @@ you vimrc: >
    let g:UltiSnipsJumpForwardTrigger="<tab>"
    let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 
+3.3 Snippet Search Path                       *UltiSnips-snippet-search-path*
+-----------------------
 
-3.3 Warning About Select Mode Mappings          *UltiSnips-warning-smappings*
+UltiSnips lets you override the name of the directories that are searched
+for snippets. You need to set the variable g:UltiSnipsSnippetDirectories,
+which defaults to: >
+   g:UltiSnipsSnippetDirectories          ["UltiSnips"] 
+
+Snippet definition files are searched in 'runtimepath', but the 'runtimepath'
+variable is traversed in reversed order (last item first). In each directory,
+UltiSnips will search for the folder names in the order they appear in
+g:UltiSnipsSnippetDirectories. If you keep your snippets in a folder called
+"mycoolsnippets" in your .vim directory and you want the snippets that ship
+with UltiSnips to be available as well, use >
+   let g:UltiSnipsSnippetDirectories=["UltiSnips", "mycoolsnippets"]
+If you do not want the shipped snippets to be available, only use
+"mycoolsnippets".
+
+See |UltiSnips-adding-snippet| for an introduction which files are parsed for
+which file type.
+
+3.4 Warning About Select Mode Mappings          *UltiSnips-warning-smappings*
 --------------------------------------
 
 The help for vim's *mapmode-s* states: >
@@ -176,12 +197,12 @@ will not unmap any mapping that contains the string "somePlugin" or
 "otherPlugin" in its complete definition as listed by *:smap* .
 
 
-3.4 Functions                                           *UltiSnips-functions*
+3.5 Functions                                           *UltiSnips-functions*
 -------------
 
 Ultisnips provides two functions for extending core functionality.
 
- 3.4.1 UltiSnips_AddSnippet                            *UltiSnips_AddSnippet*
+ 3.5.1 UltiSnips_AddSnippet                            *UltiSnips_AddSnippet*
 
 The first function is UltiSnips_AddSnippet(trigger, value, description,
 options, ...) which adds a new snippet to the current list of snippets with
@@ -190,7 +211,7 @@ for details on the meaning of those. All of the arguments are strings. You can
 also specify the filetype for the new snippet with the final optional
 argument.
 
- 3.4.2 UltiSnips_Anon                                        *UltiSnips_Anon*
+ 3.5.2 UltiSnips_Anon                                        *UltiSnips_Anon*
 
 The second function is UltiSnips_Anon(value, ...), which expands an anonymous
 Snippet. The snippet that gets expanded doesn't get added to the global list
@@ -211,8 +232,10 @@ provide many examples to make things clearer.
 4.1 Adding Snippets                               *UltiSnips-adding-snippets*
 -------------------
 
-Snippets are searched in *runtimepath* . In each directory, a directory called
-"UltiSnips" (case matters) is looked for. Inside these directories, files are
+See |UltiSnips-snippet-search-path| for an explanation of where directories
+with snippet definitions are expected.
+
+While iterating over the snippet definition directories found, files are
 looked for called ft.snippets, for example: >
    ruby.snippets
    c.snippets

@@ -1038,12 +1038,14 @@ class SnippetManager(object):
     # Loading
     def _load_snippets_for(self, ft):
         self._snippets[ft] = _SnippetDictionary()
-        for p in vim.eval("&runtimepath").split(',')[::-1]:
-            pattern = p + os.path.sep + "UltiSnips" + os.path.sep + \
-                    "*%s.snippets" % ft
 
-            for fn in glob.glob(pattern):
-                self._parse_snippets(ft, fn)
+        snippet_dirs = vim.eval("g:UltiSnipsSnippetDirectories")
+        for p in vim.eval("&runtimepath").split(',')[::-1]:
+            for snippet_dir in snippet_dirs:
+                pattern = os.path.join(p, snippet_dir, "*%s.snippets" % ft)
+
+                for fn in glob.glob(pattern):
+                    self._parse_snippets(ft, fn)
 
         # Now load for the parents
         for p in self._snippets[ft].extends:
