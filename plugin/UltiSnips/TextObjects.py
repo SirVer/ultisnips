@@ -13,6 +13,10 @@ from UltiSnips.Geometry import Span, Position
 
 __all__ = [ "Mirror", "Transformation", "SnippetInstance", "StartMarker" ]
 
+from itertools import takewhile
+
+from debug import debug
+
 ###########################################################################
 #                              Helper class                               #
 ###########################################################################
@@ -135,16 +139,35 @@ class _TOParser(object):
         return "TOParser(%s)" % self._p
 
     def parse(self):
-        self._parse_tabs()
-        self._parse_pythoncode()
-        self._parse_vimlcode()
-        self._parse_shellcode()
-        self._parse_transformations()
-        self._parse_mirrors_or_ts()
+        text = ""
 
-        self._parse_escaped_chars()
+        idx = 0
+        while idx < len(self._v):
+            if self._v[idx] == '\\':
+                text += self._v[idx+1]
+                idx += 2
+            elif self._v[idx:].startswith("${"):
+                didx, dtext = self._parse_tabstop(idx, self._v)
+                debug("%r, %r" %(didx,dtext))
+                idx += didx
+                text += dtext
+            else:
+                text += self._v[idx]
+                idx += 1
 
-        self._finish()
+        self._v = text
+
+        # self._parse_tabs()
+        # self._parse_pythoncode()
+        # self._parse_vimlcode()
+        #
+        # self._parse_shellcode()
+        # self._parse_transformations()
+        # self._parse_mirrors_or_ts()
+
+        # self._parse_escaped_chars()
+
+        # self._finish()
 
     #################
     # Escaped chars #
@@ -253,24 +276,10 @@ class _TOParser(object):
 
         return VimLCode(self._p, start, end, content)
 
-
-
     ########
     # TABS #
     ########
-    def _parse_tabs(self):
-        ts = []
-        m = self._TABSTOP.search(self._v)
-        while m:
-            ts.append(self._handle_tabstop(m))
-            m = self._TABSTOP.search(self._v)
-
-        for t, def_text in ts:
-            child_parser = _TOParser(t, def_text, self._indent)
-            child_parser._parse_tabs()
-            self._childs.append(child_parser)
-
-    def _handle_tabstop(self, m):
+    def _parse_tabstop(self, start_pos, v):
         def _find_closingbracket(v,start_pos):
             bracks_open = 1
             for idx, c in enumerate(v[start_pos:]):
@@ -283,9 +292,9 @@ class _TOParser(object):
                     if not bracks_open:
                         return start_pos+idx+1
 
-        start_pos = m.start()
         end_pos = _find_closingbracket(self._v, start_pos+2)
 
+        m = self._TABSTOP.match(v[start_pos:])
         def_text = self._v[m.end():end_pos-1]
 
         start, end = self._get_start_end(self._v,start_pos,end_pos)
@@ -297,7 +306,19 @@ class _TOParser(object):
 
         self._overwrite_area(start_pos, end_pos)
 
-        return ts, def_text
+        return end_pos-start_pos, def_text
+        ts = []
+        # m = self._TABSTOP.search(self._v)
+
+        # while m:
+            # ts.append(self._handle_tabstop(m))
+            # m = self._TABSTOP.search(self._v)
+
+        # for t, def_text in ts:
+            # child_parser = _TOParser(t, def_text, self._indent)
+            # child_parser._parse_tabs()
+            # self._childs.append(child_parser)
+
 
     ###################
     # TRANSFORMATIONS #
@@ -934,6 +955,7 @@ class SnippetInstance(TextObject):
 
         TextObject.__init__(self, parent, start, end, initial_text)
 
+        debug("initial_text: %r" % (initial_text))
         _TOParser(self, initial_text, indent).parse()
 
         # Check if we have a zero Tab, if not, add one at the end
