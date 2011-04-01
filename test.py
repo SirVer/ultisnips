@@ -427,6 +427,23 @@ class TabStop_EscapingCharsDollars(_VimTest):
     snippets = ("test", r"snip \$0 $$0 end")
     keys = "test" + EX + "hi"
     wanted = "snip $0 $hi end"
+class TabStop_EscapingChars_Backslash(_VimTest):
+    snippets = ("test", r"This \ is a backslash!")
+    keys = "test" + EX
+    wanted = "This \\ is a backslash!"
+class TabStop_EscapingChars_Backslash2(_VimTest):
+    snippets = ("test", r"This is a backslash \\ done")
+    keys = "test" + EX
+    wanted = r"This is a backslash \ done"
+class TabStop_EscapingChars_Backslash3(_VimTest):
+    snippets = ("test", r"These are two backslashes \\\\ done")
+    keys = "test" + EX
+    wanted = r"These are two backslashes \\ done"
+class TabStop_EscapingChars_Backslash4(_VimTest):
+    # Test for bug 746446
+    snippets = ("test", r"\\$1{$2}")
+    keys = "test" + EX + "hello" + JF + "world"
+    wanted = r"\hello{world}"
 class TabStop_EscapingChars_RealLife(_VimTest):
     snippets = ("test", r"usage: \`basename \$0\` ${1:args}")
     keys = "test" + EX + "[ -u -v -d ]"
