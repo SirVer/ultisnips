@@ -85,12 +85,14 @@ function! UltiSnipsEdit(...)
 		endif
 		exe ':'.mode.' '.g:UltiSnipsSnippetsDir.'/'.type.'.snippets'
 	else
-		for dir in split(&runtimepath, ',')
-			if isdirectory(dir.'/UltiSnips')
-				let g:UltiSnipsSnippetsDir = dir.'/UltiSnips'
-				call UltiSnipsEdit(type)
-				break
-			endif
+		for dir in g:UltiSnipsSnippetDirectories
+			for p in reverse(split(&runtimepath, ','))
+				if isdirectory(p.'/'.dir)
+					let g:UltiSnipsSnippetsDir = p.'/'.dir
+					call UltiSnipsEdit(type)
+					break
+				endif
+			endfor
 		endfor
 	endif
 endfunction
