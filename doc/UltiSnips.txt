@@ -201,7 +201,7 @@ will not unmap any mapping that contains the string "somePlugin" or
 3.5 Functions                                           *UltiSnips-functions*
 -------------
 
-Ultisnips provides two functions for extending core functionality.
+UltiSnips provides two functions for extending core functionality.
 
  3.5.1 UltiSnips_AddSnippet                            *UltiSnips_AddSnippet*
 
@@ -309,6 +309,11 @@ snippet on. The options currently supported are >
        option is set, UltiSnips will not try to do this expansion, and will
        leave the tabs alone. This can be useful for snippets dealing with
        tab delimited formats, etc.
+   f   Do not turn 'formatoptions' off when expanding the snippet. Normally,
+       UltiSnips will disable the 'c' and the 't' option of 'formatoptions'
+       because otherwise, Vim might break a line without UltiSnips noticing
+       and this might mess up the snippet completely. This is useful for
+       snippets that need paragraphs in their tabstops.
 <
 
  4.1.1 Character Escaping:                             *UltiSnips-character-escaping*

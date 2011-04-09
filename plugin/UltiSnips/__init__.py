@@ -357,6 +357,10 @@ class Snippet(object):
 
         return match
 
+    def keep_formatoptions_unchanged(self):
+        return "f" in self._opts
+    keep_formatoptions_unchanged = property(keep_formatoptions_unchanged)
+
     def overwrites_previous(self):
         return "!" in self._opts
     overwrites_previous = property(overwrites_previous)
@@ -587,6 +591,8 @@ class SnippetManager(object):
     def __init__(self):
         self._vstate = VimState()
         self._supertab_keys = None
+        self._csnippets = []
+        self._cached_offending_vim_options = {}
 
         self.reset()
 
@@ -594,7 +600,10 @@ class SnippetManager(object):
     def reset(self, test_error=False):
         self._test_error = test_error
         self._snippets = {}
-        self._csnippets = []
+
+        while len(self._csnippets):
+            self._current_snippet_is_done()
+
         self._reinit()
 
     @err_to_scratch_buffer
@@ -763,8 +772,9 @@ class SnippetManager(object):
     def entered_insert_mode(self):
         self._vstate.update()
         if self._cs and self._vstate.has_moved:
+            while len(self._csnippets):
+                self._current_snippet_is_done()
             self._reinit()
-            self._csnippets = []
 
     ###################################
     # Private/Protect Functions Below #
@@ -795,11 +805,17 @@ class SnippetManager(object):
 
         # Did we leave the snippet with this movement?
         if self._cs and not (self._vstate.pos in self._cs.abs_span):
-            self._csnippets.pop()
+            self._current_snippet_is_done()
 
             self._reinit()
 
             self._check_if_still_inside_snippet()
+
+    def _current_snippet_is_done(self):
+        self._csnippets.pop()
+
+        if not len(self._csnippets):
+            self._reset_offending_vim_options()
 
     def _jump(self, backwards = False):
         jumped = False
@@ -812,13 +828,13 @@ class SnippetManager(object):
                 jumped = True
                 if self._ctab.no == 0:
                     self._ctab = None
-                    self._csnippets.pop()
+                    self._current_snippet_is_done()
                 self._vstate.update()
             else:
                 # This really shouldn't happen, because a snippet should
                 # have been popped when its final tabstop was used.
                 # Cleanup by removing current snippet and recursing.
-                self._csnippets.pop()
+                self._current_snippet_is_done()
                 jumped = self._jump(backwards)
         return jumped
 
@@ -929,6 +945,8 @@ class SnippetManager(object):
         if snippet.matched:
             text_before = before[:-len(snippet.matched)]
 
+        self._unset_offending_vim_options(snippet)
+
         self._expect_move_wo_change = True
         if self._cs:
             # Determine position
@@ -981,6 +999,19 @@ class SnippetManager(object):
 
         return True
 
+    # Handling of offending vim options
+    def _unset_offending_vim_options(self, snippet):
+        # Care for textwrapping
+        if not snippet.keep_formatoptions_unchanged:
+            self._cached_offending_vim_options["fo"] = ''.join(
+                c for c in vim.eval("&fo") if c in "ct"
+            )
+            for c in "ct": vim.command("set fo-=%s" % c)
+
+    def _reset_offending_vim_options(self):
+        # Textwrapping
+        for c in self._cached_offending_vim_options.pop("fo", []):
+            vim.command("set fo+=%s" % c)
 
     # Input Handling
     def _chars_entered(self, chars, del_more_lines = 0):

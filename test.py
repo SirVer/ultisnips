@@ -342,13 +342,26 @@ class _FormatoptionsBase(_VimTest):
     def _options_off(self):
         self.send(":set tw=0\n")
 
-class FOSimple_ExceptCorrectResult(_FormatoptionsBase):
+class FOSimple_WithoutBreak_ExceptCorrectResult(_FormatoptionsBase):
     snippets = ("test", "${1:longer expand}\n$0")
+    keys = "test" + EX + "This is a longer text that should not wrap as formatoptions are disabled"
+    wanted = "This is a longer text that should not wrap as formatoptions are disabled\n"
+
+class FO_WithoutBreakEnableAfterSnippet_ExceptCorrectResult(_FormatoptionsBase):
+    snippets = ("test", "${1:longer expand}\n")
+    keys = "test" + EX + "This is a longer text that should not wrap as formatoptions are disabled" \
+            + JF + "This is a longer text that should wrap"
+    wanted = "This is a longer text that should not wrap as formatoptions are disabled\n" + \
+            "This is a longer\ntext that should\nwrap"
+
+
+class FOSimple_WithBreak_ExceptCorrectResult(_FormatoptionsBase):
+    snippets = ("test", "${1:longer expand}\n$0", "", "f")
     keys = "test" + EX + "This is a longer text that should wrap"
     wanted = "This is a longer\ntext that should\nwrap\n"
 
 class FOTextBeforeAndAfter_ExceptCorrectResult(_FormatoptionsBase):
-    snippets = ("test", "Before${1:longer expand}After\nstart$1end")
+    snippets = ("test", "Before${1:longer expand}After\nstart$1end", "", "f")
     keys = "test" + EX + "This is a longer text that should wrap"
     wanted = \
 """BeforeThis is a
@@ -361,7 +374,7 @@ should wrapend"""
 
 class FOTextAfter_ExceptCorrectResult(_FormatoptionsBase):
     """Testcase for lp:719998"""
-    snippets = ("test", "${1:longer expand}after\nstart$1end")
+    snippets = ("test", "${1:longer expand}after\nstart$1end", "", "f")
     keys = ("test" + EX + "This is a longer snippet that should wrap properly "
             "and the mirror below should work as well")
     wanted = \
@@ -378,7 +391,7 @@ should work as wellend"""
 
 class FOWrapOnLongWord_ExceptCorrectResult(_FormatoptionsBase):
     """Testcase for lp:719998"""
-    snippets = ("test", "${1:longer expand}after\nstart$1end")
+    snippets = ("test", "${1:longer expand}after\nstart$1end", "", "f")
     keys = ("test" + EX + "This is a longersnippet that should wrap properly")
     wanted = \
 """This is a
