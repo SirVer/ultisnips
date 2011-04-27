@@ -899,7 +899,7 @@ class SnippetManager(object):
         filetypes = self._ensure_snippets_loaded()
 
         found_snippets = []
-        for ft in filetypes[::-1]:
+        for ft in filetypes:
             found_snippets += self._find_snippets(ft, before, possible)
 
         # Search if any of the snippets overwrites the previous
