@@ -68,33 +68,21 @@ command! -nargs=0 UltiSnipsReset :py UltiSnips_Manager.reset()
 function! UltiSnipsEdit(...)
     if a:0 == 1 && a:1 != ''
         let type = a:1
-    elseif &filetype != ''
-        let type = split(&filetype, '\.')[0]
     else
-        let type = 'all'
+        python vim.command("let type = '%s'" % UltiSnips_Manager.filetype)
     endif
 
-    if exists('g:UltiSnipsSnippetsDir')
-        let mode = 'e'
-        if exists('g:UltiSnipsEditSplit')
-            if g:UltiSnipsEditSplit == 'vertical'
-                let mode = 'vs'
-            elseif g:UltiSnipsEditSplit == 'horizontal'
-                let mode = 'sp'
-            endif
+    python vim.command("let file = '%s'" % UltiSnips_Manager.file_to_edit(vim.eval("type")))
+
+    let mode = 'e'
+    if exists('g:UltiSnipsEditSplit')
+        if g:UltiSnipsEditSplit == 'vertical'
+            let mode = 'vs'
+        elseif g:UltiSnipsEditSplit == 'horizontal'
+            let mode = 'sp'
         endif
-        exe ':'.mode.' '.g:UltiSnipsSnippetsDir.'/'.type.'.snippets'
-    else
-        for dir in g:UltiSnipsSnippetDirectories
-            for p in reverse(split(&runtimepath, ','))
-                if isdirectory(p.'/'.dir)
-                    let g:UltiSnipsSnippetsDir = p.'/'.dir
-                    call UltiSnipsEdit(type)
-                    break
-                endif
-            endfor
-        endfor
     endif
+    exe ':'.mode.' '.file
 endfunction
 
 " edit snippets, default of current file type or the specified type
