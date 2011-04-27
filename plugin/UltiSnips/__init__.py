@@ -870,7 +870,9 @@ class SnippetManager(object):
             feedkeys(feedkey, mode)
 
     def _ensure_snippets_loaded(self):
-        for ft in self._filetypes():
+        filetypes = self._filetypes()
+
+        for ft in filetypes:
             if ft not in self._snippets:
                 self._load_snippets_for(ft)
 
