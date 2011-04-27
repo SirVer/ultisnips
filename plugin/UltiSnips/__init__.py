@@ -1084,7 +1084,7 @@ class SnippetManager(object):
             for snippet_dir in snippet_dirs:
                 pth = os.path.realpath(os.path.join(rtp, snippet_dir))
 
-                patterns = ["%s.snippets", "*_%s.snippets"] # TODO: doc this
+                patterns = ["%s.snippets", "*_%s.snippets"]
                 if not default and pth == base_snippets:
                     patterns.remove("%s.snippets")
 
@@ -1122,7 +1122,7 @@ class SnippetManager(object):
         existing = self.base_snippet_files_for(ft, False)
         filename = ft + ".snippets"
 
-        if vim.eval("exists('g:UltiSnipsSnippetsDir')") == 1: # TODO: doc this
+        if vim.eval("exists('g:UltiSnipsSnippetsDir')") == 1:
             snipdir = vim.eval("g:UltiSnipsSnippetsDir")
             edit = os.path.join(snipdir, filename)
         elif existing:
