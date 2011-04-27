@@ -1066,6 +1066,16 @@ class SnippetManager(object):
         _SnippetsFileParser(ft, fn, self, file_data).parse()
 
     def base_snippet_files_for(self, ft, default=True):
+        """ Returns a list of snippet files matching the given filetype (ft).
+        If default is set to false, it doesn't include shipped files.
+
+        Searches through each path in 'runtimepath' in reverse order,
+        in each of these, it searches each directory name listed in
+        'g:UltiSnipsSnippetDirectories' in order, then looks for files in these
+        directories called 'ft.snippets' or '*_ft.snippets' replacing ft with
+        the filetype.
+        """
+
         snippet_dirs = vim.eval("g:UltiSnipsSnippetDirectories")
         base_snippets = os.path.realpath(os.path.join(__file__, "../../../UltiSnips"))
         ret = []
@@ -1093,10 +1103,18 @@ class SnippetManager(object):
         return [ft for ft in fts[::-1] if ft]
 
     def filetype(self):
+        """ Property for the current (undotted) filetype. """
         return self._filetypes()[-1]
     filetype = property(filetype)
 
     def file_to_edit(self, ft=None):
+        """ Gets a file to edit based on the given filetype.
+        If no filetype is given, uses the current filetype from vim.
+
+        Checks 'g:UltiSnipsSnippetsDir' and uses it if it exists
+        If a non-shipped file already exists, it uses it.
+        Otherwise uses a file in ~/.vim/ or ~/vimfiles
+        """
         if not ft:
             ft = self.filetype
 
@@ -1130,6 +1148,11 @@ class SnippetManager(object):
 
 
     def base_snippet_files(self, dotft=None):
+        """ Returns a list of all snippet files for the given filetype.
+        If no filetype is given, uses furrent filetype.
+        If the filetype is dotted (e.g. 'cuda.cpp.c') then it is split and
+        each filetype is checked.
+        """
         ret = []
         filetypes = self._filetypes(dotft)
 
