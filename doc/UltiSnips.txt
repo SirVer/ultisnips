@@ -121,15 +121,10 @@ To Update an installation, simply pull the latest revision: >
 3.1 Commands                                             *UltiSnips-commands*
 ------------
 
-                                                            *:UltiSnipsReset*
-UltiSnips defines two commands, the first one is UltiSnipsReset, which will
-reload the snippets definitions and is useful while you are tweaking a
-snippet.
-
                                                              *:UltiSnipsEdit*
-The second command is UltiSnipsEdit. It opens or creates your private snippet
-definition file for the current filetype. You can easily open them manually of
-course, this is just a shortcut. There is also a variable called: >
+UltiSnipsEdit opens or creates your private snippet definition file for the
+current filetype. You can easily open them manually of course, this is just a
+shortcut. There is also a variable called: >
    g:UltiSnipsEditSplit
 which can be set to "normal" (default), "horizontal" or "vertical" that
 defines if a new window should be opened for the edit. There is also a
@@ -348,10 +343,8 @@ Good bye, Sir. Hope to talk to you soon.
 endsnippet
 ------------------- SNAP -------------------
 
-Now, restart vim or reset UltiSnips by typing >
-   :UltiSnipsReset
-
-now try it in insert mode:
+UltiSnips will pick up that you added/changed this file automatically, so just 
+try it in insert mode:
 bye<tab> -->
 Good bye, Sir. Hope to talk to you soon.
 - Arthur, King of Britain

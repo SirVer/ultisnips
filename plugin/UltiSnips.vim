@@ -61,10 +61,6 @@ endif
 " }}}
 
 "" Global Commands {{{
-
-" reset/reload snippets
-command! -nargs=0 UltiSnipsReset :py UltiSnips_Manager.reset()
-
 function! UltiSnipsEdit(...)
     if a:0 == 1 && a:1 != ''
         let type = a:1
