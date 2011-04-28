@@ -556,10 +556,10 @@ class VimState(object):
                 # Check if any mappings where found
                 all_maps = filter(len, vim.eval(r"_tmp_smaps").splitlines())
                 if (len(all_maps) == 1 and all_maps[0][0] not in " sv"):
-                        # "No maps found". String could be localized. Hopefully
-                        # it doesn't start with any of these letters in any
-                        # language
-                        continue
+                    # "No maps found". String could be localized. Hopefully
+                    # it doesn't start with any of these letters in any
+                    # language
+                    continue
 
                 # Only keep mappings that should not be ignored
                 maps = [m for m in all_maps if
@@ -870,9 +870,10 @@ class SnippetManager(object):
             feedkeys(feedkey, mode)
 
     def _ensure_snippets_loaded(self):
-        filetypes = vim.eval("&filetype").split(".") + [ "all" ]
-        for ft in filetypes[::-1]:
-            if len(ft) and ft not in self._snippets:
+        filetypes = self._filetypes()
+
+        for ft in filetypes:
+            if ft not in self._snippets:
                 self._load_snippets_for(ft)
 
         return filetypes
@@ -898,7 +899,7 @@ class SnippetManager(object):
         filetypes = self._ensure_snippets_loaded()
 
         found_snippets = []
-        for ft in filetypes[::-1]:
+        for ft in filetypes:
             found_snippets += self._find_snippets(ft, before, possible)
 
         # Search if any of the snippets overwrites the previous
@@ -1066,17 +1067,108 @@ class SnippetManager(object):
     def _parse_snippets(self, ft, fn, file_data=None):
         _SnippetsFileParser(ft, fn, self, file_data).parse()
 
+    def base_snippet_files_for(self, ft, default=True):
+        """ Returns a list of snippet files matching the given filetype (ft).
+        If default is set to false, it doesn't include shipped files.
+
+        Searches through each path in 'runtimepath' in reverse order,
+        in each of these, it searches each directory name listed in
+        'g:UltiSnipsSnippetDirectories' in order, then looks for files in these
+        directories called 'ft.snippets' or '*_ft.snippets' replacing ft with
+        the filetype.
+        """
+
+        snippet_dirs = vim.eval("g:UltiSnipsSnippetDirectories")
+        base_snippets = os.path.realpath(os.path.join(__file__, "../../../UltiSnips"))
+        ret = []
+
+        for rtp in vim.eval("&runtimepath").split(',')[::-1]:
+            for snippet_dir in snippet_dirs:
+                pth = os.path.realpath(os.path.join(rtp, snippet_dir))
+
+                patterns = ["%s.snippets", "*_%s.snippets"]
+                if not default and pth == base_snippets:
+                    patterns.remove("%s.snippets")
+
+                for pattern in patterns:
+                    for fn in glob.glob(os.path.join(pth, pattern % ft)):
+                        if fn not in ret:
+                            ret.append(fn)
+
+        return ret
+
+    def _filetypes(self, dotft=None):
+        if dotft is None:
+            dotft = vim.eval("&filetype")
+
+        fts = dotft.split(".") + [ "all" ]
+        return [ft for ft in fts[::-1] if ft]
+
+    def filetype(self):
+        """ Property for the current (undotted) filetype. """
+        return self._filetypes()[-1]
+    filetype = property(filetype)
+
+    def file_to_edit(self, ft=None):
+        """ Gets a file to edit based on the given filetype.
+        If no filetype is given, uses the current filetype from vim.
+
+        Checks 'g:UltiSnipsSnippetsDir' and uses it if it exists
+        If a non-shipped file already exists, it uses it.
+        Otherwise uses a file in ~/.vim/ or ~/vimfiles
+        """
+        if not ft:
+            ft = self.filetype
+
+        edit = None
+        existing = self.base_snippet_files_for(ft, False)
+        filename = ft + ".snippets"
+
+        if vim.eval("exists('g:UltiSnipsSnippetsDir')") == 1:
+            snipdir = vim.eval("g:UltiSnipsSnippetsDir")
+            edit = os.path.join(snipdir, filename)
+        elif existing:
+            edit = existing[-1] # last sourced/highest priority
+        else:
+            home = vim.eval("$HOME")
+            rtp = vim.eval("&rtp").split(",")
+            snippet_dirs = ["UltiSnips"] + vim.eval("g:UltiSnipsSnippetDirectories")
+            us = snippet_dirs[-1]
+
+            path = os.path.join(home, ".vim", us)
+            for dirname in [".vim", "vimfiles"]:
+                pth = os.path.join(home, dirname)
+                if pth in rtp:
+                    path = os.path.join(pth, us)
+
+            if not os.path.isdir(path):
+                os.mkdir(path)
+
+            edit = os.path.join(path, filename)
+
+        return edit
+
+
+    def base_snippet_files(self, dotft=None):
+        """ Returns a list of all snippet files for the given filetype.
+        If no filetype is given, uses furrent filetype.
+        If the filetype is dotted (e.g. 'cuda.cpp.c') then it is split and
+        each filetype is checked.
+        """
+        ret = []
+        filetypes = self._filetypes(dotft)
+
+        for ft in filetypes:
+            ret += self.base_snippet_files_for(ft)
+
+        return ret
+
     # Loading
     def _load_snippets_for(self, ft):
         self._snippets[ft] = _SnippetDictionary()
 
-        snippet_dirs = vim.eval("g:UltiSnipsSnippetDirectories")
-        for p in vim.eval("&runtimepath").split(',')[::-1]:
-            for snippet_dir in snippet_dirs:
-                pattern = os.path.join(p, snippet_dir, "*%s.snippets" % ft)
-
-                for fn in glob.glob(pattern):
-                    self._parse_snippets(ft, fn)
+        for fn in self.base_snippet_files_for(ft):
+            self._parse_snippets(ft, fn)
 
         # Now load for the parents
         for p in self._snippets[ft].extends:

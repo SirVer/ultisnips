@@ -121,17 +121,24 @@ To Update an installation, simply pull the latest revision: >
 3.1 Commands                                             *UltiSnips-commands*
 ------------
 
-UltiSnips defines two Commands, the first one is UltiSnipsReset, which will
+                                                            *:UltiSnipsReset*
+UltiSnips defines two commands, the first one is UltiSnipsReset, which will
 reload the snippets definitions and is useful while you are tweaking a
 snippet.
-UltiSnipsEdit is the second one. It opens your private snippet definition file
-for the current filetype. You can easily open them manually of course, this is
-just a shortcut. There is also a variable called: >
 
+                                                             *:UltiSnipsEdit*
+The second command is UltiSnipsEdit. It opens or creates your private snippet
+definition file for the current filetype. You can easily open them manually of
+course, this is just a shortcut. There is also a variable called: >
    g:UltiSnipsEditSplit
-
 which can be set to "normal" (default), "horizontal" or "vertical" that
-defines if a new window should be opened for the edit.
+defines if a new window should be opened for the edit. There is also a
+variable called: >
+   g:UltiSnipsSnippetsDir
+that, when set to a directory like "~/.vim/mydir/UltiSnips", becomes the base
+directory for the snippet file to open. For example, if it is set to
+"~/.vim/mydir/UltiSnips" and the current 'filetype' is "cpp", then
+:UltiSnipsEdit will open "~/.vim/mydir/UltiSnips/cpp.snippets".
 
 3.2 Triggers                                             *UltiSnips-triggers*
 ------------
@@ -237,9 +244,11 @@ See |UltiSnips-snippet-search-path| for an explanation of where directories
 with snippet definitions are expected.
 
 While iterating over the snippet definition directories found, files are
-looked for called ft.snippets, for example: >
+looked for called ft.snippets or *_ft.snippets where "ft" is the current
+'filetype', and the "*" matches anything, for example: >
    ruby.snippets
    c.snippets
+   my_c.snippets
    perl.snippets
 These files contain the snippet definitions for the various file types. A
 special file is >
@@ -248,7 +257,7 @@ which contains snippets that are always expanded, no matter what file type is
 defined. For example, I keep mail signatures and date insertion snippets here.
 
 The dotted file type syntax of vim is supported. For example, for my cpp or
-CUDA files, i keep the file type set to ":set ft=cpp.c" or ":set
+CUDA files, I keep the file type set to ":set ft=cpp.c" or ":set
 ft=cuda.cpp.c". This activates all snippets for each file type in the order
 specified.
 
