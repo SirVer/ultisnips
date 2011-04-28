@@ -65,19 +65,28 @@ def echom(mes, *args):
 
 class _SnippetDictionary(object):
     def __init__(self, *args, **kwargs):
-        self._snippets = []
-        self._extends = []
-        self._files = {}
+        self._added = []
+        self.reset()
 
-    def add_snippet(self, s):
-        self._snippets.append(s)
+    def add_snippet(self, s, fn=None):
+        if fn:
+            self._snippets.append(s)
+
+            if fn not in self.files:
+                self.addfile(fn)
+        else:
+            self._added.append(s)
 
     def get_matching_snippets(self, trigger, potentially):
         """Returns all snippets matching the given trigger."""
         if not potentially:
-            return [ s for s in self._snippets if s.matches(trigger) ]
+            return [ s for s in self.snippets if s.matches(trigger) ]
         else:
-            return [ s for s in self._snippets if s.could_match(trigger) ]
+            return [ s for s in self.snippets if s.could_match(trigger) ]
+
+    def snippets(self):
+        return self._added + self._snippets
+    snippets = property(snippets)
 
     def clear_snippets(self, triggers=[]):
         """Remove all snippets that match each trigger in triggers.
@@ -86,13 +95,22 @@ class _SnippetDictionary(object):
         if triggers:
             for t in triggers:
                 for s in self.get_matching_snippets(t, potentially=False):
-                    self._snippets.remove(s)
+                    if s in self._snippets:
+                        self._snippets.remove(s)
+                    if s in self._added:
+                        self._added.remove(s)
         else:
             self._snippets = []
+            self._added = []
 
     def files(self):
         return self._files
     files = property(files)
+
+    def reset(self):
+        self._snippets = []
+        self._extends = []
+        self._files = {}
 
 
     def _hash(self, path):
@@ -233,7 +251,7 @@ class _SnippetsFileParser(object):
                 self._globals[trig] = []
             self._globals[trig].append(cv)
         elif snip == "snippet":
-            self._sm.add_snippet(trig, cv, desc, opts, self._ft, self._globals)
+            self._sm.add_snippet(trig, cv, desc, opts, self._ft, self._globals, fn=self._fn)
         else:
             self._error("Invalid snippet type: '%s'" % snip)
 
@@ -694,9 +712,9 @@ class SnippetManager(object):
         return self._snippets[ft]
 
     @err_to_scratch_buffer
-    def add_snippet(self, trigger, value, descr, options, ft = "all", globals = None):
+    def add_snippet(self, trigger, value, descr, options, ft = "all", globals = None, fn=None):
         l = self.snippet_dict(ft).add_snippet(
-            Snippet(trigger, value, descr, options, globals or {})
+            Snippet(trigger, value, descr, options, globals or {}), fn
         )
 
     @err_to_scratch_buffer
@@ -1200,7 +1218,7 @@ class SnippetManager(object):
 
     # Loading
     def _load_snippets_for(self, ft):
-        self._snippets[ft] = _SnippetDictionary()
+        self.snippet_dict(ft).reset()
 
         for fn in self.base_snippet_files_for(ft):
             self._parse_snippets(ft, fn)
