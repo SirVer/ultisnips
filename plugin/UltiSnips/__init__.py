@@ -7,7 +7,11 @@ import glob
 import os
 import re
 import string
-from zlib import crc32
+
+try:
+    from zlib import crc32
+except:
+    crc32 = None
 
 import vim
 
@@ -117,15 +121,16 @@ class _SnippetDictionary(object):
         if not os.path.isfile(path):
             return False
 
-        #hash = os.stat(path).st_mtime
-
-        file = open(path, "rb")
-        hash = 0
-        while True:
-            data = file.read(2048)
-            if not data:
-                break
-            hash = crc32(data, hash)
+        if crc32:
+            file = open(path, "rb")
+            hash = 0
+            while True:
+                data = file.read(2048)
+                if not data:
+                    break
+                hash = crc32(data, hash)
+        else:
+            hash = os.stat(path).st_mtime
 
         return hash
 
@@ -1230,11 +1235,14 @@ class SnippetManager(object):
 
 
     def _needs_update(self, ft):
+        do_hash = vim.eval('exists("g:UltiSnipsDoHash")') == "0" \
+                or vim.eval("g:UltiSnipsDoHash") != "0"
+
         if ft not in self._snippets:
             return True
-        elif self.snippet_dict(ft).needs_update():
+        elif do_hash and self.snippet_dict(ft).needs_update():
             return True
-        else:
+        elif do_hash:
             cur_snips = set(self.base_snippet_files_for(ft))
             old_snips = set(self.snippet_dict(ft).files)
 

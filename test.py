@@ -2007,7 +2007,13 @@ class AddFunc_Opt(_AddFuncBase):
 # SNIPPETS FILE PARSING #
 #########################
 
-class ParseSnippets_SimpleSnippet(_VimTest):
+class _PS_Base(_VimTest):
+    def _options_on(self):
+        self.send(":let UltiSnipsDoHash=0\n")
+    def _options_off(self):
+        self.send(":unlet UltiSnipsDoHash\n")
+
+class ParseSnippets_SimpleSnippet(_PS_Base):
     snippets_test_file = ("all", "test_file", r"""
         snippet testsnip "Test Snippet" b!
         This is a test snippet!
@@ -2016,7 +2022,7 @@ class ParseSnippets_SimpleSnippet(_VimTest):
     keys = "testsnip" + EX
     wanted = "This is a test snippet!"
 
-class ParseSnippets_MissingEndSnippet(_VimTest):
+class ParseSnippets_MissingEndSnippet(_PS_Base):
     snippets_test_file = ("all", "test_file", r"""
         snippet testsnip "Test Snippet" b!
         This is a test snippet!
@@ -2027,7 +2033,7 @@ class ParseSnippets_MissingEndSnippet(_VimTest):
         UltiSnips: Missing 'endsnippet' for 'testsnip' in test_file(5)
         """).strip()
 
-class ParseSnippets_UnknownDirective(_VimTest):
+class ParseSnippets_UnknownDirective(_PS_Base):
     snippets_test_file = ("all", "test_file", r"""
         unknown directive
         """)
@@ -2037,7 +2043,7 @@ class ParseSnippets_UnknownDirective(_VimTest):
         UltiSnips: Invalid line 'unknown directive' in test_file(2)
         """).strip()
 
-class ParseSnippets_ExtendsWithoutFiletype(_VimTest):
+class ParseSnippets_ExtendsWithoutFiletype(_PS_Base):
     snippets_test_file = ("all", "test_file", r"""
         extends
         """)
@@ -2047,7 +2053,7 @@ class ParseSnippets_ExtendsWithoutFiletype(_VimTest):
         UltiSnips: 'extends' without file types in test_file(2)
         """).strip()
 
-class ParseSnippets_ClearAll(_VimTest):
+class ParseSnippets_ClearAll(_PS_Base):
     snippets_test_file = ("all", "test_file", r"""
         snippet testsnip "Test snippet"
         This is a test.
@@ -2058,7 +2064,7 @@ class ParseSnippets_ClearAll(_VimTest):
     keys = "testsnip" + EX
     wanted = "testsnip" + EX
 
-class ParseSnippets_ClearOne(_VimTest):
+class ParseSnippets_ClearOne(_PS_Base):
     snippets_test_file = ("all", "test_file", r"""
         snippet testsnip "Test snippet"
         This is a test.
@@ -2073,7 +2079,7 @@ class ParseSnippets_ClearOne(_VimTest):
     keys = "toclear" + EX + "\n" + "testsnip" + EX
     wanted = "toclear" + EX + "\n" + "This is a test."
 
-class ParseSnippets_ClearTwo(_VimTest):
+class ParseSnippets_ClearTwo(_PS_Base):
     snippets_test_file = ("all", "test_file", r"""
         snippet testsnip "Test snippet"
         This is a test.
@@ -2089,7 +2095,7 @@ class ParseSnippets_ClearTwo(_VimTest):
     wanted = "toclear" + EX + "\n" + "testsnip" + EX
 
 
-class _ParseSnippets_MultiWord(_VimTest):
+class _ParseSnippets_MultiWord(_PS_Base):
     snippets_test_file = ("all", "test_file", r"""
         snippet /test snip/
         This is a test.
@@ -2113,7 +2119,7 @@ class ParseSnippets_MultiWord_Description_Option(_ParseSnippets_MultiWord):
     keys = "snippet test" + EX
     wanted = "This is yet another test."
 
-class _ParseSnippets_MultiWord_RE(_VimTest):
+class _ParseSnippets_MultiWord_RE(_PS_Base):
     snippets_test_file = ("all", "test_file", r"""
         snippet /[d-f]+/ "" r
         az test
@@ -2137,7 +2143,7 @@ class ParseSnippets_MultiWord_RE3(_ParseSnippets_MultiWord_RE):
     keys = "test test test" + EX
     wanted = "re-test"
 
-class ParseSnippets_MultiWord_Quotes(_VimTest):
+class ParseSnippets_MultiWord_Quotes(_PS_Base):
     snippets_test_file = ("all", "test_file", r"""
         snippet "test snip"
         This is a test.
@@ -2145,7 +2151,7 @@ class ParseSnippets_MultiWord_Quotes(_VimTest):
         """)
     keys = "test snip" + EX
     wanted = "This is a test."
-class ParseSnippets_MultiWord_WithQuotes(_VimTest):
+class ParseSnippets_MultiWord_WithQuotes(_PS_Base):
     snippets_test_file = ("all", "test_file", r"""
         snippet !"test snip"!
         This is a test.
@@ -2154,7 +2160,7 @@ class ParseSnippets_MultiWord_WithQuotes(_VimTest):
     keys = '"test snip"' + EX
     wanted = "This is a test."
 
-class ParseSnippets_MultiWord_NoContainer(_VimTest):
+class ParseSnippets_MultiWord_NoContainer(_PS_Base):
     snippets_test_file = ("all", "test_file", r"""
         snippet test snip
         This is a test.
@@ -2166,7 +2172,7 @@ class ParseSnippets_MultiWord_NoContainer(_VimTest):
         UltiSnips: Invalid multiword trigger: 'test snip' in test_file(2)
         """).strip()
 
-class ParseSnippets_MultiWord_UnmatchedContainer(_VimTest):
+class ParseSnippets_MultiWord_UnmatchedContainer(_PS_Base):
     snippets_test_file = ("all", "test_file", r"""
         snippet !inv snip/
         This is a test.
@@ -2178,7 +2184,7 @@ class ParseSnippets_MultiWord_UnmatchedContainer(_VimTest):
         UltiSnips: Invalid multiword trigger: '!inv snip/' in test_file(2)
         """).strip()
 
-class ParseSnippets_Global_Python(_VimTest):
+class ParseSnippets_Global_Python(_PS_Base):
     snippets_test_file = ("all", "test_file", r"""
         global !p
         def tex(ins):
@@ -2196,7 +2202,7 @@ class ParseSnippets_Global_Python(_VimTest):
     keys = "ab" + EX + "\nac" + EX
     wanted = "x a bob b y\nx a jon b y"
 
-class ParseSnippets_Global_Local_Python(_VimTest):
+class ParseSnippets_Global_Local_Python(_PS_Base):
     snippets_test_file = ("all", "test_file", r"""
 global !p
 def tex(ins):

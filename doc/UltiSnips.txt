@@ -176,6 +176,10 @@ with UltiSnips to be available as well, use >
 If you do not want the shipped snippets to be available, only use
 "mycoolsnippets".
 
+By default, UltiSnips will check for updates to .snippets files whenever
+it is activated. This behavior can be disabled as follows: >
+   let g:UltiSnipsDoHash=0
+
 See |UltiSnips-adding-snippet| for an introduction which files are parsed for
 which file type.
 
