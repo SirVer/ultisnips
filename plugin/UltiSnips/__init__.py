@@ -7,6 +7,7 @@ import glob
 import os
 import re
 import string
+from zlib import crc32
 
 import vim
 
@@ -58,10 +59,15 @@ def feedkeys(s, mode='n'):
     """Wrapper around vim's feedkeys function. Mainly for convenience."""
     vim.command(r'call feedkeys("%s", "%s")' % (s, mode))
 
+def echom(mes, *args):
+    mes = mes % args
+    vim.command('echom "%s"' % mes.replace('"', '\\"'))
+
 class _SnippetDictionary(object):
     def __init__(self, *args, **kwargs):
         self._snippets = []
         self._extends = []
+        self._files = {}
 
     def add_snippet(self, s):
         self._snippets.append(s)
@@ -83,6 +89,37 @@ class _SnippetDictionary(object):
                     self._snippets.remove(s)
         else:
             self._snippets = []
+
+    def files(self):
+        return self._files
+    files = property(files)
+
+
+    def _hash(self, path):
+        if not os.path.isfile(path):
+            return False
+
+        #hash = os.stat(path).st_mtime
+
+        file = open(path, "rb")
+        hash = 0
+        while True:
+            data = file.read(2048)
+            if not data:
+                break
+            hash = crc32(data, hash)
+
+        return hash
+
+
+    def addfile(self, path):
+        self.files[path] = self._hash(path)
+
+    def needs_update(self):
+        for path, hash in self.files.items():
+            if not hash or hash != self._hash(path):
+                return True
+        return False
 
     def extends():
         def fget(self):
@@ -651,13 +688,21 @@ class SnippetManager(object):
         if not rv:
             self._handle_failure(self.expand_trigger)
 
-    @err_to_scratch_buffer
-    def add_snippet(self, trigger, value, descr, options, ft = "all", globals = None):
+    def snippet_dict(self, ft):
         if ft not in self._snippets:
             self._snippets[ft] = _SnippetDictionary()
-        l = self._snippets[ft].add_snippet(
+        return self._snippets[ft]
+
+    @err_to_scratch_buffer
+    def add_snippet(self, trigger, value, descr, options, ft = "all", globals = None):
+        l = self.snippet_dict(ft).add_snippet(
             Snippet(trigger, value, descr, options, globals or {})
         )
+
+    @err_to_scratch_buffer
+    def add_snippet_file(self, ft, path):
+        sd = self.snippet_dict(ft)
+        sd.addfile(path)
 
     @err_to_scratch_buffer
     def expand_anon(self, value, trigger="", descr="", options="", globals=None):
@@ -680,9 +725,7 @@ class SnippetManager(object):
 
     @err_to_scratch_buffer
     def add_extending_info(self, ft, parents):
-        if ft not in self._snippets:
-            self._snippets[ft] = _SnippetDictionary()
-        sd = self._snippets[ft]
+        sd = self.snippet_dict(ft)
         for p in parents:
             if p in sd.extends:
                 continue
@@ -868,15 +911,6 @@ class SnippetManager(object):
 
         if feedkey:
             feedkeys(feedkey, mode)
-
-    def _ensure_snippets_loaded(self):
-        filetypes = self._filetypes()
-
-        for ft in filetypes:
-            if ft not in self._snippets:
-                self._load_snippets_for(ft)
-
-        return filetypes
 
     def _get_before_after(self):
         """ Returns the text before and after the cursor as a
@@ -1065,6 +1099,7 @@ class SnippetManager(object):
     _cs = property(_cs)
 
     def _parse_snippets(self, ft, fn, file_data=None):
+        self.add_snippet_file(ft, fn)
         _SnippetsFileParser(ft, fn, self, file_data).parse()
 
     def base_snippet_files_for(self, ft, default=True):
@@ -1174,6 +1209,48 @@ class SnippetManager(object):
         for p in self._snippets[ft].extends:
             if p not in self._snippets:
                 self._load_snippets_for(p)
+
+
+    def _needs_update(self, ft):
+        if ft not in self._snippets:
+            return True
+        elif self.snippet_dict(ft).needs_update():
+            return True
+        else:
+            cur_snips = set(self.base_snippet_files_for(ft))
+            old_snips = set(self.snippet_dict(ft).files)
+
+            if cur_snips - old_snips:
+                return True
+
+        return False
+
+
+    def _ensure_loaded(self, ft, checked=None):
+        if not checked:
+            checked = set([ft])
+        elif ft in checked:
+            return
+        else:
+            checked.add(ft)
+
+        if self._needs_update(ft):
+            self._load_snippets_for(ft)
+
+        for parent in self.snippet_dict(ft).extends:
+            self._ensure_loaded(parent, checked)
+
+
+    def _ensure_snippets_loaded(self):
+        """ Checks for changes in the list of snippet files or the contents
+        of the snippet files and reloads them if necessary.
+        """
+        filetypes = self._filetypes()
+
+        for ft in filetypes:
+            self._ensure_loaded(ft)
+
+        return filetypes
 
     def _find_snippets(self, ft, trigger, potentially = False, seen=None):
         """
