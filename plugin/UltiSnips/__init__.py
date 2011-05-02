@@ -751,7 +751,9 @@ class SnippetManager(object):
             feedkeys(r"i")
             self._chars_entered('')
         else:
-            feedkeys(r"\<BS>")
+            # We can't just pass <BS> through, because we took vim
+            # out of SELECT mode, so instead we reselect and replace
+            feedkeys(r"gvc")
 
     @err_to_scratch_buffer
     def cursor_moved(self):

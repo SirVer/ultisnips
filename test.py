@@ -1882,6 +1882,17 @@ class Snippet_With_DoubleQuote_List(_VimTest):
     keys = "te" + LS + "1\n"
     wanted = "Expand me\"!"
 
+# Test for Bug #774917
+class Backspace_TabStop_Zero(_VimTest):
+    snippets = ("test", "A${1:C} ${0:DDD}", "This is Case 1")
+    keys = "test" + EX + "A" + JF + BS + "BBB"
+    wanted = "AA BBB"
+
+class Backspace_TabStop_NotZero(_VimTest):
+    snippets = ("test", "A${1:C} ${2:DDD}", "This is Case 1")
+    keys = "test" + EX + "A" + JF + BS + "BBB"
+    wanted = "AA BBB"
+
 ######################
 # SELECTING MULTIPLE #
 ######################
