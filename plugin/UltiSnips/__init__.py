@@ -949,7 +949,9 @@ class SnippetManager(object):
             snippets[s.trigger].append(s)
 
         # Transform dictionary into flat list of snippets
-        snippets = [item for sublist in snippets.values() for item in sublist]
+        selected_snippets = set([item for sublist in snippets.values() for item in sublist])
+        # Return snippets to their original order
+        snippets = [snip for snip in found_snippets if snip in selected_snippets]
 
         return snippets
 
