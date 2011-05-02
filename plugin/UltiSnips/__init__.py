@@ -945,11 +945,15 @@ class SnippetManager(object):
             found_snippets += self._find_snippets(ft, before, possible)
 
         # Search if any of the snippets overwrites the previous
-        snippets = []
+        # Dictionary allows O(1) access for easy overwrites
+        snippets = {}
         for s in found_snippets:
-            if s.overwrites_previous:
-                snippets = []
-            snippets.append(s)
+            if (s.trigger not in snippets) or s.overwrites_previous:
+                snippets[s.trigger] = []
+            snippets[s.trigger].append(s)
+
+        # Transform dictionary into flat list of snippets
+        snippets = [item for sublist in snippets.values() for item in sublist]
 
         return snippets
 
