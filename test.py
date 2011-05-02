@@ -1786,7 +1786,6 @@ class SnippetOptions_Regex_SameLine_Simple(_VimTest):
     keys = "abc test test" + EX
     wanted = "abc test Expand me!"
 
-
 #######################
 # MULTI-WORD SNIPPETS #
 #######################
@@ -1855,6 +1854,33 @@ class MultiWord_SnippetOptions_ExpandWordSnippets_ExpandSuffix(
     _MultiWord_SnippetOptions_ExpandWordSnippets):
     keys = "a-test it" + EX
     wanted = "a-Expand me!"
+
+# Test for Bug #774917
+def _snip_quote(qt):
+    return (
+            ("te" + qt + "st", "Expand me!", ""),
+            ("te", "Bad", ""),
+            )
+
+class Snippet_With_SingleQuote(_VimTest):
+    snippets = _snip_quote("'")
+    keys = "te'st" + EX
+    wanted = "Expand me!"
+
+class Snippet_With_SingleQuote_List(_VimTest):
+    snippets = _snip_quote("'")
+    keys = "te" + LS + "1\n"
+    wanted = "Expand me!"
+
+class Snippet_With_DoubleQuote(_VimTest):
+    snippets = _snip_quote('"')
+    keys = 'te"st' + EX
+    wanted = "Expand me!"
+
+class Snippet_With_DoubleQuote_List(_VimTest):
+    snippets = _snip_quote('"')
+    keys = "te" + LS + "1\n"
+    wanted = "Expand me!"
 
 ######################
 # SELECTING MULTIPLE #
