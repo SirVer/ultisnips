@@ -1858,29 +1858,29 @@ class MultiWord_SnippetOptions_ExpandWordSnippets_ExpandSuffix(
 # Test for Bug #774917
 def _snip_quote(qt):
     return (
-            ("te" + qt + "st", "Expand me!", ""),
+            ("te" + qt + "st", "Expand me" + qt + "!", "test: "+qt),
             ("te", "Bad", ""),
             )
 
 class Snippet_With_SingleQuote(_VimTest):
     snippets = _snip_quote("'")
     keys = "te'st" + EX
-    wanted = "Expand me!"
+    wanted = "Expand me'!"
 
 class Snippet_With_SingleQuote_List(_VimTest):
     snippets = _snip_quote("'")
     keys = "te" + LS + "1\n"
-    wanted = "Expand me!"
+    wanted = "Expand me'!"
 
 class Snippet_With_DoubleQuote(_VimTest):
     snippets = _snip_quote('"')
     keys = 'te"st' + EX
-    wanted = "Expand me!"
+    wanted = "Expand me\"!"
 
 class Snippet_With_DoubleQuote_List(_VimTest):
     snippets = _snip_quote('"')
     keys = "te" + LS + "1\n"
-    wanted = "Expand me!"
+    wanted = "Expand me\"!"
 
 ######################
 # SELECTING MULTIPLE #

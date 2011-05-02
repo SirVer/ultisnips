@@ -966,7 +966,7 @@ class SnippetManager(object):
         )
 
         try:
-            rv = vim.eval("inputlist(%s)" % display)
+            rv = vim.eval("inputlist([%s])" % vim_string(display))
             if rv is None or rv == '0':
                 return None
             rv = int(rv)
