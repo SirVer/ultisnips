@@ -14,7 +14,7 @@ import vim
 from UltiSnips.Geometry import Position
 from UltiSnips.TextObjects import *
 from UltiSnips.Buffer import VimBuffer
-from UltiSnips.Util import IndentUtil
+from UltiSnips.Util import IndentUtil, vim_string
 from UltiSnips.Langmap import LangMapTranslator
 
 # The following lines silence DeprecationWarnings. They are raised
@@ -51,17 +51,13 @@ Following is the full stack trace:
             _to_scratch_buffer(s)
     return wrapper
 
-def _vim_quote(s):
-    """Quote string s as Vim literal string."""
-    return "'" + s.replace("'", "''") + "'"
-
 def feedkeys(s, mode='n'):
     """Wrapper around vim's feedkeys function. Mainly for convenience."""
     vim.command(r'call feedkeys("%s", "%s")' % (s, mode))
 
 def echom(mes, *args):
     mes = mes % args
-    vim.command('echom "%s"' % mes.replace('"', '\\"'))
+    vim.command('echom %s' % vim_string(mes))
 
 class _SnippetDictionary(object):
     def __init__(self, *args, **kwargs):
@@ -151,7 +147,7 @@ class _SnippetsFileParser(object):
         self._idx = 0
 
     def _error(self, msg):
-        fn = vim.eval("""fnamemodify(%s, ":~:.")""" % _vim_quote(self._fn))
+        fn = vim.eval("""fnamemodify(%s, ":~:.")""" % vim_string(self._fn))
         self._sm._error("%s in %s(%d)" % (msg, fn, self._idx + 1))
 
     def _line(self):
@@ -831,7 +827,7 @@ class SnippetManager(object):
     # Private/Protect Functions Below #
     ###################################
     def _error(self, msg):
-        msg = _vim_quote("UltiSnips: " + msg)
+        msg = vim_string("UltiSnips: " + msg)
         if self._test_error:
             msg = msg.replace('"', r'\"')
             msg = msg.replace('|', r'\|')
