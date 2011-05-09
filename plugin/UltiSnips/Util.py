@@ -4,6 +4,21 @@
 import vim
 import os
 
+def vim_string(inp):
+    """ Creates a vim-friendly string from a group of
+    dicts, lists and strings.
+    """
+    def conv(obj):
+        if isinstance(obj, list):
+            return u'[' + u",".join([conv(o) for o in obj]) + u']'
+        elif isinstance(obj, dict):
+            return u'{' + u','.join([
+                u"%s:%s" % (conv(key), conv(value))
+                for key, value in obj.iteritems()]) + u'}'
+        else:
+            return u'"%s"' % str(obj).replace(u'"', u'\\"')
+    return conv(inp)
+
 class IndentUtil(object):
     """ Utility class for dealing properly with indentation. """
 

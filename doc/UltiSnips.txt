@@ -747,6 +747,7 @@ Contributers are listed in chronological order:
    Timo Schmiade
    blueyed - Daniel Hahler
    expelledboy - Anthony Jackson
+   allait
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------
