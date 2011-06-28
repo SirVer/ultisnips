@@ -189,6 +189,7 @@ EOF
 
 au CursorMovedI * py UltiSnips_Manager.cursor_moved()
 au InsertEnter * py UltiSnips_Manager.entered_insert_mode()
+au WinLeave * py UltiSnips_Manager.leaving_window()
 
 call UltiSnips_MapKeys()
 

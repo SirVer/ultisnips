@@ -825,6 +825,18 @@ class SnippetManager(object):
                 self._current_snippet_is_done()
             self._reinit()
 
+    @err_to_scratch_buffer
+    def leaving_window(self):
+        """
+        Called when the user switches tabs. It basically means that all
+        snippets must be properly terminated
+        """
+        self._vstate.update()
+        while len(self._csnippets):
+            self._current_snippet_is_done()
+        self._reinit()
+
+
     ###################################
     # Private/Protect Functions Below #
     ###################################
