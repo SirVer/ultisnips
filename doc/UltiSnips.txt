@@ -148,7 +148,7 @@ current expand situation. The variables with the default values are: >
 
 It is possible to set the Expand and Forward trigger to the same value. You
 can get a more TextMate like configuration by adding the next three lines to
-you vimrc: >
+your vimrc: >
    let g:UltiSnipsExpandTrigger="<tab>"
    let g:UltiSnipsJumpForwardTrigger="<tab>"
    let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
@@ -750,6 +750,7 @@ Contributers are listed in chronological order:
    allait - Alexey Bezhan
    peacech - Charles Gunawan
    guns - Sung Pae
+   shlomif - Shlomi Fish
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------
