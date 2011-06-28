@@ -748,6 +748,7 @@ Contributers are listed in chronological order:
    blueyed - Daniel Hahler
    expelledboy - Anthony Jackson
    allait - Alexey Bezhan
+   peacech - Charles Gunawan
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------

@@ -961,14 +961,12 @@ class SnippetManager(object):
         """ Given a list of snippets, ask the user which one they
         want to use, and return it.
         """
-        display = repr(
-            [ "%i: %s" % (i+1,s.description) for i,s in
-             enumerate(snippets)
-            ]
-        )
+        # make a python list
+        display = [ "%i: %s" % (i+1,s.description) for i,s in enumerate(snippets)]
 
         try:
-            rv = vim.eval("inputlist([%s])" % vim_string(display))
+            # let vim_string format it as a vim list
+            rv = vim.eval("inputlist(%s)" % vim_string(display))
             if rv is None or rv == '0':
                 return None
             rv = int(rv)
