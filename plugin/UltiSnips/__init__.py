@@ -1169,7 +1169,7 @@ class SnippetManager(object):
         existing = self.base_snippet_files_for(ft, False)
         filename = ft + ".snippets"
 
-        if vim.eval("exists('g:UltiSnipsSnippetsDir')") == 1:
+        if vim.eval("exists('g:UltiSnipsSnippetsDir')") == "1":
             snipdir = vim.eval("g:UltiSnipsSnippetsDir")
             edit = os.path.join(snipdir, filename)
         elif existing:
