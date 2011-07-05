@@ -221,6 +221,32 @@ snippet table "XHTML <table>"
 </table>
 endsnippet
 
+snippet a "Link"
+<a href="${1:http://www.${2:url.com}}"${3: target="_blank"}>${4:Anchor Text}</a>
+endsnippet
+
+snippet p "paragraph"
+<p>$0</p>
+endsnippet
+
+snippet li "list item"
+<li></li>
+endsnippet
+
+snippet ul "unordered list"
+<ul>
+$0
+</ul>
+endsnippet
+
+snippet td "table cell"
+<td>$0</td>
+endsnippet
+
+snippet tr "table row"
+<tr>$0</tr>
+endsnippet
+
 snippet title "XHTML <title>"
 <title>${1:`!p snip.rv = snip.basename or "Page Title"`}</title>
 endsnippet
