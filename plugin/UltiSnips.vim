@@ -14,6 +14,7 @@ endif
 
 " Snipmate compatibilty: Filename function, taken from
 " snipMate.vim {{{
+let g:snips_author = "John Doe"
 fun! Filename(...)
     let filename = expand('%:t:r')
     if filename == '' | return a:0 == 2 ? a:2 : '' | endif
