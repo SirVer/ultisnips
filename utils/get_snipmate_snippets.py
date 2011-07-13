@@ -8,21 +8,9 @@ import sys
 import re
 import os
 
-def global_code_as_required(content):
-	" Return some global code for the resulting snippet. Only python support here.. "
-	if "`!p snip.rv = Filename" in content:
-		return "import os\n" + \
-		"""def Filename(fn, *args):
-			filename = os.path.splitext(fn)[0]
-			if filename == "":
-				return args[1] if len(args) == 2 else ""
-			return filename if len(args) == 0 or args[0] == "" else args[1].replace("$1", filename)
-		"""
-
 def convert_snippet_contents(content):
 	" If the snippet contains snipmate style substitutions, convert them to ultisnips style "
-	content = re.sub("`\s*Filename\(", "`!p snip.rv = Filename(fn, ", content)
-	content = re.sub("`(?!!)([^`]+`)", "`!v \g<1>", content)
+	content = re.sub("`([^`]+`)", "`!v \g<1>", content)
 	return content
 
 def convert_snippet_file(source):
@@ -92,7 +80,4 @@ if __name__ == '__main__':
 		target = open(target, "w")
 
 	snippets = convert_snippets(source)
-	global_code = global_code_as_required(snippets)
-	if global_code:
-		print >> target, "global !p\n%s\nendglobal\n" % global_code
 	print >> target, snippets
