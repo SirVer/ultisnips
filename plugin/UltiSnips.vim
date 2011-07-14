@@ -12,16 +12,6 @@ if exists('did_UltiSnips_vim') || &cp || version < 700 || !has("python")
     finish
 endif
 
-" Snipmate compatibilty: Filename function, taken from
-" snipMate.vim {{{
-let g:snips_author = "John Doe"
-fun! Filename(...)
-    let filename = expand('%:t:r')
-    if filename == '' | return a:0 == 2 ? a:2 : '' | endif
-    return !a:0 || a:1 == '' ? filename : substitute(a:1, '$1', filename, 'g')
-endf
-" }}}
-
 " Global Variables {{{
 
 " The trigger used to expand a snippet.

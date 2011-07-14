@@ -7,6 +7,7 @@
 import sys
 import re
 import os
+import argparse
 
 def convert_snippet_contents(content):
 	" If the snippet contains snipmate style substitutions, convert them to ultisnips style "
@@ -68,16 +69,20 @@ def convert_snippets(source):
 		return convert_snippet_file(source)
 
 if __name__ == '__main__':
-	if len(sys.argv) not in (3, 2):
-		print >> sys.stderr, "Syntax: get_snipmate_snippets.py <source directory or file> [target file]"
-		print >> sys.stderr
+	# Parse command line
+	argsp = argparse.ArgumentParser(description="Convert snipmate compatible snippets to UltiSnips' file format",
+		epilog="example:\n  %s drupal/ drupal.snippets\n   will convert all drupal specific snippets from snipmate into one file drupal.snippets" % sys.argv[0],
+		formatter_class=argparse.RawDescriptionHelpFormatter)
+	argsp.add_argument("source", help="Source directory for one filetype or a snippets file")
+	argsp.add_argument("target", help="File to write the resulting snippets into. If omitted, the snippets will be written to stdout.", nargs="?", default="-")
+	args = argsp.parse_args()
+
+	source = args.source
+	try:
+		target = sys.stdout if args.target == "-" else open(args.target, "w")
+	except IOError:
+		print >> sys.stderr, "Error: Failed to open output file %s for writing" % args.target
 		sys.exit(1)
-	if len(sys.argv) == 2:
-		source = sys.argv[1]
-		target = sys.stdout
-	else:
-		source, target = sys.argv[1:]
-		target = open(target, "w")
 
 	snippets = convert_snippets(source)
 	print >> target, snippets
