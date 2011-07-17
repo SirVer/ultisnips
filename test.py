@@ -222,6 +222,9 @@ class _VimTest(unittest.TestCase):
         # Reset UltiSnips
         self.send(":py UltiSnips_Manager.reset(test_error=True)\n")
 
+        # Make it unlikely that we do not parse any shipped snippets
+        self.send(":let g:UltiSnipsSnippetDirectories=['<un_def_ined>']\n")
+
         # Clear the buffer
         self.send("bggVGd")
 
@@ -1869,7 +1872,7 @@ class Snippet_With_SingleQuote(_VimTest):
 
 class Snippet_With_SingleQuote_List(_VimTest):
     snippets = _snip_quote("'")
-    keys = "te" + LS + "1\n"
+    keys = "te" + LS + "2\n"
     wanted = "Expand me'!"
 
 class Snippet_With_DoubleQuote(_VimTest):
@@ -1879,7 +1882,7 @@ class Snippet_With_DoubleQuote(_VimTest):
 
 class Snippet_With_DoubleQuote_List(_VimTest):
     snippets = _snip_quote('"')
-    keys = "te" + LS + "1\n"
+    keys = "te" + LS + "2\n"
     wanted = "Expand me\"!"
 
 # Test for Bug #774917
@@ -1963,12 +1966,12 @@ class _ListAllSnippets(_VimTest):
 
 class ListAllAvailable_NothingTyped_ExceptCorrectResult(_ListAllSnippets):
     keys = "" + LS + "3\n"
-    wanted = "OHEEEE"
+    wanted = "BLAAH"
 class ListAllAvailable_testtyped_ExceptCorrectResult(_ListAllSnippets):
-    keys = "hallo test" + LS + "1\n"
+    keys = "hallo test" + LS + "2\n"
     wanted = "hallo BLAAH"
 class ListAllAvailable_testtypedSecondOpt_ExceptCorrectResult(_ListAllSnippets):
-    keys = "hallo test" + LS + "2\n"
+    keys = "hallo test" + LS + "1\n"
     wanted = "hallo TEST ONE"
 
 class ListAllAvailable_NonDefined_NoExceptionShouldBeRaised(_ListAllSnippets):
