@@ -751,6 +751,7 @@ Contributers are listed in chronological order:
    peacech - Charles Gunawan
    guns - Sung Pae
    shlomif - Shlomi Fish
+   pberndt - Phillip Berndt
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------
