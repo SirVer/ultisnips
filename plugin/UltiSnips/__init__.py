@@ -667,6 +667,9 @@ class SnippetManager(object):
         before, after = self._get_before_after()
         snippets = self._snips(before, True)
 
+        # Sort snippets alphabetically
+        snippets.sort(key=lambda x: x.trigger)
+
         if not snippets:
             return True
 
