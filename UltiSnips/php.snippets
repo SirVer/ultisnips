@@ -1,0 +1,110 @@
+## Snippets from SnipMate, taken from
+## https://github.com/scrooloose/snipmate-snippets.git
+
+snippet array "array"
+$${1:arrayName} = array('${2}' => ${3});${4}
+endsnippet
+
+snippet class "class"
+/**
+ * ${1}
+ */
+class ${2:ClassName}
+{
+	${3}
+	function ${4:__construct}(${5:argument})
+	{
+		${6:// code...}
+	}
+}
+endsnippet
+
+snippet def "def"
+define('${1}'${2});${3}
+endsnippet
+
+snippet do "do"
+do {
+	${2:// code... }
+} while (${1:/* condition */});"
+endsnippet
+
+snippet doc_f "doc_f"
+/**
+ * $2
+ * @return ${4:void}
+ * @author ${5:`!v g:snips_author`}
+ **/
+${1:public }function ${2:someFunc}(${3})
+{${6}
+}
+endsnippet
+
+snippet doc_i "doc_i"
+/**
+ * $1
+ * @package ${2:default}
+ * @author ${3:`!v g:snips_author`}
+ **/
+interface ${1:someClass}
+{${4}
+} // END interface $1"
+endsnippet
+
+snippet else "else"
+else {
+	${1:// code...}
+}
+endsnippet
+
+snippet for "for"
+for ($${2:i} = 0; $$2 < ${1:count}; $$2${3:++}) {
+	${4:// code...}
+}
+endsnippet
+
+snippet foreachk "foreachk"
+foreach ($${1:variable} as $${2:key} => $${3:value}){
+	${4:// code...}
+}
+endsnippet
+
+snippet get "get"
+$_GET['${1}']${2}
+endsnippet
+
+snippet if "if"
+if (${1:/* condition */}) {
+	${2:// code...}
+}
+endsnippet
+
+snippet inc "inc"
+include '${1:file}';${2}
+endsnippet
+
+snippet log "log"
+error_log(var_export(${1}, true));${2}
+endsnippet
+
+snippet post "post"
+$_POST['${1}']${2}
+endsnippet
+
+snippet req1 "req1"
+require_once '${1:file}';${2}
+endsnippet
+
+snippet session "session"
+$_SESSION['${1}']${2}
+endsnippet
+
+snippet t "t"
+$${1:retVal} = (${2:condition}) ? ${3:a} : ${4:b};${5}
+endsnippet
+
+snippet var "var"
+var_export(${1});${2}
+endsnippet
+
+# :vim:ft=snippets:
