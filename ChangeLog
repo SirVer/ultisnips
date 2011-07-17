@@ -1,11 +1,16 @@
+version 1.4:
+  - New or improved snippets: php, html, djangohtml, mako, lua 
+  - Snippets are now listed alphabetically by their trigger, no longer in
+    order of appearance
+  - Snippet files are now automatically reloaded when they change.
+  - Support for other directory names for snippets beside
+    "UltiSnips" *UltiSnips-snippet-search-path*
   - Errors are now shown in a scratch window.
-  - Mako snippets
   - Now fully supports Windows with python >= 2.6. UltiSnips should now work
     on all systems that Vim runs on.
-  - Lua snippets
   - a syntax file was added for snippets files with nice highlighting.
-  - snippets definition files now have the filetype snippets. It used to be
-    snippet.
+  - snippets definition files now have the filetype 'snippets'. It used to be
+    'snippet'.
 
 version 1.3:
   - Erlang snippets (g0rdin)
