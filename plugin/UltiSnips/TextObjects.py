@@ -129,6 +129,8 @@ class _TOParser(object):
     _UNESCAPE = re.compile(r'\\[`$\\]')
 
     def __init__(self, parent, val, indent):
+
+
         self._v = val
         self._p = parent
         self._indent = indent
@@ -139,23 +141,28 @@ class _TOParser(object):
         return "TOParser(%s)" % self._p
 
     def parse(self):
-        text = ""
+        val = self._v
+        # self._v = ""
+        s = SnippetParser(self, val)
+        s.parse()
 
-        idx = 0
-        while idx < len(self._v):
-            if self._v[idx] == '\\':
-                text += self._v[idx+1]
-                idx += 2
-            elif self._v[idx:].startswith("${"):
-                didx, dtext = self._parse_tabstop(idx, self._v)
-                debug("%r, %r" %(didx,dtext))
-                idx += didx
-                text += dtext
-            else:
-                text += self._v[idx]
-                idx += 1
+        # text = ""
 
-        self._v = text
+        # idx = 0
+        # while idx < len(self._v):
+            # if self._v[idx] == '\\':
+                # text += self._v[idx+1]
+                # idx += 2
+            # elif self._v[idx:].startswith("${"):
+                # didx, dtext = self._parse_tabstop(idx, self._v)
+                # debug("%r, %r" %(didx,dtext))
+                # idx += didx
+                # text += dtext
+            # else:
+                # text += self._v[idx]
+                # idx += 1
+
+        # self._v = text
 
         # self._parse_tabs()
         # self._parse_pythoncode()
@@ -955,7 +962,6 @@ class SnippetInstance(TextObject):
 
         TextObject.__init__(self, parent, start, end, initial_text)
 
-        debug("initial_text: %r" % (initial_text))
         _TOParser(self, initial_text, indent).parse()
 
         # Check if we have a zero Tab, if not, add one at the end
@@ -1022,5 +1028,220 @@ class SnippetInstance(TextObject):
                 return ts
 
         return self._tabstops[self._cts]
+
+## TODO: everything below here should be it's own module
+from debug import debug
+import string
+
+class TextIterator(object):
+    def __init__(self, text):
+        self._text = text
+        self._line = 0
+        self._col = 0
+
+        self._idx = 0
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        if self._idx >= len(self._text):
+            raise StopIteration
+
+        rv = self._text[self._idx]
+        if self._idx > 0 and self._text[self._idx - 1] in ('\n', '\r\n'):
+            self._line += 1
+            self._col = 0
+        else:
+            self._col += 1
+        self._idx += 1
+
+        return rv
+
+    def peek(self, count = 1):
+        try:
+            return self._text[self._idx:self._idx + count]
+        except IndexError:
+            return None
+
+    @property
+    def idx(self):
+        return self._idx
+
+    @property
+    def pos(self):
+        return Position(self._line, self._col)
+
+    @property
+    def exhausted(self):
+        return self._idx >= len(self._text)
+
+class Token(object):
+    pass
+
+class LiteralTextToken(Token):
+    def __init__(self, text):
+        self.text = text
+
+class TabStopToken(Token):
+    def __init__(self, number, start, end, default_text):
+        self.no = number
+        self.start = start
+        self.end = end
+        self.default_text = default_text
+
+class MirrorToken(Token):
+    def __init__(self, number, start, end):
+        self.no = number
+        self.start = start
+        self.end = end
+
+class ParsingMode(object):
+    pass
+
+class LiteralMode(ParsingMode):
+    def __init__(self):
+        self._text = ""
+
+    def run(self, gen):
+        for c in gen:
+            if c is '\\':
+                self._text += gen.next()
+            else:
+                self._text += c
+
+            if gen.peek(2) == '${':
+                return "tabstop"
+            if gen.peek(1) == '$' and gen.peek(2)[-1] in string.digits:
+                # TODO: this is not strong enough. 
+                return "tabstop_or_mirror"
+
+    def finish(self):
+        return LiteralTextToken(self._text)
+
+
+class TabStopMode(ParsingMode):
+    def __init__(self):
+        self._handler = self._parse_number
+        self._number = ""
+        self._default_text = ""
+
+    def _parse_number(self, gen):
+        debug("gen.pos: %s, gen.peek(: %s" % (gen.pos, gen.peek()))
+        while gen.peek() in string.digits:
+            self._number += gen.next()
+        if gen.peek() is ":":
+            gen.next()
+
+        self._number = int(self._number)
+        self._handler = self._parse_default_text
+
+    def _parse_default_text(self, gen):
+        for c in gen:
+            if c == '}': return False
+            self._default_text += c
+        return False
+
+    def run(self, gen):
+        self._start = gen.pos
+
+        gen.next() # $
+        gen.next() # {
+
+        while self._handler(gen) != False:
+            pass
+
+        self._end = gen.pos
+
+    def finish(self):
+        return TabStopToken(
+            self._number, self._start, self._end, self._default_text
+        )
+
+class TabStopOrMirrorMode(ParsingMode):
+    def __init__(self):
+        self._number = ""
+
+    def run(self, gen):
+        self._start = gen.pos
+
+        gen.next()
+
+        while gen.peek() in string.digits:
+            self._number += gen.next()
+
+        self._end = gen.pos
+
+    def finish(self):
+        return MirrorToken(
+            int(self._number), self._start, self._end
+        )
+
+
+class SnippetParser(object):
+    MODES = {
+        "literal": LiteralMode,
+        "tabstop": TabStopMode,
+        "tabstop_or_mirror": TabStopOrMirrorMode,
+    }
+
+    def __init__(self, parent, text):
+        debug("text: %s" % (text))
+        self.current_to = parent._p
+        self.stream = TextIterator(text)
+        self.mode = None
+
+        self.tokens = []
+
+    def parse(self):
+        self.switch_mode("literal")
+
+        seen_ts = set()
+
+        debug("tokens: %s" % (self.tokens))
+        for token in self.tokens:
+            if isinstance(token, LiteralTextToken):
+                # self.current_to._v += LiteralTextToken.text
+                pass
+            elif isinstance(token, TabStopToken):
+                # TODO: could also take the token directly
+                debug("token.start: %s, token.end: %s" % (token.start, token.end))
+                ts = TabStop(token.no, self.current_to,
+                        token.start, token.end, token.default_text)
+                seen_ts.add(token.no)
+                self.current_to._add_tabstop(token.no,ts)
+
+
+        for token in self.tokens:
+            if isinstance(token, MirrorToken):
+                # TODO: maybe we can get rid of _get_tabstop and _add_tabstop
+                if token.no not in seen_ts:
+                    debug("token.start: %s, token.end: %s" % (token.start, token.end))
+                    ts = TabStop(token.no, self.current_to,
+                            token.start, token.end)
+                    debug("ALIVE1" % ())
+                    seen_ts.add(token.no)
+                    debug("ALIVE2" % ())
+                    self.current_to._add_tabstop(token.no,ts)
+                    debug("ALIVE3" % ())
+                else:
+                    raise RuntimeError("Never here!")
+                    Mirror(self.current_to, self.current_to._get_tabstop(self.current_to, token.no), token.start, token.end)
+
+
+
+
+
+
+    def switch_mode(self, mode_name):
+        while not self.stream.exhausted:
+            self.mode = self.MODES[mode_name]()
+            mode_name = self.mode.run(self.stream)
+            self.tokens.append(self.mode.finish())
+            mode_name = mode_name or "literal"
+
+
+
+
 
 
