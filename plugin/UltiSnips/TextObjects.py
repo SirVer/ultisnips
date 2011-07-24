@@ -110,7 +110,6 @@ class _CleverReplace(object):
 
         return self._unescape(tv.decode("string-escape"))
 
-
 class _TOParser(object):
     def __init__(self, parent_to, text, indent):
         self._indent = indent
@@ -145,7 +144,6 @@ class _TOParser(object):
                 if token.no not in seen_ts:
                     raise RuntimeError("Tabstop %i is not known but is used by a Transformation" % t._ts)
                 Transformation(parent, seen_ts[token.no], token)
-        # TODO: check if all associations have been done properly. Also add a testcase for this!
 
     def _do_parse(self, all_tokens, seen_ts):
         tokens = list(tokenize(self._text, self._indent))
