@@ -144,7 +144,7 @@ class _TOParser(object):
         val = self._v
         # self._v = ""
         s = SnippetParser(self._p, val)
-        s.parse()
+        s.parse(self._indent)
 
         # text = ""
 
@@ -1077,9 +1077,9 @@ class TextIterator(object):
         return self._idx >= len(self._text)
 
 class Token(object):
-    def __init__(self, gen):
+    def __init__(self, gen, indent):
         self.start = gen.pos
-        self._parse(gen)
+        self._parse(gen, indent)
         self.end = gen.pos
 
 
@@ -1132,7 +1132,7 @@ class TabStopToken(Token):
         # TODO: bad name for function
         return klass.CHECK.match(stream.peek(10)) != None
 
-    def _parse(self, stream):
+    def _parse(self, stream, indent):
         stream.next() # $
         stream.next() # {
 
@@ -1156,7 +1156,7 @@ class TransformationToken(Token):
         # TODO: bad name for function
         return klass.CHECK.match(stream.peek(10)) != None
 
-    def _parse(self, stream):
+    def _parse(self, stream, indent):
         stream.next() # $
         stream.next() # {
 
@@ -1181,7 +1181,7 @@ class MirrorToken(Token):
         # TODO: bad name for function
         return klass.CHECK.match(stream.peek(10)) != None
 
-    def _parse(self, stream):
+    def _parse(self, stream, indent):
         self.no = ""
         stream.next() # $
         while not stream.exhausted and stream.peek() in string.digits:
@@ -1200,7 +1200,7 @@ class EscapeCharToken(Token):
         if len(cs) == 2 and cs[0] == '\\' and cs[1] in chars:
             return True
 
-    def _parse(self, stream):
+    def _parse(self, stream, indent):
         stream.next() # \
         self.char = stream.next()
 
@@ -1216,7 +1216,7 @@ class ShellCodeToken(Token):
     def check(klass, stream):
         return stream.peek(1) == '`'
 
-    def _parse(self, stream):
+    def _parse(self, stream, indent):
         stream.next() # `
         self.content = _parse_till_unescaped_char(stream, '`')
 
@@ -1226,20 +1226,76 @@ class ShellCodeToken(Token):
             self.start, self.end, self.content
         )
 
+
+# TODO: identical to VimLCodeToken
+class PythonCodeToken(Token):
+    CHECK = re.compile(r'^`!p\s')
+
+    @classmethod
+    def check(klass, stream):
+        return klass.CHECK.match(stream.peek(4)) is not None
+
+    def _parse(self, stream, indent):
+        for i in range(3):
+            stream.next() # `!p
+        if stream.peek() in '\t ':
+            stream.next()
+
+        content = _parse_till_unescaped_char(stream, '`')
+
+        # TODO: stupid to pass the indent down even if only python
+        # needs it. Stupid to indent beforehand.
+
+        debug("indent: %r" % (indent))
+        # Strip the indent if any
+        if len(indent):
+            lines = content.splitlines()
+            self.content = lines[0] + '\n'
+            self.content += '\n'.join([l[len(indent):]
+                        for l in lines[1:]])
+        else:
+            self.content = content
+        self.indent = indent
+
+    # TODO: get rid of those __repr__ maybe
+    def __repr__(self):
+        return "PythonCodeToken(%r,%r,%r)" % (
+            self.start, self.end, self.content
+        )
+
+
+class VimLCodeToken(Token):
+    CHECK = re.compile(r'^`!v\s')
+
+    @classmethod
+    def check(klass, stream):
+        return klass.CHECK.match(stream.peek(4)) is not None
+
+    def _parse(self, stream, indent):
+        for i in range(4):
+            stream.next() # `!v
+        self.content = _parse_till_unescaped_char(stream, '`')
+
+    # TODO: get rid of those __repr__ maybe
+    def __repr__(self):
+        return "VimLCodeToken(%r,%r,%r)" % (
+            self.start, self.end, self.content
+        )
+
 class ParsingMode(object):
-    def tokens(self, stream):
+    def tokens(self, stream, indent):
         while True:
             done_something = False
             for t in self.ALLOWED_TOKENS:
                 if t.check(stream):
-                    yield t(stream)
+                    yield t(stream, indent)
                     done_something = True
                     break
             if not done_something:
                 stream.next()
 
 class LiteralMode(ParsingMode):
-    ALLOWED_TOKENS = [ EscapeCharToken, TransformationToken, TabStopToken, MirrorToken, ShellCodeToken ]
+    ALLOWED_TOKENS = [ EscapeCharToken, TransformationToken, TabStopToken, MirrorToken, PythonCodeToken, VimLCodeToken, ShellCodeToken ]
 
 
 class SnippetParser(object):
@@ -1250,18 +1306,49 @@ class SnippetParser(object):
         self.mode = None
 
 
-    def parse(self, seen_ts = None, unresolved_ts = None):
-        tokens = list(LiteralMode().tokens(self.stream))
+    def parse(self, indent):
 
-        if seen_ts is None:
-            seen_ts = {}
-        if unresolved_ts is None:
-            unresolved_ts = set()
+        seen_ts = {}
+        dangling_references = set()
+        tokens = []
 
-        unparsed_ts = []
+        self._parse(indent, tokens, seen_ts, dangling_references)
+
+        debug("all tokens: %s" % (tokens))
+        debug("seen_ts: %s" % (seen_ts))
+        debug("dangling_references: %s" % (dangling_references))
+        # TODO: begin second phase: resolve ambiguity
+        # TODO: do this only once at the top level
+        for parent, token in tokens:
+            if isinstance(token, MirrorToken):
+                # TODO: maybe we can get rid of _get_tabstop and _add_tabstop
+                if token.no not in seen_ts:
+                    debug("token.start: %s, token.end: %s" % (token.start, token.end))
+                    ts = TabStop(token.no, parent, token.start, token.end)
+                    seen_ts[token.no] = ts
+                    parent._add_tabstop(token.no,ts)
+                else:
+                    Mirror(parent, seen_ts[token.no], token.start, token.end)
+
+        # TODO: third phase: associate tabstops with Transformations
+        # TODO: do this only once
+        # TODO: this access private parts
+        resolved_ts = set()
+        for tr in dangling_references:
+            if tr._ts in seen_ts:
+                tr._ts = seen_ts[tr._ts]
+                resolved_ts.add(tr)
+
+        # TODO: check if all associations have been done properly. Also add a testcase for this!
+        dangling_references -= resolved_ts
+
+    def _parse(self, indent, all_tokens, seen_ts, dangling_references):
+        tokens = list(LiteralMode().tokens(self.stream, indent))
 
         debug("tokens: %s" % (tokens))
         for token in tokens:
+            all_tokens.append((self.current_to, token))
+
             if isinstance(token, TabStopToken):
                 # TODO: could also take the token directly
                 debug("token.start: %s, token.end: %s" % (token.start, token.end))
@@ -1270,43 +1357,18 @@ class SnippetParser(object):
                 seen_ts[token.no] = ts
                 self.current_to._add_tabstop(token.no,ts)
 
-                unparsed_ts.append(ts)
+                # TODO: can't parsing be done here directly?
+                k = SnippetParser(ts, ts.current_text)
+                k._parse(indent, all_tokens, seen_ts, dangling_references)
             elif isinstance(token, EscapeCharToken):
                 EscapedChar(self.current_to, token.start, token.end, token.char)
             elif isinstance(token, TransformationToken):
                 tr = Transformation(self.current_to, token.no, token.start, token.end, token.search, token.replace, token.options)
-                unresolved_ts.add(tr)
+                dangling_references.add(tr)
             elif isinstance(token, ShellCodeToken):
                 ShellCode(self.current_to, token.start, token.end, token.content)
+            elif isinstance(token, PythonCodeToken):
+                PythonCode(self.current_to, token.start, token.end, token.content, token.indent)
+            elif isinstance(token, VimLCodeToken):
+                VimLCode(self.current_to, token.start, token.end, token.content)
 
-        for ts in unparsed_ts:
-            debug("ts.current_text: %r" % (ts.current_text))
-            k = SnippetParser(ts, ts.current_text)
-            k.parse(seen_ts, unresolved_ts)
-
-        # TODO: begin second phase: resolve ambiguity
-        # TODO: do this only once at the top level
-        for token in tokens:
-            if isinstance(token, MirrorToken):
-                # TODO: maybe we can get rid of _get_tabstop and _add_tabstop
-                if token.no not in seen_ts:
-                    debug("token.start: %s, token.end: %s" % (token.start, token.end))
-                    ts = TabStop(token.no, self.current_to,
-                            token.start, token.end)
-                    debug("ALIVE1" % ())
-                    seen_ts[token.no] = ts
-                    debug("ALIVE2" % ())
-                    self.current_to._add_tabstop(token.no,ts)
-                    debug("ALIVE3" % ())
-                else:
-                    Mirror(self.current_to, seen_ts[token.no], token.start, token.end)
-
-        # TODO: third phase: associate tabstops with Transformations
-        # TODO: do this only once
-        # TODO: this access private parts
-        resolved_ts = set()
-        for tr in unresolved_ts:
-            if tr._ts in seen_ts:
-                tr._ts = seen_ts[tr._ts]
-                resolved_ts.add(tr)
-        unresolved_ts -= resolved_ts
