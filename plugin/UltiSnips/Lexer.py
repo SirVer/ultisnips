@@ -11,7 +11,10 @@ import re
 
 from Geometry import Position
 
-# TODO: review this file
+__all__ = [
+    "tokenize", "EscapeCharToken", "TransformationToken", "TabStopToken",
+    "MirrorToken", "PythonCodeToken", "VimLCodeToken", "ShellCodeToken"
+]
 
 # Helper Classes  {{{
 class _TextIterator(object):
@@ -46,20 +49,19 @@ class _TextIterator(object):
             return None
 
     @property
-    def idx(self):
-        return self._idx # TODO: does this need to be exposed?
-
-    @property
     def pos(self):
         return Position(self._line, self._col)
 
     @property
-    def exhausted(self):
+    def exhausted(self): # Only used in one place. Really neede? TODO
         return self._idx >= len(self._text)
 # End: Helper Classes  }}}
 # Helper functions  {{{
 def _parse_number(stream):
-    # TODO: document me
+    """
+    Expects the stream to contain a number next, returns the number
+    without consuming any more bytes
+    """
     rv = ""
     while stream.peek() in string.digits:
         rv += stream.next()
@@ -67,7 +69,12 @@ def _parse_number(stream):
     return int(rv)
 
 def _parse_till_closing_brace(stream):
-    # TODO: document me, this also eats the closing brace
+    """
+    Returns all chars till a non-escaped } is found. Other
+    non escaped { are taken into account and skipped over.
+
+    Will also consume the closing }, but not return it
+    """
     rv = ""
     in_braces = 1
     while True:
@@ -77,25 +84,23 @@ def _parse_till_closing_brace(stream):
             c = stream.next()
             if c == '{': in_braces += 1
             elif c == '}': in_braces -= 1
-            if in_braces == 0:
-                break
+            if in_braces == 0: break
             rv += c
     return rv
 
-
-# TODO: the functionality of some of these functions are quite
-# similar. Somekind of next_matching
 def _parse_till_unescaped_char(stream, char):
-    # TODO: document me, this also eats the closing slash
+    """
+    Returns all chars till a non-escaped `char` is found.
+
+    Will also consume the closing `char`, but not return it
+    """
     rv = ""
-    in_braces = 1
     while True:
         if EscapeCharToken.check(stream, char):
             rv += stream.next() + stream.next()
         else:
             c = stream.next()
-            if c == char:
-                break
+            if c == char: break
             rv += c
     return rv
 # End: Helper functions  }}}

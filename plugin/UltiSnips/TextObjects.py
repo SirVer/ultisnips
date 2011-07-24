@@ -10,12 +10,10 @@ import vim
 from UltiSnips.Util import IndentUtil
 from UltiSnips.Buffer import TextBuffer
 from UltiSnips.Geometry import Span, Position
+from UltiSnips.Lexer import tokenize, EscapeCharToken, TransformationToken,  \
+    TabStopToken, MirrorToken, PythonCodeToken, VimLCodeToken, ShellCodeToken
 
 __all__ = [ "Mirror", "Transformation", "SnippetInstance", "StartMarker" ]
-
-from itertools import takewhile
-
-from debug import debug
 
 ###########################################################################
 #                              Helper class                               #
@@ -111,6 +109,66 @@ class _CleverReplace(object):
         tv = self._replace_conditional(match, tv)
 
         return self._unescape(tv.decode("string-escape"))
+
+
+class _TOParser(object):
+    def __init__(self, parent_to, text, indent):
+        self._indent = indent
+        self._parent_to = parent_to
+        self._text = text
+
+    def parse(self):
+        seen_ts = {}
+        all_tokens = []
+
+        self._do_parse(all_tokens, seen_ts)
+
+        self._resolve_ambiguity(all_tokens, seen_ts)
+        self._create_objects_with_links_to_tabs(all_tokens, seen_ts)
+
+    #####################
+    # Private Functions #
+    #####################
+    def _resolve_ambiguity(self, all_tokens, seen_ts):
+        for parent, token in all_tokens:
+            if isinstance(token, MirrorToken):
+                if token.no not in seen_ts:
+                    ts = TabStop(parent, token)
+                    seen_ts[token.no] = ts
+                    parent._add_tabstop(token.no,ts)
+                else:
+                    Mirror(parent, seen_ts[token.no], token)
+
+    def _create_objects_with_links_to_tabs(self, all_tokens, seen_ts):
+        for parent, token in all_tokens:
+            if isinstance(token, TransformationToken):
+                if token.no not in seen_ts:
+                    raise RuntimeError("Tabstop %i is not known but is used by a Transformation" % t._ts)
+                Transformation(parent, seen_ts[token.no], token)
+        # TODO: check if all associations have been done properly. Also add a testcase for this!
+
+    def _do_parse(self, all_tokens, seen_ts):
+        tokens = list(tokenize(self._text, self._indent))
+
+        for token in tokens:
+            all_tokens.append((self._parent_to, token))
+
+            if isinstance(token, TabStopToken):
+                ts = TabStop(self._parent_to, token)
+                seen_ts[token.no] = ts
+                self._parent_to._add_tabstop(token.no,ts)
+
+                k = _TOParser(ts, ts.current_text, self._indent)
+                k._do_parse(all_tokens, seen_ts)
+            elif isinstance(token, EscapeCharToken):
+                EscapedChar(self._parent_to, token)
+            elif isinstance(token, ShellCodeToken):
+                ShellCode(self._parent_to, token)
+            elif isinstance(token, PythonCodeToken):
+                PythonCode(self._parent_to, token)
+            elif isinstance(token, VimLCodeToken):
+                VimLCode(self._parent_to, token)
+
 
 
 ###########################################################################
@@ -728,68 +786,3 @@ class SnippetInstance(TextObject):
                 return ts
 
         return self._tabstops[self._cts]
-
-## TODO: everything below here should be it's own module
-from debug import debug # TODO: remove
-from Lexer import tokenize, EscapeCharToken, TransformationToken,  \
-    TabStopToken, MirrorToken, PythonCodeToken, VimLCodeToken, ShellCodeToken
-
-class _TOParser(object):
-    def __init__(self, parent, text, indent):
-        self._indent = indent
-        self.current_to = parent
-        self.text = text
-        debug("text: %s" % (text))
-
-    def parse(self):
-        seen_ts = {}
-        tokens = []
-
-        self._parse(tokens, seen_ts)
-
-        debug("all tokens: %s" % (tokens))
-        debug("seen_ts: %s" % (seen_ts))
-        # TODO: begin second phase: resolve ambiguity
-        # TODO: do this only once at the top level
-        for parent, token in tokens:
-            if isinstance(token, MirrorToken):
-                # TODO: maybe we can get rid of _get_tabstop and _add_tabstop
-                if token.no not in seen_ts:
-                    debug("token.start: %s, token.end: %s" % (token.start, token.end))
-                    ts = TabStop(parent, token)
-                    seen_ts[token.no] = ts
-                    parent._add_tabstop(token.no,ts)
-                else:
-                    Mirror(parent, seen_ts[token.no], token)
-
-        # TODO: third phase: associate tabstops with Transformations
-        for parent, token in tokens:
-            if isinstance(token, TransformationToken):
-                if token.no not in seen_ts:
-                    raise RuntimeError("Tabstop %i is not known" % t._ts)
-                Transformation(parent, seen_ts[token.no], token)
-        # TODO: check if all associations have been done properly. Also add a testcase for this!
-
-    def _parse(self, all_tokens, seen_ts):
-        tokens = list(tokenize(self.text, self._indent))
-
-        debug("tokens: %s" % (tokens))
-        for token in tokens:
-            all_tokens.append((self.current_to, token))
-
-            if isinstance(token, TabStopToken):
-                ts = TabStop(self.current_to, token)
-                seen_ts[token.no] = ts
-                self.current_to._add_tabstop(token.no,ts)
-
-                k = _TOParser(ts, ts.current_text, self._indent)
-                k._parse(all_tokens, seen_ts)
-            elif isinstance(token, EscapeCharToken):
-                EscapedChar(self.current_to, token)
-            elif isinstance(token, ShellCodeToken):
-                ShellCode(self.current_to, token)
-            elif isinstance(token, PythonCodeToken):
-                PythonCode(self.current_to, token)
-            elif isinstance(token, VimLCodeToken):
-                VimLCode(self.current_to, token)
-
