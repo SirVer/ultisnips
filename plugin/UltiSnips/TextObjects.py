@@ -1110,16 +1110,16 @@ def _parse_till_closing_brace(stream):
 
 # TODO: the functionality of some of these functions are quite
 # similar. Somekind of next_matching
-def _parse_till_unescaped_slash(stream):
+def _parse_till_unescaped_char(stream, char):
     # TODO: document me, this also eats the closing slash
     rv = ""
     in_braces = 1
     while True:
-        if EscapeCharToken.check(stream, '/'):
+        if EscapeCharToken.check(stream, char):
             rv += stream.next() + stream.next()
         else:
             c = stream.next()
-            if c == '/':
+            if c == char:
                 break
             rv += c
     return rv
@@ -1164,8 +1164,8 @@ class TransformationToken(Token):
 
         stream.next() # /
 
-        self.search = _parse_till_unescaped_slash(stream)
-        self.replace = _parse_till_unescaped_slash(stream)
+        self.search = _parse_till_unescaped_char(stream, '/')
+        self.replace = _parse_till_unescaped_char(stream, '/')
         self.options = _parse_till_closing_brace(stream)
 
     def __repr__(self):
@@ -1211,6 +1211,21 @@ class EscapeCharToken(Token):
             self.start, self.end, self.char
         )
 
+class ShellCodeToken(Token):
+    @classmethod
+    def check(klass, stream):
+        return stream.peek(1) == '`'
+
+    def _parse(self, stream):
+        stream.next() # `
+        self.content = _parse_till_unescaped_char(stream, '`')
+
+    # TODO: get rid of those __repr__ maybe
+    def __repr__(self):
+        return "ShellCodeToken(%r,%r,%r)" % (
+            self.start, self.end, self.content
+        )
+
 class ParsingMode(object):
     def tokens(self, stream):
         while True:
@@ -1224,7 +1239,7 @@ class ParsingMode(object):
                 stream.next()
 
 class LiteralMode(ParsingMode):
-    ALLOWED_TOKENS = [ EscapeCharToken, TransformationToken, TabStopToken, MirrorToken ]
+    ALLOWED_TOKENS = [ EscapeCharToken, TransformationToken, TabStopToken, MirrorToken, ShellCodeToken ]
 
 
 class SnippetParser(object):
@@ -1261,6 +1276,8 @@ class SnippetParser(object):
             elif isinstance(token, TransformationToken):
                 tr = Transformation(self.current_to, token.no, token.start, token.end, token.search, token.replace, token.options)
                 unresolved_ts.add(tr)
+            elif isinstance(token, ShellCodeToken):
+                ShellCode(self.current_to, token.start, token.end, token.content)
 
         for ts in unparsed_ts:
             debug("ts.current_text: %r" % (ts.current_text))
