@@ -1049,7 +1049,7 @@ class TextIterator(object):
             raise StopIteration
 
         rv = self._text[self._idx]
-        if self._idx > 0 and self._text[self._idx - 1] in ('\n', '\r\n'):
+        if self._text[self._idx] in ('\n', '\r\n'):
             self._line += 1
             self._col = 0
         else:
@@ -1118,30 +1118,55 @@ class TabStopToken(Token):
         if stream.peek() is ":":
             stream.next()
             self.default_text = _parse_till_closing_brace(stream)
+        debug("self.start: %s, stream.pos: %s" % (self.start, stream.pos))
+
+    def __repr__(self):
+        return "TabStopToken(%r,%r,%r,%r)" % (
+            self.start, self.end, self.no, self.default_text
+        )
 
 class MirrorToken(Token):
-    CHECK = re.compile(r'^\$\d+\s')
+    CHECK = re.compile(r'^\$\d+')
 
     @classmethod
     def check(klass, stream):
         # TODO: bad name for function
+        debug("string.peek(2: %r" % (stream.peek(2)))
+        rv =  stream.peek(1) == '$' and stream.peek(2)[-1] in string.digits
+        debug("rv: %s" % (rv))
+        return rv
+    # TODO
         return klass.CHECK.match(stream.peek(10)) != None
 
-    def __init__(self, stream):
-        self.no = ""
-
-        Token.__init__(self, stream) # TODO: check for gen usage
-
     def _parse(self, stream):
+        self.no = ""
         stream.next() # $
-        while stream.peek() in string.digits:
+        while not stream.exhausted and stream.peek() in string.digits:
             self.no += stream.next()
         self.no = int(self.no)
+
+    def __repr__(self):
+        return "MirrorToken(%r,%r,%r)" % (
+            self.start, self.end, self.no
+        )
 
 class EscapeCharToken(Token):
     @classmethod
     def check(klass, stream):
-        return stream.peek(1) == '\\'
+        cs = stream.peek(2)
+        if len(cs) == 2 and cs[0] == '\\' and cs[1] in '{}\$`':
+            return True
+
+    def _parse(self, stream):
+        stream.next() # \
+        self.char = stream.next()
+
+
+    # TODO: get rid of those repr maybe
+    def __repr__(self):
+        return "EscapeCharToken(%r,%r,%r)" % (
+            self.start, self.end, self.char
+        )
 
 class ParsingMode(object):
     def tokens(self, stream):
@@ -1181,6 +1206,8 @@ class SnippetParser(object):
                         token.start, token.end, token.default_text)
                 seen_ts.add(token.no)
                 self.current_to._add_tabstop(token.no,ts)
+            elif isinstance(token, EscapeCharToken):
+                EscapedChar(self.current_to, token.start, token.end, token.char)
 
 
         for token in tokens:
@@ -1196,5 +1223,4 @@ class SnippetParser(object):
                     self.current_to._add_tabstop(token.no,ts)
                     debug("ALIVE3" % ())
                 else:
-                    raise RuntimeError("Never here!")
                     Mirror(self.current_to, self.current_to._get_tabstop(self.current_to, token.no), token.start, token.end)
