@@ -103,6 +103,7 @@ def _parse_till_unescaped_char(stream, char):
 # Tokens  {{{
 class Token(object):
     def __init__(self, gen, indent):
+        self.initial_text = ""
         self.start = gen.pos
         self._parse(gen, indent)
         self.end = gen.pos
@@ -123,11 +124,11 @@ class TabStopToken(Token):
 
         if stream.peek() is ":":
             stream.next()
-        self.default_text = _parse_till_closing_brace(stream)
+        self.initial_text = _parse_till_closing_brace(stream)
 
     def __repr__(self):
         return "TabStopToken(%r,%r,%r,%r)" % (
-            self.start, self.end, self.no, self.default_text
+            self.start, self.end, self.no, self.initial_text
         )
 
 class TransformationToken(Token):
@@ -164,6 +165,7 @@ class MirrorToken(Token):
         return klass.CHECK.match(stream.peek(10)) != None
 
     def _parse(self, stream, indent):
+        # TODO: why not parse number?
         self.no = ""
         stream.next() # $
         while not stream.exhausted and stream.peek() in string.digits:
@@ -184,13 +186,11 @@ class EscapeCharToken(Token):
 
     def _parse(self, stream, indent):
         stream.next() # \
-        self.char = stream.next()
+        self.initial_text = stream.next()
 
-
-    # TODO: get rid of those __repr__ maybe
     def __repr__(self):
         return "EscapeCharToken(%r,%r,%r)" % (
-            self.start, self.end, self.char
+            self.start, self.end, self.initial_text
         )
 
 class ShellCodeToken(Token):
@@ -200,12 +200,12 @@ class ShellCodeToken(Token):
 
     def _parse(self, stream, indent):
         stream.next() # `
-        self.content = _parse_till_unescaped_char(stream, '`')
+        self.code = _parse_till_unescaped_char(stream, '`')
 
     # TODO: get rid of those __repr__ maybe
     def __repr__(self):
         return "ShellCodeToken(%r,%r,%r)" % (
-            self.start, self.end, self.content
+            self.start, self.end, self.code
         )
 
 # TODO: identical to VimLCodeToken
@@ -222,25 +222,25 @@ class PythonCodeToken(Token):
         if stream.peek() in '\t ':
             stream.next()
 
-        content = _parse_till_unescaped_char(stream, '`')
+        code = _parse_till_unescaped_char(stream, '`')
 
         # TODO: stupid to pass the indent down even if only python
         # needs it. Stupid to indent beforehand.
 
         # Strip the indent if any
         if len(indent):
-            lines = content.splitlines()
-            self.content = lines[0] + '\n'
-            self.content += '\n'.join([l[len(indent):]
+            lines = code.splitlines()
+            self.code = lines[0] + '\n'
+            self.code += '\n'.join([l[len(indent):]
                         for l in lines[1:]])
         else:
-            self.content = content
+            self.code = code
         self.indent = indent
 
     # TODO: get rid of those __repr__ maybe
     def __repr__(self):
         return "PythonCodeToken(%r,%r,%r)" % (
-            self.start, self.end, self.content
+            self.start, self.end, self.code
         )
 
 
@@ -254,12 +254,11 @@ class VimLCodeToken(Token):
     def _parse(self, stream, indent):
         for i in range(4):
             stream.next() # `!v
-        self.content = _parse_till_unescaped_char(stream, '`')
+        self.code = _parse_till_unescaped_char(stream, '`')
 
-    # TODO: get rid of those __repr__ maybe
     def __repr__(self):
         return "VimLCodeToken(%r,%r,%r)" % (
-            self.start, self.end, self.content
+            self.start, self.end, self.code
         )
 # End: Tokens  }}}
 
