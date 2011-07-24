@@ -1066,7 +1066,7 @@ class TextIterator(object):
 
     @property
     def idx(self):
-        return self._idx
+        return self._idx # TODO: does this need to be exposed?
 
     @property
     def pos(self):
@@ -1077,133 +1077,104 @@ class TextIterator(object):
         return self._idx >= len(self._text)
 
 class Token(object):
-    pass
+    def __init__(self, gen):
+        self.start = gen.pos
+        self._parse(gen)
+        self.end = gen.pos
 
-class LiteralTextToken(Token):
-    def __init__(self, text):
-        self.text = text
+
+def _parse_number(stream):
+    # TODO: document me
+    rv = ""
+    while stream.peek() in string.digits:
+        rv += stream.next()
+
+    return int(rv)
+
+def _parse_till_closing_brace(stream):
+    # TODO: document me
+    rv = ""
+    for c in stream:
+        if c == '}': break # TODO: must count braces
+        rv += c
+    return rv
 
 class TabStopToken(Token):
-    def __init__(self, number, start, end, default_text):
-        self.no = number
-        self.start = start
-        self.end = end
-        self.default_text = default_text
+    @classmethod
+    def check(klass, stream):
+        # TODO: bad name for function
+        return stream.peek(2) == '${'
+
+    def __init__(self, gen):
+        Token.__init__(self, gen)
+
+    def _parse(self, stream):
+        stream.next() # $
+        stream.next() # {
+
+        self.no = _parse_number(stream)
+
+        self.default_text = ""
+        if stream.peek() is ":":
+            stream.next()
+            self.default_text = _parse_till_closing_brace(stream)
 
 class MirrorToken(Token):
-    def __init__(self, number, start, end):
-        self.no = number
-        self.start = start
-        self.end = end
+    CHECK = re.compile(r'^\$\d+\s')
+
+    @classmethod
+    def check(klass, stream):
+        # TODO: bad name for function
+        return klass.CHECK.match(stream.peek(10)) != None
+
+    def __init__(self, stream):
+        self.no = ""
+
+        Token.__init__(self, stream) # TODO: check for gen usage
+
+    def _parse(self, stream):
+        stream.next() # $
+        while stream.peek() in string.digits:
+            self.no += stream.next()
+        self.no = int(self.no)
+
+class EscapeCharToken(Token):
+    @classmethod
+    def check(klass, stream):
+        return stream.peek(1) == '\\'
 
 class ParsingMode(object):
-    pass
+    def tokens(self, stream):
+        while True:
+            done_something = False
+            for t in self.ALLOWED_TOKENS:
+                if t.check(stream):
+                    yield t(stream)
+                    done_something = True
+                    break
+            if not done_something:
+                stream.next()
 
 class LiteralMode(ParsingMode):
-    def __init__(self):
-        self._text = ""
-
-    def run(self, gen):
-        for c in gen:
-            if c is '\\':
-                self._text += gen.next()
-            else:
-                self._text += c
-
-            if gen.peek(2) == '${':
-                return "tabstop"
-            if gen.peek(1) == '$' and gen.peek(2)[-1] in string.digits:
-                # TODO: this is not strong enough. 
-                return "tabstop_or_mirror"
-
-    def finish(self):
-        return LiteralTextToken(self._text)
-
-
-class TabStopMode(ParsingMode):
-    def __init__(self):
-        self._handler = self._parse_number
-        self._number = ""
-        self._default_text = ""
-
-    def _parse_number(self, gen):
-        debug("gen.pos: %s, gen.peek(: %s" % (gen.pos, gen.peek()))
-        while gen.peek() in string.digits:
-            self._number += gen.next()
-        if gen.peek() is ":":
-            gen.next()
-
-        self._number = int(self._number)
-        self._handler = self._parse_default_text
-
-    def _parse_default_text(self, gen):
-        for c in gen:
-            if c == '}': return False
-            self._default_text += c
-        return False
-
-    def run(self, gen):
-        self._start = gen.pos
-
-        gen.next() # $
-        gen.next() # {
-
-        while self._handler(gen) != False:
-            pass
-
-        self._end = gen.pos
-
-    def finish(self):
-        return TabStopToken(
-            self._number, self._start, self._end, self._default_text
-        )
-
-class TabStopOrMirrorMode(ParsingMode):
-    def __init__(self):
-        self._number = ""
-
-    def run(self, gen):
-        self._start = gen.pos
-
-        gen.next()
-
-        while gen.peek() in string.digits:
-            self._number += gen.next()
-
-        self._end = gen.pos
-
-    def finish(self):
-        return MirrorToken(
-            int(self._number), self._start, self._end
-        )
+    ALLOWED_TOKENS = [ EscapeCharToken, TabStopToken, MirrorToken ]
 
 
 class SnippetParser(object):
-    MODES = {
-        "literal": LiteralMode,
-        "tabstop": TabStopMode,
-        "tabstop_or_mirror": TabStopOrMirrorMode,
-    }
-
     def __init__(self, parent, text):
         debug("text: %s" % (text))
         self.current_to = parent._p
         self.stream = TextIterator(text)
         self.mode = None
 
-        self.tokens = []
 
     def parse(self):
-        self.switch_mode("literal")
+        tokens = list(LiteralMode().tokens(self.stream))
 
         seen_ts = set()
 
-        debug("tokens: %s" % (self.tokens))
-        for token in self.tokens:
-            if isinstance(token, LiteralTextToken):
-                # self.current_to._v += LiteralTextToken.text
-                pass
-            elif isinstance(token, TabStopToken):
+        debug("tokens: %s" % (tokens))
+        for token in tokens:
+            if isinstance(token, TabStopToken):
                 # TODO: could also take the token directly
                 debug("token.start: %s, token.end: %s" % (token.start, token.end))
                 ts = TabStop(token.no, self.current_to,
@@ -1212,7 +1183,7 @@ class SnippetParser(object):
                 self.current_to._add_tabstop(token.no,ts)
 
 
-        for token in self.tokens:
+        for token in tokens:
             if isinstance(token, MirrorToken):
                 # TODO: maybe we can get rid of _get_tabstop and _add_tabstop
                 if token.no not in seen_ts:
@@ -1227,21 +1198,3 @@ class SnippetParser(object):
                 else:
                     raise RuntimeError("Never here!")
                     Mirror(self.current_to, self.current_to._get_tabstop(self.current_to, token.no), token.start, token.end)
-
-
-
-
-
-
-    def switch_mode(self, mode_name):
-        while not self.stream.exhausted:
-            self.mode = self.MODES[mode_name]()
-            mode_name = self.mode.run(self.stream)
-            self.tokens.append(self.mode.finish())
-            mode_name = mode_name or "literal"
-
-
-
-
-
-

@@ -186,7 +186,7 @@ class _VimTest(unittest.TestCase):
                 '\n\n' + self.text_after
         if self.expected_error:
             wanted = wanted + "\n" + self.expected_error
-        for i in range(4):
+        for i in range(0): # TODO: make this a 4 again
             if self.output != wanted:
                 # Redo this, but slower
                 self.sleeptime += 0.02
@@ -2541,7 +2541,7 @@ if __name__ == '__main__':
 
     # Now, source our runtime
     send(":so plugin/UltiSnips.vim\n", options.session)
-    time.sleep(2) # Parsing and initializing UltiSnips takes a while.
+    time.sleep(.1) # Parsing and initializing UltiSnips takes a while. # TODO: amke this 2 seconds again
 
     # Inform all test case which screen session to use
     suite = unittest.TestSuite()
