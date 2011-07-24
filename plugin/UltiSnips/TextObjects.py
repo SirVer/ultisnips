@@ -143,7 +143,7 @@ class _TOParser(object):
     def parse(self):
         val = self._v
         # self._v = ""
-        s = SnippetParser(self, val)
+        s = SnippetParser(self._p, val)
         s.parse()
 
         # text = ""
@@ -1092,21 +1092,45 @@ def _parse_number(stream):
     return int(rv)
 
 def _parse_till_closing_brace(stream):
-    # TODO: document me
+    # TODO: document me, this also eats the closing brace
     rv = ""
-    for c in stream:
-        if c == '}': break # TODO: must count braces
-        rv += c
+    in_braces = 1
+    while True:
+        if EscapeCharToken.check(stream, '{}'):
+            rv += stream.next() + stream.next()
+        else:
+            c = stream.next()
+            if c == '{': in_braces += 1
+            elif c == '}': in_braces -= 1
+            if in_braces == 0:
+                break
+            rv += c
+    return rv
+
+
+# TODO: the functionality of some of these functions are quite
+# similar. Somekind of next_matching
+def _parse_till_unescaped_slash(stream):
+    # TODO: document me, this also eats the closing slash
+    rv = ""
+    in_braces = 1
+    while True:
+        if EscapeCharToken.check(stream, '/'):
+            rv += stream.next() + stream.next()
+        else:
+            c = stream.next()
+            if c == '/':
+                break
+            rv += c
     return rv
 
 class TabStopToken(Token):
+    CHECK = re.compile(r'^\${\d+[:}]')
+
     @classmethod
     def check(klass, stream):
         # TODO: bad name for function
-        return stream.peek(2) == '${'
-
-    def __init__(self, gen):
-        Token.__init__(self, gen)
+        return klass.CHECK.match(stream.peek(10)) != None
 
     def _parse(self, stream):
         stream.next() # $
@@ -1114,15 +1138,39 @@ class TabStopToken(Token):
 
         self.no = _parse_number(stream)
 
-        self.default_text = ""
         if stream.peek() is ":":
             stream.next()
-            self.default_text = _parse_till_closing_brace(stream)
+        self.default_text = _parse_till_closing_brace(stream)
         debug("self.start: %s, stream.pos: %s" % (self.start, stream.pos))
 
     def __repr__(self):
         return "TabStopToken(%r,%r,%r,%r)" % (
             self.start, self.end, self.no, self.default_text
+        )
+
+class TransformationToken(Token):
+    CHECK = re.compile(r'^\${\d+\/')
+
+    @classmethod
+    def check(klass, stream):
+        # TODO: bad name for function
+        return klass.CHECK.match(stream.peek(10)) != None
+
+    def _parse(self, stream):
+        stream.next() # $
+        stream.next() # {
+
+        self.no = _parse_number(stream)
+
+        stream.next() # /
+
+        self.search = _parse_till_unescaped_slash(stream)
+        self.replace = _parse_till_unescaped_slash(stream)
+        self.options = _parse_till_closing_brace(stream)
+
+    def __repr__(self):
+        return "TransformationToken(%r,%r,%r,%r,%r)" % (
+            self.start, self.end, self.no, self.search, self.replace
         )
 
 class MirrorToken(Token):
@@ -1131,11 +1179,6 @@ class MirrorToken(Token):
     @classmethod
     def check(klass, stream):
         # TODO: bad name for function
-        debug("string.peek(2: %r" % (stream.peek(2)))
-        rv =  stream.peek(1) == '$' and stream.peek(2)[-1] in string.digits
-        debug("rv: %s" % (rv))
-        return rv
-    # TODO
         return klass.CHECK.match(stream.peek(10)) != None
 
     def _parse(self, stream):
@@ -1152,9 +1195,9 @@ class MirrorToken(Token):
 
 class EscapeCharToken(Token):
     @classmethod
-    def check(klass, stream):
+    def check(klass, stream, chars = '{}\$`'):
         cs = stream.peek(2)
-        if len(cs) == 2 and cs[0] == '\\' and cs[1] in '{}\$`':
+        if len(cs) == 2 and cs[0] == '\\' and cs[1] in chars:
             return True
 
     def _parse(self, stream):
@@ -1162,7 +1205,7 @@ class EscapeCharToken(Token):
         self.char = stream.next()
 
 
-    # TODO: get rid of those repr maybe
+    # TODO: get rid of those __repr__ maybe
     def __repr__(self):
         return "EscapeCharToken(%r,%r,%r)" % (
             self.start, self.end, self.char
@@ -1181,21 +1224,26 @@ class ParsingMode(object):
                 stream.next()
 
 class LiteralMode(ParsingMode):
-    ALLOWED_TOKENS = [ EscapeCharToken, TabStopToken, MirrorToken ]
+    ALLOWED_TOKENS = [ EscapeCharToken, TransformationToken, TabStopToken, MirrorToken ]
 
 
 class SnippetParser(object):
     def __init__(self, parent, text):
         debug("text: %s" % (text))
-        self.current_to = parent._p
+        self.current_to = parent
         self.stream = TextIterator(text)
         self.mode = None
 
 
-    def parse(self):
+    def parse(self, seen_ts = None, unresolved_ts = None):
         tokens = list(LiteralMode().tokens(self.stream))
 
-        seen_ts = set()
+        if seen_ts is None:
+            seen_ts = {}
+        if unresolved_ts is None:
+            unresolved_ts = set()
+
+        unparsed_ts = []
 
         debug("tokens: %s" % (tokens))
         for token in tokens:
@@ -1204,12 +1252,23 @@ class SnippetParser(object):
                 debug("token.start: %s, token.end: %s" % (token.start, token.end))
                 ts = TabStop(token.no, self.current_to,
                         token.start, token.end, token.default_text)
-                seen_ts.add(token.no)
+                seen_ts[token.no] = ts
                 self.current_to._add_tabstop(token.no,ts)
+
+                unparsed_ts.append(ts)
             elif isinstance(token, EscapeCharToken):
                 EscapedChar(self.current_to, token.start, token.end, token.char)
+            elif isinstance(token, TransformationToken):
+                tr = Transformation(self.current_to, token.no, token.start, token.end, token.search, token.replace, token.options)
+                unresolved_ts.add(tr)
 
+        for ts in unparsed_ts:
+            debug("ts.current_text: %r" % (ts.current_text))
+            k = SnippetParser(ts, ts.current_text)
+            k.parse(seen_ts, unresolved_ts)
 
+        # TODO: begin second phase: resolve ambiguity
+        # TODO: do this only once at the top level
         for token in tokens:
             if isinstance(token, MirrorToken):
                 # TODO: maybe we can get rid of _get_tabstop and _add_tabstop
@@ -1218,9 +1277,19 @@ class SnippetParser(object):
                     ts = TabStop(token.no, self.current_to,
                             token.start, token.end)
                     debug("ALIVE1" % ())
-                    seen_ts.add(token.no)
+                    seen_ts[token.no] = ts
                     debug("ALIVE2" % ())
                     self.current_to._add_tabstop(token.no,ts)
                     debug("ALIVE3" % ())
                 else:
-                    Mirror(self.current_to, self.current_to._get_tabstop(self.current_to, token.no), token.start, token.end)
+                    Mirror(self.current_to, seen_ts[token.no], token.start, token.end)
+
+        # TODO: third phase: associate tabstops with Transformations
+        # TODO: do this only once
+        # TODO: this access private parts
+        resolved_ts = set()
+        for tr in unresolved_ts:
+            if tr._ts in seen_ts:
+                tr._ts = seen_ts[tr._ts]
+                resolved_ts.add(tr)
+        unresolved_ts -= resolved_ts
