@@ -10,6 +10,8 @@ import vim
 from UltiSnips.Util import IndentUtil
 from UltiSnips.Buffer import TextBuffer
 from UltiSnips.Geometry import Span, Position
+from UltiSnips.Lexer import tokenize, EscapeCharToken, TransformationToken,  \
+    TabStopToken, MirrorToken, PythonCodeToken, VimLCodeToken, ShellCodeToken
 
 __all__ = [ "Mirror", "Transformation", "SnippetInstance", "StartMarker" ]
 
@@ -109,300 +111,83 @@ class _CleverReplace(object):
         return self._unescape(tv.decode("string-escape"))
 
 class _TOParser(object):
-    # A simple tabstop with default value
-    _TABSTOP = re.compile(r'''(?<![^\\]\\)\${(\d+)[:}]''')
-    # A mirror or a tabstop without default value.
-    _MIRROR_OR_TS = re.compile(r'(?<![^\\]\\)\$(\d+)')
-    # A mirror or a tabstop without default value.
-    _TRANSFORMATION = re.compile(r'(?<![^\\]\\)\${(\d+)/(.*?)/(.*?)/([a-zA-z]*)}')
-    # The beginning of a shell code fragment
-    _SHELLCODE = re.compile(r'(?<![^\\]\\)`')
-    # The beginning of a python code fragment
-    _PYTHONCODE = re.compile(r'(?<![^\\]\\)`!p')
-    # The beginning of a vimL code fragment
-    _VIMCODE = re.compile(r'(?<![^\\]\\)`!v')
-    # Escaped characters in substrings
-    _UNESCAPE = re.compile(r'\\[`$\\]')
-
-    def __init__(self, parent, val, indent):
-        self._v = val
-        self._p = parent
+    def __init__(self, parent_to, text, indent):
         self._indent = indent
-
-        self._childs = []
-
-    def __repr__(self):
-        return "TOParser(%s)" % self._p
+        self._parent_to = parent_to
+        self._text = text
 
     def parse(self):
-        self._parse_tabs()
-        self._parse_pythoncode()
-        self._parse_vimlcode()
-        self._parse_shellcode()
-        self._parse_transformations()
-        self._parse_mirrors_or_ts()
+        seen_ts = {}
+        all_tokens = []
 
-        self._parse_escaped_chars()
+        self._do_parse(all_tokens, seen_ts)
 
-        self._finish()
-
-    #################
-    # Escaped chars #
-    #################
-    def _parse_escaped_chars(self):
-        m = self._UNESCAPE.search(self._v)
-        while m:
-            self._handle_unescape(m)
-            m = self._UNESCAPE.search(self._v)
-
-        for c in self._childs:
-            c._parse_escaped_chars()
-
-    def _handle_unescape(self, m):
-        start_pos = m.start()
-        end_pos = start_pos + 2
-        char = self._v[start_pos+1]
-
-        start, end = self._get_start_end(self._v,start_pos,end_pos)
-
-        self._overwrite_area(start_pos,end_pos)
-
-        return EscapedChar(self._p, start, end, char)
-
-    ##############
-    # Shell Code #
-    ##############
-    def _parse_shellcode(self):
-        m = self._SHELLCODE.search(self._v)
-        while m:
-            self._handle_shellcode(m)
-            m = self._SHELLCODE.search(self._v)
-
-        for c in self._childs:
-            c._parse_shellcode()
-
-    def _handle_shellcode(self, m):
-        start_pos = m.start()
-        end_pos = self._find_closing_bt(start_pos+1)
-
-        content = self._v[start_pos+1:end_pos-1]
-
-        start, end = self._get_start_end(self._v,start_pos,end_pos)
-
-        self._overwrite_area(start_pos,end_pos)
-
-        return ShellCode(self._p, start, end, content)
-
-    ###############
-    # Python Code #
-    ###############
-    def _parse_pythoncode(self):
-        m = self._PYTHONCODE.search(self._v)
-        while m:
-            self._handle_pythoncode(m)
-            m = self._PYTHONCODE.search(self._v)
-
-        for c in self._childs:
-            c._parse_pythoncode()
-
-    def _handle_pythoncode(self, m):
-        start_pos = m.start()
-        end_pos = self._find_closing_bt(start_pos+1)
-
-        # Strip `!p `
-        content = self._v[start_pos+3:end_pos-1]
-
-        start, end = self._get_start_end(self._v,start_pos,end_pos)
-
-        self._overwrite_area(start_pos,end_pos)
-
-        # Strip the indent if any
-        if len(self._indent):
-            lines = content.splitlines()
-            new_content = lines[0] + '\n'
-            new_content += '\n'.join([l[len(self._indent):]
-                        for l in lines[1:]])
-        else:
-            new_content = content
-        new_content = new_content.strip()
-
-        return PythonCode(self._p, start, end, new_content, self._indent)
-
-    #############
-    # VimL Code #
-    #############
-    def _parse_vimlcode(self):
-        m = self._VIMCODE.search(self._v)
-        while m:
-            self._handle_vimlcode(m)
-            m = self._VIMCODE.search(self._v)
-
-        for c in self._childs:
-            c._parse_vimlcode()
-
-    def _handle_vimlcode(self, m):
-        start_pos = m.start()
-        end_pos = self._find_closing_bt(start_pos+1)
-
-        # Strip `!v `
-        content = self._v[start_pos+3:end_pos-1]
-
-        start, end = self._get_start_end(self._v,start_pos,end_pos)
-
-        self._overwrite_area(start_pos,end_pos)
-
-        return VimLCode(self._p, start, end, content)
-
-
-
-    ########
-    # TABS #
-    ########
-    def _parse_tabs(self):
-        ts = []
-        m = self._TABSTOP.search(self._v)
-        while m:
-            ts.append(self._handle_tabstop(m))
-            m = self._TABSTOP.search(self._v)
-
-        for t, def_text in ts:
-            child_parser = _TOParser(t, def_text, self._indent)
-            child_parser._parse_tabs()
-            self._childs.append(child_parser)
-
-    def _handle_tabstop(self, m):
-        def _find_closingbracket(v,start_pos):
-            bracks_open = 1
-            for idx, c in enumerate(v[start_pos:]):
-                if c == '{':
-                    if v[idx+start_pos-1] != '\\':
-                        bracks_open += 1
-                elif c == '}':
-                    if v[idx+start_pos-1] != '\\':
-                        bracks_open -= 1
-                    if not bracks_open:
-                        return start_pos+idx+1
-
-        start_pos = m.start()
-        end_pos = _find_closingbracket(self._v, start_pos+2)
-
-        def_text = self._v[m.end():end_pos-1]
-
-        start, end = self._get_start_end(self._v,start_pos,end_pos)
-
-        no = int(m.group(1))
-        ts = TabStop(no, self._p, start, end, def_text)
-
-        self._p._add_tabstop(no,ts)
-
-        self._overwrite_area(start_pos, end_pos)
-
-        return ts, def_text
-
-    ###################
-    # TRANSFORMATIONS #
-    ###################
-    def _parse_transformations(self):
-        self._trans = []
-        for m in self._TRANSFORMATION.finditer(self._v):
-            self._trans.append(self._handle_transformation(m))
-
-        for t in self._childs:
-            t._parse_transformations()
-
-    def _handle_transformation(self, m):
-        no = int(m.group(1))
-        search = m.group(2)
-        replace = m.group(3)
-        options = m.group(4)
-
-        start_pos, end_pos = m.span()
-        start, end = self._get_start_end(self._v,start_pos,end_pos)
-
-        self._overwrite_area(*m.span())
-
-        return Transformation(self._p, no, start, end, search, replace, options)
+        self._resolve_ambiguity(all_tokens, seen_ts)
+        self._create_objects_with_links_to_tabs(all_tokens, seen_ts)
 
     #####################
-    # MIRRORS OR TS: $1 #
+    # Private Functions #
     #####################
-    def _parse_mirrors_or_ts(self):
-        for m in self._MIRROR_OR_TS.finditer(self._v):
-            self._handle_ts_or_mirror(m)
+    def _resolve_ambiguity(self, all_tokens, seen_ts):
+        for parent, token in all_tokens:
+            if isinstance(token, MirrorToken):
+                if token.no not in seen_ts:
+                    ts = TabStop(parent, token)
+                    seen_ts[token.no] = ts
+                    parent._add_tabstop(token.no,ts)
+                else:
+                    Mirror(parent, seen_ts[token.no], token)
 
-        for t in self._childs:
-            t._parse_mirrors_or_ts()
+    def _create_objects_with_links_to_tabs(self, all_tokens, seen_ts):
+        for parent, token in all_tokens:
+            if isinstance(token, TransformationToken):
+                if token.no not in seen_ts:
+                    raise RuntimeError("Tabstop %i is not known but is used by a Transformation" % t._ts)
+                Transformation(parent, seen_ts[token.no], token)
 
-    def _handle_ts_or_mirror(self, m):
-        no = int(m.group(1))
+    def _do_parse(self, all_tokens, seen_ts):
+        tokens = list(tokenize(self._text, self._indent))
 
-        start_pos, end_pos = m.span()
-        start, end = self._get_start_end(self._v,start_pos,end_pos)
+        for token in tokens:
+            all_tokens.append((self._parent_to, token))
 
-        ts = self._p._get_tabstop(self._p, no)
-        if ts is not None:
-            rv = Mirror(self._p, ts, start, end)
-        else:
-            rv = TabStop(no, self._p, start, end)
-            self._p._add_tabstop(no,rv)
+            if isinstance(token, TabStopToken):
+                ts = TabStop(self._parent_to, token)
+                seen_ts[token.no] = ts
+                self._parent_to._add_tabstop(token.no,ts)
 
-        self._overwrite_area(*m.span())
-
-        return rv
-
-    ###################
-    # Resolve symbols #
-    ###################
-    def _finish(self):
-        for c in self._childs:
-            c._finish()
-
-        for t in self._trans:
-            ts = self._p._get_tabstop(self._p,t._ts)
-            if ts is None:
-                raise RuntimeError, "Tabstop %i is not known" % t._ts
-            t._ts = ts
-
-
-    ####################
-    # Helper functions #
-    ####################
-    def _find_closing_bt(self, start_pos):
-        for idx,c in enumerate(self._v[start_pos:]):
-            if c == '`' and self._v[idx+start_pos-1] != '\\':
-                return idx + start_pos + 1
-
-    def _get_start_end(self, val, start_pos, end_pos):
-        def _get_pos(s, pos):
-            line_idx = s[:pos].count('\n')
-            line_start = s[:pos].rfind('\n') + 1
-            start_in_line = pos - line_start
-            return Position(line_idx, start_in_line)
-
-        return _get_pos(val, start_pos), _get_pos(val, end_pos)
-
-    def _overwrite_area(self, s, e):
-        """Overwrite the given span with spaces. But keep newlines in place"""
-        area = self._v[s:e]
-        area = '\n'.join( [" "*len(i) for i in area.splitlines()] )
-        self._v = self._v[:s] + area + self._v[e:]
+                k = _TOParser(ts, ts.current_text, self._indent)
+                k._do_parse(all_tokens, seen_ts)
+            elif isinstance(token, EscapeCharToken):
+                EscapedChar(self._parent_to, token)
+            elif isinstance(token, ShellCodeToken):
+                ShellCode(self._parent_to, token)
+            elif isinstance(token, PythonCodeToken):
+                PythonCode(self._parent_to, token)
+            elif isinstance(token, VimLCodeToken):
+                VimLCode(self._parent_to, token)
 
 
 
 ###########################################################################
 #                             Public classes                              #
 ###########################################################################
-
 class TextObject(object):
     """
     This base class represents any object in the text
     that has a span in any ways
     """
-    def __init__(self, parent, start, end, initial_text):
-        self._start = start
-        self._end = end
-
+    def __init__(self, parent, token, end = None, initial_text = ""):
         self._parent = parent
+
+        if end is not None: # Took 4 arguments
+            self._start = token
+            self._end = end
+            self._current_text = TextBuffer(initial_text)
+        else: # Initialize from token
+            self._start = token.start
+            self._end = token.end
+            self._current_text = TextBuffer(token.initial_text)
 
         self._childs = []
         self._tabstops = {}
@@ -410,13 +195,10 @@ class TextObject(object):
         if parent is not None:
             parent._add_child(self)
 
-        self._current_text = TextBuffer(initial_text)
-
         self._cts = 0
 
     def __cmp__(self, other):
         return cmp(self._start, other._start)
-
 
     ##############
     # PROPERTIES #
@@ -545,7 +327,6 @@ class TextObject(object):
 
         return max(posible_sol)
 
-
     ###############################
     # Private/Protected functions #
     ###############################
@@ -605,7 +386,6 @@ class EscapedChar(TextObject):
     """
     pass
 
-
 class StartMarker(TextObject):
     """
     This class only remembers it's starting position. It is used to
@@ -614,15 +394,15 @@ class StartMarker(TextObject):
     """
     def __init__(self, start):
         end = Position(start.line, start.col)
-        TextObject.__init__(self, None, start, end, "")
+        TextObject.__init__(self, None, start, end)
 
 
 class Mirror(TextObject):
     """
     A Mirror object mirrors a TabStop that is, text is repeated here
     """
-    def __init__(self, parent, ts, start, end):
-        TextObject.__init__(self, parent, start, end, "")
+    def __init__(self, parent, ts, token):
+        TextObject.__init__(self, parent, token)
 
         self._ts = ts
 
@@ -634,19 +414,19 @@ class Mirror(TextObject):
 
 
 class Transformation(Mirror):
-    def __init__(self, parent, ts, start, end, s, r, options):
-        Mirror.__init__(self, parent, ts, start, end)
+    def __init__(self, parent, ts, token):
+        Mirror.__init__(self, parent, ts, token)
 
         flags = 0
         self._match_this_many = 1
-        if options:
-            if "g" in options:
+        if token.options:
+            if "g" in token.options:
                 self._match_this_many = 0
-            if "i" in options:
+            if "i" in token.options:
                 flags |=  re.IGNORECASE
 
-        self._find = re.compile(s, flags | re.DOTALL)
-        self._replace = _CleverReplace(r)
+        self._find = re.compile(token.search, flags | re.DOTALL)
+        self._replace = _CleverReplace(token.replace)
 
     def _do_update(self):
         t = self._ts.current_text
@@ -657,9 +437,8 @@ class Transformation(Mirror):
         return "Transformation(%s -> %s)" % (self._start, self._end)
 
 class ShellCode(TextObject):
-    def __init__(self, parent, start, end, code):
-
-        code = code.replace("\\`", "`")
+    def __init__(self, parent, token):
+        code = token.code.replace("\\`", "`")
 
         # Write the code to a temporary file
         handle, path = tempfile.mkstemp(text=True)
@@ -678,16 +457,17 @@ class ShellCode(TextObject):
 
         os.unlink(path)
 
-        TextObject.__init__(self, parent, start, end, output)
+        token.initial_text = output
+        TextObject.__init__(self, parent, token)
 
     def __repr__(self):
         return "ShellCode(%s -> %s)" % (self._start, self._end)
 
 class VimLCode(TextObject):
-    def __init__(self, parent, start, end, code):
-        self._code = code.replace("\\`", "`").strip()
+    def __init__(self, parent, token):
+        self._code = token.code.replace("\\`", "`").strip()
 
-        TextObject.__init__(self, parent, start, end, "")
+        TextObject.__init__(self, parent, token)
 
     def _do_update(self):
         self.current_text = str(vim.eval(self._code))
@@ -844,9 +624,9 @@ class SnippetUtil(object):
 
 
 class PythonCode(TextObject):
-    def __init__(self, parent, start, end, code, indent=""):
+    def __init__(self, parent, token):
 
-        code = code.replace("\\`", "`")
+        code = token.code.replace("\\`", "`")
 
         # Find our containing snippet for snippet local data
         snippet = parent
@@ -855,7 +635,7 @@ class PythonCode(TextObject):
                 snippet = snippet._parent
             except AttributeError:
                 snippet = None
-        self._snip = SnippetUtil(indent)
+        self._snip = SnippetUtil(token.indent)
         self._locals = snippet.locals
 
         self._globals = {}
@@ -865,7 +645,7 @@ class PythonCode(TextObject):
         # Add Some convenience to the code
         self._code = "import re, os, vim, string, random\n" + code
 
-        TextObject.__init__(self, parent, start, end, "")
+        TextObject.__init__(self, parent, token)
 
 
     def _do_update(self):
@@ -903,9 +683,13 @@ class TabStop(TextObject):
     This is the most important TextObject. A TabStop is were the cursor
     comes to rest when the user taps through the Snippet.
     """
-    def __init__(self, no, parent, start, end, default_text = ""):
-        TextObject.__init__(self, parent, start, end, default_text)
-        self._no = no
+    def __init__(self, parent, token, start = None, end = None):
+        if start is not None:
+            self._no = token
+            TextObject.__init__(self, parent, start, end)
+        else:
+            TextObject.__init__(self, parent, token)
+            self._no = token.no
 
     def no(self):
         return self._no
@@ -952,7 +736,7 @@ class SnippetInstance(TextObject):
                     col -= self.start.col
                 start = Position(delta.line, col)
                 end = Position(delta.line, col)
-                ts = TabStop(0, self, start, end, "")
+                ts = TabStop(self, 0, start, end)
                 self._add_tabstop(0,ts)
 
                 self.update()
@@ -1000,5 +784,3 @@ class SnippetInstance(TextObject):
                 return ts
 
         return self._tabstops[self._cts]
-
-

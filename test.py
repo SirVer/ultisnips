@@ -443,6 +443,18 @@ class TabStop_EscapingCharsDollars(_VimTest):
     snippets = ("test", r"snip \$0 $$0 end")
     keys = "test" + EX + "hi"
     wanted = "snip $0 $hi end"
+class TabStop_EscapingCharsDollars1(_VimTest):
+    snippets = ("test", r"a\${1:literal}")
+    keys = "test" + EX
+    wanted = "a${1:literal}"
+class TabStop_EscapingCharsDollars_BeginningOfLine(_VimTest):
+    snippets = ("test", "\n\\${1:literal}")
+    keys = "test" + EX
+    wanted = "\n${1:literal}"
+class TabStop_EscapingCharsDollars_BeginningOfDefinitionText(_VimTest):
+    snippets = ("test", "\\${1:literal}")
+    keys = "test" + EX
+    wanted = "${1:literal}"
 class TabStop_EscapingChars_Backslash(_VimTest):
     snippets = ("test", r"This \ is a backslash!")
     keys = "test" + EX
