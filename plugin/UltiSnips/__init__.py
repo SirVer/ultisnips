@@ -719,7 +719,7 @@ class SnippetManager(object):
         before, after = self._get_before_after()
         snip = Snippet(trigger, value, descr, options, globals)
 
-        if snip.matches(before):
+        if not trigger or snip.matches(before):
             self._do_snippet(snip, before, after)
             return True
         else:

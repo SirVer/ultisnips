@@ -2008,6 +2008,11 @@ class Anon_NoTrigger_Simple(_AnonBase):
     keys = "abc" + EA
     wanted = "abcsimple expand"
 
+class Anon_NoTrigger_AfterSpace(_AnonBase):
+    args = '"simple expand"'
+    keys = "abc " + EA
+    wanted = "abc simple expand"
+
 class Anon_NoTrigger_Multi(_AnonBase):
     args = '"simple $1 expand $1 $0"'
     keys = "abc" + EA + "123" + JF + "456"
