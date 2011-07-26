@@ -229,6 +229,12 @@ the snippet, and 3) the options. All of the optional arguments are the same as
 the |UltiSnips_AddSnippet| function. The description is unused right now,
 whereas the trigger and options can change the way the snippet expands.
 
+This feature is frequently used in .vimrc. A typical use case from my
+restructured text file looks like this:
+
+   inoremap <silent> $$ <C-R>=UltiSnips_Anon(':latex:\`$1\`$0')<cr>
+
+This expands the snippet whenever I type two $ signs.
 
 =============================================================================
 4. SYNTAX                                                  *UltiSnips-syntax*
