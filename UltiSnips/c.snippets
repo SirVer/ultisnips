@@ -2,7 +2,7 @@
 ###########################################################################
 #                            TextMate Snippets                            #
 ###########################################################################
-snippet def "#ifndef … #define … #endif"
+snippet def "#ifndef ... #define ... #endif"
 #ifndef ${1/([A-Za-z0-9_]+).*/$1/}
 #define ${1:SYMBOL} ${2:value}
 #endif
@@ -71,7 +71,7 @@ do {
 } while(${1:/* condition */});
 endsnippet
 
-snippet fprintf "fprintf …"
+snippet fprintf "fprintf ..."
 fprintf(${1:stderr}, "${2:%s}\n"${2/([^%]|%%)*(%.)?.*/(?2:, :\);)/}$3${2/([^%]|%%)*(%.)?.*/(?2:\);)/}
 endsnippet
 
