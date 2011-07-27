@@ -2013,6 +2013,15 @@ class Anon_NoTrigger_AfterSpace(_AnonBase):
     keys = "abc " + EA
     wanted = "abc simple expand"
 
+class Anon_NoTrigger_BeginningOfLine(_AnonBase):
+    args = r"':latex:\`$1\`$0'"
+    keys = EA + "Hello" + JF + "World"
+    wanted = ":latex:`Hello`World"
+class Anon_NoTrigger_FirstCharOfLine(_AnonBase):
+    args = r"':latex:\`$1\`$0'"
+    keys = " " + EA + "Hello" + JF + "World"
+    wanted = " :latex:`Hello`World"
+
 class Anon_NoTrigger_Multi(_AnonBase):
     args = '"simple $1 expand $1 $0"'
     keys = "abc" + EA + "123" + JF + "456"
