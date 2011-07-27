@@ -232,9 +232,13 @@ whereas the trigger and options can change the way the snippet expands.
 This feature is frequently used in .vimrc. A typical use case from my
 restructured text file looks like this:
 
-   inoremap <silent> $$ <C-R>=UltiSnips_Anon(':latex:\`$1\`$0')<cr>
+   inoremap <silent> $$ $$<C-R>=UltiSnips_Anon(':latex:\`$1\`', '$$')<cr>
 
-This expands the snippet whenever I type two $ signs.
+This expands the snippet whenever I type two $ signs. Note that In the right
+hand site of the mapping, I retype the '$$' trigger and also inform UltiSnips
+about the trigger; if I do not do this or give an empty trigger, vim will
+trick UltiSnips by unreliably claiming that there is already one or zero '$'
+signs before the snippet is expanded.
 
 =============================================================================
 4. SYNTAX                                                  *UltiSnips-syntax*
