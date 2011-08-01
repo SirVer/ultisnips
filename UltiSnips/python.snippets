@@ -24,69 +24,107 @@ endsnippet
 # style comments in docstrings.
 
 global !p
-def get_args(arglist, snip):
+
+NORMAL  = 0x1
+DOXYGEN = 0x2
+
+def get_args(arglist):
     args = [arg.split('=')[0].strip() for arg in arglist.split(',') if arg]
     args = [arg for arg in args if arg and arg != "self"]
 
-    if args:
+    return args
+
+
+def get_style(snip):
+    style = snip.opt("g:ultisnips_python_style", "normal")
+
+    if    style == "doxygen": return DOXYGEN
+    else: return NORMAL
+
+
+def format_arg(arg, style):
+    if style == DOXYGEN:
+        return "@param %s @todo" % arg
+    elif style == NORMAL:
+        return ":%s: @todo" % arg
+
+
+def format_return(style):
+    if style == DOXYGEN:
+        return "@return: @todo"
+    elif style == NORMAL:
+        return ":returns: @todo"
+
+
+def write_docstring_args(args, snip):
+    if not args:
+        snip.rv += ' """'
+        return
+
+    snip += ""
+
+    style = get_style(snip)
+
+    for arg in args:
+        snip += format_arg(arg, style)
+
+
+def write_init_body(args, parents, snip):
+    parents = [p.strip() for p in parents.split(",")]
+    parents = [p for p in parents if p != 'object']
+
+    for p in parents:
+        snip += p + ".__init__(self)"
+
+    if parents:
         snip += ""
 
     for arg in args:
-        style = snip.opt("g:ultisnips_python_style", "normal")
-        if style == "doxygen":
-            snip += "@param %s TODO" % arg
-        else:
-            snip += ":%s: TODO" % arg
-    return args
+        snip += "self._%s = %s" % (arg, arg)
+
 endglobal
 
-snippet class "smart class" b
+
+
+########################################
+# Class & Special Method Name Snippets #
+########################################
+
+snippet class "class with docstrings" b
 class ${1:MyClass}(${2:object}):
 	""" ${3:Docstring for $1 }"""
 
 	def __init__(self$4):
-		""" ${5:TODO: Fill me in}`!p
+		""" ${5:@todo: to be defined}`!p
 snip.rv = ""
 snip >> 2
 
-args = get_args(t[4], snip)
+args = get_args(t[4])
 
-if args:
-    snip += '"""'
-else:
-    snip.rv += ' """'
+write_docstring_args(args, snip)
+if args: snip += '"""'
 
-for sup in t[2].split(","):
-    sup = sup.strip()
-    snip += sup + ".__init__(self)"
-
-for arg in args:
-    snip += "self._%s = %s" % (arg, arg)
+snip += ""
+write_init_body(args, t[2], snip)
 `
 		$0
 endsnippet
 
-snippet def "smart def" b
+
+snippet def "function with docstrings" b
 def ${1:function}(${2:self}):
-	""" ${3:TODO: Docstring for $1}`!p
-snip.rv = "" # Force update
+	""" ${4:@todo: Docstring for $1}`!p
+snip.rv = ""
 snip >> 1
 
-args = get_args(t[2], snip)
+args = get_args(t[2])
+write_docstring_args(args, snip)
 
-`${4:
+style = get_style(snip)
+snip += format_return(style)
+snip += '"""' `
 
-	`!p
-snip.rv = "" # Force update
-style = snip.opt("g:ultisnips_python_style", "normal")
-
-if style == "doxygen":
-    snip.rv = "@return"
-else:
-    snip.rv = ":returns:"` ${5:TODO}
-    }"""
 	${0:pass}
-
 endsnippet
 
 
