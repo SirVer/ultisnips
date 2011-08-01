@@ -82,6 +82,11 @@ def write_init_body(args, parents, snip):
     for arg in args:
         snip += "self._%s = %s" % (arg, arg)
 
+
+def write_slots_args(args, snip):
+    args = ['"%s"' % arg for arg in args]
+    snip += '__slots__ = (%s,)' % ', '.join(args)
+
 endglobal
 
 
@@ -93,6 +98,32 @@ endglobal
 snippet class "class with docstrings" b
 class ${1:MyClass}(${2:object}):
 	""" ${3:Docstring for $1 }"""
+
+	def __init__(self$4):
+		""" ${5:@todo: to be defined}`!p
+snip.rv = ""
+snip >> 2
+
+args = get_args(t[4])
+
+write_docstring_args(args, snip)
+if args: snip += '"""'
+
+snip += ""
+write_init_body(args, t[2], snip)
+`
+		$0
+endsnippet
+
+
+snippet slotclass "class with slots and docstrings" b
+class ${1:MyClass}(${2:object}):
+	""" ${3:Docstring for $1 }"""
+	`!p
+snip >> 1
+args = get_args(t[4])
+write_slots_args(args, snip)
+    `
 
 	def __init__(self$4):
 		""" ${5:@todo: to be defined}`!p
