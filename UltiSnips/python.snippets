@@ -348,9 +348,10 @@ snippet /(^|(?<=\W))\./ "self." r
 self.
 endsnippet
 
-snippet from "from blah import blah" b
+snippet from "from module import name" b
 from ${1:module} import ${2:Stuff}
 endsnippet
+
 
 ##############
 # PROPERTIES #
@@ -370,6 +371,7 @@ def ${1:property}():
 	return locals()
 $1 = property(**$1())
 endsnippet
+
 
 ##########################
 # Try / Except / Finally #
@@ -410,9 +412,11 @@ finally:
 	${7:pass}
 endsnippet
 
-##############
-# Assertions #
-##############
+
+#####################
+# Assertions & Tests #
+#####################
+
 snippet ae "Assert equal" b
 self.assertEqual(${1:first},${2:second})
 endsnippet
@@ -431,6 +435,21 @@ endsnippet
 
 snippet ar "Assert raises" b
 self.assertRaises(${1:exception}, ${2:func}${3/.+/, /}${3:arguments})
+endsnippet
+
+
+snippet testcase "pyunit testcase" b
+class Test${1:Class}(${2:unittest.TestCase}):
+	""" ${3:Test case docstring}"""
+
+	def setUp(self):
+		${3:pass}
+
+	def tearDown(self):
+		${4:pass}
+
+	def test_${5:name}(self):
+		${6:pass}
 endsnippet
 
 # vim:ft=snippets:
