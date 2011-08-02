@@ -42,10 +42,10 @@ endglobal
 
 snippet class "smart class" b
 class ${1:MyClass}(${2:object}):
-	""" ${3:Docstring for $1 }"""
+	"""${3:Docstring for $1 }"""
 
 	def __init__(self$4):
-		""" ${5:TODO: Fill me in}`!p
+		"""${5:TODO: Fill me in}`!p
 snip.rv = ""
 snip >> 2
 
@@ -67,8 +67,8 @@ for arg in args:
 endsnippet
 
 snippet def "smart def" b
-def ${1:function}(${2:self}):
-	""" ${3:TODO: Docstring for $1}`!p
+def ${1:function}(`!p if snip.indent: snip.rv = 'self, '`${2:arg1}):
+	"""${3:TODO: Docstring for $1}`!p
 snip.rv = "" # Force update
 snip >> 1
 
