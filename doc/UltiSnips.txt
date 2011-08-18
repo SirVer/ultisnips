@@ -762,6 +762,7 @@ Contributers are listed in chronological order:
    guns - Sung Pae
    shlomif - Shlomi Fish
    pberndt - Phillip Berndt
+   thanatermesis-elive - Thanatermesis
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------
