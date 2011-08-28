@@ -1142,7 +1142,13 @@ class SnippetManager(object):
         base_snippets = os.path.realpath(os.path.join(__file__, "../../../UltiSnips"))
         ret = []
 
-        for rtp in vim.eval("&runtimepath").split(',')[::-1]:
+        paths = vim.eval("&runtimepath").split(',')
+
+        if vim.eval("exists('g:UltiSnipsDontReverseSearchPath')") == "0" or \
+           vim.eval("g:UltiSnipsDontReverseSearchPath") == "0":
+            paths = paths[::-1]
+
+        for rtp in paths:
             for snippet_dir in snippet_dirs:
                 pth = os.path.realpath(os.path.join(rtp, snippet_dir))
 
