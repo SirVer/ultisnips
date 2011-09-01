@@ -504,7 +504,8 @@ class VimState(object):
         vim.current.window.cursor = lineno + 1, col
 
         if delta.line == delta.col == 0:
-            if col == 0 or vim.eval("mode()") != 'i':
+            if col == 0 or vim.eval("mode()") != 'i' and \
+                    col < len(vim.current.buffer[lineno]):
                 feedkeys(r"\<Esc>i")
             else:
                 feedkeys(r"\<Esc>a")
