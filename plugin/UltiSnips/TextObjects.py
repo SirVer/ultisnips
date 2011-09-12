@@ -259,18 +259,25 @@ class TextObject(object):
     # Public functions #
     ####################
     def update(self):
-        for idx,c in enumerate(self._childs):
-            oldend = Position(c.end.line, c.end.col)
+        def _update_childs(only_those = ()):
+            for idx,c in enumerate(self._childs):
+                if only_those and not isinstance(c, only_those):
+                    continue
 
-            new_end = c.update()
+                oldend = Position(c.end.line, c.end.col)
 
-            moved_lines = new_end.line - oldend.line
-            moved_cols = new_end.col - oldend.col
+                new_end = c.update()
 
-            self._current_text.replace_text(c.start, oldend, c._current_text)
+                moved_lines = new_end.line - oldend.line
+                moved_cols = new_end.col - oldend.col
 
-            self._move_textobjects_behind(c.start, oldend, moved_lines,
-                        moved_cols, idx)
+                self._current_text.replace_text(c.start, oldend, c._current_text)
+
+                self._move_textobjects_behind(c.start, oldend, moved_lines,
+                            moved_cols, idx)
+
+        _update_childs((TabStop,))
+        _update_childs()
 
         self._do_update()
 

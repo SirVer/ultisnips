@@ -608,6 +608,26 @@ class TabStop_TSInDefault_MirrorsOutside_Overwrite(_VimTest):
     snippets = ("test", "hi ${1:this ${2:second}} $2")
     keys = "test" + EX + "Hallo"
     wanted = "hi Hallo "
+class TabStop_TSInDefault_MirrorsOutside_Overwrite1(_VimTest):
+    snippets = ("test", "$1: ${1:'${2:second}'} $2")
+    keys = "test" + EX + "Hallo"
+    wanted = "Hallo: Hallo "
+class TabStop_TSInDefault_MirrorsOutside_OverwriteSecond1(_VimTest):
+    snippets = ("test", "$1: ${1:'${2:second}'} $2")
+    keys = "test" + EX + JF + "Hallo"
+    wanted = "'Hallo': 'Hallo' Hallo"
+class TabStop_TSInDefault_MirrorsOutside_OverwriteFirstSwitchNumbers(_VimTest):
+    snippets = ("test", "$2: ${2:'${1:second}'} $1")
+    keys = "test" + EX + "Hallo"
+    wanted = "'Hallo': 'Hallo' Hallo"
+class TabStop_TSInDefault_MirrorsOutside_OverwriteFirst_RLExample(_VimTest):
+    snippets = ("test", """`!p snip.rv = t[1].split('/')[-1].lower().strip("'")` = require(${1:'${2:sys}'})""")
+    keys = "test" + EX + "WORLD" + JF + "End"
+    wanted = "world = require(WORLD)End"
+class TabStop_TSInDefault_MirrorsOutside_OverwriteSecond_RLExample(_VimTest):
+    snippets = ("test", """`!p snip.rv = t[1].split('/')[-1].lower().strip("'")` = require(${1:'${2:sys}'})""")
+    keys = "test" + EX + JF + "WORLD" + JF + "End"
+    wanted = "world = require('WORLD')End"
 
 class TabStop_Multiline_Leave(_VimTest):
     snippets = ("test", "hi ${1:first line\nsecond line} world" )
