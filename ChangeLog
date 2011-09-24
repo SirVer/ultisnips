@@ -1,3 +1,9 @@
+version 1.5:
+  - Some critical bug fixes for new vim versions.
+  - New or improved snippets: tex, texmath, python, jinja2, go, puppet, xhtml
+  - Configuration of search path for snippets *UltiSnips-snippet-search-path* 
+  - New parser implementation: A little faster, more flexible and less bugged.
+
 version 1.4:
   - New or improved snippets: php, html, djangohtml, mako, lua 
   - Snippets are now listed alphabetically by their trigger, no longer in
