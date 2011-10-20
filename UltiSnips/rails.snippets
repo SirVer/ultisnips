@@ -893,4 +893,8 @@ setup do
 end
 endsnippet
 
+snippet trans "Translation snippet" 
+I18n.t('`!v substitute(substitute(substitute(@%, substitute(getcwd() . "/", "\/", "\\\\/", "g"), "", ""), "\\(\\.\\(html\\|js\\)\\.\\(haml\\|erb\\)\\|\\(_controller\\)\\?\\.rb\\)$", "", ""), "/", ".", "g")`.${2:${1/[^\w]/_/g}}${3}', :default => "${1:some_text}"${4})${5:$0}
+endsnippet
+
 # vim:ft=snippets:
