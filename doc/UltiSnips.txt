@@ -780,9 +780,7 @@ Contributers are listed in chronological order:
    Jan Mollowitz (phux)
    Georgi Valkov (gvalkov)
    Miek Gieben (miek)
-   graudeejs (graudeejs)
-
-
+   Aldis Berjoza (graudeejs)
 
 vim:tw=78:ts=8:ft=help:norl:
 

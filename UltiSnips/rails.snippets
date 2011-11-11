@@ -897,4 +897,10 @@ snippet trans "Translation snippet"
 I18n.t('`!v substitute(substitute(substitute(@%, substitute(getcwd() . "/", "\/", "\\\\/", "g"), "", ""), "\\(\\.\\(html\\|js\\)\\.\\(haml\\|erb\\)\\|\\(_controller\\)\\?\\.rb\\)$", "", ""), "/", ".", "g")`.${2:${1/[^\w]/_/g}}${3}', :default => "${1:some_text}"${4})${5:$0}
 endsnippet
 
+snippet route_spec
+it 'routes to #${1:action}' do
+  ${2:get}('/${3:url}').should route_to('`!v substitute(expand('%:t:r'), '_routing_spec$', '', '')`#$1'${4:, ${5:params}})${6}
+end
+endsnippet
+
 # vim:ft=snippets:
