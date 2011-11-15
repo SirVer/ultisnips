@@ -1,0 +1,472 @@
+snippet #! "#!/usr/bin/env ruby"
+#!/usr/bin/env ruby
+$0
+endsnippet
+
+
+
+snippet #utf8 "# encoding: UTF-8"
+# encoding: UTF-8
+$0
+endsnippet
+
+
+
+snippet If "<command> if <expression>"
+${1:command} if ${2:expression$0}
+endsnippet
+
+
+
+snippet Unless "<command> unless <expression>"
+${1:command} unless ${2:expression$0}
+endsnippet
+
+
+
+snippet if "if <condition> ... end"
+if ${1:condition}
+	${2:# TODO}
+end${3:$0}
+endsnippet
+
+
+
+snippet ife "if <condition> ... else ... end"
+if ${1:condition}
+	${2:# TODO}
+else
+	${3:# TODO}
+end${4:$0}
+endsnippet
+
+
+
+snippet ifee "if <condition> ... elseif <condition> ... else ... end"
+if ${1:condition}
+	${2:# TODO}
+elsif ${3:condition}
+	${4:# TODO}
+else
+	${5:# TODO}
+end${6:$0}
+endsnippet
+
+
+
+snippet unless "unless <condition> ... end"
+unless ${1:condition}
+	${2:# TODO}
+end${3:$0}
+endsnippet
+
+
+
+snippet unlesse "unless <condition> ... else ... end"
+unless ${1:condition}
+	${2:# TODO}
+else
+	${3:# TODO}
+end${4:$0}
+endsnippet
+
+
+
+snippet unlesee "unless <condition> ... elseif <condition> ... else ... end"
+unless ${1:condition}
+	${2:# TODO}
+elsif ${3:condition}
+	${4:# TODO}
+else
+	${5:# TODO}
+end${6:$0}
+endsnippet
+
+
+
+snippet "(de)?f" "def <name>..." r
+def ${1:function_name}${2: ${3:*args}}
+	${4:# TODO$0}
+end
+endsnippet
+
+
+
+snippet defi "def initialize ..."
+def initialize${1: ${2:*args}}
+	${3:# TODO$0}
+end
+endsnippet
+
+
+
+snippet defr "def <name> ... rescue ..."
+def ${1:function_name}${2: ${3:*args}}
+	${4:# TODO}
+rescue
+	${5:# TODO}
+end
+endsnippet
+
+
+
+snippet For "(<from>..<to>).each { |<i>| <block> }"
+(${1:from}..${2:to}).each { |${3:i}| ${4:# TODO} }${5:$0}
+endsnippet
+
+
+
+snippet for "(<from>..<to>).each do |<i>| <block> end"
+(${1:from}..${2:to}).each do |${3:i}|
+	${4:# TODO}
+end${5:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.Merge!" ".merge!(<other_hash>) { |<key>,<oldval>,<newval>| <block> }" r
+`!p snip.rv=match.group(1)`.merge!(${1:other_hash}) { |${2:key},${3:oldval},${4:newval}| ${5:block} }${6:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.merge!" ".merge!(<other_hash>) do |<key>,<oldval>,<newval>| <block> end" r
+`!p snip.rv=match.group(1)`.merge!(${1:other_hash}) do |${2:key},${3:oldval},${4:newval}|
+	${5:block}
+end${6:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.Delete_?if" ".delete_if { |<key>,<value>| <block> }" r
+`!p snip.rv=match.group(1)`.delete_if { |${1:key},${2:value}| ${3:# TODO} }${4:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.delete_?if" ".delete_if do |<key>,<value>| <block> end" r
+`!p snip.rv=match.group(1)`.delete_if do |${1:key}, ${2:value}|
+	${3:# TODO}
+end${4:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.Keep_?if" ".keep_if { |<key>,<value>| <block> }" r
+`!p snip.rv=match.group(1)`.keep_if { |${1:key},${2:value}| ${3:# TODO} }${4:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.keep_?if" ".keep_if do <key>,<value>| <block> end" r
+`!p snip.rv=match.group(1)`.keep_if do |${1:key}, ${2:value}|
+	${3:# TODO}
+end${4:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.Reject" ".reject { |<key>,<value>| <block> }" r
+`!p snip.rv=match.group(1)`.reject { |${1:key}, ${2:value}| ${3:# TODO} }${4:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.reject" ".reject do <key>,<value>| <block> end" r
+`!p snip.rv=match.group(1)`.reject do |${1:key}, ${2:value}|
+	${3:# TODO}
+end${4:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.Select" ".select { |<item>| <block>}" r
+`!p snip.rv=match.group(1)`.select { |${1:item}| ${2:block} }${3:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.select" ".select do |<item>| <block> end" r
+`!p snip.rv=match.group(1)`.select do |${1:item}|
+	${2:block}
+end${3:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.Reverse_?each" ".revere_each { |<key>| <block> }" r
+`!p snip.rv=match.group(1)`.reverse_each { |${1:key}| ${2:# TODO} }${3:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.reverse_?each" ".revere_each do |<key>| <block> end" r
+`!p snip.rv=match.group(1)`.reverse_each do |${1:key}|
+	${2:# TODO}
+end${3:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.Sort" ".sort { |<a>, <b>| <block> }" i
+`!p snip.rv=match.group(1)`.sort { |${1:a}, ${2,b}| ${3:# TODO} }${4:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.sort" ".sort do |<a>, <b>| <block> end" r
+`!p snip.rv=match.group(1)`.sort do |${1:a},${2,b}|
+	${3:# TODO}
+end${4:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.Each_?key" ".each_key { |<key>| <block> }" r
+`!p snip.rv=match.group(1)`.each_key { |${1:key}| ${2:# TODO} }${3:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.each_?key" ".each_key do |key| <block> end" r
+`!p snip.rv=match.group(1)`.each_key do |${1:key}|
+	${2:# TODO}
+end${3:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.Each_?value" ".each_value { |<value>| <block> }" r
+`!p snip.rv=match.group(1)`.each_value { |${1:value}| ${2:# TODO} }${3:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.each_?value" ".each_value do |<value>| <block> end" r
+`!p snip.rv=match.group(1)`.each_value do |${1:value}|
+	${2:# TODO}
+end${3:$0}
+endsnippet
+
+
+
+snippet Each "<elements>.each { |<element>| <block> }"
+${1:elements}.each { |${2:${1/s$//}}| ${3:# TODO} }${4:$0}
+endsnippet
+
+
+
+snippet each "<elements>.each do |<element>| <block> end"
+${1:elements}.each do |${2:${1/s$//}}|
+	${3:# TODO}
+end${4:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.Each" ".each { |<element>| <block> }" r
+`!p snip.rv=match.group(1)`.each { |${1:element}| ${2:# TODO} }${3:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.each" ".each do |<element>| <block> end" r
+`!p snip.rv=match.group(1)`.each do |${1:element}|
+	${2:# TODO}
+end${3:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.Each_?index" ".each_index { |<element>| <block> }" r
+`!p snip.rv=match.group(1)`.each_index { |${1:element}| ${2:# TODO} }${3:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.each_?index" ".each_index do |<element>| <block> end" r
+`!p snip.rv=match.group(1)`.each_index do |${1:element}|
+	${2:# TODO}
+end${3:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.Each_?pair"  ".each_pair { |<key>, <value>| <block> }" r
+`!p snip.rv=match.group(1)`.each_pair { |${1:key}, ${2:value}| ${3:# TODO} }${4:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.each_?pair" ".each_pair do |<key>, <value>| <block> end" r
+`!p snip.rv=match.group(1)`.each_pair do |${1:key}, ${2:value}|
+	${3:# TODO}
+end${4:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.Map" ".map { |<key>| <block> }" r
+`!p snip.rv=match.group(1)`.map { |${1:key}| ${2:code} }${3:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.map" ".map do |<key>| <block> end" r
+`!p snip.rv=match.group(1)`.map do |${1:key}|
+	${2:code}
+end${3:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.sub" ".sub(<expression>) { <block> }" r
+`!p snip.rv=match.group(1)`.sub(${1:expression}) { ${2:"code"} }${3:$0}
+endsnippet
+
+
+
+snippet "([^ \t]+)\.gsub" ".gsub(<expression>) { <block> }" r
+`!p snip.rv=match.group(1)`.gsub(${1:expression}) { ${2:"code"} }${3:$0}
+endsnippet
+
+snippet do "do |<key>| ... end" i
+do ${1:|${2:key}|}
+	${3:$0}
+end
+endsnippet
+
+snippet Do "do ... end" i
+do
+	${1:$0}
+end
+endsnippet
+
+
+snippet until "until <expression> ... end"
+until ${1:expression}
+	${2:# TODO}
+end${3:$0}
+endsnippet
+
+
+
+snippet Until "begin ... end until <expression>"
+begin
+	${2:# TODO}
+end until ${1:expression}${3:$0}
+endsnippet
+
+
+
+snippet while "while <expression> ... end"
+while ${1:expression}
+	${2:# TODO}
+end${3:$0}
+endsnippet
+
+
+
+snippet While "begin ... end while <expression>"
+begin
+	${2:# TODO}
+end while ${1:expression}${3:$0}
+endsnippet
+
+
+
+snippet r "attr_reader :<attr_names>"
+attr_reader :${1:attr_names}
+endsnippet
+
+
+
+snippet w "attr_writer :<attr_names>"
+attr_writer :${1:attr_names}
+endsnippet
+
+
+
+snippet w "attr_accessor :<attr_names>"
+snippet rw
+attr_accessor :${1:attr_names}
+endsnippet
+
+
+
+snippet attr "attr_reader :<attr_names>"
+attr_reader :${1:attr_names}
+endsnippet
+
+
+
+snippet attr "attr_writer :<attr_names>"
+attr_writer :${1:attr_names}
+endsnippet
+
+
+
+snippet attr "attr_accessor :<attr_names>"
+attr_accessor :${1:attr_names}
+endsnippet
+
+
+
+snippet begin "begin ... rescue ... end"
+begin
+	${1:# TODO}
+rescue
+	${2:# TODO}
+end
+endsnippet
+
+
+
+snippet begin "begin ... rescue ... else ... ensure ... end"
+begin
+	${1:# Raise exception}
+rescue Exception => e
+	puts e.message
+	puts e.backtrace.inspect
+	${2:# Rescue}
+else
+	${3:# other exception}
+ensure
+	${4:# always excute}
+end
+endsnippet
+
+
+
+snippet rescue
+rescue Exception => e
+	puts e.message
+	puts e.backtrace.inspect
+	${1:# Rescue}
+endsnippet
+
+
+
+snippet case "case <variable> when <expression> ... end"
+case ${1:variable}
+when ${2:expression}
+${3:$0}
+end
+endsnippet
+
+
+
+snippet alias "alias :<new_name> :<old_name>"
+alias :${1:new_name} :${2:old_name}
+endsnippet
+
+
+
+snippet class "class <class_name> def initialize ... end end"
+class ${1:class_name}
+	${2:def initialize ${3:*args}
+		${4}
+	end}
+	$0
+end
+endsnippet
