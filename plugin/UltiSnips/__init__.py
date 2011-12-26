@@ -14,7 +14,7 @@ import vim
 from UltiSnips.Geometry import Position
 from UltiSnips.TextObjects import *
 from UltiSnips.Buffer import VimBuffer
-from UltiSnips.Util import IndentUtil, vim_string
+from UltiSnips.Util import IndentUtil, vim_string, as_utf8
 from UltiSnips.Langmap import LangMapTranslator
 
 # The following lines silence DeprecationWarnings. They are raised
@@ -266,9 +266,9 @@ class Snippet(object):
     _TABS = re.compile(r"^\t*")
 
     def __init__(self, trigger, value, descr, options, globals):
-        self._t = trigger
-        self._v = value
-        self._d = descr
+        self._t = as_utf8(trigger)
+        self._v = as_utf8(value)
+        self._d = as_utf8(descr)
         self._opts = options
         self._matched = ""
         self._last_re = None

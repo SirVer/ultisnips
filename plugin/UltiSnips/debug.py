@@ -3,9 +3,13 @@
 
 __all__ = [ "debug" ]
 
+import types
+
 def debug(s):
+    if not isinstance(s, types.UnicodeType):
+        s = s.decode("utf-8")
     f = open("/tmp/file.txt","a")
-    f.write(s+'\n')
+    f.write(s.encode("utf-8")+'\n')
     f.close()
 
 

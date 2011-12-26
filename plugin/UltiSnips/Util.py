@@ -1,8 +1,14 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import vim
 import os
+import types
+import vim
+
+def as_utf8(s):
+    if not isinstance(s, types.UnicodeType):
+        s = s.decode("utf-8")
+    return s.encode("utf-8")
 
 def vim_string(inp):
     """ Creates a vim-friendly string from a group of
@@ -10,14 +16,15 @@ def vim_string(inp):
     """
     def conv(obj):
         if isinstance(obj, list):
-            return u'[' + u",".join([conv(o) for o in obj]) + u']'
+            rv = u'[' + u','.join(conv(o) for o in obj) + u']'
         elif isinstance(obj, dict):
-            return u'{' + u','.join([
+            rv = u'{' + u','.join([
                 u"%s:%s" % (conv(key), conv(value))
                 for key, value in obj.iteritems()]) + u'}'
         else:
-            return u'"%s"' % str(obj).replace(u'"', u'\\"')
-    return conv(inp)
+            rv = u'"%s"' % str(obj).decode("utf-8").replace(u'"', u'\\"')
+        return rv
+    return conv(inp).encode("utf-8")
 
 class IndentUtil(object):
     """ Utility class for dealing properly with indentation. """

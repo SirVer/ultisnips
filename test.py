@@ -1912,6 +1912,16 @@ class Snippet_With_DoubleQuote(_VimTest):
     keys = 'te"st' + EX
     wanted = "Expand me\"!"
 
+class Snippet_With_Umlauts_List(_VimTest):
+    snippets = _snip_quote(u'ü')
+    keys = 'te' + LS + "2\n"
+    wanted = "Expand meü!"
+
+class Snippet_With_Umlauts(_VimTest):
+    snippets = _snip_quote(u'ü')
+    keys = u'teüst' + EX
+    wanted = "Expand meü!"
+
 class Snippet_With_DoubleQuote_List(_VimTest):
     snippets = _snip_quote('"')
     keys = "te" + LS + "2\n"
