@@ -170,6 +170,16 @@ function! UltiSnips_MapKeys()
     " Do not remap this.
     snoremap <silent> <BS> <Esc>:py  UltiSnips_Manager.backspace_while_selected()<cr>
 endf
+
+function! UltiSnips_CursorMoved()
+    py UltiSnips_Manager.cursor_moved()
+endf
+function! UltiSnips_EnteredInsertMode()
+    py UltiSnips_Manager.entered_insert_mode()
+endf
+function! UltiSnips_LeavingWindow()
+    py UltiSnips_Manager.leaving_window()
+endf
 " }}}
 
 "" STARTUP CODE {{{
@@ -187,9 +197,9 @@ UltiSnips_Manager.forward_trigger = vim.eval("g:UltiSnipsJumpForwardTrigger")
 UltiSnips_Manager.backward_trigger = vim.eval("g:UltiSnipsJumpBackwardTrigger")
 EOF
 
-au CursorMovedI * py UltiSnips_Manager.cursor_moved()
-au InsertEnter * py UltiSnips_Manager.entered_insert_mode()
-au WinLeave * py UltiSnips_Manager.leaving_window()
+au CursorMovedI * call UltiSnips_CursorMoved()
+au InsertEnter * call UltiSnips_EnteredInsertMode()
+au WinLeave * call UltiSnips_LeavingWindow()
 
 call UltiSnips_MapKeys()
 
