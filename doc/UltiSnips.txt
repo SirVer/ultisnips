@@ -767,6 +767,7 @@ Contributers are listed in chronological order:
    pberndt - Phillip Berndt
    thanatermesis-elive - Thanatermesis
    rico-ambiescent - Rico Sta. Cruz
+   Cody Frazer 
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------
