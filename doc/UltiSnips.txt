@@ -726,6 +726,21 @@ UltiSnips needs the help of a vibrant vim community to make it more useful
 tomorrow than it is today. Please consider joining this effort by providing
 new snippets, new features or bug reports.
 
+You can contribute by fixing or reporting bugs in our issue tracker:
+https://bugs.launchpad.net/ultisnips
+
+You can contribute snippets or patches in various ways. Here are the
+possibilities in order of convenience for me (please be as convenient as you
+can be):
+
+* Clone the repository on launchpad (bzr clone lp:ultisnips), make fixes, push
+  the branch and send a merge request on launchpad.
+* Clone the repository on GitHub (git clone git@github.com:SirVer/ultisnips.git),
+  make your changes and send a pull request on GitHub.
+* Make a patch, report a bug/feature request and attach the patch to it.
+* Send me an Email with a patch.
+* Send me an Email with the changed files only.
+
 If you like this plugin, please also vote for it on its vim script page. It is
 life changing for me, maybe it is for you too.
 You can find the page here:
