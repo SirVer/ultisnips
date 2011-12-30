@@ -14,4 +14,14 @@ Launchpad is superior and already has a significant history. Please report
 
 .. _issues over there: https://bugs.launchpad.net/ultisnips
 
+Screencasts
+-----------
+
+* `Episode 1: What are snippets and do I need them?`__
+
+__ http://www.sirver.net/blog/2011/12/30/first-episode-of-ultisnips-screencast/
+
+
+
+
 
