@@ -508,6 +508,19 @@ endsnippet
 wow<tab>Hello World ->
 Hello World                                                     HELLO WORLD
 
+Sometimes you want to have helper functions that are available in all your
+snippet files. This is easily achieved using a global snippet and a python
+module. First, add a search path to your python path by adding something along
+this line to your vimrc: >
+
+   py import sys; sys.path.append("/home/sirver/.vim/python")
+
+Now use a global snippet in your snippet file to import modules from this
+directory: >
+
+   global !p
+   from my_snippet_helpers import *
+   endglobals
 
 4.4 Tab Stops and Placeholders  *UltiSnips-tabstops* *UltiSnips-placeholders*
 ------------------------------
