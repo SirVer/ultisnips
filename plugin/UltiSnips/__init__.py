@@ -1151,7 +1151,7 @@ class SnippetManager(object):
 
         for rtp in paths:
             for snippet_dir in snippet_dirs:
-                pth = os.path.realpath(os.path.join(rtp, snippet_dir))
+                pth = os.path.realpath(os.path.expanduser(os.path.join(rtp, snippet_dir)))
 
                 patterns = ["%s.snippets", "*_%s.snippets"]
                 if not default and pth == base_snippets:
