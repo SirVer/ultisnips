@@ -17,6 +17,9 @@ Launchpad is superior and already has a significant history. Please report
 Screencasts
 -----------
 
+The blog posts of the screencasts contain more advanced examples of the things
+discussed in the video.
+
 * `Episode 1: What are snippets and do I need them?`__
 * `Episode 2: Creating Basic Snippets`__
 
