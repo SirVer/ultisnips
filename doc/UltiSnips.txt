@@ -66,7 +66,7 @@ http://www.sirver.net/blog/2012/01/08/second-episode-of-ultisnips-screencast/
 
 UltiSnips is inspired by the snippets solution implemented in TextMate
 (http://macromates.com/). The idea of implementing snippets for vim is not new
-and I want to thank Michael Sander (Author of snipMate) for some
+and I want to thank Michael Sanders (Author of snipMate) for some
 implementation details I stole from him and for the permission to use some of
 his snippets.
 
