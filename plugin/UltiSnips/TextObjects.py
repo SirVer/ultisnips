@@ -28,6 +28,7 @@ class _CleverReplace(object):
     _CONDITIONAL = re.compile(r"\(\?(\d+):", re.DOTALL)
 
     _UNESCAPE = re.compile(r'\\[^ntrab]')
+    _SCHARS_ESCPAE = re.compile(r'\\[ntrab]')
 
     def __init__(self, s):
         self._s = s
@@ -95,6 +96,8 @@ class _CleverReplace(object):
 
     def _unescape(self, v):
         return self._UNESCAPE.subn(lambda m: m.group(0)[-1], v)[0]
+    def _schar_escape(self, v):
+        return self._SCHARS_ESCPAE.subn(lambda m: eval(r"'\%s'" % m.group(0)[-1]), v)[0]
 
     def replace(self, match):
         start, end = match.span()
@@ -109,9 +112,7 @@ class _CleverReplace(object):
         tv = self._LONG_CASEFOLDINGS.subn(self._lcase_folding, tv)[0]
         tv = self._replace_conditional(match, tv)
 
-        tv = tv.replace(r'\"', '"')
-        tv = tv.replace(r"\'", "'")
-        return self._unescape(tv)
+        return self._unescape(self._schar_escape(tv))
 
 class _TOParser(object):
     def __init__(self, parent_to, text, indent):
