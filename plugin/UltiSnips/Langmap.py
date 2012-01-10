@@ -12,8 +12,6 @@ for example if 'j' is remapped, but nothing is mapped back to 'j', then moving
 one line down is no longer possible and UltiSnips will fail.
 """
 
-import string
-
 import vim
 
 class Real_LangMapTranslator(object):
@@ -34,7 +32,7 @@ class Real_LangMapTranslator(object):
                 from_chars += c[::2]
                 to_chars += c[1::2]
 
-        self._maps[langmap] = string.maketrans(to_chars, from_chars)
+        self._maps[langmap] = (from_chars, to_chars)
 
     def translate(self, s):
         langmap = vim.eval("&langmap").strip()
@@ -44,7 +42,9 @@ class Real_LangMapTranslator(object):
         if langmap not in self._maps:
             self._create_translation(langmap)
 
-        return s.translate(self._maps[langmap])
+        for f,t in zip(*self._maps[langmap]):
+            s = s.replace(f,t)
+        return s
 
 class Dummy_LangMapTranslator(object):
     """
