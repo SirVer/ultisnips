@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+from UltiSnips.Util import CheapTotalOrdering
+
 __all__ = [ "Position", "Span" ]
 
-
-class Position(object):
+class Position(CheapTotalOrdering):
     def __init__(self, line, col):
         self.line = line
         self.col = col
@@ -43,7 +44,9 @@ class Position(object):
     def __cmp__(self, other):
         s = self._line, self._col
         o = other._line, other._col
-        return cmp(s,o)
+        if s < o: return -1
+        if s > o: return 1
+        return 0
 
     def __repr__(self):
         return "(%i,%i)" % (self._line, self._col)

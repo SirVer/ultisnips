@@ -295,7 +295,7 @@ class Snippet(object):
             return before.strip()
         else:
             before_words = before
-            for i in xrange(-1, -(num_words + 1), -1):
+            for i in range(-1, -(num_words + 1), -1):
                 left = before_words.rfind(word_list[i])
                 before_words = before_words[:left]
             return before[len(before_words):].strip()
