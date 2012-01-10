@@ -9,7 +9,7 @@ into Logical Units called Tokens.
 import string
 import re
 
-from Geometry import Position
+from .Geometry import Position
 
 __all__ = [
     "tokenize", "EscapeCharToken", "TransformationToken", "TabStopToken",

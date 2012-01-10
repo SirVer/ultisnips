@@ -4,11 +4,20 @@
 import os
 import types
 import vim
+import sys
 
-def as_utf8(s):
-    if not isinstance(s, types.UnicodeType):
-        s = s.decode("utf-8")
-    return s.encode("utf-8")
+if sys.version_info > (2,8):
+    def as_utf8(s):
+        return s.encode("utf-8")
+    def as_unicode(s):
+        if isinstance(s, bytes):
+            return s.decode("utf-8")
+        return s
+else:
+    def as_utf8(s):
+        if not isinstance(s, types.UnicodeType):
+            s = s.decode("utf-8")
+        return s.encode("utf-8")
 
 def vim_string(inp):
     """ Creates a vim-friendly string from a group of
@@ -16,13 +25,13 @@ def vim_string(inp):
     """
     def conv(obj):
         if isinstance(obj, list):
-            rv = u'[' + u','.join(conv(o) for o in obj) + u']'
+            rv = unicode('[' + ','.join(conv(o) for o in obj) + ']')
         elif isinstance(obj, dict):
-            rv = u'{' + u','.join([
-                u"%s:%s" % (conv(key), conv(value))
-                for key, value in obj.iteritems()]) + u'}'
+            rv = unicode('{' + ','.join([
+                "%s:%s" % (conv(key), conv(value))
+                for key, value in obj.iteritems()]) + '}')
         else:
-            rv = u'"%s"' % str(obj).decode("utf-8").replace(u'"', u'\\"')
+            rv = '"%s"' % str(obj).decode("utf-8").replace('"', '\\"')
         return rv
     return conv(inp).encode("utf-8")
 

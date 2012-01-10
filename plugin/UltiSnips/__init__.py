@@ -14,7 +14,7 @@ import vim
 from UltiSnips.Geometry import Position
 from UltiSnips.TextObjects import *
 from UltiSnips.Buffer import VimBuffer
-from UltiSnips.Util import IndentUtil, vim_string, as_utf8
+from UltiSnips.Util import IndentUtil, vim_string, as_unicode
 from UltiSnips.Langmap import LangMapTranslator
 
 # The following lines silence DeprecationWarnings. They are raised
@@ -266,9 +266,9 @@ class Snippet(object):
     _TABS = re.compile(r"^\t*")
 
     def __init__(self, trigger, value, descr, options, globals):
-        self._t = as_utf8(trigger)
-        self._v = as_utf8(value)
-        self._d = as_utf8(descr)
+        self._t = as_unicode(trigger)
+        self._v = as_unicode(value)
+        self._d = as_unicode(descr)
         self._opts = options
         self._matched = ""
         self._last_re = None
@@ -596,7 +596,7 @@ class VimState(object):
                             "| redir END")
 
                 # Check if any mappings where found
-                all_maps = filter(len, vim.eval(r"_tmp_smaps").splitlines())
+                all_maps = list(filter(len, vim.eval(r"_tmp_smaps").splitlines()))
                 if (len(all_maps) == 1 and all_maps[0][0] not in " sv"):
                     # "No maps found". String could be localized. Hopefully
                     # it doesn't start with any of these letters in any
@@ -989,7 +989,7 @@ class SnippetManager(object):
             if rv > len(snippets):
                 rv = len(snippets)
             return snippets[rv-1]
-        except vim.error, e:
+        except vim.error as e:
             if str(e) == 'invalid expression':
                 return None
             raise

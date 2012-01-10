@@ -8,8 +8,15 @@
 "   directory above this file.
 " }}}
 
-if exists('did_UltiSnips_vim') || &cp || version < 700 || !has("python")
+if exists('did_UltiSnips_vim') || &cp || version < 700
     finish
+endif
+
+if !has("python3")
+    if !has("python")
+        echo  "UltiSnips requires py >= 2.5 or any py3"
+        finish
+    endif
 endif
 
 " Global Variables {{{
@@ -65,10 +72,18 @@ function! UltiSnipsEdit(...)
     if a:0 == 1 && a:1 != ''
         let type = a:1
     else
-        python vim.command("let type = '%s'" % UltiSnips_Manager.filetype)
+        if has("python3")
+            python3 vim.command("let type = '%s'" % UltiSnips_Manager.filetype)
+        else
+            python vim.command("let type = '%s'" % UltiSnips_Manager.filetype)
+        endif
     endif
 
-    python vim.command("let file = '%s'" % UltiSnips_Manager.file_to_edit(vim.eval("type")))
+    if has("python3")
+        python3 vim.command("let file = '%s'" % UltiSnips_Manager.file_to_edit(vim.eval("type")))
+    else
+        python vim.command("let file = '%s'" % UltiSnips_Manager.file_to_edit(vim.eval("type")))
+    endif
 
     let mode = 'e'
     if exists('g:UltiSnipsEditSplit')
@@ -93,42 +108,67 @@ function! CompensateForPUM()
     """ to explicitly check for the presence of the popup menu, and update
     """ the vim-state accordingly.
     if pumvisible()
-        py UltiSnips_Manager.cursor_moved()
+        if has("python3")
+            python3 UltiSnips_Manager.cursor_moved()
+        else
+            python UltiSnips_Manager.cursor_moved()
+        endif
     endif
 endfunction
 
 function! UltiSnips_ExpandSnippet()
-    py UltiSnips_Manager.expand()
+    if has("python3")
+        python3 UltiSnips_Manager.expand()
+    else
+        python UltiSnips_Manager.expand()
+    endif
     return ""
 endfunction
 
 function! UltiSnips_ExpandSnippetOrJump()
     call CompensateForPUM()
-    py UltiSnips_Manager.expand_or_jump()
+    if has("python3")
+        python3 UltiSnips_Manager.expand_or_jump()
+    else
+        python UltiSnips_Manager.expand_or_jump()
+    endif
     return ""
 endfunction
 
 function! UltiSnips_ListSnippets()
-    py UltiSnips_Manager.list_snippets()
+    if has("python3")
+        python3 UltiSnips_Manager.list_snippets()
+    else
+        python UltiSnips_Manager.list_snippets()
+    endif
     return ""
 endfunction
 
 function! UltiSnips_JumpBackwards()
     call CompensateForPUM()
-    py UltiSnips_Manager.jump_backwards()
+    if has("python3")
+        python3 UltiSnips_Manager.jump_backwards()
+    else
+        python UltiSnips_Manager.jump_backwards()
+    endif
     return ""
 endfunction
 
 function! UltiSnips_JumpForwards()
     call CompensateForPUM()
-    py UltiSnips_Manager.jump_forwards()
+    if has("python3")
+        python3 UltiSnips_Manager.jump_forwards()
+    else
+        python UltiSnips_Manager.jump_forwards()
+    endif
     return ""
 endfunction
 
 function! UltiSnips_AddSnippet(trigger, value, descr, options, ...)
     " Takes the same arguments as SnippetManager.add_snippet:
     " (trigger, value, descr, options, ft = "all", globals = None)
-py << EOB
+if has("python3")
+python3 << EOB
 args = vim.eval("a:000")
 trigger = vim.eval("a:trigger")
 value = vim.eval("a:value")
@@ -137,17 +177,36 @@ options = vim.eval("a:options")
 
 UltiSnips_Manager.add_snippet(trigger, value, descr, options, *args)
 EOB
+else
+python << EOB
+args = vim.eval("a:000")
+trigger = vim.eval("a:trigger")
+value = vim.eval("a:value")
+descr = vim.eval("a:descr")
+options = vim.eval("a:options")
+
+UltiSnips_Manager.add_snippet(trigger, value, descr, options, *args)
+EOB
+endif
     return ""
 endfunction
 
 function! UltiSnips_Anon(value, ...)
     " Takes the same arguments as SnippetManager.expand_anon:
     " (value, trigger="", descr="", options="", globals = None)
-py << EOB
+if has("python3")
+python3 << EOB
 args = vim.eval("a:000")
 value = vim.eval("a:value")
 UltiSnips_Manager.expand_anon(value, *args)
 EOB
+else
+python << EOB
+args = vim.eval("a:000")
+value = vim.eval("a:value")
+UltiSnips_Manager.expand_anon(value, *args)
+EOB
+endif
     return ""
 endfunction
 
@@ -168,23 +227,52 @@ function! UltiSnips_MapKeys()
     exec "snoremap <silent> " . g:UltiSnipsListSnippets . " <Esc>:call UltiSnips_ListSnippets()<cr>"
 
     " Do not remap this.
-    snoremap <silent> <BS> <Esc>:py  UltiSnips_Manager.backspace_while_selected()<cr>
+    if has("python3")
+        snoremap <silent> <BS> <Esc>:python3 UltiSnips_Manager.backspace_while_selected()<cr>
+    else
+        snoremap <silent> <BS> <Esc>:python  UltiSnips_Manager.backspace_while_selected()<cr>
+    endif
 endf
 
 function! UltiSnips_CursorMoved()
-    py UltiSnips_Manager.cursor_moved()
+    if has("python3")
+        python3 UltiSnips_Manager.cursor_moved()
+    else
+        python UltiSnips_Manager.cursor_moved()
+    endif
 endf
 function! UltiSnips_EnteredInsertMode()
-    py UltiSnips_Manager.entered_insert_mode()
+    if has("python3")
+        python3 UltiSnips_Manager.entered_insert_mode()
+    else
+        python UltiSnips_Manager.entered_insert_mode()
+    endif
 endf
 function! UltiSnips_LeavingWindow()
-    py UltiSnips_Manager.leaving_window()
+    if has("python3")
+        python3 UltiSnips_Manager.leaving_window()
+    else
+        python UltiSnips_Manager.leaving_window()
+    endif
 endf
 " }}}
 
 "" STARTUP CODE {{{
 
 " Expand our path
+if has("python3")
+python3 << EOF
+import vim, os, sys
+
+new_path = vim.eval('expand("<sfile>:h")')
+sys.path.append(new_path)
+
+from UltiSnips import UltiSnips_Manager
+UltiSnips_Manager.expand_trigger = vim.eval("g:UltiSnipsExpandTrigger")
+UltiSnips_Manager.forward_trigger = vim.eval("g:UltiSnipsJumpForwardTrigger")
+UltiSnips_Manager.backward_trigger = vim.eval("g:UltiSnipsJumpBackwardTrigger")
+EOF
+else
 python << EOF
 import vim, os, sys
 
@@ -196,6 +284,7 @@ UltiSnips_Manager.expand_trigger = vim.eval("g:UltiSnipsExpandTrigger")
 UltiSnips_Manager.forward_trigger = vim.eval("g:UltiSnipsJumpForwardTrigger")
 UltiSnips_Manager.backward_trigger = vim.eval("g:UltiSnipsJumpBackwardTrigger")
 EOF
+endif
 
 au CursorMovedI * call UltiSnips_CursorMoved()
 au InsertEnter * call UltiSnips_EnteredInsertMode()
