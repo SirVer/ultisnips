@@ -10,7 +10,7 @@ import sys
 
 __all__ = ['as_unicode']
 
-if sys.version_info > (2,8):
+if sys.version_info >= (3,0):
     def as_unicode(s):
         if isinstance(s, bytes):
             return s.decode("utf-8")
