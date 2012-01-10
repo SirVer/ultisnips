@@ -1,3 +1,5 @@
+	- Full support for :py3. UltiSnips now truly works with python >= 2.6.
+
 version 1.6:
   - Significant speed improvements and a few bugs fixed.
   - Better handling of non ASCII chars in snippets by assuming UTF-8 encoding
