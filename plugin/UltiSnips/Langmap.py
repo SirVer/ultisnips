@@ -14,6 +14,8 @@ one line down is no longer possible and UltiSnips will fail.
 
 import vim
 
+from UltiSnips.Compatibility import as_unicode
+
 class Real_LangMapTranslator(object):
     """
     This is the object to deal with langmaps if this option is compiled
@@ -35,7 +37,7 @@ class Real_LangMapTranslator(object):
         self._maps[langmap] = (from_chars, to_chars)
 
     def translate(self, s):
-        langmap = vim.eval("&langmap").strip()
+        langmap = as_unicode(vim.eval("&langmap").strip())
         if langmap == "":
             return s
 
