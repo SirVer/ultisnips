@@ -1,3 +1,4 @@
+	- Improved handling of utf-8 characters in files and snippet definitions.
 	- Full support for :py3. UltiSnips now truly works with python >= 2.6.
 
 version 1.6:
