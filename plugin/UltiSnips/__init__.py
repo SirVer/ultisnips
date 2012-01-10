@@ -11,7 +11,7 @@ import traceback
 import vim
 
 from UltiSnips.Geometry import Position
-from UltiSnips.Compatibility import make_suitable_for_vim
+from UltiSnips.Compatibility import make_suitable_for_vim, set_vim_cursor, vim_cursor
 from UltiSnips.TextObjects import *
 from UltiSnips.Buffer import VimBuffer
 from UltiSnips.Util import IndentUtil, vim_string, as_unicode
@@ -462,7 +462,7 @@ class VimState(object):
         self._text_changed = None
 
     def update(self):
-        line, col = vim.current.window.cursor
+        line, col = vim_cursor()
         line -= 1
         abs_pos = Position(line,col)
         if self._abs_pos:
@@ -470,7 +470,7 @@ class VimState(object):
         self._abs_pos = abs_pos
 
         # Update buffer infos
-        cols = len(vim.current.buffer[line])
+        cols = len(as_unicode(vim.current.buffer[line]))
         if self._cols:
             self._dcols = cols - self._cols
         self._cols = cols
@@ -491,9 +491,9 @@ class VimState(object):
         # If the length didn't change but we moved a column, check if
         # the char under the cursor has changed (might be one char tab).
         elif self.moved.col == 1:
-            self._text_changed = self._cline != vim.current.buffer[line]
+            self._text_changed = self._cline != as_unicode(vim.current.buffer[line])
         self._lline = self._cline
-        self._cline = vim.current.buffer[line]
+        self._cline = as_unicode(vim.current.buffer[line])
 
     def select_span(self, r):
         self._unmap_select_mode_mapping()
@@ -501,11 +501,11 @@ class VimState(object):
         delta = r.end - r.start
         lineno, col = r.start.line, r.start.col
 
-        vim.current.window.cursor = lineno + 1, col
+        set_vim_cursor(lineno + 1, col)
 
         if delta.line == delta.col == 0:
             if col == 0 or vim.eval("mode()") != 'i' and \
-                    col < len(vim.current.buffer[lineno]):
+                    col < len(as_unicode(vim.current.buffer[lineno])):
                 feedkeys(r"\<Esc>i")
             else:
                 feedkeys(r"\<Esc>a")
@@ -518,7 +518,7 @@ class VimState(object):
             # an extra space which we can select.  Note that this problem could
             # be circumvent by selecting the tab backwards (that is starting
             # at the end); one would not need to modify the line for this.
-            if col >= len(vim.current.buffer[lineno]):
+            if col >= len(as_unicode(vim.current.buffer[lineno])):
                 vim.current.buffer[lineno] += " "
 
             if delta.line:
@@ -537,7 +537,7 @@ class VimState(object):
             # and select right from there. Note that the we have to select
             # one column less since vim's visual selection is including the
             # ending while Python slicing is excluding the ending.
-            if r.end.col == 0 and not len(vim.current.buffer[r.end.line]):
+            if r.end.col == 0 and not len(as_unicode(vim.current.buffer[r.end.line])):
                 # Selecting should end on an empty line -> Select the previous
                 # line till its end
                 do_select = "k$"
@@ -776,7 +776,7 @@ class SnippetManager(object):
                 # a newline character or pasted some text which means we have
                 # to copy everything he entered on the last line and keep the
                 # indent vim chose for this line.
-                lline = vim.current.buffer[self._vstate.ppos.line]
+                lline = as_unicode(vim.current.buffer[self._vstate.ppos.line])
 
                 # Another thing that might have happened is that a word
                 # wrapped, in this case the last line is shortened and we must
@@ -790,7 +790,7 @@ class SnippetManager(object):
                 line_was_lengthened = len(lline) > len(self._vstate.last_line)
 
                 user_didnt_enter_newline = len(lline) != self._vstate.ppos.col
-                cline = vim.current.buffer[self._vstate.pos.line]
+                cline = as_unicode(vim.current.buffer[self._vstate.pos.line])
                 if line_was_lengthened:
                     this_entered = vim.current.line[:self._vstate.pos.col]
                     self._chars_entered('\n' + cline + this_entered, 1)
@@ -813,7 +813,7 @@ class SnippetManager(object):
                 # Backspace over line end
                 self._backspace(1)
             else:
-                line = vim.current.line
+                line = as_unicode(vim.current.line)
 
                 chars = line[self._vstate.pos.col - self._vstate.moved.col:
                              self._vstate.pos.col]
@@ -938,7 +938,7 @@ class SnippetManager(object):
         """ Returns the text before and after the cursor as a
         tuple.
         """
-        lineno,col = vim.current.window.cursor
+        lineno, col = vim.current.window.cursor  # Note: we want byte position here
 
         line = vim.current.line
 
@@ -999,7 +999,7 @@ class SnippetManager(object):
         that needs to be done with it. 'before' and 'after' should
         come from _get_before_after.
         """
-        lineno,col = vim.current.window.cursor
+        lineno, col = vim_cursor()
         # Adjust before, maybe the trigger is not the complete word
 
         text_before = before
@@ -1114,7 +1114,8 @@ class SnippetManager(object):
         self._vb.replace_lines(sline, sline + dlines,
                        s._current_text)
         ct_end = self._ctab.abs_end
-        vim.current.window.cursor = ct_end.line +1, ct_end.col
+
+        set_vim_cursor(ct_end.line + 1, ct_end.col)
 
         self._vstate.update()
 

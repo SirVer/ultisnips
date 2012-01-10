@@ -1928,6 +1928,23 @@ class Snippet_With_Umlauts(_VimTest):
     keys = 'teüst' + EX
     wanted = "Expand meü!"
 
+class Snippet_With_Umlauts_TypeOn(_VimTest):
+    snippets = ('ül', 'üüüüüßßßß')
+    keys = 'te ül' + EX + "more text"
+    wanted = "te üüüüüßßßßmore text"
+class Snippet_With_Umlauts_OverwriteFirst(_VimTest):
+    snippets = ('ül', 'üü ${1:world} üü ${2:hello}ßß\nüüüü')
+    keys = 'te ül' + EX + "more text" + JF + JF + "end"
+    wanted = "te üü more text üü helloßß\nüüüüend"
+class Snippet_With_Umlauts_OverwriteSecond(_VimTest):
+    snippets = ('ül', 'üü ${1:world} üü ${2:hello}ßß\nüüüü')
+    keys = 'te ül' + EX + JF + "more text" + JF + "end"
+    wanted = "te üü world üü more textßß\nüüüüend"
+class Snippet_With_Umlauts_OverwriteNone(_VimTest):
+    snippets = ('ül', 'üü ${1:world} üü ${2:hello}ßß\nüüüü')
+    keys = 'te ül' + EX + JF + JF + "end"
+    wanted = "te üü world üü helloßß\nüüüüend"
+
 class Snippet_With_DoubleQuote_List(_VimTest):
     snippets = _snip_quote('"')
     keys = "te" + LS + "2\n"
