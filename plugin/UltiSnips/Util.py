@@ -4,9 +4,10 @@
 import os
 import types
 import vim
-import sys
 
-class CheapTotalOrdering:
+from UltiSnips.Compatibility import as_unicode
+
+class CheapTotalOrdering:  # TODO: use functools for >= 2.7
     """Total ordering only appears in python 2.7. We try to stay compatible with
     python 2.5 for now, so we define our own"""
 
@@ -22,18 +23,6 @@ class CheapTotalOrdering:
     def __ge__(self, other):
         return self.__cmp__(other) >= 0
 
-if sys.version_info > (2,8):
-    def as_utf8(s):
-        return s.encode("utf-8")
-    def as_unicode(s):
-        if isinstance(s, bytes):
-            return s.decode("utf-8")
-        return s
-else:
-    def as_utf8(s):
-        if not isinstance(s, types.UnicodeType):
-            s = s.decode("utf-8")
-        return s.encode("utf-8")
 
 def vim_string(inp):
     """ Creates a vim-friendly string from a group of
@@ -41,15 +30,15 @@ def vim_string(inp):
     """
     def conv(obj):
         if isinstance(obj, list):
-            rv = unicode('[' + ','.join(conv(o) for o in obj) + ']')
+            rv = as_unicode('[' + ','.join(conv(o) for o in obj) + ']')
         elif isinstance(obj, dict):
-            rv = unicode('{' + ','.join([
+            rv = as_unicode('{' + ','.join([
                 "%s:%s" % (conv(key), conv(value))
                 for key, value in obj.iteritems()]) + '}')
         else:
-            rv = '"%s"' % str(obj).decode("utf-8").replace('"', '\\"')
+            rv = as_unicode('"%s"' % str(obj).replace('"', '\\"'))
         return rv
-    return conv(inp).encode("utf-8")
+    return conv(inp)
 
 class IndentUtil(object):
     """ Utility class for dealing properly with indentation. """
