@@ -9,7 +9,7 @@ from UltiSnips.Compatibility import as_unicode
 
 def debug(s):
     s = as_unicode(s)
-    f = open("/tmp/file.txt","ba")
+    f = open("/tmp/file.txt","ab")
     f.write((s + '\n').encode("utf-8"))
     f.close()
 
