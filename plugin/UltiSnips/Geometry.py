@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from UltiSnips.Util import CheapTotalOrdering
+from UltiSnips.Compatibility import CheapTotalOrdering
 
 __all__ = [ "Position", "Span" ]
 

@@ -7,23 +7,6 @@ import vim
 
 from UltiSnips.Compatibility import as_unicode
 
-class CheapTotalOrdering:  # TODO: use functools for >= 2.7
-    """Total ordering only appears in python 2.7. We try to stay compatible with
-    python 2.5 for now, so we define our own"""
-
-    def __lt__(self, other):
-        return self.__cmp__(other) < 0
-
-    def __le__(self, other):
-        return self.__cmp__(other) <= 0
-
-    def __gt__(self, other):
-        return self.__cmp__(other) > 0
-
-    def __ge__(self, other):
-        return self.__cmp__(other) >= 0
-
-
 def vim_string(inp):
     """ Creates a vim-friendly string from a group of
     dicts, lists and strings.
@@ -36,7 +19,7 @@ def vim_string(inp):
                 "%s:%s" % (conv(key), conv(value))
                 for key, value in obj.iteritems()]) + '}')
         else:
-            rv = as_unicode('"%s"' % str(obj).replace('"', '\\"'))
+            rv = as_unicode('"%s"') % as_unicode(obj).replace('"', '\\"')
         return rv
     return conv(inp)
 

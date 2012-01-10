@@ -37,8 +37,6 @@ WIN = platform.system() == "Windows"
 
 from textwrap import dedent
 
-
-
 # Some constants for better reading
 BS = '\x7f'
 ESC = '\x1b'
@@ -131,12 +129,12 @@ def send_win(keys, session):
 
 ################ end windows ################
 
-
-
-
-def send_screen(s,session):
+def send_screen(s, session):
     s = s.replace("'", r"'\''")
-    os.system(("screen -x %s -X stuff '%s'" % (session, s)).encode("utf-8"))
+    cmd = "screen -x %s -X stuff '%s'" % (session, s)
+    if sys.version_info >= (3,0):
+        cmd = cmd.encode("utf-8")
+    os.system(cmd)
 
 
 def send(s, session):
@@ -149,7 +147,7 @@ def focus(title=None):
     if WIN:
         focus_win(title=title)
 
-def type(str, session, sleeptime):
+def send_keystrokes(str, session, sleeptime):
     """
     Send the keystrokes to vim via screen. Pause after each char, so
     vim can handle this
@@ -182,8 +180,8 @@ class _VimTest(unittest.TestCase):
         else:
             self.send(":py3 << EOF\n%s\nEOF\n" % s)
 
-    def type(self,s):
-        type(s, self.session, self.sleeptime)
+    def send_keystrokes(self,s):
+        send_keystrokes(s, self.session, self.sleeptime)
 
     def check_output(self):
         wanted = self.text_before + '\n\n' + self.wanted + \
@@ -269,7 +267,7 @@ class _VimTest(unittest.TestCase):
             self.send("i")
 
             # Execute the command
-            self.type(self.keys)
+            self.send_keystrokes(self.keys)
 
             self.send(ESC)
 

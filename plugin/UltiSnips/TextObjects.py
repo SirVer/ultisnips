@@ -7,11 +7,13 @@ import stat
 import tempfile
 import vim
 
-from UltiSnips.Util import IndentUtil, CheapTotalOrdering
 from UltiSnips.Buffer import TextBuffer
+from UltiSnips.Compatibility import CheapTotalOrdering
+from UltiSnips.Compatibility import compatible_exec
 from UltiSnips.Geometry import Span, Position
 from UltiSnips.Lexer import tokenize, EscapeCharToken, TransformationToken,  \
     TabStopToken, MirrorToken, PythonCodeToken, VimLCodeToken, ShellCodeToken
+from UltiSnips.Util import IndentUtil
 
 __all__ = [ "Mirror", "Transformation", "SnippetInstance", "StartMarker" ]
 
@@ -146,7 +148,7 @@ class _TOParser(object):
         for parent, token in all_tokens:
             if isinstance(token, TransformationToken):
                 if token.no not in seen_ts:
-                    raise RuntimeError("Tabstop %i is not known but is used by a Transformation" % t._ts)
+                    raise RuntimeError("Tabstop %i is not known but is used by a Transformation" % token.no)
                 Transformation(parent, seen_ts[token.no], token)
 
     def _do_parse(self, all_tokens, seen_ts):
@@ -646,7 +648,7 @@ class PythonCode(TextObject):
 
         self._globals = {}
         globals = snippet.globals.get("!p", [])
-        exec("\n".join(globals).replace("\r\n", "\n"), self._globals)
+        compatible_exec("\n".join(globals).replace("\r\n", "\n"), self._globals)
 
         # Add Some convenience to the code
         self._code = "import re, os, vim, string, random\n" + code
@@ -674,7 +676,7 @@ class PythonCode(TextObject):
         })
 
         self._code = self._code.replace("\r\n", "\n")
-        exec(self._code, self._globals, local_d)
+        compatible_exec(self._code, self._globals, local_d)
 
         if self._snip._rv_changed:
             self.current_text = self._snip.rv

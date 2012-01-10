@@ -3,6 +3,7 @@
 
 import vim
 from UltiSnips.Geometry import Position
+from UltiSnips.Compatibility import make_suitable_for_vim
 
 __all__ = [ "TextBuffer", "VimBuffer" ]
 
@@ -59,9 +60,9 @@ class VimBuffer(Buffer):
         return vim.current.buffer[a]
     def __setitem__(self, a, b):
         if isinstance(a,slice):
-            vim.current.buffer[a.start:a.stop] = b
+            vim.current.buffer[a.start:a.stop] = make_suitable_for_vim(b)
         else:
-            vim.current.buffer[a] = b
+            vim.current.buffer[a] = make_suitable_for_vim(b)
 
         # Open any folds this might have created
         vim.current.window.cursor = a.start + 1, 0
