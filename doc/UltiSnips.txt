@@ -4,9 +4,6 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
 
 1. Description                                  |UltiSnips-description|
 2. Installation and Updating                    |UltiSnips-installnupgrade|
-   2.1 Installation                             |UltiSnips-installation|
-   2.2 Deinstallation                           |UltiSnips-deinstallation|
-   2.3 Updating                                 |UltiSnips-updating|
 3. Settings & Commands                          |UltiSnips-settings|
    3.1 Commands                                 |UltiSnips-commands|
    3.2 Triggers                                 |UltiSnips-triggers|
@@ -73,23 +70,26 @@ his snippets.
 =============================================================================
 2. INSTALLATION AND UPDATING                       *UltiSnips-installnupdate*
 
+To use UltiSnips, you need a python enabled Vim 7. You have python if either
+   :echo has("python") or :echo has("python3") 
+yields '1'. Recent versions have been tested with python 2.7 and python 3.2,
+theoretically, UltiSnips should work with all versions >= python 2.6.
 
-2.1 Installation                                     *UltiSnips-installation*
-----------------
+Using Pathogen:                                     *UltiSnips-using-pathogen*
 
-UltiSnips has only been tested on Mac OS X and Linux. Like TextMates Snippets
-it also relies heavily on shell integration, therefore Windows users will have
-only a part of the functionality.
+If you are a Pathogen user, you can track the official mirror of UltiSnips on github: >
 
-To use UltiSnips, you need a python enabled Vim 7. You have python if
-   :echo has("python")
-yields '1'.
+   $ cd ~/.vim/
+   $ git submodule add https://github.com/sirver/ultisnips bundle/ultisnips
 
-If you have Python, you only need to install UltiSnips. The recommended way to
-do so is by using bzr (http://bazaar-vcs.org/). It is in all major linux
-distribution (either package bzr or bazaar) and can be easily installed under
-Mac OS X: >
-   $ easy_install bzr
+See the pathogen documentation how to update a bundle.
+
+Using Bzr:                                               *UltiSnips-using-bzr*
+
+To track the main repository on github, you will need bzr
+(http://bazaar-vcs.org/). It is in all major linux distribution (either
+package bzr or bazaar) and can be easily installed under Mac OS X: >
+   $ pip install bzr
 
 To get UltiSnips, check it out into a directory of your choice. Then add this
 directory to your Vim runtime path: >
@@ -104,23 +104,14 @@ Restart vim. UltiSnips should work now. To access the help, use >
    :helptags ~/.vim/ultisnips_rep/doc
    :help UltiSnips
 
-2.2 Deinstallation                                 *UltiSnips-deinstallation*
-------------------
-
-To Uninstall UltiSnips, remove the directory you installed it to and remove
-the path from your vim runtimepath: >
-   $ rm -rf ~/.vim/ultisnips_rep
-   $ vim ~/.vimrc
-
-remove the line: >
-   set runtimepath+=~/.vim/ultisnips_rep
-
-2.3 Updating                                             *UltiSnips-updating*
-------------
-
 To Update an installation, simply pull the latest revision: >
    $ cd ~/.vim/ultisnips_rep
    $ bzr pull
+
+Using a downloaded packet:               *UltiSnips-using-a-downloaded-packet*
+
+See *UltiSnips-using-bzr* Just unpack into a directory of your choice and add
+the path to runtimepath.
 
 =============================================================================
 3. SETTINGS                                              *UltiSnips-settings*
