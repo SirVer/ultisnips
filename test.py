@@ -1473,6 +1473,10 @@ class Transformation_CINewlines_ECR(_VimTest):
     snippets = ("test", r"$1 ${1/, */\n/}")
     keys = "test" + EX + "test, hallo"
     wanted = "test, hallo test\nhallo"
+class Transformation_CITabstop_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1/, */\t/}")
+    keys = "test" + EX + "test, hallo"
+    wanted = "test, hallo test\thallo"
 class Transformation_CIEscapedParensinReplace_ECR(_VimTest):
     snippets = ("test", r"$1 ${1/hal((?:lo)|(?:ul))/(?1:ha\($1\))/}")
     keys = "test" + EX + "test, halul"
