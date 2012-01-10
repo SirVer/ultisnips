@@ -6,6 +6,22 @@ import types
 import vim
 import sys
 
+class CheapTotalOrdering:
+    """Total ordering only appears in python 2.7. We try to stay compatible with
+    python 2.5 for now, so we define our own"""
+
+    def __lt__(self, other):
+        return self.__cmp__(other) < 0
+
+    def __le__(self, other):
+        return self.__cmp__(other) <= 0
+
+    def __gt__(self, other):
+        return self.__cmp__(other) > 0
+
+    def __ge__(self, other):
+        return self.__cmp__(other) >= 0
+
 if sys.version_info > (2,8):
     def as_utf8(s):
         return s.encode("utf-8")

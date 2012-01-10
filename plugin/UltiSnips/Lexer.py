@@ -9,7 +9,7 @@ into Logical Units called Tokens.
 import string
 import re
 
-from .Geometry import Position
+from UltiSnips.Geometry import Position
 
 __all__ = [
     "tokenize", "EscapeCharToken", "TransformationToken", "TabStopToken",
@@ -122,7 +122,7 @@ class TabStopToken(Token):
 
         self.no = _parse_number(stream)
 
-        if stream.peek() is ":":
+        if stream.peek() == ":":
             stream.next()
         self.initial_text = _parse_till_closing_brace(stream)
 
