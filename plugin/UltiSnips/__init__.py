@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
+#
+from debug import debug # TODO
 
 from functools import wraps
 import glob
@@ -596,7 +598,7 @@ class VimState(object):
                             "| redir END")
 
                 # Check if any mappings where found
-                all_maps = list(filter(len, vim.eval(r"_tmp_smaps").splitlines()))
+                all_maps = list(filter(len, as_unicode(vim.eval(r"_tmp_smaps")).splitlines()))
                 if (len(all_maps) == 1 and all_maps[0][0] not in " sv"):
                     # "No maps found". String could be localized. Hopefully
                     # it doesn't start with any of these letters in any
@@ -627,7 +629,19 @@ class VimState(object):
                             continue
 
                     # Actually unmap it
-                    vim.command("sunmap %s %s" % (option,trig))
+                    try:
+                        cmd = as_unicode("silent! sunmap %s %s") % (option, trig)
+                        vim.command(cmd.encode("utf-8"))
+                    except:
+                        # Bug 908139: ignore unmaps that fail because of
+                        # unprintable characters. This is not ideal because we
+                        # will not be able to unmap lhs with any unprintable
+                        # character. If the lhs stats with a printable
+                        # character this will leak to the user when he tries to
+                        # type this character as a first in a selected tabstop.
+                        # This case should be rare enough to not bother us
+                        # though.
+                        pass
 
 class SnippetManager(object):
     def __init__(self):
