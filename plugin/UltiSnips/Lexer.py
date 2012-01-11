@@ -12,7 +12,7 @@ import re
 from UltiSnips.Geometry import Position
 
 __all__ = [
-    "tokenize", "EscapeCharToken", "TransformationToken", "TabStopToken",
+    "tokenize", "EscapeCharToken", "VisualToken", "TransformationToken", "TabStopToken",
     "MirrorToken", "PythonCodeToken", "VimLCodeToken", "ShellCodeToken"
 ]
 
@@ -43,8 +43,10 @@ class _TextIterator(object):
         return rv
 
     def peek(self, count = 1):
-        try:
+        if count > 1: # This might return '' if nothing is found
             return self._text[self._idx:self._idx + count]
+        try:
+            return self._text[self._idx]
         except IndexError:
             return None
 
@@ -114,7 +116,7 @@ class TabStopToken(Token):
 
     @classmethod
     def starts_here(klass, stream):
-        return klass.CHECK.match(stream.peek(10)) != None
+        return klass.CHECK.match(stream.peek(10)) is not None
 
     def _parse(self, stream, indent):
         stream.next() # $
@@ -131,12 +133,41 @@ class TabStopToken(Token):
             self.start, self.end, self.no, self.initial_text
         )
 
+class VisualToken(Token):
+    TOKEN = "${VISUAL}"
+    CHECK = re.compile(r"^[ \t]*\${VISUAL}")
+
+    @classmethod
+    def starts_here(klass, stream):
+        return klass.CHECK.match(stream.peek(10000)) is not None
+
+    def _parse(self, stream, indent):
+        self.leading_whitespace = ""
+        while stream.peek() != self.TOKEN[0]:
+            self.leading_whitespace += stream.next()
+
+        for i in range(len(self.TOKEN)):
+            stream.next()
+
+        # Make sure that a ${VISUAL} at the end of a line behaves like a block
+        # of text and does not introduce another line break.
+        while 1:
+            nc = stream.peek()
+            if nc is None or nc not in '\r\n':
+                break
+            stream.next()
+
+    def __repr__(self):
+        return "VisualToken(%r,%r)" % (
+            self.start, self.end
+        )
+
 class TransformationToken(Token):
     CHECK = re.compile(r'^\${\d+\/')
 
     @classmethod
     def starts_here(klass, stream):
-        return klass.CHECK.match(stream.peek(10)) != None
+        return klass.CHECK.match(stream.peek(10)) is not None
 
     def _parse(self, stream, indent):
         stream.next() # $
@@ -160,7 +191,7 @@ class MirrorToken(Token):
 
     @classmethod
     def starts_here(klass, stream):
-        return klass.CHECK.match(stream.peek(10)) != None
+        return klass.CHECK.match(stream.peek(10)) is not None
 
     def _parse(self, stream, indent):
         stream.next() # $
@@ -250,7 +281,7 @@ class VimLCodeToken(Token):
 # End: Tokens  }}}
 
 __ALLOWED_TOKENS = [
-    EscapeCharToken, TransformationToken, TabStopToken, MirrorToken,
+    EscapeCharToken, VisualToken, TransformationToken, TabStopToken, MirrorToken,
     PythonCodeToken, VimLCodeToken, ShellCodeToken
 ]
 def tokenize(text, indent):
