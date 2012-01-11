@@ -9,7 +9,7 @@ import vim
 
 from UltiSnips.Buffer import TextBuffer
 from UltiSnips.Compatibility import CheapTotalOrdering
-from UltiSnips.Compatibility import compatible_exec
+from UltiSnips.Compatibility import compatible_exec, as_unicode
 from UltiSnips.Geometry import Span, Position
 from UltiSnips.Lexer import tokenize, EscapeCharToken, TransformationToken,  \
     TabStopToken, MirrorToken, PythonCodeToken, VimLCodeToken, ShellCodeToken
@@ -209,7 +209,7 @@ class TextObject(CheapTotalOrdering):
     ##############
     def current_text():
         def fget(self):
-            return str(self._current_text)
+            return as_unicode(self._current_text)
         def fset(self, text):
             self._current_text = TextBuffer(text)
 
@@ -478,7 +478,7 @@ class VimLCode(TextObject):
         TextObject.__init__(self, parent, token)
 
     def _do_update(self):
-        self.current_text = str(vim.eval(self._code))
+        self.current_text = as_unicode(vim.eval(self._code))
 
     def __repr__(self):
         return "VimLCode(%s -> %s)" % (self._start, self._end)
@@ -681,7 +681,7 @@ class PythonCode(TextObject):
         if self._snip._rv_changed:
             self.current_text = self._snip.rv
         else:
-            self.current_text = str(local_d["res"])
+            self.current_text = as_unicode(local_d["res"])
 
     def __repr__(self):
         return "PythonCode(%s -> %s)" % (self._start, self._end)

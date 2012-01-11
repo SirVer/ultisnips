@@ -1944,6 +1944,14 @@ class Snippet_With_Umlauts_OverwriteNone(_VimTest):
     snippets = ('ül', 'üü ${1:world} üü ${2:hello}ßß\nüüüü')
     keys = 'te ül' + EX + JF + JF + "end"
     wanted = "te üü world üü helloßß\nüüüüend"
+class Snippet_With_Umlauts_Mirrors(_VimTest):
+    snippets = ('ül', 'üü ${1:world} üü $1')
+    keys = 'te ül' + EX + "hello"
+    wanted = "te üü hello üü hello"
+class Snippet_With_Umlauts_Python(_VimTest):
+    snippets = ('ül', 'üü ${1:world} üü `!p snip.rv = len(t[1])*"a"`')
+    keys = 'te ül' + EX + "hüüll"
+    wanted = "te üü hüüll üü aaaaa"
 
 class Snippet_With_DoubleQuote_List(_VimTest):
     snippets = _snip_quote('"')

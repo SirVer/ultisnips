@@ -53,7 +53,7 @@ if sys.version_info >= (3,0):
     def as_unicode(s):
         if isinstance(s, bytes):
             return s.decode("utf-8")
-        return s
+        return str(s)
 
     def make_suitable_for_vim(s):
         return s
@@ -98,9 +98,9 @@ else:
             return self.__cmp__(other) >= 0
 
     def as_unicode(s):
-        if not isinstance(s, unicode):
+        if isinstance(s, str):
             return s.decode("utf-8")
-        return s
+        return unicode(s)
 
     def make_suitable_for_vim(s):
         if isinstance(s, list):
