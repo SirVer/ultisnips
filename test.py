@@ -2528,10 +2528,10 @@ class _SelectModeMappings(_VimTest):
     def _options_off(self):
         for key, m in self.maps:
             if not len(key): continue
-            self.send(":sunmap %s\n" % key)
+            self.send(":silent! sunmap %s\n" % key)
         for key, m in self.buffer_maps:
             if not len(key): continue
-            self.send(":sunmap <buffer> %s\n" % key)
+            self.send(":silent! sunmap <buffer> %s\n" % key)
 
         self.send(":let g:UltiSnipsRemoveSelectModeMappings=1\n")
         self.send(":let g:UltiSnipsMappingsToIgnore= []\n")
