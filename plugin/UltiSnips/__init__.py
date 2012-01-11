@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 #
-from debug import debug # TODO
-
 from functools import wraps
 import glob
 import hashlib
@@ -275,7 +273,6 @@ class Snippet(object):
         self._matched = ""
         self._last_re = None
         self._globals = globals
-        self._util = IndentUtil()
 
     def __repr__(self):
         return "Snippet(%s,%s,%s)" % (self._t,self._d,self._opts)
@@ -421,11 +418,12 @@ class Snippet(object):
         return self._matched
     matched = property(matched)
 
-    def launch(self, text_before, parent, start, end = None):
+    def launch(self, text_before, visual_content, parent, start, end = None):
         indent = self._INDENT.match(text_before).group(0)
         lines = (self._v + "\n").splitlines()
-        self._util.reset()
+        ind_util = IndentUtil()
 
+        # Replace leading tabs in the snippet definition via proper indenting
         v = []
         for line_num, line in enumerate(lines):
             if "t" in self._opts:
@@ -433,10 +431,8 @@ class Snippet(object):
             else:
                 tabs = len(self._TABS.match(line).group(0))
 
+            line_ind = ind_util.ntabs_to_proper_indent(tabs)
 
-            line_ind = tabs * self._util.sw * " "
-            line_ind = self._util.indent_to_spaces(line_ind)
-            line_ind = self._util.spaces_to_indent(line_ind)
             if line_num != 0:
                 line_ind = indent + line_ind
 
@@ -444,11 +440,11 @@ class Snippet(object):
         v = os.linesep.join(v)
 
         if parent is None:
-            return SnippetInstance(StartMarker(start), indent,
-                    v, last_re = self._last_re, globals = self._globals)
+            return SnippetInstance(StartMarker(start), indent, v, None, None, visual_content = visual_content,
+                    last_re = self._last_re, globals = self._globals)
         else:
-            return SnippetInstance(parent, indent, v, start,
-                    end, last_re = self._last_re, globals = self._globals)
+            return SnippetInstance(parent, indent, v, start, end, visual_content,
+                    last_re = self._last_re, globals = self._globals)
 
 class VimState(object):
     def __init__(self):
@@ -656,6 +652,7 @@ class SnippetManager(object):
     def reset(self, test_error=False):
         self._test_error = test_error
         self._snippets = {}
+        self._visual_content = as_unicode("")
 
         while len(self._csnippets):
             self._current_snippet_is_done()
@@ -709,6 +706,29 @@ class SnippetManager(object):
             rv = self._jump()
         if not rv:
             self._handle_failure(self.expand_trigger)
+
+    @err_to_scratch_buffer
+    def save_last_visual_selection(self):
+        """
+        This is called when the expand trigger is pressed in visual mode.
+        Our job is to remember everything between '< and '> and pass it on to
+        ${VISUAL} in case it will be needed.
+        """
+        sl, sc = map(int, (vim.eval("""line("'<")"""), vim.eval("""virtcol("'<")""")))
+        el, ec = map(int, (vim.eval("""line("'>")"""), vim.eval("""virtcol("'>")""")))
+
+        def _vim_line_with_eol(ln):
+            return as_unicode(vim.current.buffer[ln] + '\n')
+
+        if sl == el:
+            text = _vim_line_with_eol(sl-1)[sc-1:ec]
+        else:
+            text = _vim_line_with_eol(sl-1)[sc-1:]
+            for cl in range(sl,el-1):
+                text += _vim_line_with_eol(cl)
+            text += _vim_line_with_eol(el-1)[:ec]
+
+        self._visual_content = text
 
     def snippet_dict(self, ft):
         if ft not in self._snippets:
@@ -1034,7 +1054,8 @@ class SnippetManager(object):
                 end = Position(pos.line - p_start.line, pos.col)
             start = Position(end.line, end.col - len(snippet.matched))
 
-            si = snippet.launch(text_before, self._ctab, start, end)
+            si = snippet.launch(text_before, self._visual_content, self._ctab, start, end)
+            self._visual_content = ""
 
             self._update_vim_buffer()
 
@@ -1045,7 +1066,8 @@ class SnippetManager(object):
             self._vb = VimBuffer(text_before, after)
 
             start = Position(lineno-1, len(text_before))
-            self._csnippets.append(snippet.launch(text_before, None, start))
+            self._csnippets.append(snippet.launch(text_before, self._visual_content, None, start))
+            self._visual_content = ""
 
             self._vb.replace_lines(lineno-1, lineno-1,
                        self._cs._current_text)

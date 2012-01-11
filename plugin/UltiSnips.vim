@@ -144,6 +144,15 @@ function! UltiSnips_ListSnippets()
     return ""
 endfunction
 
+function! UltiSnips_SaveLastVisualSelection()
+    if has("python3")
+        python3 UltiSnips_Manager.save_last_visual_selection()
+    else
+        python UltiSnips_Manager.save_last_visual_selection()
+    endif
+    return ""
+endfunction
+
 function! UltiSnips_JumpBackwards()
     call CompensateForPUM()
     if has("python3")
@@ -221,6 +230,7 @@ function! UltiSnips_MapKeys()
         exec "inoremap <silent> " . g:UltiSnipsJumpForwardTrigger  . " <C-R>=UltiSnips_JumpForwards()<cr>"
         exec "snoremap <silent> " . g:UltiSnipsJumpForwardTrigger  . " <Esc>:call UltiSnips_JumpForwards()<cr>"
     endif
+    exec 'xnoremap ' . g:UltiSnipsExpandTrigger. ' <Esc>:call UltiSnips_SaveLastVisualSelection()<cr>gvs'
     exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=UltiSnips_JumpBackwards()<cr>"
     exec "snoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <Esc>:call UltiSnips_JumpBackwards()<cr>"
     exec "inoremap <silent> " . g:UltiSnipsListSnippets . " <C-R>=UltiSnips_ListSnippets()<cr>"

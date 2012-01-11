@@ -48,6 +48,12 @@ class IndentUtil(object):
                 new_ind.append(ch)
         return "".join(new_ind)
 
+    def ntabs_to_proper_indent(self, ntabs):
+        line_ind = ntabs * self.sw * " "
+        line_ind = self.indent_to_spaces(line_ind)
+        line_ind = self.spaces_to_indent(line_ind)
+        return line_ind
+
     def indent_to_spaces(self, indent):
         """ Converts indentation to spaces respecting vim settings. """
         indent = self._strip_tabs(indent, self.ts)
