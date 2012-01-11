@@ -594,7 +594,7 @@ class VimState(object):
                             "| redir END")
 
                 # Check if any mappings where found
-                all_maps = list(filter(len, as_unicode(vim.eval(r"_tmp_smaps")).splitlines()))
+                all_maps = list(filter(len, vim.eval(r"_tmp_smaps").splitlines()))
                 if (len(all_maps) == 1 and all_maps[0][0] not in " sv"):
                     # "No maps found". String could be localized. Hopefully
                     # it doesn't start with any of these letters in any
@@ -626,8 +626,8 @@ class VimState(object):
 
                     # Actually unmap it
                     try:
-                        cmd = as_unicode("silent! sunmap %s %s") % (option, trig)
-                        vim.command(cmd.encode("utf-8"))
+                        cmd = ("silent! sunmap %s %s") % (option, trig)
+                        vim.command(cmd)
                     except:
                         # Bug 908139: ignore unmaps that fail because of
                         # unprintable characters. This is not ideal because we
