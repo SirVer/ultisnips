@@ -16,12 +16,13 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    4.1 Adding Snippets                          |UltiSnips-adding-snippets|
       4.1.1 Character Escaping                  |UltiSnips-character-escaping|
    4.2 Plaintext Snippets                       |UltiSnips-plaintext-snippets|
-   4.3 Interpolation                            |UltiSnips-interpolation|
-      4.3.1 Shellcode                           |UltiSnips-shellcode|
-      4.3.2 VimScript                           |UltiSnips-vimscript|
-      4.3.3 Python                              |UltiSnips-python|
-      4.3.4 Global Snippets                     |UltiSnips-globals|
-   4.4 Tab Stops and Placeholders               |UltiSnips-tabstops|
+   4.3 Visual Placeholder                       |UltiSnips-visual-placeholder|
+   4.4 Interpolation                            |UltiSnips-interpolation|
+      4.4.1 Shellcode                           |UltiSnips-shellcode|
+      4.4.2 VimScript                           |UltiSnips-vimscript|
+      4.4.3 Python                              |UltiSnips-python|
+      4.4.4 Global Snippets                     |UltiSnips-globals|
+   4.5 Tab Stops and Placeholders               |UltiSnips-tabstops|
    4.6 Mirrors                                  |UltiSnips-mirrors|
    4.7 Transformations                          |UltiSnips-transformations|
       4.7.1 Replacement String                  |UltiSnips-replacement-string|
@@ -110,7 +111,7 @@ To Update an installation, simply pull the latest revision: >
 
 Using a downloaded packet:               *UltiSnips-using-a-downloaded-packet*
 
-See *UltiSnips-using-bzr* Just unpack into a directory of your choice and add
+See UltiSnips-using-bzr. Just unpack into a directory of your choice and add
 the path to runtimepath.
 
 =============================================================================
@@ -360,10 +361,30 @@ bye<tab> -->
 Good bye, Sir. Hope to talk to you soon.
 - Arthur, King of Britain
 
-4.3 Interpolation                                   *UltiSnips-interpolation*
+4.3 Visual Placeholder                         *UltiSnips-visual-placeholder*
+----------------------
+
+Snippets can contain a special placeholder called ${VISUAL}. When you select
+some text in visual mode and press the key to expand a trigger
+(see g:UltiSnipsExpandTrigger) the selected text will get deleted and you will
+drop to insert mode. The next snippet you expand will have the selected text
+in the place of the ${VISUAL}. As a small example, let's take this snippet:
+
+------------------- SNIP -------------------
+snippet t
+<tag>${VISUAL}</tag>
+endsnippet
+------------------- SNAP -------------------
+And starting with this line: >
+   this should be cool
+position the cursor on the should, then press viw (visual mode -> select inner
+word). Then press tab, type "t" and press tab again >
+   -> this <tag>should</tag> be cool
+
+4.4 Interpolation                                   *UltiSnips-interpolation*
 -----------------
 
- 4.3.1 Shellcode:                                         *UltiSnips-shellcode*
+ 4.4.1 Shellcode:                                         *UltiSnips-shellcode*
 
 You can enter shellcode in your snippets in nearly all places. Shell code is
 written to a script and then executed. The output is inserted into the snippet
@@ -390,7 +411,7 @@ endsnippet
 today<tab> ->
 Today is 15.6.2009.
 
- 4.3.2 VimScript:                                         *UltiSnips-vimscript*
+ 4.4.2 VimScript:                                         *UltiSnips-vimscript*
 
 You can also use VimScript (also sometimes called VimL) in interpolation. This
 works very much the same as interpolation of shellcode, expect that it must be
@@ -405,7 +426,7 @@ endsnippet
     (note the 4 spaces in front): indent<tab> ->
     (note the 4 spaces in front): Indent is: 4.
 
- 4.3.3 Python:                                               *UltiSnips-python*
+ 4.4.3 Python:                                               *UltiSnips-python*
 
 By far the most powerful interpolation is by using python code. The syntax is
 similar to the one for Vimscript, but in python code the value of the property
@@ -484,7 +505,7 @@ endsnippet
 wow<tab>Hello World ->
 Hello World                                                     HELLO WORLD
 
- 4.3.4 Global Snippets:                                   *UltiSnips-globals*
+ 4.4.4 Global Snippets:                                   *UltiSnips-globals*
 
 Global snippets provide a way to take common code out of snippets. Currently,
 only python code is supported. The result of executing the contents of the
@@ -520,7 +541,7 @@ directory: >
    from my_snippet_helpers import *
    endglobals
 
-4.4 Tab Stops and Placeholders  *UltiSnips-tabstops* *UltiSnips-placeholders*
+4.5 Tab Stops and Placeholders  *UltiSnips-tabstops* *UltiSnips-placeholders*
 ------------------------------
 
 Very often, it is convenient to quickly add some text snippet and jump on to
