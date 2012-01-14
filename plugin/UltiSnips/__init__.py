@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
 #
+
+from debug import debug # TODO
 from functools import wraps
 import glob
 import hashlib
@@ -933,7 +935,6 @@ class SnippetManager(object):
                 self._span_selected = self._ctab.abs_span
                 jumped = True
                 if self._ctab.no == 0:
-                    self._ctab = None
                     self._current_snippet_is_done()
                 self._vstate.update()
             else:
@@ -1066,9 +1067,8 @@ class SnippetManager(object):
 
             self._update_vim_buffer()
 
-            if si.has_tabs:
-                self._csnippets.append(si)
-                self._jump()
+            self._csnippets.append(si)
+            self._jump()
         else:
             self._vb = VimBuffer(text_before, after)
 
@@ -1119,8 +1119,17 @@ class SnippetManager(object):
 
     # Input Handling
     def _chars_entered(self, chars, del_more_lines = 0):
+        debug("chars: %s, self._span_selected: %s" % (chars, self._span_selected))
+        debug("self._ctab.current_text: %s" % (self._ctab.current_text))
         if (self._span_selected is not None):
-            self._ctab.current_text = chars
+            # No current tabstop, but there are snippets? That means we returned from a recursive
+            # tabstop and still have the tabstop zero selected. The current tabstop is therefore
+            # the one in the latest snippet, but do not overwrite the complete text of the snippet
+            if self._ctab is None and len(self._csnippets):
+                self._ctab = self._csnippets[-1]._tabstops[self._csnippets[-1]._cts]  # TODO: private parts
+                self._ctab.current_text += chars
+            else:
+                self._ctab.current_text = chars
 
             moved = 0
             # If this edit changed the buffer in any ways we might have to

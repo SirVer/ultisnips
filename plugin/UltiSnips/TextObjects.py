@@ -18,6 +18,8 @@ from UltiSnips.Util import IndentUtil
 
 __all__ = [ "Mirror", "Transformation", "SnippetInstance", "StartMarker" ]
 
+from debug import debug # TODO
+
 ###########################################################################
 #                              Helper class                               #
 ###########################################################################
@@ -296,23 +298,25 @@ class TextObject(CheapTotalOrdering):
             return
         tno_max = max(self._tabstops.keys())
 
-        posible_sol = []
+        possible_sol = []
         i = no + 1
         while i <= tno_max:
             if i in self._tabstops:
-                posible_sol.append( (i, self._tabstops[i]) )
+                possible_sol.append( (i, self._tabstops[i]) )
                 break
             i += 1
 
         c = [ c._get_next_tab(no) for c in self._childs ]
+        debug("self: %s, c: %s" % (self, c))
         c = filter(lambda i: i, c)
 
-        posible_sol += c
+        possible_sol += c
+        debug("no: %s, possible_sol: %s" % (no, possible_sol))
 
-        if not len(posible_sol):
+        if not len(possible_sol):
             return None
 
-        return min(posible_sol)
+        return min(possible_sol)
 
 
     def _get_prev_tab(self, no):
@@ -320,23 +324,23 @@ class TextObject(CheapTotalOrdering):
             return
         tno_min = min(self._tabstops.keys())
 
-        posible_sol = []
+        possible_sol = []
         i = no - 1
         while i >= tno_min and i > 0:
             if i in self._tabstops:
-                posible_sol.append( (i, self._tabstops[i]) )
+                possible_sol.append( (i, self._tabstops[i]) )
                 break
             i -= 1
 
         c = [ c._get_prev_tab(no) for c in self._childs ]
         c = filter(lambda i: i, c)
 
-        posible_sol += c
+        possible_sol += c
 
-        if not len(posible_sol):
+        if not len(possible_sol):
             return None
 
-        return max(posible_sol)
+        return max(possible_sol)
 
     ###############################
     # Private/Protected functions #
@@ -761,32 +765,21 @@ class SnippetInstance(TextObject):
         _TOParser(self, initial_text, indent).parse()
 
         # Check if we have a zero Tab, if not, add one at the end
-        if isinstance(parent, TabStop):
-            if not parent.no == 0:
-                # We are recursively called, if we have a zero tab, remove it.
-                if 0 in self._tabstops:
-                    self._tabstops[0].current_text = ""
-                    del self._tabstops[0]
-        else:
-            self.update()
-            if 0 not in self._tabstops:
-                delta = self._end - self._start
-                col = self.end.col
-                if delta.line == 0:
-                    col -= self.start.col
-                start = Position(delta.line, col)
-                end = Position(delta.line, col)
-                ts = TabStop(self, 0, start, end)
-                self._add_tabstop(0,ts)
+        self.update()
+        if 0 not in self._tabstops:
+            delta = self._end - self._start
+            col = self.end.col
+            if delta.line == 0:
+                col -= self.start.col
+            start = Position(delta.line, col)
+            end = Position(delta.line, col)
+            ts = TabStop(self, 0, start, end)
+            self._add_tabstop(0,ts)
 
-                self.update()
+            self.update()
 
     def __repr__(self):
         return "SnippetInstance(%s -> %s)" % (self._start, self._end)
-
-    def has_tabs(self):
-        return len(self._tabstops)
-    has_tabs = property(has_tabs)
 
     def _get_tabstop(self, requester, no):
         # SnippetInstances are completely self contained, therefore, we do not
@@ -815,10 +808,7 @@ class SnippetInstance(TextObject):
             res = self._get_next_tab(self._cts)
             if res is None:
                 self._cts = None
-                if 0 in self._tabstops:
-                    return self._tabstops[0]
-                else:
-                    return None
+                return self._tabstops[0]
             else:
                 self._cts, ts = res
                 return ts

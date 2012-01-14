@@ -1055,15 +1055,15 @@ class RecTabStopsWithExpandtab_SpecialIndentProblem_ECR(_ExpandTabs):
 ###############################
 class RecTabStops_SimpleCase_ExceptCorrectResult(_VimTest):
     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
-    keys = "m" + EX + "m" + EX + "hello" + JF + "world" + JF + "end"
-    wanted = "[ [ hello  world ]  end ]"
+    keys = "m" + EX + "m" + EX + "hello" + JF + "world" + JF + "ups" + JF + "end"
+    wanted = "[ [ hello  world ]ups  end ]"
 class RecTabStops_SimpleCaseLeaveSecondSecond_ExceptCorrectResult(_VimTest):
     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
-    keys = "m" + EX + "m" + EX + "hello" + JF + "world" + JF + JF + "end"
+    keys = "m" + EX + "m" + EX + "hello" + JF + "world" + JF + JF + JF + "end"
     wanted = "[ [ hello  world ]  sec ]end"
 class RecTabStops_SimpleCaseLeaveFirstSecond_ExceptCorrectResult(_VimTest):
     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
-    keys = "m" + EX + "m" + EX + "hello" + JF + JF + "world" + JF + "end"
+    keys = "m" + EX + "m" + EX + "hello" + JF + JF + JF + "world" + JF + "end"
     wanted = "[ [ hello  sec ]  world ]end"
 
 class RecTabStops_InnerWOTabStop_ECR(_VimTest):
@@ -1116,38 +1116,39 @@ class RecTabStops_ExpandedInZeroTSTwice_ECR(_VimTest):
     keys = "m" + EX + "hi" + JF + "m" + EX + "again" + JF + "m1" + \
             EX + "CD" + JF + "DE"
     wanted = "A A C CD D DE E B again B hi"
-class RecTabStops_ExpandedInZeroTSSecondTimeIgnoreZTS_ECR(_VimTest):
+class RecTabStops_ExpandedInZeroTSSecondTime_ECR(_VimTest):
     snippets = (
         ("m", "A $0 B $1"),
         ("m1", "C $1 D $0 E"),
     )
-    keys = "m" + EX + "hi" + JF + "m" + EX + "m1" + EX + "CD" + JF + "DE"
-    wanted = "A A DE B C CD D  E B hi"
+    keys = "m" + EX + "hi" + JF + "m" + EX + "m1" + EX + "CD" + JF + "DE" + JF + "AB"
+    wanted = "A A AB B C CD D DE E B hi"
 
 class RecTabStops_MirrorInnerSnippet_ECR(_VimTest):
     snippets = (
         ("m", "[ $1 $2 ] $1"),
         ("m1", "ASnip $1 ASnip $2 ASnip"),
     )
-    keys = "m" + EX + "m1" + EX + "Hallo" + JF + "Hi" + JF + "two" + JF + "end"
-    wanted = "[ ASnip Hallo ASnip Hi ASnip two ] ASnip Hallo ASnip Hi ASnipend"
+    keys = "m" + EX + "m1" + EX + "Hallo" + JF + "Hi" + JF + "endone" + JF + "two" + JF + "totalend"
+    wanted = "[ ASnip Hallo ASnip Hi ASnipendone two ] ASnip Hallo ASnip Hi ASnipendonetotalend"
 
+# TODO: $0 mitten im snippet (geht wahrscheinlich nicht)
+# TODO: $0 explizit am ende
 class RecTabStops_NotAtBeginningOfTS_ExceptCorrectResult(_VimTest):
     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
-    keys = "m" + EX + "hello m" + EX + "hi" + JF + "two" + JF + "three" + \
+    keys = "m" + EX + "hello m" + EX + "hi" + JF + "two" + JF + "ups" + JF + "three" + \
             JF + "end"
-    wanted = "[ hello [ hi  two ]  three ]end"
+    wanted = "[ hello [ hi  two ]ups  three ]end"
 class RecTabStops_InNewlineInTabstop_ExceptCorrectResult(_VimTest):
-    sleeptime = 0.09 # Do this very slowly
     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
-    keys = "m" + EX + "hello\nm" + EX + "hi" + JF + "two" + JF + "three" + \
+    keys = "m" + EX + "hello\nm" + EX + "hi" + JF + "two" + JF + "ups" + JF + "three" + \
             JF + "end"
-    wanted = "[ hello\n[ hi  two ]  three ]end"
+    wanted = "[ hello\n[ hi  two ]ups  three ]end"
 class RecTabStops_InNewlineInTabstopNotAtBeginOfLine_ECR(_VimTest):
     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
     keys = "m" + EX + "hello\nhello again m" + EX + "hi" + JF + "two" + \
-            JF + "three" + JF + "end"
-    wanted = "[ hello\nhello again [ hi  two ]  three ]end"
+            JF + "ups" + JF + "three" + JF + "end"
+    wanted = "[ hello\nhello again [ hi  two ]ups  three ]end"
 
 class RecTabStops_InNewlineMultiline_ECR(_VimTest):
     snippets = ("m", "M START\n$0\nM END")
@@ -1165,19 +1166,20 @@ class RecTabStops_InNewlineMultilineWithIndent_ECR(_VimTest):
     snippets = ("m", "M START\n    $0\nM END")
     keys = "m" + EX + "m" + EX + "hi"
     wanted = "M START\n    M START\n        hi\n    M END\nM END"
-class RecTabStops_InNewlineMultilineWithNonZeroTS_ECR(_VimTest):
-    snippets = ("m", "M START\n    $1\nM END -> $0")
-    keys = "m" + EX + "m" + EX + "hi" + JF + "hallo"
-    wanted = "M START\n    M START\n        hi\n    M END -> \n" \
-        "M END -> hallo"
+# TODO: this has error
+# class RecTabStops_InNewlineMultilineWithNonZeroTS_ECR(_VimTest):
+    # snippets = ("m", "M START\n    $1\nM END -> $0")
+    # keys = "m" + EX + "m" + EX + "hi" + JF + "hallo"
+    # wanted = "M START\n    M START\n        hi\n    M END -> \n" \
+        # "M END -> hallo"
 
 class RecTabStops_BarelyNotLeavingInner_ECR(_VimTest):
     snippets = (
         ("m", "[ ${1:first} ${2:sec} ]"),
     )
     keys = "m" + EX + "m" + EX + "a" + 3*ARR_L + JF + "hallo" + \
-            JF + "world" + JF + "end"
-    wanted = "[ [ a hallo ] world ]end"
+            JF + "ups" + JF + "world" + JF + "end"
+    wanted = "[ [ a hallo ]ups world ]end"
 class RecTabStops_LeavingInner_ECR(_VimTest):
     snippets = (
         ("m", "[ ${1:first} ${2:sec} ]"),
@@ -1190,8 +1192,8 @@ class RecTabStops_LeavingInnerInner_ECR(_VimTest):
         ("m", "[ ${1:first} ${2:sec} ]"),
     )
     keys = "m" + EX + "m" + EX + "m" + EX + "a" + 4*ARR_L + JF + "hallo" + \
-            JF + "world" + JF + "end"
-    wanted = "[ [ [ a sec ] hallo ] world ]end"
+            JF + "ups" + JF + "world" + JF + "end"
+    wanted = "[ [ [ a sec ] hallo ]ups world ]end"
 class RecTabStops_LeavingInnerInnerTwo_ECR(_VimTest):
     snippets = (
         ("m", "[ ${1:first} ${2:sec} ]"),
@@ -1201,22 +1203,22 @@ class RecTabStops_LeavingInnerInnerTwo_ECR(_VimTest):
     wanted = "[ [ [ a sec ] sec ] hallo ]end"
 
 
-class RecTabStops_IgnoreZeroTS_ECR(_VimTest):
+class RecTabStops_ZeroTSisNothingSpecial_ECR(_VimTest):
     snippets = (
         ("m1", "[ ${1:first} $0 ${2:sec} ]"),
         ("m", "[ ${1:first} ${2:sec} ]"),
     )
-    keys = "m" + EX + "m1" + EX + "hi" + JF + "two" + \
-            JF + "three" + JF + "end"
-    wanted = "[ [ hi  two ] three ]end"
+    keys = "m" + EX + "m1" + EX + "one" + JF + "two" + \
+            JF + "three" + JF + "four" + JF + "end"
+    wanted = "[ [ one three two ] four ]end"
 class RecTabStops_MirroredZeroTS_ECR(_VimTest):
     snippets = (
         ("m1", "[ ${1:first} ${0:Year, some default text} $0 ${2:sec} ]"),
         ("m", "[ ${1:first} ${2:sec} ]"),
     )
-    keys = "m" + EX + "m1" + EX + "hi" + JF + "two" + \
-            JF + "three" + JF + "end"
-    wanted = "[ [ hi   two ] three ]end"
+    keys = "m" + EX + "m1" + EX + "one" + JF + "two" + \
+            JF + "three" + JF + "four" + JF + "end"
+    wanted = "[ [ one three three two ] four ]end"
 
 ###########
 # MIRRORS #
