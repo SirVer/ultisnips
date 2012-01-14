@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-#
 
-from debug import debug # TODO
 from functools import wraps
 import glob
 import hashlib
@@ -1119,8 +1117,6 @@ class SnippetManager(object):
 
     # Input Handling
     def _chars_entered(self, chars, del_more_lines = 0):
-        debug("chars: %s, self._span_selected: %s" % (chars, self._span_selected))
-        debug("self._ctab.current_text: %s" % (self._ctab.current_text))
         if (self._span_selected is not None):
             # No current tabstop, but there are snippets? That means we returned from a recursive
             # tabstop and still have the tabstop zero selected. The current tabstop is therefore

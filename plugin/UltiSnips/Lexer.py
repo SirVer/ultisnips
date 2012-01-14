@@ -278,6 +278,13 @@ class VimLCodeToken(Token):
         return "VimLCodeToken(%r,%r,%r)" % (
             self.start, self.end, self.code
         )
+
+class EndOfTextToken(Token):
+    def _parse(self, stream, indent):
+        pass # Does nothing
+
+    def __repr__(self):
+        return "EndOfText(%r)" % self.end
 # End: Tokens  }}}
 
 __ALLOWED_TOKENS = [
@@ -287,14 +294,16 @@ __ALLOWED_TOKENS = [
 def tokenize(text, indent):
     stream = _TextIterator(text)
 
-    while True:
-        done_something = False
-        for t in __ALLOWED_TOKENS:
-            if t.starts_here(stream):
-                yield t(stream, indent)
-                done_something = True
-                break
-        if not done_something:
-            stream.next()
-
+    try:
+        while True:
+            done_something = False
+            for t in __ALLOWED_TOKENS:
+                if t.starts_here(stream):
+                    yield t(stream, indent)
+                    done_something = True
+                    break
+            if not done_something:
+                stream.next()
+    except StopIteration:
+        yield EndOfTextToken(stream, indent)
 

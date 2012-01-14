@@ -18,8 +18,6 @@ from UltiSnips.Util import IndentUtil
 
 __all__ = [ "Mirror", "Transformation", "SnippetInstance", "StartMarker" ]
 
-from debug import debug # TODO
-
 ###########################################################################
 #                              Helper class                               #
 ###########################################################################
@@ -125,7 +123,7 @@ class _TOParser(object):
         self._parent_to = parent_to
         self._text = text
 
-    def parse(self):
+    def parse(self, add_ts_zero = False):
         seen_ts = {}
         all_tokens = []
 
@@ -133,6 +131,11 @@ class _TOParser(object):
 
         self._resolve_ambiguity(all_tokens, seen_ts)
         self._create_objects_with_links_to_tabs(all_tokens, seen_ts)
+
+        if add_ts_zero and 0 not in seen_ts:
+            mark = all_tokens[-1][1].end # Last token is always EndOfText
+            m1 = Position(mark.line, mark.col + 1)
+            self._parent_to._add_tabstop(0, TabStop(self._parent_to, 0, mark, m1))
 
     #####################
     # Private Functions #
@@ -307,11 +310,9 @@ class TextObject(CheapTotalOrdering):
             i += 1
 
         c = [ c._get_next_tab(no) for c in self._childs ]
-        debug("self: %s, c: %s" % (self, c))
         c = filter(lambda i: i, c)
 
         possible_sol += c
-        debug("no: %s, possible_sol: %s" % (no, possible_sol))
 
         if not len(possible_sol):
             return None
@@ -388,7 +389,7 @@ class TextObject(CheapTotalOrdering):
         self._childs.append(c)
         self._childs.sort()
 
-    def _add_tabstop(self, no, ts):
+    def _add_tabstop(self, no, ts): # TODO: should not take no
         self._tabstops[no] = ts
 
 class EscapedChar(TextObject):
@@ -762,20 +763,9 @@ class SnippetInstance(TextObject):
 
         TextObject.__init__(self, parent, start, end, initial_text)
 
-        _TOParser(self, initial_text, indent).parse()
+        _TOParser(self, initial_text, indent).parse(True)
 
-        # Check if we have a zero Tab, if not, add one at the end
-        self.update()
-        if 0 not in self._tabstops:
-            delta = self._end - self._start
-            col = self.end.col
-            if delta.line == 0:
-                col -= self.start.col
-            start = Position(delta.line, col)
-            end = Position(delta.line, col)
-            ts = TabStop(self, 0, start, end)
-            self._add_tabstop(0,ts)
-
+        if not isinstance(parent, TabStop):
             self.update()
 
     def __repr__(self):
