@@ -815,6 +815,7 @@ Contributers are listed in chronological order:
    thanatermesis-elive - Thanatermesis
    rico-ambiescent - Rico Sta. Cruz
    Cody Frazer 
+   suy - Alejandro Exojo
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------
