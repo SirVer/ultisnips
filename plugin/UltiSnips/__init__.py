@@ -1122,7 +1122,7 @@ class SnippetManager(object):
             # tabstop and still have the tabstop zero selected. The current tabstop is therefore
             # the one in the latest snippet, but do not overwrite the complete text of the snippet
             if self._ctab is None and len(self._csnippets):
-                self._ctab = self._csnippets[-1]._tabstops[self._csnippets[-1]._cts]  # TODO: private parts
+                self._ctab = self._csnippets[-1].current_tabstop
                 self._ctab.current_text += chars
             else:
                 self._ctab.current_text = chars

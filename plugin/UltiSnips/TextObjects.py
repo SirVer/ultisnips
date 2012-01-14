@@ -135,7 +135,7 @@ class _TOParser(object):
         if add_ts_zero and 0 not in seen_ts:
             mark = all_tokens[-1][1].end # Last token is always EndOfText
             m1 = Position(mark.line, mark.col + 1)
-            self._parent_to._add_tabstop(0, TabStop(self._parent_to, 0, mark, m1))
+            self._parent_to._add_tabstop(TabStop(self._parent_to, 0, mark, m1))
 
     #####################
     # Private Functions #
@@ -146,7 +146,7 @@ class _TOParser(object):
                 if token.no not in seen_ts:
                     ts = TabStop(parent, token)
                     seen_ts[token.no] = ts
-                    parent._add_tabstop(token.no,ts)
+                    parent._add_tabstop(ts)
                 else:
                     Mirror(parent, seen_ts[token.no], token)
 
@@ -166,7 +166,7 @@ class _TOParser(object):
             if isinstance(token, TabStopToken):
                 ts = TabStop(self._parent_to, token)
                 seen_ts[token.no] = ts
-                self._parent_to._add_tabstop(token.no,ts)
+                self._parent_to._add_tabstop(ts)
 
                 k = _TOParser(ts, ts.current_text, self._indent)
                 k._do_parse(all_tokens, seen_ts)
@@ -228,8 +228,14 @@ class TextObject(CheapTotalOrdering):
             self._childs = []
             self._tabstops = {}
         return locals()
-
     current_text = property(**current_text())
+
+    @property
+    def current_tabstop(self):
+        if self._cts is None:
+            return None
+        return self._tabstops[self._cts]
+
     def abs_start(self):
         if self._parent:
             ps = self._parent.abs_start
@@ -389,8 +395,8 @@ class TextObject(CheapTotalOrdering):
         self._childs.append(c)
         self._childs.sort()
 
-    def _add_tabstop(self, no, ts): # TODO: should not take no
-        self._tabstops[no] = ts
+    def _add_tabstop(self, ts):
+        self._tabstops[ts.no] = ts
 
 class EscapedChar(TextObject):
     """
