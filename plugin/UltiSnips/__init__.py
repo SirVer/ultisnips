@@ -1106,9 +1106,9 @@ class SnippetManager(object):
         # Care for textwrapping
         if not snippet.keep_formatoptions_unchanged:
             self._cached_offending_vim_options["fo"] = ''.join(
-                c for c in vim.eval("&fo") if c in "ct"
+                c for c in vim.eval("&fo") if c in "cta"
             )
-            for c in "ct": vim.command("set fo-=%s" % c)
+            for c in "cta": vim.command("set fo-=%s" % c)
 
     def _reset_offending_vim_options(self):
         # Textwrapping
