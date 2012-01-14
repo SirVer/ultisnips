@@ -1123,6 +1123,27 @@ class RecTabStops_ExpandedInZeroTSSecondTime_ECR(_VimTest):
     )
     keys = "m" + EX + "hi" + JF + "m" + EX + "m1" + EX + "CD" + JF + "DE" + JF + "AB"
     wanted = "A A AB B C CD D DE E B hi"
+class RecTabsStops_TypeInZero_ECR(_VimTest):
+    snippets = (
+        ("v", r"\vec{$1}", "Vector", "w"),
+        ("frac", r"\frac{${1:one}}${0:zero}{${2:two}}", "Fractio", "w"),
+    )
+    keys = "v" + EX + "frac" + EX + "a" + JF + "b" + JF + "frac" + EX + "aa" + JF + JF + "cc" + JF + \
+            "hello frac" + EX + JF + JF + "world"
+    wanted = r"\vec{\frac{a}\frac{aa}cc{two}{b}}hello \frac{one}world{two}"
+class RecTabsStops_TypeInZero2_ECR(_VimTest):
+    snippets = (
+        ("m", r"_${0:explicit zero}", "snip", "i"),
+    )
+    keys = "m" + EX + "hello m" + EX + "world m" + EX + "end"
+    wanted = r"_hello _world _end"
+class RecTabsStops_BackspaceZero_ECR(_VimTest):
+    snippets = (
+        ("m", r"${1:one}${0:explicit zero}${2:two}", "snip", "i"),
+    )
+    keys = "m" + EX + JF + JF + BS + "m" + EX
+    wanted = r"oneoneexplicit zerotwotwo"
+
 
 class RecTabStops_MirrorInnerSnippet_ECR(_VimTest):
     snippets = (
@@ -1132,8 +1153,6 @@ class RecTabStops_MirrorInnerSnippet_ECR(_VimTest):
     keys = "m" + EX + "m1" + EX + "Hallo" + JF + "Hi" + JF + "endone" + JF + "two" + JF + "totalend"
     wanted = "[ ASnip Hallo ASnip Hi ASnipendone two ] ASnip Hallo ASnip Hi ASnipendonetotalend"
 
-# TODO: $0 mitten im snippet (geht wahrscheinlich nicht)
-# TODO: $0 explizit am ende
 class RecTabStops_NotAtBeginningOfTS_ExceptCorrectResult(_VimTest):
     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
     keys = "m" + EX + "hello m" + EX + "hi" + JF + "two" + JF + "ups" + JF + "three" + \
