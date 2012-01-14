@@ -1185,12 +1185,11 @@ class RecTabStops_InNewlineMultilineWithIndent_ECR(_VimTest):
     snippets = ("m", "M START\n    $0\nM END")
     keys = "m" + EX + "m" + EX + "hi"
     wanted = "M START\n    M START\n        hi\n    M END\nM END"
-# TODO: this has error
-# class RecTabStops_InNewlineMultilineWithNonZeroTS_ECR(_VimTest):
-    # snippets = ("m", "M START\n    $1\nM END -> $0")
-    # keys = "m" + EX + "m" + EX + "hi" + JF + "hallo"
-    # wanted = "M START\n    M START\n        hi\n    M END -> \n" \
-        # "M END -> hallo"
+class RecTabStops_InNewlineMultilineWithNonZeroTS_ECR(_VimTest):
+    snippets = ("m", "M START\n    $1\nM END -> $0")
+    keys = "m" + EX + "m" + EX + "hi" + JF + "hallo" + JF + "end"
+    wanted = "M START\n    M START\n        hi\n    M END -> hallo\n" \
+        "M END -> end"
 
 class RecTabStops_BarelyNotLeavingInner_ECR(_VimTest):
     snippets = (
