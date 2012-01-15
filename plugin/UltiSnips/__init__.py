@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+import edit_distance
+from debug import debug
+
 from functools import wraps
 import glob
 import hashlib
@@ -650,6 +653,7 @@ class SnippetManager(object):
 
     @err_to_scratch_buffer
     def reset(self, test_error=False):
+        self._lvb = ""
         self._test_error = test_error
         self._snippets = {}
         self._visual_content = as_unicode("")
@@ -795,6 +799,11 @@ class SnippetManager(object):
 
     @err_to_scratch_buffer
     def cursor_moved(self):
+        cb = as_unicode('\n'.join(vim.current.buffer))
+        rv = edit_distance.edit_script(self._lvb, cb)
+        # debug("rv: %r" % (rv,))
+        self._lvb = cb
+        return
         self._vstate.update()
 
         if not self._vstate.buf_changed and not self._expect_move_wo_change:
