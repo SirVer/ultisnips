@@ -794,7 +794,6 @@ class SnippetManager(object):
             # This does not change the buffer at all, only moves the cursor.
             self._vstate.update()
             feedkeys(r"i")
-            self._chars_entered('')
         else:
             # We can't just pass <BS> through, because we took vim
             # out of SELECT mode, so instead we reselect and replace

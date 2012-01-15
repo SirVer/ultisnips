@@ -34,7 +34,7 @@ class Position(CheapTotalOrdering):
 
         return Position(self.line + pos.line, self.col + pos.col)
 
-    def __sub__(self,pos):
+    def __sub__(self,pos): # TODO: is this really true?
         if not isinstance(pos,Position):
             raise TypeError("unsupported operand type(s) for +: " \
                     "'Position' and %s" % type(pos))

@@ -136,8 +136,10 @@ class _TOParser(object):
 
         if add_ts_zero and 0 not in seen_ts:
             mark = all_tokens[-1][1].end # Last token is always EndOfText
-            m1 = Position(mark.line, mark.col + 1)
+            m1 = Position(mark.line, mark.col)
             self._parent_to._add_tabstop(TabStop(self._parent_to, 0, mark, m1))
+
+        self._replace_initital_texts()
 
     #####################
     # Private Functions #
@@ -158,6 +160,15 @@ class _TOParser(object):
                 if token.no not in seen_ts:
                     raise RuntimeError("Tabstop %i is not known but is used by a Transformation" % token.no)
                 Transformation(parent, seen_ts[token.no], token)
+
+    def _replace_initital_texts(self):
+        def _do_it(obj):
+            obj.initial_replace()
+
+            for c in obj._childs: # TODO: private parts!
+                _do_it(c)
+
+        _do_it(self._parent_to)
 
     def _do_parse(self, all_tokens, seen_ts):
         tokens = list(tokenize(self._text, self._indent))
@@ -198,11 +209,11 @@ class TextObject(CheapTotalOrdering):
         if end is not None: # Took 4 arguments
             self._start = token
             self._end = end
-            ct = TextBuffer(initial_text)
+            self._initial_text = TextBuffer(initial_text)
         else: # Initialize from token
             self._start = token.start
             self._end = token.end
-            ct = TextBuffer(token.initial_text)
+            self._initial_text = TextBuffer(token.initial_text)
 
         self._childs = []
         self._tabstops = {}
@@ -212,9 +223,16 @@ class TextObject(CheapTotalOrdering):
 
         self._cts = 0
 
+    def initial_replace(self):
+        ct = self._initial_text # TODO: Initial Text is nearly unused.
         debug("self._start: %r, self._end: %r" % (self._start, self._end))
         debug("ct: %r" % (ct))
-        self._end = ct.to_vim(self._start, self._end)
+        old_end = self._end
+        ct.to_vim(self.abs_start, self.abs_end) # TODO: to vim returns something unused
+        self._end = ct.calc_end(self._start)
+        if self._end != old_end:
+            if self._parent is not None:
+                self._parent.child_end_moved(self, old_end, self._end)
 
     def __cmp__(self, other):
         return self._start.__cmp__(other._start)
@@ -282,27 +300,53 @@ class TextObject(CheapTotalOrdering):
     ####################
     # Public functions #
     ####################
+    def child_end_moved(self, child, old_end, new_end):
+        debug("self: %r, child: %r, old_end: %r, new_end: %r" % (self, child, old_end, new_end))
+        delta = new_end - old_end
+
+        def __move_col(obj):
+            if obj.line == new_end.line and obj.col >= old_end.col:
+                obj.col += delta.col
+
+        if delta.line == 0:
+            __move_col(self._end)
+            for c in self._childs:
+                if c == child: continue
+                __move_col(c._start)
+                __move_col(c._end)
+        else:
+            assert(0)
+
     def edited(self, cmds):
         debug("begin: self.current_text: %r" % (self.current_text))
+        debug("self._start: %r, self._end: %r" % (self._start, self._end))
         for cmd in cmds:
             debug("cmd: %r" % (cmd,))
             ctype, line, col, char = cmd
             assert(char != '\n')
 
-            def __move_col(obj, delta):
-                if obj.line == line and obj.col >= col:
-                    obj.col += delta
+            def __move_col_end(obj, delta):
+                end = obj.abs_end
+                if end.line == line and end.col >= col:
+                    obj._end.col += delta
+            def __move_col_start(obj, delta):
+                start = obj.abs_start
+                if start.line == line and start.col > col:
+                    obj._start.col += delta
 
             pos = Position(line, col)
             delta = 1 if "I" == ctype else -1
             if pos in self.abs_span:
-                __move_col(self._end, delta)
+                __move_col_end(self, delta)
 
                 for c in self._childs:
-                    __move_col(c._start, delta)
-                    __move_col(c._end, delta)
+                    debug("b4c: %r" % (c))
+                    __move_col_start(c, delta)
+                    __move_col_end(c, delta)
+                    debug("afc: %r" % (c))
 
         debug("end: self.current_text: %r" % (self.current_text))
+        debug("self._start: %r, self._end: %r" % (self._start, self._end))
 
 
     def update(self):
@@ -791,7 +835,7 @@ class SnippetInstance(TextObject):
 
         _TOParser(self, initial_text, indent).parse(True)
 
-        if not isinstance(parent, TabStop):
+        if not isinstance(parent, TabStop): # TODO: these lines are likely not needed
             self.update()
 
     def __repr__(self):

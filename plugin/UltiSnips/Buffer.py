@@ -45,8 +45,6 @@ class TextBuffer(Buffer):
         new_end = self.calc_end(start)
 
         if len(self._lines) == 1:
-            if not self._lines[0]:
-                return new_end
             buf[start.line] = make_suitable_for_vim(buf[start.line][:start.col] + self._lines[0] + buf[start.line][end.col:])
         else:
             end_cache = buf[start.line][end.col:]
