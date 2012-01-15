@@ -39,7 +39,7 @@ def edit_script(a, b):
                 d[cost].append((y+1,x+1, nline, ncol, what))
             else:
                 if x < len(a):
-                    d[cost + 1].append((y,x+1, nline, ncol, what + (("D",nline, ncol),) ))
+                    d[cost + 1].append((y,x+1, nline, ncol, what + (("D",nline, ncol, a[x]),) ))
                 if y < len(b):
                     oline, ocol = nline, ncol
                     ncol += 1

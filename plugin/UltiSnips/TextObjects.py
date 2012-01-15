@@ -16,7 +16,9 @@ from UltiSnips.Lexer import tokenize, EscapeCharToken, VisualToken, \
     VimLCodeToken, ShellCodeToken
 from UltiSnips.Util import IndentUtil
 
-__all__ = [ "Mirror", "Transformation", "SnippetInstance", "StartMarker" ]
+__all__ = [ "Mirror", "Transformation", "SnippetInstance" ]
+
+from debug import debug
 
 ###########################################################################
 #                              Helper class                               #
@@ -192,14 +194,15 @@ class TextObject(CheapTotalOrdering):
     def __init__(self, parent, token, end = None, initial_text = ""):
         self._parent = parent
 
+        ct = None
         if end is not None: # Took 4 arguments
             self._start = token
             self._end = end
-            self._current_text = TextBuffer(initial_text)
+            ct = TextBuffer(initial_text)
         else: # Initialize from token
             self._start = token.start
             self._end = token.end
-            self._current_text = TextBuffer(token.initial_text)
+            ct = TextBuffer(token.initial_text)
 
         self._childs = []
         self._tabstops = {}
@@ -209,26 +212,29 @@ class TextObject(CheapTotalOrdering):
 
         self._cts = 0
 
+        debug("self._start: %r, self._end: %r" % (self._start, self._end))
+        debug("ct: %r" % (ct))
+        self._end = ct.to_vim(self._start, self._end)
+
     def __cmp__(self, other):
         return self._start.__cmp__(other._start)
 
     ##############
     # PROPERTIES #
     ##############
-    def current_text():
-        def fget(self):
-            return as_unicode(self._current_text)
-        def fset(self, text):
-            self._current_text = TextBuffer(text)
+    @property
+    def current_text(self):
+        abs_span = self.abs_span
+        buf = vim.current.buffer
 
-            # All our childs are set to "" so they
-            # do no longer disturb anything that mirrors it
-            for c in self._childs:
-                c.current_text = ""
-            self._childs = []
-            self._tabstops = {}
-        return locals()
-    current_text = property(**current_text())
+        if abs_span.start.line == abs_span.end.line:
+            return as_unicode(buf[abs_span.start.col:abs_span.end.col])
+        else:
+            lines = []
+            lines.append(buf[abs_span.start.line][abs_span.col:])
+            lines.extend(buf[abs_span.start.line+1:abs_span.end.line])
+            line.append(buf[aps_span.end.line][:abs_span.end.col])
+            return as_unicode('\n'.join(lines))
 
     @property
     def current_tabstop(self):
@@ -276,6 +282,29 @@ class TextObject(CheapTotalOrdering):
     ####################
     # Public functions #
     ####################
+    def edited(self, cmds):
+        debug("begin: self.current_text: %r" % (self.current_text))
+        for cmd in cmds:
+            debug("cmd: %r" % (cmd,))
+            ctype, line, col, char = cmd
+            assert(char != '\n')
+
+            def __move_col(obj, delta):
+                if obj.line == line and obj.col >= col:
+                    obj.col += delta
+
+            pos = Position(line, col)
+            delta = 1 if "I" == ctype else -1
+            if pos in self.abs_span:
+                __move_col(self._end, delta)
+
+                for c in self._childs:
+                    __move_col(c._start, delta)
+                    __move_col(c._end, delta)
+
+        debug("end: self.current_text: %r" % (self.current_text))
+
+
     def update(self):
         def _update_childs(childs):
             for idx,c in childs:
@@ -291,16 +320,16 @@ class TextObject(CheapTotalOrdering):
                 self._move_textobjects_behind(c.start, oldend, moved_lines,
                             moved_cols, idx)
 
-        _update_childs((idx, c) for idx, c in enumerate(self._childs) if isinstance(c, TabStop))
-        _update_childs((idx, c) for idx, c in enumerate(self._childs) if not isinstance(c, TabStop))
+        # _update_childs((idx, c) for idx, c in enumerate(self._childs) if isinstance(c, TabStop))
+        # _update_childs((idx, c) for idx, c in enumerate(self._childs) if not isinstance(c, TabStop))
 
-        self._do_update()
+        # self._do_update()
 
-        new_end = self._current_text.calc_end(self._start)
+        # new_end = self._current_text.calc_end(self._start)
 
-        self._end = new_end
+        # self._end = new_end
 
-        return new_end
+        # return new_end
 
     def _get_next_tab(self, no):
         if not len(self._tabstops.keys()):
@@ -407,16 +436,6 @@ class EscapedChar(TextObject):
     This is a base class without functionality just to mark it in the code.
     """
     pass
-
-class StartMarker(TextObject):
-    """
-    This class only remembers it's starting position. It is used to
-    transform relative values into absolute position values in the vim
-    buffer
-    """
-    def __init__(self, start):
-        end = Position(start.line, start.col)
-        TextObject.__init__(self, None, start, end)
 
 
 class Mirror(TextObject):
@@ -745,9 +764,10 @@ class TabStop(TextObject):
         return self._no
     no = property(no)
 
+    # TODO: none of the _repr_ must access _current_text
     def __repr__(self):
         return "TabStop(%s -> %s, %s)" % (self._start, self._end,
-            repr(self._current_text))
+            repr(self.current_text))
 
 class SnippetInstance(TextObject):
     """

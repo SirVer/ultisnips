@@ -421,7 +421,7 @@ class Snippet(object):
         return self._matched
     matched = property(matched)
 
-    def launch(self, text_before, visual_content, parent, start, end = None):
+    def launch(self, text_before, visual_content, parent, start, end):
         indent = self._INDENT.match(text_before).group(0)
         lines = (self._v + "\n").splitlines()
         ind_util = IndentUtil()
@@ -443,11 +443,14 @@ class Snippet(object):
         v = os.linesep.join(v)
 
         if parent is None:
-            return SnippetInstance(StartMarker(start), indent, v, None, None, visual_content = visual_content,
+            si = SnippetInstance(None, indent, v, start, end, visual_content = visual_content,
                     last_re = self._last_re, globals = self._globals)
         else:
-            return SnippetInstance(parent, indent, v, start, end, visual_content,
+            si = SnippetInstance(parent, indent, v, start, end, visual_content,
                     last_re = self._last_re, globals = self._globals)
+
+        return si
+
 
 class VimState(object):
     def __init__(self):
@@ -799,70 +802,18 @@ class SnippetManager(object):
 
     @err_to_scratch_buffer
     def cursor_moved(self):
+        self._check_if_still_inside_snippet()
         cb = as_unicode('\n'.join(vim.current.buffer))
-        rv = edit_distance.edit_script(self._lvb, cb)
-        # debug("rv: %r" % (rv,))
+        if len(self._csnippets):
+            debug("self._lvb: %r, cb: %r" % (self._lvb, cb))
+            rv = edit_distance.edit_script(self._lvb, cb)
+            self._csnippets[0].edited(rv)
+
+            # debug("rv: %r" % (rv,))
         self._lvb = cb
         return
         self._vstate.update()
 
-        if not self._vstate.buf_changed and not self._expect_move_wo_change:
-            self._check_if_still_inside_snippet()
-
-        if not self._ctab:
-            return
-
-        if self._vstate.buf_changed and self._ctab:
-            # Detect a carriage return
-            if self._vstate.moved.col <= 0 and self._vstate.moved.line == 1:
-                # Multiple things might have happened: either the user entered
-                # a newline character or pasted some text which means we have
-                # to copy everything he entered on the last line and keep the
-                # indent vim chose for this line.
-                lline = as_unicode(vim.current.buffer[self._vstate.ppos.line])
-
-                # Another thing that might have happened is that a word
-                # wrapped, in this case the last line is shortened and we must
-                # delete what Vim deleted there
-                line_was_shortened = len(self._vstate.last_line) > len(lline)
-
-                # Another thing that might have happened is that vim has
-                # adjusted the indent of the last line and therefore the line
-                # effectively got longer. This means a newline was entered and
-                # we quite definitively do not want the indent that vim added
-                line_was_lengthened = len(lline) > len(self._vstate.last_line)
-
-                user_didnt_enter_newline = len(lline) != self._vstate.ppos.col
-                cline = as_unicode(vim.current.buffer[self._vstate.pos.line])
-                if line_was_lengthened:
-                    this_entered = vim.current.line[:self._vstate.pos.col]
-                    self._chars_entered('\n' + cline + this_entered, 1)
-                if line_was_shortened and user_didnt_enter_newline:
-                    nchars_deleted_in_lline = self._vstate.ppos.col - len(lline)
-                    self._backspace(nchars_deleted_in_lline)
-                    nchars_wrapped_from_lline_after_cursor = \
-                            len(self._vstate.last_line) - self._vstate.ppos.col
-                    self._chars_entered('\n' + cline
-                        [:len(cline)-nchars_wrapped_from_lline_after_cursor], 1)
-                else:
-                    pentered = lline[self._vstate.ppos.col:]
-                    this_entered = vim.current.line[:self._vstate.pos.col]
-
-                    self._chars_entered(pentered + '\n' + this_entered)
-            elif self._vstate.moved.line == 0 and self._vstate.moved.col<0:
-                # Some deleting was going on
-                self._backspace(-self._vstate.moved.col)
-            elif self._vstate.moved.line < 0:
-                # Backspace over line end
-                self._backspace(1)
-            else:
-                line = as_unicode(vim.current.line)
-
-                chars = line[self._vstate.pos.col - self._vstate.moved.col:
-                             self._vstate.pos.col]
-                self._chars_entered(chars)
-
-        self._expect_move_wo_change = False
 
     @err_to_scratch_buffer
     def entered_insert_mode(self):
@@ -927,9 +878,12 @@ class SnippetManager(object):
 
     def _jump(self, backwards = False):
         jumped = False
+        debug("self._cs: %r" % (self._cs))
         if self._cs:
             self._expect_move_wo_change = True
             self._ctab = self._cs.select_next_tab(backwards)
+            debug("self._ctab: %r" % (self._ctab))
+            debug("self._ctab.abs_span: %r" % (self._ctab.abs_span))
             if self._ctab:
                 self._vstate.select_span(self._ctab.abs_span)
                 self._span_selected = self._ctab.abs_span
@@ -1065,7 +1019,8 @@ class SnippetManager(object):
             si = snippet.launch(text_before, self._visual_content, self._ctab, start, end)
             self._visual_content = ""
 
-            self._update_vim_buffer()
+
+            # self._update_vim_buffer()
 
             self._csnippets.append(si)
             self._jump()
@@ -1073,11 +1028,15 @@ class SnippetManager(object):
             self._vb = VimBuffer(text_before, after)
 
             start = Position(lineno-1, len(text_before))
-            self._csnippets.append(snippet.launch(text_before, self._visual_content, None, start))
+            end = Position(lineno-1, len(before))
+            self._csnippets.append(snippet.launch(text_before, self._visual_content, None, start, end))
             self._visual_content = ""
 
-            self._vb.replace_lines(lineno-1, lineno-1,
-                       self._cs._current_text)
+            self._lvb = as_unicode('\n'.join(vim.current.buffer))
+            debug("in launch: self._lvb: %r" % (self._lvb))
+
+            #self._vb.replace_lines(lineno-1, lineno-1,
+                       #self._cs._current_text)
 
             self._jump()
 
@@ -1137,15 +1096,15 @@ class SnippetManager(object):
                         self._span_selected.end.line
             self._span_selected = None
 
-            self._update_vim_buffer(moved + del_more_lines)
+            # self._update_vim_buffer(moved + del_more_lines)
         else:
             self._ctab.current_text += chars
-            self._update_vim_buffer(del_more_lines)
+            # self._update_vim_buffer(del_more_lines)
 
 
     def _backspace(self, count):
         self._ctab.current_text = self._ctab.current_text[:-count]
-        self._update_vim_buffer()
+        # self._update_vim_buffer()
 
     def _update_vim_buffer(self, del_more_lines = 0):
         if not len(self._csnippets):

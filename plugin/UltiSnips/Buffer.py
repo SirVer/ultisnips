@@ -37,6 +37,25 @@ class TextBuffer(Buffer):
             new_end = Position(start.line + len(text)-1, len(text[-1]))
         return new_end
 
+    def to_vim(self, start, end):
+        assert(start.line == end.line) # TODO
+
+        buf = vim.current.buffer
+
+        new_end = self.calc_end(start)
+
+        if len(self._lines) == 1:
+            if not self._lines[0]:
+                return new_end
+            buf[start.line] = make_suitable_for_vim(buf[start.line][:start.col] + self._lines[0] + buf[start.line][end.col:])
+        else:
+            end_cache = buf[start.line][end.col:]
+            buf[start.line] = make_suitable_for_vim(buf[start.line][:start.col] + self._lines[0])
+            buf[start.line+1:start.line+1] = self._lines[1:-1]
+            buf[new_end.line:new_end.line] = [ make_suitable_for_vim(self._lines[-1] + end_cache) ]
+
+        return new_end
+
     def replace_text( self, start, end, content ):
         first_line = self[start.line][:start.col]
         last_line = self[end.line][end.col:]

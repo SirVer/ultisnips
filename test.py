@@ -426,7 +426,6 @@ class TabStopSimpleReplaceEndingWithNewline_ExceptCorrectResult(_VimTest):
     keys = "hallo" + EX + "\nAnd more"
     wanted = "Hallo Welt\n\nAnd more"
 
-
 class ExitTabStop_ExceptCorrectResult(_VimTest):
     snippets = ("echo", "$0 run")
     keys = "echo" + EX + "test"
@@ -651,6 +650,13 @@ class TabStop_Multiline_DelFirstOverwriteSecond_Overwrite(_VimTest):
     snippets = ("test", "hi $1 $2 ${1:first line\nsecond line} ${2:Hi} world" )
     keys = "test" + EX + BS + JF + "Nothing"
     wanted = "hi  Nothing  Nothing world"
+
+class TabStopNavigatingInInsertModeSimple_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "Hallo ${1:WELT} ups")
+    keys = "hallo" + EX + "welt" + 2*ARR_L + "hips" + JF + "end"
+    wanted = "hallo wehipslt upsend"
+
+
 
 ###########################
 # ShellCode Interpolation #
