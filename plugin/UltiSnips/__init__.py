@@ -791,7 +791,7 @@ class SnippetManager(object):
             debug("rv: %r" % (rv,))
             cv = edit_distance.compactify(rv)
             debug("cv: %r" % (cv))
-            self._csnippets[0].edited(rv)
+            self._csnippets[0].edited(cv)
 
             # debug("rv: %r" % (rv,))
         self._lvb = cb

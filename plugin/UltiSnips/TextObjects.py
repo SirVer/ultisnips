@@ -227,13 +227,17 @@ class TextObject(CheapTotalOrdering):
     def initial_replace(self):
         ct = self._initial_text # TODO: Initial Text is nearly unused.
         debug("self._start: %r, self._end: %r" % (self._start, self._end))
+        debug("self.abs_start: %r, self.abs_end: %r" % (self.abs_start, self.abs_end))
         debug("ct: %r" % (ct))
         old_end = self.abs_end
         ct.to_vim(self.abs_start, self.abs_end) # TODO: to vim returns something unused
+        debug("self.abs_end: %r" % (self.abs_end))
         self._end = ct.calc_end(self._start)
+        debug("self.abs_start: %r, self.abs_end: %r" % (self.abs_start, self.abs_end))
         if self.abs_end != old_end:
-            if self._parent is not None:
-                self._parent.child_end_moved(old_end, self.abs_end - old_end, set((self,)))
+            exclude = set(c for c in self._childs)
+            exclude.add(self)
+            self.child_end_moved(old_end, self.abs_end - old_end, exclude)
 
     def __cmp__(self, other):
         return self._start.__cmp__(other._start)
@@ -320,18 +324,19 @@ class TextObject(CheapTotalOrdering):
 
         if self not in skip:
             _move_end(self)
+
         for c in self._childs:
             if c in skip: continue
             _move_start(c)
             _move_end(c)
 
-        for c in self._childs: # TODO: is this needed?
-            if c.abs_start == self.abs_start and (c._start == c._end):
-                debug("Deleting Child: c: %r" % (c))
-                self._del_child(c) # TODO: What about mirrors?
+        if self._parent and self._parent not in skip:
+            self._parent.child_end_moved(sp, diff, set((self,)))
+
 
     def _do_edit(self, cmd):
         debug("self: %r, cmd: %r" % (self, cmd))
+        debug("self._childs: %r" % (self._childs))
         def __del_move_col_end(obj):
             end = obj.abs_end
             if end.line == line and end.col > col:
@@ -352,50 +357,46 @@ class TextObject(CheapTotalOrdering):
                 obj._start.col += 1
 
         ctype, line, col, char = cmd
-        assert(char != '\n')
+        assert('\n' not in char)
         pos = Position(line, col)
 
+        to_kill = set()
         for c in self._childs:
-            abs_span = c.abs_span
-            if pos in abs_span:
-                if c._do_edit(cmd):
-                    return True
+            abs_start = c.abs_start
+            abs_end = c.abs_end
+
+            if ctype == "D":
+                end_pos = pos + Position(0, len(char))
+                # TODO: char is no longer true -> Text
+                # Case: this deletion removes the child
+                if (pos <= abs_start and end_pos > abs_end):
+                    to_kill.add(c)
+                # Case: this edit command is completely for the child
+                elif (abs_start <= pos <= abs_end) and (abs_start <= end_pos <= abs_end):
+                    c._do_edit(cmd)
+                    return
+            if ctype == "I":
+                if (abs_start <= pos <= abs_end):
+                    c._do_edit(cmd)
+                    return
+        for c in to_kill:
+            debug("Kill c: %r" % (c))
+            self._del_child(c)
 
         # We have to handle this ourselves
-        if ctype == "D":
-            if self._start == self._end:
-                self._parent._del_child(self)
-                return False
-            oe = self.abs_end
-            __del_move_col_end(self)
+        if ctype == "D": # TODO: code duplication
+            assert(self.abs_start != self.abs_end) # Makes no sense to delete in empty textobject
 
-            for c in self._childs:
-                debug("b4c: %r" % (c))
-                __del_move_col_start(c)
-                __del_move_col_end(c)
-                debug("afc: %r" % (c))
-            ne = self.abs_end
+            delta = Position(0, -len(char))
+            self._end += delta
 
-            if self._parent and oe != ne:
-                self._parent.child_end_moved(oe, ne - oe, set((self,)))
+            self.child_end_moved(self.abs_end, delta, set((self,)))
         else:
-            oe = self.abs_end
-            __ins_move_col_end(self)
+            old_end = self.abs_end
+            delta = Position(0, len(char))
+            self._end += delta
 
-            for c in self._childs:
-                debug("b4c: %r" % (c))
-                __ins_move_col_start(c)
-                __ins_move_col_end(c)
-                debug("afc: %r" % (c))
-
-            ne = self.abs_end
-            if self._parent and oe != ne:
-                self._parent.child_end_moved(oe, ne - oe, set((self,)))
-
-        for c in self._childs: # TODO: Code duplicate
-            if c.abs_start == self.abs_start and (c._start == c._end):
-                debug("Deleting Child: c: %r" % (c))
-                self._del_child(c) # TODO: What about mirrors?
+            self.child_end_moved(old_end, delta, set((self,)))
 
         return True
 

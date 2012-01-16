@@ -4,7 +4,6 @@
 import heapq # TODO: overkill. Bucketing is better
 from collections import defaultdict
 import sys
-from debug import debug
 
 class GridPoint(object):
     """Docstring for GridPoint """
@@ -29,34 +28,33 @@ def edit_script(a, b):
     cost = 0
     while True:
         while len(d[cost]):
-            x, y, nline, ncol, what = d[cost].pop()
+            x, y, line, col, what = d[cost].pop()
 
             if x == len(a) and y == len(b):
                 return what
 
-            while x < len(a) and y < len(b) and a[x] == b[y]:
-                ncol += 1
+            if x < len(a) and y < len(b) and a[x] == b[y]:
+                ncol = col + 1
+                nline = line
                 if a[x] == '\n':
                     ncol = 0
-                    nline += 1
-                if seen[x,y] > cost:
+                    nline +=1
+                if seen[x+1,y+1] > cost:
                     d[cost].append((x+1,y+1, nline, ncol, what))
-                    seen[x,y] = cost
-                x += 1
-                y += 1
-            if x < len(a):
-                if seen[x+1,y] > cost + 1:
-                    seen[x+1,y] = cost + 1
-                    d[cost + 1].append((x+1,y, nline, ncol, what + (("D",nline, ncol, a[x]),) ))
+                    seen[x+1,y+1] = cost
             if y < len(b):
-                oline, ocol = nline, ncol
-                ncol += 1
+                ncol = col + 1
+                nline = line
                 if b[y] == '\n':
                     ncol = 0
                     nline += 1
                 if seen[x,y+1] > cost + 1:
                     seen[x,y+1] = cost + 1
-                    d[cost + 1].append((x,y+1, nline, ncol, what + (("I", oline, ocol,b[y]),)))
+                    d[cost + 1].append((x,y+1, nline, ncol, what + (("I", line, col,b[y]),)))
+            if x < len(a):
+                if seen[x+1,y] > cost + 1:
+                    seen[x+1,y] = cost + 1
+                    d[cost + 1].append((x+1,y, line, col, what + (("D",line, col, a[x]),) ))
         cost += 1
 
 def compactify(es):
@@ -104,6 +102,10 @@ class TestLotsaNewlines(_Base, unittest.TestCase):
 class TestCrash(_Base, unittest.TestCase):
     a = 'hallo Blah mitte=sdfdsfsd\nhallo kjsdhfjksdhfkjhsdfkh mittekjshdkfhkhsdfdsf'
     b = 'hallo Blah mitte=sdfdsfsd\nhallo b mittekjshdkfhkhsdfdsf'
+
+class TestRealLife(_Base, unittest.TestCase):
+    a = 'hallo End Beginning'
+    b = 'hallo End t'
     # def test_all_match(self):
         # rv = edit_script("abcdef", "abcdef")
         # self.assertEqual("MMMMMM", rv)

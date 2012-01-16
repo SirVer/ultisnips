@@ -563,6 +563,10 @@ class TabStopSimpleReplace_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo ${0:End} ${1:Beginning}")
     keys = "hallo" + EX + "na" + JF + "Du Nase"
     wanted = "hallo Du Nase na"
+class TabStopSimpleReplaceReversed_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo ${1:End} ${0:Beginning}")
+    keys = "hallo" + EX + "na" + JF + "Du Nase"
+    wanted = "hallo na Du Nase"
 class TabStopSimpleReplaceSurrounded_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo ${0:End} a small feed")
     keys = "hallo" + EX + "Nase"
@@ -719,7 +723,7 @@ class TabStop_TSInDefaultText_ZeroLengthNested_Overwrite(_VimTest):
     keys = "test" + EX + JF + "ups" + JF + "End"
     wanted = """haupsblEnd"""
 
-
+# TODO: Test for Python where initial text is longer than python code. Might lead to problems
 ##class TabStop_TSInDefaultNested_OverwriteOneJumpBackToOther(_VimTest):
 ##    snippets = ("test", "hi ${1:this ${2:second ${3:third}}} $4")
 ##    keys = "test" + EX + JF + "Hallo" + JF + "Ende"
