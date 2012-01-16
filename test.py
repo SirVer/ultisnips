@@ -529,7 +529,7 @@ class TabStopTestJumpingRLExampleWithZeroTab_ExceptCorrectResult(_VimTest):
     keys = "test" + EX + JF + "Blah"
     wanted = "each_byte { |byte| Blah }"
 
-class TestJumpingDontJumpToEndIfThereIsTabZero_ExceptCorrectResult(_VimTest):
+class TabStopTestJumpingDontJumpToEndIfThereIsTabZero_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo $0 $1")
     keys = "hallo" + EX + "Test" + JF + "Hi" + JF + JF + "du"
     wanted = "hallo Hidu Test"

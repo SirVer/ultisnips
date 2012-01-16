@@ -3,6 +3,7 @@
 
 import heapq # TODO: overkill. Bucketing is better
 from collections import defaultdict
+import sys
 
 class GridPoint(object):
     """Docstring for GridPoint """
@@ -20,44 +21,51 @@ class GridPoint(object):
 
 def edit_script(a, b):
     d = defaultdict(list)
+    seen = defaultdict(lambda: sys.maxint)
 
     d[0] = [ (0,0,0,0, ()) ]
 
     cost = 0
     while True:
         while len(d[cost]):
-            y, x, nline, ncol, what = d[cost].pop()
+            x, y, nline, ncol, what = d[cost].pop()
 
             if x == len(a) and y == len(b):
                 return what
 
-            if x < len(a) and y < len(b) and a[x] == b[y]:
+            while x < len(a) and y < len(b) and a[x] == b[y]:
                 ncol += 1
                 if a[x] == '\n':
                     ncol = 0
                     nline += 1
-                d[cost].append((y+1,x+1, nline, ncol, what))
-            else:
-                if x < len(a):
-                    d[cost + 1].append((y,x+1, nline, ncol, what + (("D",nline, ncol, a[x]),) ))
-                if y < len(b):
-                    oline, ocol = nline, ncol
-                    ncol += 1
-                    if b[y] == '\n':
-                        ncol = 0
-                        nline += 1
-                    d[cost + 1].append((y+1,x, nline, ncol, what + (("I", oline, ocol,b[y]),)))
+                if seen[x,y] > cost:
+                    d[cost].append((x+1,y+1, nline, ncol, what))
+                    seen[x,y] = cost
+                x += 1
+                y += 1
+            if x < len(a):
+                if seen[x+1,y] > cost + 1:
+                    seen[x+1,y] = cost + 1
+                    d[cost + 1].append((x+1,y, nline, ncol, what + (("D",nline, ncol, a[x]),) ))
+            if y < len(b):
+                oline, ocol = nline, ncol
+                ncol += 1
+                if b[y] == '\n':
+                    ncol = 0
+                    nline += 1
+                if seen[x,y+1] > cost + 1:
+                    seen[x,y+1] = cost + 1
+                    d[cost + 1].append((x,y+1, nline, ncol, what + (("I", oline, ocol,b[y]),)))
         cost += 1
 
 def transform(a, cmds):
     buf = a.split("\n")
 
     for cmd in cmds:
-        if cmd[0] == "D":
-            line, col = cmd[1:]
+        ctype, line, col, char = cmd
+        if ctype == "D":
             buf[line] = buf[line][:col] + buf[line][col+1:]
-        elif cmd[0] == "I":
-            line, col, char = cmd[1:]
+        elif ctype == "I":
             buf[line] = buf[line][:col] + char + buf[line][col:]
         buf = '\n'.join(buf).split('\n')
     return '\n'.join(buf)
@@ -80,6 +88,9 @@ class TestAllMatch(_Base, unittest.TestCase):
 class TestLotsaNewlines(_Base, unittest.TestCase):
     a, b = "Hello", "Hello\nWorld\nWorld\nWorld"
 
+class TestCrash(_Base, unittest.TestCase):
+    a = 'hallo Blah mitte=sdfdsfsd\nhallo kjsdhfjksdhfkjhsdfkh mittekjshdkfhkhsdfdsf'
+    b = 'hallo Blah mitte=sdfdsfsd\nhallo b mittekjshdkfhkhsdfdsf'
     # def test_all_match(self):
         # rv = edit_script("abcdef", "abcdef")
         # self.assertEqual("MMMMMM", rv)

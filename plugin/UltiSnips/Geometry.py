@@ -57,7 +57,7 @@ class Span(object):
         self._e = end
 
     def __contains__(self, pos):
-        return self._s <= pos < self._e
+        return self._s <= pos <= self._e
 
     def start():
         def fget(self):

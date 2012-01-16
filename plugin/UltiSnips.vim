@@ -172,9 +172,6 @@ function! UltiSnips_MapKeys()
     exec "snoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <Esc>:call UltiSnips_JumpBackwards()<cr>"
     exec "inoremap <silent> " . g:UltiSnipsListSnippets . " <C-R>=UltiSnips_ListSnippets()<cr>"
     exec "snoremap <silent> " . g:UltiSnipsListSnippets . " <Esc>:call UltiSnips_ListSnippets()<cr>"
-
-    " Do not remap this.
-    snoremap <silent> <BS> <Esc>:exec g:_uspy "UltiSnips_Manager.backspace_while_selected()"<cr>
 endf
 
 function! UltiSnips_CursorMoved()

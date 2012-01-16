@@ -227,12 +227,12 @@ class TextObject(CheapTotalOrdering):
         ct = self._initial_text # TODO: Initial Text is nearly unused.
         debug("self._start: %r, self._end: %r" % (self._start, self._end))
         debug("ct: %r" % (ct))
-        old_end = self._end
+        old_end = self.abs_end
         ct.to_vim(self.abs_start, self.abs_end) # TODO: to vim returns something unused
         self._end = ct.calc_end(self._start)
-        if self._end != old_end:
+        if self.abs_end != old_end:
             if self._parent is not None:
-                self._parent.child_end_moved(self, old_end, self._end)
+                self._parent.child_end_moved(self, old_end, self.abs_end)
 
     def __cmp__(self, other):
         return self._start.__cmp__(other._start)
@@ -246,7 +246,7 @@ class TextObject(CheapTotalOrdering):
         buf = vim.current.buffer
 
         if abs_span.start.line == abs_span.end.line:
-            return as_unicode(buf[abs_span.start.col:abs_span.end.col])
+            return as_unicode(buf[abs_span.start.line][abs_span.start.col:abs_span.end.col])
         else:
             lines = []
             lines.append(buf[abs_span.start.line][abs_span.col:])
@@ -300,53 +300,92 @@ class TextObject(CheapTotalOrdering):
     ####################
     # Public functions #
     ####################
-    def child_end_moved(self, child, old_end, new_end):
+    def child_end_moved(self, child, old_end, new_end): # TODO: pretty wasteful, give index
         debug("self: %r, child: %r, old_end: %r, new_end: %r" % (self, child, old_end, new_end))
         delta = new_end - old_end
 
-        def __move_col(obj):
-            if obj.line == new_end.line and obj.col >= old_end.col:
-                obj.col += delta.col
+        def _move_col_start(obj):
+            if obj.abs_start.line == new_end.line and obj.abs_start.col >= old_end.col:
+                obj._start.col += delta.col
+        def _move_col_end(obj):
+            if obj.abs_end.line == new_end.line and obj.abs_end.col >= old_end.col:
+                obj._end.col += delta.col
 
         if delta.line == 0:
-            __move_col(self._end)
+            _move_col_end(self)
             for c in self._childs:
                 if c == child: continue
-                __move_col(c._start)
-                __move_col(c._end)
+                _move_col_start(c)
+                _move_col_end(c)
         else:
             assert(0)
 
+    def _do_edit(self, cmd):
+        debug("self: %r, cmd: %r" % (self, cmd))
+        def __del_move_col_end(obj):
+            end = obj.abs_end
+            if end.line == line and end.col > col:
+                obj._end.col -= 1
+            return obj._end
+        def __del_move_col_start(obj):
+            start = obj.abs_start
+            if start.line == line and start.col > col:
+                obj._start.col -= 1
+        def __ins_move_col_end(obj):
+            end = obj.abs_end
+            if end.line == line and end.col >= col:
+                obj._end.col += 1
+            return obj._end
+        def __ins_move_col_start(obj):
+            start = obj.abs_start
+            if start.line == line and start.col > col:
+                obj._start.col += 1
+
+        ctype, line, col, char = cmd
+        assert(char != '\n')
+        pos = Position(line, col)
+
+        for c in self._childs:
+            if pos in c.abs_span:
+                c._do_edit(cmd)
+                return
+        # We have to handle this ourselves
+        if ctype == "D":
+            oe = self.abs_end
+            __del_move_col_end(self)
+
+            for c in self._childs:
+                debug("b4c: %r" % (c))
+                __del_move_col_start(c)
+                __del_move_col_end(c)
+                debug("afc: %r" % (c))
+            ne = self.abs_end
+
+            if self._parent and oe != ne:
+                self._parent.child_end_moved(self, oe, ne)
+        else:
+            oe = self.abs_end
+            __ins_move_col_end(self)
+
+            for c in self._childs:
+                debug("b4c: %r" % (c))
+                __ins_move_col_start(c)
+                __ins_move_col_end(c)
+                debug("afc: %r" % (c))
+
+            ne = self.abs_end
+            if self._parent and oe != ne:
+                self._parent.child_end_moved(self, oe, ne)
+
+
     def edited(self, cmds):
         debug("begin: self.current_text: %r" % (self.current_text))
-        debug("self._start: %r, self._end: %r" % (self._start, self._end))
+        debug("self.abs_start: %r, self.abs_end: %r" % (self.abs_start, self.abs_end))
         for cmd in cmds:
-            debug("cmd: %r" % (cmd,))
-            ctype, line, col, char = cmd
-            assert(char != '\n')
-
-            def __move_col_end(obj, delta):
-                end = obj.abs_end
-                if end.line == line and end.col >= col:
-                    obj._end.col += delta
-            def __move_col_start(obj, delta):
-                start = obj.abs_start
-                if start.line == line and start.col > col:
-                    obj._start.col += delta
-
-            pos = Position(line, col)
-            delta = 1 if "I" == ctype else -1
-            if pos in self.abs_span:
-                __move_col_end(self, delta)
-
-                for c in self._childs:
-                    debug("b4c: %r" % (c))
-                    __move_col_start(c, delta)
-                    __move_col_end(c, delta)
-                    debug("afc: %r" % (c))
-
+            self._do_edit(cmd)
         debug("end: self.current_text: %r" % (self.current_text))
-        debug("self._start: %r, self._end: %r" % (self._start, self._end))
+        debug("self.abs_start: %r, self.abs_end: %r" % (self.abs_start, self.abs_end))
+        debug("self._childs: %r" % (self._childs))
 
 
     def update(self):
@@ -810,7 +849,7 @@ class TabStop(TextObject):
 
     # TODO: none of the _repr_ must access _current_text
     def __repr__(self):
-        return "TabStop(%s -> %s, %s)" % (self._start, self._end,
+        return "TabStop(%i, %s -> %s, %s)" % (self._no, self.abs_start, self.abs_end,
             repr(self.current_text))
 
 class SnippetInstance(TextObject):

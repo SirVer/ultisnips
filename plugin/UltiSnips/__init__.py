@@ -500,7 +500,7 @@ class VimState(object):
         self._cline = as_unicode(vim.current.buffer[line])
 
     def select_span(self, r):
-        self._unmap_select_mode_mapping()
+        # self._unmap_select_mode_mapping() # TODO: Bring this back!
 
         delta = r.end - r.start
         lineno, col = r.start.line, r.start.col
@@ -780,24 +780,6 @@ class SnippetManager(object):
                 continue
 
             sd.extends.append(p)
-
-
-    @err_to_scratch_buffer
-    def backspace_while_selected(self):
-        """
-        This is called when backspace was pressed while vim was in select
-        mode. For us this might mean that a TabStop was selected and it's
-        content should be deleted.
-        """
-        if self._cs and (self._span_selected is not None):
-            # This only happens when a default value is delted using backspace.
-            # This does not change the buffer at all, only moves the cursor.
-            self._vstate.update()
-            feedkeys(r"i")
-        else:
-            # We can't just pass <BS> through, because we took vim
-            # out of SELECT mode, so instead we reselect and replace
-            feedkeys(r"gvc")
 
     @err_to_scratch_buffer
     def cursor_moved(self):
