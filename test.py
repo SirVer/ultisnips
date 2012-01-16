@@ -469,88 +469,89 @@ class ParseSnippets_MultiWord_UnmatchedContainer(_PS_Base):
         UltiSnips: Invalid multiword trigger: '!inv snip/' in test_file(2)
         """).strip()
 
-class ParseSnippets_Global_Python(_PS_Base):
-    snippets_test_file = ("all", "test_file", r"""
-        global !p
-        def tex(ins):
-            return "a " + ins + " b"
-        endglobal
-
-        snippet ab
-        x `!p snip.rv = tex("bob")` y
-        endsnippet
-
-        snippet ac
-        x `!p snip.rv = tex("jon")` y
-        endsnippet
-        """)
-    keys = "ab" + EX + "\nac" + EX
-    wanted = "x a bob b y\nx a jon b y"
-
-class ParseSnippets_Global_Local_Python(_PS_Base):
-    snippets_test_file = ("all", "test_file", r"""
-global !p
-def tex(ins):
-    return "a " + ins + " b"
-endglobal
-
-snippet ab
-x `!p first = tex("bob")
-snip.rv = "first"` `!p snip.rv = first` y
-endsnippet
-        """)
-    keys = "ab" + EX
-    wanted = "x first a bob b y"
+## TODO
+## class ParseSnippets_Global_Python(_PS_Base):
+##     snippets_test_file = ("all", "test_file", r"""
+##         global !p
+##         def tex(ins):
+##             return "a " + ins + " b"
+##         endglobal
+## 
+##         snippet ab
+##         x `!p snip.rv = tex("bob")` y
+##         endsnippet
+## 
+##         snippet ac
+##         x `!p snip.rv = tex("jon")` y
+##         endsnippet
+##         """)
+##     keys = "ab" + EX + "\nac" + EX
+##     wanted = "x a bob b y\nx a jon b y"
+## 
+## class ParseSnippets_Global_Local_Python(_PS_Base):
+##     snippets_test_file = ("all", "test_file", r"""
+## global !p
+## def tex(ins):
+##     return "a " + ins + " b"
+## endglobal
+## 
+## snippet ab
+## x `!p first = tex("bob")
+## snip.rv = "first"` `!p snip.rv = first` y
+## endsnippet
+##         """)
+##     keys = "ab" + EX
+##     wanted = "x first a bob b y"
 # End: Snippet Definition Parsing  #}}}
 
-### Simple Expands  {{{#
-##class _SimpleExpands(_VimTest):
-##    snippets = ("hallo", "Hallo Welt!")
-##
-##class SimpleExpand_ExceptCorrectResult(_SimpleExpands):
-##    keys = "hallo" + EX
-##    wanted = "Hallo Welt!"
-##class SimpleExpandTwice_ExceptCorrectResult(_SimpleExpands):
-##    keys = "hallo" + EX + '\nhallo' + EX
-##    wanted = "Hallo Welt!\nHallo Welt!"
-##
-##class SimpleExpandNewLineAndBackspae_ExceptCorrectResult(_SimpleExpands):
-##    keys = "hallo" + EX + "\nHallo Welt!\n\n\b\b\b\b\b"
-##    wanted = "Hallo Welt!\nHallo We"
-##    def _options_on(self):
-##        self.send(":set backspace=eol,start\n")
-##    def _options_off(self):
-##        self.send(":set backspace=\n")
-##
-##class SimpleExpandTypeAfterExpand_ExceptCorrectResult(_SimpleExpands):
-##    keys = "hallo" + EX + "and again"
-##    wanted = "Hallo Welt!and again"
-##
-##class SimpleExpandTypeAndDelete_ExceptCorrectResult(_SimpleExpands):
-##    keys = "na du hallo" + EX + "and again\b\b\b\b\bblub"
-##    wanted = "na du Hallo Welt!and blub"
-##
-##class DoNotExpandAfterSpace_ExceptCorrectResult(_SimpleExpands):
-##    keys = "hallo " + EX
-##    wanted = "hallo " + EX
-##
-##class ExitSnippetModeAfterTabstopZero(_VimTest):
-##    snippets = ("test", "SimpleText")
-##    keys = "test" + EX + EX
-##    wanted = "SimpleText" + EX
-##
-##class ExpandInTheMiddleOfLine_ExceptCorrectResult(_SimpleExpands):
-##    keys = "Wie hallo gehts" + ESC + "bhi" + EX
-##    wanted = "Wie Hallo Welt! gehts"
-##class MultilineExpand_ExceptCorrectResult(_VimTest):
-##    snippets = ("hallo", "Hallo Welt!\nUnd Wie gehts")
-##    keys = "Wie hallo gehts" + ESC + "bhi" + EX
-##    wanted = "Wie Hallo Welt!\nUnd Wie gehts gehts"
-##class MultilineExpandTestTyping_ExceptCorrectResult(_VimTest):
-##    snippets = ("hallo", "Hallo Welt!\nUnd Wie gehts")
-##    wanted = "Wie Hallo Welt!\nUnd Wie gehtsHuiui! gehts"
-##    keys = "Wie hallo gehts" + ESC + "bhi" + EX + "Huiui!"
-### End: Simple Expands  #}}}
+# Simple Expands  {{{#
+class _SimpleExpands(_VimTest):
+    snippets = ("hallo", "Hallo Welt!")
+
+class SimpleExpand_ExceptCorrectResult(_SimpleExpands):
+    keys = "hallo" + EX
+    wanted = "Hallo Welt!"
+class SimpleExpandTwice_ExceptCorrectResult(_SimpleExpands):
+    keys = "hallo" + EX + '\nhallo' + EX
+    wanted = "Hallo Welt!\nHallo Welt!"
+
+class SimpleExpandNewLineAndBackspae_ExceptCorrectResult(_SimpleExpands):
+    keys = "hallo" + EX + "\nHallo Welt!\n\n\b\b\b\b\b"
+    wanted = "Hallo Welt!\nHallo We"
+    def _options_on(self):
+        self.send(":set backspace=eol,start\n")
+    def _options_off(self):
+        self.send(":set backspace=\n")
+
+class SimpleExpandTypeAfterExpand_ExceptCorrectResult(_SimpleExpands):
+    keys = "hallo" + EX + "and again"
+    wanted = "Hallo Welt!and again"
+
+class SimpleExpandTypeAndDelete_ExceptCorrectResult(_SimpleExpands):
+    keys = "na du hallo" + EX + "and again\b\b\b\b\bblub"
+    wanted = "na du Hallo Welt!and blub"
+
+class DoNotExpandAfterSpace_ExceptCorrectResult(_SimpleExpands):
+    keys = "hallo " + EX
+    wanted = "hallo " + EX
+
+class ExitSnippetModeAfterTabstopZero(_VimTest):
+    snippets = ("test", "SimpleText")
+    keys = "test" + EX + EX
+    wanted = "SimpleText" + EX
+
+class ExpandInTheMiddleOfLine_ExceptCorrectResult(_SimpleExpands):
+    keys = "Wie hallo gehts" + ESC + "bhi" + EX
+    wanted = "Wie Hallo Welt! gehts"
+class MultilineExpand_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "Hallo Welt!\nUnd Wie gehts")
+    keys = "Wie hallo gehts" + ESC + "bhi" + EX
+    wanted = "Wie Hallo Welt!\nUnd Wie gehts gehts"
+class MultilineExpandTestTyping_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "Hallo Welt!\nUnd Wie gehts")
+    wanted = "Wie Hallo Welt!\nUnd Wie gehtsHuiui! gehts"
+    keys = "Wie hallo gehts" + ESC + "bhi" + EX + "Huiui!"
+# End: Simple Expands  #}}}
 ### TabStop Tests  {{{#
 ##class TabStopSimpleReplace_ExceptCorrectResult(_VimTest):
 ##    snippets = ("hallo", "hallo ${0:End} ${1:Beginning}")

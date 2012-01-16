@@ -305,11 +305,25 @@ class TextObject(CheapTotalOrdering):
         delta = new_end - old_end
 
         def _move_col_start(obj):
-            if obj.abs_start.line == new_end.line and obj.abs_start.col >= old_end.col:
+            if obj.abs_start.line == old_end.line and obj.abs_start.col >= old_end.col:
                 obj._start.col += delta.col
         def _move_col_end(obj):
-            if obj.abs_end.line == new_end.line and obj.abs_end.col >= old_end.col:
+            if obj.abs_end.line == old_end.line and obj.abs_end.col >= old_end.col:
                 obj._end.col += delta.col
+
+        def _move_line_col_start(obj):
+            if obj.abs_start.line == old_end.line and obj.abs_start.col >= old_end.col:
+                obj._start.line += delta.line
+                obj._start.col += delta.col
+            elif obj.abs_start.line > old_end.line:
+                obj._start.line += delta.line
+
+        def _move_line_col_end(obj):
+            if obj.abs_end.line == old_end.line and obj.abs_end.col >= old_end.col:
+                obj._end.line += delta.line
+                obj._end.col += delta.col
+            elif obj.abs_end.line > old_end.line:
+                obj._end.line += delta.line
 
         if delta.line == 0:
             _move_col_end(self)
@@ -318,7 +332,11 @@ class TextObject(CheapTotalOrdering):
                 _move_col_start(c)
                 _move_col_end(c)
         else:
-            assert(0)
+            _move_line_col_end(self)
+            for c in self._childs:
+                if c == child: continue
+                _move_line_col_start(c)
+                _move_line_col_end(c)
 
     def _do_edit(self, cmd):
         debug("self: %r, cmd: %r" % (self, cmd))

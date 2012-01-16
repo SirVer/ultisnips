@@ -7,6 +7,8 @@ from UltiSnips.Compatibility import make_suitable_for_vim, as_unicode
 
 __all__ = [ "TextBuffer", "VimBuffer" ]
 
+from debug import debug
+
 class Buffer(object):
     def _replace(self, start, end, content, first_line, last_line):
         text = content[:]
@@ -38,19 +40,18 @@ class TextBuffer(Buffer):
         return new_end
 
     def to_vim(self, start, end):
-        assert(start.line == end.line) # TODO
-
         buf = vim.current.buffer
 
         new_end = self.calc_end(start)
 
-        if len(self._lines) == 1:
-            buf[start.line] = make_suitable_for_vim(buf[start.line][:start.col] + self._lines[0] + buf[start.line][end.col:])
-        else:
-            end_cache = buf[start.line][end.col:]
-            buf[start.line] = make_suitable_for_vim(buf[start.line][:start.col] + self._lines[0])
-            buf[start.line+1:start.line+1] = self._lines[1:-1]
-            buf[new_end.line:new_end.line] = [ make_suitable_for_vim(self._lines[-1] + end_cache) ]
+        before = buf[start.line][:start.col]
+        after = buf[end.line][end.col:]
+        lines = []
+        if len(self._lines):
+            lines.append(before + self._lines[0])
+            lines.extend(self._lines[1:])
+            lines[-1] += after
+        buf[start.line:end.line + 1] = make_suitable_for_vim(lines)
 
         return new_end
 
@@ -68,7 +69,7 @@ class TextBuffer(Buffer):
     def __str__(self):
         return '\n'.join(self._lines)
 
-class VimBuffer(Buffer):
+class VimBuffer(Buffer): # TODO: this should become obsolete
     def __init__(self, before, after):
         self._bf = before
         self._af = after
