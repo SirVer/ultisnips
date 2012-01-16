@@ -25,12 +25,17 @@ def edit_script(a, b):
 
     d[0] = [ (0,0,0,0, ()) ]
 
+    # TODO: needs some doku
     cost = 0
+    DI_COST = 1000 # len(a)+len(b) Fix this up
     while True:
         while len(d[cost]):
+            #sumarized = [ compactify(what) for c, x, line, col, what in d[cost] ] # TODO: not needed
+            #print "%r: %r" % (cost, sumarized)
             x, y, line, col, what = d[cost].pop()
 
-            if x == len(a) and y == len(b):
+            if a[x:] == b[y:]: ## TODO: try out is
+                #print "cost: %r" % (cost)
                 return what
 
             if x < len(a) and y < len(b) and a[x] == b[y]:
@@ -39,22 +44,22 @@ def edit_script(a, b):
                 if a[x] == '\n':
                     ncol = 0
                     nline +=1
-                if seen[x+1,y+1] > cost:
-                    d[cost].append((x+1,y+1, nline, ncol, what))
-                    seen[x+1,y+1] = cost
+                if seen[x+1,y+1] > cost + len(a) - x:
+                    d[cost + len(a) - x].append((x+1,y+1, nline, ncol, what)) # TODO: slow!
+                    seen[x+1,y+1] = cost + len(a) - x
             if y < len(b):
                 ncol = col + 1
                 nline = line
                 if b[y] == '\n':
                     ncol = 0
                     nline += 1
-                if seen[x,y+1] > cost + 1:
-                    seen[x,y+1] = cost + 1
-                    d[cost + 1].append((x,y+1, nline, ncol, what + (("I", line, col,b[y]),)))
+                if seen[x,y+1] > cost + DI_COST:
+                    seen[x,y+1] = cost + DI_COST
+                    d[cost + DI_COST].append((x,y+1, nline, ncol, what + (("I", line, col,b[y]),)))
             if x < len(a):
-                if seen[x+1,y] > cost + 1:
-                    seen[x+1,y] = cost + 1
-                    d[cost + 1].append((x+1,y, line, col, what + (("D",line, col, a[x]),) ))
+                if seen[x+1,y] > cost + DI_COST:
+                    seen[x+1,y] = cost + DI_COST
+                    d[cost + DI_COST].append((x+1,y, line, col, what + (("D",line, col, a[x]),) ))
         cost += 1
 
 def compactify(es):
@@ -87,25 +92,30 @@ import unittest
 class _Base(object):
     def runTest(self):
         es = edit_script(self.a, self.b)
+        print "compactify(es: %r" % (compactify(es))
         tr = transform(self.a, es)
         self.assertEqual(self.b, tr)
 
-class TestEmptyString(_Base, unittest.TestCase):
-    a, b = "", ""
+# class TestEmptyString(_Base, unittest.TestCase):
+    # a, b = "", ""
 
-class TestAllMatch(_Base, unittest.TestCase):
-    a, b = "abcdef", "abcdef"
+# class TestAllMatch(_Base, unittest.TestCase):
+    # a, b = "abcdef", "abcdef"
 
-class TestLotsaNewlines(_Base, unittest.TestCase):
-    a, b = "Hello", "Hello\nWorld\nWorld\nWorld"
+# class TestLotsaNewlines(_Base, unittest.TestCase):
+    # a, b = "Hello", "Hello\nWorld\nWorld\nWorld"
 
-class TestCrash(_Base, unittest.TestCase):
-    a = 'hallo Blah mitte=sdfdsfsd\nhallo kjsdhfjksdhfkjhsdfkh mittekjshdkfhkhsdfdsf'
-    b = 'hallo Blah mitte=sdfdsfsd\nhallo b mittekjshdkfhkhsdfdsf'
+# class TestCrash(_Base, unittest.TestCase):
+    # a = 'hallo Blah mitte=sdfdsfsd\nhallo kjsdhfjksdhfkjhsdfkh mittekjshdkfhkhsdfdsf'
+    # b = 'hallo Blah mitte=sdfdsfsd\nhallo b mittekjshdkfhkhsdfdsf'
 
-class TestRealLife(_Base, unittest.TestCase):
-    a = 'hallo End Beginning'
-    b = 'hallo End t'
+# class TestRealLife(_Base, unittest.TestCase):
+    # a = 'hallo End Beginning'
+    # b = 'hallo End t'
+
+class TestRealLife1(_Base, unittest.TestCase):
+    a = 'Vorne hallo Hinten'
+    b = 'Vorne hallo  Hinten'
     # def test_all_match(self):
         # rv = edit_script("abcdef", "abcdef")
         # self.assertEqual("MMMMMM", rv)

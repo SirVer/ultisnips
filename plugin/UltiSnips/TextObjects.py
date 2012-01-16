@@ -139,7 +139,7 @@ class _TOParser(object):
             m1 = Position(mark.line, mark.col)
             self._parent_to._add_tabstop(TabStop(self._parent_to, 0, mark, m1))
 
-        self._replace_initital_texts()
+        self._replace_initital_texts(seen_ts)
 
     #####################
     # Private Functions #
@@ -152,7 +152,8 @@ class _TOParser(object):
                     seen_ts[token.no] = ts
                     parent._add_tabstop(ts)
                 else:
-                    Mirror(parent, seen_ts[token.no], token)
+                    m = Mirror(parent, token)
+                    seen_ts[token.no].add_referencer(m)
 
     def _create_objects_with_links_to_tabs(self, all_tokens, seen_ts):
         for parent, token in all_tokens:
@@ -161,7 +162,7 @@ class _TOParser(object):
                     raise RuntimeError("Tabstop %i is not known but is used by a Transformation" % token.no)
                 Transformation(parent, seen_ts[token.no], token)
 
-    def _replace_initital_texts(self):
+    def _replace_initital_texts(self, seen_ts):
         def _do_it(obj):
             debug("In _do_it: obj: %r" % (obj))
             obj.initial_replace()
@@ -170,6 +171,9 @@ class _TOParser(object):
                 _do_it(c)
 
         _do_it(self._parent_to)
+
+        for ts in seen_ts.values():
+            ts.update_referencers()
 
     def _do_parse(self, all_tokens, seen_ts):
         tokens = list(tokenize(self._text, self._indent))
@@ -224,8 +228,8 @@ class TextObject(CheapTotalOrdering):
 
         self._cts = 0
 
-    def initial_replace(self):
-        ct = self._initial_text # TODO: Initial Text is nearly unused.
+    def initial_replace(self, gtc = None):
+        ct = gtc or self._initial_text # TODO: Initial Text is nearly unused.
         debug("self._start: %r, self._end: %r" % (self._start, self._end))
         debug("self.abs_start: %r, self.abs_end: %r" % (self.abs_start, self.abs_end))
         debug("ct: %r" % (ct))
@@ -555,16 +559,13 @@ class Mirror(TextObject):
     """
     A Mirror object mirrors a TabStop that is, text is repeated here
     """
-    def __init__(self, parent, ts, token):
-        TextObject.__init__(self, parent, token)
-
-        self._ts = ts
-
-    def _do_update(self):
-        self.current_text = self._ts.current_text
+    def new_text(self, tb):
+        debug("new_text, self: %r" % (self))
+        debug("self.abs_start: %r, self.abs_end: %r, self.current_text: %r" % (self.abs_start, self.abs_end, self.current_text))
+        self.initial_replace(tb)
 
     def __repr__(self):
-        return "Mirror(%s -> %s)" % (self._start, self._end)
+        return "Mirror(%s -> %s)" % (self.abs_start, self.abs_end)
 
 class Visual(TextObject):
     """
@@ -866,12 +867,34 @@ class TabStop(TextObject):
     comes to rest when the user taps through the Snippet.
     """
     def __init__(self, parent, token, start = None, end = None):
+        self._referencer = []
+
         if start is not None:
             self._no = token
             TextObject.__init__(self, parent, start, end)
         else:
             TextObject.__init__(self, parent, token)
             self._no = token.no
+
+        # debug("In Referencer: %r" % (r))
+        # for r in self._referencer:
+            # r.new_text(TextBuffer(self.current_text))
+
+
+    def _do_edit(self, *args, **kwargs):
+        TextObject._do_edit(self, *args, **kwargs)
+
+        self.update_referencers()
+
+    def update_referencers(self):
+        for r in self._referencer:
+            debug("r: %r" % (r))
+            debug("self.current_text: %r" % (self.current_text))
+            r.new_text(TextBuffer(self.current_text))
+
+    def add_referencer(self, r):
+        self._referencer.append(r)
+        self._referencer.sort()
 
     def no(self):
         return self._no
@@ -903,9 +926,6 @@ class SnippetInstance(TextObject):
         TextObject.__init__(self, parent, start, end, initial_text)
 
         _TOParser(self, initial_text, indent).parse(True)
-
-        if not isinstance(parent, TabStop): # TODO: these lines are likely not needed
-            self.update()
 
     def __repr__(self):
         return "SnippetInstance(%s -> %s)" % (self._start, self._end)

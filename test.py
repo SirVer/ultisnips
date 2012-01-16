@@ -640,11 +640,6 @@ class TabStopEscapingWhenSelectedNoCharTS_ECR(_VimTest):
     keys = "test" + EX + ESC + "0ihi"
     wanted = "hisnip "
 
-class TabStopUsingBackspaceToDeleteDefaultValue_ECR(_VimTest):
-    snippets = ("test", "snip ${1/.+/(?0:matched)/} ${1:default}")
-    keys = "test" + EX + BS
-    wanted = "snip  "
-
 class TabStopWithOneChar_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "nothing ${1:i} hups")
     keys = "hallo" + EX + "ship"
@@ -718,10 +713,26 @@ class TabStop_TSInDefaultTextRLExample_OverwriteSecondTabBackTwice(_VimTest):
             " allaway" + JF + "Third" + JF + "Last"
     wanted = """<div allaway>\n  Third Last\n</div>"""
 
-class TabStop_TSInDefaultText_ZeroLengthNested_Overwrite(_VimTest):
+class TabStop_TSInDefaultText_ZeroLengthNested_OverwriteSecond(_VimTest):
     snippets = ("test", """h${1:a$2b}l""")
     keys = "test" + EX + JF + "ups" + JF + "End"
     wanted = """haupsblEnd"""
+class TabStop_TSInDefaultText_ZeroLengthNested_OverwriteFirst(_VimTest):
+    snippets = ("test", """h${1:a$2b}l""")
+    keys = "test" + EX + "ups" + JF + "End"
+    wanted = """hupslEnd"""
+class TabStop_TSInDefaultText_ZeroLengthNested_OverwriteSecondJumpBackOverwrite(_VimTest):
+    snippets = ("test", """h${1:a$2b}l""")
+    keys = "test" + EX + JF + "longertext" + JB + "overwrite" + JF + "End"
+    wanted = """hoverwritelEnd"""
+class TabStop_TSInDefaultText_ZeroLengthNested_OverwriteSecondJumpBackAndForward(_VimTest):
+    snippets = ("test", """h${1:a$2b}l""")
+    keys = "test" + EX + JF + "longertext" + JB + JF + "overwrite" + JF + "End"
+    wanted = """haoverwriteblEnd"""
+class TabStop_TSInDefaultText_ZeroLengthNested_OverwriteSecondJumpBackAndForward1(_VimTest):
+    snippets = ("test", """h${1:a$2b}l""")
+    keys = "test" + EX + JF + "longertext" + JB + JF + JF + "End"
+    wanted = """halongertextblEnd"""
 
 # TODO: Test for Python where initial text is longer than python code. Might lead to problems
 ##class TabStop_TSInDefaultNested_OverwriteOneJumpBackToOther(_VimTest):
@@ -1142,46 +1153,46 @@ class TabStop_TSInDefaultText_ZeroLengthNested_Overwrite(_VimTest):
 ##    keys = "    test" + EX
 ##    wanted = "    hi 4 End"
 ### End: VimScript Interpolation  #}}}
-### Mirrors  {{{#
-##class TextTabStopTextAfterTab_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1 Hinten\n$1")
-##    keys = "test" + EX + "hallo"
-##    wanted = "hallo Hinten\nhallo"
-##class TextTabStopTextBeforeTab_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "Vorne $1\n$1")
-##    keys = "test" + EX + "hallo"
-##    wanted = "Vorne hallo\nhallo"
-##class TextTabStopTextSurroundedTab_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "Vorne $1 Hinten\n$1")
-##    keys = "test" + EX + "hallo test"
-##    wanted = "Vorne hallo test Hinten\nhallo test"
-##
-##class TextTabStopTextBeforeMirror_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1\nVorne $1")
-##    keys = "test" + EX + "hallo"
-##    wanted = "hallo\nVorne hallo"
-##class TextTabStopAfterMirror_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1\n$1 Hinten")
-##    keys = "test" + EX + "hallo"
-##    wanted = "hallo\nhallo Hinten"
-##class TextTabStopSurroundMirror_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1\nVorne $1 Hinten")
-##    keys = "test" + EX + "hallo welt"
-##    wanted = "hallo welt\nVorne hallo welt Hinten"
-##class TextTabStopAllSurrounded_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "ObenVorne $1 ObenHinten\nVorne $1 Hinten")
-##    keys = "test" + EX + "hallo welt"
-##    wanted = "ObenVorne hallo welt ObenHinten\nVorne hallo welt Hinten"
-##
-##class MirrorBeforeTabstopLeave_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1 ${1:this is it} $1")
-##    keys = "test" + EX
-##    wanted = "this is it this is it this is it"
-##class MirrorBeforeTabstopOverwrite_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1 ${1:this is it} $1")
-##    keys = "test" + EX + "a"
-##    wanted = "a a a"
-##
+# Mirrors  {{{#
+class TextTabStopTextAfterTab_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 Hinten\n$1")
+    keys = "test" + EX + "hallo"
+    wanted = "hallo Hinten\nhallo"
+class TextTabStopTextBeforeTab_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "Vorne $1\n$1")
+    keys = "test" + EX + "hallo"
+    wanted = "Vorne hallo\nhallo"
+class TextTabStopTextSurroundedTab_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "Vorne $1 Hinten\n$1")
+    keys = "test" + EX + "hallo test"
+    wanted = "Vorne hallo test Hinten\nhallo test"
+
+class TextTabStopTextBeforeMirror_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1\nVorne $1")
+    keys = "test" + EX + "hallo"
+    wanted = "hallo\nVorne hallo"
+class TextTabStopAfterMirror_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1\n$1 Hinten")
+    keys = "test" + EX + "hallo"
+    wanted = "hallo\nhallo Hinten"
+class TextTabStopSurroundMirror_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1\nVorne $1 Hinten")
+    keys = "test" + EX + "hallo welt"
+    wanted = "hallo welt\nVorne hallo welt Hinten"
+class TextTabStopAllSurrounded_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ObenVorne $1 ObenHinten\nVorne $1 Hinten")
+    keys = "test" + EX + "hallo welt"
+    wanted = "ObenVorne hallo welt ObenHinten\nVorne hallo welt Hinten"
+
+class MirrorBeforeTabstopLeave_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1:this is it} $1")
+    keys = "test" + EX
+    wanted = "this is it this is it this is it"
+class MirrorBeforeTabstopOverwrite_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1:this is it} $1")
+    keys = "test" + EX + "a"
+    wanted = "a a a"
+
 ##class TextTabStopSimpleMirrorMultiline_ExceptCorrectResult(_VimTest):
 ##    snippets = ("test", "$1\n$1")
 ##    keys = "test" + EX + "hallo"
@@ -1426,7 +1437,10 @@ class TabStop_TSInDefaultText_ZeroLengthNested_Overwrite(_VimTest):
 ##     snippets = ("test", "snip ${1/.+/(?0:matched)/} ${1:default}")
 ##     keys = "test" + EX + BS + "hallo"
 ##     wanted = "snip matched hallo"
-
+## class TransformationUsingBackspaceToDeleteDefaultValue_ECR(_VimTest):
+##     snippets = ("test", "snip ${1/.+/(?0:matched)/} ${1:default}")
+##     keys = "test" + EX + BS
+##     wanted = "snip  "
 ### End: Transformations  #}}}
 ### ${VISUAL}  {{{#
 ##class Visual_NoVisualSelection_Ignore(_VimTest):

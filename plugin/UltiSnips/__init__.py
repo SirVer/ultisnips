@@ -794,7 +794,7 @@ class SnippetManager(object):
             self._csnippets[0].edited(cv)
 
             # debug("rv: %r" % (rv,))
-        self._lvb = cb
+        self._lvb = as_unicode('\n'.join(vim.current.buffer))
         return
         self._vstate.update()
 
