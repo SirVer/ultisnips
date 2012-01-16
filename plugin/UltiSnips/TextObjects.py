@@ -331,8 +331,10 @@ class TextObject(CheapTotalOrdering):
 
         for c in self._childs:
             if c in skip: continue
+            debug("b4: c.abs_span: %r" % (c.abs_span))
             _move_start(c)
             _move_end(c)
+            debug("a4: c.abs_span: %r" % (c.abs_span))
 
         if self._parent and self._parent not in skip:
             self._parent.child_end_moved(sp, diff, set((self,)))
@@ -402,14 +404,22 @@ class TextObject(CheapTotalOrdering):
 
             self.child_end_moved(old_end, delta, set((self,)))
 
-        return True
-
-
     def edited(self, cmds):
         debug("begin: self.current_text: %r" % (self.current_text))
         debug("self.abs_start: %r, self.abs_end: %r" % (self.abs_start, self.abs_end))
         for cmd in cmds:
             self._do_edit(cmd)
+
+        # Update all referers # TODO: maybe in a function of its own
+        def _do_it(obj):
+            if isinstance(obj, TabStop):
+                obj.update_referencers()
+
+            for c in obj._childs:
+                _do_it(c)
+
+        _do_it(self)
+
         debug("end: self.current_text: %r" % (self.current_text))
         debug("self.abs_start: %r, self.abs_end: %r" % (self.abs_start, self.abs_end))
         debug("self._childs: %r" % (self._childs))
@@ -559,10 +569,18 @@ class Mirror(TextObject):
     """
     A Mirror object mirrors a TabStop that is, text is repeated here
     """
-    def new_text(self, tb):
+    def new_text(self, tb): # TODO: function has a stupid name
         debug("new_text, self: %r" % (self))
         debug("self.abs_start: %r, self.abs_end: %r, self.current_text: %r" % (self.abs_start, self.abs_end, self.current_text))
-        self.initial_replace(tb)
+        # TODO: initial replace does not need to take an argument
+        old_end = self.abs_end
+        tb.to_vim(self.abs_start, self.abs_end) # TODO: to vim returns something unused
+        debug("self.abs_end: %r" % (self.abs_end))
+        self._end = tb.calc_end(self._start)
+        debug("self.abs_start: %r, self.abs_end: %r" % (self.abs_start, self.abs_end))
+        if self.abs_end != old_end:
+            # TODO: child_end_moved is a stupid name for this function
+            self.child_end_moved(old_end, self.abs_end - old_end, set((self,)))
 
     def __repr__(self):
         return "Mirror(%s -> %s)" % (self.abs_start, self.abs_end)
@@ -875,16 +893,6 @@ class TabStop(TextObject):
         else:
             TextObject.__init__(self, parent, token)
             self._no = token.no
-
-        # debug("In Referencer: %r" % (r))
-        # for r in self._referencer:
-            # r.new_text(TextBuffer(self.current_text))
-
-
-    def _do_edit(self, *args, **kwargs):
-        TextObject._do_edit(self, *args, **kwargs)
-
-        self.update_referencers()
 
     def update_referencers(self):
         for r in self._referencer:

@@ -789,11 +789,9 @@ class SnippetManager(object):
             debug("self._lvb: %r, cb: %r" % (self._lvb, cb))
             rv = edit_distance.edit_script(self._lvb, cb)
             debug("rv: %r" % (rv,))
-            cv = edit_distance.compactify(rv)
-            debug("cv: %r" % (cv))
-            self._csnippets[0].edited(cv)
-
-            # debug("rv: %r" % (rv,))
+            self._csnippets[0].edited(rv)
+            debug("## self._csnippets: %r" % (self._csnippets[0]))
+            debug("## self._cnsippets._childs: %r" % (self._csnippets[0]._childs))
         self._lvb = as_unicode('\n'.join(vim.current.buffer))
         return
         self._vstate.update()
