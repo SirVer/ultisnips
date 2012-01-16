@@ -163,6 +163,7 @@ class _TOParser(object):
 
     def _replace_initital_texts(self):
         def _do_it(obj):
+            debug("In _do_it: obj: %r" % (obj))
             obj.initial_replace()
 
             for c in obj._childs: # TODO: private parts!
@@ -181,7 +182,7 @@ class _TOParser(object):
                 seen_ts[token.no] = ts
                 self._parent_to._add_tabstop(ts)
 
-                k = _TOParser(ts, ts.current_text, self._indent)
+                k = _TOParser(ts, token.initial_text, self._indent)
                 k._do_parse(all_tokens, seen_ts)
             elif isinstance(token, EscapeCharToken):
                 EscapedChar(self._parent_to, token)
@@ -232,7 +233,7 @@ class TextObject(CheapTotalOrdering):
         self._end = ct.calc_end(self._start)
         if self.abs_end != old_end:
             if self._parent is not None:
-                self._parent.child_end_moved(self, old_end, self.abs_end)
+                self._parent.child_end_moved(old_end, self.abs_end - old_end, set((self,)))
 
     def __cmp__(self, other):
         return self._start.__cmp__(other._start)
@@ -249,9 +250,9 @@ class TextObject(CheapTotalOrdering):
             return as_unicode(buf[abs_span.start.line][abs_span.start.col:abs_span.end.col])
         else:
             lines = []
-            lines.append(buf[abs_span.start.line][abs_span.col:])
+            lines.append(buf[abs_span.start.line][abs_span.start.col:])
             lines.extend(buf[abs_span.start.line+1:abs_span.end.line])
-            line.append(buf[aps_span.end.line][:abs_span.end.col])
+            lines.append(buf[abs_span.end.line][:abs_span.end.col])
             return as_unicode('\n'.join(lines))
 
     @property
@@ -300,43 +301,34 @@ class TextObject(CheapTotalOrdering):
     ####################
     # Public functions #
     ####################
-    def child_end_moved(self, child, old_end, new_end): # TODO: pretty wasteful, give index
-        debug("self: %r, child: %r, old_end: %r, new_end: %r" % (self, child, old_end, new_end))
-        delta = new_end - old_end
+    def child_end_moved(self, sp, diff, skip): # TODO: pretty wasteful, give index
+        debug("self: %r, skip: %r, diff: %r" % (self, skip, diff))
 
-        def _move_col_start(obj):
-            if obj.abs_start.line == old_end.line and obj.abs_start.col >= old_end.col:
-                obj._start.col += delta.col
-        def _move_col_end(obj):
-            if obj.abs_end.line == old_end.line and obj.abs_end.col >= old_end.col:
-                obj._end.col += delta.col
+        def _move_start(obj):
+            if obj.abs_start.line == sp.line and obj.abs_start.col >= sp.col:
+                obj._start.line += diff.line
+                obj._start.col += diff.col
+            elif obj.abs_start.line > sp.line:
+                obj._start.line += diff.line
 
-        def _move_line_col_start(obj):
-            if obj.abs_start.line == old_end.line and obj.abs_start.col >= old_end.col:
-                obj._start.line += delta.line
-                obj._start.col += delta.col
-            elif obj.abs_start.line > old_end.line:
-                obj._start.line += delta.line
+        def _move_end(obj):
+            if obj.abs_end.line == sp.line and obj.abs_end.col >= sp.col:
+                obj._end.line += diff.line
+                obj._end.col += diff.col
+            elif obj.abs_end.line > sp.line:
+                obj._end.line += diff.line
 
-        def _move_line_col_end(obj):
-            if obj.abs_end.line == old_end.line and obj.abs_end.col >= old_end.col:
-                obj._end.line += delta.line
-                obj._end.col += delta.col
-            elif obj.abs_end.line > old_end.line:
-                obj._end.line += delta.line
+        if self not in skip:
+            _move_end(self)
+        for c in self._childs:
+            if c in skip: continue
+            _move_start(c)
+            _move_end(c)
 
-        if delta.line == 0:
-            _move_col_end(self)
-            for c in self._childs:
-                if c == child: continue
-                _move_col_start(c)
-                _move_col_end(c)
-        else:
-            _move_line_col_end(self)
-            for c in self._childs:
-                if c == child: continue
-                _move_line_col_start(c)
-                _move_line_col_end(c)
+        for c in self._childs: # TODO: is this needed?
+            if c.abs_start == self.abs_start and (c._start == c._end):
+                debug("Deleting Child: c: %r" % (c))
+                self._del_child(c) # TODO: What about mirrors?
 
     def _do_edit(self, cmd):
         debug("self: %r, cmd: %r" % (self, cmd))
@@ -364,11 +356,16 @@ class TextObject(CheapTotalOrdering):
         pos = Position(line, col)
 
         for c in self._childs:
-            if pos in c.abs_span:
-                c._do_edit(cmd)
-                return
+            abs_span = c.abs_span
+            if pos in abs_span:
+                if c._do_edit(cmd):
+                    return True
+
         # We have to handle this ourselves
         if ctype == "D":
+            if self._start == self._end:
+                self._parent._del_child(self)
+                return False
             oe = self.abs_end
             __del_move_col_end(self)
 
@@ -380,7 +377,7 @@ class TextObject(CheapTotalOrdering):
             ne = self.abs_end
 
             if self._parent and oe != ne:
-                self._parent.child_end_moved(self, oe, ne)
+                self._parent.child_end_moved(oe, ne - oe, set((self,)))
         else:
             oe = self.abs_end
             __ins_move_col_end(self)
@@ -393,7 +390,14 @@ class TextObject(CheapTotalOrdering):
 
             ne = self.abs_end
             if self._parent and oe != ne:
-                self._parent.child_end_moved(self, oe, ne)
+                self._parent.child_end_moved(oe, ne - oe, set((self,)))
+
+        for c in self._childs: # TODO: Code duplicate
+            if c.abs_start == self.abs_start and (c._start == c._end):
+                debug("Deleting Child: c: %r" % (c))
+                self._del_child(c) # TODO: What about mirrors?
+
+        return True
 
 
     def edited(self, cmds):
@@ -407,19 +411,20 @@ class TextObject(CheapTotalOrdering):
 
 
     def update(self):
-        def _update_childs(childs):
-            for idx,c in childs:
-                oldend = Position(c.end.line, c.end.col)
+        pass # TODO: remove this function
+        # def _update_childs(childs):
+            # for idx,c in childs:
+                # oldend = Position(c.end.line, c.end.col)
 
-                new_end = c.update()
+                # new_end = c.update()
 
-                moved_lines = new_end.line - oldend.line
-                moved_cols = new_end.col - oldend.col
+                # moved_lines = new_end.line - oldend.line
+                # moved_cols = new_end.col - oldend.col
 
-                self._current_text.replace_text(c.start, oldend, c._current_text)
+                # self._current_text.replace_text(c.start, oldend, c._current_text)
 
-                self._move_textobjects_behind(c.start, oldend, moved_lines,
-                            moved_cols, idx)
+                # self._move_textobjects_behind(c.start, oldend, moved_lines,
+                            # moved_cols, idx)
 
         # _update_childs((idx, c) for idx, c in enumerate(self._childs) if isinstance(c, TabStop))
         # _update_childs((idx, c) for idx, c in enumerate(self._childs) if not isinstance(c, TabStop))
@@ -485,28 +490,28 @@ class TextObject(CheapTotalOrdering):
     def _do_update(self):
         pass
 
-    def _move_textobjects_behind(self, start, end, lines, cols, obj_idx):
-        if lines == 0 and cols == 0:
-            return
+    # def _move_textobjects_behind(self, start, end, lines, cols, obj_idx):
+        # if lines == 0 and cols == 0:
+            # return
 
-        for idx,m in enumerate(self._childs[obj_idx+1:]):
-            delta_lines = 0
-            delta_cols_begin = 0
-            delta_cols_end = 0
+        # for idx,m in enumerate(self._childs[obj_idx+1:]):
+            # delta_lines = 0
+            # delta_cols_begin = 0
+            # delta_cols_end = 0
 
-            if m.start.line > end.line:
-                delta_lines = lines
-            elif m.start.line == end.line:
-                if m.start.col >= end.col:
-                    if lines:
-                        delta_lines = lines
-                    delta_cols_begin = cols
-                    if m.start.line == m.end.line:
-                        delta_cols_end = cols
-            m.start.line += delta_lines
-            m.end.line += delta_lines
-            m.start.col += delta_cols_begin
-            m.end.col += delta_cols_end
+            # if m.start.line > end.line:
+                # delta_lines = lines
+            # elif m.start.line == end.line:
+                # if m.start.col >= end.col:
+                    # if lines:
+                        # delta_lines = lines
+                    # delta_cols_begin = cols
+                    # if m.start.line == m.end.line:
+                        # delta_cols_end = cols
+            # m.start.line += delta_lines
+            # m.end.line += delta_lines
+            # m.start.col += delta_cols_begin
+            # m.end.col += delta_cols_end
 
     def _get_tabstop(self, requester, no):
         if no in self._tabstops:
@@ -524,6 +529,12 @@ class TextObject(CheapTotalOrdering):
     def _add_child(self,c):
         self._childs.append(c)
         self._childs.sort()
+
+    def _del_child(self,c):
+        self._childs.remove(c)
+
+        if isinstance(c, TabStop):
+            del self._tabstops[c.no]
 
     def _add_tabstop(self, ts):
         self._tabstops[ts.no] = ts

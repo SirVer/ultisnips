@@ -788,6 +788,9 @@ class SnippetManager(object):
         if len(self._csnippets):
             debug("self._lvb: %r, cb: %r" % (self._lvb, cb))
             rv = edit_distance.edit_script(self._lvb, cb)
+            debug("rv: %r" % (rv,))
+            cv = edit_distance.compactify(rv)
+            debug("cv: %r" % (cv))
             self._csnippets[0].edited(rv)
 
             # debug("rv: %r" % (rv,))

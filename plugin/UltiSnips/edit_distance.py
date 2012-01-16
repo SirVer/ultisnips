@@ -4,6 +4,7 @@
 import heapq # TODO: overkill. Bucketing is better
 from collections import defaultdict
 import sys
+from debug import debug
 
 class GridPoint(object):
     """Docstring for GridPoint """
@@ -57,6 +58,18 @@ def edit_script(a, b):
                     seen[x,y+1] = cost + 1
                     d[cost + 1].append((x,y+1, nline, ncol, what + (("I", oline, ocol,b[y]),)))
         cost += 1
+
+def compactify(es):
+    cmds = []
+    for cmd in es:
+        ctype, line, col, char = cmd
+        if (cmds and ctype == "D" and cmds[-1][1] == cmd[1] and cmds[-1][2] == cmd[2] and char != '\n'):
+            cmds[-1][-1] += char
+        elif (cmds and ctype == "I" and cmds[-1][1] == cmd[1] and cmds[-1][2]+1 == cmd[2] and char != '\n'):
+            cmds[-1][-1] += char
+        else:
+            cmds.append(list(cmd))
+    return cmds
 
 def transform(a, cmds):
     buf = a.split("\n")

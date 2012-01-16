@@ -551,183 +551,175 @@ class MultilineExpandTestTyping_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "Hallo Welt!\nUnd Wie gehts")
     wanted = "Wie Hallo Welt!\nUnd Wie gehtsHuiui! gehts"
     keys = "Wie hallo gehts" + ESC + "bhi" + EX + "Huiui!"
+class SimpleExpandEndingWithNewline_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "Hallo Welt\n")
+    keys = "hallo" + EX + "\nAnd more"
+    wanted = "Hallo Welt\n\nAnd more"
+
+
 # End: Simple Expands  #}}}
-### TabStop Tests  {{{#
-##class TabStopSimpleReplace_ExceptCorrectResult(_VimTest):
-##    snippets = ("hallo", "hallo ${0:End} ${1:Beginning}")
-##    keys = "hallo" + EX + "na" + JF + "Du Nase"
-##    wanted = "hallo Du Nase na"
-##class TabStopSimpleReplaceSurrounded_ExceptCorrectResult(_VimTest):
-##    snippets = ("hallo", "hallo ${0:End} a small feed")
-##    keys = "hallo" + EX + "Nase"
-##    wanted = "hallo Nase a small feed"
-##class TabStopSimpleReplaceSurrounded1_ExceptCorrectResult(_VimTest):
-##    snippets = ("hallo", "hallo $0 a small feed")
-##    keys = "hallo" + EX + "Nase"
-##    wanted = "hallo Nase a small feed"
-##class TabStopSimpleReplaceEndingWithNewline_ExceptCorrectResult(_VimTest):
-##    snippets = ("hallo", "Hallo Welt\n")
-##    keys = "hallo" + EX + "\nAnd more"
-##    wanted = "Hallo Welt\n\nAnd more"
-##
-##class ExitTabStop_ExceptCorrectResult(_VimTest):
-##    snippets = ("echo", "$0 run")
-##    keys = "echo" + EX + "test"
-##    wanted = "test run"
-##
-##class TabStopNoReplace_ExceptCorrectResult(_VimTest):
-##    snippets = ("echo", "echo ${1:Hallo}")
-##    keys = "echo" + EX
-##    wanted = "echo Hallo"
-##
-##class TabStop_EscapingCharsBackticks(_VimTest):
-##    snippets = ("test", r"snip \` literal")
-##    keys = "test" + EX
-##    wanted = "snip ` literal"
-##class TabStop_EscapingCharsDollars(_VimTest):
-##    snippets = ("test", r"snip \$0 $$0 end")
-##    keys = "test" + EX + "hi"
-##    wanted = "snip $0 $hi end"
-##class TabStop_EscapingCharsDollars1(_VimTest):
-##    snippets = ("test", r"a\${1:literal}")
-##    keys = "test" + EX
-##    wanted = "a${1:literal}"
-##class TabStop_EscapingCharsDollars_BeginningOfLine(_VimTest):
-##    snippets = ("test", "\n\\${1:literal}")
-##    keys = "test" + EX
-##    wanted = "\n${1:literal}"
-##class TabStop_EscapingCharsDollars_BeginningOfDefinitionText(_VimTest):
-##    snippets = ("test", "\\${1:literal}")
-##    keys = "test" + EX
-##    wanted = "${1:literal}"
-##class TabStop_EscapingChars_Backslash(_VimTest):
-##    snippets = ("test", r"This \ is a backslash!")
-##    keys = "test" + EX
-##    wanted = "This \\ is a backslash!"
-##class TabStop_EscapingChars_Backslash2(_VimTest):
-##    snippets = ("test", r"This is a backslash \\ done")
-##    keys = "test" + EX
-##    wanted = r"This is a backslash \ done"
-##class TabStop_EscapingChars_Backslash3(_VimTest):
-##    snippets = ("test", r"These are two backslashes \\\\ done")
-##    keys = "test" + EX
-##    wanted = r"These are two backslashes \\ done"
-##class TabStop_EscapingChars_Backslash4(_VimTest):
-##    # Test for bug 746446
-##    snippets = ("test", r"\\$1{$2}")
-##    keys = "test" + EX + "hello" + JF + "world"
-##    wanted = r"\hello{world}"
-##class TabStop_EscapingChars_RealLife(_VimTest):
-##    snippets = ("test", r"usage: \`basename \$0\` ${1:args}")
-##    keys = "test" + EX + "[ -u -v -d ]"
-##    wanted = "usage: `basename $0` [ -u -v -d ]"
-##
-##class TabStopEscapingWhenSelected_ECR(_VimTest):
-##    snippets = ("test", "snip ${1:default}")
-##    keys = "test" + EX + ESC + "0ihi"
-##    wanted = "hisnip default"
-##class TabStopEscapingWhenSelectedSingleCharTS_ECR(_VimTest):
-##    snippets = ("test", "snip ${1:i}")
-##    keys = "test" + EX + ESC + "0ihi"
-##    wanted = "hisnip i"
-##class TabStopEscapingWhenSelectedNoCharTS_ECR(_VimTest):
-##    snippets = ("test", "snip $1")
-##    keys = "test" + EX + ESC + "0ihi"
-##    wanted = "hisnip "
-##
-##class TabStopUsingBackspaceToDeleteDefaultValue_ECR(_VimTest):
-##    snippets = ("test", "snip ${1/.+/(?0:matched)/} ${1:default}")
-##    keys = "test" + EX + BS
-##    wanted = "snip  "
-##class TabStopUsingBackspaceToDeleteDefaultValueInFirstTab_ECR(_VimTest):
-##    sleeptime = 0.09 # Do this very slowly
-##    snippets = ("test", "snip ${1/.+/(?0:m1)/} ${2/.+/(?0:m2)/} "
-##                "${1:default} ${2:def}")
-##    keys = "test" + EX + BS + JF + "hi"
-##    wanted = "snip  m2  hi"
-##class TabStopUsingBackspaceToDeleteDefaultValueInSecondTab_ECR(_VimTest):
-##    snippets = ("test", "snip ${1/.+/(?0:m1)/} ${2/.+/(?0:m2)/} "
-##                "${1:default} ${2:def}")
-##    keys = "test" + EX + "hi" + JF + BS
-##    wanted = "snip m1  hi "
-##class TabStopUsingBackspaceToDeleteDefaultValueTypeSomethingThen_ECR(_VimTest):
-##    snippets = ("test", "snip ${1/.+/(?0:matched)/} ${1:default}")
-##    keys = "test" + EX + BS + "hallo"
-##    wanted = "snip matched hallo"
-##
-##class TabStopWithOneChar_ExceptCorrectResult(_VimTest):
-##    snippets = ("hallo", "nothing ${1:i} hups")
-##    keys = "hallo" + EX + "ship"
-##    wanted = "nothing ship hups"
-##
-##class TabStopTestJumping_ExceptCorrectResult(_VimTest):
-##    snippets = ("hallo", "hallo ${2:End} mitte ${1:Beginning}")
-##    keys = "hallo" + EX + JF + "Test" + JF + "Hi"
-##    wanted = "hallo Test mitte BeginningHi"
-##class TabStopTestJumping2_ExceptCorrectResult(_VimTest):
-##    snippets = ("hallo", "hallo $2 $1")
-##    keys = "hallo" + EX + JF + "Test" + JF + "Hi"
-##    wanted = "hallo Test Hi"
-##class TabStopTestJumpingRLExampleWithZeroTab_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "each_byte { |${1:byte}| $0 }")
-##    keys = "test" + EX + JF + "Blah"
-##    wanted = "each_byte { |byte| Blah }"
-##
-##class TabStopTestJumpingDontJumpToEndIfThereIsTabZero_ExceptCorrectResult(_VimTest):
-##    snippets = ("hallo", "hallo $0 $1")
-##    keys = "hallo" + EX + "Test" + JF + "Hi" + JF + JF + "du"
-##    wanted = "hallo Hidu Test"
-##
-##class TabStopTestBackwardJumping_ExceptCorrectResult(_VimTest):
-##    snippets = ("hallo", "hallo ${2:End} mitte${1:Beginning}")
-##    keys = "hallo" + EX + "Somelengthy Text" + JF + "Hi" + JB + \
-##            "Lets replace it again" + JF + "Blah" + JF + JB*2 + JF
-##    wanted = "hallo Blah mitteLets replace it again"
-##class TabStopTestBackwardJumping2_ExceptCorrectResult(_VimTest):
-##    snippets = ("hallo", "hallo $2 $1")
-##    keys = "hallo" + EX + "Somelengthy Text" + JF + "Hi" + JB + \
-##            "Lets replace it again" + JF + "Blah" + JF + JB*2 + JF
-##    wanted = "hallo Blah Lets replace it again"
-##
-##class TabStopTestMultilineExpand_ExceptCorrectResult(_VimTest):
-##    snippets = ("hallo", "hallo $0\nnice $1 work\n$3 $2\nSeem to work")
-##    keys ="test hallo World" + ESC + "02f i" + EX + "world" + JF + "try" + \
-##            JF + "test" + JF + "one more" + JF + JF
-##    wanted = "test hallo one more\nnice world work\n" \
-##            "test try\nSeem to work World"
-##
-##class TabStop_TSInDefaultTextRLExample_OverwriteNone_ECR(_VimTest):
-##    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
-##    keys = "test" + EX
-##    wanted = """<div id="some_id">\n  \n</div>"""
-##class TabStop_TSInDefaultTextRLExample_OverwriteFirst(_VimTest):
-##    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
-##    keys = "test" + EX + " blah" + JF + "Hallo"
-##    wanted = """<div blah>\n  Hallo\n</div>"""
-##class TabStop_TSInDefaultTextRLExample_DeleteFirst(_VimTest):
-##    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
-##    keys = "test" + EX + BS + JF + "Hallo"
-##    wanted = """<div>\n  Hallo\n</div>"""
-##class TabStop_TSInDefaultTextRLExample_OverwriteFirstJumpBack(_VimTest):
-##    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $3  $0\n</div>""")
-##    keys = "test" + EX + "Hi" + JF + "Hallo" + JB + "SomethingElse" + JF + \
-##            "Nupl" + JF + "Nox"
-##    wanted = """<divSomethingElse>\n  Nupl  Nox\n</div>"""
-##class TabStop_TSInDefaultTextRLExample_OverwriteSecond(_VimTest):
-##    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
-##    keys = "test" + EX + JF + "no" + JF + "End"
-##    wanted = """<div id="no">\n  End\n</div>"""
-##class TabStop_TSInDefaultTextRLExample_OverwriteSecondTabBack(_VimTest):
-##    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $3 $0\n</div>""")
-##    keys = "test" + EX + JF + "no" + JF + "End" + JB + "yes" + JF + "Begin" \
-##            + JF + "Hi"
-##    wanted = """<div id="yes">\n  Begin Hi\n</div>"""
-##class TabStop_TSInDefaultTextRLExample_OverwriteSecondTabBackTwice(_VimTest):
-##    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $3 $0\n</div>""")
-##    keys = "test" + EX + JF + "no" + JF + "End" + JB + "yes" + JB + \
-##            " allaway" + JF + "Third" + JF + "Last"
-##    wanted = """<div allaway>\n  Third Last\n</div>"""
-##
+# TabStop Tests  {{{#
+class TabStopSimpleReplace_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo ${0:End} ${1:Beginning}")
+    keys = "hallo" + EX + "na" + JF + "Du Nase"
+    wanted = "hallo Du Nase na"
+class TabStopSimpleReplaceSurrounded_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo ${0:End} a small feed")
+    keys = "hallo" + EX + "Nase"
+    wanted = "hallo Nase a small feed"
+class TabStopSimpleReplaceSurrounded1_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo $0 a small feed")
+    keys = "hallo" + EX + "Nase"
+    wanted = "hallo Nase a small feed"
+class TabStop_Exit_ExceptCorrectResult(_VimTest):
+    snippets = ("echo", "$0 run")
+    keys = "echo" + EX + "test"
+    wanted = "test run"
+
+class TabStopNoReplace_ExceptCorrectResult(_VimTest):
+    snippets = ("echo", "echo ${1:Hallo}")
+    keys = "echo" + EX
+    wanted = "echo Hallo"
+
+class TabStop_EscapingCharsBackticks(_VimTest):
+    snippets = ("test", r"snip \` literal")
+    keys = "test" + EX
+    wanted = "snip ` literal"
+class TabStop_EscapingCharsDollars(_VimTest):
+    snippets = ("test", r"snip \$0 $$0 end")
+    keys = "test" + EX + "hi"
+    wanted = "snip $0 $hi end"
+class TabStop_EscapingCharsDollars1(_VimTest):
+    snippets = ("test", r"a\${1:literal}")
+    keys = "test" + EX
+    wanted = "a${1:literal}"
+class TabStop_EscapingCharsDollars_BeginningOfLine(_VimTest):
+    snippets = ("test", "\n\\${1:literal}")
+    keys = "test" + EX
+    wanted = "\n${1:literal}"
+class TabStop_EscapingCharsDollars_BeginningOfDefinitionText(_VimTest):
+    snippets = ("test", "\\${1:literal}")
+    keys = "test" + EX
+    wanted = "${1:literal}"
+class TabStop_EscapingChars_Backslash(_VimTest):
+    snippets = ("test", r"This \ is a backslash!")
+    keys = "test" + EX
+    wanted = "This \\ is a backslash!"
+class TabStop_EscapingChars_Backslash2(_VimTest):
+    snippets = ("test", r"This is a backslash \\ done")
+    keys = "test" + EX
+    wanted = r"This is a backslash \ done"
+class TabStop_EscapingChars_Backslash3(_VimTest):
+    snippets = ("test", r"These are two backslashes \\\\ done")
+    keys = "test" + EX
+    wanted = r"These are two backslashes \\ done"
+class TabStop_EscapingChars_Backslash4(_VimTest):
+    # Test for bug 746446
+    snippets = ("test", r"\\$1{$2}")
+    keys = "test" + EX + "hello" + JF + "world"
+    wanted = r"\hello{world}"
+class TabStop_EscapingChars_RealLife(_VimTest):
+    snippets = ("test", r"usage: \`basename \$0\` ${1:args}")
+    keys = "test" + EX + "[ -u -v -d ]"
+    wanted = "usage: `basename $0` [ -u -v -d ]"
+
+class TabStopEscapingWhenSelected_ECR(_VimTest):
+    snippets = ("test", "snip ${1:default}")
+    keys = "test" + EX + ESC + "0ihi"
+    wanted = "hisnip default"
+class TabStopEscapingWhenSelectedSingleCharTS_ECR(_VimTest):
+    snippets = ("test", "snip ${1:i}")
+    keys = "test" + EX + ESC + "0ihi"
+    wanted = "hisnip i"
+class TabStopEscapingWhenSelectedNoCharTS_ECR(_VimTest):
+    snippets = ("test", "snip $1")
+    keys = "test" + EX + ESC + "0ihi"
+    wanted = "hisnip "
+
+class TabStopUsingBackspaceToDeleteDefaultValue_ECR(_VimTest):
+    snippets = ("test", "snip ${1/.+/(?0:matched)/} ${1:default}")
+    keys = "test" + EX + BS
+    wanted = "snip  "
+
+class TabStopWithOneChar_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "nothing ${1:i} hups")
+    keys = "hallo" + EX + "ship"
+    wanted = "nothing ship hups"
+
+class TabStopTestJumping_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo ${2:End} mitte ${1:Beginning}")
+    keys = "hallo" + EX + JF + "Test" + JF + "Hi"
+    wanted = "hallo Test mitte BeginningHi"
+class TabStopTestJumping2_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo $2 $1")
+    keys = "hallo" + EX + JF + "Test" + JF + "Hi"
+    wanted = "hallo Test Hi"
+class TabStopTestJumpingRLExampleWithZeroTab_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "each_byte { |${1:byte}| $0 }")
+    keys = "test" + EX + JF + "Blah"
+    wanted = "each_byte { |byte| Blah }"
+
+class TabStopTestJumpingDontJumpToEndIfThereIsTabZero_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo $0 $1")
+    keys = "hallo" + EX + "Test" + JF + "Hi" + JF + JF + "du"
+    wanted = "hallo Hidu Test"
+
+class TabStopTestBackwardJumping_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo ${2:End} mitte${1:Beginning}")
+    keys = "hallo" + EX + "Somelengthy Text" + JF + "Hi" + JB + \
+            "Lets replace it again" + JF + "Blah" + JF + JB*2 + JF
+    wanted = "hallo Blah mitteLets replace it again"
+class TabStopTestBackwardJumping2_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo $2 $1")
+    keys = "hallo" + EX + "Somelengthy Text" + JF + "Hi" + JB + \
+            "Lets replace it again" + JF + "Blah" + JF + JB*2 + JF
+    wanted = "hallo Blah Lets replace it again"
+
+class TabStopTestMultilineExpand_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "hallo $0\nnice $1 work\n$3 $2\nSeem to work")
+    keys ="test hallo World" + ESC + "02f i" + EX + "world" + JF + "try" + \
+            JF + "test" + JF + "one more" + JF + JF
+    wanted = "test hallo one more\nnice world work\n" \
+            "test try\nSeem to work World"
+
+class TabStop_TSInDefaultTextRLExample_OverwriteNone_ECR(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
+    keys = "test" + EX
+    wanted = """<div id="some_id">\n  \n</div>"""
+class TabStop_TSInDefaultTextRLExample_OverwriteFirst_NoJumpBack(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
+    keys = "test" + EX + " blah" + JF + "Hallo"
+    wanted = """<div blah>\n  Hallo\n</div>"""
+class TabStop_TSInDefaultTextRLExample_DeleteFirst(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
+    keys = "test" + EX + BS + JF + "Hallo"
+    wanted = """<div>\n  Hallo\n</div>"""
+class TabStop_TSInDefaultTextRLExample_OverwriteFirstJumpBack(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $3  $0\n</div>""")
+    keys = "test" + EX + "Hi" + JF + "Hallo" + JB + "SomethingElse" + JF + \
+            "Nupl" + JF + "Nox"
+    wanted = """<divSomethingElse>\n  Nupl  Nox\n</div>"""
+class TabStop_TSInDefaultTextRLExample_OverwriteSecond(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $0\n</div>""")
+    keys = "test" + EX + JF + "no" + JF + "End"
+    wanted = """<div id="no">\n  End\n</div>"""
+class TabStop_TSInDefaultTextRLExample_OverwriteSecondTabBack(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $3 $0\n</div>""")
+    keys = "test" + EX + JF + "no" + JF + "End" + JB + "yes" + JF + "Begin" \
+            + JF + "Hi"
+    wanted = """<div id="yes">\n  Begin Hi\n</div>"""
+class TabStop_TSInDefaultTextRLExample_OverwriteSecondTabBackTwice(_VimTest):
+    snippets = ("test", """<div${1: id="${2:some_id}"}>\n  $3 $0\n</div>""")
+    keys = "test" + EX + JF + "no" + JF + "End" + JB + "yes" + JB + \
+            " allaway" + JF + "Third" + JF + "Last"
+    wanted = """<div allaway>\n  Third Last\n</div>"""
+
+class TabStop_TSInDefaultText_ZeroLengthNested_Overwrite(_VimTest):
+    snippets = ("test", """h${1:a$2b}l""")
+    keys = "test" + EX + JF + "ups" + JF + "End"
+    wanted = """haupsblEnd"""
+
+
 ##class TabStop_TSInDefaultNested_OverwriteOneJumpBackToOther(_VimTest):
 ##    snippets = ("test", "hi ${1:this ${2:second ${3:third}}} $4")
 ##    keys = "test" + EX + JF + "Hallo" + JF + "Ende"
@@ -1415,6 +1407,22 @@ class MultilineExpandTestTyping_ExceptCorrectResult(_VimTest):
 ##    snippets = ("test", r"$1 ${1/, */, /g}")
 ##    keys = "test" + EX + "a, nice,   building"
 ##    wanted = "a, nice,   building a, nice, building"
+## class TransformationUsingBackspaceToDeleteDefaultValueInFirstTab_ECR(_VimTest):
+##     sleeptime = 0.09 # Do this very slowly
+##     snippets = ("test", "snip ${1/.+/(?0:m1)/} ${2/.+/(?0:m2)/} "
+##                 "${1:default} ${2:def}")
+##     keys = "test" + EX + BS + JF + "hi"
+##     wanted = "snip  m2  hi"
+## class TransformationUsingBackspaceToDeleteDefaultValueInSecondTab_ECR(_VimTest):
+##     snippets = ("test", "snip ${1/.+/(?0:m1)/} ${2/.+/(?0:m2)/} "
+##                 "${1:default} ${2:def}")
+##     keys = "test" + EX + "hi" + JF + BS
+##     wanted = "snip m1  hi "
+## class TransformationUsingBackspaceToDeleteDefaultValueTypeSomethingThen_ECR(_VimTest):
+##     snippets = ("test", "snip ${1/.+/(?0:matched)/} ${1:default}")
+##     keys = "test" + EX + BS + "hallo"
+##     wanted = "snip matched hallo"
+
 ### End: Transformations  #}}}
 ### ${VISUAL}  {{{#
 ##class Visual_NoVisualSelection_Ignore(_VimTest):
