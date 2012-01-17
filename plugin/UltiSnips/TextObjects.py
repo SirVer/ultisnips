@@ -276,21 +276,11 @@ class TextObject(object):
         self._is_killed = False # TODO: not often needed
 
     def initial_replace(self):
+        # TODO: could this be replaced via _really_updateman?
         ct = self._initial_text # TODO: Initial Text is nearly unused.
-        debug("self._start: %r, self._end: %r" % (self._start, self._end))
-        debug("self._start: %r, self._end: %r" % (self._start, self._end))
-        debug("ct: %r" % (ct))
         old_end = self._end
-        ct.to_vim(self._start, self._end) # TODO: to vim returns something unused
-        debug("self._end: %r" % (self._end))
-        self._end = ct.calc_end(self._start)
-        debug("self._start: %r, self._end: %r" % (self._start, self._end))
-        if self._end != old_end:
-            exclude = set()
-            exclude = set(c for c in self._childs)
-            exclude.add(self)
-            # TODO: maybe get rid of this function as well?
-            self.child_end_moved(min(old_end, self._end), self._end - old_end, exclude)
+        self._end = ct.to_vim(self._start, self._end)
+        self.child_end_moved2(old_end, self._end)
 
     def __lt__(self, other):
         return self._start < other._start
@@ -340,10 +330,6 @@ class TextObject(object):
         if not (self._parent) or old_end == new_end:
             return
 
-        debug("###*** ")
-        assert(self._parent)
-        _do_print(self._parent)
-
         pold_end = self._parent._end.copy()
         _move_nocheck(self._parent._end, old_end, new_end, new_end - old_end)
         def _move_all(o):
@@ -356,37 +342,8 @@ class TextObject(object):
         for c in self._parent._childs:
             if c is self: continue
             _move_all(c)
-        _do_print(self._parent)
-        debug("***### ")
 
-        debug("pold_end: %r, self._parent._end: %r" % (pold_end, self._parent._end))
         self._parent.child_end_moved2(pold_end, self._parent._end)
-
-
-
-
-
-    def child_end_moved(self, sp, diff, skip = set()): # TODO: pretty wasteful, give index
-        debug("self: %r, skip: %r, diff: %r" % (self, skip, diff))
-
-        if self not in skip:
-            _move(self._end, sp, diff)
-
-        for c in self._childs:
-            if c in skip: continue
-            def _move_all(o):
-                _move(o._start, sp, diff)
-                _move(o._end, sp, diff)
-
-                for oc in o._childs:
-                    _move_all(oc)
-            _move_all(c)
-
-        debug("self._parent: %r" % (self._parent))
-        if self._parent and self._parent not in skip:
-            debug("b4 parent sp: %r, diff: %r" % (sp, diff))
-            self._parent.child_end_moved(sp, diff, set((self,)))
-            debug("after parent sp: %r, diff: %r" % (sp, diff))
 
     def _do_edit(self, cmd):
         debug("self: %r, cmd: %r" % (self, cmd))
@@ -463,7 +420,6 @@ class TextObject(object):
                 delta = Position(0, len(char))
         old_end = self._end.copy()
         _move(self._end, Position(line, col), delta)
-        #self.child_end_moved(Position(line, col), self._end - old_end, set((self,)))
         self.child_end_moved2(old_end, self._end)
 
     def edited(self, cmds): # TODO: Only in SnippetInstance
@@ -642,7 +598,7 @@ class NoneditableTextObject(TextObject):
         old_end = self._end.copy()
         self._end = tb.to_vim(self._start, self._end) # TODO: to vim returns something unused
 
-        # TODO: child_end_moved is a stupid name for this function
+        # TODO: child_end_moved2 is a stupid name for this function
         self.child_end_moved2(old_end, self._end)
 
 class EscapedChar(NoneditableTextObject):
@@ -934,7 +890,6 @@ class SnippetUtil(object):
 
 class PythonCode(NoneditableTextObject):
     def __init__(self, parent, token):
-
         code = token.code.replace("\\`", "`")
 
         # Find our containing snippet for snippet local data
@@ -956,8 +911,7 @@ class PythonCode(NoneditableTextObject):
 
         NoneditableTextObject.__init__(self, parent, token)
 
-
-    def _do_update(self):
+    def _really_updateman(self):
         path = vim.eval('expand("%")')
         if path is None:
             path = ""
@@ -980,9 +934,9 @@ class PythonCode(NoneditableTextObject):
         compatible_exec(self._code, self._globals, local_d)
 
         if self._snip._rv_changed:
-            self.current_text = self._snip.rv
+            self._replace_text(TextBuffer(self._snip.rv))
         else:
-            self.current_text = as_unicode(local_d["res"])
+            self._replace_text(TextBuffer(as_unicode(local_d['res'])))
 
     def __repr__(self):
         return "PythonCode(%s -> %s)" % (self._start, self._end)
