@@ -13,10 +13,10 @@ import traceback
 
 import vim
 
-from UltiSnips.Geometry import Position
+from UltiSnips.Geometry import Position, Span
 from UltiSnips.Compatibility import make_suitable_for_vim, set_vim_cursor, vim_cursor
 from UltiSnips.TextObjects import *
-from UltiSnips.Buffer import VimBuffer
+from UltiSnips.Buffer import VimBuffer, TextBuffer
 from UltiSnips.Util import IndentUtil, vim_string, as_unicode
 from UltiSnips.Langmap import LangMapTranslator
 
@@ -656,7 +656,7 @@ class SnippetManager(object):
 
     @err_to_scratch_buffer
     def reset(self, test_error=False):
-        self._lvb = ""
+        self._lvb = TextBuffer("")
         self._test_error = test_error
         self._snippets = {}
         self._visual_content = as_unicode("")
@@ -783,38 +783,59 @@ class SnippetManager(object):
 
     @err_to_scratch_buffer
     def cursor_moved(self):
-        self._check_if_still_inside_snippet()
-        cb = as_unicode('\n'.join(vim.current.buffer))
-        if len(self._csnippets):
-            debug("self._lvb: %r, cb: %r" % (self._lvb, cb))
-            rv = edit_distance.edit_script(self._lvb, cb)
+        self._vstate.update()
+        debug("self._vstate.pos: %r, self._vstate.ppos: %r" % (self._vstate.pos, self._vstate.ppos))
+
+        if self._csnippets:
+            abs_end = self._vstate.pos
+            abs_start = self._vstate.ppos
+            if abs_end < abs_start:
+                abs_start, abs_end = abs_end, abs_start
+            abs_start = Position(0,0) # TODO
+            abs_end = Position(len(vim.current.buffer)-1, 10000)
+            span = Span(abs_start, abs_end)
+
+            debug("span: %r" % (span))
+
+            # TODO
+            # ct = TextBuffer('\n'.join(vim.current.buffer))[span]
+            # lt = self._lvb[span]
+            ct = '\n'.join(vim.current.buffer)
+            lt = '\n'.join(self._lvb)
+
+            debug("lt: %r, ct: %r" % (lt, ct))
+            rv = edit_distance.edit_script(lt, ct, abs_start.line, abs_start.col)
             debug("rv: %r" % (rv,))
             self._csnippets[0].edited(rv)
+
+        self._check_if_still_inside_snippet()
+        if self._csnippets:
+            self._csnippets[0].do_edits()
+
             debug("## self._csnippets: %r" % (self._csnippets[0]))
             debug("## self._cnsippets._childs: %r" % (self._csnippets[0]._childs))
-        self._lvb = as_unicode('\n'.join(vim.current.buffer))
-        return
+        self._lvb = TextBuffer('\n'.join(vim.current.buffer)) # TODO: no need to cache everything
         self._vstate.update()
 
 
-    @err_to_scratch_buffer
-    def entered_insert_mode(self):
-        self._vstate.update()
-        if self._cs and self._vstate.has_moved:
-            while len(self._csnippets):
-                self._current_snippet_is_done()
-            self._reinit()
+    # @err_to_scratch_buffer # TODO: will be needed again
+    # def entered_insert_mode(self):
+        # self._vstate.update()
+        # if self._cs and self._vstate.has_moved:
+            # while len(self._csnippets):
+                # self._current_snippet_is_done()
+            # self._reinit()
 
-    @err_to_scratch_buffer
-    def leaving_window(self):
-        """
-        Called when the user switches tabs. It basically means that all
-        snippets must be properly terminated
-        """
-        self._vstate.update()
-        while len(self._csnippets):
-            self._current_snippet_is_done()
-        self._reinit()
+    # @err_to_scratch_buffer # TODO: will be needed again
+    # def leaving_window(self):
+        # """
+        # Called when the user switches tabs. It basically means that all
+        # snippets must be properly terminated
+        # """
+        # self._vstate.update()
+        # while len(self._csnippets):
+            # self._current_snippet_is_done()
+        # self._reinit()
 
 
     ###################################
@@ -838,13 +859,14 @@ class SnippetManager(object):
     def _reinit(self):
         self._ctab = None
         self._span_selected = None
-        self._expect_move_wo_change = False
 
     def _check_if_still_inside_snippet(self):
         # Cursor moved without input.
         self._ctab = None
 
         # Did we leave the snippet with this movement?
+        if self._cs:
+            debug("self._vstate.pos: %r, self._cs.abs_span: %r" % (self._vstate.pos, self._cs.abs_span))
         if self._cs and not (self._vstate.pos in self._cs.abs_span):
             self._current_snippet_is_done()
 
@@ -853,6 +875,7 @@ class SnippetManager(object):
             self._check_if_still_inside_snippet()
 
     def _current_snippet_is_done(self):
+        debug("*** Snippet is done" )
         self._csnippets.pop()
 
         if not len(self._csnippets):
@@ -862,7 +885,6 @@ class SnippetManager(object):
         jumped = False
         debug("self._cs: %r" % (self._cs))
         if self._cs:
-            self._expect_move_wo_change = True
             self._ctab = self._cs.select_next_tab(backwards)
             debug("self._ctab: %r" % (self._ctab))
             debug("self._ctab.abs_span: %r" % (self._ctab.abs_span))
@@ -986,7 +1008,6 @@ class SnippetManager(object):
 
         self._unset_offending_vim_options(snippet)
 
-        self._expect_move_wo_change = True
         if self._cs:
             # Determine position
             pos = self._vstate.pos
@@ -1001,9 +1022,6 @@ class SnippetManager(object):
             si = snippet.launch(text_before, self._visual_content, self._ctab, start, end)
             self._visual_content = ""
 
-
-            # self._update_vim_buffer()
-
             self._csnippets.append(si)
             self._jump()
         else:
@@ -1014,7 +1032,7 @@ class SnippetManager(object):
             self._csnippets.append(snippet.launch(text_before, self._visual_content, None, start, end))
             self._visual_content = ""
 
-            self._lvb = as_unicode('\n'.join(vim.current.buffer))
+            self._lvb = TextBuffer('\n'.join(vim.current.buffer)) # TODO: no need to cache everything
             debug("in launch: self._lvb: %r" % (self._lvb))
 
             #self._vb.replace_lines(lineno-1, lineno-1,
@@ -1023,8 +1041,6 @@ class SnippetManager(object):
             self._jump()
 
     def _try_expand(self):
-        self._expect_move_wo_change = False
-
         before, after = self._get_before_after()
         if not before:
             return False
@@ -1057,58 +1073,6 @@ class SnippetManager(object):
         # Textwrapping
         for c in self._cached_offending_vim_options.pop("fo", []):
             vim.command("set fo+=%s" % c)
-
-    # Input Handling
-    def _chars_entered(self, chars, del_more_lines = 0):
-        if (self._span_selected is not None):
-            # No current tabstop, but there are snippets? That means we returned from a recursive
-            # tabstop and still have the tabstop zero selected. The current tabstop is therefore
-            # the one in the latest snippet, but do not overwrite the complete text of the snippet
-            if self._ctab is None and len(self._csnippets):
-                self._ctab = self._csnippets[-1].current_tabstop
-                self._ctab.current_text += chars
-            else:
-                self._ctab.current_text = chars
-
-            moved = 0
-            # If this edit changed the buffer in any ways we might have to
-            # delete more or less lines, according how the cursors has moved
-            if self._vstate.buf_changed:
-                moved = self._span_selected.start.line - \
-                        self._span_selected.end.line
-            self._span_selected = None
-
-            # self._update_vim_buffer(moved + del_more_lines)
-        else:
-            self._ctab.current_text += chars
-            # self._update_vim_buffer(del_more_lines)
-
-
-    def _backspace(self, count):
-        self._ctab.current_text = self._ctab.current_text[:-count]
-        # self._update_vim_buffer()
-
-    def _update_vim_buffer(self, del_more_lines = 0):
-        if not len(self._csnippets):
-            return
-
-        s = self._csnippets[0]
-        sline = s.abs_start.line
-        dlines = s.end.line - s.start.line
-
-        s.update()
-
-        # Replace
-        if self._vstate.buf_changed:
-            dlines += self._vstate.moved.line
-        dlines += del_more_lines
-        self._vb.replace_lines(sline, sline + dlines,
-                       s._current_text)
-        ct_end = self._ctab.abs_end
-
-        set_vim_cursor(ct_end.line + 1, ct_end.col)
-
-        self._vstate.update()
 
     def _cs(self):
         if not len(self._csnippets):

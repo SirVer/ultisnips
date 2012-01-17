@@ -61,7 +61,18 @@ class TextBuffer(Buffer):
         return self._replace( start, end, content, first_line, last_line)
 
     def __getitem__(self, a):
-        return self._lines.__getitem__(a)
+        try:
+            s, e = a.start, a.end
+            if s.line == e.line:
+                return self._lines[s.line][s.col:e.col]
+            else:
+                return ('\n'.join(
+                    [self._lines[s.line][s.col:]] +
+                    self._lines[s.line+1:e.line] +
+                    [self._lines[e.line][:e.col]]
+                ))
+        except AttributeError:
+            return self._lines.__getitem__(a) # TODO: is this ever used?
     def __setitem__(self, a, b):
         return self._lines.__setitem__(a,b)
     def __repr__(self):

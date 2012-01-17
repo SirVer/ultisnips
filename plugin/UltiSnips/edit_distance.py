@@ -5,25 +5,11 @@ import heapq # TODO: overkill. Bucketing is better
 from collections import defaultdict
 import sys
 
-class GridPoint(object):
-    """Docstring for GridPoint """
-
-    __slots__ = ("parent", "cost",)
-
-    def __init__(self, parent, cost):
-        """@todo: to be defined
-
-        :parent: @todo
-        :cost: @todo
-        """
-        self._parent = parent
-        self._cost = cost
-
-def edit_script(a, b):
+def edit_script(a, b, sline = 0, scol = 0):
     d = defaultdict(list)
     seen = defaultdict(lambda: sys.maxint)
 
-    d[0] = [ (0,0,0,0, ()) ]
+    d[0] = [ (0,0,sline,scol, ()) ]
 
     # TODO: needs some doku
     cost = 0

@@ -172,6 +172,8 @@ function! UltiSnips_MapKeys()
     exec "snoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <Esc>:call UltiSnips_JumpBackwards()<cr>"
     exec "inoremap <silent> " . g:UltiSnipsListSnippets . " <C-R>=UltiSnips_ListSnippets()<cr>"
     exec "snoremap <silent> " . g:UltiSnipsListSnippets . " <Esc>:call UltiSnips_ListSnippets()<cr>"
+
+    snoremap <silent> <BS> <c-g>c
 endf
 
 function! UltiSnips_CursorMoved()
@@ -197,6 +199,7 @@ exec g:_uspy "UltiSnips_Manager.forward_trigger = vim.eval('g:UltiSnipsJumpForwa
 exec g:_uspy "UltiSnips_Manager.backward_trigger = vim.eval('g:UltiSnipsJumpBackwardTrigger')"
 
 au CursorMovedI * call UltiSnips_CursorMoved()
+" au CursorMoved * call UltiSnips_CursorMoved()
 "au InsertEnter * call UltiSnips_EnteredInsertMode()
 "au WinLeave * call UltiSnips_LeavingWindow()
 

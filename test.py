@@ -1193,59 +1193,63 @@ class MirrorBeforeTabstopOverwrite_ExceptCorrectResult(_VimTest):
     keys = "test" + EX + "a"
     wanted = "a a a"
 
-##class TextTabStopSimpleMirrorMultiline_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1\n$1")
-##    keys = "test" + EX + "hallo"
-##    wanted = "hallo\nhallo"
-##class SimpleMirrorMultilineMany_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "    $1\n$1\na$1b\n$1\ntest $1 mich")
-##    keys = "test" + EX + "hallo"
-##    wanted = "    hallo\nhallo\nahallob\nhallo\ntest hallo mich"
-##class MultilineTabStopSimpleMirrorMultiline_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1\n\n$1\n\n$1")
-##    keys = "test" + EX + "hallo Du\nHi"
-##    wanted = "hallo Du\nHi\n\nhallo Du\nHi\n\nhallo Du\nHi"
-##class MultilineTabStopSimpleMirrorMultiline1_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1\n$1\n$1")
-##    keys = "test" + EX + "hallo Du\nHi"
-##    wanted = "hallo Du\nHi\nhallo Du\nHi\nhallo Du\nHi"
-##class MultilineTabStopSimpleMirrorDeleteInLine_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1\n$1\n$1")
-##    keys = "test" + EX + "hallo Du\nHi\b\bAch Blah"
-##    wanted = "hallo Du\nAch Blah\nhallo Du\nAch Blah\nhallo Du\nAch Blah"
-##class TextTabStopSimpleMirrorMultilineMirrorInFront_ECR(_VimTest):
-##    snippets = ("test", "$1\n${1:sometext}")
-##    keys = "test" + EX + "hallo\nagain"
-##    wanted = "hallo\nagain\nhallo\nagain"
-##
-##class SimpleMirrorDelete_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1\n$1")
-##    keys = "test" + EX + "hallo\b\b"
-##    wanted = "hal\nhal"
-##
-##class SimpleMirrorSameLine_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1 $1")
-##    keys = "test" + EX + "hallo"
-##    wanted = "hallo hallo"
-##class Transformation_SimpleMirrorSameLineBeforeTabDefVal_ECR(_VimTest):
-##    snippets = ("test", "$1 ${1:replace me}")
-##    keys = "test" + EX + "hallo foo"
-##    wanted = "hallo foo hallo foo"
-##class SimpleMirrorSameLineMany_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1 $1 $1 $1")
-##    keys = "test" + EX + "hallo du"
-##    wanted = "hallo du hallo du hallo du hallo du"
-##class SimpleMirrorSameLineManyMultiline_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1 $1 $1 $1")
-##    keys = "test" + EX + "hallo du\nwie gehts"
-##    wanted = "hallo du\nwie gehts hallo du\nwie gehts hallo du\nwie gehts" \
-##            " hallo du\nwie gehts"
-##class SimpleMirrorDeleteSomeEnterSome_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1\n$1")
-##    keys = "test" + EX + "hallo\b\bhups"
-##    wanted = "halhups\nhalhups"
-##
-##
+class TextTabStopSimpleMirrorMultiline_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1\n$1")
+    keys = "test" + EX + "hallo"
+    wanted = "hallo\nhallo"
+class SimpleMirrorMultilineMany_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "    $1\n$1\na$1b\n$1\ntest $1 mich")
+    keys = "test" + EX + "hallo"
+    wanted = "    hallo\nhallo\nahallob\nhallo\ntest hallo mich"
+class MultilineTabStopSimpleMirrorMultiline_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1\n\n$1\n\n$1")
+    keys = "test" + EX + "hallo Du\nHi"
+    wanted = "hallo Du\nHi\n\nhallo Du\nHi\n\nhallo Du\nHi"
+class MultilineTabStopSimpleMirrorMultiline1_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1\n$1\n$1")
+    keys = "test" + EX + "hallo Du\nHi"
+    wanted = "hallo Du\nHi\nhallo Du\nHi\nhallo Du\nHi"
+class MultilineTabStopSimpleMirrorDeleteInLine_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1\n$1\n$1")
+    keys = "test" + EX + "hallo Du\nHi\b\bAch Blah"
+    wanted = "hallo Du\nAch Blah\nhallo Du\nAch Blah\nhallo Du\nAch Blah"
+class TextTabStopSimpleMirrorMultilineMirrorInFront_ECR(_VimTest):
+    snippets = ("test", "$1\n${1:sometext}")
+    keys = "test" + EX + "hallo\nagain"
+    wanted = "hallo\nagain\nhallo\nagain"
+
+class SimpleMirrorDelete_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1\n$1")
+    keys = "test" + EX + "hallo\b\b"
+    wanted = "hal\nhal"
+
+class SimpleMirrorSameLine_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 $1")
+    keys = "test" + EX + "hallo"
+    wanted = "hallo hallo"
+class SimpleMirrorSameLineBeforeTabDefVal_ECR(_VimTest):
+    snippets = ("test", "$1 ${1:replace me}")
+    keys = "test" + EX + "hallo foo"
+    wanted = "hallo foo hallo foo"
+class SimpleMirrorSameLineBeforeTabDefVal_DelB4Typing_ECR(_VimTest):
+    snippets = ("test", "$1 ${1:replace me}")
+    keys = "test" + EX + BS + "hallo foo"
+    wanted = "hallo foo hallo foo"
+class SimpleMirrorSameLineMany_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 $1 $1 $1")
+    keys = "test" + EX + "hallo du"
+    wanted = "hallo du hallo du hallo du hallo du"
+class SimpleMirrorSameLineManyMultiline_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 $1 $1 $1")
+    keys = "test" + EX + "hallo du\nwie gehts"
+    wanted = "hallo du\nwie gehts hallo du\nwie gehts hallo du\nwie gehts" \
+            " hallo du\nwie gehts"
+class SimpleMirrorDeleteSomeEnterSome_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1\n$1")
+    keys = "test" + EX + "hallo\b\bhups"
+    wanted = "halhups\nhalhups"
+
+
 ##class SimpleTabstopWithDefaultSimpelType_ExceptCorrectResult(_VimTest):
 ##    snippets = ("test", "ha ${1:defa}\n$1")
 ##    keys = "test" + EX + "world"

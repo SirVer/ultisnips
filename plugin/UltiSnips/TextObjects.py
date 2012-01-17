@@ -202,7 +202,7 @@ class _TOParser(object):
 ###########################################################################
 #                             Public classes                              #
 ###########################################################################
-class TextObject(CheapTotalOrdering):
+class TextObject(object):
     """
     This base class represents any object in the text
     that has a span in any ways
@@ -243,8 +243,10 @@ class TextObject(CheapTotalOrdering):
             exclude.add(self)
             self.child_end_moved(old_end, self.abs_end - old_end, exclude)
 
-    def __cmp__(self, other):
-        return self._start.__cmp__(other._start)
+    def __lt__(self, other):
+        return self._start < other._start
+    def __le__(self, other):
+        return self._start <= other._start
 
     ##############
     # PROPERTIES #
@@ -331,10 +333,11 @@ class TextObject(CheapTotalOrdering):
 
         for c in self._childs:
             if c in skip: continue
-            debug("b4: c.abs_span: %r" % (c.abs_span))
+            debug(" c: %r" % (c))
+            debug("   b4: c.abs_span: %r" % (c.abs_span))
             _move_start(c)
             _move_end(c)
-            debug("a4: c.abs_span: %r" % (c.abs_span))
+            debug("   a4: c.abs_span: %r" % (c.abs_span))
 
         if self._parent and self._parent not in skip:
             self._parent.child_end_moved(sp, diff, set((self,)))
@@ -343,27 +346,9 @@ class TextObject(CheapTotalOrdering):
     def _do_edit(self, cmd):
         debug("self: %r, cmd: %r" % (self, cmd))
         debug("self._childs: %r" % (self._childs))
-        def __del_move_col_end(obj):
-            end = obj.abs_end
-            if end.line == line and end.col > col:
-                obj._end.col -= 1
-            return obj._end
-        def __del_move_col_start(obj):
-            start = obj.abs_start
-            if start.line == line and start.col > col:
-                obj._start.col -= 1
-        def __ins_move_col_end(obj):
-            end = obj.abs_end
-            if end.line == line and end.col >= col:
-                obj._end.col += 1
-            return obj._end
-        def __ins_move_col_start(obj):
-            start = obj.abs_start
-            if start.line == line and start.col > col:
-                obj._start.col += 1
-
         ctype, line, col, char = cmd
-        assert('\n' not in char)
+        debug("char: %r" % (char))
+        assert( ('\n' not in char) or (char == "\n"))
         pos = Position(line, col)
 
         to_kill = set()
@@ -372,7 +357,10 @@ class TextObject(CheapTotalOrdering):
             abs_end = c.abs_end
 
             if ctype == "D":
-                end_pos = pos + Position(0, len(char))
+                if char == "\n":
+                    end_pos = Position(line + 1, 0) # TODO: is this even needed?
+                else:
+                    end_pos = pos + Position(0, len(char))
                 # TODO: char is no longer true -> Text
                 # Case: this deletion removes the child
                 if (pos <= abs_start and end_pos > abs_end):
@@ -393,23 +381,38 @@ class TextObject(CheapTotalOrdering):
         if ctype == "D": # TODO: code duplication
             assert(self.abs_start != self.abs_end) # Makes no sense to delete in empty textobject
 
-            delta = Position(0, -len(char))
+            if char == "\n":
+                delta = Position(-1, 0) # TODO: this feels somehow incorrect:
+            else:
+                delta = Position(0, -len(char))
             self._end += delta
 
             self.child_end_moved(self.abs_end, delta, set((self,)))
         else:
             old_end = self.abs_end
-            delta = Position(0, len(char))
+            if char == "\n":
+                delta = Position(1, -col) # TODO: this feels somehow incorrect
+            else:
+                delta = Position(0, len(char))
+
             self._end += delta
 
             self.child_end_moved(old_end, delta, set((self,)))
 
     def edited(self, cmds):
+        assert(len([c for c in self._childs if isinstance(c, VimCursor)]) == 0)
+
         debug("begin: self.current_text: %r" % (self.current_text))
         debug("self.abs_start: %r, self.abs_end: %r" % (self.abs_start, self.abs_end))
+        # Replay User Edits to update end of our current texts
         for cmd in cmds:
             self._do_edit(cmd)
 
+    def do_edits(self):
+        debug("In do_edits")
+        # Do our own edits; keep track of the Cursor
+        vc = VimCursor(self)
+        assert(len([c for c in self._childs if isinstance(c, VimCursor)]) == 1)
         # Update all referers # TODO: maybe in a function of its own
         def _do_it(obj):
             if isinstance(obj, TabStop):
@@ -419,6 +422,12 @@ class TextObject(CheapTotalOrdering):
                 _do_it(c)
 
         _do_it(self)
+
+        #debug("self._childs: %r, vc: %r" % (self._childs, vc))
+        vc.update_position()
+        self._del_child(vc)
+        assert(len([c for c in self._childs if isinstance(c, VimCursor)]) == 0)
+        debug("self._childs: %r" % (self._childs))
 
         debug("end: self.current_text: %r" % (self.current_text))
         debug("self.abs_start: %r, self.abs_end: %r" % (self.abs_start, self.abs_end))
@@ -546,7 +555,9 @@ class TextObject(CheapTotalOrdering):
         self._childs.sort()
 
     def _del_child(self,c):
+        debug("len(self._childs): %r, self._childs: %r" % (len(self._childs), self._childs))
         self._childs.remove(c)
+        debug("len(self._childs): %r, self._childs: %r" % (len(self._childs), self._childs))
 
         if isinstance(c, TabStop):
             del self._tabstops[c.no]
@@ -563,6 +574,27 @@ class EscapedChar(TextObject):
     This is a base class without functionality just to mark it in the code.
     """
     pass
+
+class VimCursor(TextObject):
+    def __init__(self, parent):
+        line, col = vim.current.window.cursor # TODO: some schenanigans like col -> byte?
+        s = Position(line-1, col)
+        e = Position(line-1, col)
+        TextObject.__init__(self, parent, s, e)
+
+    def update_position(self):
+        assert(self._start == self._end)
+        vim.current.window.cursor = (self._start.line + 1, self._start.col)
+
+    def __repr__(self):
+        return "VimCursor(%r)" % (self._start)
+
+    @property # TODO: remove those again
+    def abs_start(self):
+        return self._start
+    @property
+    def abs_end(self):
+        return self._end
 
 
 class Mirror(TextObject):
