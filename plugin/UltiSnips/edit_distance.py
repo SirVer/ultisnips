@@ -60,7 +60,7 @@ def edit_script(a, b, sline = 0, scol = 0):
 
             if x < len(a): # DELETE
                 if (what and what[-1][0] == "D" and what[-1][1] == line and
-                    what[-1][2] == col and a[x] != '\n' and
+                    what[-1][2] == col and a[x] != '\n' and what[-1][-1] != '\n' and
                     seen[x+1,y] > cost + D_COST // 2
                 ):
                     seen[x+1,y] = cost + D_COST // 2
@@ -76,7 +76,11 @@ def transform(a, cmds):
     for cmd in cmds:
         ctype, line, col, char = cmd
         if ctype == "D":
-            buf[line] = buf[line][:col] + buf[line][col+len(char):]
+            if char != '\n':
+                buf[line] = buf[line][:col] + buf[line][col+len(char):]
+            else:
+                buf[line] = buf[line] + buf[line+1]
+                del buf[line+1]
         elif ctype == "I":
             buf[line] = buf[line][:col] + char + buf[line][col:]
         buf = '\n'.join(buf).split('\n')
@@ -133,6 +137,17 @@ class TestRealLife1(_Base, unittest.TestCase):
     wanted = (
         ("I", 0, 11, " "),
     )
+
+class TestWithNewline(_Base, unittest.TestCase):
+    a = 'First Line\nSecond Line'
+    b = 'n'
+    wanted = (
+        ("D", 0, 0, "First Line"),
+        ("D", 0, 0, "\n"),
+        ("D", 0, 0, "Second Line"),
+        ("I", 0, 0, "n"),
+    )
+
 
 class TestCheapDelete(_Base, unittest.TestCase):
     a = 'Vorne hallo Hinten'

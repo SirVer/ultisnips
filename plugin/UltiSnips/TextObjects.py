@@ -411,14 +411,27 @@ class TextObject(object):
             self._del_child(c)
 
         # We have to handle this ourselves
+        sp = self.abs_start # TODO
+        def _move_end(obj, diff): # TODO: this is code duplication, the other one is buggy!
+            if obj.abs_end < sp: return
+
+            if delta.line >= 0:
+                if obj.abs_end.line == sp.line:
+                    obj._end.col += diff.col
+                obj._end.line += diff.line
+            else:
+                obj._end.line += diff.line
+                if obj.abs_end.line == sp.line:
+                    obj._end.col += diff.col
+
         if ctype == "D": # TODO: code duplication
             assert(self.abs_start != self.abs_end) # Makes no sense to delete in empty textobject
 
             if char == "\n":
-                delta = Position(-1, 0) # TODO: this feels somehow incorrect:
+                delta = Position(-1, col) # TODO: this feels somehow incorrect:
             else:
                 delta = Position(0, -len(char))
-            self._end += delta
+            _move_end(self, delta)
 
             self.child_end_moved(self.abs_end, delta, set((self,)))
         else:
@@ -427,8 +440,7 @@ class TextObject(object):
                 delta = Position(1, -col) # TODO: this feels somehow incorrect
             else:
                 delta = Position(0, len(char))
-
-            self._end += delta
+            _move_end(self, delta)
 
             self.child_end_moved(old_end, delta, set((self,)))
 

@@ -782,31 +782,31 @@ class TabStop_TSInDefault_MirrorsOutside_OverwriteFirstSwitchNumbers(_VimTest):
     # keys = "test" + EX + JF + "WORLD" + JF + "End"
     # wanted = "world = require('WORLD')End"
 
-##class TabStop_Multiline_Leave(_VimTest):
-##    snippets = ("test", "hi ${1:first line\nsecond line} world" )
-##    keys = "test" + EX
-##    wanted = "hi first line\nsecond line world"
-##class TabStop_Multiline_Overwrite(_VimTest):
-##    snippets = ("test", "hi ${1:first line\nsecond line} world" )
-##    keys = "test" + EX + "Nothing"
-##    wanted = "hi Nothing world"
-##class TabStop_Multiline_MirrorInFront_Leave(_VimTest):
-##    snippets = ("test", "hi $1 ${1:first line\nsecond line} world" )
-##    keys = "test" + EX
-##    wanted = "hi first line\nsecond line first line\nsecond line world"
-##class TabStop_Multiline_MirrorInFront_Overwrite(_VimTest):
-##    snippets = ("test", "hi $1 ${1:first line\nsecond line} world" )
-##    keys = "test" + EX + "Nothing"
-##    wanted = "hi Nothing Nothing world"
-##class TabStop_Multiline_DelFirstOverwriteSecond_Overwrite(_VimTest):
-##    snippets = ("test", "hi $1 $2 ${1:first line\nsecond line} ${2:Hi} world" )
-##    keys = "test" + EX + BS + JF + "Nothing"
-##    wanted = "hi  Nothing  Nothing world"
-##
-##class TabStopNavigatingInInsertModeSimple_ExceptCorrectResult(_VimTest):
-##    snippets = ("hallo", "Hallo ${1:WELT} ups")
-##    keys = "hallo" + EX + "welt" + 2*ARR_L + "hips" + JF + "end"
-##    wanted = "hallo wehipslt upsend"
+class TabStop_Multiline_Leave(_VimTest):
+    snippets = ("test", "hi ${1:first line\nsecond line} world" )
+    keys = "test" + EX
+    wanted = "hi first line\nsecond line world"
+class TabStop_Multiline_Overwrite(_VimTest):
+    snippets = ("test", "hi ${1:first line\nsecond line} world" )
+    keys = "test" + EX + "Nothing"
+    wanted = "hi Nothing world"
+class TabStop_Multiline_MirrorInFront_Leave(_VimTest):
+    snippets = ("test", "hi $1 ${1:first line\nsecond line} world" )
+    keys = "test" + EX
+    wanted = "hi first line\nsecond line first line\nsecond line world"
+class TabStop_Multiline_MirrorInFront_Overwrite(_VimTest):
+    snippets = ("test", "hi $1 ${1:first line\nsecond line} world" )
+    keys = "test" + EX + "Nothing"
+    wanted = "hi Nothing Nothing world"
+class TabStop_Multiline_DelFirstOverwriteSecond_Overwrite(_VimTest):
+    snippets = ("test", "hi $1 $2 ${1:first line\nsecond line} ${2:Hi} world" )
+    keys = "test" + EX + BS + JF + "Nothing"
+    wanted = "hi  Nothing  Nothing world"
+
+class TabStopNavigatingInInsertModeSimple_ExceptCorrectResult(_VimTest):
+    snippets = ("hallo", "Hallo ${1:WELT} ups")
+    keys = "hallo" + EX + "haselnut" + 2*ARR_L + "hips" + JF + "end"
+    wanted = "Hallo haselnhipsut upsend"
 ### End: TabStop Tests  #}}}
 ### ShellCode Interpolation  {{{#
 ##class TabStop_Shell_SimpleExample(_VimTest):
