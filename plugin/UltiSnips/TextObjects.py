@@ -152,8 +152,7 @@ class _TOParser(object):
                     seen_ts[token.no] = ts
                     parent._add_tabstop(ts)
                 else:
-                    m = Mirror(parent, token)
-                    seen_ts[token.no].add_referencer(m)
+                    Mirror(parent, seen_ts[token.no], token)
 
     def _create_objects_with_links_to_tabs(self, all_tokens, seen_ts):
         for parent, token in all_tokens:
@@ -163,17 +162,22 @@ class _TOParser(object):
                 Transformation(parent, seen_ts[token.no], token)
 
     def _replace_initital_texts(self, seen_ts):
-        def _do_it(obj):
-            debug("In _do_it: obj: %r" % (obj))
+        def _place_initial_text(obj):
+            debug("In _place_initial_text: obj: %r" % (obj))
             obj.initial_replace()
 
             for c in obj._childs: # TODO: private parts!
-                _do_it(c)
+                _place_initial_text(c)
 
-        _do_it(self._parent_to)
+        _place_initial_text(self._parent_to)
 
-        for ts in seen_ts.values():
-            ts.update_referencers()
+        def _update_non_tabstops(obj): # TODO: Stupid function name
+            obj._really_updateman()
+
+            for c in obj._childs:
+                _update_non_tabstops(c)
+
+        _update_non_tabstops(self._parent_to)
 
     def _do_parse(self, all_tokens, seen_ts):
         tokens = list(tokenize(self._text, self._indent))
@@ -364,7 +368,7 @@ class TextObject(object):
                     end_pos = pos + Position(0, len(char))
                 # TODO: char is no longer true -> Text
                 # Case: this deletion removes the child
-                if (pos <= abs_start and end_pos > abs_end):
+                if (pos < abs_start and end_pos >= abs_end):
                     debug("Case 1")
                     to_kill.add(c)
                 # Case: this edit command is completely for the child
@@ -443,14 +447,13 @@ class TextObject(object):
         vc = VimCursor(self)
         assert(len([c for c in self._childs if isinstance(c, VimCursor)]) == 1)
         # Update all referers # TODO: maybe in a function of its own
-        def _do_it(obj):
-            if isinstance(obj, TabStop):
-                obj.update_referencers()
+        def _update_non_tabstops(obj): # TODO: stupid functon name
+            obj._really_updateman()
 
             for c in obj._childs:
-                _do_it(c)
+                _update_non_tabstops(c)
 
-        _do_it(self)
+        _update_non_tabstops(self)
 
         #debug("self._childs: %r, vc: %r" % (self._childs, vc))
         vc.update_position()
@@ -491,6 +494,7 @@ class TextObject(object):
         # return new_end
 
     def _get_next_tab(self, no):
+        debug("_get_next_tab: self: %r, no: %r" % (self, no))
         if not len(self._tabstops.keys()):
             return
         tno_max = max(self._tabstops.keys())
@@ -540,7 +544,7 @@ class TextObject(object):
     ###############################
     # Private/Protected functions #
     ###############################
-    def _do_update(self):
+    def _really_updateman(self): # TODO:
         pass
 
     # def _move_textobjects_behind(self, start, end, lines, cols, obj_idx):
@@ -632,10 +636,21 @@ class Mirror(TextObject):
     """
     A Mirror object mirrors a TabStop that is, text is repeated here
     """
-    def new_text(self, tb): # TODO: function has a stupid name
-        if self._is_killed:
-            return
+    def __init__(self, parent, tabstop, token):
+        TextObject.__init__(self, parent, token)
 
+        self._ts = tabstop
+
+    def _really_updateman(self): # TODO: function has a stupid name
+        # TODO: this function will get called to often. It should
+        # check if a replacement is really needed
+        assert(not self._is_killed)
+
+        if self._ts._is_killed:
+            tb = TextBuffer("")
+        else:
+
+            tb = TextBuffer(self._ts.current_text)
         debug("new_text, self: %r" % (self))
         debug("self.abs_start: %r, self.abs_end: %r, self.current_text: %r" % (self.abs_start, self.abs_end, self.current_text))
         # TODO: initial replace does not need to take an argument
@@ -647,6 +662,9 @@ class Mirror(TextObject):
         if self.abs_end != old_end:
             # TODO: child_end_moved is a stupid name for this function
             self.child_end_moved(old_end, self.abs_end - old_end, set((self,)))
+
+        if self._ts._is_killed:
+            self._parent._del_child(self)
 
     def __repr__(self):
         return "Mirror(%s -> %s)" % (self.abs_start, self.abs_end)
@@ -951,24 +969,12 @@ class TabStop(TextObject):
     comes to rest when the user taps through the Snippet.
     """
     def __init__(self, parent, token, start = None, end = None):
-        self._referencer = []
-
         if start is not None:
             self._no = token
             TextObject.__init__(self, parent, start, end)
         else:
             TextObject.__init__(self, parent, token)
             self._no = token.no
-
-    def update_referencers(self):
-        for r in self._referencer:
-            debug("r: %r" % (r))
-            debug("self.current_text: %r" % (self.current_text))
-            r.new_text(TextBuffer(self.current_text))
-
-    def add_referencer(self, r):
-        self._referencer.append(r)
-        self._referencer.sort()
 
     def no(self):
         return self._no
@@ -1015,6 +1021,7 @@ class SnippetInstance(TextObject):
         return rv
 
     def select_next_tab(self, backwards = False):
+        debug("select_next_tab: self: %r, self._cts: %r" % (self, self._cts))
         if self._cts is None:
             return
 

@@ -5,6 +5,8 @@ import heapq # TODO: overkill. Bucketing is better
 from collections import defaultdict
 import sys
 
+# TODO: check test cases here. They are not up to date
+
 def edit_script(a, b, sline = 0, scol = 0):
     d = defaultdict(list)
     seen = defaultdict(lambda: sys.maxint)
@@ -13,7 +15,8 @@ def edit_script(a, b, sline = 0, scol = 0):
 
     # TODO: needs some doku
     cost = 0
-    DI_COST = len(a)+len(b)
+    D_COST = len(a)+len(b)
+    I_COST = len(a)+len(b)
     while True:
         while len(d[cost]):
             #sumarized = [ compactify(what) for c, x, line, col, what in d[cost] ] # TODO: not needed
@@ -30,9 +33,14 @@ def edit_script(a, b, sline = 0, scol = 0):
                 if a[x] == '\n':
                     ncol = 0
                     nline +=1
-                if seen[x+1,y+1] > cost + 1:
-                    d[cost+1].append((x+1,y+1, nline, ncol, what)) # TODO: slow!
-                    seen[x+1,y+1] = cost + 1
+                lcost = cost + 1
+                if (what and what[-1][0] == "D" and what[-1][1] == line and
+                        what[-1][2] == col and a[x] != '\n'):
+                    # Matching directly after a deletion should be as costly as DELETE + INSERT + a bit
+                    lcost = (D_COST + I_COST)*1.5
+                if seen[x+1,y+1] > lcost:
+                    d[lcost].append((x+1,y+1, nline, ncol, what)) # TODO: slow!
+                    seen[x+1,y+1] = lcost
 
             if y < len(b): # INSERT
                 ncol = col + 1
@@ -42,24 +50,24 @@ def edit_script(a, b, sline = 0, scol = 0):
                     nline += 1
                 if (what and what[-1][0] == "I" and what[-1][1] == nline and
                     what[-1][2]+len(what[-1][-1]) == col and b[y] != '\n' and
-                    seen[x,y+1] > cost + (DI_COST + ncol) // 2
+                    seen[x,y+1] > cost + (I_COST + ncol) // 2
                 ):
-                    seen[x,y+1] = cost + (DI_COST + ncol) // 2
-                    d[cost + (DI_COST + ncol) // 2].append((x,y+1, line, ncol, what[:-1] + (("I", what[-1][1], what[-1][2], what[-1][-1] + b[y]),) ))
-                elif seen[x,y+1] > cost + DI_COST + ncol:
-                    seen[x,y+1] = cost + DI_COST + ncol
-                    d[cost + ncol + DI_COST].append((x,y+1, nline, ncol, what + (("I", line, col,b[y]),)))
+                    seen[x,y+1] = cost + (I_COST + ncol) // 2
+                    d[cost + (I_COST + ncol) // 2].append((x,y+1, line, ncol, what[:-1] + (("I", what[-1][1], what[-1][2], what[-1][-1] + b[y]),) ))
+                elif seen[x,y+1] > cost + I_COST + ncol:
+                    seen[x,y+1] = cost + I_COST + ncol
+                    d[cost + ncol + I_COST].append((x,y+1, nline, ncol, what + (("I", line, col,b[y]),)))
 
             if x < len(a): # DELETE
                 if (what and what[-1][0] == "D" and what[-1][1] == line and
                     what[-1][2] == col and a[x] != '\n' and
-                    seen[x+1,y] > cost + DI_COST // 2
+                    seen[x+1,y] > cost + D_COST // 2
                 ):
-                    seen[x+1,y] = cost + DI_COST // 2
-                    d[cost + DI_COST // 2].append((x+1,y, line, col, what[:-1] + (("D",line, col, what[-1][-1] + a[x]),) ))
-                elif seen[x+1,y] > cost + DI_COST:
-                    seen[x+1,y] = cost + DI_COST
-                    d[cost + DI_COST].append((x+1,y, line, col, what + (("D",line, col, a[x]),) ))
+                    seen[x+1,y] = cost + D_COST // 2
+                    d[cost + D_COST // 2].append((x+1,y, line, col, what[:-1] + (("D",line, col, what[-1][-1] + a[x]),) ))
+                elif seen[x+1,y] > cost + D_COST:
+                    seen[x+1,y] = cost + D_COST
+                    d[cost + D_COST].append((x+1,y, line, col, what + (("D",line, col, a[x]),) ))
         cost += 1
 
 def transform(a, cmds):
@@ -150,6 +158,13 @@ class TestPaperExample(_Base, unittest.TestCase):
         ("I", 0, 5, "c"),
     )
 
+class TestCommonCharacters(_Base, unittest.TestCase):
+    a,b = "hasomelongertextbl", "hol"
+    wanted = (
+        ("D", 0, 1, "asomelongertextb"),
+        ("I", 0, 1, "o"),
+    )
+
 class TestSKienaExample(_Base, unittest.TestCase):
     a, b = "thou shalt not", "you should not"
     wanted = (
@@ -173,8 +188,7 @@ class MatchIsTooCheap(_Base, unittest.TestCase):
     a = "stdin.h"
     b = "s"
     wanted = (
-        ("D", 0, 0, "stdin.h"),
-        ("I", 0, 0, "s"),
+        ("D", 0, 1, "tdin.h"),
     )
 
 if __name__ == '__main__':

@@ -735,52 +735,53 @@ class TabStop_TSInDefaultText_ZeroLengthNested_OverwriteSecondJumpBackAndForward
     wanted = """halongertextblEnd"""
 
 # TODO: Test for Python where initial text is longer than python code. Might lead to problems
-##class TabStop_TSInDefaultNested_OverwriteOneJumpBackToOther(_VimTest):
-##    snippets = ("test", "hi ${1:this ${2:second ${3:third}}} $4")
-##    keys = "test" + EX + JF + "Hallo" + JF + "Ende"
-##    wanted = "hi this Hallo Ende"
-##class TabStop_TSInDefaultNested_OverwriteOneJumpToThird(_VimTest):
-##    snippets = ("test", "hi ${1:this ${2:second ${3:third}}} $4")
-##    keys = "test" + EX + JF + JF + "Hallo" + JF + "Ende"
-##    wanted = "hi this second Hallo Ende"
-##class TabStop_TSInDefaultNested_OverwriteOneJumpAround(_VimTest):
-##    snippets = ("test", "hi ${1:this ${2:second ${3:third}}} $4")
-##    keys = "test" + EX + JF + JF + "Hallo" + JB+JB + "Blah" + JF + "Ende"
-##    wanted = "hi Blah Ende"
-##
-##class TabStop_TSInDefault_MirrorsOutside_DoNothing(_VimTest):
-##    snippets = ("test", "hi ${1:this ${2:second}} $2")
-##    keys = "test" + EX
-##    wanted = "hi this second second"
-##class TabStop_TSInDefault_MirrorsOutside_OverwriteSecond(_VimTest):
-##    snippets = ("test", "hi ${1:this ${2:second}} $2")
-##    keys = "test" + EX + JF + "Hallo"
-##    wanted = "hi this Hallo Hallo"
-##class TabStop_TSInDefault_MirrorsOutside_Overwrite(_VimTest):
-##    snippets = ("test", "hi ${1:this ${2:second}} $2")
-##    keys = "test" + EX + "Hallo"
-##    wanted = "hi Hallo "
-##class TabStop_TSInDefault_MirrorsOutside_Overwrite1(_VimTest):
-##    snippets = ("test", "$1: ${1:'${2:second}'} $2")
-##    keys = "test" + EX + "Hallo"
-##    wanted = "Hallo: Hallo "
-##class TabStop_TSInDefault_MirrorsOutside_OverwriteSecond1(_VimTest):
-##    snippets = ("test", "$1: ${1:'${2:second}'} $2")
-##    keys = "test" + EX + JF + "Hallo"
-##    wanted = "'Hallo': 'Hallo' Hallo"
-##class TabStop_TSInDefault_MirrorsOutside_OverwriteFirstSwitchNumbers(_VimTest):
-##    snippets = ("test", "$2: ${2:'${1:second}'} $1")
-##    keys = "test" + EX + "Hallo"
-##    wanted = "'Hallo': 'Hallo' Hallo"
-##class TabStop_TSInDefault_MirrorsOutside_OverwriteFirst_RLExample(_VimTest):
-##    snippets = ("test", """`!p snip.rv = t[1].split('/')[-1].lower().strip("'")` = require(${1:'${2:sys}'})""")
-##    keys = "test" + EX + "WORLD" + JF + "End"
-##    wanted = "world = require(WORLD)End"
-##class TabStop_TSInDefault_MirrorsOutside_OverwriteSecond_RLExample(_VimTest):
-##    snippets = ("test", """`!p snip.rv = t[1].split('/')[-1].lower().strip("'")` = require(${1:'${2:sys}'})""")
-##    keys = "test" + EX + JF + "WORLD" + JF + "End"
-##    wanted = "world = require('WORLD')End"
-##
+class TabStop_TSInDefaultNested_OverwriteOneJumpBackToOther(_VimTest):
+    snippets = ("test", "hi ${1:this ${2:second ${3:third}}} $4")
+    keys = "test" + EX + JF + "Hallo" + JF + "Ende"
+    wanted = "hi this Hallo Ende"
+class TabStop_TSInDefaultNested_OverwriteOneJumpToThird(_VimTest):
+    snippets = ("test", "hi ${1:this ${2:second ${3:third}}} $4")
+    keys = "test" + EX + JF + JF + "Hallo" + JF + "Ende"
+    wanted = "hi this second Hallo Ende"
+class TabStop_TSInDefaultNested_OverwriteOneJumpAround(_VimTest):
+    snippets = ("test", "hi ${1:this ${2:second ${3:third}}} $4")
+    keys = "test" + EX + JF + JF + "Hallo" + JB+JB + "Blah" + JF + "Ende"
+    wanted = "hi Blah Ende"
+
+class TabStop_TSInDefault_MirrorsOutside_DoNothing(_VimTest):
+    snippets = ("test", "hi ${1:this ${2:second}} $2")
+    keys = "test" + EX
+    wanted = "hi this second second"
+class TabStop_TSInDefault_MirrorsOutside_OverwriteSecond(_VimTest):
+    snippets = ("test", "hi ${1:this ${2:second}} $2")
+    keys = "test" + EX + JF + "Hallo"
+    wanted = "hi this Hallo Hallo"
+class TabStop_TSInDefault_MirrorsOutside_Overwrite0(_VimTest):
+    snippets = ("test", "hi ${1:this ${2:second}} $2")
+    keys = "test" + EX + "Hallo"
+    wanted = "hi Hallo "
+class TabStop_TSInDefault_MirrorsOutside_Overwrite1(_VimTest):
+    snippets = ("test", "$1: ${1:'${2:second}'} $2")
+    keys = "test" + EX + "Hallo"
+    wanted = "Hallo: Hallo "
+class TabStop_TSInDefault_MirrorsOutside_OverwriteSecond1(_VimTest):
+    snippets = ("test", "$1: ${1:'${2:second}'} $2")
+    keys = "test" + EX + JF + "Hallo"
+    wanted = "'Hallo': 'Hallo' Hallo"
+class TabStop_TSInDefault_MirrorsOutside_OverwriteFirstSwitchNumbers(_VimTest):
+    snippets = ("test", "$2: ${2:'${1:second}'} $1")
+    keys = "test" + EX + "Hallo"
+    wanted = "'Hallo': 'Hallo' Hallo"
+# TODO: these tests have python in them
+# class TabStop_TSInDefault_MirrorsOutside_OverwriteFirst_RLExample(_VimTest):
+    # snippets = ("test", """`!p snip.rv = t[1].split('/')[-1].lower().strip("'")` = require(${1:'${2:sys}'})""")
+    # keys = "test" + EX + "WORLD" + JF + "End"
+    # wanted = "world = require(WORLD)End"
+# class TabStop_TSInDefault_MirrorsOutside_OverwriteSecond_RLExample(_VimTest):
+    # snippets = ("test", """`!p snip.rv = t[1].split('/')[-1].lower().strip("'")` = require(${1:'${2:sys}'})""")
+    # keys = "test" + EX + JF + "WORLD" + JF + "End"
+    # wanted = "world = require('WORLD')End"
+
 ##class TabStop_Multiline_Leave(_VimTest):
 ##    snippets = ("test", "hi ${1:first line\nsecond line} world" )
 ##    keys = "test" + EX
