@@ -633,22 +633,33 @@ class TextObject(object):
     def _add_tabstop(self, ts):
         self._tabstops[ts.no] = ts
 
-class EscapedChar(TextObject):
+class NoneditableTextObject(TextObject):
     """
-    This class is a escape char like \$. It is handled in a text object
-    to make sure that remaining children are correctly moved after
-    replacing the text.
+    All passive text objects that the user can't edit by hand
+    """
+
+    def _replace_text(self, tb):
+        old_end = self._end.copy()
+        self._end = tb.to_vim(self._start, self._end) # TODO: to vim returns something unused
+
+        # TODO: child_end_moved is a stupid name for this function
+        self.child_end_moved2(old_end, self._end)
+
+class EscapedChar(NoneditableTextObject):
+    """
+    This class is a escape char like \$. It is handled in a text object to make
+    sure that siblings are correctly moved after replacing the text.
 
     This is a base class without functionality just to mark it in the code.
     """
     pass
 
-class VimCursor(TextObject):
+class VimCursor(NoneditableTextObject):
     def __init__(self, parent):
         line, col = vim.current.window.cursor # TODO: some schenanigans like col -> byte?
         s = Position(line-1, col)
         e = Position(line-1, col)
-        TextObject.__init__(self, parent, s, e)
+        NoneditableTextObject.__init__(self, parent, s, e)
 
     def update_position(self):
         assert(self._start == self._end)
@@ -657,13 +668,13 @@ class VimCursor(TextObject):
     def __repr__(self):
         return "VimCursor(%r)" % (self._start)
 
-# TODO: Maybe DependantTextObject which can't be edited and can be killed
-class Mirror(TextObject):
+
+class Mirror(NoneditableTextObject):
     """
     A Mirror object mirrors a TabStop that is, text is repeated here
     """
     def __init__(self, parent, tabstop, token):
-        TextObject.__init__(self, parent, token)
+        NoneditableTextObject.__init__(self, parent, token)
 
         self._ts = tabstop
 
@@ -671,23 +682,10 @@ class Mirror(TextObject):
         # TODO: this function will get called to often. It should
         # check if a replacement is really needed
         assert(not self._is_killed)
+        # TODO: can current_text be a text buffer?
+        tb = TextBuffer("" if self._ts._is_killed else self._ts.current_text)
 
-        if self._ts._is_killed:
-            tb = TextBuffer("")
-        else:
-
-            tb = TextBuffer(self._ts.current_text)
-        debug("new_text, self: %r" % (self))
-        debug("tb: %r" % (tb))
-        debug("self._start: %r, self._end: %r, self.current_text: %r" % (self._start, self._end, self.current_text))
-        # TODO: initial replace does not need to take an argument
-        old_end = self._end
-        tb.to_vim(self._start, self._end) # TODO: to vim returns something unused
-        new_end = tb.calc_end(self._start)
-        self._end = new_end
-        if new_end != old_end:
-            # TODO: child_end_moved is a stupid name for this function
-            self.child_end_moved2(old_end, new_end)
+        self._replace_text(tb)
 
         if self._ts._is_killed:
             self._parent._del_child(self)
@@ -695,7 +693,7 @@ class Mirror(TextObject):
     def __repr__(self):
         return "Mirror(%s -> %s, %r)" % (self._start, self._end, self.current_text)
 
-class Visual(TextObject):
+class Visual(NoneditableTextObject):
     """
     A ${VISUAL} placeholder that will use the text that was last visually
     selected and insert it here. If there was no text visually selected,
@@ -715,7 +713,7 @@ class Visual(TextObject):
 
         self._text = text
 
-        TextObject.__init__(self, parent, token, initial_text = self._text)
+        NoneditableTextObject.__init__(self, parent, token, initial_text = self._text)
 
     def _do_update(self):
         self.current_text = self._text
@@ -747,7 +745,7 @@ class Transformation(Mirror):
     def __repr__(self):
         return "Transformation(%s -> %s)" % (self._start, self._end)
 
-class ShellCode(TextObject):
+class ShellCode(NoneditableTextObject):
     def __init__(self, parent, token):
         code = token.code.replace("\\`", "`")
 
@@ -769,19 +767,19 @@ class ShellCode(TextObject):
         os.unlink(path)
 
         token.initial_text = output
-        TextObject.__init__(self, parent, token)
+        NoneditableTextObject.__init__(self, parent, token)
 
     def __repr__(self):
         return "ShellCode(%s -> %s)" % (self._start, self._end)
 
-class VimLCode(TextObject):
+class VimLCode(NoneditableTextObject):
     def __init__(self, parent, token):
         self._code = token.code.replace("\\`", "`").strip()
 
-        TextObject.__init__(self, parent, token)
+        NoneditableTextObject.__init__(self, parent, token)
 
-    def _do_update(self):
-        self.current_text = as_unicode(vim.eval(self._code))
+    def _really_updateman(self):
+        self._replace_text(TextBuffer(as_unicode(vim.eval(self._code))))
 
     def __repr__(self):
         return "VimLCode(%s -> %s)" % (self._start, self._end)
@@ -934,7 +932,7 @@ class SnippetUtil(object):
         self.shift(other)
 
 
-class PythonCode(TextObject):
+class PythonCode(NoneditableTextObject):
     def __init__(self, parent, token):
 
         code = token.code.replace("\\`", "`")
@@ -956,7 +954,7 @@ class PythonCode(TextObject):
         # Add Some convenience to the code
         self._code = "import re, os, vim, string, random\n" + code
 
-        TextObject.__init__(self, parent, token)
+        NoneditableTextObject.__init__(self, parent, token)
 
 
     def _do_update(self):

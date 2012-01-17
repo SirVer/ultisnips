@@ -808,48 +808,54 @@ class TabStopNavigatingInInsertModeSimple_ExceptCorrectResult(_VimTest):
     keys = "hallo" + EX + "haselnut" + 2*ARR_L + "hips" + JF + "end"
     wanted = "Hallo haselnhipsut upsend"
 ### End: TabStop Tests  #}}}
-### ShellCode Interpolation  {{{#
-##class TabStop_Shell_SimpleExample(_VimTest):
-##    skip_on_windows = True
-##    snippets = ("test", "hi `echo hallo` you!")
-##    keys = "test" + EX + "and more"
-##    wanted = "hi hallo you!and more"
-##class TabStop_Shell_TextInNextLine(_VimTest):
-##    skip_on_windows = True
-##    snippets = ("test", "hi `echo hallo`\nWeiter")
-##    keys = "test" + EX + "and more"
-##    wanted = "hi hallo\nWeiterand more"
-##class TabStop_Shell_InDefValue_Leave(_VimTest):
-##    skip_on_windows = True
-##    sleeptime = 0.09 # Do this very slowly
-##    snippets = ("test", "Hallo ${1:now `echo fromecho`} end")
-##    keys = "test" + EX + JF + "and more"
-##    wanted = "Hallo now fromecho endand more"
-##class TabStop_Shell_InDefValue_Overwrite(_VimTest):
-##    skip_on_windows = True
-##    snippets = ("test", "Hallo ${1:now `echo fromecho`} end")
-##    keys = "test" + EX + "overwrite" + JF + "and more"
-##    wanted = "Hallo overwrite endand more"
-##class TabStop_Shell_TestEscapedChars_Overwrite(_VimTest):
-##    skip_on_windows = True
-##    snippets = ("test", r"""`echo \`echo "\\$hi"\``""")
-##    keys = "test" + EX
-##    wanted = "$hi"
-##class TabStop_Shell_TestEscapedCharsAndShellVars_Overwrite(_VimTest):
-##    skip_on_windows = True
-##    snippets = ("test", r"""`hi="blah"; echo \`echo "$hi"\``""")
-##    keys = "test" + EX
-##    wanted = "blah"
-##
-##class TabStop_Shell_ShebangPython(_VimTest):
-##    skip_on_windows = True
-##    sleeptime = 0.09 # Do this very slowly
-##    snippets = ("test", """Hallo ${1:now `#!/usr/bin/env python
-##print "Hallo Welt"
-##`} end""")
-##    keys = "test" + EX + JF + "and more"
-##    wanted = "Hallo now Hallo Welt endand more"
-### End: ShellCode Interpolation  #}}}
+# ShellCode Interpolation  {{{#
+class TabStop_Shell_SimpleExample(_VimTest):
+    skip_on_windows = True
+    snippets = ("test", "hi `echo hallo` you!")
+    keys = "test" + EX + "and more"
+    wanted = "hi hallo you!and more"
+class TabStop_Shell_TextInNextLine(_VimTest):
+    skip_on_windows = True
+    snippets = ("test", "hi `echo hallo`\nWeiter")
+    keys = "test" + EX + "and more"
+    wanted = "hi hallo\nWeiterand more"
+class TabStop_Shell_InDefValue_Leave(_VimTest):
+    skip_on_windows = True
+    sleeptime = 0.09 # Do this very slowly
+    snippets = ("test", "Hallo ${1:now `echo fromecho`} end")
+    keys = "test" + EX + JF + "and more"
+    wanted = "Hallo now fromecho endand more"
+class TabStop_Shell_InDefValue_Overwrite(_VimTest):
+    skip_on_windows = True
+    snippets = ("test", "Hallo ${1:now `echo fromecho`} end")
+    keys = "test" + EX + "overwrite" + JF + "and more"
+    wanted = "Hallo overwrite endand more"
+class TabStop_Shell_TestEscapedChars_Overwrite(_VimTest):
+    skip_on_windows = True
+    snippets = ("test", r"""`echo \`echo "\\$hi"\``""")
+    keys = "test" + EX
+    wanted = "$hi"
+class TabStop_Shell_TestEscapedCharsAndShellVars_Overwrite(_VimTest):
+    skip_on_windows = True
+    snippets = ("test", r"""`hi="blah"; echo \`echo "$hi"\``""")
+    keys = "test" + EX
+    wanted = "blah"
+
+class TabStop_Shell_ShebangPython(_VimTest):
+    skip_on_windows = True
+    sleeptime = 0.09 # Do this very slowly
+    snippets = ("test", """Hallo ${1:now `#!/usr/bin/env python
+print "Hallo Welt"
+`} end""")
+    keys = "test" + EX + JF + "and more"
+    wanted = "Hallo now Hallo Welt endand more"
+# End: ShellCode Interpolation  #}}}
+# VimScript Interpolation  {{{#
+class TabStop_VimScriptInterpolation_SimpleExample(_VimTest):
+    snippets = ("test", """hi `!v indent(".")` End""")
+    keys = "    test" + EX
+    wanted = "    hi 4 End"
+# End: VimScript Interpolation  #}}}
 ### PythonCode Interpolation  {{{#
 ###### Deprecated way ##########
 ##class PythonCodeOld_SimpleExample(_VimTest):
@@ -1148,12 +1154,6 @@ class TabStopNavigatingInInsertModeSimple_ExceptCorrectResult(_VimTest):
 ##    keys = """test""" + EX
 ##    wanted = """hi nothing test End"""
 ### End: PythonCode Interpolation  #}}}
-### VimScript Interpolation  {{{#
-##class TabStop_VimScriptInterpolation_SimpleExample(_VimTest):
-##    snippets = ("test", """hi `!v indent(".")` End""")
-##    keys = "    test" + EX
-##    wanted = "    hi 4 End"
-### End: VimScript Interpolation  #}}}
 # Mirrors  {{{#
 class TextTabStopTextAfterTab_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 Hinten\n$1")
