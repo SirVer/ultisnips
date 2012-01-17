@@ -13,7 +13,7 @@ def edit_script(a, b, sline = 0, scol = 0):
 
     # TODO: needs some doku
     cost = 0
-    DI_COST = len(a)+len(b) # Fix this up
+    DI_COST = len(a)+len(b)
     while True:
         while len(d[cost]):
             #sumarized = [ compactify(what) for c, x, line, col, what in d[cost] ] # TODO: not needed
@@ -30,9 +30,9 @@ def edit_script(a, b, sline = 0, scol = 0):
                 if a[x] == '\n':
                     ncol = 0
                     nline +=1
-                if seen[x+1,y+1] > cost:
-                    d[cost].append((x+1,y+1, nline, ncol, what)) # TODO: slow!
-                    seen[x+1,y+1] = cost
+                if seen[x+1,y+1] > cost + 1:
+                    d[cost+1].append((x+1,y+1, nline, ncol, what)) # TODO: slow!
+                    seen[x+1,y+1] = cost + 1
 
             if y < len(b): # INSERT
                 ncol = col + 1
@@ -42,13 +42,13 @@ def edit_script(a, b, sline = 0, scol = 0):
                     nline += 1
                 if (what and what[-1][0] == "I" and what[-1][1] == nline and
                     what[-1][2]+len(what[-1][-1]) == col and b[y] != '\n' and
-                    seen[x,y+1] > cost + (DI_COST + x) // 2
+                    seen[x,y+1] > cost + (DI_COST + ncol) // 2
                 ):
-                    seen[x,y+1] = cost + (DI_COST + x) // 2
-                    d[cost + (DI_COST + x) // 2].append((x,y+1, line, ncol, what[:-1] + (("I", what[-1][1], what[-1][2], what[-1][-1] + b[y]),) ))
-                elif seen[x,y+1] > cost + DI_COST + x:
-                    seen[x,y+1] = cost + DI_COST + x
-                    d[cost + x + DI_COST].append((x,y+1, nline, ncol, what + (("I", line, col,b[y]),)))
+                    seen[x,y+1] = cost + (DI_COST + ncol) // 2
+                    d[cost + (DI_COST + ncol) // 2].append((x,y+1, line, ncol, what[:-1] + (("I", what[-1][1], what[-1][2], what[-1][-1] + b[y]),) ))
+                elif seen[x,y+1] > cost + DI_COST + ncol:
+                    seen[x,y+1] = cost + DI_COST + ncol
+                    d[cost + ncol + DI_COST].append((x,y+1, nline, ncol, what + (("I", line, col,b[y]),)))
 
             if x < len(a): # DELETE
                 if (what and what[-1][0] == "D" and what[-1][1] == line and
@@ -107,16 +107,16 @@ class TestCrash(_Base, unittest.TestCase):
     a = 'hallo Blah mitte=sdfdsfsd\nhallo kjsdhfjksdhfkjhsdfkh mittekjshdkfhkhsdfdsf'
     b = 'hallo Blah mitte=sdfdsfsd\nhallo b mittekjshdkfhkhsdfdsf'
     wanted = (
+        ("D", 1, 6, "kjsdhfjksdhfkjhsdfkh"),
         ("I", 1, 6, "b"),
-        ("D", 1, 7, "kjsdhfjksdhfkjhsdfkh"),
     )
 
 class TestRealLife(_Base, unittest.TestCase):
     a = 'hallo End Beginning'
     b = 'hallo End t'
     wanted = (
+        ("D", 0, 10, "Beginning"),
         ("I", 0, 10, "t"),
-        ("D", 0, 11, "Beginning"),
     )
 
 class TestRealLife1(_Base, unittest.TestCase):
@@ -136,36 +136,45 @@ class TestCheapDelete(_Base, unittest.TestCase):
 class TestNoSubstring(_Base, unittest.TestCase):
     a,b = "abc", "def"
     wanted = (
+        ("D", 0, 0, "abc"),
         ("I", 0, 0, "def"),
-        ("D", 0, 3, "abc"),
     )
 # TODO: quote the correct paper
 #
 class TestPaperExample(_Base, unittest.TestCase):
     a,b = "abcabba", "cbabac"
     wanted = (
-        ("I", 0, 0, "cb"),
-        ("I", 0, 4, "a"),
-        ("D", 0, 6, "abba"),
+        ("D", 0, 0, "ab"),
+        ("I", 0, 1, "b"),
+        ("D", 0, 4, "b"),
+        ("I", 0, 5, "c"),
     )
 
 class TestSKienaExample(_Base, unittest.TestCase):
     a, b = "thou shalt not", "you should not"
     wanted = (
+        ('D', 0, 0, 'th'),
         ('I', 0, 0, 'y'),
-        ('D', 0, 1, 'th'),
         ('I', 0, 6, 'ou'),
         ('D', 0, 8, 'a'),
+        ('D', 0, 9, 't'),
         ('I', 0, 9, 'd'),
-        ('D', 0, 10, 't'),
     )
 
 class TestUltiSnipsProblem(_Base, unittest.TestCase):
     a = "this is it this is it this is it"
     b = "this is it a this is it"
     wanted = (
+        ("D", 0, 11, "this is it"),
         ("I", 0, 11, "a"),
-        ("D", 0, 12, "this is it")
+    )
+
+class MatchIsTooCheap(_Base, unittest.TestCase):
+    a = "stdin.h"
+    b = "s"
+    wanted = (
+        ("D", 0, 0, "stdin.h"),
+        ("I", 0, 0, "s"),
     )
 
 if __name__ == '__main__':

@@ -818,13 +818,14 @@ class SnippetManager(object):
         self._vstate.update()
 
 
-    # @err_to_scratch_buffer # TODO: will be needed again
-    # def entered_insert_mode(self):
-        # self._vstate.update()
-        # if self._cs and self._vstate.has_moved:
-            # while len(self._csnippets):
-                # self._current_snippet_is_done()
-            # self._reinit()
+    @err_to_scratch_buffer # TODO: will be needed again
+    def entered_insert_mode(self):
+        # TODO: very harsh
+        self._vstate.update()
+        if self._cs and self._vstate.has_moved:
+            while len(self._csnippets):
+                self._current_snippet_is_done()
+            self._reinit()
 
     # @err_to_scratch_buffer # TODO: will be needed again
     # def leaving_window(self):
@@ -858,7 +859,6 @@ class SnippetManager(object):
 
     def _reinit(self):
         self._ctab = None
-        self._span_selected = None
 
     def _check_if_still_inside_snippet(self):
         # Cursor moved without input.
@@ -890,7 +890,6 @@ class SnippetManager(object):
             debug("self._ctab.abs_span: %r" % (self._ctab.abs_span))
             if self._ctab:
                 self._vstate.select_span(self._ctab.abs_span)
-                self._span_selected = self._ctab.abs_span
                 jumped = True
                 if self._ctab.no == 0:
                     self._current_snippet_is_done()

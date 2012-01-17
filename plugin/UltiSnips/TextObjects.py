@@ -227,6 +227,7 @@ class TextObject(object):
             parent._add_child(self)
 
         self._cts = 0
+        self._is_killed = False # TODO: not often needed
 
     def initial_replace(self, gtc = None):
         ct = gtc or self._initial_text # TODO: Initial Text is nearly unused.
@@ -364,12 +365,40 @@ class TextObject(object):
                 # TODO: char is no longer true -> Text
                 # Case: this deletion removes the child
                 if (pos <= abs_start and end_pos > abs_end):
+                    debug("Case 1")
                     to_kill.add(c)
                 # Case: this edit command is completely for the child
                 elif (abs_start <= pos <= abs_end) and (abs_start <= end_pos <= abs_end):
+                    debug("Case 2")
+                    if not isinstance(c, TabStop): # Erasing inside NonTabstop -> Kill element
+                        to_kill.add(c)
+                        continue
                     c._do_edit(cmd)
                     return
+                # Case: partially for us, partially for the child
+                elif (pos < abs_start and (abs_start < end_pos <= abs_end)):
+                    debug("Case 3")
+                    my_text = char[:(abs_start-pos).col]
+                    c_text = char[(abs_start-pos).col:]
+                    debug("   my_text: %r" % (my_text))
+                    debug("   c_text: %r" % (c_text))
+                    self._do_edit((ctype, line, col, my_text))
+                    self._do_edit((ctype, line, col, c_text))
+                    return
+                elif (end_pos >= abs_end and (abs_start <= pos < abs_end)):
+                    debug("Case 4")
+                    c_text = char[(abs_end-pos).col:]
+                    my_text = char[:(abs_end-pos).col]
+                    debug("   c_text: %r" % (c_text))
+                    debug("   my_text: %r" % (my_text))
+                    self._do_edit((ctype, line, col, c_text))
+                    self._do_edit((ctype, line, col, my_text))
+                    return
+
+
             if ctype == "I":
+                if not isinstance(c, TabStop): # TODO: make this nicer
+                    continue
                 if (abs_start <= pos <= abs_end):
                     c._do_edit(cmd)
                     return
@@ -555,6 +584,7 @@ class TextObject(object):
         self._childs.sort()
 
     def _del_child(self,c):
+        c._is_killed = True # TODO: private parts
         debug("len(self._childs): %r, self._childs: %r" % (len(self._childs), self._childs))
         self._childs.remove(c)
         debug("len(self._childs): %r, self._childs: %r" % (len(self._childs), self._childs))
@@ -597,11 +627,15 @@ class VimCursor(TextObject):
         return self._end
 
 
+# TODO: Maybe DependantTextObject which can't be edited and can be killed
 class Mirror(TextObject):
     """
     A Mirror object mirrors a TabStop that is, text is repeated here
     """
     def new_text(self, tb): # TODO: function has a stupid name
+        if self._is_killed:
+            return
+
         debug("new_text, self: %r" % (self))
         debug("self.abs_start: %r, self.abs_end: %r, self.current_text: %r" % (self.abs_start, self.abs_end, self.current_text))
         # TODO: initial replace does not need to take an argument

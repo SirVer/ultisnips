@@ -1249,50 +1249,61 @@ class SimpleMirrorDeleteSomeEnterSome_ExceptCorrectResult(_VimTest):
     keys = "test" + EX + "hallo\b\bhups"
     wanted = "halhups\nhalhups"
 
+class SimpleTabstopWithDefaultSimpelType_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha ${1:defa}\n$1")
+    keys = "test" + EX + "world"
+    wanted = "ha world\nworld"
+class SimpleTabstopWithDefaultComplexType_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha ${1:default value} $1\nanother: $1 mirror")
+    keys = "test" + EX + "world"
+    wanted = "ha world world\nanother: world mirror"
+class SimpleTabstopWithDefaultSimpelKeep_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha ${1:defa}\n$1")
+    keys = "test" + EX
+    wanted = "ha defa\ndefa"
+class SimpleTabstopWithDefaultComplexKeep_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha ${1:default value} $1\nanother: $1 mirror")
+    keys = "test" + EX
+    wanted = "ha default value default value\nanother: default value mirror"
 
-##class SimpleTabstopWithDefaultSimpelType_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "ha ${1:defa}\n$1")
-##    keys = "test" + EX + "world"
-##    wanted = "ha world\nworld"
-##class SimpleTabstopWithDefaultComplexType_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "ha ${1:default value} $1\nanother: $1 mirror")
-##    keys = "test" + EX + "world"
-##    wanted = "ha world world\nanother: world mirror"
-##class SimpleTabstopWithDefaultSimpelKeep_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "ha ${1:defa}\n$1")
-##    keys = "test" + EX
-##    wanted = "ha defa\ndefa"
-##class SimpleTabstopWithDefaultComplexKeep_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "ha ${1:default value} $1\nanother: $1 mirror")
-##    keys = "test" + EX
-##    wanted = "ha default value default value\nanother: default value mirror"
-##
-##class TabstopWithMirrorManyFromAll_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "ha $5 ${1:blub} $4 $0 ${2:$1.h} $1 $3 ${4:More}")
-##    keys = "test" + EX + "hi" + JF + "hu" + JF + "hub" + JF + "hulla" + \
-##            JF + "blah" + JF + "end"
-##    wanted = "ha blah hi hulla end hu hi hub hulla"
-##class TabstopWithMirrorInDefaultNoType_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "ha ${1:blub} ${2:$1.h}")
-##    keys = "test" + EX
-##    wanted = "ha blub blub.h"
-##class TabstopWithMirrorInDefaultTwiceAndExtra_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "ha $1 ${2:$1.h $1.c}\ntest $1")
-##    keys = "test" + EX + "stdin"
-##    wanted = "ha stdin stdin.h stdin.c\ntest stdin"
-##class TabstopWithMirrorInDefaultMultipleLeave_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "ha $1 ${2:snip} ${3:$1.h $2}")
-##    keys = "test" + EX + "stdin"
-##    wanted = "ha stdin snip stdin.h snip"
-##class TabstopWithMirrorInDefaultMultipleOverwrite_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "ha $1 ${2:snip} ${3:$1.h $2}")
-##    keys = "test" + EX + "stdin" + JF + "do snap"
-##    wanted = "ha stdin do snap stdin.h do snap"
-##class TabstopWithMirrorInDefaultOverwrite_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "ha $1 ${2:$1.h}")
-##    keys = "test" + EX + "stdin" + JF + "overwritten"
-##    wanted = "ha stdin overwritten"
-##
+class TabstopWithMirrorManyFromAll_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha $5 ${1:blub} $4 $0 ${2:$1.h} $1 $3 ${4:More}")
+    keys = "test" + EX + "hi" + JF + "hu" + JF + "hub" + JF + "hulla" + \
+            JF + "blah" + JF + "end"
+    wanted = "ha blah hi hulla end hu hi hub hulla"
+class TabstopWithMirrorInDefaultNoType_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha ${1:blub} ${2:$1.h}")
+    keys = "test" + EX
+    wanted = "ha blub blub.h"
+class TabstopWithMirrorInDefaultNoType1_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha ${1:blub} ${2:$1}")
+    keys = "test" + EX
+    wanted = "ha blub blub"
+class TabstopWithMirrorInDefaultTwiceAndExtra_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha $1 ${2:$1.h $1.c}\ntest $1")
+    keys = "test" + EX + "stdin"
+    wanted = "ha stdin stdin.h stdin.c\ntest stdin"
+class TabstopWithMirrorInDefaultMultipleLeave_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha $1 ${2:snip} ${3:$1.h $2}")
+    keys = "test" + EX + "stdin"
+    wanted = "ha stdin snip stdin.h snip"
+class TabstopWithMirrorInDefaultMultipleOverwrite_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha $1 ${2:snip} ${3:$1.h $2}")
+    keys = "test" + EX + "stdin" + JF + "do snap"
+    wanted = "ha stdin do snap stdin.h do snap"
+class TabstopWithMirrorInDefaultOverwrite_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha $1 ${2:$1.h}")
+    keys = "test" + EX + "stdin" + JF + "overwritten"
+    wanted = "ha stdin overwritten"
+class TabstopWithMirrorInDefaultOverwrite1_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha $1 ${2:$1}")
+    keys = "test" + EX + "stdin" + JF + "overwritten"
+    wanted = "ha stdin overwritten"
+class TabstopWithMirrorInDefaultNoOverwrite1_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "ha $1 ${2:$1}")
+    keys = "test" + EX + "stdin" + JF + JF + "end"
+    wanted = "ha stdin stdinend"
+
 ##class MirrorRealLifeExample_ExceptCorrectResult(_VimTest):
 ##    snippets = (
 ##        ("for", "for(size_t ${2:i} = 0; $2 < ${1:count}; ${3:++$2})" \
