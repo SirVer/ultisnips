@@ -6,6 +6,8 @@ Not really a Lexer in the classical sense, but code to hack Snippet Definitions
 into Logical Units called Tokens.
 """
 
+from debug import debug
+
 import string
 import re
 
@@ -18,10 +20,10 @@ __all__ = [
 
 # Helper Classes  {{{
 class _TextIterator(object):
-    def __init__(self, text):
+    def __init__(self, text, offset):
         self._text = text
-        self._line = 0
-        self._col = 0
+        self._line = offset.line
+        self._col = offset.col
 
         self._idx = 0
 
@@ -291,8 +293,9 @@ __ALLOWED_TOKENS = [
     EscapeCharToken, VisualToken, TransformationToken, TabStopToken, MirrorToken,
     PythonCodeToken, VimLCodeToken, ShellCodeToken
 ]
-def tokenize(text, indent):
-    stream = _TextIterator(text)
+def tokenize(text, indent, offset):
+    debug("tokenize: offset: %r" % (offset))
+    stream = _TextIterator(text, offset)
 
     try:
         while True:

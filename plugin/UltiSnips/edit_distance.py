@@ -164,14 +164,14 @@ class TestNoSubstring(_Base, unittest.TestCase):
     )
 # TODO: quote the correct paper
 #
-class TestPaperExample(_Base, unittest.TestCase):
-    a,b = "abcabba", "cbabac"
-    wanted = (
-        ("D", 0, 0, "ab"),
-        ("I", 0, 1, "b"),
-        ("D", 0, 4, "b"),
-        ("I", 0, 5, "c"),
-    )
+# class TestPaperExample(_Base, unittest.TestCase):
+    # a,b = "abcabba", "cbabac"
+    # wanted = (
+        # ("D", 0, 0, "ab"),
+        # ("I", 0, 1, "b"),
+        # ("D", 0, 4, "b"),
+        # ("I", 0, 5, "c"),
+    # )
 
 class TestCommonCharacters(_Base, unittest.TestCase):
     a,b = "hasomelongertextbl", "hol"
@@ -205,6 +205,18 @@ class MatchIsTooCheap(_Base, unittest.TestCase):
     wanted = (
         ("D", 0, 1, "tdin.h"),
     )
+
+class MultiLine(_Base, unittest.TestCase):
+    a = "hi first line\nsecond line first line\nsecond line world"
+    b = "hi first line\nsecond line k world"
+
+    wanted = (
+        ("D", 1, 12, "first line"),
+        ("D", 1, 12, "\n"),
+        ("D", 1, 12, "second line"),
+        ("I", 1, 12, "k"),
+    )
+
 
 if __name__ == '__main__':
    unittest.main()

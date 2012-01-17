@@ -805,7 +805,7 @@ class SnippetManager(object):
 
             debug("lt: %r, ct: %r" % (lt, ct))
             rv = edit_distance.edit_script(lt, ct, abs_start.line, abs_start.col)
-            debug("rv: %r" % (rv,))
+            debug("edit_script: %r" % (rv,))
             self._csnippets[0].edited(rv)
 
         self._check_if_still_inside_snippet()
@@ -866,8 +866,8 @@ class SnippetManager(object):
 
         # Did we leave the snippet with this movement?
         if self._cs:
-            debug("self._vstate.pos: %r, self._cs.abs_span: %r" % (self._vstate.pos, self._cs.abs_span))
-        if self._cs and not (self._vstate.pos in self._cs.abs_span):
+            debug("self._vstate.pos: %r, self._cs.span: %r" % (self._vstate.pos, self._cs.span))
+        if self._cs and not (self._vstate.pos in self._cs.span):
             self._current_snippet_is_done()
 
             self._reinit()
@@ -887,9 +887,9 @@ class SnippetManager(object):
         if self._cs:
             self._ctab = self._cs.select_next_tab(backwards)
             debug("self._ctab: %r" % (self._ctab))
-            debug("self._ctab.abs_span: %r" % (self._ctab.abs_span))
+            debug("self._ctab.span: %r" % (self._ctab.span))
             if self._ctab:
-                self._vstate.select_span(self._ctab.abs_span)
+                self._vstate.select_span(self._ctab.span)
                 jumped = True
                 if self._ctab.no == 0:
                     self._current_snippet_is_done()

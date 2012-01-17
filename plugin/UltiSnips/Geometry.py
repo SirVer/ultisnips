@@ -27,12 +27,21 @@ class Position(object):
         return locals()
     line = property(**line())
 
+    def copy(self):
+        return Position(self._line, self._col)
+
     def __add__(self,pos):
         if not isinstance(pos,Position):
             raise TypeError("unsupported operand type(s) for +: " \
                     "'Position' and %s" % type(pos))
 
         return Position(self.line + pos.line, self.col + pos.col)
+
+    # def geometric_add(self, delta): # TODO
+        # assert(delta.line >= 0 and delta.col >= 0)
+        # if delta.line == 0:
+            # return Position(self.line, self.col + other.col)
+        # return Position(self.line + delta.line, 
 
     def __sub__(self,pos): # TODO: is this really true?
         if not isinstance(pos,Position):
