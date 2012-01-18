@@ -5,10 +5,10 @@ import os
 import re
 import stat
 import tempfile
+
 import vim
 
 from UltiSnips.Buffer import TextBuffer
-from UltiSnips.Compatibility import CheapTotalOrdering
 from UltiSnips.Compatibility import compatible_exec, as_unicode
 from UltiSnips.Geometry import Span, Position
 from UltiSnips.Lexer import tokenize, EscapeCharToken, VisualToken, \
@@ -218,34 +218,7 @@ class _TOParser(object):
 ###########################################################################
 #                             Public classes                              #
 ###########################################################################
-# TODO: this function is related to text object and should maybe be private
-def _move_nocheck(obj, old_end, new_end, diff):
-    assert(diff == (new_end - old_end)) # TODO: argument has no sense
-    if obj < old_end: return
-    debug("obj: %r, new_end: %r, diff: %r" % (obj, new_end, diff))
-    if diff.line >= 0:
-        obj.line += diff.line
-        if obj.line == new_end.line:
-            obj.col += diff.col
-    else:
-        debug("diff: %r" % (diff))
-        obj.line += diff.line
-        if obj.line == new_end.line:
-            obj.col += diff.col
-
-def _move(obj, sp, diff):
-    if obj < sp: return
-
-    debug("obj: %r, sp: %r, diff: %r" % (obj, sp, diff))
-    if diff.line >= 0:
-        if obj.line == sp.line:
-            obj.col += diff.col
-        obj.line += diff.line
-    else:
-        debug("diff: %r" % (diff))
-        obj.line += diff.line
-        if obj.line == sp.line:
-            obj.col += sp.col
+from UltiSnips.Geometry import _move # TODO
 
 class TextObject(object):
     """
@@ -276,15 +249,27 @@ class TextObject(object):
 
     def initial_replace(self):
         # TODO: could this be replaced via _really_updateman?
-        ct = self._initial_text # TODO: Initial Text is nearly unused.
+        tb = self._initial_text # TODO: Initial Text is nearly unused.
         old_end = self._end
-        self._end = ct.to_vim(self._start, self._end)
-        self.child_end_moved2(old_end, self._end)
+        self._end = tb.to_vim(self._start, self._end) # TODO: to vim returns something unused
+
+        # TODO: child_end_moved2 is a stupid name for this function
+        self.child_end_moved3(min(old_end, self._end), self._end.gsub(old_end))
 
     def __lt__(self, other):
         return self._start < other._start
     def __le__(self, other):
         return self._start <= other._start
+
+    def __repr__(self):
+        ct = ""
+        try:
+            ct = self.current_text
+        except IndexError:
+            ct = "<err>"
+
+        return "%s(%r->%r,%r)" % (self.__class__.__name__,
+                self._start, self._end, ct)
 
     ##############
     # PROPERTIES #
@@ -334,15 +319,59 @@ class TextObject(object):
                 return c._find_parent_for_new_to(pos)
         return self
 
-    def child_end_moved2(self, old_end, new_end): # TODO: pretty wasteful, give index
+    def child_end_moved3(self, pivot, diff):
+        if not (self._parent):
+            return
+
+        debug("child_end_moved3: self: %r, pivot: %r, diff: %r" % (self, pivot, diff))
+        _move(self._parent._end, pivot, diff)
+        def _move_all(o):
+            _move(o._start, pivot, diff)
+            _move(o._end, pivot, diff)
+
+            for oc in o._childs:
+                _move_all(oc)
+
+        for c in self._parent._childs[self._parent._childs.index(self)+1:]:
+            st,en = c._start.copy(), c._end.copy()
+            _move_all(c)
+            if (st != c._start) or (en != c._end):
+                debug("moved -> (%r,%r) c: %r" % (st, en, c))
+
+        self._parent.child_end_moved3(pivot, diff)
+        _do_print_all(self)
+
+
+    def child_end_moved2(self, old_end, new_end):
         if not (self._parent) or old_end == new_end:
             return
 
+        # TODO: rename function
+        diff = new_end - old_end
+        diff1 = old_end - new_end
+        # def _move_obj(obj):
+            # # if obj < old_end: return
+            # _move(obj, old_end, diff1)
+
+        def _move_obj(obj):
+            if obj < old_end:
+                debug("DENIED!") # TODO
+                return
+            if diff.line >= 0:
+                obj.line += diff.line
+                if obj.line == new_end.line:
+                    obj.col += diff.col
+            else:
+                debug("diff: %r" % (diff))
+                obj.line += diff.line
+                if obj.line == new_end.line:
+                    obj.col += diff.col
+
         pold_end = self._parent._end.copy()
-        _move_nocheck(self._parent._end, old_end, new_end, new_end - old_end)
+        _move_obj(self._parent._end)
         def _move_all(o):
-            _move_nocheck(o._start, old_end, new_end, new_end - old_end)
-            _move_nocheck(o._end, old_end, new_end, new_end - old_end)
+            _move_obj(o._start)
+            _move_obj(o._end)
 
             for oc in o._childs:
                 _move_all(oc)
@@ -353,6 +382,7 @@ class TextObject(object):
         self._parent.child_end_moved2(pold_end, self._parent._end)
 
     def _do_edit(self, cmd):
+        debug("cmd: %r, self: %r" % (cmd, self))
         ctype, line, col, char = cmd
         assert( ('\n' not in char) or (char == "\n"))
         pos = Position(line, col)
@@ -416,17 +446,18 @@ class TextObject(object):
             assert(self._start != self._end) # Makes no sense to delete in empty textobject
 
             if char == "\n":
-                delta = Position(-1, col) # TODO: this feels somehow incorrect:
+                delta = Position(-1, 0) # TODO: this feels somehow incorrect:
             else:
                 delta = Position(0, -len(char))
         else:
             if char == "\n":
-                delta = Position(1, -col) # TODO: this feels somehow incorrect
+                delta = Position(1, 0) # TODO: this feels somehow incorrect
             else:
                 delta = Position(0, len(char))
         old_end = self._end.copy()
-        _move(self._end, Position(line, col), delta)
-        self.child_end_moved2(old_end, self._end)
+        pivot = Position(line, col)
+        _move(self._end, pivot, delta)
+        self.child_end_moved3(pivot, delta)
 
     def edited(self, cmds): # TODO: Only in SnippetInstance
         assert(len([c for c in self._childs if isinstance(c, VimCursor)]) == 0)
@@ -435,13 +466,12 @@ class TextObject(object):
         for cmd in cmds:
             self._do_edit(cmd)
 
+        _do_print_all(self)
+
     def do_edits(self): # TODO: only in snippets instance, stupid name
         debug("In do_edits")
         # Do our own edits; keep track of the Cursor
         vc = VimCursor(self)
-        assert(len([c for c in self._childs if isinstance(c, VimCursor)]) == 1)
-        # Update all referers # TODO: maybe in a function of its own
-
 
         done = set()
         not_done = set()
@@ -462,44 +492,13 @@ class TextObject(object):
             raise RuntimeError("Cyclic dependency in TextElements!")
 
 
-        #debug("self._childs: %r, vc: %r" % (self._childs, vc))
         vc.update_position()
         self._del_child(vc)
-        assert(len([c for c in self._childs if isinstance(c, VimCursor)]) == 0)
-        debug("self._childs: %r" % (self._childs))
 
         _do_print_all(self)
 
 
-    def update(self):
-        pass # TODO: remove this function
-        # def _update_childs(childs):
-            # for idx,c in childs:
-                # oldend = Position(c.end.line, c.end.col)
-
-                # new_end = c.update()
-
-                # moved_lines = new_end.line - oldend.line
-                # moved_cols = new_end.col - oldend.col
-
-                # self._current_text.replace_text(c.start, oldend, c._current_text)
-
-                # self._move_textobjects_behind(c.start, oldend, moved_lines,
-                            # moved_cols, idx)
-
-        # _update_childs((idx, c) for idx, c in enumerate(self._childs) if isinstance(c, TabStop))
-        # _update_childs((idx, c) for idx, c in enumerate(self._childs) if not isinstance(c, TabStop))
-
-        # self._do_update()
-
-        # new_end = self._current_text.calc_end(self._start)
-
-        # self._end = new_end
-
-        # return new_end
-
     def _get_next_tab(self, no):
-        debug("_get_next_tab: self: %r, no: %r" % (self, no))
         if not len(self._tabstops.keys()):
             return
         tno_max = max(self._tabstops.keys())
@@ -558,29 +557,6 @@ class TextObject(object):
             if self._really_updateman(done, not_done):
                 done.add(self)
 
-    # def _move_textobjects_behind(self, start, end, lines, cols, obj_idx):
-        # if lines == 0 and cols == 0:
-            # return
-
-        # for idx,m in enumerate(self._childs[obj_idx+1:]):
-            # delta_lines = 0
-            # delta_cols_begin = 0
-            # delta_cols_end = 0
-
-            # if m.start.line > end.line:
-                # delta_lines = lines
-            # elif m.start.line == end.line:
-                # if m.start.col >= end.col:
-                    # if lines:
-                        # delta_lines = lines
-                    # delta_cols_begin = cols
-                    # if m.start.line == m.end.line:
-                        # delta_cols_end = cols
-            # m.start.line += delta_lines
-            # m.end.line += delta_lines
-            # m.start.col += delta_cols_begin
-            # m.end.col += delta_cols_end
-
     def _get_tabstop(self, requester, no):
         if no in self._tabstops:
             return self._tabstops[no]
@@ -600,14 +576,12 @@ class TextObject(object):
 
     def _del_child(self,c):
         c._is_killed = True # TODO: private parts
-        debug("len(self._childs): %r, self._childs: %r" % (len(self._childs), self._childs))
         self._childs.remove(c)
-        debug("len(self._childs): %r, self._childs: %r" % (len(self._childs), self._childs))
 
         if isinstance(c, TabStop):
             del self._tabstops[c.no]
 
-    def _add_tabstop(self, ts):
+    def _add_tabstop(self, ts): # Why is tabstop not doing this in __init__? TODO
         self._tabstops[ts.no] = ts
 
 class NoneditableTextObject(TextObject):
@@ -619,9 +593,10 @@ class NoneditableTextObject(TextObject):
         debug("_replace_text: self: %r, tb: %r" % (self, tb))
         old_end = self._end
         self._end = tb.to_vim(self._start, self._end) # TODO: to vim returns something unused
+        assert(not len(self._childs))
 
         # TODO: child_end_moved2 is a stupid name for this function
-        self.child_end_moved2(old_end, self._end)
+        self.child_end_moved3(min(old_end, self._end), self._end.gsub(old_end))
 
 class EscapedChar(NoneditableTextObject):
     """
@@ -642,10 +617,6 @@ class VimCursor(NoneditableTextObject):
     def update_position(self):
         assert(self._start == self._end)
         vim.current.window.cursor = (self._start.line + 1, self._start.col)
-
-    def __repr__(self):
-        return "VimCursor(%r)" % (self._start)
-
 
 class Mirror(NoneditableTextObject):
     """
@@ -671,9 +642,6 @@ class Mirror(NoneditableTextObject):
         tb = TextBuffer(self._ts.current_text)
         self._replace_text(tb)
         return True
-
-    def __repr__(self):
-        return "Mirror(%s -> %s, %r)" % (self._start, self._end, self.current_text)
 
 class Visual(NoneditableTextObject):
     """
@@ -703,11 +671,6 @@ class Visual(NoneditableTextObject):
         self._replace_text(TextBuffer(self._text))
         self._parent._del_child(self)
         return True
-
-    # TODO: __repr__ is now basically the same for all elements
-    def __repr__(self):
-        return "Visual(%s -> %s)" % (self._start, self._end)
-
 
 class Transformation(Mirror):
     def __init__(self, parent, ts, token):
@@ -743,9 +706,6 @@ class Transformation(Mirror):
         self._replace_text(TextBuffer(t))
         return True
 
-    def __repr__(self):
-        return "Transformation(%s -> %s)" % (self._start, self._end)
-
 class ShellCode(NoneditableTextObject):
     def __init__(self, parent, token):
         code = token.code.replace("\\`", "`")
@@ -770,9 +730,6 @@ class ShellCode(NoneditableTextObject):
         token.initial_text = output
         NoneditableTextObject.__init__(self, parent, token)
 
-    def __repr__(self):
-        return "ShellCode(%s -> %s)" % (self._start, self._end)
-
 class VimLCode(NoneditableTextObject):
     def __init__(self, parent, token):
         self._code = token.code.replace("\\`", "`").strip()
@@ -782,9 +739,6 @@ class VimLCode(NoneditableTextObject):
     def _really_updateman(self, done, not_done):
         self._replace_text(TextBuffer(as_unicode(vim.eval(self._code))))
         return True
-
-    def __repr__(self):
-        return "VimLCode(%s -> %s)" % (self._start, self._end)
 
 class _Tabs(object):
     def __init__(self, to):
@@ -987,9 +941,6 @@ class PythonCode(NoneditableTextObject):
             return False
         return True
 
-    def __repr__(self):
-        return "PythonCode(%s -> %s)" % (self._start, self._end)
-
 class TabStop(TextObject):
     """
     This is the most important TextObject. A TabStop is were the cursor
@@ -1006,11 +957,6 @@ class TabStop(TextObject):
     def no(self):
         return self._no
     no = property(no)
-
-    # TODO: none of the _repr_ must access _current_text
-    def __repr__(self):
-        return "TabStop(%i, %s -> %s, %s)" % (self._no, self._start, self._end,
-            repr(self.current_text))
 
 class SnippetInstance(TextObject):
     """
@@ -1036,9 +982,6 @@ class SnippetInstance(TextObject):
 
         _do_print_all(self)
         self.do_edits()
-
-    def __repr__(self):
-        return "SnippetInstance(%s -> %s, %r)" % (self._start, self._end, self.current_text)
 
     def _get_tabstop(self, requester, no):
         # SnippetInstances are completely self contained, therefore, we do not

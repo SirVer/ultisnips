@@ -10,7 +10,7 @@ import sys
 
 import vim
 
-__all__ = ['as_unicode', 'compatible_exec', 'CheapTotalOrdering', 'vim_cursor', 'set_vim_cursor']
+__all__ = ['as_unicode', 'compatible_exec', 'vim_cursor', 'set_vim_cursor']
 
 if sys.version_info >= (3,0):
     from UltiSnips.Compatibility_py3 import *
@@ -34,22 +34,6 @@ if sys.version_info >= (3,0):
 
         col = len(raw_bytes.decode("utf-8"))
         return line, col
-    class CheapTotalOrdering:
-        """Total ordering only appears in python 2.7. We try to stay compatible with
-        python 2.5 for now, so we define our own"""
-
-        def __lt__(self, other):
-            return self.__cmp__(other) < 0
-
-        def __le__(self, other):
-            return self.__cmp__(other) <= 0
-
-        def __gt__(self, other):
-            return self.__cmp__(other) > 0
-
-        def __ge__(self, other):
-            return self.__cmp__(other) >= 0
-
     def as_unicode(s):
         if isinstance(s, bytes):
             return s.decode("utf-8")
@@ -79,23 +63,6 @@ else:
 
         col = len(raw_bytes.decode("utf-8"))
         return line, col
-
-
-    class CheapTotalOrdering(object):
-        """Total ordering only appears in python 2.7. We try to stay compatible with
-        python 2.5 for now, so we define our own"""
-
-        def __lt__(self, other):
-            return self.__cmp__(other) < 0
-
-        def __le__(self, other):
-            return self.__cmp__(other) <= 0
-
-        def __gt__(self, other):
-            return self.__cmp__(other) > 0
-
-        def __ge__(self, other):
-            return self.__cmp__(other) >= 0
 
     def as_unicode(s):
         if isinstance(s, str):

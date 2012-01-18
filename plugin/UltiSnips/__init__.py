@@ -16,7 +16,7 @@ import vim
 from UltiSnips.Geometry import Position, Span
 from UltiSnips.Compatibility import make_suitable_for_vim, set_vim_cursor, vim_cursor
 from UltiSnips.TextObjects import *
-from UltiSnips.Buffer import VimBuffer, TextBuffer
+from UltiSnips.Buffer import TextBuffer
 from UltiSnips.Util import IndentUtil, vim_string, as_unicode
 from UltiSnips.Langmap import LangMapTranslator
 
@@ -500,7 +500,7 @@ class VimState(object):
         self._cline = as_unicode(vim.current.buffer[line])
 
     def select_span(self, r):
-        self._unmap_select_mode_mapping() # TODO: Bring this back!
+        self._unmap_select_mode_mapping()
 
         delta = r.end - r.start
         lineno, col = r.start.line, r.start.col
@@ -557,7 +557,6 @@ class VimState(object):
             move_cmd = LangMapTranslator().translate(
                 r"\<Esc>%sv%s%s\<c-g>" % (move_one_right, move_lines, do_select)
             )
-            debug("move_cmd: %r" % (move_cmd))
 
             feedkeys(move_cmd)
 
@@ -793,7 +792,6 @@ class SnippetManager(object):
     @err_to_scratch_buffer
     def cursor_moved(self):
         self._vstate.update()
-        debug("self._vstate.pos: %r, self._vstate.ppos: %r" % (self._vstate.pos, self._vstate.ppos))
 
         if self._csnippets:
             abs_end = self._vstate.pos
@@ -804,8 +802,6 @@ class SnippetManager(object):
             abs_end = Position(len(vim.current.buffer)-1, 10000)
             span = Span(abs_start, abs_end)
 
-            debug("span: %r" % (span))
-
             # TODO
             # ct = TextBuffer('\n'.join(vim.current.buffer))[span]
             # lt = self._lvb[span]
@@ -813,38 +809,34 @@ class SnippetManager(object):
             lt = as_unicode(self._lvb)
 
             rv = edit_distance.edit_script(lt, ct, abs_start.line, abs_start.col)
-            debug("edit_script: %r" % (rv,))
             self._csnippets[0].edited(rv)
 
         self._check_if_still_inside_snippet()
         if self._csnippets:
             self._csnippets[0].do_edits()
-
-            debug("## self._csnippets: %r" % (self._csnippets[0]))
-            debug("## self._cnsippets._childs: %r" % (self._csnippets[0]._childs))
         self._lvb = TextBuffer('\n'.join(vim.current.buffer)) # TODO: no need to cache everything
         self._vstate.update()
 
 
-    @err_to_scratch_buffer # TODO: will be needed again
+    @err_to_scratch_buffer
     def entered_insert_mode(self):
-        # TODO: very harsh
+        # TODO: very harsh, we can be more freely now
         self._vstate.update()
         if self._cs and self._vstate.has_moved:
             while len(self._csnippets):
                 self._current_snippet_is_done()
             self._reinit()
 
-    # @err_to_scratch_buffer # TODO: will be needed again
-    # def leaving_window(self):
-        # """
-        # Called when the user switches tabs. It basically means that all
-        # snippets must be properly terminated
-        # """
-        # self._vstate.update()
-        # while len(self._csnippets):
-            # self._current_snippet_is_done()
-        # self._reinit()
+    @err_to_scratch_buffer # TODO: does this still does the correct thing?
+    def leaving_window(self):
+        """
+        Called when the user switches tabs. It basically means that all
+        snippets must be properly terminated
+        """
+        self._vstate.update()
+        while len(self._csnippets):
+            self._current_snippet_is_done()
+        self._reinit()
 
 
     ###################################
@@ -873,8 +865,6 @@ class SnippetManager(object):
         self._ctab = None
 
         # Did we leave the snippet with this movement?
-        if self._cs:
-            debug("self._vstate.pos: %r, self._cs.span: %r" % (self._vstate.pos, self._cs.span))
         if self._cs and not (self._vstate.pos in self._cs.span):
             self._current_snippet_is_done()
 
@@ -891,11 +881,8 @@ class SnippetManager(object):
 
     def _jump(self, backwards = False):
         jumped = False
-        debug("self._cs: %r" % (self._cs))
         if self._cs:
             self._ctab = self._cs.select_next_tab(backwards)
-            debug("self._ctab: %r" % (self._ctab))
-            debug("self._ctab.span: %r" % (self._ctab.span))
             if self._ctab:
                 self._vstate.select_span(self._ctab.span)
                 jumped = True
@@ -1032,7 +1019,6 @@ class SnippetManager(object):
             self._visual_content = ""
 
         self._lvb = TextBuffer('\n'.join(vim.current.buffer)) # TODO: no need to cache everything
-        debug("in launch: self._lvb: %r" % (self._lvb))
 
         self._jump()
 

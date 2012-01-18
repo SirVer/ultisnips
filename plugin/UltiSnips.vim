@@ -201,7 +201,7 @@ exec g:_uspy "UltiSnips_Manager.backward_trigger = vim.eval('g:UltiSnipsJumpBack
 au CursorMovedI * call UltiSnips_CursorMoved()
 " au CursorMoved * call UltiSnips_CursorMoved()
 au InsertEnter * call UltiSnips_EnteredInsertMode()
-"au WinLeave * call UltiSnips_LeavingWindow()
+au WinLeave * call UltiSnips_LeavingWindow()
 
 call UltiSnips_MapKeys()
 

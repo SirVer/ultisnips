@@ -5,27 +5,11 @@ import vim
 from UltiSnips.Geometry import Position
 from UltiSnips.Compatibility import make_suitable_for_vim, as_unicode
 
-__all__ = [ "TextBuffer", "VimBuffer" ]
+__all__ = [ "TextBuffer" ]
 
 from debug import debug
 
-class Buffer(object):
-    def _replace(self, start, end, content, first_line, last_line):
-        text = content[:]
-        if len(text) == 1:
-            arr = [ first_line + text[0] + last_line ]
-            new_end = start + Position(0,len(text[0]))
-        else:
-            arr = [ first_line + text[0] ] + \
-                    text[1:-1] + \
-                    [ text[-1] + last_line ]
-            new_end = Position(start.line + len(text)-1, len(text[-1]))
-
-        self[start.line:end.line+1] = arr
-
-        return new_end
-
-class TextBuffer(Buffer):
+class TextBuffer(object):
     def __init__(self, textblock):
         # We do not use splitlines() here because it handles cases like 'text\n'
         # differently than we want it here
@@ -43,7 +27,6 @@ class TextBuffer(Buffer):
         buf = vim.current.buffer
 
         # Open any folds this might have created
-        cc = vim.current.window.cursor
         vim.current.window.cursor = start.line + 1, 0
         vim.command("normal zv")
 
@@ -58,14 +41,7 @@ class TextBuffer(Buffer):
             lines[-1] += after
         buf[start.line:end.line + 1] = make_suitable_for_vim(lines)
 
-        vim.current.window.cursor = cc
-
         return new_end
-
-    def replace_text( self, start, end, content ):  # TODO: no longer needed?
-        first_line = self[start.line][:start.col]
-        last_line = self[end.line][end.col:]
-        return self._replace( start, end, content, first_line, last_line)
 
     def __getitem__(self, a):
         try:
@@ -86,29 +62,3 @@ class TextBuffer(Buffer):
         return repr('\n'.join(self._lines))
     def __str__(self):
         return '\n'.join(self._lines)
-
-class VimBuffer(Buffer): # TODO: this should become obsolete
-    def __init__(self, before, after):
-        self._bf = before
-        self._af = after
-    def __getitem__(self, a):
-        if isinstance(a, slice):
-            return [ as_unicode(k) for k in vim.current.buffer[a] ]
-        return as_unicode(vim.current.buffer[a])
-
-    def __setitem__(self, a, b):
-        if isinstance(a,slice):
-            vim.current.buffer[a.start:a.stop] = make_suitable_for_vim(b)
-        else:
-            vim.current.buffer[a] = make_suitable_for_vim(b)
-
-
-    def __repr__(self):
-        return "VimBuffer()"
-
-    def replace_lines( self, fline, eline, content ):
-        start = Position(fline,0 )
-        end = Position(eline, 100000)
-        return self._replace( start, end, content, self._bf, self._af)
-
-
