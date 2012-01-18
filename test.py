@@ -469,39 +469,38 @@ class ParseSnippets_MultiWord_UnmatchedContainer(_PS_Base):
         UltiSnips: Invalid multiword trigger: '!inv snip/' in test_file(2)
         """).strip()
 
-## TODO
-## class ParseSnippets_Global_Python(_PS_Base):
-##     snippets_test_file = ("all", "test_file", r"""
-##         global !p
-##         def tex(ins):
-##             return "a " + ins + " b"
-##         endglobal
-## 
-##         snippet ab
-##         x `!p snip.rv = tex("bob")` y
-##         endsnippet
-## 
-##         snippet ac
-##         x `!p snip.rv = tex("jon")` y
-##         endsnippet
-##         """)
-##     keys = "ab" + EX + "\nac" + EX
-##     wanted = "x a bob b y\nx a jon b y"
-## 
-## class ParseSnippets_Global_Local_Python(_PS_Base):
-##     snippets_test_file = ("all", "test_file", r"""
-## global !p
-## def tex(ins):
-##     return "a " + ins + " b"
-## endglobal
-## 
-## snippet ab
-## x `!p first = tex("bob")
-## snip.rv = "first"` `!p snip.rv = first` y
-## endsnippet
-##         """)
-##     keys = "ab" + EX
-##     wanted = "x first a bob b y"
+class ParseSnippets_Global_Python(_PS_Base):
+    snippets_test_file = ("all", "test_file", r"""
+        global !p
+        def tex(ins):
+            return "a " + ins + " b"
+        endglobal
+
+        snippet ab
+        x `!p snip.rv = tex("bob")` y
+        endsnippet
+
+        snippet ac
+        x `!p snip.rv = tex("jon")` y
+        endsnippet
+        """)
+    keys = "ab" + EX + "\nac" + EX
+    wanted = "x a bob b y\nx a jon b y"
+
+class ParseSnippets_Global_Local_Python(_PS_Base):
+    snippets_test_file = ("all", "test_file", r"""
+global !p
+def tex(ins):
+    return "a " + ins + " b"
+endglobal
+
+snippet ab
+x `!p first = tex("bob")
+snip.rv = "first"` `!p snip.rv = first` y
+endsnippet
+        """)
+    keys = "ab" + EX
+    wanted = "x first a bob b y"
 # End: Snippet Definition Parsing  #}}}
 
 # Simple Expands  {{{#
@@ -772,15 +771,14 @@ class TabStop_TSInDefault_MirrorsOutside_OverwriteFirstSwitchNumbers(_VimTest):
     snippets = ("test", "$2: ${2:'${1:second}'} $1")
     keys = "test" + EX + "Hallo"
     wanted = "'Hallo': 'Hallo' Hallo"
-# TODO: these tests have python in them
-# class TabStop_TSInDefault_MirrorsOutside_OverwriteFirst_RLExample(_VimTest):
-    # snippets = ("test", """`!p snip.rv = t[1].split('/')[-1].lower().strip("'")` = require(${1:'${2:sys}'})""")
-    # keys = "test" + EX + "WORLD" + JF + "End"
-    # wanted = "world = require(WORLD)End"
-# class TabStop_TSInDefault_MirrorsOutside_OverwriteSecond_RLExample(_VimTest):
-    # snippets = ("test", """`!p snip.rv = t[1].split('/')[-1].lower().strip("'")` = require(${1:'${2:sys}'})""")
-    # keys = "test" + EX + JF + "WORLD" + JF + "End"
-    # wanted = "world = require('WORLD')End"
+class TabStop_TSInDefault_MirrorsOutside_OverwriteFirst_RLExample(_VimTest):
+    snippets = ("test", """`!p snip.rv = t[1].split('/')[-1].lower().strip("'")` = require(${1:'${2:sys}'})""")
+    keys = "test" + EX + "WORLD" + JF + "End"
+    wanted = "world = require(WORLD)End"
+class TabStop_TSInDefault_MirrorsOutside_OverwriteSecond_RLExample(_VimTest):
+    snippets = ("test", """`!p snip.rv = t[1].split('/')[-1].lower().strip("'")` = require(${1:'${2:sys}'})""")
+    keys = "test" + EX + JF + "WORLD" + JF + "End"
+    wanted = "world = require('WORLD')End"
 
 class TabStop_Multiline_Leave(_VimTest):
     snippets = ("test", "hi ${1:first line\nsecond line} world" )
@@ -856,7 +854,7 @@ class TabStop_VimScriptInterpolation_SimpleExample(_VimTest):
     keys = "    test" + EX
     wanted = "    hi 4 End"
 # End: VimScript Interpolation  #}}}
-### PythonCode Interpolation  {{{#
+# PythonCode Interpolation  {{{#
 # Deprecated Implementation  {{{#
 class PythonCodeOld_SimpleExample(_VimTest):
     snippets = ("test", """hi `!p res = "Hallo"` End""")
@@ -870,12 +868,11 @@ class PythonCodeOld_ReferencePlaceholderBefore(_VimTest):
     snippets = ("test", """`!p res = len(t[1])*"#"`\n${1:some text}""")
     keys = "test" + EX + "Hallo Welt"
     wanted = "##########\nHallo Welt"
-# TODO
-# class PythonCodeOld_TransformedBeforeMultiLine(_VimTest):
-    # snippets = ("test", """${1/.+/egal/m} ${1:`!p
-# res = "Hallo"`} End""")
-    # keys = "test" + EX
-    # wanted = "egal Hallo End"
+class PythonCodeOld_TransformedBeforeMultiLine(_VimTest):
+    snippets = ("test", """${1/.+/egal/m} ${1:`!p
+res = "Hallo"`} End""")
+    keys = "test" + EX
+    wanted = "egal Hallo End"
 class PythonCodeOld_IndentedMultiline(_VimTest):
     snippets = ("test", """start `!p a = 1
 b = 2
@@ -912,13 +909,11 @@ class PythonCode_ReferencePlaceholderBefore(_VimTest):
     snippets = ("test", """`!p snip.rv = len(t[1])*"#"`\n${1:some text}""")
     keys = "test" + EX + "Hallo Welt"
     wanted = "##########\nHallo Welt"
-# TODO
-# class PythonCode_TransformedBeforeMultiLine(_VimTest):
-    # snippets = ("test", """${1/.+/egal/m} ${1:`!p
-# snip.rv = "Hallo"`} End""")
-    # keys = "test" + EX
-    # wanted = "egal Hallo End"
-
+class PythonCode_TransformedBeforeMultiLine(_VimTest):
+    snippets = ("test", """${1/.+/egal/m} ${1:`!p
+snip.rv = "Hallo"`} End""")
+    keys = "test" + EX
+    wanted = "egal Hallo End"
 class PythonCode_MultilineIndented(_VimTest):
     snippets = ("test", """start `!p a = 1
 b = 2
@@ -1145,6 +1140,10 @@ snip.rv = "World"
     keys = " " * 8 + "test" + EX  # < 8 works.
     wanted = """        hi World End"""
 
+class PythonCode_TrickyReferences(_VimTest):
+    snippets = ("test", r"""${2:${1/.+/egal/}} ${1:$3} ${3:`!p snip.rv = "hi"`}""")
+    keys = "ups test" + EX
+    wanted = "ups egal hi hi"
 # locals
 class PythonCode_Locals(_VimTest):
     snippets = ("test", r"""hi `!p a = "test"
@@ -1153,8 +1152,7 @@ snip.rv = "nothing"` `!p snip.rv = a
     keys = """test""" + EX
     wanted = """hi nothing test End"""
 # End: New Implementation  #}}}
-
-### End: PythonCode Interpolation  #}}}
+# End: PythonCode Interpolation  #}}}
 # Mirrors  {{{#
 class TextTabStopTextAfterTab_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 Hinten\n$1")
@@ -1318,147 +1316,148 @@ class MirrorRealLifeExample_ExceptCorrectResult(_VimTest):
 \t// do nothing
 }"""
 ### End: Mirrors  #}}}
-### Transformations  {{{#
-##class Transformation_SimpleCase_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1 ${1/foo/batzl/}")
-##    keys = "test" + EX + "hallo foo boy"
-##    wanted = "hallo foo boy hallo batzl boy"
-##class Transformation_SimpleCaseNoTransform_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1 ${1/foo/batzl/}")
-##    keys = "test" + EX + "hallo"
-##    wanted = "hallo hallo"
-##class Transformation_SimpleCaseTransformInFront_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "${1/foo/batzl/} $1")
-##    keys = "test" + EX + "hallo foo"
-##    wanted = "hallo batzl hallo foo"
-##class Transformation_SimpleCaseTransformInFrontDefVal_ECR(_VimTest):
-##    snippets = ("test", "${1/foo/batzl/} ${1:replace me}")
-##    keys = "test" + EX + "hallo foo"
-##    wanted = "hallo batzl hallo foo"
-##class Transformation_MultipleTransformations_ECR(_VimTest):
-##    snippets = ("test", "${1:Some Text}${1/.+/\\U$0\E/}\n${1/.+/\L$0\E/}")
-##    keys = "test" + EX + "SomE tExt "
-##    wanted = "SomE tExt SOME TEXT \nsome text "
-##class Transformation_TabIsAtEndAndDeleted_ECR(_VimTest):
-##    snippets = ("test", "${1/.+/is something/}${1:some}")
-##    keys = "hallo test" + EX + "some\b\b\b\b\b"
-##    wanted = "hallo "
-##class Transformation_TabIsAtEndAndDeleted1_ECR(_VimTest):
-##    snippets = ("test", "${1/.+/is something/}${1:some}")
-##    keys = "hallo test" + EX + "some\b\b\b\bmore"
-##    wanted = "hallo is somethingmore"
-##class Transformation_TabIsAtEndNoTextLeave_ECR(_VimTest):
-##    snippets = ("test", "${1/.+/is something/}${1}")
-##    keys = "hallo test" + EX
-##    wanted = "hallo "
-##class Transformation_TabIsAtEndNoTextType_ECR(_VimTest):
-##    snippets = ("test", "${1/.+/is something/}${1}")
-##    keys = "hallo test" + EX + "b"
-##    wanted = "hallo is somethingb"
-##class Transformation_InsideTabLeaveAtDefault_ECR(_VimTest):
-##    snippets = ("test", r"$1 ${2:${1/.+/(?0:defined $0)/}}")
-##    keys = "test" + EX + "sometext" + JF
-##    wanted = "sometext defined sometext"
-##class Transformation_InsideTabOvertype_ECR(_VimTest):
-##    snippets = ("test", r"$1 ${2:${1/.+/(?0:defined $0)/}}")
-##    keys = "test" + EX + "sometext" + JF + "overwrite"
-##    wanted = "sometext overwrite"
-##
-##
-##class Transformation_Backreference_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1 ${1/([ab])oo/$1ull/}")
-##    keys = "test" + EX + "foo boo aoo"
-##    wanted = "foo boo aoo foo bull aoo"
-##class Transformation_BackreferenceTwice_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", r"$1 ${1/(dead) (par[^ ]*)/this $2 is a bit $1/}")
-##    keys = "test" + EX + "dead parrot"
-##    wanted = "dead parrot this parrot is a bit dead"
-##
-##class Transformation_CleverTransformUpercaseChar_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1 ${1/(.)/\\u$1/}")
-##    keys = "test" + EX + "hallo"
-##    wanted = "hallo Hallo"
-##class Transformation_CleverTransformLowercaseChar_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1 ${1/(.*)/\l$1/}")
-##    keys = "test" + EX + "Hallo"
-##    wanted = "Hallo hallo"
-##class Transformation_CleverTransformLongUpper_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1 ${1/(.*)/\\U$1\E/}")
-##    keys = "test" + EX + "hallo"
-##    wanted = "hallo HALLO"
-##class Transformation_CleverTransformLongLower_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1 ${1/(.*)/\L$1\E/}")
-##    keys = "test" + EX + "HALLO"
-##    wanted = "HALLO hallo"
-##
-##class Transformation_ConditionalInsertionSimple_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1 ${1/(^a).*/(?0:began with an a)/}")
-##    keys = "test" + EX + "a some more text"
-##    wanted = "a some more text began with an a"
-##class Transformation_CIBothDefinedNegative_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1 ${1/(?:(^a)|(^b)).*/(?1:yes:no)/}")
-##    keys = "test" + EX + "b some"
-##    wanted = "b some no"
-##class Transformation_CIBothDefinedPositive_ExceptCorrectResult(_VimTest):
-##    snippets = ("test", "$1 ${1/(?:(^a)|(^b)).*/(?1:yes:no)/}")
-##    keys = "test" + EX + "a some"
-##    wanted = "a some yes"
-##class Transformation_ConditionalInsertRWEllipsis_ECR(_VimTest):
-##    snippets = ("test", r"$1 ${1/(\w+(?:\W+\w+){,7})\W*(.+)?/$1(?2:...)/}")
-##    keys = "test" + EX + "a b  c d e f ghhh h oha"
-##    wanted = "a b  c d e f ghhh h oha a b  c d e f ghhh h..."
-##class Transformation_ConditionalInConditional_ECR(_VimTest):
-##    snippets = ("test", r"$1 ${1/^.*?(-)?(>)?$/(?2::(?1:>:.))/}")
-##    keys = "test" + EX + "hallo" + ESC + "$a\n" + \
-##           "test" + EX + "hallo-" + ESC + "$a\n" + \
-##           "test" + EX + "hallo->"
-##    wanted = "hallo .\nhallo- >\nhallo-> "
-##
-##class Transformation_CINewlines_ECR(_VimTest):
-##    snippets = ("test", r"$1 ${1/, */\n/}")
-##    keys = "test" + EX + "test, hallo"
-##    wanted = "test, hallo test\nhallo"
-##class Transformation_CITabstop_ECR(_VimTest):
-##    snippets = ("test", r"$1 ${1/, */\t/}")
-##    keys = "test" + EX + "test, hallo"
-##    wanted = "test, hallo test\thallo"
-##class Transformation_CIEscapedParensinReplace_ECR(_VimTest):
-##    snippets = ("test", r"$1 ${1/hal((?:lo)|(?:ul))/(?1:ha\($1\))/}")
-##    keys = "test" + EX + "test, halul"
-##    wanted = "test, halul test, ha(ul)"
-##
-##class Transformation_OptionIgnoreCase_ECR(_VimTest):
-##    snippets = ("test", r"$1 ${1/test/blah/i}")
-##    keys = "test" + EX + "TEST"
-##    wanted = "TEST blah"
-##class Transformation_OptionReplaceGlobal_ECR(_VimTest):
-##    snippets = ("test", r"$1 ${1/, */-/g}")
-##    keys = "test" + EX + "a, nice, building"
-##    wanted = "a, nice, building a-nice-building"
-##class Transformation_OptionReplaceGlobalMatchInReplace_ECR(_VimTest):
-##    snippets = ("test", r"$1 ${1/, */, /g}")
-##    keys = "test" + EX + "a, nice,   building"
-##    wanted = "a, nice,   building a, nice, building"
-## class TransformationUsingBackspaceToDeleteDefaultValueInFirstTab_ECR(_VimTest):
-##     sleeptime = 0.09 # Do this very slowly
-##     snippets = ("test", "snip ${1/.+/(?0:m1)/} ${2/.+/(?0:m2)/} "
-##                 "${1:default} ${2:def}")
-##     keys = "test" + EX + BS + JF + "hi"
-##     wanted = "snip  m2  hi"
-## class TransformationUsingBackspaceToDeleteDefaultValueInSecondTab_ECR(_VimTest):
-##     snippets = ("test", "snip ${1/.+/(?0:m1)/} ${2/.+/(?0:m2)/} "
-##                 "${1:default} ${2:def}")
-##     keys = "test" + EX + "hi" + JF + BS
-##     wanted = "snip m1  hi "
-## class TransformationUsingBackspaceToDeleteDefaultValueTypeSomethingThen_ECR(_VimTest):
-##     snippets = ("test", "snip ${1/.+/(?0:matched)/} ${1:default}")
-##     keys = "test" + EX + BS + "hallo"
-##     wanted = "snip matched hallo"
-## class TransformationUsingBackspaceToDeleteDefaultValue_ECR(_VimTest):
-##     snippets = ("test", "snip ${1/.+/(?0:matched)/} ${1:default}")
-##     keys = "test" + EX + BS
-##     wanted = "snip  "
-### End: Transformations  #}}}
+# Transformations  {{{#
+# TODO: more edits that cross boundaries between text objects
+class Transformation_SimpleCase_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/foo/batzl/}")
+    keys = "test" + EX + "hallo foo boy"
+    wanted = "hallo foo boy hallo batzl boy"
+class Transformation_SimpleCaseNoTransform_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/foo/batzl/}")
+    keys = "test" + EX + "hallo"
+    wanted = "hallo hallo"
+class Transformation_SimpleCaseTransformInFront_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "${1/foo/batzl/} $1")
+    keys = "test" + EX + "hallo foo"
+    wanted = "hallo batzl hallo foo"
+class Transformation_SimpleCaseTransformInFrontDefVal_ECR(_VimTest):
+    snippets = ("test", "${1/foo/batzl/} ${1:replace me}")
+    keys = "test" + EX + "hallo foo"
+    wanted = "hallo batzl hallo foo"
+class Transformation_MultipleTransformations_ECR(_VimTest):
+    snippets = ("test", "${1:Some Text}${1/.+/\\U$0\E/}\n${1/.+/\L$0\E/}")
+    keys = "test" + EX + "SomE tExt "
+    wanted = "SomE tExt SOME TEXT \nsome text "
+class Transformation_TabIsAtEndAndDeleted_ECR(_VimTest):
+    snippets = ("test", "${1/.+/is something/}${1:some}")
+    keys = "hallo test" + EX + "some\b\b\b\b\b"
+    wanted = "hallo "
+class Transformation_TabIsAtEndAndDeleted1_ECR(_VimTest):
+    snippets = ("test", "${1/.+/is something/}${1:some}")
+    keys = "hallo test" + EX + "some\b\b\b\bmore"
+    wanted = "hallo is somethingmore"
+class Transformation_TabIsAtEndNoTextLeave_ECR(_VimTest):
+    snippets = ("test", "${1/.+/is something/}${1}")
+    keys = "hallo test" + EX
+    wanted = "hallo "
+class Transformation_TabIsAtEndNoTextType_ECR(_VimTest):
+    snippets = ("test", "${1/.+/is something/}${1}")
+    keys = "hallo test" + EX + "b"
+    wanted = "hallo is somethingb"
+class Transformation_InsideTabLeaveAtDefault_ECR(_VimTest):
+    snippets = ("test", r"$1 ${2:${1/.+/(?0:defined $0)/}}")
+    keys = "test" + EX + "sometext" + JF
+    wanted = "sometext defined sometext"
+class Transformation_InsideTabOvertype_ECR(_VimTest):
+    snippets = ("test", r"$1 ${2:${1/.+/(?0:defined $0)/}}")
+    keys = "test" + EX + "sometext" + JF + "overwrite"
+    wanted = "sometext overwrite"
+
+
+class Transformation_Backreference_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/([ab])oo/$1ull/}")
+    keys = "test" + EX + "foo boo aoo"
+    wanted = "foo boo aoo foo bull aoo"
+class Transformation_BackreferenceTwice_ExceptCorrectResult(_VimTest):
+    snippets = ("test", r"$1 ${1/(dead) (par[^ ]*)/this $2 is a bit $1/}")
+    keys = "test" + EX + "dead parrot"
+    wanted = "dead parrot this parrot is a bit dead"
+
+class Transformation_CleverTransformUpercaseChar_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/(.)/\\u$1/}")
+    keys = "test" + EX + "hallo"
+    wanted = "hallo Hallo"
+class Transformation_CleverTransformLowercaseChar_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/(.*)/\l$1/}")
+    keys = "test" + EX + "Hallo"
+    wanted = "Hallo hallo"
+class Transformation_CleverTransformLongUpper_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/(.*)/\\U$1\E/}")
+    keys = "test" + EX + "hallo"
+    wanted = "hallo HALLO"
+class Transformation_CleverTransformLongLower_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/(.*)/\L$1\E/}")
+    keys = "test" + EX + "HALLO"
+    wanted = "HALLO hallo"
+
+class Transformation_ConditionalInsertionSimple_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/(^a).*/(?0:began with an a)/}")
+    keys = "test" + EX + "a some more text"
+    wanted = "a some more text began with an a"
+class Transformation_CIBothDefinedNegative_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/(?:(^a)|(^b)).*/(?1:yes:no)/}")
+    keys = "test" + EX + "b some"
+    wanted = "b some no"
+class Transformation_CIBothDefinedPositive_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 ${1/(?:(^a)|(^b)).*/(?1:yes:no)/}")
+    keys = "test" + EX + "a some"
+    wanted = "a some yes"
+class Transformation_ConditionalInsertRWEllipsis_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1/(\w+(?:\W+\w+){,7})\W*(.+)?/$1(?2:...)/}")
+    keys = "test" + EX + "a b  c d e f ghhh h oha"
+    wanted = "a b  c d e f ghhh h oha a b  c d e f ghhh h..."
+class Transformation_ConditionalInConditional_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1/^.*?(-)?(>)?$/(?2::(?1:>:.))/}")
+    keys = "test" + EX + "hallo" + ESC + "$a\n" + \
+           "test" + EX + "hallo-" + ESC + "$a\n" + \
+           "test" + EX + "hallo->"
+    wanted = "hallo .\nhallo- >\nhallo-> "
+
+class Transformation_CINewlines_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1/, */\n/}")
+    keys = "test" + EX + "test, hallo"
+    wanted = "test, hallo test\nhallo"
+class Transformation_CITabstop_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1/, */\t/}")
+    keys = "test" + EX + "test, hallo"
+    wanted = "test, hallo test\thallo"
+class Transformation_CIEscapedParensinReplace_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1/hal((?:lo)|(?:ul))/(?1:ha\($1\))/}")
+    keys = "test" + EX + "test, halul"
+    wanted = "test, halul test, ha(ul)"
+
+class Transformation_OptionIgnoreCase_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1/test/blah/i}")
+    keys = "test" + EX + "TEST"
+    wanted = "TEST blah"
+class Transformation_OptionReplaceGlobal_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1/, */-/g}")
+    keys = "test" + EX + "a, nice, building"
+    wanted = "a, nice, building a-nice-building"
+class Transformation_OptionReplaceGlobalMatchInReplace_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1/, */, /g}")
+    keys = "test" + EX + "a, nice,   building"
+    wanted = "a, nice,   building a, nice, building"
+class TransformationUsingBackspaceToDeleteDefaultValueInFirstTab_ECR(_VimTest):
+     sleeptime = 0.09 # Do this very slowly
+     snippets = ("test", "snip ${1/.+/(?0:m1)/} ${2/.+/(?0:m2)/} "
+                 "${1:default} ${2:def}")
+     keys = "test" + EX + BS + JF + "hi"
+     wanted = "snip  m2  hi"
+class TransformationUsingBackspaceToDeleteDefaultValueInSecondTab_ECR(_VimTest):
+     snippets = ("test", "snip ${1/.+/(?0:m1)/} ${2/.+/(?0:m2)/} "
+                 "${1:default} ${2:def}")
+     keys = "test" + EX + "hi" + JF + BS
+     wanted = "snip m1  hi "
+class TransformationUsingBackspaceToDeleteDefaultValueTypeSomethingThen_ECR(_VimTest):
+     snippets = ("test", "snip ${1/.+/(?0:matched)/} ${1:default}")
+     keys = "test" + EX + BS + "hallo"
+     wanted = "snip matched hallo"
+class TransformationUsingBackspaceToDeleteDefaultValue_ECR(_VimTest):
+     snippets = ("test", "snip ${1/.+/(?0:matched)/} ${1:default}")
+     keys = "test" + EX + BS
+     wanted = "snip  "
+# End: Transformations  #}}}
 ### ${VISUAL}  {{{#
 ##class Visual_NoVisualSelection_Ignore(_VimTest):
 ##    snippets = ("test", "h${VISUAL}b")
@@ -1535,356 +1534,6 @@ class MirrorRealLifeExample_ExceptCorrectResult(_VimTest):
 ##
 ### End: ${VISUAL}  #}}}
 
-### List Snippets  {{{#
-##class _ListAllSnippets(_VimTest):
-##    snippets = ( ("testblah", "BLAAH", "Say BLAH"),
-##                 ("test", "TEST ONE", "Say tst one"),
-##                 ("aloha", "OHEEEE",   "Say OHEE"),
-##               )
-##
-##class ListAllAvailable_NothingTyped_ExceptCorrectResult(_ListAllSnippets):
-##    keys = "" + LS + "3\n"
-##    wanted = "BLAAH"
-##class ListAllAvailable_testtyped_ExceptCorrectResult(_ListAllSnippets):
-##    keys = "hallo test" + LS + "2\n"
-##    wanted = "hallo BLAAH"
-##class ListAllAvailable_testtypedSecondOpt_ExceptCorrectResult(_ListAllSnippets):
-##    keys = "hallo test" + LS + "1\n"
-##    wanted = "hallo TEST ONE"
-##
-##class ListAllAvailable_NonDefined_NoExceptionShouldBeRaised(_ListAllSnippets):
-##    keys = "hallo qualle" + LS + "Hi"
-##    wanted = "hallo qualleHi"
-### End: List Snippets  #}}}
-### Selecting Between Same Triggers  {{{#
-##class _MultipleMatches(_VimTest):
-##    snippets = ( ("test", "Case1", "This is Case 1"),
-##                 ("test", "Case2", "This is Case 2") )
-##class Multiple_SimpleCaseSelectFirst_ECR(_MultipleMatches):
-##    keys = "test" + EX + "1\n"
-##    wanted = "Case1"
-##class Multiple_SimpleCaseSelectSecond_ECR(_MultipleMatches):
-##    keys = "test" + EX + "2\n"
-##    wanted = "Case2"
-##class Multiple_SimpleCaseSelectTooHigh_ESelectLast(_MultipleMatches):
-##    keys = "test" + EX + "5\n"
-##    wanted = "Case2"
-##class Multiple_SimpleCaseSelectZero_EEscape(_MultipleMatches):
-##    keys = "test" + EX + "0\n" + "hi"
-##    wanted = "testhi"
-##class Multiple_SimpleCaseEscapeOut_ECR(_MultipleMatches):
-##    keys = "test" + EX + ESC + "hi"
-##    wanted = "testhi"
-##class Multiple_ManySnippetsOneTrigger_ECR(_VimTest):
-##    # Snippet definition {{{#
-##    snippets = (
-##        ("test", "Case1", "This is Case 1"),
-##        ("test", "Case2", "This is Case 2"),
-##        ("test", "Case3", "This is Case 3"),
-##        ("test", "Case4", "This is Case 4"),
-##        ("test", "Case5", "This is Case 5"),
-##        ("test", "Case6", "This is Case 6"),
-##        ("test", "Case7", "This is Case 7"),
-##        ("test", "Case8", "This is Case 8"),
-##        ("test", "Case9", "This is Case 9"),
-##        ("test", "Case10", "This is Case 10"),
-##        ("test", "Case11", "This is Case 11"),
-##        ("test", "Case12", "This is Case 12"),
-##        ("test", "Case13", "This is Case 13"),
-##        ("test", "Case14", "This is Case 14"),
-##        ("test", "Case15", "This is Case 15"),
-##        ("test", "Case16", "This is Case 16"),
-##        ("test", "Case17", "This is Case 17"),
-##        ("test", "Case18", "This is Case 18"),
-##        ("test", "Case19", "This is Case 19"),
-##        ("test", "Case20", "This is Case 20"),
-##        ("test", "Case21", "This is Case 21"),
-##        ("test", "Case22", "This is Case 22"),
-##        ("test", "Case23", "This is Case 23"),
-##        ("test", "Case24", "This is Case 24"),
-##        ("test", "Case25", "This is Case 25"),
-##        ("test", "Case26", "This is Case 26"),
-##        ("test", "Case27", "This is Case 27"),
-##        ("test", "Case28", "This is Case 28"),
-##        ("test", "Case29", "This is Case 29"),
-##    ) #}}}
-##    sleeptime = 0.09 # Do this very slowly
-##    keys = "test" + EX + " " + ESC + ESC + "ahi"
-##    wanted = "testhi"
-### End: Selecting Between Same Triggers  #}}}
-### Snippet Options  {{{#
-##class SnippetOptions_OverwriteExisting_ECR(_VimTest):
-##    snippets = (
-##     ("test", "${1:Hallo}", "Types Hallo"),
-##     ("test", "${1:World}", "Types World"),
-##     ("test", "We overwrite", "Overwrite the two", "!"),
-##    )
-##    keys = "test" + EX
-##    wanted = "We overwrite"
-##class SnippetOptions_OverwriteTwice_ECR(_VimTest):
-##    snippets = (
-##        ("test", "${1:Hallo}", "Types Hallo"),
-##        ("test", "${1:World}", "Types World"),
-##        ("test", "We overwrite", "Overwrite the two", "!"),
-##        ("test", "again", "Overwrite again", "!"),
-##    )
-##    keys = "test" + EX
-##    wanted = "again"
-##class SnippetOptions_OverwriteThenChoose_ECR(_VimTest):
-##    snippets = (
-##        ("test", "${1:Hallo}", "Types Hallo"),
-##        ("test", "${1:World}", "Types World"),
-##        ("test", "We overwrite", "Overwrite the two", "!"),
-##        ("test", "No overwrite", "Not overwritten", ""),
-##    )
-##    keys = "test" + EX + "1\n\n" + "test" + EX + "2\n"
-##    wanted = "We overwrite\nNo overwrite"
-##class SnippetOptions_OnlyExpandWhenWSInFront_Expand(_VimTest):
-##    snippets = ("test", "Expand me!", "", "b")
-##    keys = "test" + EX
-##    wanted = "Expand me!"
-##class SnippetOptions_OnlyExpandWhenWSInFront_Expand2(_VimTest):
-##    snippets = ("test", "Expand me!", "", "b")
-##    keys = "   test" + EX
-##    wanted = "   Expand me!"
-##class SnippetOptions_OnlyExpandWhenWSInFront_DontExpand(_VimTest):
-##    snippets = ("test", "Expand me!", "", "b")
-##    keys = "a test" + EX
-##    wanted = "a test" + EX
-##class SnippetOptions_OnlyExpandWhenWSInFront_OneWithOneWO(_VimTest):
-##    snippets = (
-##        ("test", "Expand me!", "", "b"),
-##        ("test", "not at beginning", "", ""),
-##    )
-##    keys = "a test" + EX
-##    wanted = "a not at beginning"
-##class SnippetOptions_OnlyExpandWhenWSInFront_OneWithOneWOChoose(_VimTest):
-##    snippets = (
-##        ("test", "Expand me!", "", "b"),
-##        ("test", "not at beginning", "", ""),
-##    )
-##    keys = "  test" + EX + "1\n"
-##    wanted = "  Expand me!"
-##
-##
-##class SnippetOptions_ExpandInwordSnippets_SimpleExpand(_VimTest):
-##    snippets = (("test", "Expand me!", "", "i"), )
-##    keys = "atest" + EX
-##    wanted = "aExpand me!"
-##class SnippetOptions_ExpandInwordSnippets_ExpandSingle(_VimTest):
-##    snippets = (("test", "Expand me!", "", "i"), )
-##    keys = "test" + EX
-##    wanted = "Expand me!"
-##class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand(_VimTest):
-##    snippets = (("test", "Expand me!", "", "i"), )
-##    keys = "$test" + EX
-##    wanted = "$Expand me!"
-##class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand2(_VimTest):
-##    snippets = (("test", "Expand me!", "", "i"), )
-##    keys = "-test" + EX
-##    wanted = "-Expand me!"
-##class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand3(_VimTest):
-##    snippets = (("test", "Expand me!", "", "i"), )
-##    keys = "ßßtest" + EX
-##    wanted = "ßßExpand me!"
-##
-##class _SnippetOptions_ExpandWordSnippets(_VimTest):
-##    snippets = (("test", "Expand me!", "", "w"), )
-##class SnippetOptions_ExpandWordSnippets_NormalExpand(
-##        _SnippetOptions_ExpandWordSnippets):
-##    keys = "test" + EX
-##    wanted = "Expand me!"
-##class SnippetOptions_ExpandWordSnippets_NoExpand(
-##    _SnippetOptions_ExpandWordSnippets):
-##    keys = "atest" + EX
-##    wanted = "atest" + EX
-##class SnippetOptions_ExpandWordSnippets_ExpandSuffix(
-##    _SnippetOptions_ExpandWordSnippets):
-##    keys = "a-test" + EX
-##    wanted = "a-Expand me!"
-##class SnippetOptions_ExpandWordSnippets_ExpandSuffix2(
-##    _SnippetOptions_ExpandWordSnippets):
-##    keys = "a(test" + EX
-##    wanted = "a(Expand me!"
-##class SnippetOptions_ExpandWordSnippets_ExpandSuffix3(
-##    _SnippetOptions_ExpandWordSnippets):
-##    keys = "[[test" + EX
-##    wanted = "[[Expand me!"
-##
-##class _No_Tab_Expand(_VimTest):
-##    snippets = ("test", "\t\tExpand\tme!\t", "", "t")
-##class No_Tab_Expand_Simple(_No_Tab_Expand):
-##    keys = "test" + EX
-##    wanted = "\t\tExpand\tme!\t"
-##class No_Tab_Expand_Leading_Spaces(_No_Tab_Expand):
-##    keys = "  test" + EX
-##    wanted = "  \t\tExpand\tme!\t"
-##class No_Tab_Expand_Leading_Tabs(_No_Tab_Expand):
-##    keys = "\ttest" + EX
-##    wanted = "\t\t\tExpand\tme!\t"
-##class No_Tab_Expand_No_TS(_No_Tab_Expand):
-##    def _options_on(self):
-##        self.send(":set sw=3\n")
-##        self.send(":set sts=3\n")
-##    def _options_off(self):
-##        self.send(":set sw=8\n")
-##        self.send(":set sts=0\n")
-##    keys = "test" + EX
-##    wanted = "\t\tExpand\tme!\t"
-##class No_Tab_Expand_ET(_No_Tab_Expand):
-##    def _options_on(self):
-##        self.send(":set sw=3\n")
-##        self.send(":set expandtab\n")
-##    def _options_off(self):
-##        self.send(":set sw=8\n")
-##        self.send(":set noexpandtab\n")
-##    keys = "test" + EX
-##    wanted = "\t\tExpand\tme!\t"
-##class No_Tab_Expand_ET_Leading_Spaces(_No_Tab_Expand):
-##    def _options_on(self):
-##        self.send(":set sw=3\n")
-##        self.send(":set expandtab\n")
-##    def _options_off(self):
-##        self.send(":set sw=8\n")
-##        self.send(":set noexpandtab\n")
-##    keys = "  test" + EX
-##    wanted = "  \t\tExpand\tme!\t"
-##class No_Tab_Expand_ET_SW(_No_Tab_Expand):
-##    def _options_on(self):
-##        self.send(":set sw=8\n")
-##        self.send(":set expandtab\n")
-##    def _options_off(self):
-##        self.send(":set sw=8\n")
-##        self.send(":set noexpandtab\n")
-##    keys = "test" + EX
-##    wanted = "\t\tExpand\tme!\t"
-##class No_Tab_Expand_ET_SW_TS(_No_Tab_Expand):
-##    def _options_on(self):
-##        self.send(":set sw=3\n")
-##        self.send(":set sts=3\n")
-##        self.send(":set ts=3\n")
-##        self.send(":set expandtab\n")
-##    def _options_off(self):
-##        self.send(":set sw=8\n")
-##        self.send(":set ts=8\n")
-##        self.send(":set sts=0\n")
-##        self.send(":set noexpandtab\n")
-##    keys = "test" + EX
-##    wanted = "\t\tExpand\tme!\t"
-##
-##
-##class SnippetOptions_Regex_Expand(_VimTest):
-##    snippets = ("(test)", "Expand me!", "", "r")
-##    keys = "test" + EX
-##    wanted = "Expand me!"
-##class SnippetOptions_Regex_Multiple(_VimTest):
-##    snippets = ("(test *)+", "Expand me!", "", "r")
-##    keys = "test test test" + EX
-##    wanted = "Expand me!"
-##
-##class _Regex_Self(_VimTest):
-##    snippets = (r"((?<=\W)|^)(\.)", "self.", "", "r")
-##class SnippetOptions_Regex_Self_Start(_Regex_Self):
-##    keys = "." + EX
-##    wanted = "self."
-##class SnippetOptions_Regex_Self_Space(_Regex_Self):
-##    keys = " ." + EX
-##    wanted = " self."
-##class SnippetOptions_Regex_Self_TextAfter(_Regex_Self):
-##    keys = " .a" + EX
-##    wanted = " .a" + EX
-##class SnippetOptions_Regex_Self_TextBefore(_Regex_Self):
-##    keys = "a." + EX
-##    wanted = "a." + EX
-##class SnippetOptions_Regex_PythonBlockMatch(_VimTest):
-##    snippets = (r"([abc]+)([def]+)", r"""`!p m = match
-##snip.rv += m.group(2)
-##snip.rv += m.group(1)
-##`""", "", "r")
-##    keys = "test cabfed" + EX
-##    wanted = "test fedcab"
-##class SnippetOptions_Regex_PythonBlockNoMatch(_VimTest):
-##    snippets = (r"cabfed", r"""`!p snip.rv =  match or "No match"`""")
-##    keys = "test cabfed" + EX
-##    wanted = "test No match"
-### Tests for Bug #691575
-##class SnippetOptions_Regex_SameLine_Long_End(_VimTest):
-##    snippets = ("(test.*)", "Expand me!", "", "r")
-##    keys = "test test abc" + EX
-##    wanted = "Expand me!"
-##class SnippetOptions_Regex_SameLine_Long_Start(_VimTest):
-##    snippets = ("(.*test)", "Expand me!", "", "r")
-##    keys = "abc test test" + EX
-##    wanted = "Expand me!"
-##class SnippetOptions_Regex_SameLine_Simple(_VimTest):
-##    snippets = ("(test)", "Expand me!", "", "r")
-##    keys = "abc test test" + EX
-##    wanted = "abc test Expand me!"
-##
-##
-##class MultiWordSnippet_Simple(_VimTest):
-##    snippets = ("test me", "Expand me!")
-##    keys = "test me" + EX
-##    wanted = "Expand me!"
-##class MultiWord_SnippetOptions_OverwriteExisting_ECR(_VimTest):
-##    snippets = (
-##     ("test me", "${1:Hallo}", "Types Hallo"),
-##     ("test me", "${1:World}", "Types World"),
-##     ("test me", "We overwrite", "Overwrite the two", "!"),
-##    )
-##    keys = "test me" + EX
-##    wanted = "We overwrite"
-##class MultiWord_SnippetOptions_OnlyExpandWhenWSInFront_Expand(_VimTest):
-##    snippets = ("test it", "Expand me!", "", "b")
-##    keys = "test it" + EX
-##    wanted = "Expand me!"
-##class MultiWord_SnippetOptions_OnlyExpandWhenWSInFront_Expand2(_VimTest):
-##    snippets = ("test it", "Expand me!", "", "b")
-##    keys = "   test it" + EX
-##    wanted = "   Expand me!"
-##class MultiWord_SnippetOptions_OnlyExpandWhenWSInFront_DontExpand(_VimTest):
-##    snippets = ("test it", "Expand me!", "", "b")
-##    keys = "a test it" + EX
-##    wanted = "a test it" + EX
-##class MultiWord_SnippetOptions_OnlyExpandWhenWSInFront_OneWithOneWO(_VimTest):
-##    snippets = (
-##        ("test it", "Expand me!", "", "b"),
-##        ("test it", "not at beginning", "", ""),
-##    )
-##    keys = "a test it" + EX
-##    wanted = "a not at beginning"
-##class MultiWord_SnippetOptions_OnlyExpandWhenWSInFront_OneWithOneWOChoose(_VimTest):
-##    snippets = (
-##        ("test it", "Expand me!", "", "b"),
-##        ("test it", "not at beginning", "", ""),
-##    )
-##    keys = "  test it" + EX + "1\n"
-##    wanted = "  Expand me!"
-##
-##class MultiWord_SnippetOptions_ExpandInwordSnippets_SimpleExpand(_VimTest):
-##    snippets = (("test it", "Expand me!", "", "i"), )
-##    keys = "atest it" + EX
-##    wanted = "aExpand me!"
-##class MultiWord_SnippetOptions_ExpandInwordSnippets_ExpandSingle(_VimTest):
-##    snippets = (("test it", "Expand me!", "", "i"), )
-##    keys = "test it" + EX
-##    wanted = "Expand me!"
-##
-##class _MultiWord_SnippetOptions_ExpandWordSnippets(_VimTest):
-##    snippets = (("test it", "Expand me!", "", "w"), )
-##class MultiWord_SnippetOptions_ExpandWordSnippets_NormalExpand(
-##        _MultiWord_SnippetOptions_ExpandWordSnippets):
-##    keys = "test it" + EX
-##    wanted = "Expand me!"
-##class MultiWord_SnippetOptions_ExpandWordSnippets_NoExpand(
-##    _MultiWord_SnippetOptions_ExpandWordSnippets):
-##    keys = "atest it" + EX
-##    wanted = "atest it" + EX
-##class MultiWord_SnippetOptions_ExpandWordSnippets_ExpandSuffix(
-##    _MultiWord_SnippetOptions_ExpandWordSnippets):
-##    keys = "a-test it" + EX
-##    wanted = "a-Expand me!"
-### Snippet Options  #}}}
 ### Recursive (Nested) Snippets  {{{#
 ##class RecTabStops_SimpleCase_ExceptCorrectResult(_VimTest):
 ##    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
@@ -2070,7 +1719,357 @@ class MirrorRealLifeExample_ExceptCorrectResult(_VimTest):
 ##    keys = "m" + EX + "m1" + EX + "one" + JF + "two" + \
 ##            JF + "three" + JF + "four" + JF + "end"
 ##    wanted = "[ [ one three three two ] four ]end"
-### End: Recursive (Nested) Snippets  #}}}
+##### End: Recursive (Nested) Snippets  #}}}
+# List Snippets  {{{#
+class _ListAllSnippets(_VimTest):
+    snippets = ( ("testblah", "BLAAH", "Say BLAH"),
+                 ("test", "TEST ONE", "Say tst one"),
+                 ("aloha", "OHEEEE",   "Say OHEE"),
+               )
+
+class ListAllAvailable_NothingTyped_ExceptCorrectResult(_ListAllSnippets):
+    keys = "" + LS + "3\n"
+    wanted = "BLAAH"
+class ListAllAvailable_testtyped_ExceptCorrectResult(_ListAllSnippets):
+    keys = "hallo test" + LS + "2\n"
+    wanted = "hallo BLAAH"
+class ListAllAvailable_testtypedSecondOpt_ExceptCorrectResult(_ListAllSnippets):
+    keys = "hallo test" + LS + "1\n"
+    wanted = "hallo TEST ONE"
+
+class ListAllAvailable_NonDefined_NoExceptionShouldBeRaised(_ListAllSnippets):
+    keys = "hallo qualle" + LS + "Hi"
+    wanted = "hallo qualleHi"
+# End: List Snippets  #}}}
+# Selecting Between Same Triggers  {{{#
+class _MultipleMatches(_VimTest):
+    snippets = ( ("test", "Case1", "This is Case 1"),
+                 ("test", "Case2", "This is Case 2") )
+class Multiple_SimpleCaseSelectFirst_ECR(_MultipleMatches):
+    keys = "test" + EX + "1\n"
+    wanted = "Case1"
+class Multiple_SimpleCaseSelectSecond_ECR(_MultipleMatches):
+    keys = "test" + EX + "2\n"
+    wanted = "Case2"
+class Multiple_SimpleCaseSelectTooHigh_ESelectLast(_MultipleMatches):
+    keys = "test" + EX + "5\n"
+    wanted = "Case2"
+class Multiple_SimpleCaseSelectZero_EEscape(_MultipleMatches):
+    keys = "test" + EX + "0\n" + "hi"
+    wanted = "testhi"
+class Multiple_SimpleCaseEscapeOut_ECR(_MultipleMatches):
+    keys = "test" + EX + ESC + "hi"
+    wanted = "testhi"
+class Multiple_ManySnippetsOneTrigger_ECR(_VimTest):
+    # Snippet definition {{{#
+    snippets = (
+        ("test", "Case1", "This is Case 1"),
+        ("test", "Case2", "This is Case 2"),
+        ("test", "Case3", "This is Case 3"),
+        ("test", "Case4", "This is Case 4"),
+        ("test", "Case5", "This is Case 5"),
+        ("test", "Case6", "This is Case 6"),
+        ("test", "Case7", "This is Case 7"),
+        ("test", "Case8", "This is Case 8"),
+        ("test", "Case9", "This is Case 9"),
+        ("test", "Case10", "This is Case 10"),
+        ("test", "Case11", "This is Case 11"),
+        ("test", "Case12", "This is Case 12"),
+        ("test", "Case13", "This is Case 13"),
+        ("test", "Case14", "This is Case 14"),
+        ("test", "Case15", "This is Case 15"),
+        ("test", "Case16", "This is Case 16"),
+        ("test", "Case17", "This is Case 17"),
+        ("test", "Case18", "This is Case 18"),
+        ("test", "Case19", "This is Case 19"),
+        ("test", "Case20", "This is Case 20"),
+        ("test", "Case21", "This is Case 21"),
+        ("test", "Case22", "This is Case 22"),
+        ("test", "Case23", "This is Case 23"),
+        ("test", "Case24", "This is Case 24"),
+        ("test", "Case25", "This is Case 25"),
+        ("test", "Case26", "This is Case 26"),
+        ("test", "Case27", "This is Case 27"),
+        ("test", "Case28", "This is Case 28"),
+        ("test", "Case29", "This is Case 29"),
+    ) #}}}
+    sleeptime = 0.09 # Do this very slowly
+    keys = "test" + EX + " " + ESC + ESC + "ahi"
+    wanted = "testhi"
+# End: Selecting Between Same Triggers  #}}}
+# Snippet Options  {{{#
+class SnippetOptions_OverwriteExisting_ECR(_VimTest):
+    snippets = (
+     ("test", "${1:Hallo}", "Types Hallo"),
+     ("test", "${1:World}", "Types World"),
+     ("test", "We overwrite", "Overwrite the two", "!"),
+    )
+    keys = "test" + EX
+    wanted = "We overwrite"
+class SnippetOptions_OverwriteTwice_ECR(_VimTest):
+    snippets = (
+        ("test", "${1:Hallo}", "Types Hallo"),
+        ("test", "${1:World}", "Types World"),
+        ("test", "We overwrite", "Overwrite the two", "!"),
+        ("test", "again", "Overwrite again", "!"),
+    )
+    keys = "test" + EX
+    wanted = "again"
+class SnippetOptions_OverwriteThenChoose_ECR(_VimTest):
+    snippets = (
+        ("test", "${1:Hallo}", "Types Hallo"),
+        ("test", "${1:World}", "Types World"),
+        ("test", "We overwrite", "Overwrite the two", "!"),
+        ("test", "No overwrite", "Not overwritten", ""),
+    )
+    keys = "test" + EX + "1\n\n" + "test" + EX + "2\n"
+    wanted = "We overwrite\nNo overwrite"
+class SnippetOptions_OnlyExpandWhenWSInFront_Expand(_VimTest):
+    snippets = ("test", "Expand me!", "", "b")
+    keys = "test" + EX
+    wanted = "Expand me!"
+class SnippetOptions_OnlyExpandWhenWSInFront_Expand2(_VimTest):
+    snippets = ("test", "Expand me!", "", "b")
+    keys = "   test" + EX
+    wanted = "   Expand me!"
+class SnippetOptions_OnlyExpandWhenWSInFront_DontExpand(_VimTest):
+    snippets = ("test", "Expand me!", "", "b")
+    keys = "a test" + EX
+    wanted = "a test" + EX
+class SnippetOptions_OnlyExpandWhenWSInFront_OneWithOneWO(_VimTest):
+    snippets = (
+        ("test", "Expand me!", "", "b"),
+        ("test", "not at beginning", "", ""),
+    )
+    keys = "a test" + EX
+    wanted = "a not at beginning"
+class SnippetOptions_OnlyExpandWhenWSInFront_OneWithOneWOChoose(_VimTest):
+    snippets = (
+        ("test", "Expand me!", "", "b"),
+        ("test", "not at beginning", "", ""),
+    )
+    keys = "  test" + EX + "1\n"
+    wanted = "  Expand me!"
+
+
+class SnippetOptions_ExpandInwordSnippets_SimpleExpand(_VimTest):
+    snippets = (("test", "Expand me!", "", "i"), )
+    keys = "atest" + EX
+    wanted = "aExpand me!"
+class SnippetOptions_ExpandInwordSnippets_ExpandSingle(_VimTest):
+    snippets = (("test", "Expand me!", "", "i"), )
+    keys = "test" + EX
+    wanted = "Expand me!"
+class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand(_VimTest):
+    snippets = (("test", "Expand me!", "", "i"), )
+    keys = "$test" + EX
+    wanted = "$Expand me!"
+class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand2(_VimTest):
+    snippets = (("test", "Expand me!", "", "i"), )
+    keys = "-test" + EX
+    wanted = "-Expand me!"
+class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand3(_VimTest):
+    snippets = (("test", "Expand me!", "", "i"), )
+    keys = "ßßtest" + EX
+    wanted = "ßßExpand me!"
+
+class _SnippetOptions_ExpandWordSnippets(_VimTest):
+    snippets = (("test", "Expand me!", "", "w"), )
+class SnippetOptions_ExpandWordSnippets_NormalExpand(
+        _SnippetOptions_ExpandWordSnippets):
+    keys = "test" + EX
+    wanted = "Expand me!"
+class SnippetOptions_ExpandWordSnippets_NoExpand(
+    _SnippetOptions_ExpandWordSnippets):
+    keys = "atest" + EX
+    wanted = "atest" + EX
+class SnippetOptions_ExpandWordSnippets_ExpandSuffix(
+    _SnippetOptions_ExpandWordSnippets):
+    keys = "a-test" + EX
+    wanted = "a-Expand me!"
+class SnippetOptions_ExpandWordSnippets_ExpandSuffix2(
+    _SnippetOptions_ExpandWordSnippets):
+    keys = "a(test" + EX
+    wanted = "a(Expand me!"
+class SnippetOptions_ExpandWordSnippets_ExpandSuffix3(
+    _SnippetOptions_ExpandWordSnippets):
+    keys = "[[test" + EX
+    wanted = "[[Expand me!"
+
+class _No_Tab_Expand(_VimTest):
+    snippets = ("test", "\t\tExpand\tme!\t", "", "t")
+class No_Tab_Expand_Simple(_No_Tab_Expand):
+    keys = "test" + EX
+    wanted = "\t\tExpand\tme!\t"
+class No_Tab_Expand_Leading_Spaces(_No_Tab_Expand):
+    keys = "  test" + EX
+    wanted = "  \t\tExpand\tme!\t"
+class No_Tab_Expand_Leading_Tabs(_No_Tab_Expand):
+    keys = "\ttest" + EX
+    wanted = "\t\t\tExpand\tme!\t"
+class No_Tab_Expand_No_TS(_No_Tab_Expand):
+    def _options_on(self):
+        self.send(":set sw=3\n")
+        self.send(":set sts=3\n")
+    def _options_off(self):
+        self.send(":set sw=8\n")
+        self.send(":set sts=0\n")
+    keys = "test" + EX
+    wanted = "\t\tExpand\tme!\t"
+class No_Tab_Expand_ET(_No_Tab_Expand):
+    def _options_on(self):
+        self.send(":set sw=3\n")
+        self.send(":set expandtab\n")
+    def _options_off(self):
+        self.send(":set sw=8\n")
+        self.send(":set noexpandtab\n")
+    keys = "test" + EX
+    wanted = "\t\tExpand\tme!\t"
+class No_Tab_Expand_ET_Leading_Spaces(_No_Tab_Expand):
+    def _options_on(self):
+        self.send(":set sw=3\n")
+        self.send(":set expandtab\n")
+    def _options_off(self):
+        self.send(":set sw=8\n")
+        self.send(":set noexpandtab\n")
+    keys = "  test" + EX
+    wanted = "  \t\tExpand\tme!\t"
+class No_Tab_Expand_ET_SW(_No_Tab_Expand):
+    def _options_on(self):
+        self.send(":set sw=8\n")
+        self.send(":set expandtab\n")
+    def _options_off(self):
+        self.send(":set sw=8\n")
+        self.send(":set noexpandtab\n")
+    keys = "test" + EX
+    wanted = "\t\tExpand\tme!\t"
+class No_Tab_Expand_ET_SW_TS(_No_Tab_Expand):
+    def _options_on(self):
+        self.send(":set sw=3\n")
+        self.send(":set sts=3\n")
+        self.send(":set ts=3\n")
+        self.send(":set expandtab\n")
+    def _options_off(self):
+        self.send(":set sw=8\n")
+        self.send(":set ts=8\n")
+        self.send(":set sts=0\n")
+        self.send(":set noexpandtab\n")
+    keys = "test" + EX
+    wanted = "\t\tExpand\tme!\t"
+
+
+class SnippetOptions_Regex_Expand(_VimTest):
+    snippets = ("(test)", "Expand me!", "", "r")
+    keys = "test" + EX
+    wanted = "Expand me!"
+class SnippetOptions_Regex_Multiple(_VimTest):
+    snippets = ("(test *)+", "Expand me!", "", "r")
+    keys = "test test test" + EX
+    wanted = "Expand me!"
+
+class _Regex_Self(_VimTest):
+    snippets = (r"((?<=\W)|^)(\.)", "self.", "", "r")
+class SnippetOptions_Regex_Self_Start(_Regex_Self):
+    keys = "." + EX
+    wanted = "self."
+class SnippetOptions_Regex_Self_Space(_Regex_Self):
+    keys = " ." + EX
+    wanted = " self."
+class SnippetOptions_Regex_Self_TextAfter(_Regex_Self):
+    keys = " .a" + EX
+    wanted = " .a" + EX
+class SnippetOptions_Regex_Self_TextBefore(_Regex_Self):
+    keys = "a." + EX
+    wanted = "a." + EX
+class SnippetOptions_Regex_PythonBlockMatch(_VimTest):
+    snippets = (r"([abc]+)([def]+)", r"""`!p m = match
+snip.rv += m.group(2)
+snip.rv += m.group(1)
+`""", "", "r")
+    keys = "test cabfed" + EX
+    wanted = "test fedcab"
+class SnippetOptions_Regex_PythonBlockNoMatch(_VimTest):
+    snippets = (r"cabfed", r"""`!p snip.rv =  match or "No match"`""")
+    keys = "test cabfed" + EX
+    wanted = "test No match"
+# Tests for Bug #691575
+class SnippetOptions_Regex_SameLine_Long_End(_VimTest):
+    snippets = ("(test.*)", "Expand me!", "", "r")
+    keys = "test test abc" + EX
+    wanted = "Expand me!"
+class SnippetOptions_Regex_SameLine_Long_Start(_VimTest):
+    snippets = ("(.*test)", "Expand me!", "", "r")
+    keys = "abc test test" + EX
+    wanted = "Expand me!"
+class SnippetOptions_Regex_SameLine_Simple(_VimTest):
+    snippets = ("(test)", "Expand me!", "", "r")
+    keys = "abc test test" + EX
+    wanted = "abc test Expand me!"
+
+
+class MultiWordSnippet_Simple(_VimTest):
+    snippets = ("test me", "Expand me!")
+    keys = "test me" + EX
+    wanted = "Expand me!"
+class MultiWord_SnippetOptions_OverwriteExisting_ECR(_VimTest):
+    snippets = (
+     ("test me", "${1:Hallo}", "Types Hallo"),
+     ("test me", "${1:World}", "Types World"),
+     ("test me", "We overwrite", "Overwrite the two", "!"),
+    )
+    keys = "test me" + EX
+    wanted = "We overwrite"
+class MultiWord_SnippetOptions_OnlyExpandWhenWSInFront_Expand(_VimTest):
+    snippets = ("test it", "Expand me!", "", "b")
+    keys = "test it" + EX
+    wanted = "Expand me!"
+class MultiWord_SnippetOptions_OnlyExpandWhenWSInFront_Expand2(_VimTest):
+    snippets = ("test it", "Expand me!", "", "b")
+    keys = "   test it" + EX
+    wanted = "   Expand me!"
+class MultiWord_SnippetOptions_OnlyExpandWhenWSInFront_DontExpand(_VimTest):
+    snippets = ("test it", "Expand me!", "", "b")
+    keys = "a test it" + EX
+    wanted = "a test it" + EX
+class MultiWord_SnippetOptions_OnlyExpandWhenWSInFront_OneWithOneWO(_VimTest):
+    snippets = (
+        ("test it", "Expand me!", "", "b"),
+        ("test it", "not at beginning", "", ""),
+    )
+    keys = "a test it" + EX
+    wanted = "a not at beginning"
+class MultiWord_SnippetOptions_OnlyExpandWhenWSInFront_OneWithOneWOChoose(_VimTest):
+    snippets = (
+        ("test it", "Expand me!", "", "b"),
+        ("test it", "not at beginning", "", ""),
+    )
+    keys = "  test it" + EX + "1\n"
+    wanted = "  Expand me!"
+
+class MultiWord_SnippetOptions_ExpandInwordSnippets_SimpleExpand(_VimTest):
+    snippets = (("test it", "Expand me!", "", "i"), )
+    keys = "atest it" + EX
+    wanted = "aExpand me!"
+class MultiWord_SnippetOptions_ExpandInwordSnippets_ExpandSingle(_VimTest):
+    snippets = (("test it", "Expand me!", "", "i"), )
+    keys = "test it" + EX
+    wanted = "Expand me!"
+
+class _MultiWord_SnippetOptions_ExpandWordSnippets(_VimTest):
+    snippets = (("test it", "Expand me!", "", "w"), )
+class MultiWord_SnippetOptions_ExpandWordSnippets_NormalExpand(
+        _MultiWord_SnippetOptions_ExpandWordSnippets):
+    keys = "test it" + EX
+    wanted = "Expand me!"
+class MultiWord_SnippetOptions_ExpandWordSnippets_NoExpand(
+    _MultiWord_SnippetOptions_ExpandWordSnippets):
+    keys = "atest it" + EX
+    wanted = "atest it" + EX
+class MultiWord_SnippetOptions_ExpandWordSnippets_ExpandSuffix(
+    _MultiWord_SnippetOptions_ExpandWordSnippets):
+    keys = "a-test it" + EX
+    wanted = "a-Expand me!"
+# Snippet Options  #}}}
 
 ### Anonymous Expansion  {{{#
 ##class _AnonBase(_VimTest):

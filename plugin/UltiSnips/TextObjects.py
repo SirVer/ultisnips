@@ -180,14 +180,6 @@ class _TOParser(object):
 
         _place_initial_text(self._parent_to)
 
-        def _update_non_tabstops(obj): # TODO: Stupid function name
-            obj._really_updateman()
-
-            for c in obj._childs:
-                _update_non_tabstops(c)
-
-        _update_non_tabstops(self._parent_to)
-
     # TODO: offset is no longer used
     def _do_parse(self, all_tokens, seen_ts, offset = None):
         if offset is None:
@@ -325,7 +317,6 @@ class TextObject(object):
     ####################
     # Public functions #
     ####################
-    # TODO: This really only is called when a child has shortened
     def child_end_moved2(self, old_end, new_end): # TODO: pretty wasteful, give index
         if not (self._parent) or old_end == new_end:
             return
@@ -339,8 +330,7 @@ class TextObject(object):
             for oc in o._childs:
                 _move_all(oc)
 
-        for c in self._parent._childs:
-            if c is self: continue
+        for c in self._parent._childs[self._parent._childs.index(self)+1:]:
             _move_all(c)
 
         self._parent.child_end_moved2(pold_end, self._parent._end)
@@ -433,19 +423,33 @@ class TextObject(object):
 
         _do_print(self)
 
-    def do_edits(self): # TODO: only in snippets instance
+    def do_edits(self): # TODO: only in snippets instance, stupid name
         debug("In do_edits")
         # Do our own edits; keep track of the Cursor
         vc = VimCursor(self)
         assert(len([c for c in self._childs if isinstance(c, VimCursor)]) == 1)
         # Update all referers # TODO: maybe in a function of its own
-        def _update_non_tabstops(obj): # TODO: stupid functon name
-            obj._really_updateman()
 
+
+        done = set()
+        not_done = set()
+
+        def _find_recursive(obj):
             for c in obj._childs:
-                _update_non_tabstops(c)
+                _find_recursive(c)
+            not_done.add(obj)
 
-        _update_non_tabstops(self)
+        _find_recursive(self)
+
+        counter = 10
+        while (done != not_done) and counter:
+            debug("len(done): %r, len(not_done: %r" % (len(done), len(not_done)))
+            for obj in (not_done - done):
+                obj._update_if_not_done(done, not_done)
+            counter -= 1
+        if counter == 0:
+            raise RuntimeError("Cyclic dependency in TextElements!")
+
 
         #debug("self._childs: %r, vc: %r" % (self._childs, vc))
         vc.update_position()
@@ -534,8 +538,15 @@ class TextObject(object):
     ###############################
     # Private/Protected functions #
     ###############################
-    def _really_updateman(self): # TODO:
-        pass
+    def _really_updateman(self, done, not_done): # TODO:
+        return True
+    def _update_if_not_done(self, done, not_done): # TODO:
+        if all((c in done) for c in self._childs):
+            debug("self: %r, self._childs: %r" % (self, self._childs))
+            assert(self not in done)
+
+            if self._really_updateman(done, not_done):
+                done.add(self)
 
     # def _move_textobjects_behind(self, start, end, lines, cols, obj_idx):
         # if lines == 0 and cols == 0:
@@ -595,7 +606,8 @@ class NoneditableTextObject(TextObject):
     """
 
     def _replace_text(self, tb):
-        old_end = self._end.copy()
+        debug("_replace_text: self: %r, tb: %r" % (self, tb))
+        old_end = self._end
         self._end = tb.to_vim(self._start, self._end) # TODO: to vim returns something unused
 
         # TODO: child_end_moved2 is a stupid name for this function
@@ -634,17 +646,21 @@ class Mirror(NoneditableTextObject):
 
         self._ts = tabstop
 
-    def _really_updateman(self): # TODO: function has a stupid name
+    def _really_updateman(self, done, not_done): # TODO: function has a stupid name
         # TODO: this function will get called to often. It should
         # check if a replacement is really needed
         assert(not self._is_killed)
-        # TODO: can current_text be a text buffer?
-        tb = TextBuffer("" if self._ts._is_killed else self._ts.current_text)
-
-        self._replace_text(tb)
-
         if self._ts._is_killed:
+            self._replace_text(TextBuffer(""))
             self._parent._del_child(self)
+            return True
+
+        if (self._ts not in done):
+            return False
+        # TODO: can current_text be a text buffer?
+        tb = TextBuffer(self._ts.current_text)
+        self._replace_text(tb)
+        return True
 
     def __repr__(self):
         return "Mirror(%s -> %s, %r)" % (self._start, self._end, self.current_text)
@@ -693,10 +709,24 @@ class Transformation(Mirror):
         self._find = re.compile(token.search, flags | re.DOTALL)
         self._replace = _CleverReplace(token.replace)
 
-    def _do_update(self):
+    def _really_updateman(self, done, not_done):
+        # TODO: check todos in Mirrors function
+        # TODO: similar to Transformation
+        assert(not self._is_killed)
+        if self._ts._is_killed:
+            self._replace_text(TextBuffer(""))
+            self._parent._del_child(self)
+            return True
+
+        if self._ts not in done:
+            return False
+
         t = self._ts.current_text
+        t = "" if self._ts._is_killed else self._ts.current_text
         t = self._find.subn(self._replace.replace, t, self._match_this_many)[0]
-        self.current_text = t
+
+        self._replace_text(TextBuffer(t))
+        return True
 
     def __repr__(self):
         return "Transformation(%s -> %s)" % (self._start, self._end)
@@ -734,8 +764,9 @@ class VimLCode(NoneditableTextObject):
 
         NoneditableTextObject.__init__(self, parent, token)
 
-    def _really_updateman(self):
+    def _really_updateman(self, done, not_done):
         self._replace_text(TextBuffer(as_unicode(vim.eval(self._code))))
+        return True
 
     def __repr__(self):
         return "VimLCode(%s -> %s)" % (self._start, self._end)
@@ -911,7 +942,7 @@ class PythonCode(NoneditableTextObject):
 
         NoneditableTextObject.__init__(self, parent, token)
 
-    def _really_updateman(self):
+    def _really_updateman(self, done, not_done):
         path = vim.eval('expand("%")')
         if path is None:
             path = ""
@@ -933,10 +964,13 @@ class PythonCode(NoneditableTextObject):
         self._code = self._code.replace("\r\n", "\n")
         compatible_exec(self._code, self._globals, local_d)
 
-        if self._snip._rv_changed:
-            self._replace_text(TextBuffer(self._snip.rv))
-        else:
-            self._replace_text(TextBuffer(as_unicode(local_d['res'])))
+        rv = as_unicode(self._snip.rv if self._snip._rv_changed
+                else as_unicode(local_d['res']))
+
+        if ct != rv:
+            self._replace_text(TextBuffer(rv))
+            return False
+        return True
 
     def __repr__(self):
         return "PythonCode(%s -> %s)" % (self._start, self._end)
@@ -986,6 +1020,7 @@ class SnippetInstance(TextObject):
         _TOParser(self, initial_text, indent).parse(True)
 
         _do_print(self)
+        self.do_edits()
 
     def __repr__(self):
         return "SnippetInstance(%s -> %s, %r)" % (self._start, self._end, self.current_text)

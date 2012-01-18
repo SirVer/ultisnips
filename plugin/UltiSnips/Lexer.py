@@ -12,6 +12,7 @@ import string
 import re
 
 from UltiSnips.Geometry import Position
+from UltiSnips.Compatibility import as_unicode
 
 __all__ = [
     "tokenize", "EscapeCharToken", "VisualToken", "TransformationToken", "TabStopToken",
@@ -21,7 +22,7 @@ __all__ = [
 # Helper Classes  {{{
 class _TextIterator(object):
     def __init__(self, text, offset):
-        self._text = text
+        self._text = as_unicode(text)
         self._line = offset.line
         self._col = offset.col
 
@@ -108,7 +109,7 @@ def _parse_till_unescaped_char(stream, char):
 # Tokens  {{{
 class Token(object):
     def __init__(self, gen, indent):
-        self.initial_text = ""
+        self.initial_text = as_unicode("")
         self.start = gen.pos
         self._parse(gen, indent)
         self.end = gen.pos

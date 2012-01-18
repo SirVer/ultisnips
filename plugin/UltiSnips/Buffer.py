@@ -39,13 +39,13 @@ class TextBuffer(Buffer):
             new_end = Position(start.line + len(text)-1, len(text[-1]))
         return new_end
 
-    def to_vim(self, start, end):
+    def to_vim(self, start, end): # TODO: better take a span
         buf = vim.current.buffer
 
         new_end = self.calc_end(start)
 
-        before = buf[start.line][:start.col]
-        after = buf[end.line][end.col:]
+        before = as_unicode(buf[start.line])[:start.col]
+        after = as_unicode(buf[end.line])[end.col:]
         lines = []
         if len(self._lines):
             lines.append(before + self._lines[0])
@@ -55,7 +55,7 @@ class TextBuffer(Buffer):
 
         return new_end
 
-    def replace_text( self, start, end, content ):
+    def replace_text( self, start, end, content ):  # TODO: no longer needed?
         first_line = self[start.line][:start.col]
         last_line = self[end.line][end.col:]
         return self._replace( start, end, content, first_line, last_line)
@@ -73,7 +73,7 @@ class TextBuffer(Buffer):
                 ))
         except AttributeError:
             return self._lines.__getitem__(a) # TODO: is this ever used?
-    def __setitem__(self, a, b):
+    def __setitem__(self, a, b): # TODO: no longer needed?
         return self._lines.__setitem__(a,b)
     def __repr__(self):
         return repr('\n'.join(self._lines))
