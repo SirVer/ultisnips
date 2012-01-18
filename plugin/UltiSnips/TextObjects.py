@@ -16,6 +16,9 @@ from UltiSnips.Lexer import tokenize, EscapeCharToken, VisualToken, \
     VimLCodeToken, ShellCodeToken
 from UltiSnips.Util import IndentUtil
 
+import sys  # TODO
+sys.setrecursionlimit(100) # TODO
+
 __all__ = [ "Mirror", "Transformation", "SnippetInstance" ]
 
 from debug import debug
@@ -679,6 +682,8 @@ class Visual(NoneditableTextObject):
     this will be the empty string
     """
     def __init__(self, parent, token):
+        # TODO: rework this: get indent directly from vim buffer and
+        # only update once.
 
         # Find our containing snippet for visual_content
         snippet = parent
@@ -694,9 +699,12 @@ class Visual(NoneditableTextObject):
 
         NoneditableTextObject.__init__(self, parent, token, initial_text = self._text)
 
-    def _do_update(self):
-        self.current_text = self._text
+    def _really_updateman(self, done, not_done):
+        self._replace_text(TextBuffer(self._text))
+        self._parent._del_child(self)
+        return True
 
+    # TODO: __repr__ is now basically the same for all elements
     def __repr__(self):
         return "Visual(%s -> %s)" % (self._start, self._end)
 

@@ -1458,81 +1458,82 @@ class TransformationUsingBackspaceToDeleteDefaultValue_ECR(_VimTest):
      keys = "test" + EX + BS
      wanted = "snip  "
 # End: Transformations  #}}}
-### ${VISUAL}  {{{#
-##class Visual_NoVisualSelection_Ignore(_VimTest):
-##    snippets = ("test", "h${VISUAL}b")
-##    keys = "test" + EX + "abc"
-##    wanted = "hbabc"
-##class Visual_SelectOneWord(_VimTest):
-##    snippets = ("test", "h${VISUAL}b")
-##    keys = "blablub" + ESC + "0v6l" + EX + "test" + EX
-##    wanted = "hblablubb"
-##
-##class Visual_ExpandTwice(_VimTest):
-##    snippets = ("test", "h${VISUAL}b")
-##    keys = "blablub" + ESC + "0v6l" + EX + "test" + EX + "\ntest" + EX
-##    wanted = "hblablubb\nhb"
-##
-##class Visual_SelectOneWord_TwiceVisual(_VimTest):
-##    snippets = ("test", "h${VISUAL}b${VISUAL}a")
-##    keys = "blablub" + ESC + "0v6l" + EX + "test" + EX
-##    wanted = "hblablubbblabluba"
-##class Visual_SelectOneWord_Inword(_VimTest):
-##    snippets = ("test", "h${VISUAL}b", "Description", "i")
-##    keys = "blablub" + ESC + "0lv4l" + EX + "test" + EX
-##    wanted = "bhlablubb"
-##class Visual_SelectOneWord_TillEndOfLine(_VimTest):
-##    snippets = ("test", "h${VISUAL}b", "Description", "i")
-##    keys = "blablub" + ESC + "0v$" + EX + "test" + EX + ESC + "o"
-##    wanted = "hblablub\nb"
-##class Visual_SelectOneWordWithTabstop_TillEndOfLine(_VimTest):
-##    snippets = ("test", "h${2:ahh}${VISUAL}${1:ups}b", "Description", "i")
-##    keys = "blablub" + ESC + "0v$" + EX + "test" + EX + "mmm" + JF + "n" + JF + "done" + ESC + "o"
-##    wanted = "hnblablub\nmmmbdone"
-##class Visual_InDefaultText_SelectOneWord_NoOverwrite(_VimTest):
-##    snippets = ("test", "h${1:${VISUAL}}b")
-##    keys = "blablub" + ESC + "0v6l" + EX + "test" + EX + JF + "hello"
-##    wanted = "hblablubbhello"
-##class Visual_InDefaultText_SelectOneWord(_VimTest):
-##    snippets = ("test", "h${1:${VISUAL}}b")
-##    keys = "blablub" + ESC + "0v6l" + EX + "test" + EX + "hello"
-##    wanted = "hhellob"
-##
-##class Visual_CrossOneLine(_VimTest):
-##    snippets = ("test", "h${VISUAL}b")
-##    keys = "bla blub\n  helloi" + ESC + "0k4lvjll" + EX + "test" + EX
-##    wanted = "bla hblub\n  hellobi"
-##
-##class Visual_LineSelect(_VimTest):
-##    snippets = ("test", "h${VISUAL}b")
-##    keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX
-##    wanted = "hhello\nnice\nworld\nb"
-##class Visual_InDefaultText_LineSelect_NoOverwrite(_VimTest):
-##    snippets = ("test", "h${1:bef${VISUAL}aft}b")
-##    keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX + JF + "hi"
-##    wanted = "hbefhello\nnice\nworld\naftbhi"
-##class Visual_InDefaultText_LineSelect_Overwrite(_VimTest):
-##    snippets = ("test", "h${1:bef${VISUAL}aft}b")
-##    keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX + "jup" + JF + "hi"
-##    wanted = "hjupbhi"
-##class Visual_LineSelect_CheckIndent(_VimTest):
-##    snippets = ("test", "beg\n\t${VISUAL}\nend")
-##    keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX
-##    wanted = "beg\n\thello\n\tnice\n\tworld\nend"
-##
-##class Visual_LineSelect_CheckIndentTwice(_VimTest):
-##    snippets = ("test", "beg\n\t${VISUAL}\nend")
-##    keys = "    hello\n    nice\n\tworld" + ESC + "Vkk" + EX + "test" + EX
-##    wanted = "beg\n\t    hello\n\t    nice\n\t\tworld\nend"
-##
-##class Visual_LineSelect_WithTabStop(_VimTest):
-##    snippets = ("test", "beg\n\t${VISUAL}\n\t${1:here_we_go}\nend")
-##    keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX + "super" + JF + "done"
-##    wanted = "beg\n\thello\n\tnice\n\tworld\n\tsuper\nenddone"
-##
-##
-##
-### End: ${VISUAL}  #}}}
+# ${VISUAL}  {{{#
+class Visual_NoVisualSelection_Ignore(_VimTest):
+    snippets = ("test", "h${VISUAL}b")
+    keys = "test" + EX + "abc"
+    wanted = "hbabc"
+class Visual_SelectOneWord(_VimTest):
+    snippets = ("test", "h${VISUAL}b")
+    keys = "blablub" + ESC + "0v6l" + EX + "test" + EX
+    wanted = "hblablubb"
+
+class Visual_ExpandTwice(_VimTest):
+    snippets = ("test", "h${VISUAL}b")
+    keys = "blablub" + ESC + "0v6l" + EX + "test" + EX + "\ntest" + EX
+    wanted = "hblablubb\nhb"
+
+class Visual_SelectOneWord_TwiceVisual(_VimTest):
+    snippets = ("test", "h${VISUAL}b${VISUAL}a")
+    keys = "blablub" + ESC + "0v6l" + EX + "test" + EX
+    wanted = "hblablubbblabluba"
+class Visual_SelectOneWord_Inword(_VimTest):
+    snippets = ("test", "h${VISUAL}b", "Description", "i")
+    keys = "blablub" + ESC + "0lv4l" + EX + "test" + EX
+    wanted = "bhlablubb"
+class Visual_SelectOneWord_TillEndOfLine(_VimTest):
+    snippets = ("test", "h${VISUAL}b", "Description", "i")
+    keys = "blablub" + ESC + "0v$" + EX + "test" + EX + ESC + "o"
+    wanted = "hblablub\nb"
+class Visual_SelectOneWordWithTabstop_TillEndOfLine(_VimTest):
+    snippets = ("test", "h${2:ahh}${VISUAL}${1:ups}b", "Description", "i")
+    keys = "blablub" + ESC + "0v$" + EX + "test" + EX + "mmm" + JF + "n" + JF + "done" + ESC + "o"
+    wanted = "hnblablub\nmmmbdone"
+class Visual_InDefaultText_SelectOneWord_NoOverwrite(_VimTest):
+    snippets = ("test", "h${1:${VISUAL}}b")
+    keys = "blablub" + ESC + "0v6l" + EX + "test" + EX + JF + "hello"
+    wanted = "hblablubbhello"
+class Visual_InDefaultText_SelectOneWord(_VimTest):
+    snippets = ("test", "h${1:${VISUAL}}b")
+    keys = "blablub" + ESC + "0v6l" + EX + "test" + EX + "hello"
+    wanted = "hhellob"
+
+class Visual_CrossOneLine(_VimTest):
+    snippets = ("test", "h${VISUAL}b")
+    keys = "bla blub\n  helloi" + ESC + "0k4lvjll" + EX + "test" + EX
+    wanted = "bla hblub\n  hellobi"
+
+# TODO: with indent in default text
+class Visual_LineSelect(_VimTest):
+    snippets = ("test", "h${VISUAL}b")
+    keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX
+    wanted = "hhello\nnice\nworld\nb"
+class Visual_InDefaultText_LineSelect_NoOverwrite(_VimTest):
+    snippets = ("test", "h${1:bef${VISUAL}aft}b")
+    keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX + JF + "hi"
+    wanted = "hbefhello\nnice\nworld\naftbhi"
+class Visual_InDefaultText_LineSelect_Overwrite(_VimTest):
+    snippets = ("test", "h${1:bef${VISUAL}aft}b")
+    keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX + "jup" + JF + "hi"
+    wanted = "hjupbhi"
+class Visual_LineSelect_CheckIndent(_VimTest):
+    snippets = ("test", "beg\n\t${VISUAL}\nend")
+    keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX
+    wanted = "beg\n\thello\n\tnice\n\tworld\nend"
+
+class Visual_LineSelect_CheckIndentTwice(_VimTest):
+    snippets = ("test", "beg\n\t${VISUAL}\nend")
+    keys = "    hello\n    nice\n\tworld" + ESC + "Vkk" + EX + "test" + EX
+    wanted = "beg\n\t    hello\n\t    nice\n\t\tworld\nend"
+
+class Visual_LineSelect_WithTabStop(_VimTest):
+    snippets = ("test", "beg\n\t${VISUAL}\n\t${1:here_we_go}\nend")
+    keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX + "super" + JF + "done"
+    wanted = "beg\n\thello\n\tnice\n\tworld\n\tsuper\nenddone"
+
+
+
+# End: ${VISUAL}  #}}}
 
 # Recursive (Nested) Snippets  {{{#
 class RecTabStops_SimpleCase_ExceptCorrectResult(_VimTest):
