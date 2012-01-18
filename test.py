@@ -937,13 +937,6 @@ snip += "Hallo3"` End""")
     keys = "test" + EX
     wanted = "hi Hallo1\nHallo2\nHallo3 End"
 
-class PythonCode_MultiAppend(_VimTest):
-    snippets = ("test", """hi `!p snip.rv = "Hallo1"
-snip += "Hallo2"
-snip += "Hallo3"` End""")
-    keys = "test" + EX
-    wanted = "hi Hallo1\nHallo2\nHallo3 End"
-
 class PythonCode_MultiAppendSimpleIndent(_VimTest):
     snippets = ("test", """hi
 `!p snip.rv="Hallo1"
