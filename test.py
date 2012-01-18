@@ -805,7 +805,7 @@ class TabStopNavigatingInInsertModeSimple_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "Hallo ${1:WELT} ups")
     keys = "hallo" + EX + "haselnut" + 2*ARR_L + "hips" + JF + "end"
     wanted = "Hallo haselnhipsut upsend"
-### End: TabStop Tests  #}}}
+# End: TabStop Tests  #}}}
 # ShellCode Interpolation  {{{#
 class TabStop_Shell_SimpleExample(_VimTest):
     skip_on_windows = True
@@ -1315,7 +1315,7 @@ class MirrorRealLifeExample_ExceptCorrectResult(_VimTest):
 {
 \t// do nothing
 }"""
-### End: Mirrors  #}}}
+# End: Mirrors  #}}}
 # Transformations  {{{#
 # TODO: more edits that cross boundaries between text objects
 class Transformation_SimpleCase_ExceptCorrectResult(_VimTest):
@@ -1534,192 +1534,192 @@ class TransformationUsingBackspaceToDeleteDefaultValue_ECR(_VimTest):
 ##
 ### End: ${VISUAL}  #}}}
 
-### Recursive (Nested) Snippets  {{{#
-##class RecTabStops_SimpleCase_ExceptCorrectResult(_VimTest):
-##    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
-##    keys = "m" + EX + "m" + EX + "hello" + JF + "world" + JF + "ups" + JF + "end"
-##    wanted = "[ [ hello  world ]ups  end ]"
-##class RecTabStops_SimpleCaseLeaveSecondSecond_ExceptCorrectResult(_VimTest):
-##    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
-##    keys = "m" + EX + "m" + EX + "hello" + JF + "world" + JF + JF + JF + "end"
-##    wanted = "[ [ hello  world ]  sec ]end"
-##class RecTabStops_SimpleCaseLeaveFirstSecond_ExceptCorrectResult(_VimTest):
-##    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
-##    keys = "m" + EX + "m" + EX + "hello" + JF + JF + JF + "world" + JF + "end"
-##    wanted = "[ [ hello  sec ]  world ]end"
-##
-##class RecTabStops_InnerWOTabStop_ECR(_VimTest):
-##    snippets = (
-##        ("m1", "Just some Text"),
-##        ("m", "[ ${1:first}  ${2:sec} ]"),
-##    )
-##    keys = "m" + EX + "m1" + EX + "hi" + JF + "two" + JF + "end"
-##    wanted = "[ Just some Texthi  two ]end"
-##class RecTabStops_InnerWOTabStopTwiceDirectly_ECR(_VimTest):
-##    snippets = (
-##        ("m1", "JST"),
-##        ("m", "[ ${1:first}  ${2:sec} ]"),
-##    )
-##    keys = "m" + EX + "m1" + EX + " m1" + EX + "hi" + JF + "two" + JF + "end"
-##    wanted = "[ JST JSThi  two ]end"
-##class RecTabStops_InnerWOTabStopTwice_ECR(_VimTest):
-##    snippets = (
-##        ("m1", "JST"),
-##        ("m", "[ ${1:first}  ${2:sec} ]"),
-##    )
-##    keys = "m" + EX + "m1" + EX + JF + "m1" + EX + "hi" + JF + "end"
-##    wanted = "[ JST  JSThi ]end"
-##class RecTabStops_OuterOnlyWithZeroTS_ECR(_VimTest):
-##    snippets = (
-##        ("m", "A $0 B"),
-##        ("m1", "C $1 D $0 E"),
-##    )
-##    keys = "m" + EX + "m1" + EX + "CD" + JF + "DE"
-##    wanted = "A C CD D DE E B"
-##class RecTabStops_OuterOnlyWithZero_ECR(_VimTest):
-##    snippets = (
-##        ("m", "A $0 B"),
-##        ("m1", "C $1 D $0 E"),
-##    )
-##    keys = "m" + EX + "m1" + EX + "CD" + JF + "DE"
-##    wanted = "A C CD D DE E B"
-##class RecTabStops_ExpandedInZeroTS_ECR(_VimTest):
-##    snippets = (
-##        ("m", "A $0 B $1"),
-##        ("m1", "C $1 D $0 E"),
-##    )
-##    keys = "m" + EX + "hi" + JF + "m1" + EX + "CD" + JF + "DE"
-##    wanted = "A C CD D DE E B hi"
-##class RecTabStops_ExpandedInZeroTSTwice_ECR(_VimTest):
-##    snippets = (
-##        ("m", "A $0 B $1"),
-##        ("m1", "C $1 D $0 E"),
-##    )
-##    keys = "m" + EX + "hi" + JF + "m" + EX + "again" + JF + "m1" + \
-##            EX + "CD" + JF + "DE"
-##    wanted = "A A C CD D DE E B again B hi"
-##class RecTabStops_ExpandedInZeroTSSecondTime_ECR(_VimTest):
-##    snippets = (
-##        ("m", "A $0 B $1"),
-##        ("m1", "C $1 D $0 E"),
-##    )
-##    keys = "m" + EX + "hi" + JF + "m" + EX + "m1" + EX + "CD" + JF + "DE" + JF + "AB"
-##    wanted = "A A AB B C CD D DE E B hi"
-##class RecTabsStops_TypeInZero_ECR(_VimTest):
-##    snippets = (
-##        ("v", r"\vec{$1}", "Vector", "w"),
-##        ("frac", r"\frac{${1:one}}${0:zero}{${2:two}}", "Fractio", "w"),
-##    )
-##    keys = "v" + EX + "frac" + EX + "a" + JF + "b" + JF + "frac" + EX + "aa" + JF + JF + "cc" + JF + \
-##            "hello frac" + EX + JF + JF + "world"
-##    wanted = r"\vec{\frac{a}\frac{aa}cc{two}{b}}hello \frac{one}world{two}"
-##class RecTabsStops_TypeInZero2_ECR(_VimTest):
-##    snippets = (
-##        ("m", r"_${0:explicit zero}", "snip", "i"),
-##    )
-##    keys = "m" + EX + "hello m" + EX + "world m" + EX + "end"
-##    wanted = r"_hello _world _end"
-##class RecTabsStops_BackspaceZero_ECR(_VimTest):
-##    snippets = (
-##        ("m", r"${1:one}${0:explicit zero}${2:two}", "snip", "i"),
-##    )
-##    keys = "m" + EX + JF + JF + BS + "m" + EX
-##    wanted = r"oneoneexplicit zerotwotwo"
-##
-##
-##class RecTabStops_MirrorInnerSnippet_ECR(_VimTest):
-##    snippets = (
-##        ("m", "[ $1 $2 ] $1"),
-##        ("m1", "ASnip $1 ASnip $2 ASnip"),
-##    )
-##    keys = "m" + EX + "m1" + EX + "Hallo" + JF + "Hi" + JF + "endone" + JF + "two" + JF + "totalend"
-##    wanted = "[ ASnip Hallo ASnip Hi ASnipendone two ] ASnip Hallo ASnip Hi ASnipendonetotalend"
-##
-##class RecTabStops_NotAtBeginningOfTS_ExceptCorrectResult(_VimTest):
-##    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
-##    keys = "m" + EX + "hello m" + EX + "hi" + JF + "two" + JF + "ups" + JF + "three" + \
-##            JF + "end"
-##    wanted = "[ hello [ hi  two ]ups  three ]end"
-##class RecTabStops_InNewlineInTabstop_ExceptCorrectResult(_VimTest):
-##    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
-##    keys = "m" + EX + "hello\nm" + EX + "hi" + JF + "two" + JF + "ups" + JF + "three" + \
-##            JF + "end"
-##    wanted = "[ hello\n[ hi  two ]ups  three ]end"
-##class RecTabStops_InNewlineInTabstopNotAtBeginOfLine_ECR(_VimTest):
-##    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
-##    keys = "m" + EX + "hello\nhello again m" + EX + "hi" + JF + "two" + \
-##            JF + "ups" + JF + "three" + JF + "end"
-##    wanted = "[ hello\nhello again [ hi  two ]ups  three ]end"
-##
-##class RecTabStops_InNewlineMultiline_ECR(_VimTest):
-##    snippets = ("m", "M START\n$0\nM END")
-##    keys = "m" + EX + "m" + EX
-##    wanted = "M START\nM START\n\nM END\nM END"
-##class RecTabStops_InNewlineManualIndent_ECR(_VimTest):
-##    snippets = ("m", "M START\n$0\nM END")
-##    keys = "m" + EX + "    m" + EX + "hi"
-##    wanted = "M START\n    M START\n    hi\n    M END\nM END"
-##class RecTabStops_InNewlineManualIndentTextInFront_ECR(_VimTest):
-##    snippets = ("m", "M START\n$0\nM END")
-##    keys = "m" + EX + "    hallo m" + EX + "hi"
-##    wanted = "M START\n    hallo M START\n    hi\n    M END\nM END"
-##class RecTabStops_InNewlineMultilineWithIndent_ECR(_VimTest):
-##    snippets = ("m", "M START\n    $0\nM END")
-##    keys = "m" + EX + "m" + EX + "hi"
-##    wanted = "M START\n    M START\n        hi\n    M END\nM END"
-##class RecTabStops_InNewlineMultilineWithNonZeroTS_ECR(_VimTest):
-##    snippets = ("m", "M START\n    $1\nM END -> $0")
-##    keys = "m" + EX + "m" + EX + "hi" + JF + "hallo" + JF + "end"
-##    wanted = "M START\n    M START\n        hi\n    M END -> hallo\n" \
-##        "M END -> end"
-##
-##class RecTabStops_BarelyNotLeavingInner_ECR(_VimTest):
-##    snippets = (
-##        ("m", "[ ${1:first} ${2:sec} ]"),
-##    )
-##    keys = "m" + EX + "m" + EX + "a" + 3*ARR_L + JF + "hallo" + \
-##            JF + "ups" + JF + "world" + JF + "end"
-##    wanted = "[ [ a hallo ]ups world ]end"
-##class RecTabStops_LeavingInner_ECR(_VimTest):
-##    snippets = (
-##        ("m", "[ ${1:first} ${2:sec} ]"),
-##    )
-##    keys = "m" + EX + "m" + EX + "a" + 4*ARR_L + JF + "hallo" + \
-##            JF + "world"
-##    wanted = "[ [ a sec ] hallo ]world"
-##class RecTabStops_LeavingInnerInner_ECR(_VimTest):
-##    snippets = (
-##        ("m", "[ ${1:first} ${2:sec} ]"),
-##    )
-##    keys = "m" + EX + "m" + EX + "m" + EX + "a" + 4*ARR_L + JF + "hallo" + \
-##            JF + "ups" + JF + "world" + JF + "end"
-##    wanted = "[ [ [ a sec ] hallo ]ups world ]end"
-##class RecTabStops_LeavingInnerInnerTwo_ECR(_VimTest):
-##    snippets = (
-##        ("m", "[ ${1:first} ${2:sec} ]"),
-##    )
-##    keys = "m" + EX + "m" + EX + "m" + EX + "a" + 6*ARR_L + JF + "hallo" + \
-##            JF + "end"
-##    wanted = "[ [ [ a sec ] sec ] hallo ]end"
-##
-##
-##class RecTabStops_ZeroTSisNothingSpecial_ECR(_VimTest):
-##    snippets = (
-##        ("m1", "[ ${1:first} $0 ${2:sec} ]"),
-##        ("m", "[ ${1:first} ${2:sec} ]"),
-##    )
-##    keys = "m" + EX + "m1" + EX + "one" + JF + "two" + \
-##            JF + "three" + JF + "four" + JF + "end"
-##    wanted = "[ [ one three two ] four ]end"
-##class RecTabStops_MirroredZeroTS_ECR(_VimTest):
-##    snippets = (
-##        ("m1", "[ ${1:first} ${0:Year, some default text} $0 ${2:sec} ]"),
-##        ("m", "[ ${1:first} ${2:sec} ]"),
-##    )
-##    keys = "m" + EX + "m1" + EX + "one" + JF + "two" + \
-##            JF + "three" + JF + "four" + JF + "end"
-##    wanted = "[ [ one three three two ] four ]end"
-##### End: Recursive (Nested) Snippets  #}}}
+# Recursive (Nested) Snippets  {{{#
+class RecTabStops_SimpleCase_ExceptCorrectResult(_VimTest):
+    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
+    keys = "m" + EX + "m" + EX + "hello" + JF + "world" + JF + "ups" + JF + "end"
+    wanted = "[ [ hello  world ]ups  end ]"
+class RecTabStops_SimpleCaseLeaveSecondSecond_ExceptCorrectResult(_VimTest):
+    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
+    keys = "m" + EX + "m" + EX + "hello" + JF + "world" + JF + JF + JF + "end"
+    wanted = "[ [ hello  world ]  sec ]end"
+class RecTabStops_SimpleCaseLeaveFirstSecond_ExceptCorrectResult(_VimTest):
+    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
+    keys = "m" + EX + "m" + EX + "hello" + JF + JF + JF + "world" + JF + "end"
+    wanted = "[ [ hello  sec ]  world ]end"
+
+class RecTabStops_InnerWOTabStop_ECR(_VimTest):
+    snippets = (
+        ("m1", "Just some Text"),
+        ("m", "[ ${1:first}  ${2:sec} ]"),
+    )
+    keys = "m" + EX + "m1" + EX + "hi" + JF + "two" + JF + "end"
+    wanted = "[ Just some Texthi  two ]end"
+class RecTabStops_InnerWOTabStopTwiceDirectly_ECR(_VimTest):
+    snippets = (
+        ("m1", "JST"),
+        ("m", "[ ${1:first}  ${2:sec} ]"),
+    )
+    keys = "m" + EX + "m1" + EX + " m1" + EX + "hi" + JF + "two" + JF + "end"
+    wanted = "[ JST JSThi  two ]end"
+class RecTabStops_InnerWOTabStopTwice_ECR(_VimTest):
+    snippets = (
+        ("m1", "JST"),
+        ("m", "[ ${1:first}  ${2:sec} ]"),
+    )
+    keys = "m" + EX + "m1" + EX + JF + "m1" + EX + "hi" + JF + "end"
+    wanted = "[ JST  JSThi ]end"
+class RecTabStops_OuterOnlyWithZeroTS_ECR(_VimTest):
+    snippets = (
+        ("m", "A $0 B"),
+        ("m1", "C $1 D $0 E"),
+    )
+    keys = "m" + EX + "m1" + EX + "CD" + JF + "DE"
+    wanted = "A C CD D DE E B"
+class RecTabStops_OuterOnlyWithZero_ECR(_VimTest):
+    snippets = (
+        ("m", "A $0 B"),
+        ("m1", "C $1 D $0 E"),
+    )
+    keys = "m" + EX + "m1" + EX + "CD" + JF + "DE"
+    wanted = "A C CD D DE E B"
+class RecTabStops_ExpandedInZeroTS_ECR(_VimTest):
+    snippets = (
+        ("m", "A $0 B $1"),
+        ("m1", "C $1 D $0 E"),
+    )
+    keys = "m" + EX + "hi" + JF + "m1" + EX + "CD" + JF + "DE"
+    wanted = "A C CD D DE E B hi"
+class RecTabStops_ExpandedInZeroTSTwice_ECR(_VimTest):
+    snippets = (
+        ("m", "A $0 B $1"),
+        ("m1", "C $1 D $0 E"),
+    )
+    keys = "m" + EX + "hi" + JF + "m" + EX + "again" + JF + "m1" + \
+            EX + "CD" + JF + "DE"
+    wanted = "A A C CD D DE E B again B hi"
+class RecTabStops_ExpandedInZeroTSSecondTime_ECR(_VimTest):
+    snippets = (
+        ("m", "A $0 B $1"),
+        ("m1", "C $1 D $0 E"),
+    )
+    keys = "m" + EX + "hi" + JF + "m" + EX + "m1" + EX + "CD" + JF + "DE" + JF + "AB"
+    wanted = "A A AB B C CD D DE E B hi"
+class RecTabsStops_TypeInZero_ECR(_VimTest):
+    snippets = (
+        ("v", r"\vec{$1}", "Vector", "w"),
+        ("frac", r"\frac{${1:one}}${0:zero}{${2:two}}", "Fractio", "w"),
+    )
+    keys = "v" + EX + "frac" + EX + "a" + JF + "b" + JF + "frac" + EX + "aa" + JF + JF + "cc" + JF + \
+            "hello frac" + EX + JF + JF + "world"
+    wanted = r"\vec{\frac{a}\frac{aa}cc{two}{b}}hello \frac{one}world{two}"
+class RecTabsStops_TypeInZero2_ECR(_VimTest):
+    snippets = (
+        ("m", r"_${0:explicit zero}", "snip", "i"),
+    )
+    keys = "m" + EX + "hello m" + EX + "world m" + EX + "end"
+    wanted = r"_hello _world _end"
+class RecTabsStops_BackspaceZero_ECR(_VimTest):
+    snippets = (
+        ("m", r"${1:one}${0:explicit zero}${2:two}", "snip", "i"),
+    )
+    keys = "m" + EX + JF + JF + BS + "m" + EX
+    wanted = r"oneoneexplicit zerotwotwo"
+
+
+class RecTabStops_MirrorInnerSnippet_ECR(_VimTest):
+    snippets = (
+        ("m", "[ $1 $2 ] $1"),
+        ("m1", "ASnip $1 ASnip $2 ASnip"),
+    )
+    keys = "m" + EX + "m1" + EX + "Hallo" + JF + "Hi" + JF + "endone" + JF + "two" + JF + "totalend"
+    wanted = "[ ASnip Hallo ASnip Hi ASnipendone two ] ASnip Hallo ASnip Hi ASnipendonetotalend"
+
+class RecTabStops_NotAtBeginningOfTS_ExceptCorrectResult(_VimTest):
+    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
+    keys = "m" + EX + "hello m" + EX + "hi" + JF + "two" + JF + "ups" + JF + "three" + \
+            JF + "end"
+    wanted = "[ hello [ hi  two ]ups  three ]end"
+class RecTabStops_InNewlineInTabstop_ExceptCorrectResult(_VimTest):
+    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
+    keys = "m" + EX + "hello\nm" + EX + "hi" + JF + "two" + JF + "ups" + JF + "three" + \
+            JF + "end"
+    wanted = "[ hello\n[ hi  two ]ups  three ]end"
+class RecTabStops_InNewlineInTabstopNotAtBeginOfLine_ECR(_VimTest):
+    snippets = ("m", "[ ${1:first}  ${2:sec} ]")
+    keys = "m" + EX + "hello\nhello again m" + EX + "hi" + JF + "two" + \
+            JF + "ups" + JF + "three" + JF + "end"
+    wanted = "[ hello\nhello again [ hi  two ]ups  three ]end"
+
+class RecTabStops_InNewlineMultiline_ECR(_VimTest):
+    snippets = ("m", "M START\n$0\nM END")
+    keys = "m" + EX + "m" + EX
+    wanted = "M START\nM START\n\nM END\nM END"
+class RecTabStops_InNewlineManualIndent_ECR(_VimTest):
+    snippets = ("m", "M START\n$0\nM END")
+    keys = "m" + EX + "    m" + EX + "hi"
+    wanted = "M START\n    M START\n    hi\n    M END\nM END"
+class RecTabStops_InNewlineManualIndentTextInFront_ECR(_VimTest):
+    snippets = ("m", "M START\n$0\nM END")
+    keys = "m" + EX + "    hallo m" + EX + "hi"
+    wanted = "M START\n    hallo M START\n    hi\n    M END\nM END"
+class RecTabStops_InNewlineMultilineWithIndent_ECR(_VimTest):
+    snippets = ("m", "M START\n    $0\nM END")
+    keys = "m" + EX + "m" + EX + "hi"
+    wanted = "M START\n    M START\n        hi\n    M END\nM END"
+class RecTabStops_InNewlineMultilineWithNonZeroTS_ECR(_VimTest):
+    snippets = ("m", "M START\n    $1\nM END -> $0")
+    keys = "m" + EX + "m" + EX + "hi" + JF + "hallo" + JF + "end"
+    wanted = "M START\n    M START\n        hi\n    M END -> hallo\n" \
+        "M END -> end"
+
+class RecTabStops_BarelyNotLeavingInner_ECR(_VimTest):
+    snippets = (
+        ("m", "[ ${1:first} ${2:sec} ]"),
+    )
+    keys = "m" + EX + "m" + EX + "a" + 3*ARR_L + JF + "hallo" + \
+            JF + "ups" + JF + "world" + JF + "end"
+    wanted = "[ [ a hallo ]ups world ]end"
+class RecTabStops_LeavingInner_ECR(_VimTest):
+    snippets = (
+        ("m", "[ ${1:first} ${2:sec} ]"),
+    )
+    keys = "m" + EX + "m" + EX + "a" + 4*ARR_L + JF + "hallo" + \
+            JF + "world"
+    wanted = "[ [ a sec ] hallo ]world"
+class RecTabStops_LeavingInnerInner_ECR(_VimTest):
+    snippets = (
+        ("m", "[ ${1:first} ${2:sec} ]"),
+    )
+    keys = "m" + EX + "m" + EX + "m" + EX + "a" + 4*ARR_L + JF + "hallo" + \
+            JF + "ups" + JF + "world" + JF + "end"
+    wanted = "[ [ [ a sec ] hallo ]ups world ]end"
+class RecTabStops_LeavingInnerInnerTwo_ECR(_VimTest):
+    snippets = (
+        ("m", "[ ${1:first} ${2:sec} ]"),
+    )
+    keys = "m" + EX + "m" + EX + "m" + EX + "a" + 6*ARR_L + JF + "hallo" + \
+            JF + "end"
+    wanted = "[ [ [ a sec ] sec ] hallo ]end"
+
+
+class RecTabStops_ZeroTSisNothingSpecial_ECR(_VimTest):
+    snippets = (
+        ("m1", "[ ${1:first} $0 ${2:sec} ]"),
+        ("m", "[ ${1:first} ${2:sec} ]"),
+    )
+    keys = "m" + EX + "m1" + EX + "one" + JF + "two" + \
+            JF + "three" + JF + "four" + JF + "end"
+    wanted = "[ [ one three two ] four ]end"
+class RecTabStops_MirroredZeroTS_ECR(_VimTest):
+    snippets = (
+        ("m1", "[ ${1:first} ${0:Year, some default text} $0 ${2:sec} ]"),
+        ("m", "[ ${1:first} ${2:sec} ]"),
+    )
+    keys = "m" + EX + "m1" + EX + "one" + JF + "two" + \
+            JF + "three" + JF + "four" + JF + "end"
+    wanted = "[ [ one three three two ] four ]end"
+# End: Recursive (Nested) Snippets  #}}}
 # List Snippets  {{{#
 class _ListAllSnippets(_VimTest):
     snippets = ( ("testblah", "BLAAH", "Say BLAH"),
@@ -2071,581 +2071,581 @@ class MultiWord_SnippetOptions_ExpandWordSnippets_ExpandSuffix(
     wanted = "a-Expand me!"
 # Snippet Options  #}}}
 
-### Anonymous Expansion  {{{#
-##class _AnonBase(_VimTest):
-##    args = ""
-##    def _options_on(self):
-##        self.send(":inoremap <silent> " + EA + ' <C-R>=UltiSnips_Anon('
-##                + self.args + ')<cr>\n')
-##    def _options_off(self):
-##        self.send(":iunmap <silent> " + EA + '\n')
-##
-##class Anon_NoTrigger_Simple(_AnonBase):
-##    args = '"simple expand"'
-##    keys = "abc" + EA
-##    wanted = "abcsimple expand"
-##
-##class Anon_NoTrigger_AfterSpace(_AnonBase):
-##    args = '"simple expand"'
-##    keys = "abc " + EA
-##    wanted = "abc simple expand"
-##
-##class Anon_NoTrigger_BeginningOfLine(_AnonBase):
-##    args = r"':latex:\`$1\`$0'"
-##    keys = EA + "Hello" + JF + "World"
-##    wanted = ":latex:`Hello`World"
-##class Anon_NoTrigger_FirstCharOfLine(_AnonBase):
-##    args = r"':latex:\`$1\`$0'"
-##    keys = " " + EA + "Hello" + JF + "World"
-##    wanted = " :latex:`Hello`World"
-##
-##class Anon_NoTrigger_Multi(_AnonBase):
-##    args = '"simple $1 expand $1 $0"'
-##    keys = "abc" + EA + "123" + JF + "456"
-##    wanted = "abcsimple 123 expand 123 456"
-##
-##class Anon_Trigger_Multi(_AnonBase):
-##    args = '"simple $1 expand $1 $0", "abc"'
-##    keys = "123 abc" + EA + "123" + JF + "456"
-##    wanted = "123 simple 123 expand 123 456"
-##
-##class Anon_Trigger_Simple(_AnonBase):
-##    args = '"simple expand", "abc"'
-##    keys = "abc" + EA
-##    wanted = "simple expand"
-##
-##class Anon_Trigger_Twice(_AnonBase):
-##    args = '"simple expand", "abc"'
-##    keys = "abc" + EA + "\nabc" + EX
-##    wanted = "simple expand\nabc" + EX
-##
-##class Anon_Trigger_Opts(_AnonBase):
-##    args = '"simple expand", ".*abc", "desc", "r"'
-##    keys = "blah blah abc" + EA
-##    wanted = "simple expand"
-### End: Anonymous Expansion  #}}}
-### AddSnippet Function  {{{#
-##class _AddFuncBase(_VimTest):
-##    args = ""
-##    def _options_on(self):
-##        self.send(":call UltiSnips_AddSnippet("
-##                + self.args + ')\n')
-##
-##class AddFunc_Simple(_AddFuncBase):
-##    args = '"test", "simple expand", "desc", ""'
-##    keys = "abc test" + EX
-##    wanted = "abc simple expand"
-##
-##class AddFunc_Opt(_AddFuncBase):
-##    args = '".*test", "simple expand", "desc", "r"'
-##    keys = "abc test" + EX
-##    wanted = "simple expand"
-### End: AddSnippet Function  #}}}
+# Anonymous Expansion  {{{#
+class _AnonBase(_VimTest):
+    args = ""
+    def _options_on(self):
+        self.send(":inoremap <silent> " + EA + ' <C-R>=UltiSnips_Anon('
+                + self.args + ')<cr>\n')
+    def _options_off(self):
+        self.send(":iunmap <silent> " + EA + '\n')
 
-### ExpandTab  {{{#
-##class _ExpandTabs(_VimTest):
-##    def _options_on(self):
-##        self.send(":set sw=3\n")
-##        self.send(":set expandtab\n")
-##    def _options_off(self):
-##        self.send(":set sw=8\n")
-##        self.send(":set noexpandtab\n")
-##
-##class RecTabStopsWithExpandtab_SimpleExample_ECR(_ExpandTabs):
-##    snippets = ("m", "\tBlaahblah \t\t  ")
-##    keys = "m" + EX
-##    wanted = "   Blaahblah \t\t  "
-##
-##class RecTabStopsWithExpandtab_SpecialIndentProblem_ECR(_ExpandTabs):
-##    # Windows indents the Something line after pressing return, though it
-##    # shouldn't because it contains a manual indent. All other vim versions do
-##    # not do this. Windows vim does not interpret the changes made by :py as
-##    # changes made 'manually', while the other vim version seem to do so. Since
-##    # the fault is not with UltiSnips, we simply skip this test on windows
-##    # completely.
-##    skip_on_windows = True
-##    snippets = (
-##        ("m1", "Something"),
-##        ("m", "\t$0"),
-##    )
-##    keys = "m" + EX + "m1" + EX + '\nHallo'
-##    wanted = "   Something\n        Hallo"
-##    def _options_on(self):
-##        _ExpandTabs._options_on(self)
-##        self.send(":set indentkeys=o,O,*<Return>,<>>,{,}\n")
-##        self.send(":set indentexpr=8\n")
-##    def _options_off(self):
-##        _ExpandTabs._options_off(self)
-##        self.send(":set indentkeys=\n")
-##        self.send(":set indentexpr=\n")
-### End: ExpandTab  #}}}
-### Proper Indenting  {{{#
-##class ProperIndenting_SimpleCase_ECR(_VimTest):
-##    snippets = ("test", "for\n    blah")
-##    keys = "    test" + EX + "Hui"
-##    wanted = "    for\n        blahHui"
-##class ProperIndenting_SingleLineNoReindenting_ECR(_VimTest):
-##    snippets = ("test", "hui")
-##    keys = "    test" + EX + "blah"
-##    wanted = "    huiblah"
-##class ProperIndenting_AutoIndentAndNewline_ECR(_VimTest):
-##    snippets = ("test", "hui")
-##    keys = "    test" + EX + "\n"+ "blah"
-##    wanted = "    hui\n    blah"
-##    def _options_on(self):
-##        self.send(":set autoindent\n")
-##    def _options_off(self):
-##        self.send(":set noautoindent\n")
-### End: Proper Indenting  #}}}
-### Format options tests  {{{#
-##class _FormatoptionsBase(_VimTest):
-##    def _options_on(self):
-##        self.send(":set tw=20\n")
-##    def _options_off(self):
-##        self.send(":set tw=0\n")
-##
-##class FOSimple_WithoutBreak_ExceptCorrectResult(_FormatoptionsBase):
-##    snippets = ("test", "${1:longer expand}\n$0")
-##    keys = "test" + EX + "This is a longer text that should not wrap as formatoptions are disabled"
-##    wanted = "This is a longer text that should not wrap as formatoptions are disabled\n"
-##
-##class FO_WithoutBreakEnableAfterSnippet_ExceptCorrectResult(_FormatoptionsBase):
-##    snippets = ("test", "${1:longer expand}\n")
-##    keys = "test" + EX + "This is a longer text that should not wrap as formatoptions are disabled" \
-##            + JF + "This is a longer text that should wrap"
-##    wanted = "This is a longer text that should not wrap as formatoptions are disabled\n" + \
-##            "This is a longer\ntext that should\nwrap"
-##
-##
-##class FOSimple_WithBreak_ExceptCorrectResult(_FormatoptionsBase):
-##    snippets = ("test", "${1:longer expand}\n$0", "", "f")
-##    keys = "test" + EX + "This is a longer text that should wrap"
-##    wanted = "This is a longer\ntext that should\nwrap\n"
-##
-##class FOTextBeforeAndAfter_ExceptCorrectResult(_FormatoptionsBase):
-##    snippets = ("test", "Before${1:longer expand}After\nstart$1end", "", "f")
-##    keys = "test" + EX + "This is a longer text that should wrap"
-##    wanted = \
-##"""BeforeThis is a
-##longer text that
-##should wrapAfter
-##startThis is a
-##longer text that
-##should wrapend"""
-##
-##
-##class FOTextAfter_ExceptCorrectResult(_FormatoptionsBase):
-##    """Testcase for lp:719998"""
-##    snippets = ("test", "${1:longer expand}after\nstart$1end", "", "f")
-##    keys = ("test" + EX + "This is a longer snippet that should wrap properly "
-##            "and the mirror below should work as well")
-##    wanted = \
-##"""This is a longer
-##snippet that should
-##wrap properly and
-##the mirror below
-##should work as wellafter
-##startThis is a longer
-##snippet that should
-##wrap properly and
-##the mirror below
-##should work as wellend"""
-##
-##class FOWrapOnLongWord_ExceptCorrectResult(_FormatoptionsBase):
-##    """Testcase for lp:719998"""
-##    snippets = ("test", "${1:longer expand}after\nstart$1end", "", "f")
-##    keys = ("test" + EX + "This is a longersnippet that should wrap properly")
-##    wanted = \
-##"""This is a
-##longersnippet that
-##should wrap properlyafter
-##startThis is a
-##longersnippet that
-##should wrap properlyend"""
-### End: Format options tests  #}}}
-### Langmap Handling  {{{#
-### Test for bug 501727 #
-##class TestNonEmptyLangmap_ExceptCorrectResult(_VimTest):
-##    snippets = ("testme",
-##"""my snipped ${1:some_default}
-##and a mirror: $1
-##$2...$3
-##$0""")
-##    keys = "testme" + EX + "hi1" + JF + "hi2" + JF + "hi3" + JF + "hi4"
-##    wanted ="""my snipped hi1
-##and a mirror: hi1
-##hi2...hi3
-##hi4"""
-##
-##    def _options_on(self):
-##        self.send(":set langmap=dj,rk,nl,ln,jd,kr,DJ,RK,NL,LN,JD,KR\n")
-##    def _options_off(self):
-##        self.send(":set langmap=\n")
-##
-### Test for bug 871357 #
-##class TestLangmapWithUtf8_ExceptCorrectResult(_VimTest):
-##    snippets = ("testme",
-##"""my snipped ${1:some_default}
-##and a mirror: $1
-##$2...$3
-##$0""")
-##    keys = "testme" + EX + "hi1" + JF + "hi2" + JF + "hi3" + JF + "hi4"
-##    wanted ="""my snipped hi1
-##and a mirror: hi1
-##hi2...hi3
-##hi4"""
-##
-##    def _options_on(self):
-##        self.send(":set langmap=йq,цw,уe,кr,еt,нy,гu,шi,щo,зp,х[,ъ],фa,ыs,вd,аf,пg,рh,оj,лk,дl,ж\\;,э',яz,чx,сc,мv,иb,тn,ьm,ю.,ё',ЙQ,ЦW,УE,КR,ЕT,НY,ГU,ШI,ЩO,ЗP,Х\{,Ъ\},ФA,ЫS,ВD,АF,ПG,РH,ОJ,ЛK,ДL,Ж\:,Э\",ЯZ,ЧX,СC,МV,ИB,ТN,ЬM,Б\<,Ю\>\n")
-##
-##    def _options_off(self):
-##        self.send(":set langmap=\n")
-### End: Langmap Handling  #}}}
-### Unmap SelectMode Mappings  {{{#
-### Test for bug 427298 #
-##class _SelectModeMappings(_VimTest):
-##    snippets = ("test", "${1:World}")
-##    keys = "test" + EX + "Hello"
-##    wanted = "Hello"
-##    maps = ("", "")
-##    buffer_maps = ("", "")
-##    do_unmapping = True
-##    ignores = []
-##
-##    def _options_on(self):
-##        self.send(":let g:UltiSnipsRemoveSelectModeMappings=%i\n" %
-##                  int(self.do_unmapping))
-##        self.send(":let g:UltiSnipsMappingsToIgnore=%s\n" %
-##                  repr(self.ignores))
-##
-##        if not isinstance(self.maps[0], tuple):
-##            self.maps = (self.maps,)
-##        if not isinstance(self.buffer_maps[0], tuple):
-##            self.buffer_maps = (self.buffer_maps,)
-##
-##        for key, m in self.maps:
-##            if not len(key): continue
-##            self.send(":smap %s %s\n" % (key,m))
-##        for key, m in self.buffer_maps:
-##            if not len(key): continue
-##            self.send(":smap <buffer> %s %s\n" % (key,m))
-##
-##    def _options_off(self):
-##        for key, m in self.maps:
-##            if not len(key): continue
-##            self.send(":silent! sunmap %s\n" % key)
-##        for key, m in self.buffer_maps:
-##            if not len(key): continue
-##            self.send(":silent! sunmap <buffer> %s\n" % key)
-##
-##        self.send(":let g:UltiSnipsRemoveSelectModeMappings=1\n")
-##        self.send(":let g:UltiSnipsMappingsToIgnore= []\n")
-##
-##class SelectModeMappings_RemoveBeforeSelecting_ECR(_SelectModeMappings):
-##    maps = ("H", "x")
-##    wanted = "Hello"
-##class SelectModeMappings_DisableRemoveBeforeSelecting_ECR(_SelectModeMappings):
-##    do_unmapping = False
-##    maps = ("H", "x")
-##    wanted = "xello"
-##class SelectModeMappings_IgnoreMappings_ECR(_SelectModeMappings):
-##    ignores = ["e"]
-##    maps = ("H", "x"), ("e", "l")
-##    wanted = "Hello"
-##class SelectModeMappings_IgnoreMappings1_ECR(_SelectModeMappings):
-##    ignores = ["H"]
-##    maps = ("H", "x"), ("e", "l")
-##    wanted = "xello"
-##class SelectModeMappings_IgnoreMappings2_ECR(_SelectModeMappings):
-##    ignores = ["e", "H"]
-##    maps = ("e", "l"), ("H", "x")
-##    wanted = "xello"
-##class SelectModeMappings_BufferLocalMappings_ECR(_SelectModeMappings):
-##    buffer_maps = ("H", "blah")
-##    wanted = "Hello"
-##
-### End: Unmap SelectMode Mappings  #}}}
-### Folding Interaction  {{{#
-##class FoldingEnabled_SnippetWithFold_ExpectNoFolding(_VimTest):
-##    def _options_on(self):
-##        self.send(":set foldlevel=0\n")
-##        self.send(":set foldmethod=marker\n")
-##    def _options_off(self):
-##        self.send(":set foldlevel=0\n")
-##        self.send(":set foldmethod=manual\n")
-##
-##    snippets = ("test", r"""Hello {{{
-##${1:Welt} }}}""")
-##    keys = "test" + EX + "Ball"
-##    wanted = """Hello {{{
-##Ball }}}"""
-### End: Folding Interaction  #}}}
+class Anon_NoTrigger_Simple(_AnonBase):
+    args = '"simple expand"'
+    keys = "abc" + EA
+    wanted = "abcsimple expand"
 
-### Cursor Movement  {{{#
-##class CursorMovement_Multiline_ECR(_VimTest):
-##    snippets = ("test", r"$1 ${1:a tab}")
-##    keys = "test" + EX + "this is something\nvery nice\nnot" + JF + "more text"
-##    wanted = "this is something\nvery nice\nnot " \
-##            "this is something\nvery nice\nnotmore text"
-### End: Cursor Movement  #}}}
-### Insert Mode Moving  {{{#
-##class IMMoving_CursorsKeys_ECR(_VimTest):
-##    snippets = ("test", "${1:Some}")
-##    keys = "test" + EX + "text" + 3*ARR_U + 6*ARR_D
-##    wanted = "text"
-##class IMMoving_DoNotAcceptInputWhenMoved_ECR(_VimTest):
-##    snippets = ("test", r"$1 ${1:a tab}")
-##    keys = "test" + EX + "this" + ARR_L + "hallo"
-##    wanted = "this thihallos"
-##class IMMoving_NoExiting_ECR(_VimTest):
-##    snippets = ("test", r"$1 ${2:a tab} ${1:Tab}")
-##    keys = "hello test this" + ESC + "02f i" + EX + "tab" + 7*ARR_L + \
-##            JF + "hallo"
-##    wanted = "hello tab hallo tab this"
-##class IMMoving_NoExitingEventAtEnd_ECR(_VimTest):
-##    snippets = ("test", r"$1 ${2:a tab} ${1:Tab}")
-##    keys = "hello test this" + ESC + "02f i" + EX + "tab" + JF + "hallo"
-##    wanted = "hello tab hallo tab this"
-##class IMMoving_ExitWhenOutsideRight_ECR(_VimTest):
-##    snippets = ("test", r"$1 ${2:blub} ${1:Tab}")
-##    keys = "hello test this" + ESC + "02f i" + EX + "tab" + ARR_R + JF + "hallo"
-##    wanted = "hello tab blub tab hallothis"
-##class IMMoving_NotExitingWhenBarelyOutsideLeft_ECR(_VimTest):
-##    snippets = ("test", r"${1:Hi} ${2:blub}")
-##    keys = "hello test this" + ESC + "02f i" + EX + "tab" + 3*ARR_L + \
-##            JF + "hallo"
-##    wanted = "hello tab hallo this"
-##class IMMoving_ExitWhenOutsideLeft_ECR(_VimTest):
-##    snippets = ("test", r"${1:Hi} ${2:blub}")
-##    keys = "hello test this" + ESC + "02f i" + EX + "tab" + 4*ARR_L + \
-##            JF + "hallo"
-##    wanted = "hellohallo tab blub this"
-##class IMMoving_ExitWhenOutsideAbove_ECR(_VimTest):
-##    snippets = ("test", "${1:Hi}\n${2:blub}")
-##    keys = "hello test this" + ESC + "02f i" + EX + "tab" + 1*ARR_U + JF + \
-##            "\nhallo"
-##    wanted = "hallo\nhello tab\nblub this"
-##class IMMoving_ExitWhenOutsideBelow_ECR(_VimTest):
-##    snippets = ("test", "${1:Hi}\n${2:blub}")
-##    keys = "hello test this" + ESC + "02f i" + EX + "tab" + 2*ARR_D + JF + \
-##            "testhallo\n"
-##    wanted = "hello tab\nblub this\ntesthallo"
-### End: Insert Mode Moving  #}}}
-### Tab Completion of Words  {{{#
-##class Completion_SimpleExample_ECR(_VimTest):
-##    snippets = ("test", "$1 ${1:blah}")
-##    keys = "superkallifragilistik\ntest" + EX + "sup" + COMPL_KW + \
-##            COMPL_ACCEPT + " some more"
-##    wanted = "superkallifragilistik\nsuperkallifragilistik some more " \
-##            "superkallifragilistik some more"
-##
-### We need >2 different words with identical starts to create the
-### popup-menu:
-##COMPLETION_OPTIONS = "completion1\ncompletion2\n"
-##
-##class Completion_ForwardsJumpWithoutCOMPL_ACCEPT(_VimTest):
-##    # completions should not be truncated when JF is activated without having
-##    # pressed COMPL_ACCEPT (Bug #598903)
-##    snippets = ("test", "$1 $2")
-##    keys = COMPLETION_OPTIONS + "test" + EX + "com" + COMPL_KW + JF + "foo"
-##    wanted = COMPLETION_OPTIONS + "completion1 foo"
-##
-##class Completion_BackwardsJumpWithoutCOMPL_ACCEPT(_VimTest):
-##    # completions should not be truncated when JB is activated without having
-##    # pressed COMPL_ACCEPT (Bug #598903)
-##    snippets = ("test", "$1 $2")
-##    keys = COMPLETION_OPTIONS + "test" + EX + "foo" + JF + "com" + COMPL_KW + \
-##           JB + "foo"
-##    wanted = COMPLETION_OPTIONS + "foo completion1"
-### End: Tab Completion of Words  #}}}
-### Pressing BS in TabStop  {{{#
-### Test for Bug #774917
-##class Backspace_TabStop_Zero(_VimTest):
-##    snippets = ("test", "A${1:C} ${0:DDD}", "This is Case 1")
-##    keys = "test" + EX + "A" + JF + BS + "BBB"
-##    wanted = "AA BBB"
-##
-##class Backspace_TabStop_NotZero(_VimTest):
-##    snippets = ("test", "A${1:C} ${2:DDD}", "This is Case 1")
-##    keys = "test" + EX + "A" + JF + BS + "BBB"
-##    wanted = "AA BBB"
-### End: Pressing BS in TabStop  #}}}
+class Anon_NoTrigger_AfterSpace(_AnonBase):
+    args = '"simple expand"'
+    keys = "abc " + EA
+    wanted = "abc simple expand"
 
-### Newline in default text {{{#
-### Tests for bug 616315 #
-##class TrailingNewline_TabStop_NLInsideStuffBehind(_VimTest):
-##    snippets = ("test", r"""
-##x${1:
-##}<-behind1
-##$2<-behind2""")
-##    keys = "test" + EX + "j" + JF + "k"
-##    wanted = """
-##xj<-behind1
-##k<-behind2"""
-##
-##class TrailingNewline_TabStop_JustNL(_VimTest):
-##    snippets = ("test", r"""
-##x${1:
-##}
-##$2""")
-##    keys = "test" + EX + "j" + JF + "k"
-##    wanted = """
-##xj
-##k"""
-##
-##class TrailingNewline_TabStop_EndNL(_VimTest):
-##    snippets = ("test", r"""
-##x${1:a
-##}
-##$2""")
-##    keys = "test" + EX + "j" + JF + "k"
-##    wanted = """
-##xj
-##k"""
-##
-##class TrailingNewline_TabStop_StartNL(_VimTest):
-##    snippets = ("test", r"""
-##x${1:
-##a}
-##$2""")
-##    keys = "test" + EX + "j" + JF + "k"
-##    wanted = """
-##xj
-##k"""
-##
-##class TrailingNewline_TabStop_EndStartNL(_VimTest):
-##    snippets = ("test", r"""
-##x${1:
-##a
-##}
-##$2""")
-##    keys = "test" + EX + "j" + JF + "k"
-##    wanted = """
-##xj
-##k"""
-##
-##class TrailingNewline_TabStop_NotEndStartNL(_VimTest):
-##    snippets = ("test", r"""
-##x${1:a
-##a}
-##$2""")
-##    keys = "test" + EX + "j" + JF + "k"
-##    wanted = """
-##xj
-##k"""
-##
-##class TrailingNewline_TabStop_ExtraNL_ECR(_VimTest):
-##    snippets = ("test", r"""
-##x${1:a
-##a}
-##$2
-##""")
-##    keys = "test" + EX + "j" + JF + "k"
-##    wanted = """
-##xj
-##k
-##"""
-##
-##class _MultiLineDefault(_VimTest):
-##    snippets = ("test", r"""
-##x${1:a
-##b
-##c
-##d
-##e
-##f}
-##$2""")
-##
-##class MultiLineDefault_Jump(_MultiLineDefault):
-##    keys = "test" + EX + JF + "y"
-##    wanted = """
-##xa
-##b
-##c
-##d
-##e
-##f
-##y"""
-##
-##class MultiLineDefault_Type(_MultiLineDefault):
-##    keys = "test" + EX + "z" + JF + "y"
-##    wanted = """
-##xz
-##y"""
-##
-##class MultiLineDefault_BS(_MultiLineDefault):
-##    keys = "test" + EX + BS + JF + "y"
-##    wanted = """
-##x
-##y"""
-##
-##
-##
-### End: Newline in default text  #}}}
-### Quotes in Snippets  {{{#
-### Test for Bug #774917
-##def _snip_quote(qt):
-##    return (
-##            ("te" + qt + "st", "Expand me" + qt + "!", "test: "+qt),
-##            ("te", "Bad", ""),
-##            )
-##
-##class Snippet_With_SingleQuote(_VimTest):
-##    snippets = _snip_quote("'")
-##    keys = "te'st" + EX
-##    wanted = "Expand me'!"
-##
-##class Snippet_With_SingleQuote_List(_VimTest):
-##    snippets = _snip_quote("'")
-##    keys = "te" + LS + "2\n"
-##    wanted = "Expand me'!"
-##
-##class Snippet_With_DoubleQuote(_VimTest):
-##    snippets = _snip_quote('"')
-##    keys = 'te"st' + EX
-##    wanted = "Expand me\"!"
-##
-##class Snippet_With_DoubleQuote_List(_VimTest):
-##    snippets = _snip_quote('"')
-##    keys = "te" + LS + "2\n"
-##    wanted = "Expand me\"!"
-### End: Quotes in Snippets  #}}}
-### Umlauts and Special Chars  {{{#
-##class Snippet_With_Umlauts_List(_VimTest):
-##    snippets = _snip_quote('ü')
-##    keys = 'te' + LS + "2\n"
-##    wanted = "Expand meü!"
-##
-##class Snippet_With_Umlauts(_VimTest):
-##    snippets = _snip_quote('ü')
-##    keys = 'teüst' + EX
-##    wanted = "Expand meü!"
-##
-##class Snippet_With_Umlauts_TypeOn(_VimTest):
-##    snippets = ('ül', 'üüüüüßßßß')
-##    keys = 'te ül' + EX + "more text"
-##    wanted = "te üüüüüßßßßmore text"
-##class Snippet_With_Umlauts_OverwriteFirst(_VimTest):
-##    snippets = ('ül', 'üü ${1:world} üü ${2:hello}ßß\nüüüü')
-##    keys = 'te ül' + EX + "more text" + JF + JF + "end"
-##    wanted = "te üü more text üü helloßß\nüüüüend"
-##class Snippet_With_Umlauts_OverwriteSecond(_VimTest):
-##    snippets = ('ül', 'üü ${1:world} üü ${2:hello}ßß\nüüüü')
-##    keys = 'te ül' + EX + JF + "more text" + JF + "end"
-##    wanted = "te üü world üü more textßß\nüüüüend"
-##class Snippet_With_Umlauts_OverwriteNone(_VimTest):
-##    snippets = ('ül', 'üü ${1:world} üü ${2:hello}ßß\nüüüü')
-##    keys = 'te ül' + EX + JF + JF + "end"
-##    wanted = "te üü world üü helloßß\nüüüüend"
-##class Snippet_With_Umlauts_Mirrors(_VimTest):
-##    snippets = ('ül', 'üü ${1:world} üü $1')
-##    keys = 'te ül' + EX + "hello"
-##    wanted = "te üü hello üü hello"
-##class Snippet_With_Umlauts_Python(_VimTest):
-##    snippets = ('ül', 'üü ${1:world} üü `!p snip.rv = len(t[1])*"a"`')
-##    keys = 'te ül' + EX + "hüüll"
-##    wanted = "te üü hüüll üü aaaaa"
-### End: Umlauts and Special Chars  #}}}
+class Anon_NoTrigger_BeginningOfLine(_AnonBase):
+    args = r"':latex:\`$1\`$0'"
+    keys = EA + "Hello" + JF + "World"
+    wanted = ":latex:`Hello`World"
+class Anon_NoTrigger_FirstCharOfLine(_AnonBase):
+    args = r"':latex:\`$1\`$0'"
+    keys = " " + EA + "Hello" + JF + "World"
+    wanted = " :latex:`Hello`World"
+
+class Anon_NoTrigger_Multi(_AnonBase):
+    args = '"simple $1 expand $1 $0"'
+    keys = "abc" + EA + "123" + JF + "456"
+    wanted = "abcsimple 123 expand 123 456"
+
+class Anon_Trigger_Multi(_AnonBase):
+    args = '"simple $1 expand $1 $0", "abc"'
+    keys = "123 abc" + EA + "123" + JF + "456"
+    wanted = "123 simple 123 expand 123 456"
+
+class Anon_Trigger_Simple(_AnonBase):
+    args = '"simple expand", "abc"'
+    keys = "abc" + EA
+    wanted = "simple expand"
+
+class Anon_Trigger_Twice(_AnonBase):
+    args = '"simple expand", "abc"'
+    keys = "abc" + EA + "\nabc" + EX
+    wanted = "simple expand\nabc" + EX
+
+class Anon_Trigger_Opts(_AnonBase):
+    args = '"simple expand", ".*abc", "desc", "r"'
+    keys = "blah blah abc" + EA
+    wanted = "simple expand"
+# End: Anonymous Expansion  #}}}
+# AddSnippet Function  {{{#
+class _AddFuncBase(_VimTest):
+    args = ""
+    def _options_on(self):
+        self.send(":call UltiSnips_AddSnippet("
+                + self.args + ')\n')
+
+class AddFunc_Simple(_AddFuncBase):
+    args = '"test", "simple expand", "desc", ""'
+    keys = "abc test" + EX
+    wanted = "abc simple expand"
+
+class AddFunc_Opt(_AddFuncBase):
+    args = '".*test", "simple expand", "desc", "r"'
+    keys = "abc test" + EX
+    wanted = "simple expand"
+# End: AddSnippet Function  #}}}
+
+# ExpandTab  {{{#
+class _ExpandTabs(_VimTest):
+    def _options_on(self):
+        self.send(":set sw=3\n")
+        self.send(":set expandtab\n")
+    def _options_off(self):
+        self.send(":set sw=8\n")
+        self.send(":set noexpandtab\n")
+
+class RecTabStopsWithExpandtab_SimpleExample_ECR(_ExpandTabs):
+    snippets = ("m", "\tBlaahblah \t\t  ")
+    keys = "m" + EX
+    wanted = "   Blaahblah \t\t  "
+
+class RecTabStopsWithExpandtab_SpecialIndentProblem_ECR(_ExpandTabs):
+    # Windows indents the Something line after pressing return, though it
+    # shouldn't because it contains a manual indent. All other vim versions do
+    # not do this. Windows vim does not interpret the changes made by :py as
+    # changes made 'manually', while the other vim version seem to do so. Since
+    # the fault is not with UltiSnips, we simply skip this test on windows
+    # completely.
+    skip_on_windows = True
+    snippets = (
+        ("m1", "Something"),
+        ("m", "\t$0"),
+    )
+    keys = "m" + EX + "m1" + EX + '\nHallo'
+    wanted = "   Something\n        Hallo"
+    def _options_on(self):
+        _ExpandTabs._options_on(self)
+        self.send(":set indentkeys=o,O,*<Return>,<>>,{,}\n")
+        self.send(":set indentexpr=8\n")
+    def _options_off(self):
+        _ExpandTabs._options_off(self)
+        self.send(":set indentkeys=\n")
+        self.send(":set indentexpr=\n")
+# End: ExpandTab  #}}}
+# Proper Indenting  {{{#
+class ProperIndenting_SimpleCase_ECR(_VimTest):
+    snippets = ("test", "for\n    blah")
+    keys = "    test" + EX + "Hui"
+    wanted = "    for\n        blahHui"
+class ProperIndenting_SingleLineNoReindenting_ECR(_VimTest):
+    snippets = ("test", "hui")
+    keys = "    test" + EX + "blah"
+    wanted = "    huiblah"
+class ProperIndenting_AutoIndentAndNewline_ECR(_VimTest):
+    snippets = ("test", "hui")
+    keys = "    test" + EX + "\n"+ "blah"
+    wanted = "    hui\n    blah"
+    def _options_on(self):
+        self.send(":set autoindent\n")
+    def _options_off(self):
+        self.send(":set noautoindent\n")
+# End: Proper Indenting  #}}}
+# Format options tests  {{{#
+class _FormatoptionsBase(_VimTest):
+    def _options_on(self):
+        self.send(":set tw=20\n")
+    def _options_off(self):
+        self.send(":set tw=0\n")
+
+class FOSimple_WithoutBreak_ExceptCorrectResult(_FormatoptionsBase):
+    snippets = ("test", "${1:longer expand}\n$0")
+    keys = "test" + EX + "This is a longer text that should not wrap as formatoptions are disabled"
+    wanted = "This is a longer text that should not wrap as formatoptions are disabled\n"
+
+class FO_WithoutBreakEnableAfterSnippet_ExceptCorrectResult(_FormatoptionsBase):
+    snippets = ("test", "${1:longer expand}\n")
+    keys = "test" + EX + "This is a longer text that should not wrap as formatoptions are disabled" \
+            + JF + "This is a longer text that should wrap"
+    wanted = "This is a longer text that should not wrap as formatoptions are disabled\n" + \
+            "This is a longer\ntext that should\nwrap"
+
+
+class FOSimple_WithBreak_ExceptCorrectResult(_FormatoptionsBase):
+    snippets = ("test", "${1:longer expand}\n$0", "", "f")
+    keys = "test" + EX + "This is a longer text that should wrap"
+    wanted = "This is a longer\ntext that should\nwrap\n"
+
+class FOTextBeforeAndAfter_ExceptCorrectResult(_FormatoptionsBase):
+    snippets = ("test", "Before${1:longer expand}After\nstart$1end", "", "f")
+    keys = "test" + EX + "This is a longer text that should wrap"
+    wanted = \
+"""BeforeThis is a
+longer text that
+should wrapAfter
+startThis is a
+longer text that
+should wrapend"""
+
+
+class FOTextAfter_ExceptCorrectResult(_FormatoptionsBase):
+    """Testcase for lp:719998"""
+    snippets = ("test", "${1:longer expand}after\nstart$1end", "", "f")
+    keys = ("test" + EX + "This is a longer snippet that should wrap properly "
+            "and the mirror below should work as well")
+    wanted = \
+"""This is a longer
+snippet that should
+wrap properly and
+the mirror below
+should work as wellafter
+startThis is a longer
+snippet that should
+wrap properly and
+the mirror below
+should work as wellend"""
+
+class FOWrapOnLongWord_ExceptCorrectResult(_FormatoptionsBase):
+    """Testcase for lp:719998"""
+    snippets = ("test", "${1:longer expand}after\nstart$1end", "", "f")
+    keys = ("test" + EX + "This is a longersnippet that should wrap properly")
+    wanted = \
+"""This is a
+longersnippet that
+should wrap properlyafter
+startThis is a
+longersnippet that
+should wrap properlyend"""
+# End: Format options tests  #}}}
+# Langmap Handling  {{{#
+# Test for bug 501727 #
+class TestNonEmptyLangmap_ExceptCorrectResult(_VimTest):
+    snippets = ("testme",
+"""my snipped ${1:some_default}
+and a mirror: $1
+$2...$3
+$0""")
+    keys = "testme" + EX + "hi1" + JF + "hi2" + JF + "hi3" + JF + "hi4"
+    wanted ="""my snipped hi1
+and a mirror: hi1
+hi2...hi3
+hi4"""
+
+    def _options_on(self):
+        self.send(":set langmap=dj,rk,nl,ln,jd,kr,DJ,RK,NL,LN,JD,KR\n")
+    def _options_off(self):
+        self.send(":set langmap=\n")
+
+# Test for bug 871357 #
+class TestLangmapWithUtf8_ExceptCorrectResult(_VimTest):
+    snippets = ("testme",
+"""my snipped ${1:some_default}
+and a mirror: $1
+$2...$3
+$0""")
+    keys = "testme" + EX + "hi1" + JF + "hi2" + JF + "hi3" + JF + "hi4"
+    wanted ="""my snipped hi1
+and a mirror: hi1
+hi2...hi3
+hi4"""
+
+    def _options_on(self):
+        self.send(":set langmap=йq,цw,уe,кr,еt,нy,гu,шi,щo,зp,х[,ъ],фa,ыs,вd,аf,пg,рh,оj,лk,дl,ж\\;,э',яz,чx,сc,мv,иb,тn,ьm,ю.,ё',ЙQ,ЦW,УE,КR,ЕT,НY,ГU,ШI,ЩO,ЗP,Х\{,Ъ\},ФA,ЫS,ВD,АF,ПG,РH,ОJ,ЛK,ДL,Ж\:,Э\",ЯZ,ЧX,СC,МV,ИB,ТN,ЬM,Б\<,Ю\>\n")
+
+    def _options_off(self):
+        self.send(":set langmap=\n")
+# End: Langmap Handling  #}}}
+# Unmap SelectMode Mappings  {{{#
+# Test for bug 427298 #
+class _SelectModeMappings(_VimTest):
+    snippets = ("test", "${1:World}")
+    keys = "test" + EX + "Hello"
+    wanted = "Hello"
+    maps = ("", "")
+    buffer_maps = ("", "")
+    do_unmapping = True
+    ignores = []
+
+    def _options_on(self):
+        self.send(":let g:UltiSnipsRemoveSelectModeMappings=%i\n" %
+                  int(self.do_unmapping))
+        self.send(":let g:UltiSnipsMappingsToIgnore=%s\n" %
+                  repr(self.ignores))
+
+        if not isinstance(self.maps[0], tuple):
+            self.maps = (self.maps,)
+        if not isinstance(self.buffer_maps[0], tuple):
+            self.buffer_maps = (self.buffer_maps,)
+
+        for key, m in self.maps:
+            if not len(key): continue
+            self.send(":smap %s %s\n" % (key,m))
+        for key, m in self.buffer_maps:
+            if not len(key): continue
+            self.send(":smap <buffer> %s %s\n" % (key,m))
+
+    def _options_off(self):
+        for key, m in self.maps:
+            if not len(key): continue
+            self.send(":silent! sunmap %s\n" % key)
+        for key, m in self.buffer_maps:
+            if not len(key): continue
+            self.send(":silent! sunmap <buffer> %s\n" % key)
+
+        self.send(":let g:UltiSnipsRemoveSelectModeMappings=1\n")
+        self.send(":let g:UltiSnipsMappingsToIgnore= []\n")
+
+class SelectModeMappings_RemoveBeforeSelecting_ECR(_SelectModeMappings):
+    maps = ("H", "x")
+    wanted = "Hello"
+class SelectModeMappings_DisableRemoveBeforeSelecting_ECR(_SelectModeMappings):
+    do_unmapping = False
+    maps = ("H", "x")
+    wanted = "xello"
+class SelectModeMappings_IgnoreMappings_ECR(_SelectModeMappings):
+    ignores = ["e"]
+    maps = ("H", "x"), ("e", "l")
+    wanted = "Hello"
+class SelectModeMappings_IgnoreMappings1_ECR(_SelectModeMappings):
+    ignores = ["H"]
+    maps = ("H", "x"), ("e", "l")
+    wanted = "xello"
+class SelectModeMappings_IgnoreMappings2_ECR(_SelectModeMappings):
+    ignores = ["e", "H"]
+    maps = ("e", "l"), ("H", "x")
+    wanted = "xello"
+class SelectModeMappings_BufferLocalMappings_ECR(_SelectModeMappings):
+    buffer_maps = ("H", "blah")
+    wanted = "Hello"
+
+# End: Unmap SelectMode Mappings  #}}}
+# Folding Interaction  {{{#
+class FoldingEnabled_SnippetWithFold_ExpectNoFolding(_VimTest):
+    def _options_on(self):
+        self.send(":set foldlevel=0\n")
+        self.send(":set foldmethod=marker\n")
+    def _options_off(self):
+        self.send(":set foldlevel=0\n")
+        self.send(":set foldmethod=manual\n")
+
+    snippets = ("test", r"""Hello {{{
+${1:Welt} }}}""")
+    keys = "test" + EX + "Ball"
+    wanted = """Hello {{{
+Ball }}}"""
+# End: Folding Interaction  #}}}
+
+# Cursor Movement  {{{#
+class CursorMovement_Multiline_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1:a tab}")
+    keys = "test" + EX + "this is something\nvery nice\nnot" + JF + "more text"
+    wanted = "this is something\nvery nice\nnot " \
+            "this is something\nvery nice\nnotmore text"
+# End: Cursor Movement  #}}}
+# Insert Mode Moving  {{{#
+class IMMoving_CursorsKeys_ECR(_VimTest):
+    snippets = ("test", "${1:Some}")
+    keys = "test" + EX + "text" + 3*ARR_U + 6*ARR_D
+    wanted = "text"
+class IMMoving_AcceptInputWhenMoved_ECR(_VimTest):
+    snippets = ("test", r"$1 ${1:a tab}")
+    keys = "test" + EX + "this" + 2*ARR_L + "hallo\nwelt"
+    wanted = "thhallo\nweltis thhallo\nweltis"
+class IMMoving_NoExiting_ECR(_VimTest):
+    snippets = ("test", r"$1 ${2:a tab} ${1:Tab}")
+    keys = "hello test this" + ESC + "02f i" + EX + "tab" + 7*ARR_L + \
+            JF + "hallo"
+    wanted = "hello tab hallo tab this"
+class IMMoving_NoExitingEventAtEnd_ECR(_VimTest):
+    snippets = ("test", r"$1 ${2:a tab} ${1:Tab}")
+    keys = "hello test this" + ESC + "02f i" + EX + "tab" + JF + "hallo"
+    wanted = "hello tab hallo tab this"
+class IMMoving_ExitWhenOutsideRight_ECR(_VimTest):
+    snippets = ("test", r"$1 ${2:blub} ${1:Tab}")
+    keys = "hello test this" + ESC + "02f i" + EX + "tab" + ARR_R + JF + "hallo"
+    wanted = "hello tab blub tab hallothis"
+class IMMoving_NotExitingWhenBarelyOutsideLeft_ECR(_VimTest):
+    snippets = ("test", r"${1:Hi} ${2:blub}")
+    keys = "hello test this" + ESC + "02f i" + EX + "tab" + 3*ARR_L + \
+            JF + "hallo"
+    wanted = "hello tab hallo this"
+class IMMoving_ExitWhenOutsideLeft_ECR(_VimTest):
+    snippets = ("test", r"${1:Hi} ${2:blub}")
+    keys = "hello test this" + ESC + "02f i" + EX + "tab" + 4*ARR_L + \
+            JF + "hallo"
+    wanted = "hellohallo tab blub this"
+class IMMoving_ExitWhenOutsideAbove_ECR(_VimTest):
+    snippets = ("test", "${1:Hi}\n${2:blub}")
+    keys = "hello test this" + ESC + "02f i" + EX + "tab" + 1*ARR_U + JF + \
+            "\nhallo"
+    wanted = "hallo\nhello tab\nblub this"
+class IMMoving_ExitWhenOutsideBelow_ECR(_VimTest):
+    snippets = ("test", "${1:Hi}\n${2:blub}")
+    keys = "hello test this" + ESC + "02f i" + EX + "tab" + 2*ARR_D + JF + \
+            "testhallo\n"
+    wanted = "hello tab\nblub this\ntesthallo"
+# End: Insert Mode Moving  #}}}
+# Tab Completion of Words  {{{#
+class Completion_SimpleExample_ECR(_VimTest):
+    snippets = ("test", "$1 ${1:blah}")
+    keys = "superkallifragilistik\ntest" + EX + "sup" + COMPL_KW + \
+            COMPL_ACCEPT + " some more"
+    wanted = "superkallifragilistik\nsuperkallifragilistik some more " \
+            "superkallifragilistik some more"
+
+# We need >2 different words with identical starts to create the
+# popup-menu:
+COMPLETION_OPTIONS = "completion1\ncompletion2\n"
+
+class Completion_ForwardsJumpWithoutCOMPL_ACCEPT(_VimTest):
+    # completions should not be truncated when JF is activated without having
+    # pressed COMPL_ACCEPT (Bug #598903)
+    snippets = ("test", "$1 $2")
+    keys = COMPLETION_OPTIONS + "test" + EX + "com" + COMPL_KW + JF + "foo"
+    wanted = COMPLETION_OPTIONS + "completion1 foo"
+
+class Completion_BackwardsJumpWithoutCOMPL_ACCEPT(_VimTest):
+    # completions should not be truncated when JB is activated without having
+    # pressed COMPL_ACCEPT (Bug #598903)
+    snippets = ("test", "$1 $2")
+    keys = COMPLETION_OPTIONS + "test" + EX + "foo" + JF + "com" + COMPL_KW + \
+           JB + "foo"
+    wanted = COMPLETION_OPTIONS + "foo completion1"
+# End: Tab Completion of Words  #}}}
+# Pressing BS in TabStop  {{{#
+# Test for Bug #774917
+class Backspace_TabStop_Zero(_VimTest):
+    snippets = ("test", "A${1:C} ${0:DDD}", "This is Case 1")
+    keys = "test" + EX + "A" + JF + BS + "BBB"
+    wanted = "AA BBB"
+
+class Backspace_TabStop_NotZero(_VimTest):
+    snippets = ("test", "A${1:C} ${2:DDD}", "This is Case 1")
+    keys = "test" + EX + "A" + JF + BS + "BBB"
+    wanted = "AA BBB"
+# End: Pressing BS in TabStop  #}}}
+
+# Newline in default text {{{#
+# Tests for bug 616315 #
+class TrailingNewline_TabStop_NLInsideStuffBehind(_VimTest):
+    snippets = ("test", r"""
+x${1:
+}<-behind1
+$2<-behind2""")
+    keys = "test" + EX + "j" + JF + "k"
+    wanted = """
+xj<-behind1
+k<-behind2"""
+
+class TrailingNewline_TabStop_JustNL(_VimTest):
+    snippets = ("test", r"""
+x${1:
+}
+$2""")
+    keys = "test" + EX + "j" + JF + "k"
+    wanted = """
+xj
+k"""
+
+class TrailingNewline_TabStop_EndNL(_VimTest):
+    snippets = ("test", r"""
+x${1:a
+}
+$2""")
+    keys = "test" + EX + "j" + JF + "k"
+    wanted = """
+xj
+k"""
+
+class TrailingNewline_TabStop_StartNL(_VimTest):
+    snippets = ("test", r"""
+x${1:
+a}
+$2""")
+    keys = "test" + EX + "j" + JF + "k"
+    wanted = """
+xj
+k"""
+
+class TrailingNewline_TabStop_EndStartNL(_VimTest):
+    snippets = ("test", r"""
+x${1:
+a
+}
+$2""")
+    keys = "test" + EX + "j" + JF + "k"
+    wanted = """
+xj
+k"""
+
+class TrailingNewline_TabStop_NotEndStartNL(_VimTest):
+    snippets = ("test", r"""
+x${1:a
+a}
+$2""")
+    keys = "test" + EX + "j" + JF + "k"
+    wanted = """
+xj
+k"""
+
+class TrailingNewline_TabStop_ExtraNL_ECR(_VimTest):
+    snippets = ("test", r"""
+x${1:a
+a}
+$2
+""")
+    keys = "test" + EX + "j" + JF + "k"
+    wanted = """
+xj
+k
+"""
+
+class _MultiLineDefault(_VimTest):
+    snippets = ("test", r"""
+x${1:a
+b
+c
+d
+e
+f}
+$2""")
+
+class MultiLineDefault_Jump(_MultiLineDefault):
+    keys = "test" + EX + JF + "y"
+    wanted = """
+xa
+b
+c
+d
+e
+f
+y"""
+
+class MultiLineDefault_Type(_MultiLineDefault):
+    keys = "test" + EX + "z" + JF + "y"
+    wanted = """
+xz
+y"""
+
+class MultiLineDefault_BS(_MultiLineDefault):
+    keys = "test" + EX + BS + JF + "y"
+    wanted = """
+x
+y"""
+
+
+
+# End: Newline in default text  #}}}
+# Quotes in Snippets  {{{#
+# Test for Bug #774917
+def _snip_quote(qt):
+    return (
+            ("te" + qt + "st", "Expand me" + qt + "!", "test: "+qt),
+            ("te", "Bad", ""),
+            )
+
+class Snippet_With_SingleQuote(_VimTest):
+    snippets = _snip_quote("'")
+    keys = "te'st" + EX
+    wanted = "Expand me'!"
+
+class Snippet_With_SingleQuote_List(_VimTest):
+    snippets = _snip_quote("'")
+    keys = "te" + LS + "2\n"
+    wanted = "Expand me'!"
+
+class Snippet_With_DoubleQuote(_VimTest):
+    snippets = _snip_quote('"')
+    keys = 'te"st' + EX
+    wanted = "Expand me\"!"
+
+class Snippet_With_DoubleQuote_List(_VimTest):
+    snippets = _snip_quote('"')
+    keys = "te" + LS + "2\n"
+    wanted = "Expand me\"!"
+# End: Quotes in Snippets  #}}}
+# Umlauts and Special Chars  {{{#
+class Snippet_With_Umlauts_List(_VimTest):
+    snippets = _snip_quote('ü')
+    keys = 'te' + LS + "2\n"
+    wanted = "Expand meü!"
+
+class Snippet_With_Umlauts(_VimTest):
+    snippets = _snip_quote('ü')
+    keys = 'teüst' + EX
+    wanted = "Expand meü!"
+
+class Snippet_With_Umlauts_TypeOn(_VimTest):
+    snippets = ('ül', 'üüüüüßßßß')
+    keys = 'te ül' + EX + "more text"
+    wanted = "te üüüüüßßßßmore text"
+class Snippet_With_Umlauts_OverwriteFirst(_VimTest):
+    snippets = ('ül', 'üü ${1:world} üü ${2:hello}ßß\nüüüü')
+    keys = 'te ül' + EX + "more text" + JF + JF + "end"
+    wanted = "te üü more text üü helloßß\nüüüüend"
+class Snippet_With_Umlauts_OverwriteSecond(_VimTest):
+    snippets = ('ül', 'üü ${1:world} üü ${2:hello}ßß\nüüüü')
+    keys = 'te ül' + EX + JF + "more text" + JF + "end"
+    wanted = "te üü world üü more textßß\nüüüüend"
+class Snippet_With_Umlauts_OverwriteNone(_VimTest):
+    snippets = ('ül', 'üü ${1:world} üü ${2:hello}ßß\nüüüü')
+    keys = 'te ül' + EX + JF + JF + "end"
+    wanted = "te üü world üü helloßß\nüüüüend"
+class Snippet_With_Umlauts_Mirrors(_VimTest):
+    snippets = ('ül', 'üü ${1:world} üü $1')
+    keys = 'te ül' + EX + "hello"
+    wanted = "te üü hello üü hello"
+class Snippet_With_Umlauts_Python(_VimTest):
+    snippets = ('ül', 'üü ${1:world} üü `!p snip.rv = len(t[1])*"a"`')
+    keys = 'te ül' + EX + "hüüll"
+    wanted = "te üü hüüll üü aaaaa"
+# End: Umlauts and Special Chars  #}}}
 ###########################################################################
 #                               END OF TEST                               #
 ###########################################################################

@@ -19,6 +19,12 @@ from UltiSnips.Util import IndentUtil
 __all__ = [ "Mirror", "Transformation", "SnippetInstance" ]
 
 from debug import debug
+def _do_print_all(obj):
+    top = obj
+    while top._parent: top = top._parent
+
+    _do_print(top)
+
 def _do_print(obj, indent =""): # TODO: remote again
     debug("%s %r" % (indent, obj))
 
@@ -171,9 +177,7 @@ class _TOParser(object):
             debug("#### Initial Text: %r" % obj)
             obj.initial_replace()
 
-            par = obj
-            while par._parent: par = par._parent
-            _do_print(par)
+            _do_print_all(self._parent_to)
 
             for c in obj._childs: # TODO: private parts!
                 _place_initial_text(c)
@@ -288,13 +292,13 @@ class TextObject(object):
         buf = vim.current.buffer
 
         if _span.start.line == _span.end.line:
-            return as_unicode(buf[_span.start.line][_span.start.col:_span.end.col])
+            return as_unicode(buf[_span.start.line])[_span.start.col:_span.end.col]
         else:
             lines = []
-            lines.append(buf[_span.start.line][_span.start.col:])
-            lines.extend(buf[_span.start.line+1:_span.end.line])
-            lines.append(buf[_span.end.line][:_span.end.col])
-            return as_unicode('\n'.join(lines))
+            lines.append(as_unicode(buf[_span.start.line])[_span.start.col:])
+            lines.extend(map(as_unicode, buf[_span.start.line+1:_span.end.line]))
+            lines.append(as_unicode(buf[_span.end.line])[:_span.end.col])
+            return as_unicode('\n').join(lines)
 
     @property
     def current_tabstop(self):
@@ -317,6 +321,16 @@ class TextObject(object):
     ####################
     # Public functions #
     ####################
+    def _find_parent_for_new_to(self, pos):
+        assert(pos in self.span)
+
+        for c in self._childs: # TODO: code duplication!
+            if isinstance(c, NoneditableTextObject): # TODO: make this nicer
+                continue
+            if (c._start <= pos <= c._end):
+                return c._find_parent_for_new_to(pos)
+        return self
+
     def child_end_moved2(self, old_end, new_end): # TODO: pretty wasteful, give index
         if not (self._parent) or old_end == new_end:
             return
@@ -336,7 +350,6 @@ class TextObject(object):
         self._parent.child_end_moved2(pold_end, self._parent._end)
 
     def _do_edit(self, cmd):
-        debug("self: %r, cmd: %r" % (self, cmd))
         ctype, line, col, char = cmd
         assert( ('\n' not in char) or (char == "\n"))
         pos = Position(line, col)
@@ -359,7 +372,7 @@ class TextObject(object):
                 # Case: this edit command is completely for the child
                 elif (start <= pos <= end) and (start <= end_pos <= end):
                     debug(" Case 2")
-                    if not isinstance(c, TabStop): # Erasing inside NonTabstop -> Kill element
+                    if isinstance(c, NoneditableTextObject): # Erasing inside NonTabstop -> Kill element
                         to_kill.add(c)
                         continue
                     c._do_edit(cmd)
@@ -386,7 +399,7 @@ class TextObject(object):
 
 
             if ctype == "I":
-                if not isinstance(c, TabStop): # TODO: make this nicer
+                if isinstance(c, NoneditableTextObject): # TODO: make this nicer
                     continue
                 if (start <= pos <= end):
                     c._do_edit(cmd)
@@ -415,13 +428,9 @@ class TextObject(object):
     def edited(self, cmds): # TODO: Only in SnippetInstance
         assert(len([c for c in self._childs if isinstance(c, VimCursor)]) == 0)
 
-        debug("begin: self.current_text: %r" % (self.current_text))
-        debug("self._start: %r, self._end: %r" % (self._start, self._end))
         # Replay User Edits to update end of our current texts
         for cmd in cmds:
             self._do_edit(cmd)
-
-        _do_print(self)
 
     def do_edits(self): # TODO: only in snippets instance, stupid name
         debug("In do_edits")
@@ -443,7 +452,6 @@ class TextObject(object):
 
         counter = 10
         while (done != not_done) and counter:
-            debug("len(done): %r, len(not_done: %r" % (len(done), len(not_done)))
             for obj in (not_done - done):
                 obj._update_if_not_done(done, not_done)
             counter -= 1
@@ -457,7 +465,7 @@ class TextObject(object):
         assert(len([c for c in self._childs if isinstance(c, VimCursor)]) == 0)
         debug("self._childs: %r" % (self._childs))
 
-        _do_print(self)
+        _do_print_all(self)
 
 
     def update(self):
@@ -542,7 +550,6 @@ class TextObject(object):
         return True
     def _update_if_not_done(self, done, not_done): # TODO:
         if all((c in done) for c in self._childs):
-            debug("self: %r, self._childs: %r" % (self, self._childs))
             assert(self not in done)
 
             if self._really_updateman(done, not_done):
@@ -1019,7 +1026,7 @@ class SnippetInstance(TextObject):
 
         _TOParser(self, initial_text, indent).parse(True)
 
-        _do_print(self)
+        _do_print_all(self)
         self.do_edits()
 
     def __repr__(self):

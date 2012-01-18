@@ -500,13 +500,14 @@ class VimState(object):
         self._cline = as_unicode(vim.current.buffer[line])
 
     def select_span(self, r):
-        # self._unmap_select_mode_mapping() # TODO: Bring this back!
+        self._unmap_select_mode_mapping() # TODO: Bring this back!
 
         delta = r.end - r.start
         lineno, col = r.start.line, r.start.col
 
         set_vim_cursor(lineno + 1, col)
 
+        # Case 1: Zero Length Tabstops
         if delta.line == delta.col == 0:
             if col == 0 or vim.eval("mode()") != 'i' and \
                     col < len(as_unicode(vim.current.buffer[lineno])):
@@ -514,6 +515,8 @@ class VimState(object):
             else:
                 feedkeys(r"\<Esc>a")
         else:
+            # Case 2a: Non zero length and inclusive selection
+            # TODO: check with exclusive selection
             # If a tabstop immediately starts with a newline, the selection
             # must start after the last character in the current line. But if
             # we are in insert mode and <Esc> out of it, we cannot go past the
@@ -521,7 +524,8 @@ class VimState(object):
             # visual-select this newline. We have to hack around this by adding
             # an extra space which we can select.  Note that this problem could
             # be circumvent by selecting the tab backwards (that is starting
-            # at the end); one would not need to modify the line for this.
+            # at the end); one would not need to modify the line for this. This creates other
+            # trouble though
             if col >= len(as_unicode(vim.current.buffer[lineno])):
                 vim.current.buffer[lineno] += " "
 
@@ -541,9 +545,9 @@ class VimState(object):
             # and select right from there. Note that the we have to select
             # one column less since vim's visual selection is including the
             # ending while Python slicing is excluding the ending.
-            if r.end.col == 0 and not len(as_unicode(vim.current.buffer[r.end.line])):
-                # Selecting should end on an empty line -> Select the previous
-                # line till its end
+            if r.end.col == 0:
+                # Selecting should end at beginning of line -> Select the
+                # previous line till its end
                 do_select = "k$"
             elif r.end.col > 1:
                 do_select = "0%il" % (r.end.col-1)
@@ -553,6 +557,7 @@ class VimState(object):
             move_cmd = LangMapTranslator().translate(
                 r"\<Esc>%sv%s%s\<c-g>" % (move_one_right, move_lines, do_select)
             )
+            debug("move_cmd: %r" % (move_cmd))
 
             feedkeys(move_cmd)
 
@@ -629,6 +634,10 @@ class VimState(object):
                                 add = True
                         if not add:
                             continue
+
+                    # UltiSnips remaps <BS>. Keep this around.
+                    if trig == "<BS>":
+                        continue
 
                     # Actually unmap it
                     try:
@@ -800,10 +809,9 @@ class SnippetManager(object):
             # TODO
             # ct = TextBuffer('\n'.join(vim.current.buffer))[span]
             # lt = self._lvb[span]
-            ct = '\n'.join(vim.current.buffer)
-            lt = '\n'.join(self._lvb)
+            ct = as_unicode('\n').join(map(as_unicode, vim.current.buffer))
+            lt = as_unicode(self._lvb)
 
-            debug("lt: %r, ct: %r" % (lt, ct))
             rv = edit_distance.edit_script(lt, ct, abs_start.line, abs_start.col)
             debug("edit_script: %r" % (rv,))
             self._csnippets[0].edited(rv)
@@ -1008,36 +1016,25 @@ class SnippetManager(object):
         self._unset_offending_vim_options(snippet)
 
         if self._cs:
-            # Determine position
-            pos = self._vstate.pos
-            p_start = self._ctab.abs_start
+            start = Position(lineno-1, len(text_before))
+            end = Position(lineno-1, len(before))
 
-            if pos.line == p_start.line:
-                end = Position(0, pos.col - p_start.col)
-            else:
-                end = Position(pos.line - p_start.line, pos.col)
-            start = Position(end.line, end.col - len(snippet.matched))
-
-            si = snippet.launch(text_before, self._visual_content, self._ctab, start, end)
+            # TODO: private parts? maybe handle this in add_child 
+            si = snippet.launch(text_before, self._visual_content,
+                    self._cs._find_parent_for_new_to(start), start, end)
             self._visual_content = ""
 
             self._csnippets.append(si)
-            self._jump()
         else:
-            self._vb = VimBuffer(text_before, after)
-
             start = Position(lineno-1, len(text_before))
             end = Position(lineno-1, len(before))
             self._csnippets.append(snippet.launch(text_before, self._visual_content, None, start, end))
             self._visual_content = ""
 
-            self._lvb = TextBuffer('\n'.join(vim.current.buffer)) # TODO: no need to cache everything
-            debug("in launch: self._lvb: %r" % (self._lvb))
+        self._lvb = TextBuffer('\n'.join(vim.current.buffer)) # TODO: no need to cache everything
+        debug("in launch: self._lvb: %r" % (self._lvb))
 
-            #self._vb.replace_lines(lineno-1, lineno-1,
-                       #self._cs._current_text)
-
-            self._jump()
+        self._jump()
 
     def _try_expand(self):
         before, after = self._get_before_after()

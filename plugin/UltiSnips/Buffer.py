@@ -42,6 +42,11 @@ class TextBuffer(Buffer):
     def to_vim(self, start, end): # TODO: better take a span
         buf = vim.current.buffer
 
+        # Open any folds this might have created
+        cc = vim.current.window.cursor
+        vim.current.window.cursor = start.line + 1, 0
+        vim.command("normal zv")
+
         new_end = self.calc_end(start)
 
         before = as_unicode(buf[start.line])[:start.col]
@@ -52,6 +57,8 @@ class TextBuffer(Buffer):
             lines.extend(self._lines[1:])
             lines[-1] += after
         buf[start.line:end.line + 1] = make_suitable_for_vim(lines)
+
+        vim.current.window.cursor = cc
 
         return new_end
 
@@ -95,9 +102,6 @@ class VimBuffer(Buffer): # TODO: this should become obsolete
         else:
             vim.current.buffer[a] = make_suitable_for_vim(b)
 
-        # Open any folds this might have created
-        vim.current.window.cursor = a.start + 1, 0
-        vim.command("normal zv")
 
     def __repr__(self):
         return "VimBuffer()"
