@@ -1,66 +1,12 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import heapq # TODO: overkill. Bucketing is better
 from collections import defaultdict
 import sys
 
 # TODO: check test cases here. They are not up to date
 
 from .debug import debug
-
-def line_diffs(a, b, sline = 0):
-    d = defaultdict(list)
-    seen = defaultdict(lambda: sys.maxint)
-
-    d[0] = [ (0,0,sline, ()) ]
-    cost = 0
-    while True:
-        while len(d[cost]):
-            x, y, line, what = d[cost].pop()
-
-            if x == len(a) and y == len(b):
-                # Find first span of changes in both buffers
-                x_min, x_max = sys.maxint, -sys.maxint
-                y_min, y_max = sys.maxint, -sys.maxint
-                debug("what: %r" % (what,))
-                for cmd,x,y in what:
-                    if cmd == 'D':
-                        x_min = min(x_min, x)
-                        x_max = max(x_max, x)
-                    elif cmd == 'I':
-                        x_max = max(x_max, x-1 if x > 0 else 0)
-                        x_min = min(x_min, x-1 if x > 0 else 0)
-                        # y_min = min(y_min, line)
-                        y_min = min(y_min, y-1 if y > 0 else 0)
-                        y_max = max(y_max, y)
-                    elif cmd == "M":
-                        x_min = min(x_min, x)
-                        x_max = max(x_max, x)
-                        y_min = min(y_min, y)
-                        y_max = max(y_max, y)
-
-                return (x_min, x_max), (y_min, y_max)
-
-            # TODO: line == y
-            if x < len(a) and y < len(b) and len(a[x]) == len(b[y]) and \
-                a[x] == b[y]: # Equal lines
-                if seen[x+1,y+1] > cost:
-                    seen[x+1,y+1] = cost
-                    if x != y:
-                        d[cost].append((x+1,y+1,line+1, what + (('M', x,y),))) # TODO: match only debug
-                    else:
-                        d[cost].append((x+1,y+1,line+1, what)) # TODO: match only debug
-            if x < len(a): # Delete
-                if seen[x+1,y] > cost + 1 + x:
-                    seen[x+1,y] = cost + 1 + x
-                    d[cost+1+x].append((x+1,y, line, what + (('D', x, y),)))
-            if y < len(b): # Insert
-                if seen[x,y+1] > cost + 1 + y:
-                    seen[x,y+1] = cost + 1 + y
-                    d[cost+1+y].append((x,y+1,line+1, what + (('I', x, y),)))
-        cost += 1
-
 
 def edit_script(a, b, sline = 0):
     d = defaultdict(list)

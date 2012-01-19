@@ -796,20 +796,63 @@ class SnippetManager(object):
         if self._csnippets:
             ct = map(as_unicode, vim.current.buffer)
             lt = map(as_unicode, self._lvb[:])
-            lt_span, ct_span  = edit_distance.line_diffs(lt, ct)
-            debug("lt: %r" % (lt))
-            debug("ct: %r" % (ct))
-            debug("lt_span: %r, ct_span: %r" % (lt_span, ct_span))
+
+            cache = 10 # TODO: increase
+            c0 = min(self._vstate.pos.line, self._vstate.ppos.line)
+            c1 = max(self._vstate.pos.line, self._vstate.ppos.line)
+
+            def is_prefix(a, b):
+                """x: wieviele man vorne von a abtrennen muss, y: wieviele dnan gleich sind"""
+                for y in range(len(b)-1, 0, -1):
+                    for x in range(0, len(a)-1):
+                        if a[x:x+y] == b[:y]:
+                            return x, y
+                return None, None
+
+            def is_suffix(a, b):
+                return is_prefix(a[::-1], b[::-1])
+
+            sl = max(0, c0 - cache)
+            el = c1 + cache
+            ctb = ct[sl:el+1]
+            ltb = lt[sl:el+1]
+
+            assert(sl == 0) # TODO
+
+            xs, ys = is_prefix(ctb, ltb) # TODO: stupid name for function
+            debug("xs: %r, ys: %r" % (xs, ys))
+            xe, ye = is_suffix(ctb, ltb)
+            debug("xe: %r, ye: %r" % (xe, ye))
+            lt_span = (0, sys.maxint)
+            ct_span = (0, sys.maxint)
+            if xs is not None and xe is not None:
+                assert(xs == 0 and xe == 0) # TODO
+                fdl_front = ys
+                fdl_back = len(vim.current.buffer) - ye - 1
+                if fdl_back < fdl_front:
+                    overlap = fdl_front - fdl_back
+                    debug("overlap: %r" % (overlap))
+                    ys -= overlap
+                lt_span = (ys + xs - 1, len(ltb) - ye - xe)
+                ct_span = (ys - 1, fdl_back + 1)
+
+
+            debug("all lt: %r" % (lt))#[sl:el+1]))
+            debug("all ct: %r" % (ct))#[sl:el+1]))
 
             # TODO
             # start_line = min(self._vstate.pos.line, self._vstate.ppos.line)
             # ct = as_unicode('\n').join(map(as_unicode, vim.current.buffer[start_line:]))
             # lt = as_unicode('\n').join(self._lvb[start_line:])
-            lt = '\n'.join(lt[lt_span[0]:lt_span[1]+1])
-            ct = '\n'.join(ct[ct_span[0]:ct_span[1]+1])
-            debug("lt: %r, ct: %r" % (lt, ct))
+            lt = lt[lt_span[0]:lt_span[1]]
+            ct = ct[ct_span[0]:ct_span[1]]
+            debug("lt: %r" % (lt))
+            debug("ct: %r" % (ct))
+            debug("lt_span: %r, ct_span: %r" % (lt_span, ct_span))
 
-            rv = edit_distance.edit_script(lt, ct, min(lt_span[0], ct_span[0]))
+            lt = '\n'.join(lt)
+            ct = '\n'.join(ct)
+            rv = edit_distance.edit_script(lt, ct, lt_span[0])
             debug("rv: %r" % (rv,))
             self._csnippets[0].edited(rv)
 
@@ -1008,7 +1051,7 @@ class SnippetManager(object):
             start = Position(lineno-1, len(text_before))
             end = Position(lineno-1, len(before))
 
-            # TODO: private parts? maybe handle this in add_child 
+            # TODO: private parts? maybe handle this in add_child
             si = snippet.launch(text_before, self._visual_content,
                     self._cs._find_parent_for_new_to(start), start, end)
             self._visual_content = ""
