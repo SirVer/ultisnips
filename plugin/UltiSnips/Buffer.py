@@ -7,8 +7,6 @@ from UltiSnips.Compatibility import make_suitable_for_vim, as_unicode
 
 __all__ = [ "TextBuffer" ]
 
-from debug import debug
-
 class TextBuffer(object):
     def __init__(self, textblock):
         # We do not use splitlines() here because it handles cases like 'text\n'

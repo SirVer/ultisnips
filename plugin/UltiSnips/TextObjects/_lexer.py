@@ -6,8 +6,6 @@ Not really a Lexer in the classical sense, but code to hack Snippet Definitions
 into Logical Units called Tokens.
 """
 
-from debug import debug
-
 import string
 import re
 
@@ -295,7 +293,6 @@ __ALLOWED_TOKENS = [
     PythonCodeToken, VimLCodeToken, ShellCodeToken
 ]
 def tokenize(text, indent, offset):
-    debug("tokenize: offset: %r" % (offset))
     stream = _TextIterator(text, offset)
 
     try:
