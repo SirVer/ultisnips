@@ -794,21 +794,23 @@ class SnippetManager(object):
         self._vstate.update()
 
         if self._csnippets:
-            abs_end = self._vstate.pos
-            abs_start = self._vstate.ppos
-            if abs_end < abs_start:
-                abs_start, abs_end = abs_end, abs_start
-            abs_start = Position(0,0) # TODO
-            abs_end = Position(len(vim.current.buffer)-1, 10000)
-            span = Span(abs_start, abs_end)
+            ct = map(as_unicode, vim.current.buffer)
+            lt = map(as_unicode, self._lvb[:])
+            lt_span, ct_span  = edit_distance.line_diffs(lt, ct)
+            debug("lt: %r" % (lt))
+            debug("ct: %r" % (ct))
+            debug("lt_span: %r, ct_span: %r" % (lt_span, ct_span))
 
             # TODO
-            # ct = TextBuffer('\n'.join(vim.current.buffer))[span]
-            # lt = self._lvb[span]
-            ct = as_unicode('\n').join(map(as_unicode, vim.current.buffer))
-            lt = as_unicode(self._lvb)
+            # start_line = min(self._vstate.pos.line, self._vstate.ppos.line)
+            # ct = as_unicode('\n').join(map(as_unicode, vim.current.buffer[start_line:]))
+            # lt = as_unicode('\n').join(self._lvb[start_line:])
+            lt = '\n'.join(lt[lt_span[0]:lt_span[1]+1])
+            ct = '\n'.join(ct[ct_span[0]:ct_span[1]+1])
+            debug("lt: %r, ct: %r" % (lt, ct))
 
-            rv = edit_distance.edit_script(lt, ct, abs_start.line, abs_start.col)
+            rv = edit_distance.edit_script(lt, ct, min(lt_span[0], ct_span[0]))
+            debug("rv: %r" % (rv,))
             self._csnippets[0].edited(rv)
 
         self._check_if_still_inside_snippet()
