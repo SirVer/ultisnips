@@ -107,6 +107,7 @@ args = get_args(t[4])
 write_docstring_args(args, snip)
 if args: snip += '"""'
 
+
 snip += ""
 write_init_body(args, t[2], snip)
 `
@@ -328,7 +329,8 @@ snip.rv = ""
 snip >> 1
 
 args = get_args(t[2])
-write_docstring_args(args, snip)
+if args:
+   write_docstring_args(args, snip)
 
 style = get_style(snip)
 snip += format_return(style)
