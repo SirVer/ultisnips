@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+from debug import debug
+
 import vim
 from UltiSnips.Geometry import Position
 from UltiSnips.Compatibility import make_suitable_for_vim, as_unicode
@@ -25,6 +27,7 @@ class TextBuffer(object):
         buf = vim.current.buffer
 
         # Open any folds this might have created
+        debug("start: %r" % (start))
         vim.current.window.cursor = start.line + 1, start.col
         vim.command("normal zv")
 

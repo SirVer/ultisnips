@@ -2427,6 +2427,16 @@ class IMMoving_ExitWhenOutsideBelow_ECR(_VimTest):
             "testhallo\n"
     wanted = "hello tab\nblub this\ntesthallo"
 # End: Insert Mode Moving  #}}}
+# Undo of Snippet insertion  {{{#
+class Undo_RemoveMultilineSnippet(_VimTest):
+    snippets = ("test", "Hello\naaa ${1} bbb\nWorld")
+    keys = "test" + EX + ESC + "u" + "inothing"
+    wanted = "nothing"
+class Undo_RemoveEditInTabstop(_VimTest):
+    snippets = ("test", "$1 Hello\naaa ${1} bbb\nWorld")
+    keys = "hello test" + EX + "upsi" + ESC + "hh" + "iabcdef" + ESC + "u"
+    wanted = "hello upsi Hello\naaa upsi bbb\nWorld"
+# End: Undo of Snippet insertion  #}}}
 # Tab Completion of Words  {{{#
 class Completion_SimpleExample_ECR(_VimTest):
     snippets = ("test", "$1 ${1:blah}")

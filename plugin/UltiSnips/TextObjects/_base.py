@@ -3,6 +3,8 @@
 
 import vim
 
+from ..debug import debug, echo_to_hierarchy
+
 from UltiSnips.Buffer import TextBuffer
 from UltiSnips.Compatibility import as_unicode
 from UltiSnips.Geometry import Span, Position
@@ -131,54 +133,67 @@ class TextObject(object):
         self._parent.child_end_moved3(pivot, diff)
 
     def _do_edit(self, cmd):
+        debug("cmd: %r, self: %r" % (cmd, self))
         ctype, line, col, char = cmd
         assert( ('\n' not in char) or (char == "\n"))
         pos = Position(line, col)
 
         to_kill = set()
+        new_cmds = []
         for c in self._childs:
             start = c._start
             end = c._end
 
+            debug("consider: c: %r" % (c))
             if ctype == "D":
                 if char == "\n":
-                    end_pos = Position(line + 1, 0) # TODO: is this even needed?
+                    delend = Position(line + 1, 0) # TODO: is this even needed?
                 else:
-                    end_pos = pos + Position(0, len(char))
+                    delend = pos + Position(0, len(char))
                 # TODO: char is no longer true -> Text
                 # Case: this deletion removes the child
-                if (pos < start and end_pos >= end):
-                    to_kill.add(c)
                 # Case: this edit command is completely for the child
-                elif (start <= pos <= end) and (start <= end_pos <= end):
+                if (start <= pos < end) and (start < delend <= end):
+                    debug("Case 2")
                     if isinstance(c, NoneditableTextObject): # Erasing inside NonTabstop -> Kill element
                         to_kill.add(c)
                         continue
                     c._do_edit(cmd)
                     return
+                elif (pos < start and end <= delend) or (pos <= start and end < delend):
+                    debug("Case 1")
+                    to_kill.add(c)
                 # Case: partially for us, partially for the child
-                elif (pos < start and (start < end_pos <= end)):
+                elif (pos < start and (start < delend <= end)):
+                    debug("Case 3")
                     my_text = char[:(start-pos).col]
                     c_text = char[(start-pos).col:]
-                    self._do_edit((ctype, line, col, my_text))
-                    self._do_edit((ctype, line, col, c_text))
-                    return
-                elif (end_pos >= end and (start <= pos < end)):
+                    debug("my_text: %r, c_text: %r" % (my_text, c_text))
+                    new_cmds.append((ctype, line, col, my_text))
+                    new_cmds.append((ctype, line, col, c_text))
+                    break
+                elif (delend >= end and (start <= pos < end)):
+                    debug("Case 3")
                     c_text = char[(end-pos).col:]
                     my_text = char[:(end-pos).col]
-                    self._do_edit((ctype, line, col, c_text))
-                    self._do_edit((ctype, line, col, my_text))
-                    return
-
-
-            if ctype == "I":
+                    debug("my_text: %r, c_text: %r" % (my_text, c_text))
+                    new_cmds.append((ctype, line, col, c_text))
+                    new_cmds.append((ctype, line, col, my_text))
+                    break
+            elif ctype == "I": # Else would be okay as well
                 if isinstance(c, NoneditableTextObject): # TODO: make this nicer
                     continue
                 if (start <= pos <= end):
                     c._do_edit(cmd)
                     return
+
         for c in to_kill:
             self._del_child(c)
+        if len(new_cmds):
+            for c in new_cmds:
+                self._do_edit(c)
+            return
+
 
         # We have to handle this ourselves
         if ctype == "D": # TODO: code duplication
@@ -195,6 +210,10 @@ class TextObject(object):
                 delta = Position(0, len(char))
         old_end = self._end.copy()
         pivot = Position(line, col)
+        # TODO: this should somehow be part of child_end_moved3
+        for c in self._childs:
+            _move(c._start, pivot, delta)
+            _move(c._end, pivot, delta)
         _move(self._end, pivot, delta)
         self.child_end_moved3(pivot, delta)
 

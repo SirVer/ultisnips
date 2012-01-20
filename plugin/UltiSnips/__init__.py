@@ -5,7 +5,7 @@
 # TODO: Currently searches whole buffer. Is this really needed?
 
 import edit_distance
-from debug import debug
+from debug import debug, echo_to_hierarchy
 
 from functools import wraps
 import glob
@@ -798,6 +798,7 @@ class SnippetManager(object):
 
     @err_to_scratch_buffer
     def cursor_moved(self):
+        debug("#### CURSOR MOVED")
         self._vstate.update()
         debug("vim.eval('mode()'): %r" % (vim.eval('mode()')))
         debug("in cursor_moved self._vstate.pos: %r" % (self._vstate.pos))
@@ -812,6 +813,8 @@ class SnippetManager(object):
             return
 
         if self._csnippets:
+            debug("before editing")
+            echo_to_hierarchy(self._csnippets[-1])
             ct = map(as_unicode, vim.current.buffer)
             lt = map(as_unicode, self._lvb[:])
 
@@ -840,13 +843,16 @@ class SnippetManager(object):
             debug("ct: %r" % (ct[ct_span[0]:ct_span[1]]))
             lt = '\n'.join(lt[lt_span[0]:lt_span[1]])
             ct = '\n'.join(ct[ct_span[0]:ct_span[1]])
-            self._csnippets[0].edited(edit_distance.edit_script(lt, ct, initial_line))
+
+            es = edit_distance.edit_script(lt, ct, initial_line)
+            debug("es: %s" % (es,))
+            self._csnippets[0].edited(es)
 
         self._check_if_still_inside_snippet()
         if self._csnippets:
-            print "Doing edits!"
+            debug("Before edits!")
+            echo_to_hierarchy(self._csnippets[-1])
             self._csnippets[0].do_edits()
-            print "Done with edits!"
         self._lvb = TextBuffer('\n'.join(vim.current.buffer)) # TODO: no need to cache everything and not on every movement?
         self._vstate.update()
 
@@ -856,6 +862,7 @@ class SnippetManager(object):
         Called when the user switches tabs. It basically means that all
         snippets must be properly terminated
         """
+        debug("#### LEAVING WINDOW")
         self._vstate.update()
         while len(self._csnippets):
             self._current_snippet_is_done()
