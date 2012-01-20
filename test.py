@@ -1220,6 +1220,10 @@ class SimpleMirrorSameLine_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 $1")
     keys = "test" + EX + "hallo"
     wanted = "hallo hallo"
+class SimpleMirrorSameLine_InText_ExceptCorrectResult(_VimTest):
+    snippets = ("test", "$1 $1")
+    keys = "ups test blah" + ESC + "02f i" + EX + "hallo"
+    wanted = "ups hallo hallo blah"
 class SimpleMirrorSameLineBeforeTabDefVal_ECR(_VimTest):
     snippets = ("test", "$1 ${1:replace me}")
     keys = "test" + EX + "hallo foo"

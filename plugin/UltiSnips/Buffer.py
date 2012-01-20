@@ -25,7 +25,7 @@ class TextBuffer(object):
         buf = vim.current.buffer
 
         # Open any folds this might have created
-        vim.current.window.cursor = start.line + 1, 0
+        vim.current.window.cursor = start.line + 1, start.col
         vim.command("normal zv")
 
         new_end = self.calc_end(start)

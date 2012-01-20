@@ -799,6 +799,17 @@ class SnippetManager(object):
     @err_to_scratch_buffer
     def cursor_moved(self):
         self._vstate.update()
+        debug("vim.eval('mode()'): %r" % (vim.eval('mode()')))
+        debug("in cursor_moved self._vstate.pos: %r" % (self._vstate.pos))
+
+        if vim.eval("mode()") not in 'in':
+            return
+
+        # TODO: really necessary?
+        if self._ignore_movements:
+            debug("Ignored")
+            self._ignore_movements = False
+            return
 
         if self._csnippets:
             ct = map(as_unicode, vim.current.buffer)
@@ -825,25 +836,19 @@ class SnippetManager(object):
             lt_span[0] = max(0, lt_span[0] - 1)
             initial_line = max(0, initial_line - 1)
 
+            debug("lt: %r" % (lt[lt_span[0]:lt_span[1]]))
+            debug("ct: %r" % (ct[ct_span[0]:ct_span[1]]))
             lt = '\n'.join(lt[lt_span[0]:lt_span[1]])
             ct = '\n'.join(ct[ct_span[0]:ct_span[1]])
             self._csnippets[0].edited(edit_distance.edit_script(lt, ct, initial_line))
 
         self._check_if_still_inside_snippet()
         if self._csnippets:
+            print "Doing edits!"
             self._csnippets[0].do_edits()
-        self._lvb = TextBuffer('\n'.join(vim.current.buffer)) # TODO: no need to cache everything
+            print "Done with edits!"
+        self._lvb = TextBuffer('\n'.join(vim.current.buffer)) # TODO: no need to cache everything and not on every movement?
         self._vstate.update()
-
-
-    @err_to_scratch_buffer
-    def entered_insert_mode(self):
-        # TODO: very harsh, we can be more freely now
-        self._vstate.update()
-        if self._cs and self._vstate.has_moved:
-            while len(self._csnippets):
-                self._current_snippet_is_done()
-            self._reinit()
 
     @err_to_scratch_buffer # TODO: does this still does the correct thing?
     def leaving_window(self):
@@ -877,12 +882,13 @@ class SnippetManager(object):
 
     def _reinit(self):
         self._ctab = None
+        self._ignore_movements = False
 
     def _check_if_still_inside_snippet(self):
-        # Cursor moved without input.
-        self._ctab = None
-
         # Did we leave the snippet with this movement?
+        if self._cs:
+            debug("self._cs.span: %r" % (self._cs.span))
+            debug("self._vstate.pos: %r" % (self._vstate.pos))
         if self._cs and not (self._vstate.pos in self._cs.span):
             self._current_snippet_is_done()
 
@@ -1036,6 +1042,7 @@ class SnippetManager(object):
             self._csnippets.append(snippet.launch(text_before, self._visual_content, None, start, end))
             self._visual_content = ""
 
+        self._ignore_movements = True
         self._lvb = TextBuffer('\n'.join(vim.current.buffer)) # TODO: no need to cache everything
 
         self._jump()
