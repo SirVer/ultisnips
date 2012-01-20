@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+# TODO: Currently Caches whole buffer. Is this really needed?
+# TODO: Currently searches whole buffer. Is this really needed?
+
 import edit_distance
 from debug import debug
 
@@ -61,6 +64,134 @@ def feedkeys(s, mode='n'):
 def echom(mes, *args):
     mes = mes % args
     vim.command('echom %s' % vim_string(mes))
+
+# TODO: this function should be moved
+def select_span(r):
+    _unmap_select_mode_mapping()
+
+    delta = r.end - r.start
+    lineno, col = r.start.line, r.start.col
+
+    set_vim_cursor(lineno + 1, col)
+
+    # Case 1: Zero Length Tabstops
+    if delta.line == delta.col == 0:
+        if col == 0 or vim.eval("mode()") != 'i' and \
+                col < len(as_unicode(vim.current.buffer[lineno])):
+            feedkeys(r"\<Esc>i")
+        else:
+            feedkeys(r"\<Esc>a")
+    else:
+        # Case 2a: Non zero length and inclusive selection
+        # TODO: check with exclusive selection
+        # If a tabstop immediately starts with a newline, the selection
+        # must start after the last character in the current line. But if
+        # we are in insert mode and <Esc> out of it, we cannot go past the
+        # last character with move_one_right and therefore cannot
+        # visual-select this newline. We have to hack around this by adding
+        # an extra space which we can select.  Note that this problem could
+        # be circumvent by selecting the tab backwards (that is starting
+        # at the end); one would not need to modify the line for this. This creates other
+        # trouble though
+        if col >= len(as_unicode(vim.current.buffer[lineno])):
+            vim.current.buffer[lineno] += " "
+
+        if delta.line:
+            move_lines = "%ij" % delta.line
+        else:
+            move_lines = ""
+        # Depending on the current mode and position, we
+        # might need to move escape out of the mode and this
+        # will move our cursor one left
+        if col != 0 and vim.eval("mode()") == 'i':
+            move_one_right = "l"
+        else:
+            move_one_right = ""
+
+        # After moving to the correct line, we go back to column 0
+        # and select right from there. Note that the we have to select
+        # one column less since vim's visual selection is including the
+        # ending while Python slicing is excluding the ending.
+        if r.end.col == 0:
+            # Selecting should end at beginning of line -> Select the
+            # previous line till its end
+            do_select = "k$"
+        elif r.end.col > 1:
+            do_select = "0%il" % (r.end.col-1)
+        else:
+            do_select = "0"
+
+        move_cmd = LangMapTranslator().translate(
+            r"\<Esc>%sv%s%s\<c-g>" % (move_one_right, move_lines, do_select)
+        )
+
+        feedkeys(move_cmd)
+
+
+# TODO: this function should be moved
+def _unmap_select_mode_mapping():
+    """This function unmaps select mode mappings if so wished by the user.
+    Removes select mode mappings that can actually be typed by the user
+    (ie, ignores things like <Plug>).
+    """
+    if int(vim.eval("g:UltiSnipsRemoveSelectModeMappings")):
+        ignores = vim.eval("g:UltiSnipsMappingsToIgnore") + ['UltiSnips']
+
+        for option in ("<buffer>", ""):
+            # Put all smaps into a var, and then read the var
+            vim.command(r"redir => _tmp_smaps | silent smap %s " % option +
+                        "| redir END")
+
+            # Check if any mappings where found
+            all_maps = list(filter(len, vim.eval(r"_tmp_smaps").splitlines()))
+            if (len(all_maps) == 1 and all_maps[0][0] not in " sv"):
+                # "No maps found". String could be localized. Hopefully
+                # it doesn't start with any of these letters in any
+                # language
+                continue
+
+            # Only keep mappings that should not be ignored
+            maps = [m for m in all_maps if
+                        not any(i in m for i in ignores) and len(m.strip())]
+
+            for m in maps:
+                # The first three chars are the modes, that might be listed.
+                # We are not interested in them here.
+                trig = m[3:].split()[0]
+
+                # The bar separates commands
+                if trig[-1] == "|":
+                    trig = trig[:-1] + "<Bar>"
+
+                # Special ones
+                if trig[0] == "<":
+                    add = False
+                    # Only allow these
+                    for valid in ["Tab", "NL", "CR", "C-Tab", "BS"]:
+                        if trig == "<%s>" % valid:
+                            add = True
+                    if not add:
+                        continue
+
+                # UltiSnips remaps <BS>. Keep this around.
+                if trig == "<BS>":
+                    continue
+
+                # Actually unmap it
+                try:
+                    cmd = ("silent! sunmap %s %s") % (option, trig)
+                    vim.command(cmd)
+                except:
+                    # Bug 908139: ignore unmaps that fail because of
+                    # unprintable characters. This is not ideal because we
+                    # will not be able to unmap lhs with any unprintable
+                    # character. If the lhs stats with a printable
+                    # character this will leak to the user when he tries to
+                    # type this character as a first in a selected tabstop.
+                    # This case should be rare enough to not bother us
+                    # though.
+                    pass
+
 
 class _SnippetDictionary(object):
     def __init__(self, *args, **kwargs):
@@ -499,68 +630,6 @@ class VimState(object):
         self._lline = self._cline
         self._cline = as_unicode(vim.current.buffer[line])
 
-    def select_span(self, r):
-        self._unmap_select_mode_mapping()
-
-        delta = r.end - r.start
-        lineno, col = r.start.line, r.start.col
-
-        set_vim_cursor(lineno + 1, col)
-
-        # Case 1: Zero Length Tabstops
-        if delta.line == delta.col == 0:
-            if col == 0 or vim.eval("mode()") != 'i' and \
-                    col < len(as_unicode(vim.current.buffer[lineno])):
-                feedkeys(r"\<Esc>i")
-            else:
-                feedkeys(r"\<Esc>a")
-        else:
-            # Case 2a: Non zero length and inclusive selection
-            # TODO: check with exclusive selection
-            # If a tabstop immediately starts with a newline, the selection
-            # must start after the last character in the current line. But if
-            # we are in insert mode and <Esc> out of it, we cannot go past the
-            # last character with move_one_right and therefore cannot
-            # visual-select this newline. We have to hack around this by adding
-            # an extra space which we can select.  Note that this problem could
-            # be circumvent by selecting the tab backwards (that is starting
-            # at the end); one would not need to modify the line for this. This creates other
-            # trouble though
-            if col >= len(as_unicode(vim.current.buffer[lineno])):
-                vim.current.buffer[lineno] += " "
-
-            if delta.line:
-                move_lines = "%ij" % delta.line
-            else:
-                move_lines = ""
-            # Depending on the current mode and position, we
-            # might need to move escape out of the mode and this
-            # will move our cursor one left
-            if col != 0 and vim.eval("mode()") == 'i':
-                move_one_right = "l"
-            else:
-                move_one_right = ""
-
-            # After moving to the correct line, we go back to column 0
-            # and select right from there. Note that the we have to select
-            # one column less since vim's visual selection is including the
-            # ending while Python slicing is excluding the ending.
-            if r.end.col == 0:
-                # Selecting should end at beginning of line -> Select the
-                # previous line till its end
-                do_select = "k$"
-            elif r.end.col > 1:
-                do_select = "0%il" % (r.end.col-1)
-            else:
-                do_select = "0"
-
-            move_cmd = LangMapTranslator().translate(
-                r"\<Esc>%sv%s%s\<c-g>" % (move_one_right, move_lines, do_select)
-            )
-
-            feedkeys(move_cmd)
-
-
     def buf_changed(self):
         return self._text_changed
     buf_changed = property(buf_changed)
@@ -590,68 +659,6 @@ class VimState(object):
     ###########################
     # Private functions below #
     ###########################
-    def _unmap_select_mode_mapping(self):
-        """This function unmaps select mode mappings if so wished by the user.
-        Removes select mode mappings that can actually be typed by the user
-        (ie, ignores things like <Plug>).
-        """
-        if int(vim.eval("g:UltiSnipsRemoveSelectModeMappings")):
-            ignores = vim.eval("g:UltiSnipsMappingsToIgnore") + ['UltiSnips']
-
-            for option in ("<buffer>", ""):
-                # Put all smaps into a var, and then read the var
-                vim.command(r"redir => _tmp_smaps | silent smap %s " % option +
-                            "| redir END")
-
-                # Check if any mappings where found
-                all_maps = list(filter(len, vim.eval(r"_tmp_smaps").splitlines()))
-                if (len(all_maps) == 1 and all_maps[0][0] not in " sv"):
-                    # "No maps found". String could be localized. Hopefully
-                    # it doesn't start with any of these letters in any
-                    # language
-                    continue
-
-                # Only keep mappings that should not be ignored
-                maps = [m for m in all_maps if
-                            not any(i in m for i in ignores) and len(m.strip())]
-
-                for m in maps:
-                    # The first three chars are the modes, that might be listed.
-                    # We are not interested in them here.
-                    trig = m[3:].split()[0]
-
-                    # The bar separates commands
-                    if trig[-1] == "|":
-                        trig = trig[:-1] + "<Bar>"
-
-                    # Special ones
-                    if trig[0] == "<":
-                        add = False
-                        # Only allow these
-                        for valid in ["Tab", "NL", "CR", "C-Tab", "BS"]:
-                            if trig == "<%s>" % valid:
-                                add = True
-                        if not add:
-                            continue
-
-                    # UltiSnips remaps <BS>. Keep this around.
-                    if trig == "<BS>":
-                        continue
-
-                    # Actually unmap it
-                    try:
-                        cmd = ("silent! sunmap %s %s") % (option, trig)
-                        vim.command(cmd)
-                    except:
-                        # Bug 908139: ignore unmaps that fail because of
-                        # unprintable characters. This is not ideal because we
-                        # will not be able to unmap lhs with any unprintable
-                        # character. If the lhs stats with a printable
-                        # character this will leak to the user when he tries to
-                        # type this character as a first in a selected tabstop.
-                        # This case should be rare enough to not bother us
-                        # though.
-                        pass
 
 class SnippetManager(object):
     def __init__(self):
@@ -797,64 +804,30 @@ class SnippetManager(object):
             ct = map(as_unicode, vim.current.buffer)
             lt = map(as_unicode, self._lvb[:])
 
-            cache = 10 # TODO: increase
-            c0 = min(self._vstate.pos.line, self._vstate.ppos.line)
-            c1 = max(self._vstate.pos.line, self._vstate.ppos.line)
+            lt_span = [0, len(lt)]
+            ct_span = [0, len(ct)]
+            initial_line = 0
 
-            def is_prefix(a, b):
-                """x: wieviele man vorne von a abtrennen muss, y: wieviele dnan gleich sind"""
-                for y in range(len(b)-1, 0, -1):
-                    for x in range(0, len(a)-1):
-                        if a[x:x+y] == b[:y]:
-                            return x, y
-                return None, None
+            # Cut down on lines searched for changes. Start from behind and
+            # remove all equal lines. Then do the same from the front.
+            while (lt[lt_span[1]-1] == ct[ct_span[1]-1] and
+                   (lt_span[0] < lt_span[1]) and
+                   (ct_span[0] < ct_span[1])):
+                ct_span[1] -= 1
+                lt_span[1] -= 1
+            while (lt[lt_span[0]] == ct[ct_span[0]] and
+                   (lt_span[0] < lt_span[1]) and
+                   (ct_span[0] < ct_span[1])):
+                ct_span[0] += 1
+                lt_span[0] += 1
+                initial_line += 1
+            ct_span[0] = max(0, ct_span[0] - 1)
+            lt_span[0] = max(0, lt_span[0] - 1)
+            initial_line = max(0, initial_line - 1)
 
-            def is_suffix(a, b):
-                return is_prefix(a[::-1], b[::-1])
-
-            sl = max(0, c0 - cache)
-            el = c1 + cache
-            ctb = ct[sl:el+1]
-            ltb = lt[sl:el+1]
-
-            assert(sl == 0) # TODO
-
-            xs, ys = is_prefix(ctb, ltb) # TODO: stupid name for function
-            debug("xs: %r, ys: %r" % (xs, ys))
-            xe, ye = is_suffix(ctb, ltb)
-            debug("xe: %r, ye: %r" % (xe, ye))
-            lt_span = (0, sys.maxint)
-            ct_span = (0, sys.maxint)
-            if xs is not None and xe is not None:
-                assert(xs == 0 and xe == 0) # TODO
-                fdl_front = ys
-                fdl_back = len(vim.current.buffer) - ye - 1
-                if fdl_back < fdl_front:
-                    overlap = fdl_front - fdl_back
-                    debug("overlap: %r" % (overlap))
-                    ys -= overlap
-                lt_span = (ys + xs - 1, len(ltb) - ye - xe)
-                ct_span = (ys - 1, fdl_back + 1)
-
-
-            debug("all lt: %r" % (lt))#[sl:el+1]))
-            debug("all ct: %r" % (ct))#[sl:el+1]))
-
-            # TODO
-            # start_line = min(self._vstate.pos.line, self._vstate.ppos.line)
-            # ct = as_unicode('\n').join(map(as_unicode, vim.current.buffer[start_line:]))
-            # lt = as_unicode('\n').join(self._lvb[start_line:])
-            lt = lt[lt_span[0]:lt_span[1]]
-            ct = ct[ct_span[0]:ct_span[1]]
-            debug("lt: %r" % (lt))
-            debug("ct: %r" % (ct))
-            debug("lt_span: %r, ct_span: %r" % (lt_span, ct_span))
-
-            lt = '\n'.join(lt)
-            ct = '\n'.join(ct)
-            rv = edit_distance.edit_script(lt, ct, lt_span[0])
-            debug("rv: %r" % (rv,))
-            self._csnippets[0].edited(rv)
+            lt = '\n'.join(lt[lt_span[0]:lt_span[1]])
+            ct = '\n'.join(ct[ct_span[0]:ct_span[1]])
+            self._csnippets[0].edited(edit_distance.edit_script(lt, ct, initial_line))
 
         self._check_if_still_inside_snippet()
         if self._csnippets:
@@ -929,7 +902,7 @@ class SnippetManager(object):
         if self._cs:
             self._ctab = self._cs.select_next_tab(backwards)
             if self._ctab:
-                self._vstate.select_span(self._ctab.span)
+                select_span(self._ctab.span)
                 jumped = True
                 if self._ctab.no == 0:
                     self._current_snippet_is_done()

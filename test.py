@@ -24,6 +24,8 @@
 # The testsuite will use ``screen`` to inject commands into the Vim under test,
 # and will compare the resulting output to expected results.
 #
+#
+# TODO: visual line selection -> replace with more, less and == amount of lines
 
 import os
 import tempfile
@@ -819,7 +821,6 @@ class TabStop_Shell_TextInNextLine(_VimTest):
     wanted = "hi hallo\nWeiterand more"
 class TabStop_Shell_InDefValue_Leave(_VimTest):
     skip_on_windows = True
-    sleeptime = 0.09 # Do this very slowly
     snippets = ("test", "Hallo ${1:now `echo fromecho`} end")
     keys = "test" + EX + JF + "and more"
     wanted = "Hallo now fromecho endand more"
@@ -841,7 +842,6 @@ class TabStop_Shell_TestEscapedCharsAndShellVars_Overwrite(_VimTest):
 
 class TabStop_Shell_ShebangPython(_VimTest):
     skip_on_windows = True
-    sleeptime = 0.09 # Do this very slowly
     snippets = ("test", """Hallo ${1:now `#!/usr/bin/env python
 print "Hallo Welt"
 `} end""")
@@ -1432,7 +1432,6 @@ class Transformation_OptionReplaceGlobalMatchInReplace_ECR(_VimTest):
     keys = "test" + EX + "a, nice,   building"
     wanted = "a, nice,   building a, nice, building"
 class TransformationUsingBackspaceToDeleteDefaultValueInFirstTab_ECR(_VimTest):
-     sleeptime = 0.09 # Do this very slowly
      snippets = ("test", "snip ${1/.+/(?0:m1)/} ${2/.+/(?0:m2)/} "
                  "${1:default} ${2:def}")
      keys = "test" + EX + BS + JF + "hi"
@@ -1787,7 +1786,6 @@ class Multiple_ManySnippetsOneTrigger_ECR(_VimTest):
         ("test", "Case28", "This is Case 28"),
         ("test", "Case29", "This is Case 29"),
     ) #}}}
-    sleeptime = 0.09 # Do this very slowly
     keys = "test" + EX + " " + ESC + ESC + "ahi"
     wanted = "testhi"
 # End: Selecting Between Same Triggers  #}}}

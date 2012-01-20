@@ -6,8 +6,6 @@ import sys
 
 # TODO: check test cases here. They are not up to date
 
-from .debug import debug
-
 def edit_script(a, b, sline = 0):
     d = defaultdict(list)
     seen = defaultdict(lambda: sys.maxint)
