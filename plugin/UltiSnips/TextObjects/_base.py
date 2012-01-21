@@ -37,11 +37,16 @@ class TextObject(object):
         Overwrite the text of this object in the Vim Buffer and update its
         length information
         """
+        # We explicitly do not want to move our childs around here as we
+        # either have non or we are replacing text initially which means we do
+        # not want to mess with their positions
         old_end = self._end
         self._end = TextBuffer(gtext or self._initial_text).to_vim(self._start, self._end)
-
-        # TODO: child_end_moved3 is a stupid name for this function
-        self.child_end_moved3(min(old_end, self._end), self._end.gsub(old_end))
+        if self._parent:
+            self._parent._child_has_moved(
+                self._parent._childs.index(self), min(old_end, self._end),
+                self._end.diff(old_end)
+            )
 
     def __lt__(self, other):
         return self._start < other._start
@@ -104,6 +109,19 @@ class TextObject(object):
 
         self._parent.child_end_moved3(pivot, diff)
 
+    def _child_has_moved(self, idx, pivot, diff):
+        self._end.move(pivot, diff)
+
+        try:
+            for c in self._childs[idx+1:]:
+                c._move(pivot, diff)
+        except AttributeError: # TODO: fix this
+            pass
+
+        if self._parent:
+            self._parent._child_has_moved(
+                self._parent._childs.index(self), pivot, diff
+            )
 
 class EditableTextObject(TextObject):
     """
@@ -217,12 +235,7 @@ class EditableTextObject(TextObject):
             else:
                 delta = Position(0, len(char))
         pivot = Position(line, col)
-        # TODO: this should somehow be part of child_end_moved3
-        for c in self._childs:
-            c._start.move(pivot, delta)
-            c._end.move(pivot, delta)
-        self._end.move(pivot, delta)
-        self.child_end_moved3(pivot, delta)
+        self._child_has_moved(-1, pivot, delta)
 
     def _move(self, pivot, diff):
         TextObject._move(self, pivot, diff)

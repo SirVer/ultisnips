@@ -55,7 +55,7 @@ class Position(object):
                     "'Position' and %s" % type(pos))
         return Position(self.line - pos.line, self.col - pos.col)
 
-    def gsub(self,pos):
+    def diff(self,pos):
         if not isinstance(pos,Position):
             raise TypeError("unsupported operand type(s) for +: " \
                     "'Position' and %s" % type(pos))
