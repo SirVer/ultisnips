@@ -30,6 +30,15 @@ class SnippetInstance(TextObject):
 
         self.do_edits()
 
+    def replace_initital_text(self):
+        def _place_initial_text(obj):
+            obj.overwrite()
+
+            for c in obj._childs:
+                _place_initial_text(c)
+
+        _place_initial_text(self)
+
     def _get_tabstop(self, requester, no):
         # SnippetInstances are completely self contained, therefore, we do not
         # need to ask our parent for Tabstops

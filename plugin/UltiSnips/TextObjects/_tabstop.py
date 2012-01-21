@@ -18,6 +18,8 @@ class TabStop(TextObject):
             TextObject.__init__(self, parent, token)
             self._no = token.no
 
+        parent._tabstops[self._no] = self
+
     def no(self):
         return self._no
     no = property(no)

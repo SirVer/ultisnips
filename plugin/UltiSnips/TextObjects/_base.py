@@ -336,9 +336,6 @@ class TextObject(object):
         except AttributeError:
             pass
 
-    def _add_tabstop(self, ts): # Why is tabstop not doing this in __init__? TODO
-        self._tabstops[ts.no] = ts
-
 class NoneditableTextObject(TextObject):
     """
     All passive text objects that the user can't edit by hand

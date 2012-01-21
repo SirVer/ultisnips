@@ -46,9 +46,9 @@ class TOParser(object):
         if add_ts_zero and 0 not in seen_ts:
             mark = all_tokens[-1][1].end # Last token is always EndOfText
             m1 = Position(mark.line, mark.col)
-            self._parent_to._add_tabstop(TabStop(self._parent_to, 0, mark, m1))
+            TabStop(self._parent_to, 0, mark, m1)
 
-        self._replace_initial_texts()
+        self._parent_to.replace_initital_text()
 
     #####################
     # Private Functions #
@@ -57,9 +57,7 @@ class TOParser(object):
         for parent, token in all_tokens:
             if isinstance(token, MirrorToken):
                 if token.no not in seen_ts:
-                    ts = TabStop(parent, token)
-                    seen_ts[token.no] = ts
-                    parent._add_tabstop(ts)
+                    seen_ts[token.no] = TabStop(parent, token)
                 else:
                     Mirror(parent, seen_ts[token.no], token)
 
@@ -70,15 +68,6 @@ class TOParser(object):
                     raise RuntimeError("Tabstop %i is not known but is used by a Transformation" % token.no)
                 Transformation(parent, seen_ts[token.no], token)
 
-    def _replace_initial_texts(self):
-        def _place_initial_text(obj):
-            obj.overwrite()
-
-            for c in obj._childs: # TODO: private parts!
-                _place_initial_text(c)
-
-        _place_initial_text(self._parent_to)
-
     def _do_parse(self, all_tokens, seen_ts):
         tokens = list(tokenize(self._text, self._indent, self._parent_to.start))
 
@@ -88,7 +77,6 @@ class TOParser(object):
             if isinstance(token, TabStopToken):
                 ts = TabStop(self._parent_to, token)
                 seen_ts[token.no] = ts
-                self._parent_to._add_tabstop(ts)
 
                 k = TOParser(ts, token.initial_text, self._indent)
                 k._do_parse(all_tokens, seen_ts)
