@@ -1500,35 +1500,47 @@ class Visual_CrossOneLine(_VimTest):
     wanted = "bla hblub\n  hellobi"
 
 # TODO: with indent in default text
-class Visual_LineSelect(_VimTest):
+class Visual_LineSelect_Simple(_VimTest):
     snippets = ("test", "h${VISUAL}b")
     keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX
-    wanted = "hhello\nnice\nworld\nb"
+    wanted = "hhello\n nice\n worldb"
 class Visual_InDefaultText_LineSelect_NoOverwrite(_VimTest):
     snippets = ("test", "h${1:bef${VISUAL}aft}b")
     keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX + JF + "hi"
-    wanted = "hbefhello\nnice\nworld\naftbhi"
+    wanted = "hbefhello\n    nice\n    worldaftbhi"
 class Visual_InDefaultText_LineSelect_Overwrite(_VimTest):
     snippets = ("test", "h${1:bef${VISUAL}aft}b")
     keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX + "jup" + JF + "hi"
     wanted = "hjupbhi"
-class Visual_LineSelect_CheckIndent(_VimTest):
+class Visual_LineSelect_CheckIndentSimple(_VimTest):
     snippets = ("test", "beg\n\t${VISUAL}\nend")
     keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX
     wanted = "beg\n\thello\n\tnice\n\tworld\nend"
-
 class Visual_LineSelect_CheckIndentTwice(_VimTest):
     snippets = ("test", "beg\n\t${VISUAL}\nend")
     keys = "    hello\n    nice\n\tworld" + ESC + "Vkk" + EX + "test" + EX
     wanted = "beg\n\t    hello\n\t    nice\n\t\tworld\nend"
+class Visual_InDefaultText_IndentSpacesToTabstop_NoOverwrite(_VimTest):
+    snippets = ("test", "h${1:beforea${VISUAL}aft}b")
+    keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX + JF + "hi"
+    wanted = "hbeforeahello\n\tnice\n\tworldaftbhi"
+class Visual_InDefaultText_IndentSpacesToTabstop_Overwrite(_VimTest):
+    snippets = ("test", "h${1:beforea${VISUAL}aft}b")
+    keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX + "ups" + JF + "hi"
+    wanted = "hupsbhi"
+class Visual_InDefaultText_IndentSpacesToTabstop_NoOverwrite1(_VimTest):
+    snippets = ("test", "h${1:beforeaaa${VISUAL}aft}b")
+    keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX + JF + "hi"
+    wanted = "hbeforeaaahello\n\t  nice\n\t  worldaftbhi"
 
 class Visual_LineSelect_WithTabStop(_VimTest):
     snippets = ("test", "beg\n\t${VISUAL}\n\t${1:here_we_go}\nend")
     keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX + "super" + JF + "done"
     wanted = "beg\n\thello\n\tnice\n\tworld\n\tsuper\nenddone"
-
-
-
+class Visual_LineSelect_CheckIndentWithTS_NoOverwrite(_VimTest):
+    snippets = ("test", "beg\n\t${0:${VISUAL}}\nend")
+    keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX
+    wanted = "beg\n\thello\n\tnice\n\tworld\nend"
 # End: ${VISUAL}  #}}}
 
 # Recursive (Nested) Snippets  {{{#

@@ -136,26 +136,13 @@ class TabStopToken(Token):
 
 class VisualToken(Token):
     TOKEN = "${VISUAL}"
-    CHECK = re.compile(r"^[ \t]*\${VISUAL}")
 
     @classmethod
     def starts_here(klass, stream):
-        return klass.CHECK.match(stream.peek(10000)) is not None
+        return stream.peek(len(klass.TOKEN)) == klass.TOKEN
 
     def _parse(self, stream, indent):
-        self.leading_whitespace = ""
-        while stream.peek() != self.TOKEN[0]:
-            self.leading_whitespace += stream.next()
-
         for i in range(len(self.TOKEN)):
-            stream.next()
-
-        # Make sure that a ${VISUAL} at the end of a line behaves like a block
-        # of text and does not introduce another line break.
-        while 1:
-            nc = stream.peek()
-            if nc is None or nc not in '\r\n':
-                break
             stream.next()
 
     def __repr__(self):

@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+import re
+
+import vim
+
+from ..Compatibility import as_unicode
+from ..Util import IndentUtil
+
 from ._base import NoneditableTextObject
 
 class Visual(NoneditableTextObject):
@@ -9,30 +16,39 @@ class Visual(NoneditableTextObject):
     selected and insert it here. If there was no text visually selected,
     this will be the empty string
     """
-    def __init__(self, parent, token):
-        # TODO: rework this: get indent directly from vim buffer and
-        # only update once.
+    __REPLACE_NON_WS = re.compile(r"[^ \t]")
 
+    def __init__(self, parent, token):
         # Find our containing snippet for visual_content
         snippet = parent
         while snippet:
             try:
-                self._visual_content = snippet.visual_content.splitlines(True)
+                self._text = snippet.visual_content.text
+                self._mode = snippet.visual_content.mode
                 break
             except AttributeError:
                 snippet = snippet._parent
 
-        text = ""
-        for idx, line in enumerate(self._visual_content):
-            text += token.leading_whitespace
-            text += line
-
-        self._text = text
-
-        NoneditableTextObject.__init__(self, parent, token, initial_text = self._text)
+        NoneditableTextObject.__init__(self, parent, token)
 
     def _update(self, done, not_done):
-        self.overwrite(self._text)
+        if self._mode != "v":
+            # Keep the indent for Line/Block Selection
+            text_before = as_unicode(vim.current.buffer[self.start.line])[:self.start.col]
+            indent = self.__REPLACE_NON_WS.sub(" ", text_before)
+            iu = IndentUtil()
+            indent = iu.indent_to_spaces(indent)
+            indent = iu.spaces_to_indent(indent)
+            text = ""
+            for idx, line in enumerate(self._text.splitlines(True)):
+                if idx != 0:
+                    text += indent
+                text += line
+            text = text[:-1] # Strip final '\n'
+        else:
+            text = self._text
+
+        self.overwrite(text)
         self._parent._del_child(self)
         return True
 

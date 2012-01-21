@@ -662,6 +662,43 @@ class VimState(object):
     # Private functions below #
     ###########################
 
+from debug import debug
+
+class VisualContentPreserver(object):
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self._mode = ""
+        self._text = as_unicode("")
+
+    def conserve(self):
+        sl, sc = map(int, (vim.eval("""line("'<")"""), vim.eval("""virtcol("'<")""")))
+        el, ec = map(int, (vim.eval("""line("'>")"""), vim.eval("""virtcol("'>")""")))
+        self._mode = vim.eval("visualmode()")
+
+        def _vim_line_with_eol(ln):
+            return as_unicode(vim.current.buffer[ln] + '\n')
+
+        if sl == el:
+            text = _vim_line_with_eol(sl-1)[sc-1:ec]
+        else:
+            text = _vim_line_with_eol(sl-1)[sc-1:]
+            for cl in range(sl,el-1):
+                text += _vim_line_with_eol(cl)
+            text += _vim_line_with_eol(el-1)[:ec]
+
+        self._text = text
+
+    @property
+    def text(self):
+        return self._text
+
+    @property
+    def mode(self):
+        return self._mode
+
+
 class SnippetManager(object):
     def __init__(self):
         self._vstate = VimState()
@@ -676,7 +713,7 @@ class SnippetManager(object):
         self._lvb = TextBuffer("")
         self._test_error = test_error
         self._snippets = {}
-        self._visual_content = as_unicode("")
+        self._visual_content = VisualContentPreserver()
 
         while len(self._csnippets):
             self._current_snippet_is_done()
@@ -738,21 +775,7 @@ class SnippetManager(object):
         Our job is to remember everything between '< and '> and pass it on to
         ${VISUAL} in case it will be needed.
         """
-        sl, sc = map(int, (vim.eval("""line("'<")"""), vim.eval("""virtcol("'<")""")))
-        el, ec = map(int, (vim.eval("""line("'>")"""), vim.eval("""virtcol("'>")""")))
-
-        def _vim_line_with_eol(ln):
-            return as_unicode(vim.current.buffer[ln] + '\n')
-
-        if sl == el:
-            text = _vim_line_with_eol(sl-1)[sc-1:ec]
-        else:
-            text = _vim_line_with_eol(sl-1)[sc-1:]
-            for cl in range(sl,el-1):
-                text += _vim_line_with_eol(cl)
-            text += _vim_line_with_eol(el-1)[:ec]
-
-        self._visual_content = text
+        self._visual_content.conserve()
 
     def snippet_dict(self, ft):
         if ft not in self._snippets:
@@ -1045,14 +1068,14 @@ class SnippetManager(object):
             # TODO: private parts? maybe handle this in add_child
             si = snippet.launch(text_before, self._visual_content,
                     self._cs._find_parent_for_new_to(start), start, end)
-            self._visual_content = ""
+            self._visual_content.reset()
 
             self._csnippets.append(si)
         else:
             start = Position(lineno-1, len(text_before))
             end = Position(lineno-1, len(before))
             self._csnippets.append(snippet.launch(text_before, self._visual_content, None, start, end))
-            self._visual_content = ""
+            self._visual_content.reset()
 
         self._ignore_movements = True
         self._lvb = TextBuffer('\n'.join(vim.current.buffer)) # TODO: no need to cache everything
