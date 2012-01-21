@@ -42,9 +42,9 @@ def _to_scratch_buffer(text):
 
 def err_to_scratch_buffer(f):
     @wraps(f)
-    def wrapper(*args, **kwds):
+    def wrapper(self, *args, **kwds):
         try:
-            return f(*args, **kwds)
+            return f(self, *args, **kwds)
         except:
             s = \
 """An error occured. This is either a bug in UltiSnips or a bug in a
@@ -54,6 +54,7 @@ https://bugs.launchpad.net/ultisnips/+filebug.
 Following is the full stack trace:
 """
             s += traceback.format_exc()
+            self.leaving_window() # Vim sends no WinLeave msg here.
             _to_scratch_buffer(s)
     return wrapper
 
@@ -65,6 +66,7 @@ def echom(mes, *args):
     mes = mes % args
     vim.command('echom %s' % vim_string(mes))
 
+# TODO: all the vim wrapper functions should go into one module
 # TODO: this function should be moved
 def select_span(r):
     _unmap_select_mode_mapping()
@@ -802,6 +804,7 @@ class SnippetManager(object):
         self._vstate.update()
         debug("vim.eval('mode()'): %r" % (vim.eval('mode()')))
         debug("in cursor_moved self._vstate.pos: %r" % (self._vstate.pos))
+        # TODO: hijack two marks instead of running through the whole buffer
 
         if vim.eval("mode()") not in 'in':
             return
@@ -829,12 +832,15 @@ class SnippetManager(object):
                    (ct_span[0] < ct_span[1])):
                 ct_span[1] -= 1
                 lt_span[1] -= 1
-            while (lt[lt_span[0]] == ct[ct_span[0]] and
-                   (lt_span[0] < lt_span[1]) and
-                   (ct_span[0] < ct_span[1])):
-                ct_span[0] += 1
-                lt_span[0] += 1
-                initial_line += 1
+            try:
+                while (lt[lt_span[0]] == ct[ct_span[0]] and
+                       (lt_span[0] < lt_span[1]) and
+                       (ct_span[0] < ct_span[1])):
+                    ct_span[0] += 1
+                    lt_span[0] += 1
+                    initial_line += 1
+            except IndexError:
+                pass
             ct_span[0] = max(0, ct_span[0] - 1)
             lt_span[0] = max(0, lt_span[0] - 1)
             initial_line = max(0, initial_line - 1)
@@ -853,10 +859,9 @@ class SnippetManager(object):
             debug("Before edits!")
             echo_to_hierarchy(self._csnippets[-1])
             self._csnippets[0].do_edits()
-        self._lvb = TextBuffer('\n'.join(vim.current.buffer)) # TODO: no need to cache everything and not on every movement?
+            self._lvb = TextBuffer('\n'.join(vim.current.buffer)) # TODO: no need to cache everything and not on every movement?
         self._vstate.update()
 
-    @err_to_scratch_buffer # TODO: does this still does the correct thing?
     def leaving_window(self):
         """
         Called when the user switches tabs. It basically means that all

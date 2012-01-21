@@ -13,7 +13,7 @@ class VimLCode(NoneditableTextObject):
 
         NoneditableTextObject.__init__(self, parent, token)
 
-    def _really_updateman(self, done, not_done):
+    def _update(self, done, not_done):
         self.overwrite(as_unicode(vim.eval(self._code)))
         return True
 

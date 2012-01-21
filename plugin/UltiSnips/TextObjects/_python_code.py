@@ -182,7 +182,7 @@ class PythonCode(NoneditableTextObject):
 
         NoneditableTextObject.__init__(self, parent, token)
 
-    def _really_updateman(self, done, not_done):
+    def _update(self, done, not_done):
         path = vim.eval('expand("%")')
         if path is None:
             path = ""

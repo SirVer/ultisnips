@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 import os
+import subprocess
 import stat
 import tempfile
 
@@ -9,20 +10,22 @@ from ._base import NoneditableTextObject
 
 class ShellCode(NoneditableTextObject):
     def __init__(self, parent, token):
-        code = token.code.replace("\\`", "`")
+        NoneditableTextObject.__init__(self, parent, token)
 
+        self._code = token.code.replace("\\`", "`")
+
+    def _update(self, done, not_done):
         # Write the code to a temporary file
         handle, path = tempfile.mkstemp(text=True)
-        os.write(handle, code.encode("utf-8"))
+        os.write(handle, self._code.encode("utf-8"))
         os.close(handle)
-
         os.chmod(path, stat.S_IRWXU)
 
-        # TODO: use subprocess.
-        # TODO: should not run in the constructor
-        # Interpolate the shell code. We try to stay as compatible with Python
-        # 2.3, therefore, we do not use the subprocess module here
-        output = os.popen(path, "r").read()
+        # Execute the file and read stdout
+        proc = subprocess.Popen(path, shell=True, stdout=subprocess.PIPE)
+        proc.wait()
+        output = proc.stdout.read()
+
         if len(output) and output[-1] == '\n':
             output = output[:-1]
         if len(output) and output[-1] == '\r':
@@ -30,7 +33,9 @@ class ShellCode(NoneditableTextObject):
 
         os.unlink(path)
 
-        token.initial_text = output
-        NoneditableTextObject.__init__(self, parent, token)
+        self.overwrite(output)
+        self._parent._del_child(self)
+
+        return True
 
 

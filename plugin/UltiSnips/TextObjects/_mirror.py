@@ -12,18 +12,20 @@ class Mirror(NoneditableTextObject):
 
         self._ts = tabstop
 
-    def _really_updateman(self, done, not_done): # TODO: function has a stupid name
-        # TODO: this function will get called to often. It should
-        # check if a replacement is really needed
+    def _update(self, done, not_done):
         assert(not self._is_killed)
         if self._ts._is_killed:
             self.overwrite("")
             self._parent._del_child(self)
             return True
 
-        if (self._ts not in done):
+        if self._ts not in done:
             return False
-        self.overwrite(self._ts.current_text)
+
+        self.overwrite(self._get_text())
         return True
+
+    def _get_text(self):
+        return self._ts.current_text
 
 

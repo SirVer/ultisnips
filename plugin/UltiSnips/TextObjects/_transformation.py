@@ -117,23 +117,9 @@ class Transformation(Mirror):
         self._find = re.compile(token.search, flags | re.DOTALL)
         self._replace = _CleverReplace(token.replace)
 
-    def _really_updateman(self, done, not_done):
-        # TODO: check todos in Mirrors function
-        # TODO: similar to Transformation
-        assert(not self._is_killed)
-        if self._ts._is_killed:
-            self.overwrite("")
-            self._parent._del_child(self)
-            return True
-
-        if self._ts not in done:
-            return False
-
-        t = self._ts.current_text
-        t = "" if self._ts._is_killed else self._ts.current_text
-        t = self._find.subn(self._replace.replace, t, self._match_this_many)[0]
-
-        self.overwrite(t)
-        return True
+    def _get_text(self):
+        return self._find.subn(
+            self._replace.replace, self._ts.current_text, self._match_this_many
+        )[0]
 
 

@@ -31,7 +31,7 @@ class Visual(NoneditableTextObject):
 
         NoneditableTextObject.__init__(self, parent, token, initial_text = self._text)
 
-    def _really_updateman(self, done, not_done):
+    def _update(self, done, not_done):
         self.overwrite(self._text)
         self._parent._del_child(self)
         return True

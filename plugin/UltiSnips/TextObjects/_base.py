@@ -11,8 +11,6 @@ from UltiSnips.Geometry import Span, Position
 
 __all__ = ["TextObject", "NoneditableTextObject"]
 
-from UltiSnips.Geometry import _move # TODO
-
 class TextObject(object):
     """
     This base class represents any object in the text
@@ -118,16 +116,15 @@ class TextObject(object):
         if not (self._parent):
             return
 
-        _move(self._parent._end, pivot, diff)
+        self._parent._end.move(pivot, diff)
         def _move_all(o):
-            _move(o._start, pivot, diff)
-            _move(o._end, pivot, diff)
+            o._start.move(pivot, diff)
+            o._end.move(pivot, diff)
 
             for oc in o._childs:
                 _move_all(oc)
 
         for c in self._parent._childs[self._parent._childs.index(self)+1:]:
-            st,en = c._start.copy(), c._end.copy()
             _move_all(c)
 
         self._parent.child_end_moved3(pivot, diff)
@@ -208,13 +205,12 @@ class TextObject(object):
                 delta = Position(1, 0) # TODO: this feels somehow incorrect
             else:
                 delta = Position(0, len(char))
-        old_end = self._end.copy()
         pivot = Position(line, col)
         # TODO: this should somehow be part of child_end_moved3
         for c in self._childs:
-            _move(c._start, pivot, delta)
-            _move(c._end, pivot, delta)
-        _move(self._end, pivot, delta)
+            c._start.move(pivot, delta)
+            c._end.move(pivot, delta)
+        self._end.move(pivot, delta)
         self.child_end_moved3(pivot, delta)
 
     def edited(self, cmds): # TODO: Only in SnippetInstance
@@ -299,13 +295,18 @@ class TextObject(object):
     ###############################
     # Private/Protected functions #
     ###############################
-    def _really_updateman(self, done, not_done): # TODO:
+    def _update(self, done, not_done):
+        """
+        Return False if you want to be called again
+        for this edit cycle. Otherwise return True.
+        """
         return True
+
     def _update_if_not_done(self, done, not_done): # TODO:
         if all((c in done) for c in self._childs):
             assert(self not in done)
 
-            if self._really_updateman(done, not_done):
+            if self._update(done, not_done):
                 done.add(self)
 
     def _get_tabstop(self, requester, no):

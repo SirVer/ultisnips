@@ -25,8 +25,22 @@ class Position(object):
         return locals()
     line = property(**line())
 
-    def copy(self):
-        return Position(self._line, self._col)
+    def move(self, pivot, diff):
+        """pivot is the position of the first changed
+        character, diff is how text after it moved"""
+        if self < pivot: return
+        if diff.line == 0:
+            if self.line == pivot.line:
+                self.col += diff.col
+        elif diff.line > 0:
+            if self.line == pivot.line:
+                self.col += diff.col - pivot.col
+            self.line += diff.line
+        else:
+            self.line += diff.line
+            if self.line == pivot.line:
+                self.col += - diff.col + pivot.col
+
 
     def __add__(self,pos):
         if not isinstance(pos,Position):
@@ -35,27 +49,25 @@ class Position(object):
 
         return Position(self.line + pos.line, self.col + pos.col)
 
-    def __sub__(self,pos): # TODO: is this really true?
+    def __sub__(self,pos):
         if not isinstance(pos,Position):
             raise TypeError("unsupported operand type(s) for +: " \
                     "'Position' and %s" % type(pos))
         return Position(self.line - pos.line, self.col - pos.col)
 
-    def gsub(self,pos): # TODO: is this really true?
+    def gsub(self,pos):
         if not isinstance(pos,Position):
             raise TypeError("unsupported operand type(s) for +: " \
                     "'Position' and %s" % type(pos))
         if self.line == pos.line:
             return Position(0, self.col - pos.col)
         else:
-            #if self > pos: # Idea: self + delta = pos
             if self > pos:
                 return Position(self.line - pos.line, self.col)
             else:
                 return Position(self.line - pos.line, pos.col)
-            # else: return Position(self.line - pos.line, -self.col)
-
         return Position(self.line - pos.line, self.col - pos.col)
+
     def __eq__(self, other):
         return (self._line, self._col) == (other._line, other._col)
     def __ne__(self, other):
@@ -97,28 +109,11 @@ class Span(object):
 
 import unittest
 
-def _move(obj, pivot, diff):
-    """pivot is the position of the first changed
-    character, diff is how text after it moved"""
-    if obj < pivot: return
-    # TODO: test >= test here again
-    if diff.line == 0:
-        if obj.line == pivot.line:
-            obj.col += diff.col
-    elif diff.line > 0:
-        if obj.line == pivot.line:
-            obj.col += diff.col - pivot.col
-        obj.line += diff.line
-    else:
-        obj.line += diff.line
-        if obj.line == pivot.line:
-            obj.col += - diff.col + pivot.col
-
 class _MPBase(object):
     def runTest(self):
         obj = Position(*self.obj)
         for pivot, diff, wanted in self.steps:
-            _move(obj, Position(*pivot), Position(*diff))
+            obj.move(Position(*pivot), Position(*diff))
             self.assertEqual(Position(*wanted), obj)
 
 class MovePosition_DelSameLine(_MPBase, unittest.TestCase):
@@ -172,81 +167,4 @@ class MovePosition_DelSecondLine1(_MPBase, unittest.TestCase):
         ((0, 12), (0, -3), (0, 12)),
         ((0, 12), (0,  1), (0, 13)),
     )
-
-class RandomTest1(_MPBase, unittest.TestCase):
-    a = 'cbaca\nabccAc\nbc'
-    b = 'Aba\naca\nab'
-
-    'Aba\naca\nabccAc\nbc'
-    obj = (1,4)
-    steps = (
-        ((0, 0), (0, -1), (1, 4)),
-        ((0, 0), (0,  1), (1, 4)),
-        ((0, 3), (1, -3), (2, 4)),
-        ((1, 0), (0,  1), (2, 4)),
-        ((2, 2),(-1, -2), (0, 1)),
-    )
-
-from edit_distance import transform, edit_script
-import random, string
-
-class RandomTests(unittest.TestCase):
-    def runTest(self):
-        nlines = random.randint(1, 3)
-        def make_random_text():
-            text =[]
-            for i in range(nlines):
-                ncols = random.randint(1,5)
-                text.append(''.join(random.choice("abc") for i in range(ncols)))
-            lidx = random.randint(0, len(text)-1)
-            cidx = random.randint(0, len(text[lidx])-1)
-            text[lidx] = text[lidx][:cidx] + 'A' + text[lidx][cidx:]
-
-            return '\n'.join(text), (lidx, cidx)
-
-        def find_A(txt):
-            idx = txt.find('A')
-            line_idx = txt[:idx].count("\n")
-            return line_idx, txt.split("\n")[line_idx].find('A')
-
-        txt, initial_pos = make_random_text()
-        txt2 = make_random_text()[0]
-        self.assertEqual(find_A(txt), initial_pos)
-        print "txt: %r, txt2: %r" % (txt, txt2)
-
-        obj = Position(*initial_pos)
-        for cmd in edit_script(txt, txt2):
-            ctype, line, col, text = cmd
-
-            if ctype == 'D':
-                if text == "\n":
-                    delta = Position(-1, 0)
-                else:
-                    delta = Position(0, -len(text))
-            else:
-                if text == "\n":
-                    delta = Position(1, 0)
-                else:
-                    delta = Position(0, len(text))
-
-            txt = transform(txt, (cmd,))
-            _move(obj, Position(line, col), delta)
-
-            # Apos = Position(*find_A(txt))
-            # self.assertEqual(Apos.line, obj.line)
-            # if Apos.col != -1:
-                # self.assertEqual(Apos.col, obj.col)
-
-        self.assertEqual(txt, txt2)
-        Apos = Position(*find_A(txt))
-        self.assertEqual(Apos, obj)
-
-        print "line: %r, col: %r" % (line, col)
-
-
-
-if __name__ == '__main__':
-   # unittest.main()
-   k = RandomTest1()
-   unittest.TextTestRunner().run(k)
-
+# TODO: what to do with these tests?

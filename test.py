@@ -26,7 +26,7 @@
 #
 #
 # TODO: visual line selection -> replace with more, less and == amount of lines
-
+# TODO: edit in mirror or transofmration -> kill element
 import os
 import tempfile
 import unittest

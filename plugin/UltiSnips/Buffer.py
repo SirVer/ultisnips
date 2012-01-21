@@ -57,8 +57,7 @@ class TextBuffer(object):
                 ))
         except AttributeError:
             return self._lines.__getitem__(a) # TODO: is this ever used?
-    def __setitem__(self, a, b): # TODO: no longer needed?
-        return self._lines.__setitem__(a,b)
+
     def __repr__(self):
         return repr('\n'.join(self._lines))
     def __str__(self):
