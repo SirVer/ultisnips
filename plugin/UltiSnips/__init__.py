@@ -875,13 +875,13 @@ class SnippetManager(object):
 
             es = edit_distance.edit_script(lt, ct, initial_line)
             debug("es: %s" % (es,))
-            self._csnippets[0].edited(es)
+            self._csnippets[0].replay_user_edits(es)
 
         self._check_if_still_inside_snippet()
         if self._csnippets:
             debug("Before edits!")
             echo_to_hierarchy(self._csnippets[-1])
-            self._csnippets[0].do_edits()
+            self._csnippets[0].update_textobjects()
             self._lvb = TextBuffer('\n'.join(vim.current.buffer)) # TODO: no need to cache everything and not on every movement?
         self._vstate.update()
 
@@ -1067,7 +1067,7 @@ class SnippetManager(object):
 
             # TODO: private parts? maybe handle this in add_child
             si = snippet.launch(text_before, self._visual_content,
-                    self._cs._find_parent_for_new_to(start), start, end)
+                    self._cs.find_parent_for_new_to(start), start, end)
             self._visual_content.reset()
 
             self._csnippets.append(si)

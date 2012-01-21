@@ -14,12 +14,13 @@ def echo_to_hierarchy(to):
     def _do_print(to, indent=""):
         debug(indent + unicode(to))
 
-        for c in to._childs:
-            _do_print(c, indent=indent + "  ")
+        try:
+            for c in to._childs:
+                _do_print(c, indent=indent + "  ")
+        except AttributeError:
+            pass
 
     _do_print(par)
-
-
 
 def debug(s):
     s = as_unicode(s)

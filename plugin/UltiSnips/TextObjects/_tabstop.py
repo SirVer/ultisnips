@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from ._base import TextObject
+from ._base import EditableTextObject
 
-__all__ = [ 'TabStop']
+__all__ = ['EditableTextObject']
 
-class TabStop(TextObject):
+class TabStop(EditableTextObject):
     """
     This is the most important TextObject. A TabStop is were the cursor
     comes to rest when the user taps through the Snippet.
@@ -13,9 +13,9 @@ class TabStop(TextObject):
     def __init__(self, parent, token, start = None, end = None):
         if start is not None:
             self._no = token
-            TextObject.__init__(self, parent, start, end)
+            EditableTextObject.__init__(self, parent, start, end)
         else:
-            TextObject.__init__(self, parent, token)
+            EditableTextObject.__init__(self, parent, token)
             self._no = token.no
 
         parent._tabstops[self._no] = self

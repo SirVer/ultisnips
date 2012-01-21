@@ -2,11 +2,14 @@
 # encoding: utf-8
 
 from UltiSnips.Geometry import Position
+from UltiSnips.Compatibility import vim_cursor, set_vim_cursor
 
-from ._base import TextObject
+from ..debug import debug, echo_to_hierarchy # TODO remove all debug
+
+from ._base import EditableTextObject, NoneditableTextObject
 from ._parser import TOParser
 
-class SnippetInstance(TextObject):
+class SnippetInstance(EditableTextObject):
     """
     A Snippet instance is an instance of a Snippet Definition. That is,
     when the user expands a snippet, a SnippetInstance is created to
@@ -24,30 +27,55 @@ class SnippetInstance(TextObject):
         self.globals = globals
         self.visual_content = visual_content
 
-        TextObject.__init__(self, parent, start, end, initial_text)
+        EditableTextObject.__init__(self, parent, start, end, initial_text)
 
         TOParser(self, initial_text, indent).parse(True)
 
-        self.do_edits()
+        self.update_textobjects()
 
     def replace_initital_text(self):
         def _place_initial_text(obj):
             obj.overwrite()
 
-            for c in obj._childs:
-                _place_initial_text(c)
+            if isinstance(obj, EditableTextObject):
+                for c in obj._childs:
+                    _place_initial_text(c)
 
         _place_initial_text(self)
 
-    def _get_tabstop(self, requester, no):
-        # SnippetInstances are completely self contained, therefore, we do not
-        # need to ask our parent for Tabstops
-        p = self._parent
-        self._parent = None
-        rv = TextObject._get_tabstop(self, requester, no)
-        self._parent = p
+    def replay_user_edits(self, cmds):
+        """Replay the edits the user has done to keep endings of our
+        Text objects in sync with reality"""
+        for cmd in cmds:
+            self._do_edit(cmd)
 
-        return rv
+    def update_textobjects(self):
+        # Do our own edits; keep track of the Cursor
+        vc = _VimCursor(self)
+
+        done = set()
+        not_done = set()
+
+        def _find_recursive(obj):
+            if isinstance(obj, EditableTextObject):
+                for c in obj._childs:
+                    _find_recursive(c)
+            not_done.add(obj)
+
+        _find_recursive(self)
+
+        counter = 10
+        while (done != not_done) and counter:
+            for obj in (not_done - done):
+                if obj._update(done, not_done):
+                    done.add(obj)
+            counter -= 1
+        if counter == 0:
+            raise RuntimeError("Cyclic dependency in TextElements!")
+
+
+        vc.to_vim()
+        self._del_child(vc)
 
     def select_next_tab(self, backwards = False):
         if self._cts is None:
@@ -72,4 +100,29 @@ class SnippetInstance(TextObject):
                 return ts
 
         return self._tabstops[self._cts]
+
+    def _get_tabstop(self, requester, no):
+        # SnippetInstances are completely self contained, therefore, we do not
+        # need to ask our parent for Tabstops
+        p = self._parent
+        self._parent = None
+        rv = EditableTextObject._get_tabstop(self, requester, no)
+        self._parent = p
+
+        return rv
+
+
+class _VimCursor(NoneditableTextObject):
+    def __init__(self, parent):
+        """Helper class to keep track of the vim Cursor"""
+        line, col = vim_cursor()
+        NoneditableTextObject.__init__(
+            self, parent, Position(line-1, col), Position(line-1, col)
+        )
+
+    def to_vim(self):
+        assert(self._start == self._end)
+        set_vim_cursor(self._start.line + 1, self._start.col)
+
+
 

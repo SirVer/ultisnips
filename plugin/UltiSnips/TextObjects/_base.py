@@ -9,7 +9,7 @@ from UltiSnips.Buffer import TextBuffer
 from UltiSnips.Compatibility import as_unicode
 from UltiSnips.Geometry import Span, Position
 
-__all__ = ["TextObject", "NoneditableTextObject"]
+__all__ = ["TextObject", "EditableTextObject", "NoneditableTextObject"]
 
 class TextObject(object):
     """
@@ -29,14 +29,8 @@ class TextObject(object):
             self._end = token.end
             self._initial_text = token.initial_text
 
-        self._childs = []
-        self._tabstops = {}
-
         if parent is not None:
             parent._add_child(self)
-
-        self._cts = 0
-        self._is_killed = False # TODO: not often needed
 
     def overwrite(self, gtext = None):
         """
@@ -81,12 +75,6 @@ class TextObject(object):
             lines.append(as_unicode(buf[_span.end.line])[:_span.end.col])
             return as_unicode('\n').join(lines)
 
-    @property
-    def current_tabstop(self):
-        if self._cts is None:
-            return None
-        return self._tabstops[self._cts]
-
     def span(self):
         return Span(self._start, self._end)
     span = property(span)
@@ -102,33 +90,56 @@ class TextObject(object):
     ####################
     # Public functions #
     ####################
-    def _find_parent_for_new_to(self, pos):
-        assert(pos in self.span)
-
-        for c in self._childs: # TODO: code duplication!
-            if isinstance(c, NoneditableTextObject): # TODO: make this nicer
-                continue
-            if (c._start <= pos <= c._end):
-                return c._find_parent_for_new_to(pos)
-        return self
+    def _move(self, pivot, diff):
+        self._start.move(pivot, diff)
+        self._end.move(pivot, diff)
 
     def child_end_moved3(self, pivot, diff):
         if not (self._parent):
             return
 
         self._parent._end.move(pivot, diff)
-        def _move_all(o):
-            o._start.move(pivot, diff)
-            o._end.move(pivot, diff)
-
-            for oc in o._childs:
-                _move_all(oc)
-
         for c in self._parent._childs[self._parent._childs.index(self)+1:]:
-            _move_all(c)
+            c._move(pivot, diff)
 
         self._parent.child_end_moved3(pivot, diff)
 
+
+class EditableTextObject(TextObject):
+    """
+    This base class represents any object in the text
+    that can be changed by the user
+    """
+    def __init__(self, *args, **kwargs):
+        TextObject.__init__(self, *args, **kwargs)
+
+        self._childs = []
+        self._tabstops = {}
+
+        self._cts = 0
+        self._is_killed = False
+
+    ##############
+    # Properties #
+    ##############
+    @property
+    def _editable_childs(self):
+        return [ c for c in self._childs if isinstance(c, EditableTextObject) ]
+
+    ####################
+    # Public Functions #
+    ####################
+    def find_parent_for_new_to(self, pos):
+        assert(pos in self.span)
+
+        for c in self._editable_childs:
+            if (c._start <= pos < c._end):
+                return c.find_parent_for_new_to(pos)
+        return self
+
+    ###############################
+    # Private/Protected functions #
+    ###############################
     def _do_edit(self, cmd):
         debug("cmd: %r, self: %r" % (cmd, self))
         ctype, line, col, char = cmd
@@ -213,37 +224,11 @@ class TextObject(object):
         self._end.move(pivot, delta)
         self.child_end_moved3(pivot, delta)
 
-    def edited(self, cmds): # TODO: Only in SnippetInstance
-        # Replay User Edits to update end of our current texts
-        for cmd in cmds:
-            self._do_edit(cmd)
+    def _move(self, pivot, diff):
+        TextObject._move(self, pivot, diff)
 
-    def do_edits(self): # TODO: only in snippets instance, stupid name
-        # Do our own edits; keep track of the Cursor
-        vc = _VimCursor(self)
-
-        done = set()
-        not_done = set()
-
-        def _find_recursive(obj):
-            for c in obj._childs:
-                _find_recursive(c)
-            not_done.add(obj)
-
-        _find_recursive(self)
-
-        counter = 10
-        while (done != not_done) and counter:
-            for obj in (not_done - done):
-                obj._update_if_not_done(done, not_done)
-            counter -= 1
-        if counter == 0:
-            raise RuntimeError("Cyclic dependency in TextElements!")
-
-
-        vc.update_position()
-        self._del_child(vc)
-
+        for c in self._childs:
+            c._move(pivot, diff)
 
     def _get_next_tab(self, no):
         if not len(self._tabstops.keys()):
@@ -258,7 +243,7 @@ class TextObject(object):
                 break
             i += 1
 
-        c = [ c._get_next_tab(no) for c in self._childs ]
+        c = [ c._get_next_tab(no) for c in self._editable_childs ]
         c = filter(lambda i: i, c)
 
         possible_sol += c
@@ -292,22 +277,16 @@ class TextObject(object):
 
         return max(possible_sol)
 
-    ###############################
-    # Private/Protected functions #
-    ###############################
     def _update(self, done, not_done):
         """
         Return False if you want to be called again
         for this edit cycle. Otherwise return True.
         """
-        return True
-
-    def _update_if_not_done(self, done, not_done): # TODO:
         if all((c in done) for c in self._childs):
             assert(self not in done)
 
-            if self._update(done, not_done):
-                done.add(self)
+            done.add(self)
+        return True
 
     def _get_tabstop(self, requester, no):
         if no in self._tabstops:
@@ -327,7 +306,7 @@ class TextObject(object):
         self._childs.sort()
 
     def _del_child(self,c):
-        c._is_killed = True # TODO: private parts
+        c._is_killed = True
         self._childs.remove(c)
 
         # If this is a tabstop, delete it
@@ -340,19 +319,7 @@ class NoneditableTextObject(TextObject):
     """
     All passive text objects that the user can't edit by hand
     """
-    pass
 
-
-class _VimCursor(NoneditableTextObject):
-    def __init__(self, parent):
-        """Helperclass to keep track of the vim Cursor"""
-        line, col = vim.current.window.cursor # TODO: some schenanigans like col -> byte?
-        s = Position(line-1, col)
-        e = Position(line-1, col)
-        NoneditableTextObject.__init__(self, parent, s, e)
-
-    def update_position(self):
-        assert(self._start == self._end)
-        vim.current.window.cursor = (self._start.line + 1, self._start.col)
-
+    def _update(self, done, not_done):
+        return True
 

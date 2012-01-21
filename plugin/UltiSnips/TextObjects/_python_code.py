@@ -16,7 +16,7 @@ class _Tabs(object):
         self._to = to
 
     def __getitem__(self, no):
-        ts = self._to._get_tabstop(self._to, int(no))
+        ts = self._to._get_tabstop(self._to, int(no)) # TODO: private parts
         if ts is None:
             return ""
         return ts.current_text
@@ -193,7 +193,7 @@ class PythonCode(NoneditableTextObject):
         local_d = self._locals
 
         local_d.update({
-            't': _Tabs(self),
+            't': _Tabs(self._parent),
             'fn': fn,
             'path': path,
             'cur': ct,
@@ -201,7 +201,6 @@ class PythonCode(NoneditableTextObject):
             'snip' : self._snip,
         })
 
-        self._code = self._code.replace("\r\n", "\n")
         compatible_exec(self._code, self._globals, local_d)
 
         rv = as_unicode(self._snip.rv if self._snip._rv_changed

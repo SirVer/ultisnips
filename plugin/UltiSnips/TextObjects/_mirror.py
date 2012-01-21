@@ -13,8 +13,7 @@ class Mirror(NoneditableTextObject):
         self._ts = tabstop
 
     def _update(self, done, not_done):
-        assert(not self._is_killed)
-        if self._ts._is_killed:
+        if self._ts._is_killed:  # TODO: private parts
             self.overwrite("")
             self._parent._del_child(self)
             return True
