@@ -42,14 +42,17 @@ class VimBuffer(object):
         return before, after
 
     def cursor():
-        """The current windows cursor"""
+        """
+        The current windows cursor. Note that this is 0 based in col and 0
+        based in line which is different from Vim's cursor.
+        """
         def fget(self):
-            return vim_cursor()
-        def fset(self, value):
-            set_vim_cursor(*value)
+            line, col = vim_cursor()
+            return Position(line - 1, col)
+        def fset(self, pos):
+            set_vim_cursor(pos.line + 1, pos.col)
         return locals()
     cursor = property(**cursor())
-
 buf = VimBuffer()
 
 
@@ -195,7 +198,7 @@ def text_to_vim(start, end, text):
 
     # Open any folds this might have created
     debug("start: %r" % (start))
-    buf.cursor = start.line + 1, start.col
+    buf.cursor = start
     vim.command("normal zv")
 
     new_end = _calc_end(lines, start)

@@ -116,12 +116,11 @@ class _VimCursor(NoneditableTextObject):
     """Helper class to keep track of the Vim Cursor"""
 
     def __init__(self, parent):
-        line, col = _vim.buf.cursor
         NoneditableTextObject.__init__(
-            self, parent, Position(line-1, col), Position(line-1, col)
+            self, parent, _vim.buf.cursor, _vim.buf.cursor
         )
 
     def to_vim(self):
         assert(self._start == self._end)
-        _vim.buf.cursor = self._start.line + 1, self._start.col
+        _vim.buf.cursor = self._start
 

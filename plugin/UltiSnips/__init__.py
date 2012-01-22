@@ -676,9 +676,8 @@ class SnippetManager(object):
 
     def _check_if_still_inside_snippet(self):
         # Did we leave the snippet with this movement?
-        line, col = _vim.buf.cursor
         if self._cs and (
-            not self._cs.start <= Position(line - 1, col) <= self._cs.end
+            not self._cs.start <= _vim.buf.cursor <= self._cs.end
         ):
             self._current_snippet_is_done()
             self._reinit()
@@ -789,9 +788,7 @@ class SnippetManager(object):
         """ Expands the given snippet, and handles everything
         that needs to be done with it.
         """
-        lineno, col = _vim.buf.cursor
         # Adjust before, maybe the trigger is not the complete word
-
         text_before = before
         if snippet.matched:
             text_before = before[:-len(snippet.matched)]
@@ -799,8 +796,8 @@ class SnippetManager(object):
         self._unset_offending_vim_options(snippet)
 
         if self._cs:
-            start = Position(lineno-1, len(text_before))
-            end = Position(lineno-1, len(before))
+            start = Position(_vim.buf.cursor.line, len(text_before))
+            end = Position(_vim.buf.cursor.line, len(before))
 
             si = snippet.launch(text_before, self._visual_content,
                     self._cs.find_parent_for_new_to(start), start, end)
@@ -808,8 +805,8 @@ class SnippetManager(object):
 
             self._csnippets.append(si)
         else:
-            start = Position(lineno-1, len(text_before))
-            end = Position(lineno-1, len(before))
+            start = Position(_vim.buf.cursor.line, len(text_before))
+            end = Position(_vim.buf.cursor.line, len(before))
             self._csnippets.append(snippet.launch(text_before, self._visual_content, None, start, end))
             self._visual_content.reset()
 
