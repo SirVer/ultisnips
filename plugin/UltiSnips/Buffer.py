@@ -23,7 +23,7 @@ class TextBuffer(object):
             new_end = Position(start.line + len(text)-1, len(text[-1]))
         return new_end
 
-    def to_vim(self, start, end): # TODO: better take a span
+    def to_vim(self, start, end):
         buf = vim.current.buffer
 
         # Open any folds this might have created

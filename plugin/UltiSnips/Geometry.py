@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-__all__ = [ "Position", "Span" ]
+__all__ = [ "Position" ]
 
 class Position(object):
     def __init__(self, line, col):
@@ -79,33 +79,6 @@ class Position(object):
 
     def __repr__(self):
         return "(%i,%i)" % (self._line, self._col)
-
-class Span(object):
-    def __init__(self, start, end):
-        self._s = start
-        self._e = end
-
-    def __contains__(self, pos):
-        return self._s <= pos <= self._e
-
-    def start():
-        def fget(self):
-            return self._s
-        def fset(self, value):
-            self._s = value
-        return locals()
-    start = property(**start())
-
-    def end():
-        def fget(self):
-            return self._e
-        def fset(self, value):
-            self._e = value
-        return locals()
-    end = property(**end())
-
-    def __repr__(self):
-        return "(%s -> %s)" % (self._s, self._e)
 
 import unittest
 

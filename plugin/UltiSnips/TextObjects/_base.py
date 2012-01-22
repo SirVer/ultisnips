@@ -5,7 +5,7 @@ import vim
 
 from UltiSnips.Buffer import TextBuffer
 from UltiSnips.Compatibility import as_unicode
-from UltiSnips.Geometry import Span, Position
+from UltiSnips.Geometry import Position
 
 __all__ = ["TextObject", "EditableTextObject", "NoneditableTextObject"]
 
@@ -66,21 +66,16 @@ class TextObject(object):
     ##############
     @property
     def current_text(self):
-        _span = self.span
         buf = vim.current.buffer
 
-        if _span.start.line == _span.end.line:
-            return as_unicode(buf[_span.start.line])[_span.start.col:_span.end.col]
+        if self._start.line == self._end.line:
+            return as_unicode(buf[self._start.line])[self._start.col:self._end.col]
         else:
             lines = []
-            lines.append(as_unicode(buf[_span.start.line])[_span.start.col:])
-            lines.extend(map(as_unicode, buf[_span.start.line+1:_span.end.line]))
-            lines.append(as_unicode(buf[_span.end.line])[:_span.end.col])
+            lines.append(as_unicode(buf[self._start.line])[self._start.col:])
+            lines.extend(map(as_unicode, buf[self._start.line+1:self._end.line]))
+            lines.append(as_unicode(buf[self._end.line])[:self._end.col])
             return as_unicode('\n').join(lines)
-
-    def span(self):
-        return Span(self._start, self._end)
-    span = property(span)
 
     def start(self):
         return self._start
@@ -119,8 +114,6 @@ class EditableTextObject(TextObject):
     # Public Functions #
     ####################
     def find_parent_for_new_to(self, pos):
-        assert(pos in self.span)
-
         for c in self._editable_childs:
             if (c._start <= pos < c._end):
                 return c.find_parent_for_new_to(pos)

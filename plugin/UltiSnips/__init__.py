@@ -3,6 +3,7 @@
 
 # TODO: Currently Caches whole buffer. Is this really needed?
 # TODO: Currently searches whole buffer. Is this really needed?
+# TODO: hijack two marks instead of running through the whole buffer
 
 import edit_distance
 from debug import debug, echo_to_hierarchy
@@ -16,7 +17,7 @@ import traceback
 
 import vim
 
-from UltiSnips.Geometry import Position, Span
+from UltiSnips.Geometry import Position
 from UltiSnips.Compatibility import make_suitable_for_vim, set_vim_cursor, vim_cursor
 from UltiSnips.TextObjects import *
 from UltiSnips.Buffer import TextBuffer
@@ -68,11 +69,11 @@ def echom(mes, *args):
 
 # TODO: all the vim wrapper functions should go into one module
 # TODO: this function should be moved
-def select_span(r):
+def select(start, end):
     _unmap_select_mode_mapping()
 
-    delta = r.end - r.start
-    lineno, col = r.start.line, r.start.col
+    delta = end - start
+    lineno, col = start.line, start.col
 
     set_vim_cursor(lineno + 1, col)
 
@@ -114,14 +115,14 @@ def select_span(r):
         # one column less since Vim's visual selection is including the
         # ending while Python slicing is excluding the ending.
         inclusive = "inclusive" in vim.eval("&selection")
-        if r.end.col == 0:
+        if end.col == 0:
             # Selecting should end at beginning of line -> Select the
             # previous line till its end
             do_select = "k$"
             if not inclusive:
                 do_select += "j0"
-        elif r.end.col > 1:
-            do_select = "0%il" % (r.end.col-1 if inclusive else r.end.col)
+        elif end.col > 1:
+            do_select = "0%il" % (end.col-1 if inclusive else end.col)
         else:
             do_select = "0" if inclusive else "0l"
 
@@ -829,14 +830,11 @@ class SnippetManager(object):
         self._vstate.update()
         debug("vim.eval('mode()'): %r" % (vim.eval('mode()')))
         debug("in cursor_moved self._vstate.pos: %r" % (self._vstate.pos))
-        # TODO: hijack two marks instead of running through the whole buffer
 
         if vim.eval("mode()") not in 'in':
             return
 
-        # TODO: really necessary?
         if self._ignore_movements:
-            debug("Ignored")
             self._ignore_movements = False
             return
 
@@ -884,7 +882,7 @@ class SnippetManager(object):
             debug("Before edits!")
             echo_to_hierarchy(self._csnippets[-1])
             self._csnippets[0].update_textobjects()
-            self._lvb = TextBuffer('\n'.join(vim.current.buffer)) # TODO: no need to cache everything and not on every movement?
+            self._lvb = TextBuffer('\n'.join(vim.current.buffer))
         self._vstate.update()
 
     def leaving_window(self):
@@ -923,10 +921,7 @@ class SnippetManager(object):
 
     def _check_if_still_inside_snippet(self):
         # Did we leave the snippet with this movement?
-        if self._cs:
-            debug("self._cs.span: %r" % (self._cs.span))
-            debug("self._vstate.pos: %r" % (self._vstate.pos))
-        if self._cs and not (self._vstate.pos in self._cs.span):
+        if self._cs and not self._cs.start <= self._vstate.pos <= self._cs.end:
             self._current_snippet_is_done()
 
             self._reinit()
@@ -945,7 +940,7 @@ class SnippetManager(object):
         if self._cs:
             self._ctab = self._cs.select_next_tab(backwards)
             if self._ctab:
-                select_span(self._ctab.span)
+                select(self._ctab.start, self._ctab.end)
                 jumped = True
                 if self._ctab.no == 0:
                     self._current_snippet_is_done()
@@ -1067,7 +1062,6 @@ class SnippetManager(object):
             start = Position(lineno-1, len(text_before))
             end = Position(lineno-1, len(before))
 
-            # TODO: private parts? maybe handle this in add_child
             si = snippet.launch(text_before, self._visual_content,
                     self._cs.find_parent_for_new_to(start), start, end)
             self._visual_content.reset()
@@ -1080,7 +1074,7 @@ class SnippetManager(object):
             self._visual_content.reset()
 
         self._ignore_movements = True
-        self._lvb = TextBuffer('\n'.join(vim.current.buffer)) # TODO: no need to cache everything
+        self._lvb = TextBuffer('\n'.join(vim.current.buffer))
 
         self._jump()
 
