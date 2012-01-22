@@ -5,15 +5,12 @@
 Wrapper functionality around the functions we need from Vim
 """
 
-# TODO cleanup order
-from debug import debug
-from UltiSnips.geometry import Position
-from UltiSnips.compatibility import vim_cursor, set_vim_cursor
-
 import vim
 from vim import error
 
-from UltiSnips.compatibility import as_unicode, as_vimencoding
+from UltiSnips.geometry import Position
+from UltiSnips.compatibility import vim_cursor, set_vim_cursor, \
+        as_unicode, as_vimencoding
 
 class VimBuffer(object):
     def __getitem__(self, idx):
@@ -55,6 +52,136 @@ class VimBuffer(object):
     cursor = property(**cursor())
 buf = VimBuffer()
 
+def text_to_vim(start, end, text):
+    lines = text.split('\n')
+
+    # Open any folds this might have created
+    buf.cursor = start
+    vim.command("normal zv")
+
+    new_end = _calc_end(lines, start)
+
+    before = buf[start.line][:start.col]
+    after = buf[end.line][end.col:]
+
+    new_lines = []
+    if len(lines):
+        new_lines.append(before + lines[0])
+        new_lines.extend(lines[1:])
+        new_lines[-1] += after
+    buf[start.line:end.line + 1] = new_lines
+
+    return new_end
+
+def escape(inp):
+    """ Creates a vim-friendly string from a group of
+    dicts, lists and strings.
+    """
+    def conv(obj):
+        if isinstance(obj, list):
+            rv = as_unicode('[' + ','.join(conv(o) for o in obj) + ']')
+        elif isinstance(obj, dict):
+            rv = as_unicode('{' + ','.join([
+                "%s:%s" % (conv(key), conv(value))
+                for key, value in obj.iteritems()]) + '}')
+        else:
+            rv = as_unicode('"%s"') % as_unicode(obj).replace('"', '\\"')
+        return rv
+    return conv(inp)
+
+def command(s):
+    return as_unicode(vim.command(as_vimencoding(s)))
+
+def eval(s):
+    rv = vim.eval(as_vimencoding(s))
+    if not isinstance(rv, (dict, list)):
+        return as_unicode(rv)
+    return rv
+
+def feedkeys(s, mode='n'):
+    """Wrapper around vim's feedkeys function. Mainly for convenience."""
+    command(as_unicode(r'call feedkeys("%s", "%s")') % (s, mode))
+
+def new_scratch_buffer(text):
+    """Create a new scratch buffer with the text given"""
+    command("botright new")
+    command("set ft=text")
+    command("set buftype=nofile")
+
+    vim.buffers[-1][:] = text.splitlines()
+
+def select(start, end):
+    """Select the span in Select mode"""
+
+    _unmap_select_mode_mapping()
+
+    delta = end - start
+    lineno, col = start.line, start.col
+
+    set_vim_cursor(lineno + 1, col)
+
+    # Case 1: Zero Length Tabstops
+    if delta.line == delta.col == 0:
+        if col == 0 or eval("mode()") != 'i' and \
+                col < len(buf[lineno]):
+            feedkeys(r"\<Esc>i")
+        else:
+            feedkeys(r"\<Esc>a")
+    else:
+        # Case 2a: Non zero length
+        # If a tabstop immediately starts with a newline, the selection
+        # must start after the last character in the current line. But if
+        # we are in insert mode and <Esc> out of it, we cannot go past the
+        # last character with move_one_right and therefore cannot
+        # visual-select this newline. We have to hack around this by adding
+        # an extra space which we can select.  Note that this problem could
+        # be circumvent by selecting the tab backwards (that is starting
+        # at the end); one would not need to modify the line for this. This creates other
+        # trouble though
+        if col >= len(buf[lineno]):
+            buf[lineno] += " "
+
+        if delta.line:
+            move_lines = "%ij" % delta.line
+        else:
+            move_lines = ""
+        # Depending on the current mode and position, we
+        # might need to move escape out of the mode and this
+        # will move our cursor one left
+        if col != 0 and eval("mode()") == 'i':
+            move_one_right = "l"
+        else:
+            move_one_right = ""
+
+        # After moving to the correct line, we go back to column 0
+        # and select right from there. Note that the we have to select
+        # one column less since Vim's visual selection is including the
+        # ending while Python slicing is excluding the ending.
+        inclusive = "inclusive" in eval("&selection")
+        if end.col == 0:
+            # Selecting should end at beginning of line -> Select the
+            # previous line till its end
+            do_select = "k$"
+            if not inclusive:
+                do_select += "j0"
+        elif end.col > 1:
+            do_select = "0%il" % (end.col-1 if inclusive else end.col)
+        else:
+            do_select = "0" if inclusive else "0l"
+
+        move_cmd = _LangMapTranslator().translate(
+            r"\<Esc>%sv%s%s\<c-g>" % (move_one_right, move_lines, do_select)
+        )
+
+        feedkeys(move_cmd)
+
+# Helper functions  {{{
+def _calc_end(lines, start):
+    if len(lines) == 1:
+        new_end = start + Position(0,len(lines[0]))
+    else:
+        new_end = Position(start.line + len(lines)-1, len(lines[-1]))
+    return new_end
 
 def _unmap_select_mode_mapping():
     """This function unmaps select mode mappings if so wished by the user.
@@ -117,144 +244,9 @@ def _unmap_select_mode_mapping():
                     # This case should be rare enough to not bother us
                     # though.
                     pass
-
-
-
-def select(start, end):
-    """Select the span in Select mode"""
-
-    _unmap_select_mode_mapping()
-
-    delta = end - start
-    lineno, col = start.line, start.col
-
-    set_vim_cursor(lineno + 1, col)
-
-    # Case 1: Zero Length Tabstops
-    if delta.line == delta.col == 0:
-        if col == 0 or eval("mode()") != 'i' and \
-                col < len(buf[lineno]):
-            feedkeys(r"\<Esc>i")
-        else:
-            feedkeys(r"\<Esc>a")
-    else:
-        # Case 2a: Non zero length
-        # If a tabstop immediately starts with a newline, the selection
-        # must start after the last character in the current line. But if
-        # we are in insert mode and <Esc> out of it, we cannot go past the
-        # last character with move_one_right and therefore cannot
-        # visual-select this newline. We have to hack around this by adding
-        # an extra space which we can select.  Note that this problem could
-        # be circumvent by selecting the tab backwards (that is starting
-        # at the end); one would not need to modify the line for this. This creates other
-        # trouble though
-        if col >= len(buf[lineno]):
-            buf[lineno] += " "
-
-        if delta.line:
-            move_lines = "%ij" % delta.line
-        else:
-            move_lines = ""
-        # Depending on the current mode and position, we
-        # might need to move escape out of the mode and this
-        # will move our cursor one left
-        if col != 0 and eval("mode()") == 'i':
-            move_one_right = "l"
-        else:
-            move_one_right = ""
-
-        # After moving to the correct line, we go back to column 0
-        # and select right from there. Note that the we have to select
-        # one column less since Vim's visual selection is including the
-        # ending while Python slicing is excluding the ending.
-        inclusive = "inclusive" in eval("&selection")
-        if end.col == 0:
-            # Selecting should end at beginning of line -> Select the
-            # previous line till its end
-            do_select = "k$"
-            if not inclusive:
-                do_select += "j0"
-        elif end.col > 1:
-            do_select = "0%il" % (end.col-1 if inclusive else end.col)
-        else:
-            do_select = "0" if inclusive else "0l"
-
-        move_cmd = LangMapTranslator().translate(
-            r"\<Esc>%sv%s%s\<c-g>" % (move_one_right, move_lines, do_select)
-        )
-
-        feedkeys(move_cmd)
-
-
-def _calc_end(lines, start):
-    if len(lines) == 1:
-        new_end = start + Position(0,len(lines[0]))
-    else:
-        new_end = Position(start.line + len(lines)-1, len(lines[-1]))
-    return new_end
-
-def text_to_vim(start, end, text):
-    lines = text.split('\n')
-
-    # Open any folds this might have created
-    debug("start: %r" % (start))
-    buf.cursor = start
-    vim.command("normal zv")
-
-    new_end = _calc_end(lines, start)
-
-    before = buf[start.line][:start.col]
-    after = buf[end.line][end.col:]
-
-    new_lines = []
-    if len(lines):
-        new_lines.append(before + lines[0])
-        new_lines.extend(lines[1:])
-        new_lines[-1] += after
-    debug("textov: %s, %r" % (type(new_lines), new_lines))
-    buf[start.line:end.line + 1] = new_lines
-
-    return new_end
-
-def escape(inp):
-    """ Creates a vim-friendly string from a group of
-    dicts, lists and strings.
-    """
-    def conv(obj):
-        if isinstance(obj, list):
-            rv = as_unicode('[' + ','.join(conv(o) for o in obj) + ']')
-        elif isinstance(obj, dict):
-            rv = as_unicode('{' + ','.join([
-                "%s:%s" % (conv(key), conv(value))
-                for key, value in obj.iteritems()]) + '}')
-        else:
-            rv = as_unicode('"%s"') % as_unicode(obj).replace('"', '\\"')
-        return rv
-    return conv(inp)
-
-def command(s):
-    return as_unicode(vim.command(as_vimencoding(s)))
-
-def eval(s):
-    rv = vim.eval(as_vimencoding(s))
-    if not isinstance(rv, (dict, list)):
-        return as_unicode(rv)
-    return rv
-
-def feedkeys(s, mode='n'):
-    """Wrapper around vim's feedkeys function. Mainly for convenience."""
-    debug("feedkeys: %s, %r" % (type(s), s))
-    command(as_unicode(r'call feedkeys("%s", "%s")') % (s, mode))
-
-def new_scratch_buffer(text):
-    """Create a new scratch buffer with the text given"""
-    command("botright new")
-    command("set ft=text")
-    command("set buftype=nofile")
-
-    vim.buffers[-1][:] = text.splitlines()
-
-class Real_LangMapTranslator(object):
+# End:  Helper functions  }}}
+# Helper classes  {{{
+class _Real_LangMapTranslator(object):
     """
     This carse for the Vim langmap option and basically reverses the mappings. This
     was the only solution to get UltiSnips to work nicely with langmap; other stuff
@@ -268,7 +260,6 @@ class Real_LangMapTranslator(object):
     _maps = {}
 
     def _create_translation(self, langmap):
-        debug("langmap: %s, %r" % (type(langmap), langmap))
         from_chars, to_chars = "", ""
         for c in langmap.split(','):
             if ";" in c:
@@ -278,9 +269,6 @@ class Real_LangMapTranslator(object):
             else:
                 from_chars += c[::2]
                 to_chars += c[1::2]
-
-        debug("from: %s, %r"% (type(from_chars), from_chars))
-        debug("to: %s, %r"% (type(to_chars), to_chars))
         self._maps[langmap] = (from_chars, to_chars)
 
     def translate(self, s):
@@ -296,17 +284,14 @@ class Real_LangMapTranslator(object):
             s = s.replace(f,t)
         return s
 
-class Dummy_LangMapTranslator(object):
+class _Dummy_LangMapTranslator(object):
     """
     If vim hasn't got the langmap compiled in, we never have to do anything.
     Then this class is used.
     """
     translate = lambda self, s: s
 
-LangMapTranslator = Real_LangMapTranslator
+_LangMapTranslator = _Real_LangMapTranslator
 if not int(eval('has("langmap")')):
-    LangMapTranslator = Dummy_LangMapTranslator
-
-
-
-
+    _LangMapTranslator = _Dummy_LangMapTranslator
+# End: Helper classes  }}}

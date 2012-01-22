@@ -28,6 +28,7 @@
 # TODO: visual line selection -> replace with more, less and == amount of lines
 # TODO: edit in mirror or transofmration -> kill element
 # TODO: insert/delete in mirror or transformation
+# TODO: fold -> dd empty line -> error
 import os
 import tempfile
 import unittest
