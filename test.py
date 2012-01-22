@@ -25,6 +25,7 @@
 # and will compare the resulting output to expected results.
 #
 #
+# TODO: more edits that cross boundaries between text objects
 # TODO: visual line selection -> replace with more, less and == amount of lines
 # TODO: edit in mirror or transofmration -> kill element
 # TODO: insert/delete in mirror or transformation
@@ -737,7 +738,6 @@ class TabStop_TSInDefaultText_ZeroLengthNested_OverwriteSecondJumpBackAndForward
     keys = "test" + EX + JF + "longertext" + JB + JF + JF + "End"
     wanted = """halongertextblEnd"""
 
-# TODO: Test for Python where initial text is longer than python code. Might lead to problems
 class TabStop_TSInDefaultNested_OverwriteOneJumpBackToOther(_VimTest):
     snippets = ("test", "hi ${1:this ${2:second ${3:third}}} $4")
     keys = "test" + EX + JF + "Hallo" + JF + "Ende"
@@ -1146,6 +1146,18 @@ snip.rv = "nothing"` `!p snip.rv = a
 ` End""")
     keys = """test""" + EX
     wanted = """hi nothing test End"""
+
+class PythonCode_LongerTextThanSource_Chars(_VimTest):
+    snippets = ("test", r"""hi`!p snip.rv = "a" * 100`end""")
+    keys = """test""" + EX + JF + "ups"
+    wanted = "hi" + 100*"a" + "endups"
+
+class PythonCode_LongerTextThanSource_MultiLine(_VimTest):
+    snippets = ("test", r"""hi`!p snip.rv = "a" * 100 + '\n'*100 + "a"*100`end""")
+    keys = """test""" + EX + JF + "ups"
+    wanted = "hi" + 100*"a" + 100*"\n" + 100*"a" + "endups"
+
+
 # End: New Implementation  #}}}
 # End: PythonCode Interpolation  #}}}
 # Mirrors  {{{#
@@ -1316,7 +1328,6 @@ class MirrorRealLifeExample_ExceptCorrectResult(_VimTest):
 }"""
 # End: Mirrors  #}}}
 # Transformations  {{{#
-# TODO: more edits that cross boundaries between text objects
 class Transformation_SimpleCase_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/foo/batzl/}")
     keys = "test" + EX + "hallo foo boy"
@@ -1501,7 +1512,6 @@ class Visual_CrossOneLine(_VimTest):
     keys = "bla blub\n  helloi" + ESC + "0k4lvjll" + EX + "test" + EX
     wanted = "bla hblub\n  hellobi"
 
-# TODO: with indent in default text
 class Visual_LineSelect_Simple(_VimTest):
     snippets = ("test", "h${VISUAL}b")
     keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX
@@ -1534,6 +1544,10 @@ class Visual_InDefaultText_IndentSpacesToTabstop_NoOverwrite1(_VimTest):
     snippets = ("test", "h${1:beforeaaa${VISUAL}aft}b")
     keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX + JF + "hi"
     wanted = "hbeforeaaahello\n\t  nice\n\t  worldaftbhi"
+class Visual_InDefaultText_IndentBeforeTabstop_NoOverwrite(_VimTest):
+    snippets = ("test", "hello\n\t ${1:${VISUAL}}\nend")
+    keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX + JF + "hi"
+    wanted = "hello\n\t hello\n\t nice\n\t world\nendhi"
 
 class Visual_LineSelect_WithTabStop(_VimTest):
     snippets = ("test", "beg\n\t${VISUAL}\n\t${1:here_we_go}\nend")
