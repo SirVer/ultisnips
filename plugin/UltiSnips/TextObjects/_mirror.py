@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from ._base import NoneditableTextObject
+from UltiSnips.TextObjects._base import NoneditableTextObject
 
 class Mirror(NoneditableTextObject):
     """
@@ -13,7 +13,7 @@ class Mirror(NoneditableTextObject):
         self._ts = tabstop
 
     def _update(self, done, not_done):
-        if self._ts._is_killed:  # TODO: private parts
+        if self._ts.is_killed:
             self.overwrite("")
             self._parent._del_child(self)
             return True

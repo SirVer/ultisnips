@@ -5,10 +5,9 @@ import re
 
 import vim
 
-from ..Compatibility import as_unicode
-from ..Util import IndentUtil
-
-from ._base import NoneditableTextObject
+from UltiSnips.Compatibility import as_unicode
+from UltiSnips.Util import IndentUtil
+from UltiSnips.TextObjects._base import NoneditableTextObject
 
 class Visual(NoneditableTextObject):
     """

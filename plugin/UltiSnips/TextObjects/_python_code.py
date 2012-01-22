@@ -9,14 +9,14 @@ import vim
 from UltiSnips.Compatibility import compatible_exec, as_unicode
 from UltiSnips.Util import IndentUtil
 
-from ._base import NoneditableTextObject
+from UltiSnips.TextObjects._base import NoneditableTextObject
 
 class _Tabs(object):
     def __init__(self, to):
         self._to = to
 
     def __getitem__(self, no):
-        ts = self._to._get_tabstop(self._to, int(no)) # TODO: private parts
+        ts = self._to._get_tabstop(self._to, int(no))
         if ts is None:
             return ""
         return ts.current_text

@@ -3,8 +3,6 @@
 
 import vim
 
-from ..debug import debug, echo_to_hierarchy
-
 from UltiSnips.Buffer import TextBuffer
 from UltiSnips.Compatibility import as_unicode
 from UltiSnips.Geometry import Span, Position
@@ -99,30 +97,6 @@ class TextObject(object):
         self._start.move(pivot, diff)
         self._end.move(pivot, diff)
 
-    def child_end_moved3(self, pivot, diff):
-        if not (self._parent):
-            return
-
-        self._parent._end.move(pivot, diff)
-        for c in self._parent._childs[self._parent._childs.index(self)+1:]:
-            c._move(pivot, diff)
-
-        self._parent.child_end_moved3(pivot, diff)
-
-    def _child_has_moved(self, idx, pivot, diff):
-        self._end.move(pivot, diff)
-
-        try:
-            for c in self._childs[idx+1:]:
-                c._move(pivot, diff)
-        except AttributeError: # TODO: fix this
-            pass
-
-        if self._parent:
-            self._parent._child_has_moved(
-                self._parent._childs.index(self), pivot, diff
-            )
-
 class EditableTextObject(TextObject):
     """
     This base class represents any object in the text
@@ -133,9 +107,6 @@ class EditableTextObject(TextObject):
 
         self._childs = []
         self._tabstops = {}
-
-        self._cts = 0
-        self._is_killed = False
 
     ##############
     # Properties #
@@ -159,59 +130,47 @@ class EditableTextObject(TextObject):
     # Private/Protected functions #
     ###############################
     def _do_edit(self, cmd):
-        debug("cmd: %r, self: %r" % (cmd, self))
-        ctype, line, col, char = cmd
-        assert( ('\n' not in char) or (char == "\n"))
+        ctype, line, col, text = cmd
+        assert( ('\n' not in text) or (text == "\n"))
         pos = Position(line, col)
 
         to_kill = set()
         new_cmds = []
         for c in self._childs:
-            start = c._start
-            end = c._end
-
-            debug("consider: c: %r" % (c))
-            if ctype == "D":
-                if char == "\n":
-                    delend = Position(line + 1, 0) # TODO: is this even needed?
-                else:
-                    delend = pos + Position(0, len(char))
-                # TODO: char is no longer true -> Text
-                # Case: this deletion removes the child
-                # Case: this edit command is completely for the child
-                if (start <= pos < end) and (start < delend <= end):
-                    debug("Case 2")
-                    if isinstance(c, NoneditableTextObject): # Erasing inside NonTabstop -> Kill element
+            if ctype == "I": # Insertion
+                if (c._start <= pos <= c._end):
+                    if isinstance(c, EditableTextObject):
+                        c._do_edit(cmd)
+                        return
+                    else:
+                        to_kill.add(c)
+            else: # Deletion
+                delend = pos + Position(0, len(text)) if text != "\n"\
+                        else Position(line + 1, 0)
+                if (c._start <= pos < c._end) and (c._start < delend <= c._end):
+                    # this edit command is completely for the child
+                    if isinstance(c, NoneditableTextObject):
                         to_kill.add(c)
                         continue
                     c._do_edit(cmd)
                     return
-                elif (pos < start and end <= delend) or (pos <= start and end < delend):
-                    debug("Case 1")
+                elif (pos < c._start and c._end <= delend) or (pos <= c._start and c._end < delend):
+                    # Case: this deletion removes the child
                     to_kill.add(c)
-                # Case: partially for us, partially for the child
-                elif (pos < start and (start < delend <= end)):
-                    debug("Case 3")
-                    my_text = char[:(start-pos).col]
-                    c_text = char[(start-pos).col:]
-                    debug("my_text: %r, c_text: %r" % (my_text, c_text))
+                elif (pos < c._start and (c._start < delend <= c._end)):
+                    # Case: partially for us, partially for the child
+                    my_text = text[:(c._start-pos).col]
+                    c_text = text[(c._start-pos).col:]
                     new_cmds.append((ctype, line, col, my_text))
                     new_cmds.append((ctype, line, col, c_text))
                     break
-                elif (delend >= end and (start <= pos < end)):
-                    debug("Case 3")
-                    c_text = char[(end-pos).col:]
-                    my_text = char[:(end-pos).col]
-                    debug("my_text: %r, c_text: %r" % (my_text, c_text))
+                elif (delend >= c._end and (c._start <= pos < c._end)):
+                    # Case: partially for us, partially for the child
+                    c_text = text[(c._end-pos).col:]
+                    my_text = text[:(c._end-pos).col]
                     new_cmds.append((ctype, line, col, c_text))
                     new_cmds.append((ctype, line, col, my_text))
                     break
-            elif ctype == "I": # Else would be okay as well
-                if isinstance(c, NoneditableTextObject): # TODO: make this nicer
-                    continue
-                if (start <= pos <= end):
-                    c._do_edit(cmd)
-                    return
 
         for c in to_kill:
             self._del_child(c)
@@ -220,20 +179,12 @@ class EditableTextObject(TextObject):
                 self._do_edit(c)
             return
 
-
         # We have to handle this ourselves
-        if ctype == "D": # TODO: code duplication
+        delta = Position(1, 0) if text == "\n" else Position(0, len(text))
+        if ctype == "D":
             assert(self._start != self._end) # Makes no sense to delete in empty textobject
-
-            if char == "\n":
-                delta = Position(-1, 0) # TODO: this feels somehow incorrect:
-            else:
-                delta = Position(0, -len(char))
-        else:
-            if char == "\n":
-                delta = Position(1, 0) # TODO: this feels somehow incorrect
-            else:
-                delta = Position(0, len(char))
+            delta.line *= -1
+            delta.col *= -1
         pivot = Position(line, col)
         self._child_has_moved(-1, pivot, delta)
 
@@ -242,6 +193,17 @@ class EditableTextObject(TextObject):
 
         for c in self._childs:
             c._move(pivot, diff)
+
+    def _child_has_moved(self, idx, pivot, diff):
+        self._end.move(pivot, diff)
+
+        for c in self._childs[idx+1:]:
+            c._move(pivot, diff)
+
+        if self._parent:
+            self._parent._child_has_moved(
+                self._parent._childs.index(self), pivot, diff
+            )
 
     def _get_next_tab(self, no):
         if not len(self._tabstops.keys()):
@@ -290,17 +252,6 @@ class EditableTextObject(TextObject):
 
         return max(possible_sol)
 
-    def _update(self, done, not_done):
-        """
-        Return False if you want to be called again
-        for this edit cycle. Otherwise return True.
-        """
-        if all((c in done) for c in self._childs):
-            assert(self not in done)
-
-            done.add(self)
-        return True
-
     def _get_tabstop(self, requester, no):
         if no in self._tabstops:
             return self._tabstops[no]
@@ -314,12 +265,25 @@ class EditableTextObject(TextObject):
         if self._parent and requester is not self._parent:
             return self._parent._get_tabstop(self, no)
 
+    def _update(self, done, not_done):
+        """
+        Update this object inside the Vim Buffer.
+
+        Return False if you want to be called again
+        for this edit cycle. Otherwise return True.
+        """
+        if all((c in done) for c in self._childs):
+            assert(self not in done)
+
+            done.add(self)
+        return True
+
     def _add_child(self,c):
         self._childs.append(c)
         self._childs.sort()
 
     def _del_child(self,c):
-        c._is_killed = True
+        c._parent = None
         self._childs.remove(c)
 
         # If this is a tabstop, delete it

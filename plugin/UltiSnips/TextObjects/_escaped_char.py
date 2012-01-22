@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from ._base import NoneditableTextObject
+from UltiSnips.TextObjects._base import NoneditableTextObject
 
 class EscapedChar(NoneditableTextObject):
     """

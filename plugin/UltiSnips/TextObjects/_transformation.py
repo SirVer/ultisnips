@@ -3,7 +3,7 @@
 
 import re
 
-from ._mirror import Mirror
+from UltiSnips.TextObjects._mirror import Mirror
 
 class _CleverReplace(object):
     """
@@ -67,7 +67,6 @@ class _CleverReplace(object):
         while m:
             start = m.start()
             end = _find_closingbrace(v,start+4)
-
             args = _part_conditional(v[start+4:end-1])
 
             rv = ""
@@ -112,7 +111,7 @@ class Transformation(Mirror):
             if "g" in token.options:
                 self._match_this_many = 0
             if "i" in token.options:
-                flags |=  re.IGNORECASE
+                flags |= re.IGNORECASE
 
         self._find = re.compile(token.search, flags | re.DOTALL)
         self._replace = _CleverReplace(token.replace)

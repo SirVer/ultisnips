@@ -4,10 +4,8 @@
 from UltiSnips.Geometry import Position
 from UltiSnips.Compatibility import vim_cursor, set_vim_cursor
 
-from ..debug import debug, echo_to_hierarchy # TODO remove all debug
-
-from ._base import EditableTextObject, NoneditableTextObject
-from ._parser import TOParser
+from UltiSnips.TextObjects._base import EditableTextObject, NoneditableTextObject
+from UltiSnips.TextObjects._parser import TOParser
 
 class SnippetInstance(EditableTextObject):
     """
@@ -22,6 +20,8 @@ class SnippetInstance(EditableTextObject):
             start = Position(0,0)
         if end is None:
             end = Position(0,0)
+
+        self._cts = 0
 
         self.locals = {"match" : last_re}
         self.globals = globals
@@ -50,7 +50,9 @@ class SnippetInstance(EditableTextObject):
             self._do_edit(cmd)
 
     def update_textobjects(self):
-        # Do our own edits; keep track of the Cursor
+        """Update the text objects that should change automagically after
+        the users edits have been replayed. This might also move the Cursor
+        """
         vc = _VimCursor(self)
 
         done = set()
@@ -61,7 +63,6 @@ class SnippetInstance(EditableTextObject):
                 for c in obj._childs:
                     _find_recursive(c)
             not_done.add(obj)
-
         _find_recursive(self)
 
         counter = 10
@@ -72,7 +73,6 @@ class SnippetInstance(EditableTextObject):
             counter -= 1
         if counter == 0:
             raise RuntimeError("Cyclic dependency in TextElements!")
-
 
         vc.to_vim()
         self._del_child(vc)
@@ -113,8 +113,9 @@ class SnippetInstance(EditableTextObject):
 
 
 class _VimCursor(NoneditableTextObject):
+    """Helper class to keep track of the Vim Cursor"""
+
     def __init__(self, parent):
-        """Helper class to keep track of the vim Cursor"""
         line, col = vim_cursor()
         NoneditableTextObject.__init__(
             self, parent, Position(line-1, col), Position(line-1, col)
@@ -123,6 +124,3 @@ class _VimCursor(NoneditableTextObject):
     def to_vim(self):
         assert(self._start == self._end)
         set_vim_cursor(self._start.line + 1, self._start.col)
-
-
-

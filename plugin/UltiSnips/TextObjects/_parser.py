@@ -2,18 +2,17 @@
 # encoding: utf-8
 
 from UltiSnips.Geometry import Position
-from ._lexer import tokenize, EscapeCharToken, VisualToken, \
+from UltiSnips.TextObjects._lexer import tokenize, EscapeCharToken, VisualToken, \
     TransformationToken, TabStopToken, MirrorToken, PythonCodeToken, \
     VimLCodeToken, ShellCodeToken
-
-from ._escaped_char import EscapedChar
-from ._mirror import Mirror
-from ._python_code import PythonCode
-from ._shell_code import ShellCode
-from ._tabstop import TabStop
-from ._transformation import Transformation
-from ._viml_code import VimLCode
-from ._visual import Visual
+from UltiSnips.TextObjects._escaped_char import EscapedChar
+from UltiSnips.TextObjects._mirror import Mirror
+from UltiSnips.TextObjects._python_code import PythonCode
+from UltiSnips.TextObjects._shell_code import ShellCode
+from UltiSnips.TextObjects._tabstop import TabStop
+from UltiSnips.TextObjects._transformation import Transformation
+from UltiSnips.TextObjects._viml_code import VimLCode
+from UltiSnips.TextObjects._visual import Visual
 
 __all__ = ["TOParser"]
 

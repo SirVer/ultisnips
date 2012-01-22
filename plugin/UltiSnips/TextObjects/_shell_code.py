@@ -6,7 +6,7 @@ import subprocess
 import stat
 import tempfile
 
-from ._base import NoneditableTextObject
+from UltiSnips.TextObjects._base import NoneditableTextObject
 
 class ShellCode(NoneditableTextObject):
     def __init__(self, parent, token):

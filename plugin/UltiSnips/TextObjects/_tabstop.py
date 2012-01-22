@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from ._base import EditableTextObject
+from UltiSnips.TextObjects._base import EditableTextObject
 
 __all__ = ['EditableTextObject']
 
@@ -15,12 +15,16 @@ class TabStop(EditableTextObject):
             self._no = token
             EditableTextObject.__init__(self, parent, start, end)
         else:
-            EditableTextObject.__init__(self, parent, token)
             self._no = token.no
-
+            EditableTextObject.__init__(self, parent, token)
         parent._tabstops[self._no] = self
 
+    @property
     def no(self):
         return self._no
-    no = property(no)
+
+    @property
+    def is_killed(self):
+        return self._parent is None
+
 

@@ -4,8 +4,7 @@
 import vim
 
 from UltiSnips.Compatibility import as_unicode
-
-from ._base import NoneditableTextObject
+from UltiSnips.TextObjects._base import NoneditableTextObject
 
 class VimLCode(NoneditableTextObject):
     def __init__(self, parent, token):
