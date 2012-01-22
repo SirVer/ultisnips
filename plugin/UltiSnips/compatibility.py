@@ -39,7 +39,7 @@ if sys.version_info >= (3,0):
             return s.decode("utf-8")
         return str(s)
 
-    def make_suitable_for_vim(s):
+    def as_vimencoding(s):
         return s
 else:
     from UltiSnips.compatibility_py2 import *
@@ -69,8 +69,6 @@ else:
             return s.decode("utf-8")
         return unicode(s)
 
-    def make_suitable_for_vim(s):
-        if isinstance(s, list):
-            return [ a.encode("utf-8") for a in s ]
+    def as_vimencoding(s):
         return s.encode("utf-8")
 

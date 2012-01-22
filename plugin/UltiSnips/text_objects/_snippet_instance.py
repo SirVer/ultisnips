@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 from UltiSnips.geometry import Position
-from UltiSnips.compatibility import vim_cursor, set_vim_cursor
+import UltiSnips._vim as _vim
 
 from UltiSnips.text_objects._base import EditableTextObject, NoneditableTextObject
 from UltiSnips.text_objects._parser import TOParser
@@ -116,11 +116,12 @@ class _VimCursor(NoneditableTextObject):
     """Helper class to keep track of the Vim Cursor"""
 
     def __init__(self, parent):
-        line, col = vim_cursor()
+        line, col = _vim.buf.cursor
         NoneditableTextObject.__init__(
             self, parent, Position(line-1, col), Position(line-1, col)
         )
 
     def to_vim(self):
         assert(self._start == self._end)
-        set_vim_cursor(self._start.line + 1, self._start.col)
+        _vim.buf.cursor = self._start.line + 1, self._start.col
+

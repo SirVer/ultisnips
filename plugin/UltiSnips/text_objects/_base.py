@@ -3,9 +3,10 @@
 
 import vim
 
-from UltiSnips.buffer import TextBuffer
-from UltiSnips.compatibility import as_unicode
+import UltiSnips._vim as _vim
 from UltiSnips.geometry import Position
+
+from ..debug import debug
 
 __all__ = ["TextObject", "EditableTextObject", "NoneditableTextObject"]
 
@@ -38,8 +39,10 @@ class TextObject(object):
         # We explicitly do not want to move our childs around here as we
         # either have non or we are replacing text initially which means we do
         # not want to mess with their positions
+        debug("initial_text: %s, %s" % (self._initial_text, type(self._initial_text)))
         old_end = self._end
-        self._end = TextBuffer(gtext or self._initial_text).to_vim(self._start, self._end)
+        self._end = _vim.text_to_vim(
+                self._start, self._end, gtext or self._initial_text)
         if self._parent:
             self._parent._child_has_moved(
                 self._parent._childs.index(self), min(old_end, self._end),
@@ -66,16 +69,13 @@ class TextObject(object):
     ##############
     @property
     def current_text(self):
-        buf = vim.current.buffer
-
         if self._start.line == self._end.line:
-            return as_unicode(buf[self._start.line])[self._start.col:self._end.col]
+            return _vim.buf[self._start.line][self._start.col:self._end.col]
         else:
-            lines = []
-            lines.append(as_unicode(buf[self._start.line])[self._start.col:])
-            lines.extend(map(as_unicode, buf[self._start.line+1:self._end.line]))
-            lines.append(as_unicode(buf[self._end.line])[:self._end.col])
-            return as_unicode('\n').join(lines)
+            lines = [_vim.buf[self._start.line][self._start.col:]]
+            lines.extend(_vim.buf[self._start.line+1:self._end.line])
+            lines.append(_vim.buf[self._end.line][:self._end.col])
+            return '\n'.join(lines)
 
     def start(self):
         return self._start

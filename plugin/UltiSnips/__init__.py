@@ -4,8 +4,6 @@
 # TODO: Currently Caches whole buffer. Is this really needed?
 # TODO: Currently searches whole buffer. Is this really needed?
 # TODO: hijack two marks instead of running through the whole buffer
-
-import edit_distance
 from debug import debug, echo_to_hierarchy
 
 from functools import wraps
@@ -15,31 +13,12 @@ import os
 import re
 import traceback
 
-import vim
-
+from UltiSnips.compatibility import as_unicode
+from UltiSnips.edit_distance import edit_script
 from UltiSnips.geometry import Position
-from UltiSnips.compatibility import make_suitable_for_vim, set_vim_cursor, vim_cursor
-from UltiSnips.text_objects import *
-from UltiSnips.buffer import TextBuffer
-from UltiSnips.util import IndentUtil, vim_string, as_unicode
-from UltiSnips.langmap import LangMapTranslator
-
-# The following lines silence DeprecationWarnings. They are raised
-# by python2.6 for vim.error (which is a string that is used as an exception,
-# which is deprecated since 2.5 and will no longer work in 2.7. Let's hope
-# vim gets this fixed before)
-import sys
-if (2,6) <= sys.version_info[:2] < (3,0):
-    import warnings
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
-
-def _to_scratch_buffer(text):
-    """Create a new scratch buffer with the text given"""
-    vim.command("botright new")
-    vim.command("set ft=text")
-    vim.command("set buftype=nofile")
-
-    vim.buffers[-1][:] = text.splitlines()
+from UltiSnips.text_objects import SnippetInstance
+from UltiSnips.util import IndentUtil
+import UltiSnips._vim as _vim
 
 def err_to_scratch_buffer(f):
     @wraps(f)
@@ -56,147 +35,8 @@ Following is the full stack trace:
 """
             s += traceback.format_exc()
             self.leaving_window() # Vim sends no WinLeave msg here.
-            _to_scratch_buffer(s)
+            _vim.new_scratch_buffer(s)
     return wrapper
-
-def feedkeys(s, mode='n'):
-    """Wrapper around vim's feedkeys function. Mainly for convenience."""
-    vim.command(r'call feedkeys("%s", "%s")' % (s, mode))
-
-def echom(mes, *args):
-    mes = mes % args
-    vim.command('echom %s' % vim_string(mes))
-
-# TODO: all the vim wrapper functions should go into one module
-# TODO: this function should be moved
-def select(start, end):
-    _unmap_select_mode_mapping()
-
-    delta = end - start
-    lineno, col = start.line, start.col
-
-    set_vim_cursor(lineno + 1, col)
-
-    # Case 1: Zero Length Tabstops
-    if delta.line == delta.col == 0:
-        if col == 0 or vim.eval("mode()") != 'i' and \
-                col < len(as_unicode(vim.current.buffer[lineno])):
-            feedkeys(r"\<Esc>i")
-        else:
-            feedkeys(r"\<Esc>a")
-    else:
-        # Case 2a: Non zero length
-        # If a tabstop immediately starts with a newline, the selection
-        # must start after the last character in the current line. But if
-        # we are in insert mode and <Esc> out of it, we cannot go past the
-        # last character with move_one_right and therefore cannot
-        # visual-select this newline. We have to hack around this by adding
-        # an extra space which we can select.  Note that this problem could
-        # be circumvent by selecting the tab backwards (that is starting
-        # at the end); one would not need to modify the line for this. This creates other
-        # trouble though
-        if col >= len(as_unicode(vim.current.buffer[lineno])):
-            vim.current.buffer[lineno] += " "
-
-        if delta.line:
-            move_lines = "%ij" % delta.line
-        else:
-            move_lines = ""
-        # Depending on the current mode and position, we
-        # might need to move escape out of the mode and this
-        # will move our cursor one left
-        if col != 0 and vim.eval("mode()") == 'i':
-            move_one_right = "l"
-        else:
-            move_one_right = ""
-
-        # After moving to the correct line, we go back to column 0
-        # and select right from there. Note that the we have to select
-        # one column less since Vim's visual selection is including the
-        # ending while Python slicing is excluding the ending.
-        inclusive = "inclusive" in vim.eval("&selection")
-        if end.col == 0:
-            # Selecting should end at beginning of line -> Select the
-            # previous line till its end
-            do_select = "k$"
-            if not inclusive:
-                do_select += "j0"
-        elif end.col > 1:
-            do_select = "0%il" % (end.col-1 if inclusive else end.col)
-        else:
-            do_select = "0" if inclusive else "0l"
-
-        move_cmd = LangMapTranslator().translate(
-            r"\<Esc>%sv%s%s\<c-g>" % (move_one_right, move_lines, do_select)
-        )
-
-        feedkeys(move_cmd)
-
-
-# TODO: this function should be moved
-def _unmap_select_mode_mapping():
-    """This function unmaps select mode mappings if so wished by the user.
-    Removes select mode mappings that can actually be typed by the user
-    (ie, ignores things like <Plug>).
-    """
-    if int(vim.eval("g:UltiSnipsRemoveSelectModeMappings")):
-        ignores = vim.eval("g:UltiSnipsMappingsToIgnore") + ['UltiSnips']
-
-        for option in ("<buffer>", ""):
-            # Put all smaps into a var, and then read the var
-            vim.command(r"redir => _tmp_smaps | silent smap %s " % option +
-                        "| redir END")
-
-            # Check if any mappings where found
-            all_maps = list(filter(len, vim.eval(r"_tmp_smaps").splitlines()))
-            if (len(all_maps) == 1 and all_maps[0][0] not in " sv"):
-                # "No maps found". String could be localized. Hopefully
-                # it doesn't start with any of these letters in any
-                # language
-                continue
-
-            # Only keep mappings that should not be ignored
-            maps = [m for m in all_maps if
-                        not any(i in m for i in ignores) and len(m.strip())]
-
-            for m in maps:
-                # The first three chars are the modes, that might be listed.
-                # We are not interested in them here.
-                trig = m[3:].split()[0]
-
-                # The bar separates commands
-                if trig[-1] == "|":
-                    trig = trig[:-1] + "<Bar>"
-
-                # Special ones
-                if trig[0] == "<":
-                    add = False
-                    # Only allow these
-                    for valid in ["Tab", "NL", "CR", "C-Tab", "BS"]:
-                        if trig == "<%s>" % valid:
-                            add = True
-                    if not add:
-                        continue
-
-                # UltiSnips remaps <BS>. Keep this around.
-                if trig == "<BS>":
-                    continue
-
-                # Actually unmap it
-                try:
-                    cmd = ("silent! sunmap %s %s") % (option, trig)
-                    vim.command(cmd)
-                except:
-                    # Bug 908139: ignore unmaps that fail because of
-                    # unprintable characters. This is not ideal because we
-                    # will not be able to unmap lhs with any unprintable
-                    # character. If the lhs stats with a printable
-                    # character this will leak to the user when he tries to
-                    # type this character as a first in a selected tabstop.
-                    # This case should be rare enough to not bother us
-                    # though.
-                    pass
-
 
 class _SnippetDictionary(object):
     def __init__(self, *args, **kwargs):
@@ -286,7 +126,7 @@ class _SnippetsFileParser(object):
         self._idx = 0
 
     def _error(self, msg):
-        fn = vim.eval("""fnamemodify(%s, ":~:.")""" % vim_string(self._fn))
+        fn = _vim.eval("""fnamemodify(%s, ":~:.")""" % _vim.escape(self._fn))
         self._sm._error("%s in %s(%d)" % (msg, fn, self._idx + 1))
 
     def _line(self):
@@ -588,83 +428,6 @@ class Snippet(object):
         return si
 
 
-class VimState(object):
-    def __init__(self):
-        self._abs_pos = None
-        self._moved = Position(0,0)
-
-        self._lines = None
-        self._dlines = None
-        self._cols = None
-        self._dcols = None
-        self._cline = None
-        self._lline = None
-        self._text_changed = None
-
-    def update(self):
-        line, col = vim_cursor()
-        line -= 1
-        abs_pos = Position(line,col)
-        if self._abs_pos:
-            self._moved = abs_pos - self._abs_pos
-        self._abs_pos = abs_pos
-
-        # Update buffer infos
-        cols = len(as_unicode(vim.current.buffer[line]))
-        if self._cols:
-            self._dcols = cols - self._cols
-        self._cols = cols
-
-        lines = len(vim.current.buffer)
-        if self._lines:
-            self._dlines = lines - self._lines
-        self._lines = lines
-
-        # Check if the buffer has changed in any ways
-        self._text_changed = False
-        # does it have more lines?
-        if self._dlines:
-            self._text_changed = True
-        # did we stay in the same line and it has more columns now?
-        elif not self.moved.line and self._dcols:
-            self._text_changed = True
-        # If the length didn't change but we moved a column, check if
-        # the char under the cursor has changed (might be one char tab).
-        elif self.moved.col == 1:
-            self._text_changed = self._cline != as_unicode(vim.current.buffer[line])
-        self._lline = self._cline
-        self._cline = as_unicode(vim.current.buffer[line])
-
-    def buf_changed(self):
-        return self._text_changed
-    buf_changed = property(buf_changed)
-
-    def pos(self):
-        return self._abs_pos
-    pos = property(pos)
-
-    def ppos(self):
-        if not self.has_moved:
-            return self.pos
-        return self.pos - self.moved
-    ppos = property(ppos)
-
-    def moved(self):
-        return self._moved
-    moved = property(moved)
-
-    def has_moved(self):
-        return bool(self._moved.line or self._moved.col)
-    has_moved = property(has_moved)
-
-    def last_line(self):
-        return self._lline
-    last_line = property(last_line)
-
-    ###########################
-    # Private functions below #
-    ###########################
-
 from debug import debug
 
 class VisualContentPreserver(object):
@@ -676,12 +439,12 @@ class VisualContentPreserver(object):
         self._text = as_unicode("")
 
     def conserve(self):
-        sl, sc = map(int, (vim.eval("""line("'<")"""), vim.eval("""virtcol("'<")""")))
-        el, ec = map(int, (vim.eval("""line("'>")"""), vim.eval("""virtcol("'>")""")))
-        self._mode = vim.eval("visualmode()")
+        sl, sc = map(int, (_vim.eval("""line("'<")"""), _vim.eval("""virtcol("'<")""")))
+        el, ec = map(int, (_vim.eval("""line("'>")"""), _vim.eval("""virtcol("'>")""")))
+        self._mode = _vim.eval("visualmode()")
 
         def _vim_line_with_eol(ln):
-            return as_unicode(vim.current.buffer[ln] + '\n')
+            return _vim.buf[ln] + '\n'
 
         if sl == el:
             text = _vim_line_with_eol(sl-1)[sc-1:ec]
@@ -704,7 +467,6 @@ class VisualContentPreserver(object):
 
 class SnippetManager(object):
     def __init__(self):
-        self._vstate = VimState()
         self._supertab_keys = None
         self._csnippets = []
         self._cached_offending_vim_options = {}
@@ -713,7 +475,7 @@ class SnippetManager(object):
 
     @err_to_scratch_buffer
     def reset(self, test_error=False):
-        self._lvb = TextBuffer("")
+        self._lvb = []
         self._test_error = test_error
         self._snippets = {}
         self._visual_content = VisualContentPreserver()
@@ -740,7 +502,7 @@ class SnippetManager(object):
 
     @err_to_scratch_buffer
     def list_snippets(self):
-        before, after = self._get_before_after()
+        before, after = _vim.buf.current_line_splitted
         snippets = self._snips(before, True)
 
         # Sort snippets alphabetically
@@ -801,7 +563,7 @@ class SnippetManager(object):
         if globals is None:
             globals = {}
 
-        before, after = self._get_before_after()
+        before, after = _vim.buf.current_line_splitted
         snip = Snippet(trigger, value, descr, options, globals)
 
         if not trigger or snip.matches(before):
@@ -826,12 +588,7 @@ class SnippetManager(object):
 
     @err_to_scratch_buffer
     def cursor_moved(self):
-        debug("#### CURSOR MOVED")
-        self._vstate.update()
-        debug("vim.eval('mode()'): %r" % (vim.eval('mode()')))
-        debug("in cursor_moved self._vstate.pos: %r" % (self._vstate.pos))
-
-        if vim.eval("mode()") not in 'in':
+        if _vim.eval("mode()") not in 'in':
             return
 
         if self._ignore_movements:
@@ -841,8 +598,8 @@ class SnippetManager(object):
         if self._csnippets:
             debug("before editing")
             echo_to_hierarchy(self._csnippets[-1])
-            ct = map(as_unicode, vim.current.buffer)
-            lt = map(as_unicode, self._lvb[:])
+            ct = _vim.buf[:]
+            lt = self._lvb[:]
 
             lt_span = [0, len(lt)]
             ct_span = [0, len(ct)]
@@ -873,7 +630,7 @@ class SnippetManager(object):
             lt = '\n'.join(lt[lt_span[0]:lt_span[1]])
             ct = '\n'.join(ct[ct_span[0]:ct_span[1]])
 
-            es = edit_distance.edit_script(lt, ct, initial_line)
+            es = edit_script(lt, ct, initial_line)
             debug("es: %s" % (es,))
             self._csnippets[0].replay_user_edits(es)
 
@@ -882,8 +639,7 @@ class SnippetManager(object):
             debug("Before edits!")
             echo_to_hierarchy(self._csnippets[-1])
             self._csnippets[0].update_textobjects()
-            self._lvb = TextBuffer('\n'.join(vim.current.buffer))
-        self._vstate.update()
+            self._lvb = _vim.buf[:]
 
     def leaving_window(self):
         """
@@ -891,7 +647,6 @@ class SnippetManager(object):
         snippets must be properly terminated
         """
         debug("#### LEAVING WINDOW")
-        self._vstate.update()
         while len(self._csnippets):
             self._current_snippet_is_done()
         self._reinit()
@@ -901,19 +656,19 @@ class SnippetManager(object):
     # Private/Protect Functions Below #
     ###################################
     def _error(self, msg):
-        msg = vim_string("UltiSnips: " + msg)
+        msg = _vim.escape("UltiSnips: " + msg)
         if self._test_error:
             msg = msg.replace('"', r'\"')
             msg = msg.replace('|', r'\|')
-            vim.command("let saved_pos=getpos('.')")
-            vim.command("$:put =%s" % msg)
-            vim.command("call setpos('.', saved_pos)")
+            _vim.command("let saved_pos=getpos('.')")
+            _vim.command("$:put =%s" % msg)
+            _vim.command("call setpos('.', saved_pos)")
         elif False:
-            vim.command("echohl WarningMsg")
-            vim.command("echomsg %s" % msg)
-            vim.command("echohl None")
+            _vim.command("echohl WarningMsg")
+            _vim.command("echomsg %s" % msg)
+            _vim.command("echohl None")
         else:
-            vim.command("echoerr %s" % msg)
+            _vim.command("echoerr %s" % msg)
 
     def _reinit(self):
         self._ctab = None
@@ -921,11 +676,12 @@ class SnippetManager(object):
 
     def _check_if_still_inside_snippet(self):
         # Did we leave the snippet with this movement?
-        if self._cs and not self._cs.start <= self._vstate.pos <= self._cs.end:
+        line, col = _vim.buf.cursor
+        if self._cs and (
+            not self._cs.start <= Position(line - 1, col) <= self._cs.end
+        ):
             self._current_snippet_is_done()
-
             self._reinit()
-
             self._check_if_still_inside_snippet()
 
     def _current_snippet_is_done(self):
@@ -940,11 +696,10 @@ class SnippetManager(object):
         if self._cs:
             self._ctab = self._cs.select_next_tab(backwards)
             if self._ctab:
-                select(self._ctab.start, self._ctab.end)
+                _vim.select(self._ctab.start, self._ctab.end)
                 jumped = True
                 if self._ctab.no == 0:
                     self._current_snippet_is_done()
-                self._vstate.update()
             else:
                 # This really shouldn't happen, because a snippet should
                 # have been popped when its final tabstop was used.
@@ -963,10 +718,10 @@ class SnippetManager(object):
             feedkey = None
         mode = "n"
         if not self._supertab_keys:
-            if vim.eval("exists('g:SuperTabMappingForward')") != "0":
+            if _vim.eval("exists('g:SuperTabMappingForward')") != "0":
                 self._supertab_keys = (
-                    vim.eval("g:SuperTabMappingForward"),
-                    vim.eval("g:SuperTabMappingBackward"),
+                    _vim.eval("g:SuperTabMappingForward"),
+                    _vim.eval("g:SuperTabMappingBackward"),
                 )
             else:
                 self._supertab_keys = [ '', '' ]
@@ -982,20 +737,7 @@ class SnippetManager(object):
                 break
 
         if feedkey:
-            feedkeys(feedkey, mode)
-
-    def _get_before_after(self):
-        """ Returns the text before and after the cursor as a
-        tuple.
-        """
-        lineno, col = vim.current.window.cursor  # Note: we want byte position here
-
-        line = vim.current.line
-
-        # Get the word to the left of the current edit position
-        before, after = as_unicode(line[:col]), as_unicode(line[col:])
-
-        return before, after
+            _vim.feedkeys(feedkey, mode)
 
     def _snips(self, before, possible):
         """ Returns all the snippets for the given text
@@ -1031,25 +773,23 @@ class SnippetManager(object):
         display = [ "%i: %s" % (i+1,s.description) for i,s in enumerate(snippets)]
 
         try:
-            # let vim_string format it as a vim list
-            rv = vim.eval(make_suitable_for_vim(as_unicode("inputlist(%s)") % vim_string(display)))
+            rv = _vim.eval("inputlist(%s)" % _vim.escape(display))
             if rv is None or rv == '0':
                 return None
             rv = int(rv)
             if rv > len(snippets):
                 rv = len(snippets)
             return snippets[rv-1]
-        except vim.error as e:
+        except _vim.error as e:
             if str(e) == 'invalid expression':
                 return None
             raise
 
     def _do_snippet(self, snippet, before, after):
         """ Expands the given snippet, and handles everything
-        that needs to be done with it. 'before' and 'after' should
-        come from _get_before_after.
+        that needs to be done with it.
         """
-        lineno, col = vim_cursor()
+        lineno, col = _vim.buf.cursor
         # Adjust before, maybe the trigger is not the complete word
 
         text_before = before
@@ -1074,12 +814,12 @@ class SnippetManager(object):
             self._visual_content.reset()
 
         self._ignore_movements = True
-        self._lvb = TextBuffer('\n'.join(vim.current.buffer))
+        self._lvb = _vim.buf[:]
 
         self._jump()
 
     def _try_expand(self):
-        before, after = self._get_before_after()
+        before, after = _vim.buf.current_line_splitted
         if not before:
             return False
         snippets = self._snips(before, False)
@@ -1103,14 +843,14 @@ class SnippetManager(object):
         # Care for textwrapping
         if not snippet.keep_formatoptions_unchanged:
             self._cached_offending_vim_options["fo"] = ''.join(
-                c for c in vim.eval("&fo") if c in "cta"
+                c for c in _vim.eval("&fo") if c in "cta"
             )
-            for c in "cta": vim.command("set fo-=%s" % c)
+            for c in "cta": _vim.command("set fo-=%s" % c)
 
     def _reset_offending_vim_options(self):
         # Textwrapping
         for c in self._cached_offending_vim_options.pop("fo", []):
-            vim.command("set fo+=%s" % c)
+            _vim.command("set fo+=%s" % c)
 
     def _cs(self):
         if not len(self._csnippets):
@@ -1133,14 +873,14 @@ class SnippetManager(object):
         the filetype.
         """
 
-        snippet_dirs = vim.eval("g:UltiSnipsSnippetDirectories")
+        snippet_dirs = _vim.eval("g:UltiSnipsSnippetDirectories")
         base_snippets = os.path.realpath(os.path.join(__file__, "../../../UltiSnips"))
         ret = []
 
-        paths = vim.eval("&runtimepath").split(',')
+        paths = _vim.eval("&runtimepath").split(',')
 
-        if vim.eval("exists('g:UltiSnipsDontReverseSearchPath')") == "0" or \
-           vim.eval("g:UltiSnipsDontReverseSearchPath") == "0":
+        if _vim.eval("exists('g:UltiSnipsDontReverseSearchPath')") == "0" or \
+           _vim.eval("g:UltiSnipsDontReverseSearchPath") == "0":
             paths = paths[::-1]
 
         for rtp in paths:
@@ -1160,7 +900,7 @@ class SnippetManager(object):
 
     def _filetypes(self, dotft=None):
         if dotft is None:
-            dotft = vim.eval("&filetype")
+            dotft = _vim.eval("&filetype")
 
         fts = dotft.split(".") + [ "all" ]
         return [ft for ft in fts[::-1] if ft]
@@ -1172,7 +912,7 @@ class SnippetManager(object):
 
     def file_to_edit(self, ft=None):
         """ Gets a file to edit based on the given filetype.
-        If no filetype is given, uses the current filetype from vim.
+        If no filetype is given, uses the current filetype from Vim.
 
         Checks 'g:UltiSnipsSnippetsDir' and uses it if it exists
         If a non-shipped file already exists, it uses it.
@@ -1185,15 +925,15 @@ class SnippetManager(object):
         existing = self.base_snippet_files_for(ft, False)
         filename = ft + ".snippets"
 
-        if vim.eval("exists('g:UltiSnipsSnippetsDir')") == "1":
-            snipdir = vim.eval("g:UltiSnipsSnippetsDir")
+        if _vim.eval("exists('g:UltiSnipsSnippetsDir')") == "1":
+            snipdir = _vim.eval("g:UltiSnipsSnippetsDir")
             edit = os.path.join(snipdir, filename)
         elif existing:
             edit = existing[-1] # last sourced/highest priority
         else:
-            home = vim.eval("$HOME")
-            rtp = vim.eval("&rtp").split(",")
-            snippet_dirs = ["UltiSnips"] + vim.eval("g:UltiSnipsSnippetDirectories")
+            home = _vim.eval("$HOME")
+            rtp = _vim.eval("&rtp").split(",")
+            snippet_dirs = ["UltiSnips"] + _vim.eval("g:UltiSnipsSnippetDirectories")
             us = snippet_dirs[-1]
 
             path = os.path.join(home, ".vim", us)
@@ -1238,8 +978,8 @@ class SnippetManager(object):
 
 
     def _needs_update(self, ft):
-        do_hash = vim.eval('exists("g:UltiSnipsDoHash")') == "0" \
-                or vim.eval("g:UltiSnipsDoHash") != "0"
+        do_hash = _vim.eval('exists("g:UltiSnipsDoHash")') == "0" \
+                or _vim.eval("g:UltiSnipsDoHash") != "0"
 
         if ft not in self._snippets:
             return True

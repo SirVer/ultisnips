@@ -3,9 +3,7 @@
 
 import re
 
-import vim
-
-from UltiSnips.compatibility import as_unicode
+import UltiSnips._vim as _vim
 from UltiSnips.util import IndentUtil
 from UltiSnips.text_objects._base import NoneditableTextObject
 
@@ -33,7 +31,7 @@ class Visual(NoneditableTextObject):
     def _update(self, done, not_done):
         if self._mode != "v":
             # Keep the indent for Line/Block Selection
-            text_before = as_unicode(vim.current.buffer[self.start.line])[:self.start.col]
+            text_before = _vim.buf[self.start.line][:self.start.col]
             indent = self.__REPLACE_NON_WS.sub(" ", text_before)
             iu = IndentUtil()
             indent = iu.indent_to_spaces(indent)

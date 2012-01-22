@@ -4,8 +4,8 @@
 import os
 import re
 
-import vim
 
+import UltiSnips._vim as _vim
 from UltiSnips.compatibility import compatible_exec, as_unicode
 from UltiSnips.util import IndentUtil
 
@@ -93,12 +93,12 @@ class SnippetUtil(object):
     @property
     def fn(self):
         """ The filename. """
-        return vim.eval('expand("%:t")') or ""
+        return _vim.eval('expand("%:t")') or ""
 
     @property
     def basename(self):
         """ The filename without extension. """
-        return vim.eval('expand("%:t:r")') or ""
+        return _vim.eval('expand("%:t:r")') or ""
 
     @property
     def ft(self):
@@ -135,11 +135,11 @@ class SnippetUtil(object):
         return self._c
 
     def opt(self, option, default=None):
-        """ Gets a vim variable. """
-        if vim.eval("exists('%s')" % option) == "1":
+        """ Gets a Vim variable. """
+        if _vim.eval("exists('%s')" % option) == "1":
             try:
-                return vim.eval(option)
-            except vim.error:
+                return _vim.eval(option)
+            except _vim.error:
                 pass
         return default
 
@@ -183,7 +183,7 @@ class PythonCode(NoneditableTextObject):
         NoneditableTextObject.__init__(self, parent, token)
 
     def _update(self, done, not_done):
-        path = vim.eval('expand("%")')
+        path = _vim.eval('expand("%")')
         if path is None:
             path = ""
         fn = os.path.basename(path)
