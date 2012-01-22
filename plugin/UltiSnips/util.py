@@ -5,7 +5,7 @@ import os
 import types
 import vim
 
-from UltiSnips.Compatibility import as_unicode
+from UltiSnips.compatibility import as_unicode
 
 def vim_string(inp):
     """ Creates a vim-friendly string from a group of

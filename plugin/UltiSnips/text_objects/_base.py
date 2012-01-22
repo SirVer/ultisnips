@@ -3,9 +3,9 @@
 
 import vim
 
-from UltiSnips.Buffer import TextBuffer
-from UltiSnips.Compatibility import as_unicode
-from UltiSnips.Geometry import Position
+from UltiSnips.buffer import TextBuffer
+from UltiSnips.compatibility import as_unicode
+from UltiSnips.geometry import Position
 
 __all__ = ["TextObject", "EditableTextObject", "NoneditableTextObject"]
 

@@ -17,12 +17,12 @@ import traceback
 
 import vim
 
-from UltiSnips.Geometry import Position
-from UltiSnips.Compatibility import make_suitable_for_vim, set_vim_cursor, vim_cursor
-from UltiSnips.TextObjects import *
-from UltiSnips.Buffer import TextBuffer
-from UltiSnips.Util import IndentUtil, vim_string, as_unicode
-from UltiSnips.Langmap import LangMapTranslator
+from UltiSnips.geometry import Position
+from UltiSnips.compatibility import make_suitable_for_vim, set_vim_cursor, vim_cursor
+from UltiSnips.text_objects import *
+from UltiSnips.buffer import TextBuffer
+from UltiSnips.util import IndentUtil, vim_string, as_unicode
+from UltiSnips.langmap import LangMapTranslator
 
 # The following lines silence DeprecationWarnings. They are raised
 # by python2.6 for vim.error (which is a string that is used as an exception,

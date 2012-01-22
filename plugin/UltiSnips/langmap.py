@@ -14,7 +14,7 @@ one line down is no longer possible and UltiSnips will fail.
 
 import vim
 
-from UltiSnips.Compatibility import as_unicode
+from UltiSnips.compatibility import as_unicode
 
 class Real_LangMapTranslator(object):
     """

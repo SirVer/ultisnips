@@ -6,10 +6,10 @@ import re
 
 import vim
 
-from UltiSnips.Compatibility import compatible_exec, as_unicode
-from UltiSnips.Util import IndentUtil
+from UltiSnips.compatibility import compatible_exec, as_unicode
+from UltiSnips.util import IndentUtil
 
-from UltiSnips.TextObjects._base import NoneditableTextObject
+from UltiSnips.text_objects._base import NoneditableTextObject
 
 class _Tabs(object):
     def __init__(self, to):

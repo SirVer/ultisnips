@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from UltiSnips.Geometry import Position
-from UltiSnips.Compatibility import vim_cursor, set_vim_cursor
+from UltiSnips.geometry import Position
+from UltiSnips.compatibility import vim_cursor, set_vim_cursor
 
-from UltiSnips.TextObjects._base import EditableTextObject, NoneditableTextObject
-from UltiSnips.TextObjects._parser import TOParser
+from UltiSnips.text_objects._base import EditableTextObject, NoneditableTextObject
+from UltiSnips.text_objects._parser import TOParser
 
 class SnippetInstance(EditableTextObject):
     """

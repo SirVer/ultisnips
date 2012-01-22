@@ -3,8 +3,8 @@
 
 import vim
 
-from UltiSnips.Compatibility import as_unicode
-from UltiSnips.TextObjects._base import NoneditableTextObject
+from UltiSnips.compatibility import as_unicode
+from UltiSnips.text_objects._base import NoneditableTextObject
 
 class VimLCode(NoneditableTextObject):
     def __init__(self, parent, token):

@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from UltiSnips.Geometry import Position
-from UltiSnips.TextObjects._lexer import tokenize, EscapeCharToken, VisualToken, \
+from UltiSnips.geometry import Position
+from UltiSnips.text_objects._lexer import tokenize, EscapeCharToken, VisualToken, \
     TransformationToken, TabStopToken, MirrorToken, PythonCodeToken, \
     VimLCodeToken, ShellCodeToken
-from UltiSnips.TextObjects._escaped_char import EscapedChar
-from UltiSnips.TextObjects._mirror import Mirror
-from UltiSnips.TextObjects._python_code import PythonCode
-from UltiSnips.TextObjects._shell_code import ShellCode
-from UltiSnips.TextObjects._tabstop import TabStop
-from UltiSnips.TextObjects._transformation import Transformation
-from UltiSnips.TextObjects._viml_code import VimLCode
-from UltiSnips.TextObjects._visual import Visual
+from UltiSnips.text_objects._escaped_char import EscapedChar
+from UltiSnips.text_objects._mirror import Mirror
+from UltiSnips.text_objects._python_code import PythonCode
+from UltiSnips.text_objects._shell_code import ShellCode
+from UltiSnips.text_objects._tabstop import TabStop
+from UltiSnips.text_objects._transformation import Transformation
+from UltiSnips.text_objects._viml_code import VimLCode
+from UltiSnips.text_objects._visual import Visual
 
 __all__ = ["TOParser"]
 

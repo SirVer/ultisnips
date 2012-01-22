@@ -5,7 +5,7 @@ __all__ = [ "debug" ]
 
 import types
 
-from UltiSnips.Compatibility import as_unicode
+from UltiSnips.compatibility import as_unicode
 
 def echo_to_hierarchy(to):
     par = to

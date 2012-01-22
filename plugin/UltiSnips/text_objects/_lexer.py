@@ -9,8 +9,8 @@ into Logical Units called Tokens.
 import string
 import re
 
-from UltiSnips.Geometry import Position
-from UltiSnips.Compatibility import as_unicode
+from UltiSnips.geometry import Position
+from UltiSnips.compatibility import as_unicode
 
 __all__ = [
     "tokenize", "EscapeCharToken", "VisualToken", "TransformationToken", "TabStopToken",

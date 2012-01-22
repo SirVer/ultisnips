@@ -13,7 +13,7 @@ import vim
 __all__ = ['as_unicode', 'compatible_exec', 'vim_cursor', 'set_vim_cursor']
 
 if sys.version_info >= (3,0):
-    from UltiSnips.Compatibility_py3 import *
+    from UltiSnips.compatibility_py3 import *
 
     def set_vim_cursor(line, col):
         """Wrapper around vims access to window.cursor. It can't handle
@@ -42,7 +42,7 @@ if sys.version_info >= (3,0):
     def make_suitable_for_vim(s):
         return s
 else:
-    from UltiSnips.Compatibility_py2 import *
+    from UltiSnips.compatibility_py2 import *
 
     def set_vim_cursor(line, col):
         """Wrapper around vims access to window.cursor. It can't handle

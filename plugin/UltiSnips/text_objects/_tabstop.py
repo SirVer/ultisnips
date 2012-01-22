@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from UltiSnips.TextObjects._base import EditableTextObject
+from UltiSnips.text_objects._base import EditableTextObject
 
 __all__ = ['EditableTextObject']
 

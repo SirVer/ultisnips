@@ -4,8 +4,8 @@
 from debug import debug
 
 import vim
-from UltiSnips.Geometry import Position
-from UltiSnips.Compatibility import make_suitable_for_vim, as_unicode
+from UltiSnips.geometry import Position
+from UltiSnips.compatibility import make_suitable_for_vim, as_unicode
 
 __all__ = [ "TextBuffer" ]
 

@@ -4,7 +4,7 @@
 import unittest
 import os.path as p, sys; sys.path.append(p.join(p.dirname(__file__), ".."))
 
-from Geometry import Position
+from geometry import Position
 
 class _MPBase(object):
     def runTest(self):

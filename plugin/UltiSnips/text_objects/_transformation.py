@@ -3,7 +3,7 @@
 
 import re
 
-from UltiSnips.TextObjects._mirror import Mirror
+from UltiSnips.text_objects._mirror import Mirror
 
 class _CleverReplace(object):
     """
