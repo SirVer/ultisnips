@@ -6,8 +6,6 @@ import vim
 import UltiSnips._vim as _vim
 from UltiSnips.geometry import Position
 
-from ..debug import debug
-
 __all__ = ["TextObject", "EditableTextObject", "NoneditableTextObject"]
 
 class TextObject(object):
@@ -39,7 +37,6 @@ class TextObject(object):
         # We explicitly do not want to move our childs around here as we
         # either have non or we are replacing text initially which means we do
         # not want to mess with their positions
-        debug("initial_text: %s, %s" % (self._initial_text, type(self._initial_text)))
         old_end = self._end
         self._end = _vim.text_to_vim(
                 self._start, self._end, gtext or self._initial_text)

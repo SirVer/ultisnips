@@ -4,8 +4,6 @@
 # TODO: Currently Caches whole buffer. Is this really needed?
 # TODO: Currently searches whole buffer. Is this really needed?
 # TODO: hijack two marks instead of running through the whole buffer
-from debug import debug, echo_to_hierarchy
-
 from functools import wraps
 import glob
 import hashlib
@@ -427,9 +425,6 @@ class Snippet(object):
 
         return si
 
-
-from debug import debug
-
 class VisualContentPreserver(object):
     def __init__(self):
         self.reset()
@@ -596,7 +591,6 @@ class SnippetManager(object):
             return
 
         if self._csnippets:
-            debug("before editing")
             echo_to_hierarchy(self._csnippets[-1])
             ct = _vim.buf[:]
             lt = self._lvb[:]
@@ -625,18 +619,14 @@ class SnippetManager(object):
             lt_span[0] = max(0, lt_span[0] - 1)
             initial_line = max(0, initial_line - 1)
 
-            debug("lt: %r" % (lt[lt_span[0]:lt_span[1]]))
-            debug("ct: %r" % (ct[ct_span[0]:ct_span[1]]))
             lt = '\n'.join(lt[lt_span[0]:lt_span[1]])
             ct = '\n'.join(ct[ct_span[0]:ct_span[1]])
 
             es = edit_script(lt, ct, initial_line)
-            debug("es: %s" % (es,))
             self._csnippets[0].replay_user_edits(es)
 
         self._check_if_still_inside_snippet()
         if self._csnippets:
-            debug("Before edits!")
             echo_to_hierarchy(self._csnippets[-1])
             self._csnippets[0].update_textobjects()
             self._lvb = _vim.buf[:]
@@ -646,7 +636,6 @@ class SnippetManager(object):
         Called when the user switches tabs. It basically means that all
         snippets must be properly terminated
         """
-        debug("#### LEAVING WINDOW")
         while len(self._csnippets):
             self._current_snippet_is_done()
         self._reinit()
@@ -684,7 +673,6 @@ class SnippetManager(object):
             self._check_if_still_inside_snippet()
 
     def _current_snippet_is_done(self):
-        debug("*** Snippet is done" )
         self._csnippets.pop()
 
         if not len(self._csnippets):

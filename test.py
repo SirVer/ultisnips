@@ -30,6 +30,7 @@
 # TODO: edit in mirror or transofmration -> kill element
 # TODO: insert/delete in mirror or transformation
 # TODO: fold -> dd empty line -> error
+# TODO: python3 tests
 import os
 import tempfile
 import unittest
