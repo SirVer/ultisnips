@@ -84,8 +84,7 @@ def select_span(r):
         else:
             feedkeys(r"\<Esc>a")
     else:
-        # Case 2a: Non zero length and inclusive selection
-        # TODO: check with exclusive selection
+        # Case 2a: Non zero length
         # If a tabstop immediately starts with a newline, the selection
         # must start after the last character in the current line. But if
         # we are in insert mode and <Esc> out of it, we cannot go past the
@@ -112,16 +111,19 @@ def select_span(r):
 
         # After moving to the correct line, we go back to column 0
         # and select right from there. Note that the we have to select
-        # one column less since vim's visual selection is including the
+        # one column less since Vim's visual selection is including the
         # ending while Python slicing is excluding the ending.
+        inclusive = "inclusive" in vim.eval("&selection")
         if r.end.col == 0:
             # Selecting should end at beginning of line -> Select the
             # previous line till its end
             do_select = "k$"
+            if not inclusive:
+                do_select += "j0"
         elif r.end.col > 1:
-            do_select = "0%il" % (r.end.col-1)
+            do_select = "0%il" % (r.end.col-1 if inclusive else r.end.col)
         else:
-            do_select = "0"
+            do_select = "0" if inclusive else "0l"
 
         move_cmd = LangMapTranslator().translate(
             r"\<Esc>%sv%s%s\<c-g>" % (move_one_right, move_lines, do_select)
