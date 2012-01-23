@@ -591,7 +591,7 @@ class SnippetManager(object):
             return
 
         if self._csnippets:
-            echo_to_hierarchy(self._csnippets[-1])
+            # echo_to_hierarchy(self._csnippets[-1])
             ct = _vim.buf[:]
             lt = self._lvb[:]
 
@@ -627,7 +627,7 @@ class SnippetManager(object):
 
         self._check_if_still_inside_snippet()
         if self._csnippets:
-            echo_to_hierarchy(self._csnippets[-1])
+            # echo_to_hierarchy(self._csnippets[-1])
             self._csnippets[0].update_textobjects()
             self._lvb = _vim.buf[:]
 
