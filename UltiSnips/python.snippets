@@ -323,7 +323,9 @@ def __coerce__(self, other):
 endsnippet
 
 snippet def "function with docstrings" b
-def ${1:function}(`!p if snip.indent: snip.rv = 'self, '`${2:arg1}):
+def ${1:function}(`!p
+if snip.indent:
+   snip.rv = 'self' + (", " if len(t[2]) else "")`${2:arg1}):
 	"""${4:@todo: Docstring for $1}`!p
 snip.rv = ""
 snip >> 1
