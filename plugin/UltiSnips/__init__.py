@@ -5,7 +5,6 @@ from functools import wraps
 import glob
 import hashlib
 import os
-import platform
 import re
 import traceback
 
@@ -34,12 +33,6 @@ def _to_scratch_buffer(text):
     vim.command("set buftype=nofile")
 
     vim.buffers[-1][:] = text.splitlines()
-
-def _dot_vim():
-    """Under windows .vim is _vim"""
-    if platform.system() == "Windows":
-        return "_vim"
-    return ".vim"
 
 def err_to_scratch_buffer(f):
     @wraps(f)
@@ -1251,8 +1244,8 @@ class SnippetManager(object):
             snippet_dirs = ["UltiSnips"] + vim.eval("g:UltiSnipsSnippetDirectories")
             us = snippet_dirs[-1]
 
-            path = os.path.join(home, _dot_vim(), us)
-            for dirname in [_dot_vim(), "vimfiles"]:
+            path = os.path.join(home, ".vim", us)
+            for dirname in [".vim", "vimfiles"]:
                 pth = os.path.join(home, dirname)
                 if pth in rtp:
                     path = os.path.join(pth, us)
