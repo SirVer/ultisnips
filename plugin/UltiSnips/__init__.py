@@ -603,9 +603,11 @@ class SnippetManager(object):
             ct_span = [0, len(ct)]
             initial_line = 0
 
+            debug("lt: %r" % (lt))
+            debug("ct: %r" % (ct))
             # Cut down on lines searched for changes. Start from behind and
             # remove all equal lines. Then do the same from the front.
-            while (lt[lt_span[1]-1] == ct[ct_span[1]-1] and
+            while (lt[lt_span[1]-2] == ct[ct_span[1]-2] and
                    (lt_span[0] < lt_span[1]) and
                    (ct_span[0] < ct_span[1])):
                 ct_span[1] -= 1

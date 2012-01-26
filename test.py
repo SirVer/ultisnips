@@ -27,7 +27,6 @@
 #
 # TODO: more edits that cross boundaries between text objects
 # TODO: delete hallo snippet -> hallo '' and then delete snippet
-# TODO: fold -> dd empty line -> error
 # TODO: remove formatoption tests
 # TODO: python3 tests
 import os
@@ -2538,6 +2537,24 @@ class Backspace_TabStop_NotZero(_VimTest):
     keys = "test" + EX + "A" + JF + BS + "BBB"
     wanted = "AA BBB"
 # End: Pressing BS in TabStop  #}}}
+# Special Editing Problems {{{#
+class FoldOverwrite_Simple_ECR(_VimTest):
+    snippets = ("fold",
+"""# ${1:Description}  `!p snip.rv = vim.eval("&foldmarker").split(",")[0]`
+
+# End: $1  `!p snip.rv = vim.eval("&foldmarker").split(",")[1]`""")
+    keys = "fold" + EX + "hi"
+    wanted = "# hi  {{{\n\n# End: hi  }}}"
+class Fold_DeleteMiddleLine_ECR(_VimTest):
+    snippets = ("fold",
+"""# ${1:Description}  `!p snip.rv = vim.eval("&foldmarker").split(",")[0]`
+
+
+# End: $1  `!p snip.rv = vim.eval("&foldmarker").split(",")[1]`""")
+    keys = "fold" + EX + "hi" + ESC + "jdd"
+    wanted = "# hi  {{{\n\n# End: hi  }}}"
+# End: Special Editing Problems }}}#
+
 
 # Newline in default text {{{#
 # Tests for bug 616315 #

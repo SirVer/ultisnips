@@ -9,7 +9,6 @@ from _diff import diff, guess_edit
 from geometry import Position
 
 
-# TODO: duplicate
 def transform(a, cmds):
     buf = a.split("\n")
 
