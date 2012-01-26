@@ -4,6 +4,46 @@
 from collections import defaultdict
 import sys
 
+def matches(initial_line, a, b, cmds):
+    buf = a[:]
+    for cmd in cmds:
+        ctype, line, col, char = cmd
+        line -= initial_line
+        if ctype == "D":
+            if char != '\n':
+                buf[line] = buf[line][:col] + buf[line][col+len(char):]
+            else:
+                buf[line] = buf[line] + buf[line+1]
+                del buf[line+1]
+        elif ctype == "I":
+            buf[line] = buf[line][:col] + char + buf[line][col:]
+        buf = '\n'.join(buf).split('\n')
+    return len(buf) == len(b) and all(j==k for j,k in zip(buf, b))
+
+# TODO: module name only makes limited sense by now
+def guess_edit(initial_line, lt, ct, ppos, pos): # TODO: maybe guess edit from movement?
+    if not len(lt) and not len(ct): return True, ()
+    if pos.line == ppos.line: # Movement only in one line
+        llen = len(lt[ppos.line - initial_line])
+        clen = len(ct[pos.line - initial_line])
+        if ppos < pos and clen > llen: # Likely that only characters have been added
+            es = (
+                ("I", ppos.line, ppos.col, ct[ppos.line - initial_line][ppos.col:pos.col]),
+            )
+            if matches(initial_line, lt, ct, es): return True, es
+        if clen < llen:
+            if ppos == pos: # 'x' or DEL or dt or something
+                es = (
+                    ("D", pos.line, pos.col, lt[ppos.line - initial_line][ppos.col:ppos.col + (llen - clen)]),
+                )
+                if matches(initial_line, lt, ct, es): return True, es
+            if pos < ppos: # Backspacing or dT dF?
+                es = (
+                    ("D", pos.line, pos.col, lt[pos.line - initial_line][pos.col:pos.col + llen - clen]),
+                )
+                if matches(initial_line, lt, ct, es): return True, es
+    return False, None
+
 def edit_script(a, b, sline = 0):
     """
     Return a list of deletions and insertions that will turn a into b. This is

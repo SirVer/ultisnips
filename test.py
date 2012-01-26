@@ -26,9 +26,7 @@
 #
 #
 # TODO: more edits that cross boundaries between text objects
-# TODO: visual line selection -> replace with more, less and == amount of lines
-# TODO: edit in mirror or transofmration -> kill element
-# TODO: insert/delete in mirror or transformation
+# TODO: delete hallo snippet -> hallo '' and then delete snippet
 # TODO: fold -> dd empty line -> error
 # TODO: python3 tests
 import os
@@ -1327,6 +1325,24 @@ class MirrorRealLifeExample_ExceptCorrectResult(_VimTest):
 {
 \t// do nothing
 }"""
+
+class Mirror_TestKill_InsertBefore_NoKill(_VimTest):
+    snippets = "test", "$1 $1_"
+    keys = "hallo test" + EX + "auch" + ESC + "wihi" + ESC + "bb" + "ino" + JF + "end"
+    wanted = "hallo noauch hinoauch_end"
+class Mirror_TestKill_InsertAfter_NoKill(_VimTest):
+    snippets = "test", "$1 $1_"
+    keys = "hallo test" + EX + "auch" + ESC + "eiab" + ESC + "bb" + "ino" + JF + "end"
+    wanted = "hallo noauch noauchab_end"
+class Mirror_TestKill_InsertBeginning_Kill(_VimTest):
+    snippets = "test", "$1 $1_"
+    keys = "hallo test" + EX + "auch" + ESC + "wahi" + ESC + "bb" + "ino" + JF + "end"
+    wanted = "hallo noauch ahiuch_end"
+class Mirror_TestKill_InsertEnd_Kill(_VimTest):
+    snippets = "test", "$1 $1_"
+    keys = "hallo test" + EX + "auch" + ESC + "ehihi" + ESC + "bb" + "ino" + JF + "end"
+    wanted = "hallo noauch auchih_end"
+
 # End: Mirrors  #}}}
 # Transformations  {{{#
 class Transformation_SimpleCase_ExceptCorrectResult(_VimTest):
@@ -1467,6 +1483,22 @@ class TransformationUsingBackspaceToDeleteDefaultValue_ECR(_VimTest):
      snippets = ("test", "snip ${1/.+/(?0:matched)/} ${1:default}")
      keys = "test" + EX + BS
      wanted = "snip  "
+class Transformation_TestKill_InsertBefore_NoKill(_VimTest):
+    snippets = "test", r"$1 ${1/.*/\L$0$0\E/}_"
+    keys = "hallo test" + EX + "AUCH" + ESC + "wihi" + ESC + "bb" + "ino" + JF + "end"
+    wanted = "hallo noAUCH hinoauchnoauch_end"
+class Transformation_TestKill_InsertAfter_NoKill(_VimTest):
+    snippets = "test", r"$1 ${1/.*/\L$0$0\E/}_"
+    keys = "hallo test" + EX + "AUCH" + ESC + "eiab" + ESC + "bb" + "ino" + JF + "end"
+    wanted = "hallo noAUCH noauchnoauchab_end"
+class Transformation_TestKill_InsertBeginning_Kill(_VimTest):
+    snippets = "test", r"$1 ${1/.*/\L$0$0\E/}_"
+    keys = "hallo test" + EX + "AUCH" + ESC + "wahi" + ESC + "bb" + "ino" + JF + "end"
+    wanted = "hallo noAUCH ahiuchauch_end"
+class Transformation_TestKill_InsertEnd_Kill(_VimTest):
+    snippets = "test", r"$1 ${1/.*/\L$0$0\E/}_"
+    keys = "hallo test" + EX + "AUCH" + ESC + "ehihi" + ESC + "bb" + "ino" + JF + "end"
+    wanted = "hallo noAUCH auchauchih_end"
 # End: Transformations  #}}}
 # ${VISUAL}  {{{#
 class Visual_NoVisualSelection_Ignore(_VimTest):

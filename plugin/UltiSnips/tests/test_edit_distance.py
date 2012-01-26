@@ -5,9 +5,11 @@ import unittest
 
 import os.path as p, sys; sys.path.append(p.join(p.dirname(__file__), ".."))
 
-from edit_distance import edit_script
+from edit_distance import edit_script, guess_edit
+from geometry import Position
 
 
+# TODO: duplicate
 def transform(a, cmds):
     buf = a.split("\n")
 
@@ -26,6 +28,50 @@ def transform(a, cmds):
 
 
 import unittest
+
+# Test Guessing  {{{
+class _BaseGuessing(object):
+    def runTest(self):
+        rv, es = guess_edit(self.initial_line, self.a, self.b, Position(*self.ppos), Position(*self.pos))
+        self.assertEqual(rv, True)
+        self.assertEqual(self.wanted, es)
+
+class TestGuessing_Noop0(_BaseGuessing, unittest.TestCase):
+    a, b = [], []
+    initial_line = 0
+    ppos, pos = (0, 6), (0, 7)
+    wanted = ()
+
+class TestGuessing_InsertOneChar(_BaseGuessing, unittest.TestCase):
+    a, b = ["Hello  World"], ["Hello   World"]
+    initial_line = 0
+    ppos, pos = (0, 6), (0, 7)
+    wanted = (
+        ("I", 0, 6, " "),
+    )
+class TestGuessing_InsertOneChar1(_BaseGuessing, unittest.TestCase):
+    a, b = ["Hello  World"], ["Hello   World"]
+    initial_line = 0
+    ppos, pos = (0, 7), (0, 8)
+    wanted = (
+        ("I", 0, 7, " "),
+    )
+class TestGuessing_BackspaceOneChar(_BaseGuessing, unittest.TestCase):
+    a, b = ["Hello  World"], ["Hello World"]
+    initial_line = 0
+    ppos, pos = (0, 7), (0, 6)
+    wanted = (
+        ("D", 0, 6, " "),
+    )
+class TestGuessing_DeleteOneChar(_BaseGuessing, unittest.TestCase):
+    a, b = ["Hello  World"], ["Hello World"]
+    initial_line = 0
+    ppos, pos = (0, 5), (0, 5)
+    wanted = (
+        ("D", 0, 5, " "),
+    )
+
+# End: Test Guessing  }}}
 
 class _Base(object):
     def runTest(self):

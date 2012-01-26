@@ -7,6 +7,8 @@ import UltiSnips._vim as _vim
 from UltiSnips.text_objects._base import EditableTextObject, NoneditableTextObject
 from UltiSnips.text_objects._parser import TOParser
 
+from ..debug import debug, echo_to_hierarchy
+
 class SnippetInstance(EditableTextObject):
     """
     A Snippet instance is an instance of a Snippet Definition. That is,
@@ -46,8 +48,12 @@ class SnippetInstance(EditableTextObject):
     def replay_user_edits(self, cmds):
         """Replay the edits the user has done to keep endings of our
         Text objects in sync with reality"""
+        debug("---- BEFORE")
+        echo_to_hierarchy(self)
         for cmd in cmds:
             self._do_edit(cmd)
+        echo_to_hierarchy(self)
+        debug("---- AFTER")
 
     def update_textobjects(self):
         """Update the text objects that should change automagically after

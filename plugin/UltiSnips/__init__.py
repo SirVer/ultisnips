@@ -11,8 +11,10 @@ import os
 import re
 import traceback
 
+from debug import echo_to_hierarchy, debug
+
 from UltiSnips.compatibility import as_unicode
-from UltiSnips.edit_distance import edit_script
+from UltiSnips.edit_distance import edit_script, guess_edit 
 from UltiSnips.geometry import Position
 from UltiSnips.text_objects import SnippetInstance
 from UltiSnips.util import IndentUtil
@@ -471,6 +473,7 @@ class SnippetManager(object):
     @err_to_scratch_buffer
     def reset(self, test_error=False):
         self._lvb = []
+        self._lpos = Position(0,0)
         self._test_error = test_error
         self._snippets = {}
         self._visual_content = VisualContentPreserver()
@@ -591,9 +594,10 @@ class SnippetManager(object):
             return
 
         if self._csnippets:
-            # echo_to_hierarchy(self._csnippets[-1])
+
             ct = _vim.buf[:]
             lt = self._lvb[:]
+            pos = _vim.buf.cursor
 
             lt_span = [0, len(lt)]
             ct_span = [0, len(ct)]
@@ -606,6 +610,7 @@ class SnippetManager(object):
                    (ct_span[0] < ct_span[1])):
                 ct_span[1] -= 1
                 lt_span[1] -= 1
+            debug("1 lt_span: %r, ct_span: %r" % (lt_span ,ct_span))
             try:
                 while (lt[lt_span[0]] == ct[ct_span[0]] and
                        (lt_span[0] < lt_span[1]) and
@@ -615,21 +620,31 @@ class SnippetManager(object):
                     initial_line += 1
             except IndexError:
                 pass
+            debug("2 lt_span: %r, ct_span: %r" % (lt_span ,ct_span))
             ct_span[0] = max(0, ct_span[0] - 1)
             lt_span[0] = max(0, lt_span[0] - 1)
             initial_line = max(0, initial_line - 1)
 
-            lt = '\n'.join(lt[lt_span[0]:lt_span[1]])
-            ct = '\n'.join(ct[ct_span[0]:ct_span[1]])
+            lt = lt[lt_span[0]:lt_span[1]]
+            ct = ct[ct_span[0]:ct_span[1]]
 
-            es = edit_script(lt, ct, initial_line)
+            debug("initial_line: %r, lt: %r, ct: %r, self._lpos: %r, pos: %r" % (initial_line, lt, ct, self._lpos, pos))
+            rv, es = guess_edit(initial_line, lt, ct, self._lpos, pos)
+            if not rv:
+                debug("Not guessed :(")
+                lt = '\n'.join(lt)
+                ct = '\n'.join(ct)
+                es = edit_script(lt, ct, initial_line)
+            else:
+                debug("Guessed hooray!")
+            debug("es: %r" % (es,))
             self._csnippets[0].replay_user_edits(es)
 
         self._check_if_still_inside_snippet()
         if self._csnippets:
-            # echo_to_hierarchy(self._csnippets[-1])
             self._csnippets[0].update_textobjects()
             self._lvb = _vim.buf[:]
+            self._lpos = _vim.buf.cursor
 
     def leaving_window(self):
         """
@@ -800,6 +815,7 @@ class SnippetManager(object):
 
         self._ignore_movements = True
         self._lvb = _vim.buf[:]
+        self._lpos = _vim.buf.cursor
 
         self._jump()
 

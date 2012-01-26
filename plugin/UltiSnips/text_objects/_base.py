@@ -6,6 +6,8 @@ import vim
 import UltiSnips._vim as _vim
 from UltiSnips.geometry import Position
 
+from ..debug import debug
+
 __all__ = ["TextObject", "EditableTextObject", "NoneditableTextObject"]
 
 class TextObject(object):
@@ -120,6 +122,7 @@ class EditableTextObject(TextObject):
     # Private/Protected functions #
     ###############################
     def _do_edit(self, cmd):
+        debug("cmd: %r, self: %r" % (cmd, self))
         ctype, line, col, text = cmd
         assert( ('\n' not in text) or (text == "\n"))
         pos = Position(line, col)
@@ -128,12 +131,11 @@ class EditableTextObject(TextObject):
         new_cmds = []
         for c in self._childs:
             if ctype == "I": # Insertion
-                if (c._start <= pos <= c._end):
-                    if isinstance(c, EditableTextObject):
-                        c._do_edit(cmd)
-                        return
-                    else:
-                        to_kill.add(c)
+                if c._start < pos < Position(c._end.line, c._end.col) and isinstance(c, NoneditableTextObject):
+                    to_kill.add(c)
+                elif (c._start <= pos <= c._end) and isinstance(c, EditableTextObject):
+                    c._do_edit(cmd)
+                    return
             else: # Deletion
                 delend = pos + Position(0, len(text)) if text != "\n"\
                         else Position(line + 1, 0)
@@ -176,7 +178,11 @@ class EditableTextObject(TextObject):
             delta.line *= -1
             delta.col *= -1
         pivot = Position(line, col)
-        self._child_has_moved(-1, pivot, delta)
+        idx = -1
+        for cidx, c in enumerate(self._childs):
+            if c._start < pivot <= c._end:
+                idx = cidx
+        self._child_has_moved(idx, pivot, delta)
 
     def _move(self, pivot, diff):
         TextObject._move(self, pivot, diff)
