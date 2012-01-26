@@ -63,7 +63,6 @@ class SnippetInstance(EditableTextObject):
 
         done = set()
         not_done = set()
-
         def _find_recursive(obj):
             if isinstance(obj, EditableTextObject):
                 for c in obj._childs:
@@ -73,7 +72,7 @@ class SnippetInstance(EditableTextObject):
 
         counter = 10
         while (done != not_done) and counter:
-            for obj in (not_done - done):
+            for obj in sorted(not_done - done): # Order matters for python locals!
                 if obj._update(done, not_done):
                     done.add(obj)
             counter -= 1
