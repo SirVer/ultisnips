@@ -28,6 +28,7 @@
 # TODO: more edits that cross boundaries between text objects
 # TODO: delete hallo snippet -> hallo '' and then delete snippet
 # TODO: fold -> dd empty line -> error
+# TODO: remove formatoption tests
 # TODO: python3 tests
 import os
 import tempfile

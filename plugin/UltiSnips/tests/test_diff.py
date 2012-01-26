@@ -5,7 +5,7 @@ import unittest
 
 import os.path as p, sys; sys.path.append(p.join(p.dirname(__file__), ".."))
 
-from edit_distance import edit_script, guess_edit
+from _diff import diff, guess_edit
 from geometry import Position
 
 
@@ -75,7 +75,7 @@ class TestGuessing_DeleteOneChar(_BaseGuessing, unittest.TestCase):
 
 class _Base(object):
     def runTest(self):
-        es = edit_script(self.a, self.b)
+        es = diff(self.a, self.b)
         tr = transform(self.a, es)
         self.assertEqual(self.b, tr)
         self.assertEqual(self.wanted, es)

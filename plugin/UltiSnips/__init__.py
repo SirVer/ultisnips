@@ -14,7 +14,7 @@ import traceback
 from debug import echo_to_hierarchy, debug
 
 from UltiSnips.compatibility import as_unicode
-from UltiSnips.edit_distance import edit_script, guess_edit 
+from UltiSnips._diff import diff, guess_edit
 from UltiSnips.geometry import Position
 from UltiSnips.text_objects import SnippetInstance
 from UltiSnips.util import IndentUtil
@@ -634,7 +634,7 @@ class SnippetManager(object):
                 debug("Not guessed :(")
                 lt = '\n'.join(lt)
                 ct = '\n'.join(ct)
-                es = edit_script(lt, ct, initial_line)
+                es = diff(lt, ct, initial_line)
             else:
                 debug("Guessed hooray!")
             debug("es: %r" % (es,))

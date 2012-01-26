@@ -4,7 +4,7 @@
 from collections import defaultdict
 import sys
 
-def matches(initial_line, a, b, cmds):
+def is_complete_edit(initial_line, a, b, cmds):
     buf = a[:]
     for cmd in cmds:
         ctype, line, col, char = cmd
@@ -20,8 +20,12 @@ def matches(initial_line, a, b, cmds):
         buf = '\n'.join(buf).split('\n')
     return len(buf) == len(b) and all(j==k for j,k in zip(buf, b))
 
-# TODO: module name only makes limited sense by now
-def guess_edit(initial_line, lt, ct, ppos, pos): # TODO: maybe guess edit from movement?
+def guess_edit(initial_line, lt, ct, ppos, pos):
+    """
+    Try to guess what the user might have done by heuristically looking at cursor movement
+    number of changed lines and if they got longer or shorter. This will detect most simple
+    movements like insertion, deletion of a line or carriage return.
+    """
     if not len(lt) and not len(ct): return True, ()
     if pos.line == ppos.line: # Movement only in one line
         llen = len(lt[ppos.line - initial_line])
@@ -30,21 +34,25 @@ def guess_edit(initial_line, lt, ct, ppos, pos): # TODO: maybe guess edit from m
             es = (
                 ("I", ppos.line, ppos.col, ct[ppos.line - initial_line][ppos.col:pos.col]),
             )
-            if matches(initial_line, lt, ct, es): return True, es
+            if is_complete_edit(initial_line, lt, ct, es): return True, es
         if clen < llen:
             if ppos == pos: # 'x' or DEL or dt or something
                 es = (
                     ("D", pos.line, pos.col, lt[ppos.line - initial_line][ppos.col:ppos.col + (llen - clen)]),
                 )
-                if matches(initial_line, lt, ct, es): return True, es
+                if is_complete_edit(initial_line, lt, ct, es): return True, es
             if pos < ppos: # Backspacing or dT dF?
                 es = (
                     ("D", pos.line, pos.col, lt[pos.line - initial_line][pos.col:pos.col + llen - clen]),
                 )
-                if matches(initial_line, lt, ct, es): return True, es
+                if is_complete_edit(initial_line, lt, ct, es): return True, es
+    else: # Movement in more than one line
+        if ppos.line + 1 == pos.line and pos.col == 0: # Carriage return?
+            es = (("I", ppos.line, ppos.col, "\n"),)
+            if is_complete_edit(initial_line, lt, ct, es): return True, es
     return False, None
 
-def edit_script(a, b, sline = 0):
+def diff(a, b, sline = 0):
     """
     Return a list of deletions and insertions that will turn a into b. This is
     done by traversing an implicit edit graph and searching for the shortest
