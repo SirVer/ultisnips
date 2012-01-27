@@ -14,7 +14,7 @@ endif
 let g:_uspy=":py3 "
 if !has("python3")
     if !has("python")
-        echo  "UltiSnips requires py >= 2.5 or any py3"
+        echo  "UltiSnips requires py >= 2.6 or any py3"
         finish
     endif
     let g:_uspy=":py "
