@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-# TODO: Currently Caches whole buffer. Is this really needed?
-# TODO: Currently searches whole buffer. Is this really needed?
-# TODO: hijack two marks instead of running through the whole buffer
 from functools import wraps
 import glob
 import hashlib
@@ -594,20 +591,22 @@ class SnippetManager(object):
             return
 
         if self._csnippets:
-
-            ct = _vim.buf[:]
+            cstart = self._csnippets[0].start.line
+            cend = self._csnippets[0].end.line + len(_vim.buf) - self._lvb_len
+            ct = _vim.buf[cstart:cend + 1]
             lt = self._lvb[:]
             pos = _vim.buf.cursor
 
             lt_span = [0, len(lt)]
             ct_span = [0, len(ct)]
-            initial_line = 0
+            initial_line = cstart
 
             debug("lt: %r" % (lt))
             debug("ct: %r" % (ct))
             # Cut down on lines searched for changes. Start from behind and
             # remove all equal lines. Then do the same from the front.
-            while (lt[lt_span[1]-2] == ct[ct_span[1]-2] and
+            while (lt[lt_span[1]-1] == ct[ct_span[1]-1] and
+                    self._lpos.line < lt_span[1] and pos.line < ct_span[1] and
                    (lt_span[0] < lt_span[1]) and
                    (ct_span[0] < ct_span[1])):
                 ct_span[1] -= 1
@@ -615,6 +614,7 @@ class SnippetManager(object):
             debug("1 lt_span: %r, ct_span: %r" % (lt_span ,ct_span))
             try:
                 while (lt[lt_span[0]] == ct[ct_span[0]] and
+                        self._lpos.line <= lt_span[0] and pos.line <= ct_span[0] and
                        (lt_span[0] < lt_span[1]) and
                        (ct_span[0] < ct_span[1])):
                     ct_span[0] += 1
@@ -625,7 +625,7 @@ class SnippetManager(object):
             debug("2 lt_span: %r, ct_span: %r" % (lt_span ,ct_span))
             ct_span[0] = max(0, ct_span[0] - 1)
             lt_span[0] = max(0, lt_span[0] - 1)
-            initial_line = max(0, initial_line - 1)
+            initial_line = max(cstart, initial_line - 1)
 
             lt = lt[lt_span[0]:lt_span[1]]
             ct = ct[ct_span[0]:ct_span[1]]
@@ -645,8 +645,10 @@ class SnippetManager(object):
         self._check_if_still_inside_snippet()
         if self._csnippets:
             self._csnippets[0].update_textobjects()
-            self._lvb = _vim.buf[:]
+            self._lvb = _vim.buf[self._csnippets[0].start.line:self._csnippets[0].end.line + 1]
+            self._lvb_len = len(_vim.buf)
             self._lpos = _vim.buf.cursor
+
 
     def leaving_window(self):
         """
@@ -806,17 +808,18 @@ class SnippetManager(object):
 
             si = snippet.launch(text_before, self._visual_content,
                     self._cs.find_parent_for_new_to(start), start, end)
-            self._visual_content.reset()
-
-            self._csnippets.append(si)
         else:
             start = Position(_vim.buf.cursor.line, len(text_before))
             end = Position(_vim.buf.cursor.line, len(before))
-            self._csnippets.append(snippet.launch(text_before, self._visual_content, None, start, end))
-            self._visual_content.reset()
+            si = snippet.launch(text_before, self._visual_content, None, start, end)
+
+        self._visual_content.reset()
+        self._csnippets.append(si)
 
         self._ignore_movements = True
-        self._lvb = _vim.buf[:]
+        # TODO: move this back into VimState
+        self._lvb = _vim.buf[self._csnippets[0].start.line:self._csnippets[0].end.line + 1]
+        self._lvb_len = len(_vim.buf)
         self._lpos = _vim.buf.cursor
 
         self._jump()
