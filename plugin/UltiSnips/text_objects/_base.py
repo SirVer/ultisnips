@@ -134,7 +134,7 @@ class EditableTextObject(TextObject):
             if ctype == "I": # Insertion
                 if c._start < pos < Position(c._end.line, c._end.col) and isinstance(c, NoneditableTextObject):
                     to_kill.add(c)
-                    new_cmds.add(cmd)
+                    new_cmds.append(cmd)
                     break
                 elif (c._start <= pos <= c._end) and isinstance(c, EditableTextObject):
                     c._do_edit(cmd)
