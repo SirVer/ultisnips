@@ -25,8 +25,8 @@
 # and will compare the resulting output to expected results.
 #
 #
-# TODO: remove formatoption tests
 # TODO: python3 tests
+# TODO: check if a span was selected
 import os
 import tempfile
 import unittest
@@ -2264,29 +2264,20 @@ class ProperIndenting_AutoIndentAndNewline_ECR(_VimTest):
 class _FormatoptionsBase(_VimTest):
     def _options_on(self):
         self.send(":set tw=20\n")
+        self.send(":set fo=lrqntc\n")
     def _options_off(self):
         self.send(":set tw=0\n")
+        self.send(":set fo=tcq\n")
 
-class FOSimple_WithoutBreak_ExceptCorrectResult(_FormatoptionsBase):
-    snippets = ("test", "${1:longer expand}\n$0")
-    keys = "test" + EX + "This is a longer text that should not wrap as formatoptions are disabled"
-    wanted = "This is a longer text that should not wrap as formatoptions are disabled\n"
+class FOSimple_Break_ExceptCorrectResult(_FormatoptionsBase):
+    snippets = ("test", "${1:longer expand}\n$1\n$0", "", "f")
+    keys = "test" + EX + "This is a longer text that should wrap as formatoptions are  enabled" + JF + "end"
+    wanted = "This is a longer\ntext that should\nwrap as\nformatoptions are\nenabled\n" + \
+        "This is a longer\ntext that should\nwrap as\nformatoptions are\nenabled\n" + "end"
 
-class FO_WithoutBreakEnableAfterSnippet_ExceptCorrectResult(_FormatoptionsBase):
-    snippets = ("test", "${1:longer expand}\n")
-    keys = "test" + EX + "This is a longer text that should not wrap as formatoptions are disabled" \
-            + JF + "This is a longer text that should wrap"
-    wanted = "This is a longer text that should not wrap as formatoptions are disabled\n" + \
-            "This is a longer\ntext that should\nwrap"
-
-
-class FOSimple_WithBreak_ExceptCorrectResult(_FormatoptionsBase):
-    snippets = ("test", "${1:longer expand}\n$0", "", "f")
-    keys = "test" + EX + "This is a longer text that should wrap"
-    wanted = "This is a longer\ntext that should\nwrap\n"
 
 class FOTextBeforeAndAfter_ExceptCorrectResult(_FormatoptionsBase):
-    snippets = ("test", "Before${1:longer expand}After\nstart$1end", "", "f")
+    snippets = ("test", "Before${1:longer expand}After\nstart$1end")
     keys = "test" + EX + "This is a longer text that should wrap"
     wanted = \
 """BeforeThis is a
@@ -2299,7 +2290,7 @@ should wrapend"""
 
 class FOTextAfter_ExceptCorrectResult(_FormatoptionsBase):
     """Testcase for lp:719998"""
-    snippets = ("test", "${1:longer expand}after\nstart$1end", "", "f")
+    snippets = ("test", "${1:longer expand}after\nstart$1end")
     keys = ("test" + EX + "This is a longer snippet that should wrap properly "
             "and the mirror below should work as well")
     wanted = \
@@ -2316,7 +2307,7 @@ should work as wellend"""
 
 class FOWrapOnLongWord_ExceptCorrectResult(_FormatoptionsBase):
     """Testcase for lp:719998"""
-    snippets = ("test", "${1:longer expand}after\nstart$1end", "", "f")
+    snippets = ("test", "${1:longer expand}after\nstart$1end")
     keys = ("test" + EX + "This is a longersnippet that should wrap properly")
     wanted = \
 """This is a

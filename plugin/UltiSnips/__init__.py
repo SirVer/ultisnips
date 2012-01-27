@@ -373,10 +373,6 @@ class Snippet(object):
 
         return match
 
-    def keep_formatoptions_unchanged(self):
-        return "f" in self._opts
-    keep_formatoptions_unchanged = property(keep_formatoptions_unchanged)
-
     def overwrites_previous(self):
         return "!" in self._opts
     overwrites_previous = property(overwrites_previous)
@@ -694,9 +690,6 @@ class SnippetManager(object):
     def _current_snippet_is_done(self):
         self._csnippets.pop()
 
-        if not len(self._csnippets):
-            self._reset_offending_vim_options()
-
     def _jump(self, backwards = False):
         jumped = False
         if self._cs:
@@ -800,8 +793,6 @@ class SnippetManager(object):
         if snippet.matched:
             text_before = before[:-len(snippet.matched)]
 
-        self._unset_offending_vim_options(snippet)
-
         if self._cs:
             start = Position(_vim.buf.cursor.line, len(text_before))
             end = Position(_vim.buf.cursor.line, len(before))
@@ -843,20 +834,6 @@ class SnippetManager(object):
         self._do_snippet(snippet, before, after)
 
         return True
-
-    # Handling of offending vim options
-    def _unset_offending_vim_options(self, snippet):
-        # Care for textwrapping
-        if not snippet.keep_formatoptions_unchanged:
-            self._cached_offending_vim_options["fo"] = ''.join(
-                c for c in _vim.eval("&fo") if c in "cta"
-            )
-            for c in "cta": _vim.command("set fo-=%s" % c)
-
-    def _reset_offending_vim_options(self):
-        # Textwrapping
-        for c in self._cached_offending_vim_options.pop("fo", []):
-            _vim.command("set fo+=%s" % c)
 
     def _cs(self):
         if not len(self._csnippets):
