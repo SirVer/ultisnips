@@ -603,25 +603,24 @@ class SnippetManager(object):
 
             debug("lt: %r" % (lt))
             debug("ct: %r" % (ct))
+            debug("self._lpos: %r, pos: %r" % (self._lpos, pos))
             # Cut down on lines searched for changes. Start from behind and
             # remove all equal lines. Then do the same from the front.
-            while (lt[lt_span[1]-1] == ct[ct_span[1]-1] and
-                    self._lpos.line < lt_span[1] and pos.line < ct_span[1] and
-                   (lt_span[0] < lt_span[1]) and
-                   (ct_span[0] < ct_span[1])):
-                ct_span[1] -= 1
-                lt_span[1] -= 1
-            debug("1 lt_span: %r, ct_span: %r" % (lt_span ,ct_span))
-            try:
-                while (lt[lt_span[0]] == ct[ct_span[0]] and
-                        self._lpos.line <= lt_span[0] and pos.line <= ct_span[0] and
+            if lt and ct:
+                while (lt[lt_span[1]-1] == ct[ct_span[1]-1] and
+                        self._lpos.line < initial_line + lt_span[1]-1 and pos.line < initial_line + ct_span[1]-1 and
                        (lt_span[0] < lt_span[1]) and
                        (ct_span[0] < ct_span[1])):
+                    ct_span[1] -= 1
+                    lt_span[1] -= 1
+                debug("1 lt_span: %r, ct_span: %r" % (lt_span ,ct_span))
+                while (lt_span[0] < lt_span[1] and
+                       ct_span[0] < ct_span[1] and
+                       lt[lt_span[0]] == ct[ct_span[0]] and
+                       self._lpos.line >= initial_line and pos.line >= initial_line):
                     ct_span[0] += 1
                     lt_span[0] += 1
                     initial_line += 1
-            except IndexError:
-                pass
             debug("2 lt_span: %r, ct_span: %r" % (lt_span ,ct_span))
             ct_span[0] = max(0, ct_span[0] - 1)
             lt_span[0] = max(0, lt_span[0] - 1)
@@ -656,6 +655,7 @@ class SnippetManager(object):
         snippets must be properly terminated
         """
         while len(self._csnippets):
+            debug("*** Current snippet is done ***")
             self._current_snippet_is_done()
         self._reinit()
 

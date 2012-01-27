@@ -39,6 +39,7 @@ class TextObject(object):
         # We explicitly do not want to move our childs around here as we
         # either have non or we are replacing text initially which means we do
         # not want to mess with their positions
+        if self.current_text == gtext: return
         old_end = self._end
         self._end = _vim.text_to_vim(
                 self._start, self._end, gtext or self._initial_text)
@@ -133,23 +134,32 @@ class EditableTextObject(TextObject):
             if ctype == "I": # Insertion
                 if c._start < pos < Position(c._end.line, c._end.col) and isinstance(c, NoneditableTextObject):
                     to_kill.add(c)
+                    new_cmds.add(cmd)
+                    break
                 elif (c._start <= pos <= c._end) and isinstance(c, EditableTextObject):
                     c._do_edit(cmd)
                     return
             else: # Deletion
-                delend = pos + Position(0, len(text)) if text != "\n"\
+                delend = pos + Position(0, len(text)) if text != "\n" \
                         else Position(line + 1, 0)
                 if (c._start <= pos < c._end) and (c._start < delend <= c._end):
+                    debug("Case 1")
                     # this edit command is completely for the child
                     if isinstance(c, NoneditableTextObject):
                         to_kill.add(c)
-                        continue
-                    c._do_edit(cmd)
-                    return
+                        new_cmds.append(cmd)
+                        break
+                    else:
+                        c._do_edit(cmd)
+                        return
                 elif (pos < c._start and c._end <= delend) or (pos <= c._start and c._end < delend):
+                    debug("Case 2")
                     # Case: this deletion removes the child
                     to_kill.add(c)
+                    new_cmds.append(cmd)
+                    break
                 elif (pos < c._start and (c._start < delend <= c._end)):
+                    debug("Case 3")
                     # Case: partially for us, partially for the child
                     my_text = text[:(c._start-pos).col]
                     c_text = text[(c._start-pos).col:]
@@ -157,6 +167,7 @@ class EditableTextObject(TextObject):
                     new_cmds.append((ctype, line, col, c_text))
                     break
                 elif (delend >= c._end and (c._start <= pos < c._end)):
+                    debug("Case 4")
                     # Case: partially for us, partially for the child
                     c_text = text[(c._end-pos).col:]
                     my_text = text[:(c._end-pos).col]
@@ -238,7 +249,7 @@ class EditableTextObject(TextObject):
                 break
             i -= 1
 
-        c = [ c._get_prev_tab(no) for c in self._childs ]
+        c = [ c._get_prev_tab(no) for c in self._editable_childs ]
         c = filter(lambda i: i, c)
 
         possible_sol += c
@@ -251,7 +262,7 @@ class EditableTextObject(TextObject):
     def _get_tabstop(self, requester, no):
         if no in self._tabstops:
             return self._tabstops[no]
-        for c in self._childs:
+        for c in self._editable_childs:
             if c is requester:
                 continue
 

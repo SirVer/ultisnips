@@ -48,17 +48,17 @@ class SnippetInstance(EditableTextObject):
     def replay_user_edits(self, cmds):
         """Replay the edits the user has done to keep endings of our
         Text objects in sync with reality"""
-        debug("---- BEFORE")
+        debug("---- BEGIN USER EDITS")
         echo_to_hierarchy(self)
         for cmd in cmds:
             self._do_edit(cmd)
         echo_to_hierarchy(self)
-        debug("---- AFTER")
 
     def update_textobjects(self):
         """Update the text objects that should change automagically after
         the users edits have been replayed. This might also move the Cursor
         """
+        debug("---- BEGIN UPDATE TEXTOBJECTS")
         vc = _VimCursor(self)
 
         done = set()
@@ -77,10 +77,12 @@ class SnippetInstance(EditableTextObject):
                     done.add(obj)
             counter -= 1
         if counter == 0:
-            raise RuntimeError("Cyclic dependency in TextElements!")
+            raise RuntimeError("Cyclic dependency in Snippet definition!")
 
         vc.to_vim()
         self._del_child(vc)
+        debug("--- ALL DONE")
+        echo_to_hierarchy(self)
 
     def select_next_tab(self, backwards = False):
         if self._cts is None:

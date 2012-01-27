@@ -25,8 +25,6 @@
 # and will compare the resulting output to expected results.
 #
 #
-# TODO: more edits that cross boundaries between text objects
-# TODO: delete hallo snippet -> hallo '' and then delete snippet
 # TODO: remove formatoption tests
 # TODO: python3 tests
 import os
@@ -1156,6 +1154,14 @@ class PythonCode_LongerTextThanSource_MultiLine(_VimTest):
     keys = """test""" + EX + JF + "ups"
     wanted = "hi" + 100*"a" + 100*"\n" + 100*"a" + "endups"
 
+class PythonCode_AccessKilledTabstop_OverwriteSecond(_VimTest):
+    snippets = ("test", r"`!p snip.rv = t[2].upper()`${1:h${2:welt}o}`!p snip.rv = t[2].upper()`")
+    keys = "test" + EX + JF + "okay"
+    wanted = "OKAYhokayoOKAY"
+class PythonCode_AccessKilledTabstop_OverwriteFirst(_VimTest):
+    snippets = ("test", r"`!p snip.rv = t[2].upper()`${1:h${2:welt}o}`!p snip.rv = t[2].upper()`")
+    keys = "test" + EX + "aaa"
+    wanted = "aaa"
 
 # End: New Implementation  #}}}
 # End: PythonCode Interpolation  #}}}
@@ -2497,6 +2503,16 @@ class Undo_RemoveEditInTabstop(_VimTest):
     snippets = ("test", "$1 Hello\naaa ${1} bbb\nWorld")
     keys = "hello test" + EX + "upsi" + ESC + "hh" + "iabcdef" + ESC + "u"
     wanted = "hello upsi Hello\naaa upsi bbb\nWorld"
+class Undo_RemoveWholeSnippet(_VimTest):
+    snippets = ("test", "Hello\n${1:Hello}World")
+    keys = "first line\n\n\n\n\n\nthird line" + \
+            ESC + "3k0itest" + EX + ESC + "uiupsy"
+    wanted = "first line\n\n\nupsy\n\n\nthird line"
+class JumpForward_DefSnippet(_VimTest):
+    snippets = ("test", "${1}\n`!p snip.rv = '\\n'.join(t[1].split())`\n\n${0:pass}")
+    keys = "test" + EX + "a b c" + JF + "shallnot" + JF + "end"
+    wanted = "a b c\na\nb\nc\n\nshallnotend"
+
 # End: Undo of Snippet insertion  #}}}
 # Tab Completion of Words  {{{#
 class Completion_SimpleExample_ECR(_VimTest):

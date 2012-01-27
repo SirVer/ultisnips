@@ -27,6 +27,12 @@ def guess_edit(initial_line, lt, ct, ppos, pos):
     movements like insertion, deletion of a line or carriage return.
     """
     if not len(lt) and not len(ct): return True, ()
+    if len(lt) and not ct:
+        es = []
+        for i in lt:
+            es.append(("D", pos.line, pos.col, lt))
+            es.append(("D", pos.line, pos.col, "\n"))
+            if is_complete_edit(initial_line, lt, ct, es): return True, es
     if pos.line == ppos.line: # Movement only in one line
         llen = len(lt[ppos.line - initial_line])
         clen = len(ct[pos.line - initial_line])
