@@ -254,16 +254,20 @@ provide many examples to make things clearer.
 See |UltiSnips-snippet-search-path| for an explanation of where directories
 with snippet definitions are expected.
 
-While iterating over the snippet definition directories found, files are
-looked for called ft.snippets or *_ft.snippets where "ft" is the current
-'filetype', and the "*" matches anything, for example: >
+UltiSnips follows the same search pattern that Vim itself uses when searching
+for ftplugins: While iterating over the snippet definition directories found,
+files are listed with the following glob patterns: ft.snippets, ft_*.snippets,
+ft/*. ft is the current 'filetype', and the "*" matches anything, for example:
    ruby.snippets
    c.snippets
-   my_c.snippets
+   c_mine.snippets
+   c/a
+   c/b.snippets
    perl.snippets
-These files contain the snippet definitions for the various file types. A
-special file is >
+Those files are than traversed in order to gather snippet definitions for the
+various file types. A special filetype is all, e.g.  >
    all.snippets
+   all/a.snippets
 which contains snippets that are always expanded, no matter what file type is
 defined. For example, I keep mail signatures and date insertion snippets here.
 
@@ -276,7 +280,7 @@ As an alternative, a snippet file may contain a line that looks like this: >
    extends ft1, ft2, ft3
 For example, the first line in cpp.snippets looks like this: >
    extends c
-This means, first check all triggers for c, then add the triggers from this
+This means, first search all snippets for c, then add the snippets from this
 file. This is a convenient way to add more special cases to more general ones.
 Multiple "extends" lines are permitted throughout the snippets file.
 

@@ -871,12 +871,13 @@ class SnippetManager(object):
             for snippet_dir in snippet_dirs:
                 pth = os.path.realpath(os.path.expanduser(os.path.join(rtp, snippet_dir)))
 
-                patterns = ["%s.snippets", "*_%s.snippets"]
+                patterns = ["%s.snippets", "%s_*.snippets", os.path.join("%s","*")]
                 if not default and pth == base_snippets:
                     patterns.remove("%s.snippets")
 
                 for pattern in patterns:
                     for fn in glob.glob(os.path.join(pth, pattern % ft)):
+                        debug("fn: %r" % (fn))
                         if fn not in ret:
                             ret.append(fn)
 
