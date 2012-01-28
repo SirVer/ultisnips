@@ -1,6 +1,16 @@
-	- Support for ${VISUAL}. *UltiSnips-visual-placeholder*
+version 2.0:
+	- Backwards incompatible change: Support for normal mode editing. Snippets
+	  are no longer exited when leaving insert mode but only by leaving the
+	  text span of the snippets. This allows usage of normal mode commands and
+	  autoformatting. It also increases compatibility with other plugins.
+	- Backwards incompatible change: Changed glob patterns for snippets to 
+	  behave more like Vim *UltiSnips-adding-snippets*
+	- Backwards incompatible change: Zero Tabstop is no longer removed in
+	  nested snippets
+	- Support for ${VISUAL} placeholder. *UltiSnips-visual-placeholder*
 	- Improved handling of utf-8 characters in files and snippet definitions.
-	- Full support for :py3. UltiSnips now truly works with python >= 2.6.
+	- Full support for :py3. UltiSnips now works with python >= 2.6 or >= 3.2.
+	- New or improved snippets: python, all
 
 version 1.6:
   - Significant speed improvements and a few bugs fixed.
