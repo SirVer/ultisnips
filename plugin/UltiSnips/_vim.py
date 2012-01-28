@@ -14,6 +14,8 @@ from UltiSnips.compatibility import vim_cursor, set_vim_cursor, \
 
 class VimBuffer(object):
     def __getitem__(self, idx):
+        if isinstance(idx, slice): # Py3
+            return self.__getslice__(idx.start, idx.stop)
         rv = vim.current.buffer[idx]
         return as_unicode(rv)
     def __getslice__(self, i, j):
@@ -21,6 +23,8 @@ class VimBuffer(object):
         return [ as_unicode(l) for l in rv ]
 
     def __setitem__(self, idx, text):
+        if isinstance(idx, slice): # Py3
+            return self.__setslice__(idx.start, idx.stop, text)
         vim.current.buffer[idx] = as_vimencoding(text)
     def __setslice__(self, i, j, text):
         vim.current.buffer[i:j] = [ as_vimencoding(l) for l in text ]

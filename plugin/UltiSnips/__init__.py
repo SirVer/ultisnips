@@ -8,7 +8,7 @@ import os
 import re
 import traceback
 
-from debug import echo_to_hierarchy, debug
+from UltiSnips.debug import echo_to_hierarchy, debug
 
 from UltiSnips.compatibility import as_unicode
 from UltiSnips._diff import diff, guess_edit
@@ -597,6 +597,7 @@ class SnippetManager(object):
             ct_span = [0, len(ct)]
             initial_line = cstart
 
+            debug("type(lt): %r, type(ct): %r" % (type(lt), type(ct)))
             debug("lt: %r" % (lt))
             debug("ct: %r" % (ct))
             debug("self._lpos: %r, pos: %r" % (self._lpos, pos))

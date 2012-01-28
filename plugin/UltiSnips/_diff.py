@@ -77,7 +77,7 @@ def diff(a, b, sline = 0):
         and not after \n
     """
     d = defaultdict(list)
-    seen = defaultdict(lambda: sys.maxint)
+    seen = defaultdict(lambda: sys.maxsize)
 
     d[0] = [ (0,0,sline, 0, ()) ]
 

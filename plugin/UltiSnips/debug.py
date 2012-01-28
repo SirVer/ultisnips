@@ -12,7 +12,7 @@ def echo_to_hierarchy(to):
     while par._parent: par = par._parent
 
     def _do_print(to, indent=""):
-        debug(indent + unicode(to))
+        debug(indent + as_unicode(to))
 
         try:
             for c in to._childs:

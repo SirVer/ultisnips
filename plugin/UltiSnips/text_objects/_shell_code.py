@@ -6,6 +6,7 @@ import subprocess
 import stat
 import tempfile
 
+from UltiSnips.compatibility import as_unicode
 from UltiSnips.text_objects._base import NoneditableTextObject
 
 class ShellCode(NoneditableTextObject):
@@ -24,7 +25,7 @@ class ShellCode(NoneditableTextObject):
         # Execute the file and read stdout
         proc = subprocess.Popen(path, shell=True, stdout=subprocess.PIPE)
         proc.wait()
-        output = proc.stdout.read()
+        output = as_unicode(proc.stdout.read())
 
         if len(output) and output[-1] == '\n':
             output = output[:-1]
