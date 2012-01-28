@@ -4,6 +4,9 @@
 from collections import defaultdict
 import sys
 
+from UltiSnips import _vim
+from UltiSnips.geometry import Position
+
 def is_complete_edit(initial_line, a, b, cmds):
     buf = a[:]
     for cmd in cmds:
@@ -20,19 +23,32 @@ def is_complete_edit(initial_line, a, b, cmds):
         buf = '\n'.join(buf).split('\n')
     return len(buf) == len(b) and all(j==k for j,k in zip(buf, b))
 
-def guess_edit(initial_line, lt, ct, ppos, pos):
+def guess_edit(initial_line, lt, ct, vs):
     """
     Try to guess what the user might have done by heuristically looking at cursor movement
     number of changed lines and if they got longer or shorter. This will detect most simple
     movements like insertion, deletion of a line or carriage return.
     """
+    assert(ct)
     if not len(lt) and not len(ct): return True, ()
-    if len(lt) and not ct:
+    pos = vs.pos
+    ppos = vs.ppos
+    if len(lt) and (not ct or (len(ct) == 1 and not ct[0])):  # All text deleted?
         es = []
         for i in lt:
-            es.append(("D", pos.line, pos.col, lt))
-            es.append(("D", pos.line, pos.col, "\n"))
-            if is_complete_edit(initial_line, lt, ct, es): return True, es
+            es.append(("D", initial_line, 0, i))
+            es.append(("D", initial_line, 0, "\n"))
+        es.pop() # Remove final \n because it is not really removed
+        if is_complete_edit(initial_line, lt, ct, es): return True, es
+    if ppos.mode == 'v': # Maybe selectmode?
+        sv = list(map(int, _vim.eval("""getpos("'<")"""))); sv = Position(sv[1]-1,sv[2]-1)
+        ev = list(map(int, _vim.eval("""getpos("'>")"""))); ev = Position(ev[1]-1,ev[2]-1)
+        es = []
+        if sv.line == ev.line:
+            es.append(("D", sv.line, sv.col, lt[sv.line - initial_line][sv.col:ev.col+1]))
+            if sv != pos and sv.line == pos.line:
+                es.append(("I", sv.line, sv.col, ct[sv.line - initial_line][sv.col:pos.col+1]))
+        if is_complete_edit(initial_line, lt, ct, es): return True, es
     if pos.line == ppos.line: # Movement only in one line
         llen = len(lt[ppos.line - initial_line])
         clen = len(ct[pos.line - initial_line])

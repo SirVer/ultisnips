@@ -25,7 +25,6 @@
 # and will compare the resulting output to expected results.
 #
 #
-# TODO: check if a span was selected
 import os
 import tempfile
 import unittest
@@ -725,7 +724,7 @@ class TabStop_TSInDefaultText_ZeroLengthNested_OverwriteSecondJumpBackOverwrite(
     snippets = ("test", """h${1:a$2b}l""")
     keys = "test" + EX + JF + "longertext" + JB + "overwrite" + JF + "End"
     wanted = """hoverwritelEnd"""
-class TabStop_TSInDefaultText_ZeroLengthNested_OverwriteSecondJumpBackAndForward(_VimTest):
+class TabStop_TSInDefaultText_ZeroLengthNested_OverwriteSecondJumpBackAndForward0(_VimTest):
     snippets = ("test", """h${1:a$2b}l""")
     keys = "test" + EX + JF + "longertext" + JB + JF + "overwrite" + JF + "End"
     wanted = """haoverwriteblEnd"""

@@ -6,8 +6,6 @@ import vim
 import UltiSnips._vim as _vim
 from UltiSnips.geometry import Position
 
-from ..debug import debug
-
 __all__ = ["TextObject", "EditableTextObject", "NoneditableTextObject"]
 
 class TextObject(object):
@@ -123,7 +121,6 @@ class EditableTextObject(TextObject):
     # Private/Protected functions #
     ###############################
     def _do_edit(self, cmd):
-        debug("cmd: %r, self: %r" % (cmd, self))
         ctype, line, col, text = cmd
         assert( ('\n' not in text) or (text == "\n"))
         pos = Position(line, col)
@@ -143,7 +140,6 @@ class EditableTextObject(TextObject):
                 delend = pos + Position(0, len(text)) if text != "\n" \
                         else Position(line + 1, 0)
                 if (c._start <= pos < c._end) and (c._start < delend <= c._end):
-                    debug("Case 1")
                     # this edit command is completely for the child
                     if isinstance(c, NoneditableTextObject):
                         to_kill.add(c)
@@ -153,13 +149,11 @@ class EditableTextObject(TextObject):
                         c._do_edit(cmd)
                         return
                 elif (pos < c._start and c._end <= delend) or (pos <= c._start and c._end < delend):
-                    debug("Case 2")
                     # Case: this deletion removes the child
                     to_kill.add(c)
                     new_cmds.append(cmd)
                     break
                 elif (pos < c._start and (c._start < delend <= c._end)):
-                    debug("Case 3")
                     # Case: partially for us, partially for the child
                     my_text = text[:(c._start-pos).col]
                     c_text = text[(c._start-pos).col:]
@@ -167,7 +161,6 @@ class EditableTextObject(TextObject):
                     new_cmds.append((ctype, line, col, c_text))
                     break
                 elif (delend >= c._end and (c._start <= pos < c._end)):
-                    debug("Case 4")
                     # Case: partially for us, partially for the child
                     c_text = text[(c._end-pos).col:]
                     my_text = text[:(c._end-pos).col]

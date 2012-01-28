@@ -2,13 +2,12 @@
 # encoding: utf-8
 
 from functools import wraps
+from collections import deque
 import glob
 import hashlib
 import os
 import re
 import traceback
-
-from UltiSnips.debug import echo_to_hierarchy, debug
 
 from UltiSnips.compatibility import as_unicode
 from UltiSnips._diff import diff, guess_edit
@@ -454,19 +453,63 @@ class VisualContentPreserver(object):
     def mode(self):
         return self._mode
 
+class _VimPosition(Position):
+    def __init__(self):
+        pos = _vim.buf.cursor
+        self._mode = _vim.eval("mode()")
+        self._visualmode = _vim.eval("visualmode()")
+        Position.__init__(self, pos.line, pos.col)
+
+    @property
+    def mode(self):
+        return self._mode
+    @property
+    def visualmode(self):
+        return self._visualmode
+
+
+class VimState(object):
+    def __init__(self):
+        """
+        This class caches some state information from Vim to better
+        guess what editing tasks the user might have done in the last step
+        """
+        self._poss = deque(maxlen=5)
+        self._lvb = None
+
+    def remember_position(self):
+        self._poss.append(_VimPosition())
+
+    def remember_buffer(self, to):
+        self._lvb = _vim.buf[to.start.line:to.end.line+1]
+        self._lvb_len = len(_vim.buf)
+        self.remember_position()
+
+    @property
+    def diff_in_buffer_length(self):
+        return len(_vim.buf) - self._lvb_len
+
+    @property
+    def pos(self):
+        return self._poss[-1]
+    @property
+    def ppos(self):
+        return self._poss[-2]
+    @property
+    def remembered_buffer(self):
+        return self._lvb[:]
+
 
 class SnippetManager(object):
     def __init__(self):
         self._supertab_keys = None
         self._csnippets = []
-        self._cached_offending_vim_options = {}
 
         self.reset()
 
     @err_to_scratch_buffer
     def reset(self, test_error=False):
-        self._lvb = []
-        self._lpos = Position(0,0)
+        self._vstate = VimState()
         self._test_error = test_error
         self._snippets = {}
         self._visual_content = VisualContentPreserver()
@@ -579,6 +622,7 @@ class SnippetManager(object):
 
     @err_to_scratch_buffer
     def cursor_moved(self):
+        self._vstate.remember_position()
         if _vim.eval("mode()") not in 'in':
             return
 
@@ -588,37 +632,31 @@ class SnippetManager(object):
 
         if self._csnippets:
             cstart = self._csnippets[0].start.line
-            cend = self._csnippets[0].end.line + len(_vim.buf) - self._lvb_len
+            cend = self._csnippets[0].end.line + self._vstate.diff_in_buffer_length
             ct = _vim.buf[cstart:cend + 1]
-            lt = self._lvb[:]
+            lt = self._vstate.remembered_buffer
             pos = _vim.buf.cursor
 
             lt_span = [0, len(lt)]
             ct_span = [0, len(ct)]
             initial_line = cstart
 
-            debug("type(lt): %r, type(ct): %r" % (type(lt), type(ct)))
-            debug("lt: %r" % (lt))
-            debug("ct: %r" % (ct))
-            debug("self._lpos: %r, pos: %r" % (self._lpos, pos))
             # Cut down on lines searched for changes. Start from behind and
             # remove all equal lines. Then do the same from the front.
             if lt and ct:
                 while (lt[lt_span[1]-1] == ct[ct_span[1]-1] and
-                        self._lpos.line < initial_line + lt_span[1]-1 and pos.line < initial_line + ct_span[1]-1 and
+                        self._vstate.ppos.line < initial_line + lt_span[1]-1 and pos.line < initial_line + ct_span[1]-1 and
                        (lt_span[0] < lt_span[1]) and
                        (ct_span[0] < ct_span[1])):
                     ct_span[1] -= 1
                     lt_span[1] -= 1
-                debug("1 lt_span: %r, ct_span: %r" % (lt_span ,ct_span))
                 while (lt_span[0] < lt_span[1] and
                        ct_span[0] < ct_span[1] and
                        lt[lt_span[0]] == ct[ct_span[0]] and
-                       self._lpos.line >= initial_line and pos.line >= initial_line):
+                       self._vstate.ppos.line >= initial_line and pos.line >= initial_line):
                     ct_span[0] += 1
                     lt_span[0] += 1
                     initial_line += 1
-            debug("2 lt_span: %r, ct_span: %r" % (lt_span ,ct_span))
             ct_span[0] = max(0, ct_span[0] - 1)
             lt_span[0] = max(0, lt_span[0] - 1)
             initial_line = max(cstart, initial_line - 1)
@@ -626,24 +664,17 @@ class SnippetManager(object):
             lt = lt[lt_span[0]:lt_span[1]]
             ct = ct[ct_span[0]:ct_span[1]]
 
-            debug("initial_line: %r, lt: %r, ct: %r, self._lpos: %r, pos: %r" % (initial_line, lt, ct, self._lpos, pos))
-            rv, es = guess_edit(initial_line, lt, ct, self._lpos, pos)
+            rv, es = guess_edit(initial_line, lt, ct, self._vstate)
             if not rv:
-                debug("Not guessed :(")
                 lt = '\n'.join(lt)
                 ct = '\n'.join(ct)
                 es = diff(lt, ct, initial_line)
-            else:
-                debug("Guessed hooray!")
-            debug("es: %r" % (es,))
             self._csnippets[0].replay_user_edits(es)
 
         self._check_if_still_inside_snippet()
         if self._csnippets:
             self._csnippets[0].update_textobjects()
-            self._lvb = _vim.buf[self._csnippets[0].start.line:self._csnippets[0].end.line + 1]
-            self._lvb_len = len(_vim.buf)
-            self._lpos = _vim.buf.cursor
+            self._vstate.remember_buffer(self._csnippets[0])
 
 
     def leaving_window(self):
@@ -652,7 +683,6 @@ class SnippetManager(object):
         snippets must be properly terminated
         """
         while len(self._csnippets):
-            debug("*** Current snippet is done ***")
             self._current_snippet_is_done()
         self._reinit()
 
@@ -706,6 +736,8 @@ class SnippetManager(object):
                 # Cleanup by removing current snippet and recursing.
                 self._current_snippet_is_done()
                 jumped = self._jump(backwards)
+        if jumped:
+            self._vstate.remember_position()
         return jumped
 
     def _handle_failure(self, trigger):
@@ -809,10 +841,7 @@ class SnippetManager(object):
         self._csnippets.append(si)
 
         self._ignore_movements = True
-        # TODO: move this back into VimState
-        self._lvb = _vim.buf[self._csnippets[0].start.line:self._csnippets[0].end.line + 1]
-        self._lvb_len = len(_vim.buf)
-        self._lpos = _vim.buf.cursor
+        self._vstate.remember_buffer(self._csnippets[0])
 
         self._jump()
 
@@ -877,7 +906,6 @@ class SnippetManager(object):
 
                 for pattern in patterns:
                     for fn in glob.glob(os.path.join(pth, pattern % ft)):
-                        debug("fn: %r" % (fn))
                         if fn not in ret:
                             ret.append(fn)
 
