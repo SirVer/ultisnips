@@ -25,7 +25,6 @@
 # and will compare the resulting output to expected results.
 #
 #
-# TODO: python3 tests
 # TODO: check if a span was selected
 import os
 import tempfile
@@ -1348,6 +1347,10 @@ class Mirror_TestKill_InsertEnd_Kill(_VimTest):
     snippets = "test", "$1 $1_"
     keys = "hallo test" + EX + "auch" + ESC + "ehihi" + ESC + "bb" + "ino" + JF + "end"
     wanted = "hallo noauch auchih_end"
+class Mirror_TestKillTabstop_Kill(_VimTest):
+    snippets = "test", "welt${1:welt${2:welt}welt} $2"
+    keys = "hallo test" + EX + "elt"
+    wanted = "hallo weltelt "
 
 # End: Mirrors  #}}}
 # Transformations  {{{#
@@ -2441,6 +2444,15 @@ class CursorMovement_Multiline_ECR(_VimTest):
     keys = "test" + EX + "this is something\nvery nice\nnot" + JF + "more text"
     wanted = "this is something\nvery nice\nnot " \
             "this is something\nvery nice\nnotmore text"
+class CursorMovement_BS_InEditMode(_VimTest):
+    def _options_on(self):
+        self.send(":set backspace=eol,indent,start\n")
+
+    def _options_off(self):
+        self.send(":set backspace=\n")
+    snippets = ("<trh", "<tr>\n\t<th>$1</th>\n\t$2\n</tr>\n$3")
+    keys = "<trh" + EX + "blah" + JF + BS + BS + JF + "end"
+    wanted = "<tr>\n\t<th>blah</th>\n</tr>\nend"
 # End: Cursor Movement  #}}}
 # Insert Mode Moving  {{{#
 class IMMoving_CursorsKeys_ECR(_VimTest):
