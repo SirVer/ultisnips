@@ -20,7 +20,8 @@ if sys.version_info >= (3,0):
         multibyte chars, we therefore have to compensate"""
 
         pre_chars = vim.current.buffer[line-1][:col]
-        nbytes = len(pre_chars.encode("utf-8"))
+        vc = vim.eval("&encoding")
+        nbytes = len(pre_chars.encode(vc))
 
         vim.current.window.cursor = line, nbytes
 
@@ -30,13 +31,15 @@ if sys.version_info >= (3,0):
 
         line, nbyte = vim.current.window.cursor
 
-        raw_bytes = vim.current.buffer[line-1].encode("utf-8")[:nbyte]
+        vc = vim.eval("&encoding")
+        raw_bytes = vim.current.buffer[line-1].encode(vc)[:nbyte]
 
-        col = len(raw_bytes.decode("utf-8"))
+        col = len(raw_bytes.decode(vc))
         return line, col
     def as_unicode(s):
         if isinstance(s, bytes):
-            return s.decode("utf-8")
+            vc = vim.eval("&encoding")
+            return s.decode(vc)
         return str(s)
 
     def as_vimencoding(s):
@@ -48,8 +51,9 @@ else:
         """Wrapper around vims access to window.cursor. It can't handle
         multibyte chars, we therefore have to compensate"""
 
-        pre_chars = vim.current.buffer[line-1].decode("utf-8")[:col]
-        nbytes = len(pre_chars.encode("utf-8"))
+        vc = vim.eval("&encoding")
+        pre_chars = vim.current.buffer[line-1].decode(vc)[:col]
+        nbytes = len(pre_chars.encode(vc))
 
         vim.current.window.cursor = line, nbytes
 
@@ -61,14 +65,17 @@ else:
 
         raw_bytes = vim.current.buffer[line-1][:nbyte]
 
-        col = len(raw_bytes.decode("utf-8"))
+        vc = vim.eval("&encoding")
+        col = len(raw_bytes.decode(vc))
         return line, col
 
     def as_unicode(s):
         if isinstance(s, str):
-            return s.decode("utf-8")
+            vc = vim.eval("&encoding")
+            return s.decode(vc)
         return unicode(s)
 
     def as_vimencoding(s):
-        return s.encode("utf-8")
+        vc = vim.eval("&encoding")
+        return s.encode(vc)
 

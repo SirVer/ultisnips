@@ -24,7 +24,11 @@
 # The testsuite will use ``screen`` to inject commands into the Vim under test,
 # and will compare the resulting output to expected results.
 #
-#
+# Under windows, COM's SendKeys is used to send keystrokes to the gvim window.
+# Note that Gvim must use english keyboard input (choose in windows registry)
+# for this to work properly as SendKeys is a piece of chunk. (i.e. it sends
+# <F13> when you send a | symbol while using german key mappings)
+
 import os
 import tempfile
 import unittest
@@ -1934,6 +1938,7 @@ class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand2(_VimTest):
     keys = "-test" + EX
     wanted = "-Expand me!"
 class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand3(_VimTest):
+    skip_on_windows = True   # SendKeys can't send UTF characters
     snippets = (("test", "Expand me!", "", "i"), )
     keys = "ßßtest" + EX
     wanted = "ßßExpand me!"
@@ -2033,7 +2038,7 @@ class SnippetOptions_Regex_Multiple(_VimTest):
     wanted = "Expand me!"
 
 class _Regex_Self(_VimTest):
-    snippets = (r"((?<=\W)|^)(\.)", "self.", "", "r")
+    snippets = (u"((?<=\W)|^)(\.)", "self.", "", "r")
 class SnippetOptions_Regex_Self_Start(_Regex_Self):
     keys = "." + EX
     wanted = "self."
@@ -2340,6 +2345,7 @@ hi4"""
 
 # Test for bug 871357 #
 class TestLangmapWithUtf8_ExceptCorrectResult(_VimTest):
+    skip_on_windows = True   # SendKeys can't send UTF characters
     snippets = ("testme",
 """my snipped ${1:some_default}
 and a mirror: $1
@@ -2714,37 +2720,40 @@ class Snippet_With_DoubleQuote_List(_VimTest):
     wanted = "Expand me\"!"
 # End: Quotes in Snippets  #}}}
 # Umlauts and Special Chars  {{{#
-class Snippet_With_Umlauts_List(_VimTest):
+class _UmlautsBase(_VimTest):
+    skip_on_windows = True   # SendKeys can't send UTF characters
+
+class Snippet_With_Umlauts_List(_UmlautsBase):
     snippets = _snip_quote('ü')
     keys = 'te' + LS + "2\n"
     wanted = "Expand meü!"
 
-class Snippet_With_Umlauts(_VimTest):
+class Snippet_With_Umlauts(_UmlautsBase):
     snippets = _snip_quote('ü')
     keys = 'teüst' + EX
     wanted = "Expand meü!"
 
-class Snippet_With_Umlauts_TypeOn(_VimTest):
+class Snippet_With_Umlauts_TypeOn(_UmlautsBase):
     snippets = ('ül', 'üüüüüßßßß')
     keys = 'te ül' + EX + "more text"
     wanted = "te üüüüüßßßßmore text"
-class Snippet_With_Umlauts_OverwriteFirst(_VimTest):
+class Snippet_With_Umlauts_OverwriteFirst(_UmlautsBase):
     snippets = ('ül', 'üü ${1:world} üü ${2:hello}ßß\nüüüü')
     keys = 'te ül' + EX + "more text" + JF + JF + "end"
     wanted = "te üü more text üü helloßß\nüüüüend"
-class Snippet_With_Umlauts_OverwriteSecond(_VimTest):
+class Snippet_With_Umlauts_OverwriteSecond(_UmlautsBase):
     snippets = ('ül', 'üü ${1:world} üü ${2:hello}ßß\nüüüü')
     keys = 'te ül' + EX + JF + "more text" + JF + "end"
     wanted = "te üü world üü more textßß\nüüüüend"
-class Snippet_With_Umlauts_OverwriteNone(_VimTest):
+class Snippet_With_Umlauts_OverwriteNone(_UmlautsBase):
     snippets = ('ül', 'üü ${1:world} üü ${2:hello}ßß\nüüüü')
     keys = 'te ül' + EX + JF + JF + "end"
     wanted = "te üü world üü helloßß\nüüüüend"
-class Snippet_With_Umlauts_Mirrors(_VimTest):
+class Snippet_With_Umlauts_Mirrors(_UmlautsBase):
     snippets = ('ül', 'üü ${1:world} üü $1')
     keys = 'te ül' + EX + "hello"
     wanted = "te üü hello üü hello"
-class Snippet_With_Umlauts_Python(_VimTest):
+class Snippet_With_Umlauts_Python(_UmlautsBase):
     snippets = ('ül', 'üü ${1:world} üü `!p snip.rv = len(t[1])*"a"`')
     keys = 'te ül' + EX + "hüüll"
     wanted = "te üü hüüll üü aaaaa"

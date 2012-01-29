@@ -3,7 +3,7 @@
 
 __all__ = [ "debug" ]
 
-import types
+import sys
 
 from UltiSnips.compatibility import as_unicode
 
@@ -24,7 +24,9 @@ def echo_to_hierarchy(to):
 
 def debug(s):
     s = as_unicode(s)
-    f = open("/tmp/file.txt","ab")
+    fn = "/tmp/file.txt" if not sys.platform.lower().startswith("win") \
+            else "C:/windows/temp/ultisnips.txt"
+    f = open(fn,"ab")
     f.write((s + '\n').encode("utf-8"))
     f.close()
 

@@ -296,7 +296,7 @@ class Snippet(object):
         self._matched = ""
 
         # Don't expand on whitespace
-        if trigger and trigger.rstrip() is not trigger:
+        if trigger and trigger.rstrip() != trigger:
             return False
 
         words = self._words_for_line(trigger)
@@ -408,7 +408,7 @@ class Snippet(object):
                 line_ind = indent + line_ind
 
             v.append(line_ind + line[tabs:])
-        v = os.linesep.join(v)
+        v = '\n'.join(v)
 
         if parent is None:
             si = SnippetInstance(None, indent, v, start, end, visual_content = visual_content,
@@ -945,7 +945,7 @@ class SnippetManager(object):
             edit = existing[-1] # last sourced/highest priority
         else:
             home = _vim.eval("$HOME")
-            rtp = _vim.eval("&rtp").split(",")
+            rtp = [ os.path.realpath(os.path.expanduser(p)) for p in _vim.eval("&rtp").split(",") ]
             snippet_dirs = ["UltiSnips"] + _vim.eval("g:UltiSnipsSnippetDirectories")
             us = snippet_dirs[-1]
 
@@ -1043,7 +1043,6 @@ class SnippetManager(object):
         potentially - also returns snippets that could potentially match; that
                       is which triggers start with the current trigger
         """
-
         snips = self._snippets.get(ft,None)
         if not snips:
             return []
