@@ -29,7 +29,6 @@ def guess_edit(initial_line, lt, ct, vs):
     number of changed lines and if they got longer or shorter. This will detect most simple
     movements like insertion, deletion of a line or carriage return.
     """
-    assert(ct)
     if not len(lt) and not len(ct): return True, ()
     pos = vs.pos
     ppos = vs.ppos
@@ -38,7 +37,8 @@ def guess_edit(initial_line, lt, ct, vs):
         for i in lt:
             es.append(("D", initial_line, 0, i))
             es.append(("D", initial_line, 0, "\n"))
-        es.pop() # Remove final \n because it is not really removed
+        if ct:
+            es.pop() # Remove final \n because it is not really removed
         if is_complete_edit(initial_line, lt, ct, es): return True, es
     if ppos.mode == 'v': # Maybe selectmode?
         sv = list(map(int, _vim.eval("""getpos("'<")"""))); sv = Position(sv[1]-1,sv[2]-1)
