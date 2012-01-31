@@ -116,7 +116,7 @@ class _VimCursor(NoneditableTextObject):
 
     def __init__(self, parent):
         NoneditableTextObject.__init__(
-            self, parent, _vim.buf.cursor, _vim.buf.cursor
+            self, parent, _vim.buf.cursor, _vim.buf.cursor, tiebreaker = Position(0,0),
         )
 
     def to_vim(self):

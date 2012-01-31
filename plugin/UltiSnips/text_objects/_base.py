@@ -13,7 +13,7 @@ class TextObject(object):
     This base class represents any object in the text
     that has a span in any ways
     """
-    def __init__(self, parent, token, end = None, initial_text = ""):
+    def __init__(self, parent, token, end = None, initial_text = "", tiebreaker = None):
         self._parent = parent
 
         ct = None
@@ -25,6 +25,7 @@ class TextObject(object):
             self._start = token.start
             self._end = token.end
             self._initial_text = token.initial_text
+        self._tiebreaker = tiebreaker or Position(self._start.line, self._end.line)
 
         if parent is not None:
             parent._add_child(self)
@@ -48,9 +49,17 @@ class TextObject(object):
             )
 
     def __lt__(self, other):
-        return self._start < other._start
+        me = (self._start.line, self._start.col,
+                self._tiebreaker.line, self._tiebreaker.col)
+        o = (other._start.line, other._start.col,
+                other._tiebreaker.line, other._tiebreaker.col)
+        return me < o
     def __le__(self, other):
-        return self._start <= other._start
+        me = (self._start.line, self._start.col,
+                self._tiebreaker.line, self._tiebreaker.col)
+        o = (other._start.line, other._start.col,
+                other._tiebreaker.line, other._tiebreaker.col)
+        return me <= o
 
     def __repr__(self):
         ct = ""
@@ -178,7 +187,8 @@ class EditableTextObject(TextObject):
         # We have to handle this ourselves
         delta = Position(1, 0) if text == "\n" else Position(0, len(text))
         if ctype == "D":
-            assert(self._start != self._end) # Makes no sense to delete in empty textobject
+            if self._start == self._end: # Makes no sense to delete in empty textobject
+                return
             delta.line *= -1
             delta.col *= -1
         pivot = Position(line, col)
