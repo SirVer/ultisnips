@@ -1521,6 +1521,14 @@ class Visual_SelectOneWord(_VimTest):
     snippets = ("test", "h${VISUAL}b")
     keys = "blablub" + ESC + "0v6l" + EX + "test" + EX
     wanted = "hblablubb"
+class VisualWithDefault_ExpandWithoutVisual(_VimTest):
+    snippets = ("test", "h${VISUAL:world}b")
+    keys = "test" + EX + "hi"
+    wanted = "hworldbhi"
+class VisualWithDefault_ExpandWithVisual(_VimTest):
+    snippets = ("test", "h${VISUAL:world}b")
+    keys = "blablub" + ESC + "0v6l" + EX + "test" + EX
+    wanted = "hblablubb"
 
 class Visual_ExpandTwice(_VimTest):
     snippets = ("test", "h${VISUAL}b")

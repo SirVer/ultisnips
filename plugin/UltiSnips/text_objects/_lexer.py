@@ -135,15 +135,19 @@ class TabStopToken(Token):
         )
 
 class VisualToken(Token):
-    TOKEN = "${VISUAL}"
+    CHECK = re.compile(r"^\${VISUAL[:}]")
 
     @classmethod
     def starts_here(klass, stream):
-        return stream.peek(len(klass.TOKEN)) == klass.TOKEN
+        return klass.CHECK.match(stream.peek(10)) is not None
 
     def _parse(self, stream, indent):
-        for i in range(len(self.TOKEN)):
+        for i in range(8): # ${VISUAL
             stream.next()
+
+        if stream.peek() == ":":
+            stream.next()
+        self.alternative_text = _parse_till_closing_brace(stream)
 
     def __repr__(self):
         return "VisualToken(%r,%r)" % (

@@ -25,6 +25,9 @@ class Visual(NoneditableTextObject):
                 break
             except AttributeError:
                 snippet = snippet._parent
+        if not self._text:
+            self._text = token.alternative_text
+            self._mode = "v"
 
         NoneditableTextObject.__init__(self, parent, token)
 

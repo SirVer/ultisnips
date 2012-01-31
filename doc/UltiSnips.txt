@@ -367,11 +367,13 @@ Snippets can contain a special placeholder called ${VISUAL}. When you select
 some text in visual mode and press the key to expand a trigger
 (see g:UltiSnipsExpandTrigger) the selected text will get deleted and you will
 drop to insert mode. The next snippet you expand will have the selected text
-in the place of the ${VISUAL}. As a small example, let's take this snippet:
+in the place of the ${VISUAL}. The place holder can also contain default text
+when there is no visual text to be selected: ${VISUAL:default text}.
+As a small example, let's take this snippet:
 
 ------------------- SNIP -------------------
 snippet t
-<tag>${VISUAL}</tag>
+<tag>${VISUAL:inside text}</tag>
 endsnippet
 ------------------- SNAP -------------------
 And starting with this line: >
@@ -379,6 +381,9 @@ And starting with this line: >
 position the cursor on the should, then press viw (visual mode -> select inner
 word). Then press tab, type "t" and press tab again >
    -> this <tag>should</tag> be cool
+If you expand this snippet without having been in visual mode before, e.g. by
+writing in insert mode t<tab>, you will get >
+   <tag>inside text</tag>
 
 4.4 Interpolation                                   *UltiSnips-interpolation*
 -----------------
