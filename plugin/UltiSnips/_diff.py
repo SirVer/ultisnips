@@ -16,8 +16,11 @@ def is_complete_edit(initial_line, a, b, cmds):
             if char != '\n':
                 buf[line] = buf[line][:col] + buf[line][col+len(char):]
             else:
-                buf[line] = buf[line] + buf[line+1]
-                del buf[line+1]
+                if len(buf) > 1:
+                    buf[line] = buf[line] + buf[line+1]
+                    del buf[line+1]
+                else:
+                    del buf[line]
         elif ctype == "I":
             buf[line] = buf[line][:col] + char + buf[line][col:]
         buf = '\n'.join(buf).split('\n')
@@ -34,11 +37,11 @@ def guess_edit(initial_line, lt, ct, vs):
     ppos = vs.ppos
     if len(lt) and (not ct or (len(ct) == 1 and not ct[0])):  # All text deleted?
         es = []
+        if not ct: ct = ['']
         for i in lt:
             es.append(("D", initial_line, 0, i))
             es.append(("D", initial_line, 0, "\n"))
-        if ct:
-            es.pop() # Remove final \n because it is not really removed
+        es.pop() # Remove final \n because it is not really removed
         if is_complete_edit(initial_line, lt, ct, es): return True, es
     if ppos.mode == 'v': # Maybe selectmode?
         sv = list(map(int, _vim.eval("""getpos("'<")"""))); sv = Position(sv[1]-1,sv[2]-1)
