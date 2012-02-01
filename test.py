@@ -196,6 +196,7 @@ class _VimTest(unittest.TestCase):
             if self.output != wanted:
                 # Redo this, but slower
                 self.sleeptime += 0.02
+                self.send(ESC)
                 self.setUp()
         self.assertEqual(self.output, wanted)
 
@@ -219,8 +220,6 @@ class _VimTest(unittest.TestCase):
             return self._skip("Running on Linux")
         if self.skip_on_mac and system == "Darwin":
             return self._skip("Running on Darwin/Mac")
-
-        self.send(ESC)
 
         # Close all scratch buffers
         self.send(":silent! close\n")
@@ -261,8 +260,6 @@ class _VimTest(unittest.TestCase):
             self.send(self.text_before + '\n\n')
             self.send('\n\n' + self.text_after)
 
-            self.send(ESC)
-
             # Go to the middle of the buffer
             self.send(ESC + "ggjj")
 
@@ -281,7 +278,7 @@ class _VimTest(unittest.TestCase):
             os.close(handle)
             os.unlink(fn)
 
-            self.send(ESC + ":w! %s\n" % fn)
+            self.send(":w! %s\n" % fn)
 
             # Read the output, chop the trailing newline
             tries = 50
@@ -1811,6 +1808,9 @@ class ListAllAvailable_NothingTyped_ExceptCorrectResult(_ListAllSnippets):
 class ListAllAvailable_SpaceInFront_ExceptCorrectResult(_ListAllSnippets):
     keys = " " + LS + "3\n"
     wanted = " BLAAH"
+class ListAllAvailable_BraceInFront_ExceptCorrectResult(_ListAllSnippets):
+    keys = "} " + LS + "3\n"
+    wanted = "} BLAAH"
 class ListAllAvailable_testtyped_ExceptCorrectResult(_ListAllSnippets):
     keys = "hallo test" + LS + "2\n"
     wanted = "hallo BLAAH"

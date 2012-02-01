@@ -9,6 +9,8 @@ import os
 import re
 import traceback
 
+from UltiSnips.debug import debug
+
 from UltiSnips.compatibility import as_unicode
 from UltiSnips._diff import diff, guess_edit
 from UltiSnips.geometry import Position
@@ -333,8 +335,9 @@ class Snippet(object):
     def could_match(self, trigger):
         self._matched = ""
 
-        # Don't expand on whitespace
-        trigger = trigger.lstrip()
+        # List all on whitespace.
+        if trigger and trigger[-1] in (" ", "\t"):
+            trigger = ""
         if trigger and trigger.rstrip() is not trigger:
             return False
 
