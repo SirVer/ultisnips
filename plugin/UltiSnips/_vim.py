@@ -4,7 +4,6 @@
 """
 Wrapper functionality around the functions we need from Vim
 """
-
 import vim
 from vim import error
 
@@ -124,13 +123,17 @@ def select(start, end):
 
     set_vim_cursor(lineno + 1, col)
 
+    move_cmd = ""
+    if eval("mode()") != 'n':
+        move_cmd += r"\<Esc>"
+
     # Case 1: Zero Length Tabstops
     if delta.line == delta.col == 0:
-        if col == 0 or eval("mode()") != 'i' and \
+        if col == 0 or eval("mode()") not in 'i' and \
                 col < len(buf[lineno]):
-            feedkeys(r"\<Esc>i")
+            move_cmd += "i"
         else:
-            feedkeys(r"\<Esc>a")
+            move_cmd += "a"
     else:
         # Case 2a: Non zero length
         # If a tabstop immediately starts with a newline, the selection
@@ -173,11 +176,11 @@ def select(start, end):
         else:
             do_select = "0" if inclusive else "0l"
 
-        move_cmd = _LangMapTranslator().translate(
-            r"\<Esc>%sv%s%s\<c-g>" % (move_one_right, move_lines, do_select)
+        move_cmd += _LangMapTranslator().translate(
+            r"%sv%s%s\<c-g>" % (move_one_right, move_lines, do_select)
         )
 
-        feedkeys(move_cmd)
+    feedkeys(move_cmd)
 
 # Helper functions  {{{
 def _calc_end(lines, start):
