@@ -334,6 +334,7 @@ class Snippet(object):
         self._matched = ""
 
         # Don't expand on whitespace
+        trigger = trigger.lstrip()
         if trigger and trigger.rstrip() is not trigger:
             return False
 

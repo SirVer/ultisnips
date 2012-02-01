@@ -1808,6 +1808,9 @@ class _ListAllSnippets(_VimTest):
 class ListAllAvailable_NothingTyped_ExceptCorrectResult(_ListAllSnippets):
     keys = "" + LS + "3\n"
     wanted = "BLAAH"
+class ListAllAvailable_SpaceInFront_ExceptCorrectResult(_ListAllSnippets):
+    keys = " " + LS + "3\n"
+    wanted = " BLAAH"
 class ListAllAvailable_testtyped_ExceptCorrectResult(_ListAllSnippets):
     keys = "hallo test" + LS + "2\n"
     wanted = "hallo BLAAH"
