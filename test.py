@@ -2449,6 +2449,21 @@ ${1:Welt} }}}""")
     keys = "test" + EX + "Ball"
     wanted = """Hello {{{
 Ball }}}"""
+class FoldOverwrite_Simple_ECR(_VimTest):
+    snippets = ("fold",
+"""# ${1:Description}  `!p snip.rv = vim.eval("&foldmarker").split(",")[0]`
+
+# End: $1  `!p snip.rv = vim.eval("&foldmarker").split(",")[1]`""")
+    keys = "fold" + EX + "hi"
+    wanted = "# hi  {{{\n\n# End: hi  }}}"
+class Fold_DeleteMiddleLine_ECR(_VimTest):
+    snippets = ("fold",
+"""# ${1:Description}  `!p snip.rv = vim.eval("&foldmarker").split(",")[0]`
+
+
+# End: $1  `!p snip.rv = vim.eval("&foldmarker").split(",")[1]`""")
+    keys = "fold" + EX + "hi" + ESC + "jdd"
+    wanted = "# hi  {{{\n\n# End: hi  }}}"
 # End: Folding Interaction  #}}}
 
 # Cursor Movement  {{{#
@@ -2573,25 +2588,6 @@ class Backspace_TabStop_NotZero(_VimTest):
     keys = "test" + EX + "A" + JF + BS + "BBB"
     wanted = "AA BBB"
 # End: Pressing BS in TabStop  #}}}
-# Special Editing Problems {{{#
-class FoldOverwrite_Simple_ECR(_VimTest):
-    snippets = ("fold",
-"""# ${1:Description}  `!p snip.rv = vim.eval("&foldmarker").split(",")[0]`
-
-# End: $1  `!p snip.rv = vim.eval("&foldmarker").split(",")[1]`""")
-    keys = "fold" + EX + "hi"
-    wanted = "# hi  {{{\n\n# End: hi  }}}"
-class Fold_DeleteMiddleLine_ECR(_VimTest):
-    snippets = ("fold",
-"""# ${1:Description}  `!p snip.rv = vim.eval("&foldmarker").split(",")[0]`
-
-
-# End: $1  `!p snip.rv = vim.eval("&foldmarker").split(",")[1]`""")
-    keys = "fold" + EX + "hi" + ESC + "jdd"
-    wanted = "# hi  {{{\n\n# End: hi  }}}"
-# End: Special Editing Problems }}}#
-
-
 # Newline in default text {{{#
 # Tests for bug 616315 #
 class TrailingNewline_TabStop_NLInsideStuffBehind(_VimTest):
@@ -2770,6 +2766,28 @@ class Snippet_With_Umlauts_Python(_UmlautsBase):
     keys = 'te ül' + EX + "hüüll"
     wanted = "te üü hüüll üü aaaaa"
 # End: Umlauts and Special Chars  #}}}
+# Exclusive Selection  {{{#
+class _ES_Base(_VimTest):
+    def _options_on(self):
+        self.send(":set selection=exclusive\n")
+    def _options_off(self):
+        self.send(":set selection=inclusive\n")
+
+class ExclusiveSelection_SimpleTabstop_Test(_ES_Base):
+    snippets = ("test", "h${1:blah}w $1")
+    keys = "test" + EX + "ui" + JF
+    wanted = "huiw ui"
+
+class ExclusiveSelection_RealWorldCase_Test(_ES_Base):
+    snippets = ("for",
+"""for ($${1:i} = ${2:0}; $$1 < ${3:count}; $$1${4:++}) {
+	${5:// code}
+}""")
+    keys = "for" + EX + "k" + JF
+    wanted = """for ($k = 0; $k < count; $k++) {
+	// code
+}"""
+# End: Exclusive Selection  #}}}
 ###########################################################################
 #                               END OF TEST                               #
 ###########################################################################

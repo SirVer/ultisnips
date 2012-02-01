@@ -46,6 +46,9 @@ def guess_edit(initial_line, lt, ct, vs):
     if ppos.mode == 'v': # Maybe selectmode?
         sv = list(map(int, _vim.eval("""getpos("'<")"""))); sv = Position(sv[1]-1,sv[2]-1)
         ev = list(map(int, _vim.eval("""getpos("'>")"""))); ev = Position(ev[1]-1,ev[2]-1)
+        if "exclusive" in _vim.eval("&selection"):
+            ppos.col -= 1 # We want to be inclusive, sorry.
+            ev.col -= 1
         es = []
         if sv.line == ev.line:
             es.append(("D", sv.line, sv.col, lt[sv.line - initial_line][sv.col:ev.col+1]))
