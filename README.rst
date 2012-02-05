@@ -22,8 +22,10 @@ discussed in the video.
 
 * `Episode 1: What are snippets and do I need them?`__
 * `Episode 2: Creating Basic Snippets`__
+* `Episode 3: What's new in version 2.0`__
 
 __ http://www.sirver.net/blog/2011/12/30/first-episode-of-ultisnips-screencast/
 __ http://www.sirver.net/blog/2012/01/08/second-episode-of-ultisnips-screencast/
+__ http://www.sirver.net/blog/2012/02/05/third-episode-of-ultisnips-screencast/
 
 

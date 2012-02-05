@@ -58,6 +58,7 @@ reading the accompanying blog posts on my blog:
 
 http://www.sirver.net/blog/2011/12/30/first-episode-of-ultisnips-screencast/
 http://www.sirver.net/blog/2012/01/08/second-episode-of-ultisnips-screencast/
+http://www.sirver.net/blog/2012/02/05/third-episode-of-ultisnips-screencast/
 
 
  Acknowledgments:                                 *UltiSnips-acknowledgments*
