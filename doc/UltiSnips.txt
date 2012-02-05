@@ -73,7 +73,7 @@ his snippets.
 2. INSTALLATION AND UPDATING                       *UltiSnips-installnupdate*
 
 To use UltiSnips, you need a python enabled Vim 7. You have python if either
-   :echo has("python") or :echo has("python3") 
+   :echo has("python") or :echo has("python3")
 yields '1'. Recent versions have been tested with python 2.7 and python 3.2,
 theoretically, UltiSnips should work with all versions >= python 2.6.
 
@@ -159,7 +159,7 @@ your vimrc: >
 UltiSnips lets you override the name of the directories that are searched
 for snippets. You need to set the variable g:UltiSnipsSnippetDirectories,
 which defaults to: >
-   g:UltiSnipsSnippetDirectories          ["UltiSnips"] 
+   g:UltiSnipsSnippetDirectories          ["UltiSnips"]
 
 Snippet definition files are searched in 'runtimepath', but the 'runtimepath'
 variable is traversed in reversed order (last item first). If you would like
@@ -184,7 +184,7 @@ which file type.
 3.4 Warning About Select Mode Mappings          *UltiSnips-warning-smappings*
 --------------------------------------
 
-The help for vim's *mapmode-s* states: >
+The help for vim's |mapmode-s| states: >
    NOTE: Mapping a printable character in Select mode may confuse the user.
    It's better to explicitly use :xmap and :smap for printable characters.  Or
    use :sunmap after defining the mapping.
@@ -192,7 +192,7 @@ The help for vim's *mapmode-s* states: >
 But most vim plugins (even the ones shipped with vim) do not adhere to this.
 As UltiSnips uses select mode to mark tabstops in snippets for overwriting
 these wrong mappings get in the way. UltiSnips therefore defaults to
-*:sunmap* all mappings for printable characters in select mode. It will not
+|:sunmap| all mappings for printable characters in select mode. It will not
 touch any other mappings, especially not normal, insert or visual mode
 mappings.
 
@@ -204,7 +204,7 @@ this feature. For example >
    let g:UltiSnipsMappingsToIgnore = [ "somePlugin", "otherPlugin" ]
 
 will not unmap any mapping that contains the string "somePlugin" or
-"otherPlugin" in its complete definition as listed by *:smap* .
+"otherPlugin" in its complete definition as listed by |:smap|.
 
 
 3.5 Functions                                           *UltiSnips-functions*
@@ -355,7 +355,7 @@ Good bye, Sir. Hope to talk to you soon.
 endsnippet
 ------------------- SNAP -------------------
 
-UltiSnips will pick up that you added/changed this file automatically, so just 
+UltiSnips will pick up that you added/changed this file automatically, so just
 try it in insert mode:
 bye<tab> -->
 Good bye, Sir. Hope to talk to you soon.
@@ -819,7 +819,7 @@ Contributers are listed in chronological order:
    pberndt - Phillip Berndt
    thanatermesis-elive - Thanatermesis
    rico-ambiescent - Rico Sta. Cruz
-   Cody Frazer 
+   Cody Frazer
    suy - Alejandro Exojo
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
