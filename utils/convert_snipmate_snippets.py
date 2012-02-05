@@ -48,7 +48,15 @@ def convert_snippet_file(source):
             # In snippet: Check if indentation level is the same. If not, snippet has ended
             if line[:len(whitespace)] != whitespace:
                 retval += convert_snippet_contents(snippet) + "endsnippet\n\n"
-                state = 0
+                # Copy-paste the section from state=0 so that we don't skip every other snippet
+                if line[:8] == "snippet ":
+                    snippet_info = re.match("(\S+)\s*(.*)", line[8:])
+                    if not snippet_info:
+                        print >> sys.stderr, "Warning: Malformed snippet\n %s\n" % line
+                        continue
+                    retval += 'snippet %s "%s"' % (snippet_info.group(1), snippet_info.group(2) if snippet_info.group(2) else snippet_info.group(1)) + "\n"
+                    state = 1
+                    snippet = ""
             else:
                 snippet += line[len(whitespace):]
     if state == 2:
