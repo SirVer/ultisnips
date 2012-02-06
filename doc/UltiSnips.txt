@@ -821,6 +821,7 @@ Contributers are listed in chronological order:
    rico-ambiescent - Rico Sta. Cruz
    Cody Frazer
    suy - Alejandro Exojo
+   grota - Giuseppe Rota
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------
