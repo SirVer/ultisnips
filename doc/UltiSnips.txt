@@ -3,7 +3,7 @@
 UltiSnips                                      *snippet* *snippets* *UltiSnips*
 
 1. Description                                  |UltiSnips-description|
-2. Installation and Updating                    |UltiSnips-installnupgrade|
+2. Installation and Updating                    |UltiSnips-installnupdate|
 3. Settings & Commands                          |UltiSnips-settings|
    3.1 Commands                                 |UltiSnips-commands|
    3.2 Triggers                                 |UltiSnips-triggers|
