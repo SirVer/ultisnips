@@ -36,11 +36,19 @@ snippet mat "Smart Matrix"
 endsnippet
 
 snippet lr( "left( right)" w
-\left( $0 \right)
+\left( ${1:${VISUAL}} \right)
 endsnippet
 
 snippet lr| "left| right|" w
-\left| $0 \right|
+\left| ${1:${VISUAL}} \right|
+endsnippet
+
+snippet lr{ "left\{ right\}" w
+\left\\{ ${1:${VISUAL}} \right\\}
+endsnippet
+
+snippet lr[ "left[ right]" w
+\left[ ${1:${VISUAL}} \right]
 endsnippet
 
 # vim:ft=snippets:
