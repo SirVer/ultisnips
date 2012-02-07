@@ -9,8 +9,6 @@ import os
 import re
 import traceback
 
-from UltiSnips.debug import debug
-
 from UltiSnips.compatibility import as_unicode
 from UltiSnips._diff import diff, guess_edit
 from UltiSnips.geometry import Position
@@ -806,7 +804,7 @@ class SnippetManager(object):
         want to use, and return it.
         """
         # make a python list
-        display = [ "%i: %s" % (i+1,s.description) for i,s in enumerate(snippets)]
+        display = [ as_unicode("%i: %s") % (i+1,s.description) for i,s in enumerate(snippets)]
 
         try:
             rv = _vim.eval("inputlist(%s)" % _vim.escape(display))

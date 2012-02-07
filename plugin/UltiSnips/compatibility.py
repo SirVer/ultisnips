@@ -47,6 +47,9 @@ if sys.version_info >= (3,0):
 else:
     from UltiSnips.compatibility_py2 import *
 
+    import warnings
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+
     def set_vim_cursor(line, col):
         """Wrapper around vims access to window.cursor. It can't handle
         multibyte chars, we therefore have to compensate"""
