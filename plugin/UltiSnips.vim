@@ -11,13 +11,22 @@ if exists('did_UltiSnips_vim') || &cp || version < 700
     finish
 endif
 
-let g:_uspy=":py3 "
-if !has("python3")
-    if !has("python")
-        echo  "UltiSnips requires py >= 2.6 or any py3"
-        finish
+if !exists("g:UltiSnipsUsePythonVersion")
+    let g:_uspy=":py3 "
+    if !has("python3")
+        if !has("python")
+            echo  "UltiSnips requires py >= 2.6 or any py3"
+            finish
+        endif
+        let g:_uspy=":py "
     endif
-    let g:_uspy=":py "
+    let g:UltiSnipsUsePythonVersion = "<tab>"
+else
+    if g:UltiSnipsUsePythonVersion == 2
+        let g:_uspy=":py "
+    else
+        let g:_uspy=":py3 "
+    endif
 endif
 
 " Global Variables {{{

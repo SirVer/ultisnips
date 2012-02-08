@@ -77,6 +77,12 @@ To use UltiSnips, you need a python enabled Vim 7. You have python if either
 yields '1'. Recent versions have been tested with python 2.7 and python 3.2,
 theoretically, UltiSnips should work with all versions >= python 2.6.
 
+UltiSnips tries to autodetect which Vim Python command to use (there are two:
+:py and :py3). Unfortunately, some Vim versions choke when you test for both
+versions. In this case you have to tell UltiSnips which version to use via >
+   
+   let g:UltiSnipsUsePythonVersion = 2   " or 3
+
 Using Pathogen:                                     *UltiSnips-using-pathogen*
 
 If you are a Pathogen user, you can track the official mirror of UltiSnips on github: >
