@@ -516,6 +516,37 @@ endsnippet
 wow<tab>Hello World ->
 Hello World                                                     HELLO WORLD
 
+The following snippet is an example of the use of the match in snippets with
+regular expression. It shows how to build snippets whose expansion depends
+on the actual definition of the snippet which can vary:
+
+------------------- SNIP -------------------
+snippet "be(gin)?( (\S+))?" "begin{} / end{}" br
+\begin{${1:`!p
+snip.rv = match.group(3) if match.group(2) is not None else "something"`}}
+	${2:${VISUAL}}
+\end{$1}$0
+endsnippet
+------------------- SNAP -------------------
+be<tab>center<c-j> ->
+\begin{center}
+
+\end{center}
+------------------- SNAP -------------------
+be center<tab> ->
+\begin{center}
+
+\end{center}
+
+The second form is just a variation of the first one but, it serves as an
+illustration of how to match groups in regular expressions but it has some 
+drawbacks:
+1. If you use <tab> for expanding the snippets and also for completion then
+   if you were trying to use <tab> to complete "be form" to "be formatted"
+   then you would end up with the above SNAP which is not what you want.
+2. The snippet is harder to read.
+
+
  4.4.4 Global Snippets:                                   *UltiSnips-globals*
 
 Global snippets provide a way to take common code out of snippets. Currently,
