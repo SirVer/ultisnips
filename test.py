@@ -2554,7 +2554,6 @@ class DeleteSnippetInsertion1(_VimTest):
     snippets = ("test", r"$1${1/(.*)/(?0::.)/}")
     keys = "test" + EX + ESC + "u" + "i" + JF + "\t"
     wanted = "\t"
-
 # End: Undo of Snippet insertion  #}}}
 # Tab Completion of Words  {{{#
 class Completion_SimpleExample_ECR(_VimTest):
@@ -2795,6 +2794,14 @@ class ExclusiveSelection_RealWorldCase_Test(_ES_Base):
 	// code
 }"""
 # End: Exclusive Selection  #}}}
+# Normal mode editing  {{{#
+# Test for bug #927844
+class DeleteLastTwoLinesInSnippet(_VimTest):
+    snippets = ("test", "$1hello\nnice\nworld")
+    keys = "test" + EX + ESC + "j2dd"
+    wanted = "hello"
+
+# End: Normal mode editing  #}}}
 ###########################################################################
 #                               END OF TEST                               #
 ###########################################################################

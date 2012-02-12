@@ -55,7 +55,7 @@ def guess_edit(initial_line, lt, ct, vs):
             if sv != pos and sv.line == pos.line:
                 es.append(("I", sv.line, sv.col, ct[sv.line - initial_line][sv.col:pos.col+1]))
         if is_complete_edit(initial_line, lt, ct, es): return True, es
-    if pos.line == ppos.line: # Movement only in one line
+    if pos.line == ppos.line and len(lt) == len(ct): # Movement only in one line
         llen = len(lt[ppos.line - initial_line])
         clen = len(ct[pos.line - initial_line])
         if ppos < pos and clen > llen: # Likely that only characters have been added
