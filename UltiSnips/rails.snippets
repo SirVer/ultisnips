@@ -3,7 +3,7 @@
 ###########################################################################
 
 snippet anaf "accepts_nested_attributes_for"
-accepts_nested_attributes_for :${1:association_name}${2:${3:, :allow_destroy => true}${4:, :reject_if => proc { |obj| ${5:obj.blank?} \}}}
+accepts_nested_attributes_for :${1:association_name}${2:${3:, :allow_destroy => true}${4:, :reject_if => proc \{ |obj| ${5:obj.blank?} \}}}
 
 endsnippet
 
