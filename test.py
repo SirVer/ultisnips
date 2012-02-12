@@ -2546,10 +2546,14 @@ class JumpForward_DefSnippet(_VimTest):
     snippets = ("test", "${1}\n`!p snip.rv = '\\n'.join(t[1].split())`\n\n${0:pass}")
     keys = "test" + EX + "a b c" + JF + "shallnot" + JF + "end"
     wanted = "a b c\na\nb\nc\n\nshallnotend"
-class DeleteSnippetInsertion(_VimTest):
+class DeleteSnippetInsertion0(_VimTest):
     snippets = ("test", "${1:hello} $1")
     keys = "test" + EX + ESC + "Vkx" + "i\nworld\n"
     wanted = "world"
+class DeleteSnippetInsertion1(_VimTest):
+    snippets = ("test", r"$1${1/(.*)/(?0::.)/}")
+    keys = "test" + EX + ESC + "u" + "i" + JF + "\t"
+    wanted = "\t"
 
 # End: Undo of Snippet insertion  #}}}
 # Tab Completion of Words  {{{#
