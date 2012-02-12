@@ -86,7 +86,7 @@ class SnippetInstance(EditableTextObject):
             res = self._get_prev_tab(self._cts)
             if res is None:
                 self._cts = cts_bf
-                return self._tabstops[self._cts]
+                return self._tabstops.get(self._cts, None)
             self._cts, ts = res
             return ts
         else:

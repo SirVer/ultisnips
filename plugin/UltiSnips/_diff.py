@@ -16,7 +16,7 @@ def is_complete_edit(initial_line, a, b, cmds):
             if char != '\n':
                 buf[line] = buf[line][:col] + buf[line][col+len(char):]
             else:
-                if len(buf) > 1:
+                if line + 1 < len(buf):
                     buf[line] = buf[line] + buf[line+1]
                     del buf[line+1]
                 else:
@@ -55,25 +55,32 @@ def guess_edit(initial_line, lt, ct, vs):
             if sv != pos and sv.line == pos.line:
                 es.append(("I", sv.line, sv.col, ct[sv.line - initial_line][sv.col:pos.col+1]))
         if is_complete_edit(initial_line, lt, ct, es): return True, es
-    if pos.line == ppos.line and len(lt) == len(ct): # Movement only in one line
-        llen = len(lt[ppos.line - initial_line])
-        clen = len(ct[pos.line - initial_line])
-        if ppos < pos and clen > llen: # Likely that only characters have been added
-            es = (
-                ("I", ppos.line, ppos.col, ct[ppos.line - initial_line][ppos.col:pos.col]),
-            )
+    if pos.line == ppos.line:
+        if len(lt) == len(ct): # Movement only in one line
+            llen = len(lt[ppos.line - initial_line])
+            clen = len(ct[pos.line - initial_line])
+            if ppos < pos and clen > llen: # Likely that only characters have been added
+                es = (
+                    ("I", ppos.line, ppos.col, ct[ppos.line - initial_line][ppos.col:pos.col]),
+                )
+                if is_complete_edit(initial_line, lt, ct, es): return True, es
+            if clen < llen:
+                if ppos == pos: # 'x' or DEL or dt or something
+                    es = (
+                        ("D", pos.line, pos.col, lt[ppos.line - initial_line][ppos.col:ppos.col + (llen - clen)]),
+                    )
+                    if is_complete_edit(initial_line, lt, ct, es): return True, es
+                if pos < ppos: # Backspacing or dT dF?
+                    es = (
+                        ("D", pos.line, pos.col, lt[pos.line - initial_line][pos.col:pos.col + llen - clen]),
+                    )
+                    if is_complete_edit(initial_line, lt, ct, es): return True, es
+        elif len(ct) < len(lt): # Maybe some lines were deleted? (dd or so)
+            es = []
+            for i in range(len(lt)-len(ct)):
+                es.append( ("D", pos.line, 0, lt[pos.line - initial_line + i]))
+                es.append( ("D", pos.line, 0, '\n'))
             if is_complete_edit(initial_line, lt, ct, es): return True, es
-        if clen < llen:
-            if ppos == pos: # 'x' or DEL or dt or something
-                es = (
-                    ("D", pos.line, pos.col, lt[ppos.line - initial_line][ppos.col:ppos.col + (llen - clen)]),
-                )
-                if is_complete_edit(initial_line, lt, ct, es): return True, es
-            if pos < ppos: # Backspacing or dT dF?
-                es = (
-                    ("D", pos.line, pos.col, lt[pos.line - initial_line][pos.col:pos.col + llen - clen]),
-                )
-                if is_complete_edit(initial_line, lt, ct, es): return True, es
     else: # Movement in more than one line
         if ppos.line + 1 == pos.line and pos.col == 0: # Carriage return?
             es = (("I", ppos.line, ppos.col, "\n"),)

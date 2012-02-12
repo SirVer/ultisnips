@@ -2800,6 +2800,18 @@ class DeleteLastTwoLinesInSnippet(_VimTest):
     snippets = ("test", "$1hello\nnice\nworld")
     keys = "test" + EX + ESC + "j2dd"
     wanted = "hello"
+class DeleteCurrentTabStop1_JumpBack(_VimTest):
+    snippets = ("test", "${1:hi}\nend")
+    keys = "test" + EX + ESC + "ddi" + JB
+    wanted = "end"
+class DeleteCurrentTabStop2_JumpBack(_VimTest):
+    snippets = ("test", "${1:hi}\n${2:world}\nend")
+    keys = "test" + EX + JF + ESC + "ddi" + JB + "hello"
+    wanted = "hello\nend"
+class DeleteCurrentTabStop3_JumpAround(_VimTest):
+    snippets = ("test", "${1:hi}\n${2:world}\nend")
+    keys = "test" + EX + JF + ESC + "ddkji" + JB + "hello" + JF + "world"
+    wanted = "hello\nendworld"
 
 # End: Normal mode editing  #}}}
 ###########################################################################
