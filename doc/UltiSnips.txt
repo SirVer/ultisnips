@@ -377,7 +377,7 @@ drop to insert mode. The next snippet you expand will have the selected text
 in the place of the ${VISUAL}. The place holder can also contain default text
 when there is no visual text to be selected: ${VISUAL:default text}. And it
 can also contain transformations on the contents of the visual (See
-*UltiSnips-transformations* ). This will take the form
+|UltiSnips-transformations| ). This will take the form
 ${VISUAL:default/search/replace/option}. 
 
 As a small example, let's take this snippet. It will take the visual text,
