@@ -100,10 +100,11 @@ class _CleverReplace(object):
 
         return self._unescape(self._schar_escape(tv))
 
-
-class Transformation(Mirror):
-    def __init__(self, parent, ts, token):
-        Mirror.__init__(self, parent, ts, token)
+class TextObjectTransformation(object):
+    def __init__(self, token):
+        self._find = None
+        if token.search is None:
+            return
 
         flags = 0
         self._match_this_many = 1
@@ -116,9 +117,17 @@ class Transformation(Mirror):
         self._find = re.compile(token.search, flags | re.DOTALL)
         self._replace = _CleverReplace(token.replace)
 
+    def _transform(self, text):
+        if self._find is None:
+            return text
+        return self._find.subn(self._replace.replace, text, self._match_this_many)[0]
+
+class Transformation(Mirror, TextObjectTransformation):
+    def __init__(self, parent, ts, token):
+        Mirror.__init__(self, parent, ts, token)
+        TextObjectTransformation.__init__(self, token)
+
     def _get_text(self):
-        return self._find.subn(
-            self._replace.replace, self._ts.current_text, self._match_this_many
-        )[0]
+        return self._transform(self._ts.current_text)
 
 

@@ -375,19 +375,23 @@ some text in visual mode and press the key to expand a trigger
 (see g:UltiSnipsExpandTrigger) the selected text will get deleted and you will
 drop to insert mode. The next snippet you expand will have the selected text
 in the place of the ${VISUAL}. The place holder can also contain default text
-when there is no visual text to be selected: ${VISUAL:default text}.
-As a small example, let's take this snippet:
+when there is no visual text to be selected: ${VISUAL:default text}. And it
+can also contain transformations on the contents of the visual (See
+*UltiSnips-transformations* ). This will take the form
+${VISUAL:default/search/replace/option}. 
 
+As a small example, let's take this snippet. It will take the visual text,
+replace all "should" via "is" and put it in.
 ------------------- SNIP -------------------
 snippet t
-<tag>${VISUAL:inside text}</tag>
+<tag>${VISUAL:inside text/should/is/g}</tag>
 endsnippet
 ------------------- SNAP -------------------
 And starting with this line: >
    this should be cool
 position the cursor on the should, then press viw (visual mode -> select inner
 word). Then press tab, type "t" and press tab again >
-   -> this <tag>should</tag> be cool
+   -> this <tag>is</tag> be cool
 If you expand this snippet without having been in visual mode before, e.g. by
 writing in insert mode t<tab>, you will get >
    <tag>inside text</tag>

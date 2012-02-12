@@ -5,9 +5,10 @@ import re
 
 import UltiSnips._vim as _vim
 from UltiSnips.util import IndentUtil
+from UltiSnips.text_objects._transformation import TextObjectTransformation
 from UltiSnips.text_objects._base import NoneditableTextObject
 
-class Visual(NoneditableTextObject):
+class Visual(NoneditableTextObject,TextObjectTransformation):
     """
     A ${VISUAL} placeholder that will use the text that was last visually
     selected and insert it here. If there was no text visually selected,
@@ -30,6 +31,7 @@ class Visual(NoneditableTextObject):
             self._mode = "v"
 
         NoneditableTextObject.__init__(self, parent, token)
+        TextObjectTransformation.__init__(self, token)
 
     def _update(self, done, not_done):
         if self._mode != "v":
@@ -48,8 +50,10 @@ class Visual(NoneditableTextObject):
         else:
             text = self._text
 
+        text = self._transform(text)
         self.overwrite(text)
         self._parent._del_child(self)
+
         return True
 
 
