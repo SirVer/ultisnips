@@ -1162,6 +1162,19 @@ class PythonCode_AccessKilledTabstop_OverwriteFirst(_VimTest):
     keys = "test" + EX + "aaa"
     wanted = "aaa"
 
+class PythonVisual_NoVisualSelection_Ignore(_VimTest):
+    snippets = ("test", "h`!p snip.rv = snip.v.mode + snip.v.text`b")
+    keys = "test" + EX + "abc"
+    wanted = "hbabc"
+class PythonVisual_SelectOneWord(_VimTest):
+    snippets = ("test", "h`!p snip.rv = snip.v.mode + snip.v.text`b")
+    keys = "blablub" + ESC + "0v6l" + EX + "test" + EX
+    wanted = "hvblablubb"
+class PythonVisual_LineSelect_Simple(_VimTest):
+    snippets = ("test", "h`!p snip.rv = snip.v.mode + snip.v.text`b")
+    keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX
+    wanted = "hVhello\nnice\nworld\nb"
+
 # End: New Implementation  #}}}
 # End: PythonCode Interpolation  #}}}
 # Mirrors  {{{#
@@ -1612,8 +1625,6 @@ class VisualTransformation_SelectOneWord(_VimTest):
     snippets = ("test", r"h${VISUAL/./\U$0\E/g}b")
     keys = "blablub" + ESC + "0v6l" + EX + "test" + EX
     wanted = "hBLABLUBb"
-# TODO: python code access to visual
-# TODO: document the changes
 class VisualTransformationWithDefault_ExpandWithoutVisual(_VimTest):
     snippets = ("test", "h${VISUAL:world/./\U$0\E/g}b")
     keys = "test" + EX + "hi"

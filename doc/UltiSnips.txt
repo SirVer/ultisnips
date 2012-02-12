@@ -487,6 +487,11 @@ The snip object provides some properties as well: >
         in it. You can check if snip.c is != "" to make sure that the
         interpolation is only done once. This deprecates the "cur" variable.
 
+   snip.v:
+        information about the content for ${VISUAL}. Has two attributes:
+         snip.v.mode   ('v', 'V', '^V', see *visualmode* )
+         snip.v.text   the text that was selected
+
     snip.fn:
         the current filename.
 

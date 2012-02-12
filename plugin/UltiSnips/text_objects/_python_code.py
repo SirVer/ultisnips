@@ -3,7 +3,7 @@
 
 import os
 import re
-
+from collections import namedtuple
 
 import UltiSnips._vim as _vim
 from UltiSnips.compatibility import compatible_exec, as_unicode
@@ -21,16 +21,18 @@ class _Tabs(object):
             return ""
         return ts.current_text
 
+_VisualContent = namedtuple('_VisualContent', ['mode', 'text'])
 class SnippetUtil(object):
     """ Provides easy access to indentation, etc.
     """
 
-    def __init__(self, initial_indent, cur=""):
+    def __init__(self, initial_indent, vmode, vtext):
         self._ind = IndentUtil()
+        self._visual = _VisualContent(vmode, vtext)
 
         self._initial_indent = self._ind.indent_to_spaces(initial_indent)
 
-        self._reset(cur)
+        self._reset("")
 
     def _reset(self, cur):
         """ Gets the snippet ready for another update.
@@ -134,6 +136,11 @@ class SnippetUtil(object):
         """
         return self._c
 
+    @property
+    def v(self):
+        """Content of visual expansions"""
+        return self._visual
+
     def opt(self, option, default=None):
         """ Gets a Vim variable. """
         if _vim.eval("exists('%s')" % option) == "1":
@@ -168,10 +175,12 @@ class PythonCode(NoneditableTextObject):
         while snippet:
             try:
                 self._locals = snippet.locals
+                t = snippet.visual_content.text
+                m = snippet.visual_content.mode
                 break
             except AttributeError:
                 snippet = snippet._parent
-        self._snip = SnippetUtil(token.indent)
+        self._snip = SnippetUtil(token.indent, m, t)
 
         self._globals = {}
         globals = snippet.globals.get("!p", [])
