@@ -1,3 +1,8 @@
+version 2.1:
+	- Python interpolation access to text from visual selection via snip.v.
+	- Support for transformations of ${VISUAL} texts.
+	- New or improved snippets: python, tex, texmath, ruby, rails, html, django
+	
 version 2.0:
 	- Backwards incompatible change: Support for normal mode editing. Snippets
 	  are no longer exited when leaving insert mode but only by leaving the
