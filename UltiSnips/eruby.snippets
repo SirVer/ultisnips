@@ -256,7 +256,7 @@ render :partial => "${1:item}", :status => ${2:500}
 endsnippet
 
 snippet slt "stylesheet_link_tag"
-`!p textmate_var('TM_RAILS_TEMPLATE_START_RUBY_EXPR', snip)`stylesheet_link_tag {1::all}${2:, :cache => ${3:true}}`!p textmate_var('TM_RAILS_TEMPLATE_END_RUBY_EXPR', snip)`
+`!p textmate_var('TM_RAILS_TEMPLATE_START_RUBY_EXPR', snip)`stylesheet_link_tag ${1::all}${2:, :cache => ${3:true}}`!p textmate_var('TM_RAILS_TEMPLATE_END_RUBY_EXPR', snip)`
 endsnippet
 
 snippet st "submit_tag"
