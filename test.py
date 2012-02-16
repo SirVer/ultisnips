@@ -1531,6 +1531,10 @@ class Visual_SelectOneWord(_VimTest):
     snippets = ("test", "h${VISUAL}b")
     keys = "blablub" + ESC + "0v6l" + EX + "test" + EX
     wanted = "hblablubb"
+class Visual_SelectOneWord_ProblemAfterTab(_VimTest):
+    snippets = ("test", "h${VISUAL}b", "", "i")
+    keys = "\tblablub" + ESC + "5hv3l" + EX + "test" + EX
+    wanted = "\tbhlablbub"
 class VisualWithDefault_ExpandWithoutVisual(_VimTest):
     snippets = ("test", "h${VISUAL:world}b")
     keys = "test" + EX + "hi"
@@ -1626,11 +1630,11 @@ class VisualTransformation_SelectOneWord(_VimTest):
     keys = "blablub" + ESC + "0v6l" + EX + "test" + EX
     wanted = "hBLABLUBb"
 class VisualTransformationWithDefault_ExpandWithoutVisual(_VimTest):
-    snippets = ("test", "h${VISUAL:world/./\U$0\E/g}b")
+    snippets = ("test", r"h${VISUAL:world/./\U$0\E/g}b")
     keys = "test" + EX + "hi"
     wanted = "hWORLDbhi"
 class VisualTransformationWithDefault_ExpandWithVisual(_VimTest):
-    snippets = ("test", "h${VISUAL:world/./\U$0\E/g}b")
+    snippets = ("test", r"h${VISUAL:world/./\U$0\E/g}b")
     keys = "blablub" + ESC + "0v6l" + EX + "test" + EX
     wanted = "hBLABLUBb"
 class VisualTransformation_LineSelect_Simple(_VimTest):
@@ -1638,11 +1642,11 @@ class VisualTransformation_LineSelect_Simple(_VimTest):
     keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX
     wanted = "hHELLO\n NICE\n WORLDb"
 class VisualTransformation_InDefaultText_LineSelect_NoOverwrite(_VimTest):
-    snippets = ("test", "h${1:bef${VISUAL/./\U$0\E/g}aft}b")
+    snippets = ("test", r"h${1:bef${VISUAL/./\U$0\E/g}aft}b")
     keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX + JF + "hi"
     wanted = "hbefHELLO\n    NICE\n    WORLDaftbhi"
 class VisualTransformation_InDefaultText_LineSelect_Overwrite(_VimTest):
-    snippets = ("test", "h${1:bef${VISUAL/./\U$0\E/g}aft}b")
+    snippets = ("test", r"h${1:bef${VISUAL/./\U$0\E/g}aft}b")
     keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX + "jup" + JF + "hi"
     wanted = "hjupbhi"
 

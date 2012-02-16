@@ -8,7 +8,7 @@ import vim
 from vim import error
 
 from UltiSnips.geometry import Position
-from UltiSnips.compatibility import vim_cursor, set_vim_cursor, \
+from UltiSnips.compatibility import col2byte, byte2col, \
         as_unicode, as_vimencoding
 
 class VimBuffer(object):
@@ -47,10 +47,12 @@ class VimBuffer(object):
         based in line which is different from Vim's cursor.
         """
         def fget(self):
-            line, col = vim_cursor()
+            line, nbyte = vim.current.window.cursor
+            col = byte2col(line, nbyte)
             return Position(line - 1, col)
         def fset(self, pos):
-            set_vim_cursor(pos.line + 1, pos.col)
+            nbyte = col2byte(pos.line + 1, pos.col)
+            vim.current.window.cursor = pos.line + 1, nbyte
         return locals()
     cursor = property(**cursor())
 buf = VimBuffer()
@@ -121,7 +123,8 @@ def select(start, end):
     delta = end - start
     lineno, col = start.line, start.col
 
-    set_vim_cursor(lineno + 1, col)
+    col = col2byte(lineno + 1, col)
+    vim.current.window.cursor = lineno + 1, col
 
     move_cmd = ""
     if eval("mode()") != 'n':

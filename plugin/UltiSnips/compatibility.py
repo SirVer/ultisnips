@@ -15,27 +15,24 @@ __all__ = ['as_unicode', 'compatible_exec', 'vim_cursor', 'set_vim_cursor']
 if sys.version_info >= (3,0):
     from UltiSnips.compatibility_py3 import *
 
-    def set_vim_cursor(line, col):
-        """Wrapper around vims access to window.cursor. It can't handle
-        multibyte chars, we therefore have to compensate"""
-
+    def col2byte(line, col):
+        """
+        Convert a valid column index into a byte index inside
+        of vims buffer.
+        """
         pre_chars = vim.current.buffer[line-1][:col]
+        return len(pre_chars.encode(vim.eval("&encoding")))
+
+    def byte2col(line, nbyte):
+        """
+        Convert a column into a byteidx suitable for a mark or cursor
+        position inside of vim
+        """
+        line = vim.current.buffer[line-1]
         vc = vim.eval("&encoding")
-        nbytes = len(pre_chars.encode(vc))
+        raw_bytes = line.encode(vc)[:nbyte]
+        return len(raw_bytes.decode(vc))
 
-        vim.current.window.cursor = line, nbytes
-
-    def vim_cursor():
-        """Returns the character position (not the byte position) of the
-        vim cursor"""
-
-        line, nbyte = vim.current.window.cursor
-
-        vc = vim.eval("&encoding")
-        raw_bytes = vim.current.buffer[line-1].encode(vc)[:nbyte]
-
-        col = len(raw_bytes.decode(vc))
-        return line, col
     def as_unicode(s):
         if isinstance(s, bytes):
             vc = vim.eval("&encoding")
@@ -50,27 +47,24 @@ else:
     import warnings
     warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-    def set_vim_cursor(line, col):
-        """Wrapper around vims access to window.cursor. It can't handle
-        multibyte chars, we therefore have to compensate"""
-
+    def col2byte(line, col):
+        """
+        Convert a valid column index into a byte index inside
+        of vims buffer.
+        """
         vc = vim.eval("&encoding")
         pre_chars = vim.current.buffer[line-1].decode(vc)[:col]
-        nbytes = len(pre_chars.encode(vc))
+        return len(pre_chars.encode(vc))
 
-        vim.current.window.cursor = line, nbytes
-
-    def vim_cursor():
-        """Returns the character position (not the byte position) of the
-        vim cursor"""
-
-        line, nbyte = vim.current.window.cursor
-
-        raw_bytes = vim.current.buffer[line-1][:nbyte]
-
-        vc = vim.eval("&encoding")
-        col = len(raw_bytes.decode(vc))
-        return line, col
+    def byte2col(line, nbyte):
+        """
+        Convert a column into a byteidx suitable for a mark or cursor
+        position inside of vim
+        """
+        line = vim.current.buffer[line-1]
+        if nbyte >= len(line): # This is beyond end of line
+            return nbyte
+        return len(line[:nbyte].decode(vim.eval("&encoding")))
 
     def as_unicode(s):
         if isinstance(s, str):
