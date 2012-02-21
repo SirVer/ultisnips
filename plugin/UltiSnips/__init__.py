@@ -780,7 +780,7 @@ class SnippetManager(object):
         before the cursor. If possible is True, then get all
         possible matches.
         """
-        filetypes = self._ensure_snippets_loaded()
+        filetypes = self.ensure_snippets_loaded()
 
         found_snippets = []
         for ft in filetypes:
@@ -1027,7 +1027,7 @@ class SnippetManager(object):
             self._ensure_loaded(parent, checked)
 
 
-    def _ensure_snippets_loaded(self):
+    def ensure_snippets_loaded(self):
         """ Checks for changes in the list of snippet files or the contents
         of the snippet files and reloads them if necessary.
         """

@@ -77,7 +77,7 @@ if !exists("g:UltiSnipsSnippetDirectories")
 endif
 " }}}
 
-"" Global Commands {{{
+" Global Commands {{{
 function! UltiSnipsEdit(...)
     if a:0 == 1 && a:1 != ''
         let type = a:1
@@ -101,7 +101,7 @@ endfunction
 command! -nargs=? UltiSnipsEdit :call UltiSnipsEdit(<q-args>)
 "" }}}
 
-"" FUNCTIONS {{{
+" FUNCTIONS {{{
 function! CompensateForPUM()
     """ The CursorMovedI event is not triggered while the popup-menu is visible,
     """ and it's by this event that UltiSnips updates its vim-state. The fix is
@@ -141,6 +141,11 @@ endfunction
 function! UltiSnips_JumpForwards()
     call CompensateForPUM()
     exec g:_uspy "UltiSnips_Manager.jump_forwards()"
+    return ""
+endfunction
+
+function! UltiSnips_FileTypeChanged()
+    exec g:_uspy "UltiSnips_Manager.ensure_snippets_loaded()"
     return ""
 endfunction
 
@@ -210,6 +215,7 @@ exec g:_uspy "UltiSnips_Manager.backward_trigger = vim.eval('g:UltiSnipsJumpBack
 au CursorMovedI * call UltiSnips_CursorMoved()
 au CursorMoved * call UltiSnips_CursorMoved()
 au WinLeave * call UltiSnips_LeavingWindow()
+au FileType * call UltiSnips_FileTypeChanged()
 
 call UltiSnips_MapKeys()
 
