@@ -54,6 +54,19 @@ class _TextIterator(object):
     @property
     def pos(self):
         return Position(self._line, self._col)
+
+def unescape(s):
+    rv = ""
+    i = 0
+    while i < len(s):
+        if i+1 < len(s) and s[i] == '\\':
+            rv += s[i+1]
+            i += 1
+        else:
+            rv += s[i]
+        i += 1
+    return rv
+
 # End: Helper Classes  }}}
 # Helper functions  {{{
 def _parse_number(stream):
@@ -152,11 +165,15 @@ class VisualToken(Token):
         if stream.peek() == ":":
             stream.next()
         self.alternative_text, c = _parse_till_unescaped_char(stream, '/}')
+        self.alternative_text = unescape(self.alternative_text)
 
         if c == '/': # Transformation going on
-            self.search = _parse_till_unescaped_char(stream, '/')[0]
-            self.replace = _parse_till_unescaped_char(stream, '/')[0]
-            self.options = _parse_till_closing_brace(stream)
+            try:
+                self.search = _parse_till_unescaped_char(stream, '/')[0]
+                self.replace = _parse_till_unescaped_char(stream, '/')[0]
+                self.options = _parse_till_closing_brace(stream)
+            except StopIteration:
+                raise RuntimeError("Invalid ${VISUAL} transformation! Forgot to escape a '/'?")
         else:
             self.search = None
             self.replace = None

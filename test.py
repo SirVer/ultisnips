@@ -1539,6 +1539,10 @@ class VisualWithDefault_ExpandWithoutVisual(_VimTest):
     snippets = ("test", "h${VISUAL:world}b")
     keys = "test" + EX + "hi"
     wanted = "hworldbhi"
+class VisualWithDefaultWithSlashes_ExpandWithoutVisual(_VimTest):
+    snippets = ("test", r"h${VISUAL:\/\/ body}b")
+    keys = "test" + EX + "hi"
+    wanted = "h// bodybhi"
 class VisualWithDefault_ExpandWithVisual(_VimTest):
     snippets = ("test", "h${VISUAL:world}b")
     keys = "blablub" + ESC + "0v6l" + EX + "test" + EX
