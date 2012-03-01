@@ -61,7 +61,7 @@ def write_docstring_args(args, snip):
         snip.rv += ' """'
         return
 
-    snip += ""
+    snip.rv += '\n' + snip.mkline('', indent='')
 
     style = get_style(snip)
 
@@ -77,7 +77,7 @@ def write_init_body(args, parents, snip):
         snip += p + ".__init__(self)"
 
     if parents:
-        snip += ""
+        snip.rv += '\n' + snip.mkline('', indent='')
 
     for arg in args:
         snip += "self._%s = %s" % (arg, arg)
@@ -105,10 +105,10 @@ snip >> 2
 args = get_args(t[4])
 
 write_docstring_args(args, snip)
-if args: snip += '"""'
+if args:
+    snip.rv += '\n' + snip.mkline('', indent='')
+    snip += '"""'
 
-
-snip += ""
 write_init_body(args, t[2], snip)
 `
 		$0
@@ -118,7 +118,7 @@ endsnippet
 snippet slotclass "class with slots and docstrings" b
 class ${1:MyClass}(${2:object}):
 	"""${3:Docstring for $1 }"""
-	`!p
+`!p
 snip >> 1
 args = get_args(t[4])
 write_slots_args(args, snip)
@@ -132,9 +132,10 @@ snip >> 2
 args = get_args(t[4])
 
 write_docstring_args(args, snip)
-if args: snip += '"""'
+if args:
+    snip.rv += '\n' + snip.mkline('', indent='')
+    snip += '"""'
 
-snip += ""
 write_init_body(args, t[2], snip)
 `
 		$0
@@ -336,8 +337,8 @@ if args:
 
 style = get_style(snip)
 snip += format_return(style)
+snip.rv += '\n' + snip.mkline('', indent='')
 snip += '"""' `
-
 	${0:pass}
 endsnippet
 
