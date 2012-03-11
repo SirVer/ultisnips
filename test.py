@@ -2085,6 +2085,35 @@ class No_Tab_Expand_ET_SW_TS(_No_Tab_Expand):
     keys = "test" + EX
     wanted = "\t\tExpand\tme!\t"
 
+class _TabExpand_RealWorld(object):
+    snippets = ("hi",
+r"""hi
+`!p snip.rv="i1\n"
+snip.rv += snip.mkline("i1\n")
+snip.shift(1)
+snip.rv += snip.mkline("i2\n")
+snip.unshift(2)
+snip.rv += snip.mkline("i0\n")
+snip.shift(3)
+snip.rv += snip.mkline("i3")`
+snip.rv = repr(snip.rv)
+End""")
+
+class No_Tab_Expand_RealWorld(_TabExpand_RealWorld,_VimTest):
+    def _options_on(self):
+        self.send(":set noexpandtab\n")
+    def _options_off(self):
+        self.send(":set noexpandtab\n")
+    keys = "\t\t\thi" + EX
+    wanted = """\t\t\thi
+\t\t\ti1
+\t\t\ti1
+\t\t\t\ti2
+\t\ti0
+\t\t\t\t\ti3
+\t\t\tsnip.rv = repr(snip.rv)
+\t\t\tEnd"""
+
 
 class SnippetOptions_Regex_Expand(_VimTest):
     snippets = ("(test)", "Expand me!", "", "r")

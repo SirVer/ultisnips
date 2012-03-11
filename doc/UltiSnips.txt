@@ -1,4 +1,4 @@
-*UltiSnips.txt*    For Vim version 7.0 or later.   Last change: 2012 Mar 4
+*UltiSnips.txt*    For Vim version 7.0 or later.
 
         The Ultimate Plugin for Snippets in Vim~
 
@@ -1155,6 +1155,7 @@ Contributors listed in chronological order:
    Cody Frazer
    suy - Alejandro Exojo
    grota - Giuseppe Rota
+   iiijjjii - Jim Karsten
 
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
