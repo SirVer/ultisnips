@@ -2104,15 +2104,15 @@ class No_Tab_Expand_RealWorld(_TabExpand_RealWorld,_VimTest):
         self.send(":set noexpandtab\n")
     def _options_off(self):
         self.send(":set noexpandtab\n")
-    keys = "\t\t\thi" + EX
-    wanted = """\t\t\thi
-\t\t\ti1
-\t\t\ti1
-\t\t\t\ti2
-\t\ti0
-\t\t\t\t\ti3
-\t\t\tsnip.rv = repr(snip.rv)
-\t\t\tEnd"""
+    keys = "\t\thi" + EX
+    wanted = """\t\thi
+\t\ti1
+\t\ti1
+\t\t\ti2
+\ti0
+\t\t\t\ti3
+\t\tsnip.rv = repr(snip.rv)
+\t\tEnd"""
 
 
 class SnippetOptions_Regex_Expand(_VimTest):
