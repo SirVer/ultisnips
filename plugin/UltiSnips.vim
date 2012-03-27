@@ -207,6 +207,7 @@ function! UltiSnips_MapKeys()
     exec "snoremap <silent> " . g:UltiSnipsListSnippets . " <Esc>:call UltiSnips_ListSnippets()<cr>"
 
     snoremap <silent> <BS> <c-g>c
+    snoremap <silent> <c-h> <c-g>c
 endf
 
 function! UltiSnips_CursorMoved()
