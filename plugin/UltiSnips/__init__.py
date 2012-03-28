@@ -30,7 +30,7 @@ https://bugs.launchpad.net/ultisnips/+filebug.
 Following is the full stack trace:
 """
             s += traceback.format_exc()
-            self.leaving_window() # Vim sends no WinLeave msg here.
+            self.leaving_buffer() # Vim sends no WinLeave msg here.
             _vim.new_scratch_buffer(s)
     return wrapper
 
@@ -681,10 +681,10 @@ class SnippetManager(object):
             self._vstate.remember_buffer(self._csnippets[0])
 
 
-    def leaving_window(self):
+    def leaving_buffer(self):
         """
-        Called when the user switches tabs. It basically means that all
-        snippets must be properly terminated
+        Called when the user switches tabs/windows/buffers. It basically means
+        that all snippets must be properly terminated
         """
         while len(self._csnippets):
             self._current_snippet_is_done()

@@ -196,8 +196,8 @@ endf
 function! UltiSnips_EnteredInsertMode()
     exec g:_uspy "UltiSnips_Manager.entered_insert_mode()"
 endf
-function! UltiSnips_LeavingWindow()
-    exec g:_uspy "UltiSnips_Manager.leaving_window()"
+function! UltiSnips_LeavingBuffer()
+    exec g:_uspy "UltiSnips_Manager.leaving_buffer()"
 endf
 " }}}
 
@@ -214,7 +214,7 @@ exec g:_uspy "UltiSnips_Manager.backward_trigger = vim.eval('g:UltiSnipsJumpBack
 
 au CursorMovedI * call UltiSnips_CursorMoved()
 au CursorMoved * call UltiSnips_CursorMoved()
-au WinLeave * call UltiSnips_LeavingWindow()
+au BufLeave * call UltiSnips_LeavingWindow()
 au FileType * call UltiSnips_FileTypeChanged()
 
 call UltiSnips_MapKeys()
