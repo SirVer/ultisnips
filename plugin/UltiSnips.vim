@@ -82,7 +82,7 @@ function! UltiSnipsEdit(...)
     if a:0 == 1 && a:1 != ''
         let type = a:1
     else
-        exec g:_uspy "vim.command(\"let type = '%s'\" % UltiSnips_Manager.filetype)"
+        exec g:_uspy "vim.command(\"let type = '%s'\" % UltiSnips_Manager.primary_filetype)"
     endif
     exec g:_uspy "vim.command(\"let file = '%s'\" % UltiSnips_Manager.file_to_edit(vim.eval(\"type\")))"
 
@@ -99,6 +99,14 @@ endfunction
 
 " edit snippets, default of current file type or the specified type
 command! -nargs=? UltiSnipsEdit :call UltiSnipsEdit(<q-args>)
+
+" Global Commands {{{
+function! UltiSnipsAddFiletypes(filetypes)
+    exec g:_uspy "UltiSnips_Manager.add_buffer_filetypes('" . a:filetypes . ".all')"
+    return ""
+endfunction
+command! -nargs=1 UltiSnipsAddFiletypes :call UltiSnipsAddFiletypes(<q-args>)
+
 "" }}}
 
 " FUNCTIONS {{{
@@ -145,7 +153,8 @@ function! UltiSnips_JumpForwards()
 endfunction
 
 function! UltiSnips_FileTypeChanged()
-    exec g:_uspy "UltiSnips_Manager.ensure_snippets_loaded()"
+    exec g:_uspy "UltiSnips_Manager.reset_buffer_filetypes()"
+    exec g:_uspy "UltiSnips_Manager.add_buffer_filetypes('" . &ft . "')"
     return ""
 endfunction
 
@@ -173,6 +182,7 @@ endfunction
 function! UltiSnips_MapKeys()
     " Map the keys correctly
     if g:UltiSnipsExpandTrigger == g:UltiSnipsJumpForwardTrigger
+
         exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=UltiSnips_ExpandSnippetOrJump()<cr>"
         exec "snoremap <silent> " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips_ExpandSnippetOrJump()<cr>"
     else

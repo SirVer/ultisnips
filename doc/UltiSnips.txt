@@ -179,6 +179,29 @@ g:UltiSnipsSnippetsDir
                             'filetype' is "cpp", then :UltiSnipsEdit will open
                             "~/.vim/mydir/UltiSnips/cpp.snippets".
 
+                                                       *:UltiSnipsAddFiletypes*
+The UltiSnipsAddFiletypes command allows for explicit merging of other snippet
+filetypes for the current buffer. For example if you edit a .rst file, but
+also want the Lua snippets to be available you can issue the command >
+
+   :UltiSnipsAddFiletypes rst.lua
+
+using the dotted filetype syntax. Order is important, the first filetype in
+this list will be the one used for UltiSnipsEdit and the list is
+ordered by evaluation priority. Consequently, you might add this to your
+ftplugin/rails.vim >
+
+   :UltiSnipsAddFiletypes rails.ruby
+
+I mention rails first, because I want to edit rails snippet when using
+UltiSnipsEdit and because rails snippet should overwrite equivalent ruby
+snippets. The priority will now be rails -> ruby -> all. If you have some
+special programming snippets that should have lower priority than your ruby
+snippets you can call >
+
+   :UltiSnipsAddFiletypes ruby.programming
+
+The priority will then be rails -> ruby -> programming -> all.
 
 3.2 Triggers                                             *UltiSnips-triggers*
 ------------
