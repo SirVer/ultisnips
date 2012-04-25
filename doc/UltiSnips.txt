@@ -1203,6 +1203,7 @@ Contributors listed in chronological order:
    Timothy Mellor (mellort)
    Chris Lasher (gotgenes)
    Chen Houwu (chenhouwu)
+   Harry Zhxu (harryzhxu)
 
 Thank you for your support.
 
