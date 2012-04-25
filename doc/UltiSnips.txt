@@ -1202,6 +1202,7 @@ Contributors listed in chronological order:
    Nick Anderson (nickanderson)
    Timothy Mellor (mellort)
    Chris Lasher (gotgenes)
+   Chen Houwu (chenhouwu)
 
 Thank you for your support.
 
