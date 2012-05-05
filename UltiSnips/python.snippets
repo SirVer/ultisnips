@@ -421,6 +421,10 @@ endsnippet
 # Assertions & Tests #
 #####################
 
+snippet pdb "Set PDB breakpoint" b
+import pdb; pdb.set_trace()
+endsnippet
+
 snippet ae "Assert equal" b
 self.assertEqual(${1:first},${2:second})
 endsnippet
