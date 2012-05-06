@@ -669,12 +669,15 @@ class SnippetManager(object):
             lt = lt[lt_span[0]:lt_span[1]]
             ct = ct[ct_span[0]:ct_span[1]]
 
-            rv, es = guess_edit(initial_line, lt, ct, self._vstate)
-            if not rv:
-                lt = '\n'.join(lt)
-                ct = '\n'.join(ct)
-                es = diff(lt, ct, initial_line)
-            self._csnippets[0].replay_user_edits(es)
+            try:
+                rv, es = guess_edit(initial_line, lt, ct, self._vstate)
+                if not rv:
+                    lt = '\n'.join(lt)
+                    ct = '\n'.join(ct)
+                    es = diff(lt, ct, initial_line)
+                self._csnippets[0].replay_user_edits(es)
+            except IndexError:
+                pass # Rather do nothing than throwing an error. It will be correct most of the time
 
         self._check_if_still_inside_snippet()
         if self._csnippets:
