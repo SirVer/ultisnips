@@ -344,7 +344,7 @@ with snippet definitions should be located.
 
 Using a strategy similar to how Vim detects |ftplugins|, UltiSnips iterates
 over the snippet definition directories looking for files with names of the
-following patterns: ft.snippets, *_ft.snippets, or ft/*, where "ft" is the
+following patterns: ft.snippets, ft_*.snippets, or ft/*, where "ft" is the
 'filetype' of the current document and "*" is a shell-like wildcard matching
 any string including the empty string. The following table shows some typical
 snippet filenames and their associated filetype.
@@ -353,7 +353,7 @@ snippet filenames and their associated filetype.
     ruby.snippets            ruby
     perl.snippets            perl
     c.snippets               c
-    my_c.snippets            c
+    c_my.snippets            c
     c/a                      c
     c/b.snippets             c
     all.snippets             *all
