@@ -1180,6 +1180,7 @@ Contributors listed in chronological order:
    suy - Alejandro Exojo
    grota - Giuseppe Rota
    iiijjjii - Jim Karsten
+   fgalassi - Federico Galassi
 
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
