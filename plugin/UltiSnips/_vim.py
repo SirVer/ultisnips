@@ -225,7 +225,10 @@ def _unmap_select_mode_mapping():
             for m in maps:
                 # The first three chars are the modes, that might be listed.
                 # We are not interested in them here.
-                trig = m[3:].split()[0]
+                trig = m[3:].split()[0] if len(m[3:].split()) != 0 else None
+
+                if trig is None:
+                    continue
 
                 # The bar separates commands
                 if trig[-1] == "|":
