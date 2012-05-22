@@ -1181,6 +1181,7 @@ Contributors listed in chronological order:
    grota - Giuseppe Rota
    iiijjjii - Jim Karsten
    fgalassi - Federico Galassi
+   lucapette
 
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
