@@ -1,11 +1,10 @@
-snippet #! "#!/usr/bin/env ruby"
+snippet "^#!" "#!/usr/bin/env ruby" r
 #!/usr/bin/env ruby
 $0
 endsnippet
 
 
-
-snippet #utf8 "# encoding: UTF-8"
+snippet "^# ?[uU][tT][fF]-?8" "# encoding: UTF-8" r
 # encoding: UTF-8
 $0
 endsnippet
@@ -13,13 +12,13 @@ endsnippet
 
 
 snippet If "<command> if <expression>"
-${1:command} if ${2:expression$0}
+${1:command} if ${0:expression}
 endsnippet
 
 
 
 snippet Unless "<command> unless <expression>"
-${1:command} unless ${2:expression$0}
+${1:command} unless ${0:expression}
 endsnippet
 
 
@@ -27,7 +26,7 @@ endsnippet
 snippet if "if <condition> ... end"
 if ${1:condition}
 	${2:# TODO}
-end${3:$0}
+end
 endsnippet
 
 
@@ -37,7 +36,7 @@ if ${1:condition}
 	${2:# TODO}
 else
 	${3:# TODO}
-end${4:$0}
+end
 endsnippet
 
 
@@ -48,16 +47,16 @@ if ${1:condition}
 elsif ${3:condition}
 	${4:# TODO}
 else
-	${5:# TODO}
-end${6:$0}
+	${0:# TODO}
+end
 endsnippet
 
 
 
 snippet unless "unless <condition> ... end"
 unless ${1:condition}
-	${2:# TODO}
-end${3:$0}
+	${0:# TODO}
+end
 endsnippet
 
 
@@ -66,8 +65,8 @@ snippet unlesse "unless <condition> ... else ... end"
 unless ${1:condition}
 	${2:# TODO}
 else
-	${3:# TODO}
-end${4:$0}
+	${0:# TODO}
+end
 endsnippet
 
 
@@ -78,15 +77,15 @@ unless ${1:condition}
 elsif ${3:condition}
 	${4:# TODO}
 else
-	${5:# TODO}
-end${6:$0}
+	${0:# TODO}
+end
 endsnippet
 
 
 
 snippet "\b(de)?f" "def <name>..." r
 def ${1:function_name}${2: ${3:*args}}
-	${4:# TODO$0}
+	${0:# TODO}
 end
 endsnippet
 
@@ -94,7 +93,7 @@ endsnippet
 
 snippet defi "def initialize ..."
 def initialize${1: ${2:*args}}
-	${3:# TODO$0}
+	${0:# TODO}
 end
 endsnippet
 
@@ -104,153 +103,168 @@ snippet defr "def <name> ... rescue ..."
 def ${1:function_name}${2: ${3:*args}}
 	${4:# TODO}
 rescue
-	${5:# TODO}
+	${0:# TODO}
 end
 endsnippet
 
 
 
 snippet For "(<from>..<to>).each { |<i>| <block> }"
-(${1:from}..${2:to}).each { |${3:i}| ${4:# TODO} }${5:$0}
+(${1:from}..${2:to}).each { |${3:i}| ${4:# TODO} }
 endsnippet
 
 
 
 snippet for "(<from>..<to>).each do |<i>| <block> end"
 (${1:from}..${2:to}).each do |${3:i}|
-	${4:# TODO}
-end${5:$0}
+	${0:# TODO}
+end
 endsnippet
 
 
 
-snippet "([^ \t]+)\.Merge!" ".merge!(<other_hash>) { |<key>,<oldval>,<newval>| <block> }" r
-`!p snip.rv=match.group(1)`.merge!(${1:other_hash}) { |${2:key},${3:oldval},${4:newval}| ${5:block} }${6:$0}
+snippet "(\S+)\.Merge!" ".merge!(<other_hash>) { |<key>,<oldval>,<newval>| <block> }" r
+`!p snip.rv=match.group(1)`.merge!(${1:other_hash}) { |${2:key},${3:oldval},${4:newval}| ${5:block} }
 endsnippet
 
 
 
-snippet "([^ \t]+)\.merge!" ".merge!(<other_hash>) do |<key>,<oldval>,<newval>| <block> end" r
+snippet "(\S+)\.merge!" ".merge!(<other_hash>) do |<key>,<oldval>,<newval>| <block> end" r
 `!p snip.rv=match.group(1)`.merge!(${1:other_hash}) do |${2:key},${3:oldval},${4:newval}|
-	${5:block}
-end${6:$0}
+	${0:block}
+end
 endsnippet
 
 
 
-snippet "([^ \t]+)\.Delete_?if" ".delete_if { |<key>,<value>| <block> }" r
-`!p snip.rv=match.group(1)`.delete_if { |${1:key},${2:value}| ${3:# TODO} }${4:$0}
+snippet "(\S+)\.Del(ete)?_?if" ".delete_if { |<key>,<value>| <block> }" r
+`!p snip.rv=match.group(1)`.delete_if { |${1:key},${2:value}| ${3:# TODO} }
 endsnippet
 
 
 
-snippet "([^ \t]+)\.delete_?if" ".delete_if do |<key>,<value>| <block> end" r
+snippet "(\S+)\.del(ete)?_?if" ".delete_if do |<key>,<value>| <block> end" r
 `!p snip.rv=match.group(1)`.delete_if do |${1:key},${2:value}|
-	${3:# TODO}
-end${4:$0}
+	${0:# TODO}
+end
 endsnippet
 
 
 
-snippet "([^ \t]+)\.Keep_?if" ".keep_if { |<key>,<value>| <block> }" r
-`!p snip.rv=match.group(1)`.keep_if { |${1:key},${2:value}| ${3:# TODO} }${4:$0}
+snippet "(\S+)\.Keep_?if" ".keep_if { |<key>,<value>| <block> }" r
+`!p snip.rv=match.group(1)`.keep_if { |${1:key},${2:value}| ${3:# TODO} }
 endsnippet
 
 
 
-snippet "([^ \t]+)\.keep_?if" ".keep_if do <key>,<value>| <block> end" r
+snippet "(\S+)\.keep_?if" ".keep_if do <key>,<value>| <block> end" r
 `!p snip.rv=match.group(1)`.keep_if do |${1:key},${2:value}|
-	${3:# TODO}
-end${4:$0}
+	${0:# TODO}
+end
 endsnippet
 
 
 
-snippet "([^ \t]+)\.Reject" ".reject { |<key>,<value>| <block> }" r
-`!p snip.rv=match.group(1)`.reject { |${1:key},${2:value}| ${3:# TODO} }${4:$0}
+snippet "(\S+)\.Reject" ".reject { |<key>,<value>| <block> }" r
+`!p snip.rv=match.group(1)`.reject { |${1:key},${2:value}| ${3:# TODO} }
 endsnippet
 
 
 
-snippet "([^ \t]+)\.reject" ".reject do <key>,<value>| <block> end" r
+snippet "(\S+)\.reject" ".reject do <key>,<value>| <block> end" r
 `!p snip.rv=match.group(1)`.reject do |${1:key},${2:value}|
-	${3:# TODO}
-end${4:$0}
+	${0:# TODO}
+end
 endsnippet
 
 
 
-snippet "([^ \t]+)\.Select" ".select { |<item>| <block>}" r
-`!p snip.rv=match.group(1)`.select { |${1:item}| ${2:block} }${3:$0}
+snippet "(\S+)\.Select" ".select { |<item>| <block>}" r
+`!p snip.rv=match.group(1)`.select { |${1:item}| ${2:block} }
 endsnippet
 
 
 
-snippet "([^ \t]+)\.select" ".select do |<item>| <block> end" r
+snippet "(\S+)\.select" ".select do |<item>| <block> end" r
 `!p snip.rv=match.group(1)`.select do |${1:item}|
-	${2:block}
-end${3:$0}
+	${0:block}
+end
 endsnippet
 
 
 
-snippet "([^ \t]+)\.Sort" ".sort { |<a>,<b>| <block> }" i
-`!p snip.rv=match.group(1)`.sort { |${1:a},${2,b}| ${3:# TODO} }${4:$0}
+snippet "(\S+)\.Sort" ".sort { |<a>,<b>| <block> }" r
+`!p snip.rv=match.group(1)`.sort { |${1:a},${2:b}| ${3:# TODO} }
 endsnippet
 
 
 
-snippet "([^ \t]+)\.sort" ".sort do |<a>,<b>| <block> end" r
-`!p snip.rv=match.group(1)`.sort do |${1:a},${2,b}|
-	${3:# TODO}
-end${4:$0}
+snippet "(\S+)\.sort" ".sort do |<a>,<b>| <block> end" r
+`!p snip.rv=match.group(1)`.sort do |${1:a},${2:b}|
+	${0:# TODO}
+end
 endsnippet
 
 
 
-snippet "([^ \t]+)\.Each_?key" ".each_key { |<key>| <block> }" r
-`!p snip.rv=match.group(1)`.each_key { |${1:key}| ${2:# TODO} }${3:$0}
+snippet "(\S+)\.Each_?k(ey)?" ".each_key { |<key>| <block> }" r
+`!p snip.rv=match.group(1)`.each_key { |${1:key}| ${2:# TODO} }
 endsnippet
 
 
 
-snippet "([^ \t]+)\.each_?key" ".each_key do |key| <block> end" r
+snippet "(\S+)\.each_?k(ey)?" ".each_key do |key| <block> end" r
 `!p snip.rv=match.group(1)`.each_key do |${1:key}|
-	${2:# TODO}
-end${3:$0}
+	${0:# TODO}
+end
 endsnippet
 
 
 
-snippet "([^ \t]+)\.Each_?value" ".each_value { |<value>| <block> }" r
-`!p snip.rv=match.group(1)`.each_value { |${1:value}| ${2:# TODO} }${3:$0}
+snippet "(\S+)\.Each_?val(ue)?" ".each_value { |<value>| <block> }" r
+`!p snip.rv=match.group(1)`.each_value { |${1:value}| ${2:# TODO} }
 endsnippet
 
 
 
-snippet "([^ \t]+)\.each_?value" ".each_value do |<value>| <block> end" r
+snippet "(\S+)\.each_?val(ue)?" ".each_value do |<value>| <block> end" r
 `!p snip.rv=match.group(1)`.each_value do |${1:value}|
-	${2:# TODO}
-end${3:$0}
+	${0:# TODO}
+end
 endsnippet
 
 
 
 snippet Each "<elements>.each { |<element>| <block> }"
-${1:elements}.each { |${2:${1/s$//}}| ${3:# TODO} }${4:$0}
+${1:elements}.each { |${2:${1/s$//}}| ${3:# TODO} }
 endsnippet
 
 
 
 snippet each "<elements>.each do |<element>| <block> end"
 ${1:elements}.each do |${2:${1/s$//}}|
-	${3:# TODO}
-end${4:$0}
+	${0:# TODO}
+end
 endsnippet
 
 
 
-snippet "([^ \t]+)\.Map" ".map { |<element>| <block> }" r
+snippet each_?s(lice)? "<array>.each_slice(n) do |slice| <block> end"
+each_slice(${1:2}) do |${2:slice}|
+	${0:# TODO}
+end
+endsnippet
+
+
+
+snippet Each_?s(lice)? "<array>.each_slice(n) { |slice| <block> }"
+each_slice(${1:2}) { |${2:slice}| ${3:# TODO} }
+endsnippet
+
+
+
+
+snippet "(\S+)\.Map" ".map { |<element>| <block> }" r
 `!p snip.rv=match.group(1)`.map { |${1:`!p
 element_name = match.group(1).lstrip('$@')
 ematch = re.search("([A-Za-z][A-Za-z0-9_]+?)s?[^A-Za-z0-9_]*?$", element_name)
@@ -259,12 +273,12 @@ try:
 	snip.rv = wmatch.group(1).lower()
 except:
 	snip.rv = 'element'
-`}| ${2:# TODO} }${3:$0}
+`}| ${2:# TODO} }
 endsnippet
 
 
 
-snippet "([^ \t]+)\.map" ".map do |<element>| <block> end" r
+snippet "(\S+)\.map" ".map do |<element>| <block> end" r
 `!p snip.rv=match.group(1)`.map do |${1:`!p
 element_name = match.group(1).lstrip('$@')
 ematch = re.search("([A-Za-z][A-Za-z0-9_]+?)s?[^A-Za-z0-9_]*?$", element_name)
@@ -274,13 +288,13 @@ try:
 except:
 	snip.rv = 'element'
 `}|
-	${2:# TODO}
-end${3:$0}
+	${0:# TODO}
+end
 endsnippet
 
 
 
-snippet "([^ \t]+)\.Reverse_?each" ".reverse_each { |<element>| <block> }" r
+snippet "(\S+)\.Rev(erse)?_?each" ".reverse_each { |<element>| <block> }" r
 `!p snip.rv=match.group(1)`.reverse_each { |${1:`!p
 element_name = match.group(1).lstrip('$@')
 ematch = re.search("([A-Za-z][A-Za-z0-9_]+?)s?[^A-Za-z0-9_]*?$", element_name)
@@ -289,12 +303,12 @@ try:
 	snip.rv = wmatch.group(1).lower()
 except:
 	snip.rv = 'element'
-`}| ${2:# TODO} }${3:$0}
+`}| ${2:# TODO} }
 endsnippet
 
 
 
-snippet "([^ \t]+)\.reverse_?each" ".reverse_each do |<element>| <block> end" r
+snippet "(\S+)\.rev(erse)?_?each" ".reverse_each do |<element>| <block> end" r
 `!p snip.rv=match.group(1)`.reverse_each do |${1:`!p
 element_name = match.group(1).lstrip('$@')
 ematch = re.search("([A-Za-z][A-Za-z0-9_]+?)s?[^A-Za-z0-9_]*?$", element_name)
@@ -304,13 +318,13 @@ try:
 except:
 	snip.rv = 'element'
 `}|
-	${2:# TODO}
-end${3:$0}
+	${0:# TODO}
+end
 endsnippet
 
 
 
-snippet "([^ \t]+)\.Each" ".each { |<element>| <block> }" r
+snippet "(\S+)\.Each" ".each { |<element>| <block> }" r
 `!p snip.rv=match.group(1)`.each { |${1:`!p
 element_name = match.group(1).lstrip('$@')
 ematch = re.search("([A-Za-z][A-Za-z0-9_]+?)s?[^A-Za-z0-9_]*?$", element_name)
@@ -319,12 +333,12 @@ try:
 	snip.rv = wmatch.group(1).lower()
 except:
 	snip.rv = 'element'
-`}| ${2:# TODO} }${3:$0}
+`}| ${2:# TODO} }
 endsnippet
 
 
 
-snippet "([^ \t]+)\.each" ".each do |<element>| <block> end" r
+snippet "(\S+)\.each" ".each do |<element>| <block> end" r
 `!p snip.rv=match.group(1)`.each do |${1:`!p
 element_name = match.group(1).lstrip('$@')
 ematch = re.search("([A-Za-z][A-Za-z0-9_]+?)s?[^A-Za-z0-9_]*?$", element_name)
@@ -334,55 +348,87 @@ try:
 except:
 	snip.rv = 'element'
 `}|
-	${2:# TODO}
-end${3:$0}
+	${0:# TODO}
+end
 endsnippet
 
 
 
-snippet "([^ \t]+)\.Each_?index" ".each_index { |<index>| <block> }" r
-`!p snip.rv=match.group(1)`.each_index { |${1:index}| ${2:# TODO} }${3:$0}
+
+snippet "(\S+)\.Each_w(ith)?_?i(ndex)?" ".each_with_index { |<element>,<i>| <block> }" r
+`!p snip.rv=match.group(1)`.each_with_index { |${1:`!p
+element_name = match.group(1).lstrip('$@')
+ematch = re.search("([A-Za-z][A-Za-z0-9_]+?)s?[^A-Za-z0-9_]*?$", element_name)
+try:
+	wmatch = re.search("([A-Za-z][A-Za-z0-9_]+)$", ematch.group(1))
+	snip.rv = wmatch.group(1).lower()
+except:
+	snip.rv = 'element'
+`},${2:i}| ${3:# TODO} }$0
 endsnippet
 
 
 
-snippet "([^ \t]+)\.each_?index" ".each_index do |<index>| <block> end" r
-`!p snip.rv=match.group(1)`.each_index do |${1:index}|
-	${2:# TODO}
-end${3:$0}
+snippet "(\S+)\.each_?w(ith)?_?i(ndex)?" ".each_with_index do |<element>,<i>| <block> end" r
+`!p snip.rv=match.group(1)`.each_with_index do |${1:`!p
+element_name = match.group(1).lstrip('$@')
+ematch = re.search("([A-Za-z][A-Za-z0-9_]+?)s?[^A-Za-z0-9_]*?$", element_name)
+try:
+	wmatch = re.search("([A-Za-z][A-Za-z0-9_]+)$", ematch.group(1))
+	snip.rv = wmatch.group(1).lower()
+except:
+	snip.rv = 'element'
+`},${2:i}|
+	${0:# TODO}
+end
 endsnippet
 
 
 
-snippet "([^ \t]+)\.Each_?pair"  ".each_pair { |<key>,<value>| <block> }" r
-`!p snip.rv=match.group(1)`.each_pair { |${1:key},${2:value}| ${3:# TODO} }${4:$0}
+
+snippet "(\S+)\.Each_?p(air)?"  ".each_pair { |<key>,<value>| <block> }" r
+`!p snip.rv=match.group(1)`.each_pair { |${1:key},${2:value}| ${3:# TODO} }
 endsnippet
 
 
 
-snippet "([^ \t]+)\.each_?pair" ".each_pair do |<key>,<value>| <block> end" r
+snippet "(\S+)\.each_?p(air)?" ".each_pair do |<key>,<value>| <block> end" r
 `!p snip.rv=match.group(1)`.each_pair do |${1:key},${2:value}|
-	${3:# TODO}
-end${4:$0}
+	${0:# TODO}
+end
 endsnippet
 
 
 
-snippet "([^ \t]+)\.sub" ".sub(<expression>) { <block> }" r
-`!p snip.rv=match.group(1)`.sub(${1:expression}) { ${2:"replace_with"} }${3:$0}
+snippet "(\S+)\.sub" ".sub(<expression>) { <block> }" r
+`!p snip.rv=match.group(1)`.sub(${1:expression}) { ${2:"replace_with"} }
 endsnippet
 
 
 
-snippet "([^ \t]+)\.gsub" ".gsub(<expression>) { <block> }" r
-`!p snip.rv=match.group(1)`.gsub(${1:expression}) { ${2:"replace_with"} }${3:$0}
+snippet "(\S+)\.gsub" ".gsub(<expression>) { <block> }" r
+`!p snip.rv=match.group(1)`.gsub(${1:expression}) { ${2:"replace_with"} }
+endsnippet
+
+
+
+snippet "(\S+)\.index" ".index { |item| <block> }" r
+`!p snip.rv=match.group(1)`.index { |${1:item}| ${2:block} }
+endsnippet
+
+
+
+snippet "(\S+)\.Index" ".index do |item| ... end" r
+`!p snip.rv=match.group(1)`.index do |${1:item}|
+	${0:block}
+end
 endsnippet
 
 
 
 snippet do "do |<key>| ... end" i
 do ${1:|${2:key}|}
-	${3:$0}
+	$0
 end
 endsnippet
 
@@ -390,76 +436,57 @@ endsnippet
 
 snippet Do "do ... end" i
 do
-	${1:$0}
+	$0
 end
 endsnippet
 
 
 snippet until "until <expression> ... end"
 until ${1:expression}
-	${2:# TODO}
-end${3:$0}
+	${0:# TODO}
+end
 endsnippet
 
 
 
 snippet Until "begin ... end until <expression>"
 begin
-	${2:# TODO}
-end until ${1:expression}${3:$0}
+	${0:# TODO}
+end until ${1:expression}
 endsnippet
 
 
 
 snippet while "while <expression> ... end"
 while ${1:expression}
-	${2:# TODO}
-end${3:$0}
+	${0:# TODO}
+end
 endsnippet
 
 
 
 snippet While "begin ... end while <expression>"
 begin
-	${2:# TODO}
-end while ${1:expression}${3:$0}
+	${0:# TODO}
+end while ${1:expression}
 endsnippet
 
 
 
-snippet r "attr_reader :<attr_names>"
-attr_reader :${1:attr_names}
+snippet "\b(r|attr)" "attr_reader :<attr_names>" r
+attr_reader :${0:attr_names}
 endsnippet
 
 
 
-snippet w "attr_writer :<attr_names>"
-attr_writer :${1:attr_names}
+snippet "\b(w|attr)" "attr_writer :<attr_names>" r
+attr_writer :${0:attr_names}
 endsnippet
 
 
 
-snippet w "attr_accessor :<attr_names>"
-snippet rw
-attr_accessor :${1:attr_names}
-endsnippet
-
-
-
-snippet attr "attr_reader :<attr_names>"
-attr_reader :${1:attr_names}
-endsnippet
-
-
-
-snippet attr "attr_writer :<attr_names>"
-attr_writer :${1:attr_names}
-endsnippet
-
-
-
-snippet attr "attr_accessor :<attr_names>"
-attr_accessor :${1:attr_names}
+snippet "\b(rw|attr)" "attr_accessor :<attr_names>" r
+attr_accessor :${0:attr_names}
 endsnippet
 
 
@@ -468,7 +495,7 @@ snippet begin "begin ... rescue ... end"
 begin
 	${1:# TODO}
 rescue
-	${2:# TODO}
+	${0:# TODO}
 end
 endsnippet
 
@@ -484,7 +511,7 @@ rescue Exception => e
 else
 	${3:# other exception}
 ensure
-	${4:# always excute}
+	${0:# always excute}
 end
 endsnippet
 
@@ -494,15 +521,15 @@ snippet rescue
 rescue Exception => e
 	puts e.message
 	puts e.backtrace.inspect
-	${1:# Rescue}
+	${0:# Rescue}
 endsnippet
 
 
 
-snippet case "case <variable> when <expression> ... end"
+snippet "\b(case|sw(itch)?)" "case <variable> when <expression> ... end" r
 case ${1:variable}
 when ${2:expression}
-${3:$0}
+$0
 end
 endsnippet
 
@@ -516,9 +543,26 @@ endsnippet
 
 snippet class "class <class_name> def initialize ... end end"
 class ${1:class_name}
-	${2:def initialize ${3:*args}
-		${4}
-	end}
+	def initialize ${2:*args}
+		$0
+	end
+end
+endsnippet
+
+
+
+snippet module "module"
+module ${1:module_name}
 	$0
 end
 endsnippet
+
+
+
+snippet ###
+=begin
+  $0
+=end
+endsnippet
+
+# vim: set ts=2 sw=2 expandtab:
