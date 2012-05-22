@@ -1182,6 +1182,7 @@ Contributors listed in chronological order:
    iiijjjii - Jim Karsten
    fgalassi - Federico Galassi
    lucapette
+   Psycojoker - Laurent Peuch 
 
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
