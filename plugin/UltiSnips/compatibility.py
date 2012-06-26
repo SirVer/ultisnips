@@ -12,6 +12,19 @@ import vim
 
 __all__ = ['as_unicode', 'compatible_exec', 'vim_cursor', 'set_vim_cursor']
 
+def _vim_dec(s):
+    try:
+        return s.decode(vim.eval("&encoding"))
+    except UnicodeDecodeError:
+        # At least we tried. There might be some problems down the road now
+        return s
+
+def _vim_enc(s):
+    try:
+        return s.encode(vim.eval("&encoding"))
+    except UnicodeEncodeError:
+        return s
+
 if sys.version_info >= (3,0):
     from UltiSnips.compatibility_py3 import *
 
@@ -21,7 +34,7 @@ if sys.version_info >= (3,0):
         of vims buffer.
         """
         pre_chars = vim.current.buffer[line-1][:col]
-        return len(pre_chars.encode(vim.eval("&encoding")))
+        return len(_vim_enc(pre_chars))
 
     def byte2col(line, nbyte):
         """
@@ -29,14 +42,12 @@ if sys.version_info >= (3,0):
         position inside of vim
         """
         line = vim.current.buffer[line-1]
-        vc = vim.eval("&encoding")
-        raw_bytes = line.encode(vc)[:nbyte]
-        return len(raw_bytes.decode(vc))
+        raw_bytes = _vim_enc(line)[:nbyte]
+        return len(_vim_dec(raw_bytes))
 
     def as_unicode(s):
         if isinstance(s, bytes):
-            vc = vim.eval("&encoding")
-            return s.decode(vc)
+            return _vim_dec(s)
         return str(s)
 
     def as_vimencoding(s):
@@ -52,9 +63,8 @@ else:
         Convert a valid column index into a byte index inside
         of vims buffer.
         """
-        vc = vim.eval("&encoding")
-        pre_chars = vim.current.buffer[line-1].decode(vc)[:col]
-        return len(pre_chars.encode(vc))
+        pre_chars = _vim_dec(vim.current.buffer[line-1])[:col]
+        return len(_vim_enc(pre_chars))
 
     def byte2col(line, nbyte):
         """
@@ -64,15 +74,13 @@ else:
         line = vim.current.buffer[line-1]
         if nbyte >= len(line): # This is beyond end of line
             return nbyte
-        return len(line[:nbyte].decode(vim.eval("&encoding")))
+        return len(_vim_dec(line[:nbyte]))
 
     def as_unicode(s):
         if isinstance(s, str):
-            vc = vim.eval("&encoding")
-            return s.decode(vc)
+            return _vim_dec(s)
         return unicode(s)
 
     def as_vimencoding(s):
-        vc = vim.eval("&encoding")
-        return s.encode(vc)
+        return _vim_enc(s)
 
