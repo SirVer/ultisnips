@@ -1207,7 +1207,7 @@ Contributors listed in chronological order:
    Chris Lasher (gotgenes)
    Chen Houwu (chenhouwu)
    Harry Zhxu (harryzhxu)
-   Pavel (neoascetic)
+   Pavel Puchkin (neoascetic)
    Jacek Wysocki (exu)
 
 Thank you for your support.
