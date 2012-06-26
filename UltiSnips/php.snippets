@@ -5,20 +5,6 @@ snippet array "array"
 $${1:arrayName} = array('${2}' => ${3});${4}
 endsnippet
 
-snippet class "class"
-/**
- * ${1}
- */
-class ${2:ClassName}
-{
-	${3}
-	function ${4:__construct}(${5:argument})
-	{
-		${6:// code...}
-	}
-}
-endsnippet
-
 snippet def "def"
 define('${1}'${2});${3}
 endsnippet
@@ -105,6 +91,144 @@ endsnippet
 
 snippet var "var"
 var_export(${1});${2}
+endsnippet
+
+snippet getter "PHP Class Getter" !b
+/*
+ * Getter for $1
+ */
+public function get${1/\w+\s*/\u$0/}() 
+{
+    return $this->$1;$2
+}
+$4
+endsnippet
+
+snippet setter "PHP Class Setter" !b
+/*
+ * Setter for $1
+ */
+public function set${1/\w+\s*/\u$0/}($$1)
+{
+    $this->$1 = $$1;$3
+    return $this;
+}
+$4
+endsnippet
+
+snippet gs "PHP Class Getter Setter" !b
+protected $$1
+
+/*
+ * Getter for $1
+ */
+public function get${1/\w+\s*/\u$0/}() 
+{
+    return $this->$1;$2
+}
+
+/*
+ * Setter for $1
+ */
+public function set${1/\w+\s*/\u$0/}($$1)
+{
+    $this->$1 = $$1;$3
+    return $this;
+}
+$4
+endsnippet
+
+snippet pub "Public function" !b
+public function ${1:name}(${2:$param})
+{
+    ${3:return null;}
+}
+endsnippet
+
+snippet pro "Protected function" !b
+protected function ${1:name}(${2:$param})
+{
+    ${3:return null;}
+}
+endsnippet
+
+snippet pri "Private function" !b
+private function ${1:name}(${2:$param})
+{
+    ${3:return null;}
+}
+endsnippet
+
+snippet pubs "Public static function" !b
+public static function ${1:name}(${2:$param})
+{
+    ${3:return null;}
+}
+endsnippet
+
+snippet pros "Protected static function" !b
+protected static function ${1:name}(${2:$param})
+{
+    ${3:return null;}
+}
+endsnippet
+
+snippet pris "Private static function" !b
+private static function ${1:name}(${2:$param})
+{
+    ${3:return null;}
+}
+endsnippet
+
+snippet fu "Function snip" !b
+function ${1:name}(${2:$param}) 
+{
+    ${3:return null;}
+}
+endsnippet
+# :vim:ft=snippets
+
+snippet fore "Foreach loop"
+foreach ($${1:variable} as $${3:value}){
+    ${4:// code...}
+}
+endsnippet
+
+snippet new "New class instance" !b
+$$1 = new $1($2);
+$3
+endsnippet
+
+
+snippet ife "if else"
+if (${1:/* condition */}) {
+    ${2:// code...}
+} else {
+    ${3:// code...}
+}
+endsnippet
+
+
+snippet class "Class declaration template" !b
+/**
+ * Class ${1:`!p snip.rv=snip.fn.capitalize().split('.')[0]`} 
+ * @author $2
+ */
+class $1
+{
+    public function ${3:__construct}(${4:$options})
+    {
+        ${4:// code}
+    }
+}
+endsnippet
+
+snippet pr "Demb debug helper in HTML"
+echo '<pre>' . var_export($1, 1) . '</pre>';
+endsnippet
+
+snippet pc "Dumb debug helper in cli"
+var_export($1);
 endsnippet
 
 # :vim:ft=snippets:
