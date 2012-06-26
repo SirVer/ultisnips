@@ -1208,6 +1208,7 @@ Contributors listed in chronological order:
    Chen Houwu (chenhouwu)
    Harry Zhxu (harryzhxu)
    Pavel (neoascetic)
+   Jacek Wysocki (exu)
 
 Thank you for your support.
 
