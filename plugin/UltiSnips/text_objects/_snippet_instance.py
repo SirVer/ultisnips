@@ -71,7 +71,9 @@ class SnippetInstance(EditableTextObject):
                     done.add(obj)
             counter -= 1
         if counter == 0:
-            raise RuntimeError("Cyclic dependency in Snippet definition!")
+            raise RuntimeError("The snippets content did not converge: Check for Cyclic dependencies "
+                "or random strings in your snippet. You can use 'if not snip.c' to make sure "
+                "to only expand random output once.")
 
         vc.to_vim()
         self._del_child(vc)
