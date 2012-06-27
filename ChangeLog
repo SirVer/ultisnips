@@ -1,3 +1,10 @@
+	- Various smaller bug fixes.
+	- New command to manually add a filetype to the list for the current
+	  buffer. *:UltiSnipsAddFiletypes*
+	- New or improved snippets: snippets, haskell, bindzone, python, golang,
+	  json, html, coffee, coffee_jasmine, javascript_jasmine, ruby, php,
+	  markdown.
+
 version 2.1:
 	- Python interpolation access to text from visual selection via snip.v.
 	- Support for transformations of ${VISUAL} texts.
