@@ -12,6 +12,7 @@ Automatically filled during usage"""
 _commentDict = { }
 
 def _parse_comments(s):
+    """ Parses vim's comments option to extract comment format """
     i = iter(s.split(","))
 
     rv = []
@@ -21,10 +22,10 @@ def _parse_comments(s):
             flags,text = i.next().split(':', 1)
 
             if len(flags) == 0:
-                rv.append((text,text,text, ""))
-
+                if len(text) == 1:
+                    rv.append((text,text,text, ""))
             # parse 3-part comment, but ignore those with O flag
-            elif flags[1] == 's' and 'O' not in flags:
+            elif flags[0] == 's' and 'O' not in flags:
                 ctriple = []
                 indent = ""
 
