@@ -1209,6 +1209,7 @@ Contributors listed in chronological order:
    Harry Zhxu (harryzhxu)
    Pavel Puchkin (neoascetic)
    Jacek Wysocki (exu)
+   Alexander Kondratskiy (KholdStare)
 
 Thank you for your support.
 
