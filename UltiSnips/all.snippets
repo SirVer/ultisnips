@@ -6,6 +6,13 @@
 ##############
 global !p
 import string, vim
+
+""" Maps a filetype to comment format used for boxes """
+_commentDict = {
+    'c' :   ( '/*', '*', '*/', " " ),
+    'cpp' : ( '/*', '*', '*/', " " ),
+}
+
 def _parse_comments(s):
     i = iter(s.split(","))
 
@@ -34,10 +41,26 @@ def _parse_comments(s):
     except StopIteration:
        return rv
 
+def _get_comment_format():
+    """ Returns a 4-element tuple representing the comment format for
+    the current file. """
+
+    ft = vim.eval("&filetype")
+    # check if the comment dict has the format for the current file
+    if _commentDict.has_key(ft):
+        return _commentDict[ft]
+
+    # otherwise parse vim's comments and add it for later use
+    commentformat = _parse_comments(vim.eval("&comments"))[0]
+    _commentDict[ft] = commentformat
+
+    return commentformat
+
+
 def make_box(twidth, bwidth = None):
    if bwidth is None:
       bwidth = twidth + 2
-   b,m,e,i = _parse_comments(vim.eval("&comments"))[0]
+   b,m,e,i = _get_comment_format()
    sline = b + m + bwidth*m + 2*m
    nspaces = (bwidth - twidth)//2 
    mlines = i + m + " " + " "*nspaces
