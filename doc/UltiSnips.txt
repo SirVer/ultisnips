@@ -1210,6 +1210,7 @@ Contributors listed in chronological order:
    Pavel Puchkin (neoascetic)
    Jacek Wysocki (exu)
    Alexander Kondratskiy (KholdStare)
+   Martin Krauskopf (martin-krauskopf)
 
 Thank you for your support.
 
