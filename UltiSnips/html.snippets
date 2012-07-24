@@ -277,4 +277,119 @@ snippet movie "Embed QT movie (movie)" b
 </object>
 endsnippet
 
+
+
+
+
+
+
+snippet "^(\s*)\.([a-zA-Z0-9_.-]+)$" "div class" r
+`!p snip.rv=match.group(1)`<div class="`!p snip.rv=match.group(2).replace('.', ' ')`">
+`!p snip.rv=match.group(1)`    ${0}
+`!p snip.rv=match.group(1)`</div>
+endsnippet
+
+snippet "^(\s*)#([a-zA-Z0-9_-]+)$" "div id" r
+`!p snip.rv=match.group(1)`<div id="`!p snip.rv=match.group(2)`">
+`!p snip.rv=match.group(1)`    ${0}
+`!p snip.rv=match.group(1)`</div>
+endsnippet
+
+
+snippet "^(\s*)\.([a-zA-Z0-9_.-]+)#([a-zA-Z0-9_-]+)$" "div class id" r
+`!p snip.rv=match.group(1)`<div id="`!p snip.rv=match.group(3)`" class="`!p snip.rv=match.group(2).replace('.', ' ')`">
+`!p snip.rv=match.group(1)`    ${0}
+`!p snip.rv=match.group(1)`</div>
+endsnippet
+
+
+snippet "^(\s*)#([a-zA-Z0-9_-]+)\.([a-zA-Z0-9_.-]+)$" "div id class" r
+`!p snip.rv=match.group(1)`<div id="`!p snip.rv=match.group(2)`" class="`!p snip.rv=match.group(3).replace('.', ' ')`">
+`!p snip.rv=match.group(1)`    ${0}
+`!p snip.rv=match.group(1)`</div>
+endsnippet
+
+
+
+snippet "^(\s*)%([a-zA-Z]+)\.([a-zA-Z0-9_.-]+)#([a-zA-Z0-9_-]+)$" "div class id" r
+`!p snip.rv=match.group(1)`<`!p snip.rv=match.group(2)` id="`!p snip.rv=match.group(4)`" class="`!p snip.rv=match.group(3).replace('.', ' ')`">
+`!p snip.rv=match.group(1)`    ${0}
+`!p snip.rv=match.group(1)`</`!p snip.rv=match.group(2)`>
+endsnippet
+
+
+snippet "^(\s*)%([a-zA-Z]+)#([a-zA-Z0-9_-]+)\.([a-zA-Z0-9_.-]+)$" "div id class" r
+`!p snip.rv=match.group(1)`<`!p snip.rv=match.group(2)` id="`!p snip.rv=match.group(3)`" class="`!p snip.rv=match.group(4).replace('.', ' ')`">
+`!p snip.rv=match.group(1)`    ${0}
+`!p snip.rv=match.group(1)`</`!p snip.rv=match.group(2)`>
+endsnippet
+
+
+snippet "^(\s*)%([a-zA-Z]+)$" "element" r
+`!p snip.rv=match.group(1)`<`!p snip.rv=match.group(2)`>
+`!p snip.rv=match.group(1)`    $0
+`!p snip.rv=match.group(1)`</`!p snip.rv=match.group(2)`>
+endsnippet
+
+
+snippet "^(\s*)%([a-zA-Z]+)\.([a-zA-Z0-9_.-]+)$" "element class" r
+`!p snip.rv=match.group(1)`<`!p snip.rv=match.group(2)` class="`!p snip.rv=match.group(3).replace('.', ' ')`">
+`!p snip.rv=match.group(1)`    $0
+`!p snip.rv=match.group(1)`</`!p snip.rv=match.group(2)`>
+endsnippet
+
+
+snippet "^(\s*)%([a-zA-Z]+)#([a-zA-Z0-9_-]+)$" "element id" r
+`!p snip.rv=match.group(1)`<`!p snip.rv=match.group(2)` id="`!p snip.rv=match.group(3)`">
+`!p snip.rv=match.group(1)`    $0
+`!p snip.rv=match.group(1)`</`!p snip.rv=match.group(2)`>
+endsnippet
+
+
+
+snippet "^(\s*)!\.([a-zA-Z0-9_.-]+)$" "span class" r
+`!p snip.rv=match.group(1)`<span class="`!p snip.rv=match.group(2).replace('.', ' ')`">$1</span>
+endsnippet
+
+snippet "^(\s*)!#([a-zA-Z0-9_-]+)$" "span id" r
+`!p snip.rv=match.group(1)`<span id="`!p snip.rv=match.group(2)`">$1</span>
+endsnippet
+
+
+snippet "^(\s*)!\.([a-zA-Z0-9_.-]+)#([a-zA-Z0-9_-]+)$" "span class id" r
+`!p snip.rv=match.group(1)`<span id="`!p snip.rv=match.group(3)`" class="`!p snip.rv=match.group(2).replace('.', ' ')`">$1</span>
+endsnippet
+
+
+snippet "^(\s*)!#([a-zA-Z0-9_-]+)\.([a-zA-Z0-9_.-]+)$" "span id class" r
+`!p snip.rv=match.group(1)`<span id="`!p snip.rv=match.group(2)`" class="`!p snip.rv=match.group(3).replace('.', ' ')`">$1</span>
+endsnippet
+
+
+
+snippet "^(\s*)%([a-zA-Z]+)\.([a-zA-Z0-9_.-]+)#([a-zA-Z0-9_-]+)$" "div class id" r
+`!p snip.rv=match.group(1)`<`!p snip.rv=match.group(2)` id="`!p snip.rv=match.group(4)`" class="`!p snip.rv=match.group(3).replace('.', ' ')`">$1</`!p snip.rv=match.group(2)`>
+endsnippet
+
+
+snippet "^(\s*)!%([a-zA-Z]+)#([a-zA-Z0-9_-]+)\.([a-zA-Z0-9_.-]+)$" "div id class" r
+`!p snip.rv=match.group(1)`<`!p snip.rv=match.group(2)` id="`!p snip.rv=match.group(3)`" class="`!p snip.rv=match.group(4).replace('.', ' ')`">$1</`!p snip.rv=match.group(2)`>
+endsnippet
+
+
+snippet "^(\s*)!%([a-zA-Z]+)$" "element" r
+`!p snip.rv=match.group(1)`<`!p snip.rv=match.group(2)`>$1</`!p snip.rv=match.group(2)`>
+endsnippet
+
+
+snippet "^(\s*)!%([a-zA-Z]+)\.([a-zA-Z0-9_.-]+)$" "element class" r
+`!p snip.rv=match.group(1)`<`!p snip.rv=match.group(2)` class="`!p snip.rv=match.group(3).replace('.', ' ')`">$1</`!p snip.rv=match.group(2)`>
+endsnippet
+
+
+snippet "^(\s*)!%([a-zA-Z]+)#([a-zA-Z0-9_-]+)$" "element id" r
+`!p snip.rv=match.group(1)`<`!p snip.rv=match.group(2)` id="`!p snip.rv=match.group(3)`">$1</`!p snip.rv=match.group(2)`>
+endsnippet
+
+
 # vim:ft=snippets:
