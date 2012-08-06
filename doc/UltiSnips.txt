@@ -16,6 +16,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    3.5 Functions                                |UltiSnips-functions|
       3.5.1 UltiSnips_AddSnippet                |UltiSnips_AddSnippet|
       3.5.2 UltiSnips_Anon                      |UltiSnips_Anon|
+   3.6 Missing python support                   |Ultisnips-python-warning|
 4. Syntax                                       |UltiSnips-syntax|
    4.1 Adding Snippets                          |UltiSnips-adding-snippets|
       4.1.1 Character Escaping                  |UltiSnips-character-escaping|
@@ -328,6 +329,21 @@ the '$$' trigger and passes '$$' to the function as the trigger argument.
 This is required in order for UltiSnips to have access to the characters
 typed so it can determine if the trigger matches or not.
 
+
+3.6 Warning about missing python support           *Ultisnips-python-warning*
+----------------------------------------
+
+When UltiSnips is loaded, it will check that the running Vim was compiled with
+python support.  If no support is detected, a warning will be displayed and
+loading of Ultisnips will be skipped.
+
+If you would like to suppress this warning message, you may add the following
+line to your vimrc file.
+
+    let g:UltiSnipsNoPythonWarning = 1
+
+This may be useful if your Vim configuration files are shared across several
+systems where some of them may not have Vim compiled with python support.
 
 =============================================================================
 4. Syntax                                                  *UltiSnips-syntax*
