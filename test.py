@@ -2936,6 +2936,9 @@ if __name__ == '__main__':
     send(""":set encoding=utf-8\n""", options.session)
     send(""":set fileencoding=utf-8\n""", options.session)
 
+    # Tell vim not to complain about quitting without writing
+    send(""":set buftype=nofile\n""", options.session)
+
     # Ensure runtimepath includes only Vim's own runtime files
     # and those of the UltiSnips directory under test ('.').
     send(""":set runtimepath=$VIMRUNTIME,.\n""", options.session)
