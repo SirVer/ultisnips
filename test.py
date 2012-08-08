@@ -92,13 +92,34 @@ class VimInterface:
 class VimInterfaceScreen(VimInterface):
     def __init__(self, session):
         self.session = session
+        self.need_screen_escapes = 0
+        self.detect_parsing()
 
     def send(self, s):
+        if self.need_screen_escapes:
+            # escape characters that are special to some versions of screen
+            repl = lambda m: '\\' + m.group(0)
+            s = re.sub( r"[$^#\\']", repl, s )
+
+        # Escape single quotes in command to protect from shell
         s = s.replace("'", r"'\''")
         cmd = "screen -x %s -X stuff '%s'" % (self.session, s)
         if sys.version_info >= (3,0):
             cmd = cmd.encode("utf-8")
         os.system(cmd)
+
+    def detect_parsing(self):
+        # Clear the buffer
+        self.send("bggVGd")
+
+        # Send a string where the interpretation will depend on version of screen
+        string = "$TERM"
+        self.send("i" + string + ESC)
+        output = self.get_buffer_data()
+
+        # If the output doesn't match the input, need to do additional escaping
+        if output != string:
+            self.need_screen_escapes = 1
 
 class VimInterfaceWindows(VimInterface):
     BRACES = re.compile("([}{])")
