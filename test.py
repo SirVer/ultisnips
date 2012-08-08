@@ -74,6 +74,21 @@ class VimInterface:
             self.send(c)
             time.sleep(sleeptime)
 
+    def get_buffer_data(self):
+        handle, fn = tempfile.mkstemp(prefix="UltiSnips_Test",suffix=".txt")
+        os.close(handle)
+        os.unlink(fn)
+
+        self.send(":w! %s\n" % fn)
+
+        # Read the output, chop the trailing newline
+        tries = 50
+        while tries:
+            if os.path.exists(fn):
+                return open(fn,"r").read()[:-1]
+            time.sleep(.05)
+            tries -= 1
+
 class VimInterfaceScreen(VimInterface):
     def __init__(self, session):
         self.session = session
@@ -266,20 +281,7 @@ class _VimTest(unittest.TestCase):
 
             self._options_off()
 
-            handle, fn = tempfile.mkstemp(prefix="UltiSnips_Test",suffix=".txt")
-            os.close(handle)
-            os.unlink(fn)
-
-            self.send(":w! %s\n" % fn)
-
-            # Read the output, chop the trailing newline
-            tries = 50
-            while tries:
-                if os.path.exists(fn):
-                    self.output = open(fn,"r").read()[:-1]
-                    break
-                time.sleep(.05)
-                tries -= 1
+            self.output = self.vim.get_buffer_data()
 
 ###########################################################################
 #                            BEGINNING OF TEST                            #
