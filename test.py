@@ -39,8 +39,6 @@ import sys
 
 from textwrap import dedent
 
-WIN = platform.system() == "Windows"
-
 # Some constants for better reading
 BS = '\x7f'
 ESC = '\x1b'
@@ -63,102 +61,96 @@ EA = "#" # Expand anonymous
 COMPL_KW = chr(24)+chr(14)
 COMPL_ACCEPT = chr(25)
 
+class VimInterface:
+    def focus(title=None):
+        pass
 
-################ windows ################
+    def send_keystrokes(self, str, sleeptime):
+        """
+        Send the keystrokes to vim via screen. Pause after each char, so
+        vim can handle this
+        """
+        for c in str:
+            self.send(c)
+            time.sleep(sleeptime)
 
-if WIN:
-    # import windows specific modules
-    import win32com.client, win32gui
-    shell = win32com.client.Dispatch("WScript.Shell")
+class VimInterfaceScreen(VimInterface):
+    def __init__(self, session):
+        self.session = session
 
-def focus_win(title=None):
-    if not shell.AppActivate(title or "- GVIM"):
-        raise Exception("Failed to switch to GVim window")
-    time.sleep(1)
+    def send(self, s):
+        s = s.replace("'", r"'\''")
+        cmd = "screen -x %s -X stuff '%s'" % (self.session, s)
+        if sys.version_info >= (3,0):
+            cmd = cmd.encode("utf-8")
+        os.system(cmd)
 
-def is_focused(title=None):
-    cur_title = win32gui.GetWindowText(win32gui.GetForegroundWindow())
-    if (title or "- GVIM") in cur_title:
-        return True
-    return False
+class VimInterfaceWindows(VimInterface):
+    BRACES = re.compile("([}{])")
+    WIN_ESCAPES = ["+", "^", "%", "~", "[", "]", "<", ">", "(", ")"]
+    WIN_REPLACES = [
+            (BS, "{BS}"),
+            (ARR_L, "{LEFT}"),
+            (ARR_R, "{RIGHT}"),
+            (ARR_U, "{UP}"),
+            (ARR_D, "{DOWN}"),
+            ("\t", "{TAB}"),
+            ("\n", "~"),
+            (ESC, "{ESC}"),
 
-BRACES = re.compile("([}{])")
-WIN_ESCAPES = ["+", "^", "%", "~", "[", "]", "<", ">", "(", ")"]
-WIN_REPLACES = [
-        (BS, "{BS}"),
-        (ARR_L, "{LEFT}"),
-        (ARR_R, "{RIGHT}"),
-        (ARR_U, "{UP}"),
-        (ARR_D, "{DOWN}"),
-        ("\t", "{TAB}"),
-        ("\n", "~"),
-        (ESC, "{ESC}"),
+            # On my system ` waits for a second keystroke, so `+SPACE = "`".  On
+            # most systems, `+Space = "` ". I work around this, by sending the host
+            # ` as `+_+BS. Awkward, but the only way I found to get this working.
+            ("`", "`_{BS}"),
+            ("´", "´_{BS}"),
+            ("{^}", "{^}_{BS}"),
+    ]
 
-        # On my system ` waits for a second keystroke, so `+SPACE = "`".  On
-        # most systems, `+Space = "` ". I work around this, by sending the host
-        # ` as `+_+BS. Awkward, but the only way I found to get this working.
-        ("`", "`_{BS}"),
-        ("´", "´_{BS}"),
-        ("{^}", "{^}_{BS}"),
-]
-def convert_keys(keys):
-    keys = BRACES.sub(r"{\1}", keys)
-    for k in WIN_ESCAPES:
-        keys = keys.replace(k, "{%s}" % k)
-    for f, r in WIN_REPLACES:
-        keys = keys.replace(f, r)
-    return keys
+    def __init__(self):
+        self.seq_buf = []
+        # import windows specific modules
+        import win32com.client, win32gui
+        self.win32gui = win32gui
+        self.shell = win32com.client.Dispatch("WScript.Shell")
 
-SEQ_BUF = []
-def send_win(keys, session):
-    global SEQ_BUF
-    SEQ_BUF.append(keys)
-    seq = "".join(SEQ_BUF)
+    def is_focused(self, title=None):
+        cur_title = self.win32gui.GetWindowText(self.win32gui.GetForegroundWindow())
+        if (title or "- GVIM") in cur_title:
+            return True
+        return False
 
-    for f in SEQUENCES:
-        if f.startswith(seq) and f != seq:
-            return
-    SEQ_BUF = []
+    def focus(self, title=None):
+        if not self.shell.AppActivate(title or "- GVIM"):
+            raise Exception("Failed to switch to GVim window")
+        time.sleep(1)
 
-    seq = convert_keys(seq)
+    def convert_keys(self, keys):
+        keys = self.BRACES.sub(r"{\1}", keys)
+        for k in self.WIN_ESCAPES:
+            keys = keys.replace(k, "{%s}" % k)
+        for f, r in self.WIN_REPLACES:
+            keys = keys.replace(f, r)
+        return keys
 
-    if not is_focused():
-        time.sleep(2)
-        focus()
-    if not is_focused():
-        # This is the only way I can find to stop test execution
-        raise KeyboardInterrupt("Failed to focus GVIM")
+    def send(self, keys):
+        self.seq_buf.append(keys)
+        seq = "".join(self.seq_buf)
 
-    shell.SendKeys(seq)
+        for f in SEQUENCES:
+            if f.startswith(seq) and f != seq:
+                return
+        self.seq_buf = []
 
-################ end windows ################
+        seq = self.convert_keys(seq)
 
-def send_screen(s, session):
-    s = s.replace("'", r"'\''")
-    cmd = "screen -x %s -X stuff '%s'" % (session, s)
-    if sys.version_info >= (3,0):
-        cmd = cmd.encode("utf-8")
-    os.system(cmd)
+        if not self.is_focused():
+            time.sleep(2)
+            self.focus()
+        if not self.is_focused():
+            # This is the only way I can find to stop test execution
+            raise KeyboardInterrupt("Failed to focus GVIM")
 
-
-def send(s, session):
-    if WIN:
-        send_win(s, session)
-    else:
-        send_screen(s, session)
-
-def focus(title=None):
-    if WIN:
-        focus_win(title=title)
-
-def send_keystrokes(str, session, sleeptime):
-    """
-    Send the keystrokes to vim via screen. Pause after each char, so
-    vim can handle this
-    """
-    for c in str:
-        send(c, session)
-        time.sleep(sleeptime)
+        self.shell.SendKeys(seq)
 
 class _VimTest(unittest.TestCase):
     snippets = ("dummy", "donotdefine")
@@ -176,7 +168,7 @@ class _VimTest(unittest.TestCase):
     skip_on_mac = False
 
     def send(self,s):
-        send(s, self.session)
+        self.vim.send(s)
 
     def send_py(self,s):
         if sys.version_info < (3,0):
@@ -185,7 +177,7 @@ class _VimTest(unittest.TestCase):
             self.send(":py3 << EOF\n%s\nEOF\n" % s)
 
     def send_keystrokes(self,s):
-        send_keystrokes(s, self.session, self.sleeptime)
+        self.vim.send_keystrokes(s, self.sleeptime)
 
     def check_output(self):
         wanted = self.text_before + '\n\n' + self.wanted + \
@@ -2924,40 +2916,45 @@ if __name__ == '__main__':
     test_loader = unittest.TestLoader()
     all_test_suites = test_loader.loadTestsFromModule(__import__("test"))
 
-    focus()
+    if platform.system() == "Windows":
+        vim = VimInterfaceWindows()
+    else:
+        vim = VimInterfaceScreen(options.session)
+
+    vim.focus()
 
     # Ensure we are not running in VI-compatible mode.
-    send(""":set nocompatible\n""", options.session)
+    vim.send(""":set nocompatible\n""")
 
     # Do not mess with the X clipboard
-    send(""":set clipboard=""\n""", options.session)
+    vim.send(""":set clipboard=""\n""")
 
     # Set encoding and fileencodings
-    send(""":set encoding=utf-8\n""", options.session)
-    send(""":set fileencoding=utf-8\n""", options.session)
+    vim.send(""":set encoding=utf-8\n""")
+    vim.send(""":set fileencoding=utf-8\n""")
 
     # Tell vim not to complain about quitting without writing
-    send(""":set buftype=nofile\n""", options.session)
+    vim.send(""":set buftype=nofile\n""")
 
     # Ensure runtimepath includes only Vim's own runtime files
     # and those of the UltiSnips directory under test ('.').
-    send(""":set runtimepath=$VIMRUNTIME,.\n""", options.session)
+    vim.send(""":set runtimepath=$VIMRUNTIME,.\n""")
 
     # Set the options
-    send(""":let g:UltiSnipsExpandTrigger="<tab>"\n""", options.session)
-    send(""":let g:UltiSnipsJumpForwardTrigger="?"\n""", options.session)
-    send(""":let g:UltiSnipsJumpBackwardTrigger="+"\n""", options.session)
-    send(""":let g:UltiSnipsListSnippets="@"\n""", options.session)
+    vim.send(""":let g:UltiSnipsExpandTrigger="<tab>"\n""")
+    vim.send(""":let g:UltiSnipsJumpForwardTrigger="?"\n""")
+    vim.send(""":let g:UltiSnipsJumpBackwardTrigger="+"\n""")
+    vim.send(""":let g:UltiSnipsListSnippets="@"\n""")
 
     # Now, source our runtime
-    send(":so plugin/UltiSnips.vim\n", options.session)
+    vim.send(":so plugin/UltiSnips.vim\n")
     time.sleep(2) # Parsing and initializing UltiSnips takes a while.
 
     # Inform all test case which screen session to use
     suite = unittest.TestSuite()
     for s in all_test_suites:
         for test in s:
-            test.session = options.session
+            test.vim = vim
             test.interrupt = options.interrupt
             if len(selected_tests):
                 id = test.id().split('.')[1]
