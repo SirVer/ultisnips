@@ -1183,6 +1183,7 @@ Contributors listed in chronological order:
    fgalassi - Federico Galassi
    lucapette
    Psycojoker - Laurent Peuch 
+   aschrab - Aaron Schrab
 
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
