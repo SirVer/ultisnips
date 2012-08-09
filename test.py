@@ -2543,6 +2543,23 @@ class Fold_DeleteMiddleLine_ECR(_VimTest):
 # End: $1  `!p snip.rv = vim.eval("&foldmarker").split(",")[1]`""")
     keys = "fold" + EX + "hi" + ESC + "jdd"
     wanted = "# hi  {{{\n\n# End: hi  }}}"
+
+class PerlSyntaxFold(_VimTest):
+    def _options_on(self):
+        self.send(":set foldlevel=0\n")
+        self.send(":syntax enable\n")
+        self.send(":set foldmethod=syntax\n")
+        self.send(":let g:perl_fold = 1\n")
+        self.send(":so $VIMRUNTIME/syntax/perl.vim\n")
+    def _options_off(self):
+        self.send(":set foldmethod=manual\n")
+        self.send(":syntax clear\n")
+
+    snippets = ("test", r"""package ${1:`!v printf('c%02d', 3)`};
+${0}
+1;""")
+    keys = "test" + EX + JF + "sub junk {}"
+    wanted = "package c03;\nsub junk {}\n1;"
 # End: Folding Interaction  #}}}
 
 # Cursor Movement  {{{#
