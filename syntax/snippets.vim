@@ -26,9 +26,9 @@ syn match snipEnd "^endsnippet" contained contains=snipKeyword
 syn region snipCommand contained keepend start="`" end="`" contains=snipPythonCommand,snipVimLCommand
 syn region snipPythonCommand contained keepend start="`!p" end="`" contained contains=@Python
 syn region snipVimLCommand contained keepend start="`!v" end="`" contained contains=@Viml
-syn match snipVar "\$\d" contained
+syn match snipVar "\$\d*" contained
 syn region snipVisual matchgroup=Define start="\${VISUAL" end="}" contained
-syn region snipVarExpansion matchgroup=Define start="\${\d" end="}" contained contains=snipVar,snipVarExpansion,snipCommand
+syn region snipVarExpansion matchgroup=Define start="\${\d*" end="}" contained contains=snipVar,snipVarExpansion,snipCommand
 syn region snippet fold keepend start="^snippet" end="^endsnippet" contains=snipStart,snipEnd,snipTabsOnly,snipCommand,snipVarExpansion,snipVar,snipVisual
 
 " global definitions
