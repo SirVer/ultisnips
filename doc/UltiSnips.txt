@@ -1184,6 +1184,7 @@ Contributors listed in chronological order:
    lucapette
    Psycojoker - Laurent Peuch 
    aschrab - Aaron Schrab
+   NagatoPain (stardiviner)
 
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
