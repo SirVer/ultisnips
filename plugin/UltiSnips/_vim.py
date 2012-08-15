@@ -119,6 +119,8 @@ def new_scratch_buffer(text):
 
     vim.buffers[-1][:] = text.splitlines()
 
+    feedkeys(r"\<Esc>")
+
 def select(start, end):
     """Select the span in Select mode"""
 
