@@ -4,6 +4,8 @@
 """
 Wrapper functionality around the functions we need from Vim
 """
+import re
+
 import vim
 from vim import error
 
@@ -277,12 +279,16 @@ class _Real_LangMapTranslator(object):
     one line down is no longer possible and UltiSnips will fail.
     """
     _maps = {}
+    _SEMICOLONS = re.compile(r"(?<!\\);")
+    _COMMA = re.compile(r"(?<!\\),")
 
     def _create_translation(self, langmap):
         from_chars, to_chars = "", ""
-        for c in langmap.split(','):
-            if ";" in c:
-                a,b = c.split(';')
+        for c in self._COMMA.split(langmap):
+            c = c.replace("\\,", ",")
+            res = self._SEMICOLONS.split(c)
+            if len(res) > 1:
+                a,b = map(lambda a: a.replace("\\;", ";"), res)
                 from_chars += a
                 to_chars += b
             else:

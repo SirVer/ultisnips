@@ -36,6 +36,7 @@ import time
 import re
 import platform
 import sys
+import subprocess
 
 from textwrap import dedent
 
@@ -79,7 +80,7 @@ class VimInterface:
         os.close(handle)
         os.unlink(fn)
 
-        self.send(":w! %s\n" % fn)
+        self.send(ESC + ":w! %s\n" % fn)
 
         # Read the output, chop the trailing newline
         tries = 50
@@ -102,11 +103,19 @@ class VimInterfaceScreen(VimInterface):
             s = re.sub( r"[$^#\\']", repl, s )
 
         # Escape single quotes in command to protect from shell
-        s = s.replace("'", r"'\''")
-        cmd = "screen -x %s -X stuff '%s'" % (self.session, s)
         if sys.version_info >= (3,0):
-            cmd = cmd.encode("utf-8")
-        os.system(cmd)
+            s = s.encode("utf-8")
+
+        silent_call = lambda cmd: subprocess.call(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        while True:
+            rv = 0
+            if len(s) > 30:
+                rv |= silent_call(["screen", "-x", self.session, "-X", "register", "S", s])
+                rv |= silent_call(["screen", "-x", self.session, "-X", "paste", "S"])
+            else:
+                rv |= silent_call(["screen", "-x", self.session, "-X", "stuff", s])
+            if not rv: break
+            time.sleep(.2)
 
     def detect_parsing(self):
         # Clear the buffer
@@ -248,6 +257,9 @@ class _VimTest(unittest.TestCase):
             return self._skip("Running on Linux")
         if self.skip_on_mac and system == "Darwin":
             return self._skip("Running on Darwin/Mac")
+
+        # Escape for good measure
+        self.send(ESC + ESC + ESC)
 
         # Close all scratch buffers
         self.send(":silent! close\n")
@@ -2445,6 +2457,24 @@ hi4"""
     def _options_off(self):
         self.send(":set langmap=\n")
 
+# Test for bug 501727 #
+class TestNonEmptyLangmapWithSemi_ExceptCorrectResult(_VimTest):
+    snippets = ("testme",
+"""my snipped ${1:some_default}
+and a mirror: $1
+$2...$3
+$0""")
+    keys = "testme" + EX + "hi;" + JF + "hi2" + JF + "hi3" + JF + "hi4" + ESC + ";Hello"
+    wanted ="""my snipped hi;
+and a mirror: hi;
+hi2...hi3
+hi4Hello"""
+
+    def _options_on(self):
+        self.send(":set langmap=\\\\;;A\n")
+    def _options_off(self):
+        self.send(":set langmap=\n")
+
 # Test for bug 871357 #
 class TestLangmapWithUtf8_ExceptCorrectResult(_VimTest):
     skip_on_windows = True   # SendKeys can't send UTF characters
@@ -2945,6 +2975,8 @@ if __name__ == '__main__':
         vim = VimInterfaceScreen(options.session)
 
     vim.focus()
+
+    vim.send(ESC)
 
     # Ensure we are not running in VI-compatible mode.
     vim.send(""":set nocompatible\n""")
