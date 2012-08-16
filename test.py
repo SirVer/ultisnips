@@ -102,7 +102,6 @@ class VimInterfaceScreen(VimInterface):
             repl = lambda m: '\\' + m.group(0)
             s = re.sub( r"[$^#\\']", repl, s )
 
-        # Escape single quotes in command to protect from shell
         if sys.version_info >= (3,0):
             s = s.encode("utf-8")
 
