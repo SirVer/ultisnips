@@ -11,11 +11,20 @@ if exists('did_UltiSnips_vim') || &cp || version < 700
     finish
 endif
 
+" Define dummy version of function called by autocommand setup in
+" ftdetect/UltiSnips.vim.  If the function isn't defined (probably due to
+" using a copy of vim without python support) it will cause an error anytime a
+" new file is opened.
+function! UltiSnips_FileTypeChanged()
+endfunction
+
 if !exists("g:UltiSnipsUsePythonVersion")
     let g:_uspy=":py3 "
     if !has("python3")
         if !has("python")
-            echo  "UltiSnips requires py >= 2.6 or any py3"
+            if !exists("g:UltiSnipsNoPythonWarning")
+                echo  "UltiSnips requires py >= 2.6 or any py3"
+            endif
             finish
         endif
         let g:_uspy=":py "
