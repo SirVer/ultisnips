@@ -66,10 +66,6 @@ buf = VimBuffer()
 def text_to_vim(start, end, text):
     lines = text.split('\n')
 
-    # Open any folds this might have created
-    buf.cursor = start
-    vim.command("normal zv")
-
     new_end = _calc_end(lines, start)
 
     before = buf[start.line][:start.col]
@@ -81,6 +77,10 @@ def text_to_vim(start, end, text):
         new_lines.extend(lines[1:])
         new_lines[-1] += after
     buf[start.line:end.line + 1] = new_lines
+
+    # Open any folds this might have created
+    buf.cursor = start
+    vim.command("normal zv")
 
     return new_end
 
