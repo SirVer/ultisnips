@@ -1,7 +1,11 @@
+version 2.2:
+	- Support to silence Python-not-found warnings. *UltiSnips-python-warning*
+	- Matchit support for snippet files.
+	- Improvements to syntax file.
 	- Various smaller bug fixes.
 	- New command to manually add a filetype to the list for the current
 	  buffer. *:UltiSnipsAddFiletypes*
-	- New or improved snippets: snippets, haskell, bindzone, python, golang,
+	- New or improved snippets: all, snippets, haskell, bindzone, python, golang,
 	  json, html, coffee, coffee_jasmine, javascript_jasmine, ruby, php,
 	  markdown.
 
