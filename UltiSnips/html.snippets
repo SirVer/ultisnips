@@ -167,8 +167,8 @@ snip.rv = snip.fn and 'Hallo' or 'Nothin'
 endsnippet
 
 snippet div "XHTML <div>"
-<div${1: id="${2:name}"}>
-	$0
+<div`!p snip.rv=' id="' if t[1] else ""`${1:name}`!p snip.rv = '"' if t[1] else ""`>
+   $0
 </div>
 endsnippet
 
