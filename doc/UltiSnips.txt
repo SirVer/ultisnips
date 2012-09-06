@@ -11,6 +11,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
 3. Settings & Commands                          |UltiSnips-settings|
    3.1 Commands                                 |UltiSnips-commands|
    3.2 Triggers                                 |UltiSnips-triggers|
+      3.2.1 Using your own trigger functions    |UltiSnips-trigger-functions|
    3.3 Snippet Search Path                      |UltiSnips-snippet-search-path|
    3.4 Warning About Select Mode Mappings       |UltiSnips-warning-smappings|
    3.5 Functions                                |UltiSnips-functions|
@@ -223,6 +224,50 @@ vimrc file. >
    let g:UltiSnipsJumpForwardTrigger="<tab>"
    let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 
+3.2.1 Using your own trigger functions           *UltiSnips-trigger-functions*
+--------------------------------------
+
+For advanced users there are four functions that you can map directly to a 
+key and that correspond to some of the triggers previously defined:
+   g:UltiSnipsExpandTrigger        <--> UltiSnips_ExpandSnippet
+   g:UltiSnipsJumpForwardTrigger   <--> UltiSnips_JumpForwards
+   g:UltiSnipsJumpBackwardTrigger  <--> UltiSnips_JumpBackwards
+
+If you have g:UltiSnipsExpandTrigger and g:UltiSnipsJumpForwardTrigger set
+to the same value then when the function you are actually going to use is
+UltiSnips_ExpandSnippetOrJump.
+
+Each time any of the functions UltiSnips_ExpandSnippet,
+UltiSnips_ExpandSnippet, UltiSnips_JumpBackwards or UltiSnips_JumpBackwards is
+called a global variable is set that contains the corresponding return value
+of the corresponding function.
+
+The corresponding variables and functions are:
+UltiSnips_ExpandSnippet       --> g:ulti_expand_res (0: fail, 1: success)
+UltiSnips_ExpandSnippetOrJump --> g:ulti_expand_or_jump_res (0: fail,
+                                                    1: expand, 2: jump)
+UltiSnips_JumpForwards        --> g:ulti_jump_forwards_res (0: fail, 1: success)
+UltiSnips_JumpBackwards       --> g:ulti_jump_backwards_res (0: fail, 1: success)
+
+To see how these return values may come in handy suppose that you want to map
+a key to expand or jump, but if none of these actions is successful you want
+to call another function. Ultisnips already does this automaticall for supertab, but
+this allows you individual fine tuning of your tab key usage.
+
+Usage is as follows: You define a function >
+
+   let g:ulti_expand_or_jump_res = 0 "default value, just set once
+   function! Ulti_ExpandOrJump_and_getRes()
+     call UltiSnips_ExpandSnippetOrJump()
+     return g:ulti_expand_or_jump_res
+   endfunction
+
+then you define your mapping as >
+
+   inoremap <NL> <C-R>=(Ulti_ExpandOrJump_and_getRes() > 0)?"":IMAP_Jumpfunc('', 0)<CR>
+
+and if the you can't expand or jump from the current location then the
+alternative function IMAP_Jumpfunc('', 0) is called.
 
 3.3 Snippet Search Path                       *UltiSnips-snippet-search-path*
 -----------------------
@@ -1164,7 +1209,6 @@ bug tracker where you can report bugs and issues.
 This project aims to be the one-for-all solution for Snippets for Vim. If you
 miss a feature or find a bug, please contact me or file a support ticket.
 
-
 =============================================================================
 7. Contributors                                      *UltiSnips-contributors*
 
@@ -1200,7 +1244,8 @@ Contributors listed in chronological order:
    lucapette
    Psycojoker - Laurent Peuch 
    aschrab - Aaron Schrab
-   NagatoPain (stardiviner)
+   stardiviner - NagatoPain
+   skeept - Jorge Rodrigues
 
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
@@ -1216,7 +1261,7 @@ Contributors listed in chronological order:
    Georgi Valkov (gvalkov)
    Miek Gieben (miek)
    Aldis Berjoza (graudeejs)
-   Jorge (skeept)
+   Jorge Rodrigues (skeept)
    Martin Grenfell (scrooloose)
    Laughedelic
    Anthony Wilson (anthonywilson)

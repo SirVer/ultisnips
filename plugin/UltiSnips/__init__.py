@@ -526,17 +526,23 @@ class SnippetManager(object):
 
     @err_to_scratch_buffer
     def jump_forwards(self):
+        _vim.command("let g:ulti_jump_forwards_res = 1")
         if not self._jump():
+            _vim.command("let g:ulti_jump_forwards_res = 0")
             return self._handle_failure(self.forward_trigger)
 
     @err_to_scratch_buffer
     def jump_backwards(self):
+        _vim.command("let g:ulti_jump_backwards_res = 1")
         if not self._jump(True):
+            _vim.command("let g:ulti_jump_backwards_res = 0")
             return self._handle_failure(self.backward_trigger)
 
     @err_to_scratch_buffer
     def expand(self):
+        _vim.command("let g:ulti_expand_res = 1")
         if not self._try_expand():
+            _vim.command("let g:ulti_expand_res = 0")
             self._handle_failure(self.expand_trigger)
 
     @err_to_scratch_buffer
@@ -566,10 +572,13 @@ class SnippetManager(object):
         expansion and forward jumping. It first tries to expand a snippet, if
         this fails, it tries to jump forward.
         """
+        _vim.command('let g:ulti_expand_or_jump_res = 1')
         rv = self._try_expand()
         if not rv:
+            _vim.command('let g:ulti_expand_or_jump_res = 2')
             rv = self._jump()
         if not rv:
+            _vim.command('let g:ulti_expand_or_jump_res = 0')
             self._handle_failure(self.expand_trigger)
 
     @err_to_scratch_buffer
