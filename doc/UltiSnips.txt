@@ -1274,6 +1274,7 @@ Contributors listed in chronological order:
    Jacek Wysocki (exu)
    Alexander Kondratskiy (KholdStare)
    Martin Krauskopf (martin-krauskopf)
+   Theocrite (theocrite)
 
 Thank you for your support.
 
