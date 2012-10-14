@@ -1246,6 +1246,7 @@ Contributors listed in chronological order:
    aschrab - Aaron Schrab
    stardiviner - NagatoPain
    skeept - Jorge Rodrigues
+   buztard
 
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
