@@ -140,11 +140,11 @@ Then add this directory to your Vim runtime path by adding this line to your
 vimrc file. >
    set runtimepath+=~/.vim/ultisnips_rep
 
-UltiSnips also needs that Vim sources files from the after/ directory.
-Unfortunately, vim only allows this in the home directory. You therefore have
-to symlink/copy the files from after: >
-   mkdir -p ~/.vim/after/plugin/
-   ln -s ~/.vim/ultisnips_rep/after/plugin/* ~/.vim/after/plugin/
+UltiSnips also needs that Vim sources files from the ftdetect/ directory.
+Unfortunately, Vim only allows this directory in the .vim directory. You
+therefore have to symlink/copy the files: >
+   mkdir -p ~/.vim/ftdetect/
+   ln -s ~/.vim/ultisnips_rep/ftdetect/* ~/.vim/ftdetect/
 
 Restart Vim and UltiSnips should work. To access the help, use >
    :helptags ~/.vim/ultisnips_rep/doc
