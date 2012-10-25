@@ -85,9 +85,16 @@ They print '1' if the python version is compiled in, '0' if not.
 
 Test if Vim is compiled with python version 2.x: >
     :echo has("python")
+The python version Vim is linked agains can be found with: >
+    :py import sys; print(sys.version)
 
 Test if Vim is compiled with python version 3.x: >
     :echo has("python3")
+The python version Vim is linked agains can be found with: >
+    :py3 import sys; print(sys.version)
+
+Note that Vim is maybe not using your system wide installed python version, so
+make sure to check the Python version inside of Vim.
 
 UltiSnips attempts to autodetect which python version is compiled into Vim.
 Unfortunately, in some versions of Vim this detection does not work.
