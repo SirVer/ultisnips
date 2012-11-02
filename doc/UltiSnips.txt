@@ -1290,6 +1290,7 @@ Contributors listed in chronological order:
    Martin Krauskopf (martin-krauskopf)
    Theocrite (theocrite)
    Ferdinand Majerech (kiith-sa)
+   Vivien Didelot
 
 Thank you for your support.
 
