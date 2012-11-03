@@ -17,13 +17,11 @@ endglobal
 #                            TextMate Snippets                            #
 ###########################################################################
 snippet #!
-#!/bin/sh
-
+`!p snip.rv = '#!/bin/' + getShell() + "\n\n" `
 endsnippet
 
 snippet !env "#!/usr/bin/env (!env)"
-#!/usr/bin/env bash 
-
+`!p snip.rv = '#!/usr/bin/env ' + getShell() + "\n\n" `
 endsnippet
 
 snippet temp "Tempfile"
