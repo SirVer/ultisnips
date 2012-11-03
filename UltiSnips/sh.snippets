@@ -1,3 +1,17 @@
+global !p
+import vim
+def testShell(scope, shell):
+    return vim.eval("exists('" + scope + ":is_" + shell + "')")
+
+def getShell():
+    for scope in ["g", "b"]:
+        for shell in ["bash", "sh", "kornshell"]:
+            if testShell(scope, shell) == "1":
+                if shell == "kornshell":
+                    return "ksh"
+                return shell
+    return "sh"
+endglobal
 
 ###########################################################################
 #                            TextMate Snippets                            #
