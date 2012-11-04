@@ -335,7 +335,7 @@ finally
 endsnippet
 
 snippet catch "catch (catch)" b
-catch(${1}Exception)
+catch(${1}Exception e)
 {
     ${2:/*handle exception*/}
 }
@@ -421,7 +421,7 @@ endsnippet
 # Asserts
 
 snippet ass "assert (ass)" b
-assert(${1:false}, ${2:"TODO"});
+assert(${1:false}, "${2:TODO}");
 
 endsnippet
 
