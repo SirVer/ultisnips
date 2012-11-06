@@ -1,8 +1,13 @@
 global !p
 import vim
+
+# Tests for the existence of a variable declared by Vim's filetype detection
+# suggesting the type of shell script of the current file
 def testShell(scope, shell):
     return vim.eval("exists('" + scope + ":is_" + shell + "')")
 
+# Loops over the possible variables, checking for global variables
+# first since they indicate an override by the user.
 def getShell():
     for scope in ["g", "b"]:
         for shell in ["bash", "sh", "kornshell"]:
