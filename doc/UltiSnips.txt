@@ -1291,6 +1291,7 @@ Contributors listed in chronological order:
    Theocrite (theocrite)
    Ferdinand Majerech (kiith-sa)
    Vivien Didelot
+   Øystein Walle (osse)
 
 Thank you for your support.
 
