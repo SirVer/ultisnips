@@ -2605,6 +2605,16 @@ ${0}
     keys = "test" + EX + JF + "sub junk {}"
     wanted = "package c03;\nsub junk {}\n1;"
 # End: Folding Interaction  #}}}
+# Trailing whitespace {{{#
+class RemoveTrailingWhitespace(_VimTest):
+    snippets = ("test", """Hello\t ${1:default}\n$2""", "", "s")
+    wanted = """Hello\nGoodbye"""
+    keys = "test" + EX + BS + JF + "Goodbye"
+class LeaveTrailingWhitespace(_VimTest):
+    snippets = ("test", """Hello \t ${1:default}\n$2""")
+    wanted = """Hello \t \nGoodbye"""
+    keys = "test" + EX + BS + JF + "Goodbye"
+# End: Trailing whitespace }}}#
 
 # Cursor Movement  {{{#
 class CursorMovement_Multiline_ECR(_VimTest):
