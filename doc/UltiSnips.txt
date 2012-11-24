@@ -1260,6 +1260,7 @@ Contributors listed in chronological order:
    stardiviner - NagatoPain
    skeept - Jorge Rodrigues
    buztard
+   stephenmckinney - Steve McKinney
 
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
