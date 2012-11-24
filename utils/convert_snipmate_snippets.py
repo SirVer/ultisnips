@@ -85,12 +85,18 @@ if __name__ == '__main__':
     argsp.add_argument("target", help="File to write the resulting snippets into. If omitted, the snippets will be written to stdout.", nargs="?", default="-")
     args = argsp.parse_args()
 
-    source = args.source
+    source_file_name = args.source
+    tmp_file_name = ''.join([args.target,'.tmp'])
     try:
-        target = sys.stdout if args.target == "-" else open(args.target, "w")
+        tmp = sys.stdout if args.target == "-" else open(tmp_file_name, "w")
     except IOError:
-        print >> sys.stderr, "Error: Failed to open output file %s for writing" % args.target
+        print >> sys.stderr, "Error: Failed to open output file %s for writing" % tmp_file_name
         sys.exit(1)
 
-    snippets = convert_snippets(source)
-    print >> target, snippets
+    snippets = convert_snippets(source_file_name)
+    print >> tmp, snippets
+
+    if args.target != "-":
+        if os.access(args.target, os.F_OK):
+            os.remove(args.target)
+        os.rename(tmp_file_name, args.target)
