@@ -416,7 +416,7 @@ class Snippet(object):
             v.append(line_ind + line[tabs:])
         v = '\n'.join(v)
 
-        si = SnippetInstance(parent, indent, v, start, end, visual_content,
+        si = SnippetInstance(self, parent, indent, v, start, end, visual_content,
                 last_re = self._last_re, globals = self._globals)
 
         return si
