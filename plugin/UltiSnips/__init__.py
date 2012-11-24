@@ -288,6 +288,10 @@ class Snippet(object):
             return match
         return False
 
+    def has_option(self, opt):
+        """ Check if the named option is set """
+        return opt in self._opts
+
     def matches(self, trigger):
         # If user supplies both "w" and "i", it should perhaps be an
         # error, but if permitted it seems that "w" should take precedence
