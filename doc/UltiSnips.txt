@@ -552,6 +552,10 @@ The options currently supported are: >
        Vim settings and insert the tab characters as is. This option is useful
        for snippets involved with tab delimited formats, for example.
 
+   s   Remove whitespace immediately before the cursor at the end of a line
+       before jumping to the next tabstop.  This is useful if there is a
+       tabstop with optional text at the end of a line.
+
 The end line is the 'endsnippet' keyword on a line by itself. >
 
    endsnippet
