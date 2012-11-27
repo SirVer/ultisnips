@@ -15,12 +15,12 @@ class SnippetInstance(EditableTextObject):
     also a TextObject because it has a start an end
     """
 
-    def __init__(self, parent, indent, initial_text, start, end, visual_content, last_re, globals):
+    def __init__(self, snippet, parent, indent, initial_text, start, end, visual_content, last_re, globals):
         if start is None:
             start = Position(0,0)
         if end is None:
             end = Position(0,0)
-
+        self.snippet = snippet
         self._cts = 0
 
         self.locals = {"match" : last_re}
