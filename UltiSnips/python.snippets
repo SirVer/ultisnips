@@ -368,7 +368,12 @@ endsnippet
 
 snippet rwprop "Read write property" b
 def ${1:property}():
-	${2/.+/(?0:""")/}${2:The RW property $1}${2/.+/(?0:"""\n		)/}def fget(self):
+	${2/.+/(?0:""")/}${2:The RW property $1}`!p if t[2]:
+   snip.rv += '"""'
+   snip >> 1
+   snip += ""
+else:
+   snip.rv = ""`def fget(self):
 		return self._$1$0
 	def fset(self, value):
 		self._$1 = value

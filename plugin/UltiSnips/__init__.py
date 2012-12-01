@@ -288,6 +288,10 @@ class Snippet(object):
             return match
         return False
 
+    def has_option(self, opt):
+        """ Check if the named option is set """
+        return opt in self._opts
+
     def matches(self, trigger):
         # If user supplies both "w" and "i", it should perhaps be an
         # error, but if permitted it seems that "w" should take precedence
@@ -412,12 +416,8 @@ class Snippet(object):
             v.append(line_ind + line[tabs:])
         v = '\n'.join(v)
 
-        if parent is None:
-            si = SnippetInstance(None, indent, v, start, end, visual_content = visual_content,
-                    last_re = self._last_re, globals = self._globals)
-        else:
-            si = SnippetInstance(parent, indent, v, start, end, visual_content,
-                    last_re = self._last_re, globals = self._globals)
+        si = SnippetInstance(self, parent, indent, v, start, end, visual_content,
+                last_re = self._last_re, globals = self._globals)
 
         return si
 
@@ -743,6 +743,14 @@ class SnippetManager(object):
         if self._cs:
             self._ctab = self._cs.select_next_tab(backwards)
             if self._ctab:
+                before, after = _vim.buf.current_line_splitted
+                if self._cs.snippet.has_option("s"):
+                    if after == "":
+                        m = re.match(r'(.*?)\s+$', before)
+                        if m:
+                            lineno = _vim.buf.cursor.line
+                            _vim.text_to_vim(Position(lineno,0), Position(
+                                lineno,len(before)+len(after)), m.group(1))
                 _vim.select(self._ctab.start, self._ctab.end)
                 jumped = True
                 if self._ctab.no == 0:
