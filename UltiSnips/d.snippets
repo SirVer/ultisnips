@@ -122,7 +122,7 @@ endsnippet
 snippet el "else (el)" b
 else
 {
-    ${VISUAL}${1:/*cide*/}
+    ${VISUAL}${1:/*code*/}
 }
 endsnippet
 
@@ -335,7 +335,7 @@ finally
 endsnippet
 
 snippet catch "catch (catch)" b
-catch(${1}:Exception)
+catch(${1}Exception e)
 {
     ${2:/*handle exception*/}
 }
@@ -350,6 +350,13 @@ endsnippet
 
 snippet struct "struct (struct)"
 struct ${1:`!p snip.rv = (snip.basename or "name")`}
+{
+    ${2}
+}
+endsnippet
+
+snippet union "union (union)"
+union ${1:`!p snip.rv = (snip.basename or "name")`}
 {
     ${2}
 }
@@ -421,7 +428,7 @@ endsnippet
 # Asserts
 
 snippet ass "assert (ass)" b
-assert(${1:false}, ${2:"TODO"});
+assert(${1:false}, "${2:TODO}");
 
 endsnippet
 
@@ -436,7 +443,7 @@ unittest
 endsnippet
 
 
-# Operators
+# Common member functions
 
 snippet opDis "opDispatch (opDis)" b
 ${1:/*return type*/} opDispatch(string s)()
@@ -472,6 +479,13 @@ int opApply(int delegate(ref ${1:/*iterated type/s*/}) dg)
 }
 endsnippet
 
+snippet toString "toString (toString)" b
+string toString() @safe const pure nothrow
+{
+    ${1:/*code*/}
+}
+endsnippet
+
 
 # Comments
 
@@ -498,12 +512,12 @@ snippet fdoc "function ddoc block (fdoc)" b
 ///
 /// ${6:Returns: ${7:return value}}
 ///
-/// ${8:Throws:  ${8}Exception ${9}}
+/// ${8:Throws:  ${9}Exception ${10}}
 endsnippet
 
 snippet Par "Params (Par)"
 Params:  ${1:param} = ${2:param description}
-         ${3}
+///         ${3}
 endsnippet
 
 snippet Ret "Returns (Ret)"
