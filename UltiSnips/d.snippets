@@ -443,7 +443,7 @@ unittest
 endsnippet
 
 
-# Operators
+# Common member functions
 
 snippet opDis "opDispatch (opDis)" b
 ${1:/*return type*/} opDispatch(string s)()
@@ -476,6 +476,13 @@ int opApply(int delegate(ref ${1:/*iterated type/s*/}) dg)
         if(result){break;}
     }
     return result;
+}
+endsnippet
+
+snippet toString "toString (toString)" b
+string toString() @safe const pure nothrow
+{
+    ${1:/*code*/}
 }
 endsnippet
 
