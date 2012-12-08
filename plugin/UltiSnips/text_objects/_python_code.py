@@ -2,7 +2,6 @@
 # encoding: utf-8
 
 import os
-import re
 from collections import namedtuple
 
 import UltiSnips._vim as _vim
@@ -10,6 +9,7 @@ from UltiSnips.compatibility import compatible_exec, as_unicode
 from UltiSnips.util import IndentUtil
 
 from UltiSnips.text_objects._base import NoneditableTextObject
+
 
 class _Tabs(object):
     def __init__(self, to):
@@ -22,6 +22,8 @@ class _Tabs(object):
         return ts.current_text
 
 _VisualContent = namedtuple('_VisualContent', ['mode', 'text'])
+
+
 class SnippetUtil(object):
     """ Provides easy access to indentation, etc.
     """
@@ -43,6 +45,7 @@ class SnippetUtil(object):
         self._c = cur
         self._rv = ""
         self._changed = False
+        self._package = None
         self.reset_indent()
 
     def shift(self, amount=1):
@@ -65,7 +68,7 @@ class SnippetUtil(object):
         try:
             self.indent = self.indent[:by]
         except IndexError:
-            indent = ""
+            self.indent = ""
 
     def mkline(self, line="", indent=None):
         """ Creates a properly set up line.
@@ -74,7 +77,7 @@ class SnippetUtil(object):
         :indent: the indentation to have at the beginning
                  if None, it uses the default amount
         """
-        if indent == None:
+        if indent is None:
             indent = self.indent
             # this deals with the fact that the first line is
             # already properly indented
@@ -103,6 +106,45 @@ class SnippetUtil(object):
         return _vim.eval('expand("%:t:r")') or ""
 
     @property
+    def dirname(self):
+        """ The filename's directory. """
+        return _vim.eval('expand("%:p:h")') or ""
+
+    @property
+    def package(self):
+        """
+        Try our best to detect the python package name where this snip is
+        being used
+        """
+        if self._package is not None:
+            return self._package
+
+        package = []
+
+        curdir = self.dirname
+        while True:
+            if os.path.isfile(os.path.join(curdir, '__init__.py')):
+                package.append(os.path.basename(curdir))
+                curdir = os.path.abspath(os.path.join(curdir, '..'))
+                continue
+            break
+
+        if package:
+            package.reverse()
+            self._package = '.'.join(package)
+        return self._package
+
+    @property
+    def module(self):
+        """
+        Try our best to detect the python module name where this snipped is
+        being used.
+        """
+        if not self.package:
+            return ''
+        return '{0}.{1}'.format(self.package, self.basename)
+
+    @property
     def ft(self):
         """ The filetype. """
         return self.opt("&filetype", "")
@@ -117,6 +159,7 @@ class SnippetUtil(object):
         """
         def fget(self):
             return self._rv
+
         def fset(self, value):
             self._changed = True
             self._rv = value
@@ -153,7 +196,7 @@ class SnippetUtil(object):
     # Syntatic sugar
     def __add__(self, value):
         """ Appends the given line to rv using mkline. """
-        self.rv += '\n' # handles the first line properly
+        self.rv += '\n'  # handles the first line properly
         self.rv += self.mkline(value)
         return self
 
@@ -207,17 +250,17 @@ class PythonCode(NoneditableTextObject):
             'path': path,
             'cur': ct,
             'res': ct,
-            'snip' : self._snip,
+            'snip': self._snip,
         })
 
         compatible_exec(self._code, self._globals, local_d)
 
-        rv = as_unicode(self._snip.rv if self._snip._rv_changed
-                else as_unicode(local_d['res']))
+        rv = as_unicode(
+            self._snip.rv if self._snip._rv_changed
+            else as_unicode(local_d['res'])
+        )
 
         if ct != rv:
             self.overwrite(rv)
             return False
         return True
-
-
