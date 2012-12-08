@@ -29,12 +29,26 @@ NORMAL  = 0x1
 DOXYGEN = 0x2
 SPHINX  = 0x3
 
+SINGLE_QUOTES = 0x1
+DOUBLE_QUOTES = 0x2
+
 def get_args(arglist):
     args = [arg.split('=')[0].strip() for arg in arglist.split(',') if arg]
     args = [arg for arg in args if arg and arg != "self"]
 
     return args
 
+
+def get_quoting_style(snip):
+    style = snip.opt("g:ultisnips_python_quoting_style", "double")
+    if style == 'single':
+        return SINGLE_QUOTES
+    return DOUBLE_QUOTES
+
+def tripple_quotes(snip):
+    if get_quoting_style(snip) == SINGLE_QUOTES:
+        return "'''"
+    return '"""'
 
 def get_style(snip):
     style = snip.opt("g:ultisnips_python_style", "normal")
@@ -62,7 +76,7 @@ def format_return(style):
 
 def write_docstring_args(args, snip):
     if not args:
-        snip.rv += ' """'
+        snip.rv += ' {0}'.format(tripple_quotes(snip))
         return
 
     snip.rv += '\n' + snip.mkline('', indent='')
@@ -99,10 +113,10 @@ endglobal
 
 snippet class "class with docstrings" b
 class ${1:MyClass}(${2:object}):
-	"""${3:Docstring for $1 }"""
+	`!p snip.rv = tripple_quotes(snip)`${3:Docstring for $1 }`!p snip.rv = tripple_quotes(snip)`
 
 	def __init__(self$4):
-		"""${5:@todo: to be defined}`!p
+		`!p snip.rv = tripple_quotes(snip)`${5:@todo: to be defined1}`!p
 snip.rv = ""
 snip >> 2
 
@@ -111,7 +125,7 @@ args = get_args(t[4])
 write_docstring_args(args, snip)
 if args:
     snip.rv += '\n' + snip.mkline('', indent='')
-    snip += '"""'
+    snip += '{0} 2 '.format(tripple_quotes(snip))
 
 write_init_body(args, t[2], snip)
 `
@@ -121,7 +135,7 @@ endsnippet
 
 snippet slotclass "class with slots and docstrings" b
 class ${1:MyClass}(${2:object}):
-	"""${3:Docstring for $1 }"""
+	`!p snip.rv = tripple_quotes(snip)`${3:Docstring for $1 }`!p snip.rv = tripple_quotes(snip)`
 `!p
 snip >> 1
 args = get_args(t[4])
@@ -129,7 +143,7 @@ write_slots_args(args, snip)
 `
 
 	def __init__(self$4):
-		"""${5:@todo: to be defined}`!p
+		`!p snip.rv = tripple_quotes(snip)`${5:@todo: to be defined}`!p
 snip.rv = ""
 snip >> 2
 
@@ -138,7 +152,7 @@ args = get_args(t[4])
 write_docstring_args(args, snip)
 if args:
     snip.rv += '\n' + snip.mkline('', indent='')
-    snip += '"""'
+    snip += tripple_quotes(snip)
 
 write_init_body(args, t[2], snip)
 `
@@ -331,7 +345,7 @@ snippet def "function with docstrings" b
 def ${1:function}(`!p
 if snip.indent:
    snip.rv = 'self' + (", " if len(t[2]) else "")`${2:arg1}):
-	"""${4:@todo: Docstring for $1}`!p
+	`!p snip.rv = tripple_quotes(snip)`${4:@todo: Docstring for $1}`!p
 snip.rv = ""
 snip >> 1
 
@@ -342,7 +356,7 @@ if args:
 style = get_style(snip)
 snip += format_return(style)
 snip.rv += '\n' + snip.mkline('', indent='')
-snip += '"""' `
+snip += tripple_quotes(snip) `
 	${0:pass}
 endsnippet
 
@@ -368,7 +382,7 @@ endsnippet
 
 snippet rwprop "Read write property" b
 def ${1:property}():
-	${2/.+/(?0:""")/}${2:The RW property $1}`!p if t[2]:
+	${2/.+/(?0:`!p snip.rv = tripple_quotes(snip)`)/}${2:The RW property $1}`!p if t[2]:
    snip.rv += '"""'
    snip >> 1
    snip += ""
@@ -453,7 +467,7 @@ endsnippet
 
 snippet testcase "pyunit testcase" b
 class Test${1:Class}(${2:unittest.TestCase}):
-	"""${3:Test case docstring}"""
+	`!p snip.rv = tripple_quotes(snip)`${3:Test case docstring}`!p snip.rv = tripple_quotes(snip)`
 
 	def setUp(self):
 		${4:pass}
