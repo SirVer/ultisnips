@@ -103,6 +103,11 @@ class SnippetUtil(object):
         return _vim.eval('expand("%:t:r")') or ""
 
     @property
+    def dirname(self):
+        """ The filename's directory. """
+        return _vim.eval('expand("%:p:h")') or ""
+
+    @property
     def ft(self):
         """ The filetype. """
         return self.opt("&filetype", "")
