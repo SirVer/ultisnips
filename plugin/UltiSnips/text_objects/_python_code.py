@@ -43,6 +43,7 @@ class SnippetUtil(object):
         self._c = cur
         self._rv = ""
         self._changed = False
+        self._package = None
         self.reset_indent()
 
     def shift(self, amount=1):
@@ -106,6 +107,40 @@ class SnippetUtil(object):
     def dirname(self):
         """ The filename's directory. """
         return _vim.eval('expand("%:p:h")') or ""
+
+    @property
+    def package(self):
+        """
+        Try our best to detect the python package name where this snip is
+        being used
+        """
+        if self._package is not None:
+            return self._package
+
+        package = []
+
+        curdir = self.dirname
+        while True:
+            if os.path.isfile(os.path.join(curdir, '__init__.py')):
+                package.append(os.path.basename(curdir))
+                curdir = os.path.abspath(os.path.join(curdir, '..'))
+                continue
+            break
+
+        if package:
+            package.reverse()
+            self._package = '.'.join(package)
+        return self._package
+
+    @property
+    def module(self):
+        """
+        Try our best to detect the python module name where this snipped is
+        being used.
+        """
+        if not self.package:
+            return ''
+        return '{0}.{1}'.format(self.package, self.basename)
 
     @property
     def ft(self):
