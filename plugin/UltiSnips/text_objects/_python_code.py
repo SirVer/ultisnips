@@ -226,8 +226,10 @@ class PythonCode(NoneditableTextObject):
         self._snip = SnippetUtil(token.indent, m, t)
 
         self._globals = {}
-        globals = snippet.globals.get("!p", [])
-        compatible_exec("\n".join(globals).replace("\r\n", "\n"), self._globals)
+        shared_globals = snippet.globals.values()
+        compatible_exec(
+            "\n".join(shared_globals).replace("\r\n", "\n"), self._globals
+        )
 
         # Add Some convenience to the code
         self._code = "import re, os, vim, string, random\n" + code
