@@ -142,6 +142,8 @@ class SnippetUtil(object):
         """
         if not self.package:
             return ''
+        if self.basename == '__init__':
+            return self.package
         return '{0}.{1}'.format(self.package, self.basename)
 
     @property
