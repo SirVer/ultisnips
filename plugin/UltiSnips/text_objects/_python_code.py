@@ -2,7 +2,6 @@
 # encoding: utf-8
 
 import os
-import re
 from collections import namedtuple
 
 import UltiSnips._vim as _vim
@@ -10,6 +9,7 @@ from UltiSnips.compatibility import compatible_exec, as_unicode
 from UltiSnips.util import IndentUtil
 
 from UltiSnips.text_objects._base import NoneditableTextObject
+
 
 class _Tabs(object):
     def __init__(self, to):
@@ -22,6 +22,8 @@ class _Tabs(object):
         return ts.current_text
 
 _VisualContent = namedtuple('_VisualContent', ['mode', 'text'])
+
+
 class SnippetUtil(object):
     """ Provides easy access to indentation, etc.
     """
@@ -65,7 +67,7 @@ class SnippetUtil(object):
         try:
             self.indent = self.indent[:by]
         except IndexError:
-            indent = ""
+            self.indent = ""
 
     def mkline(self, line="", indent=None):
         """ Creates a properly set up line.
@@ -74,7 +76,7 @@ class SnippetUtil(object):
         :indent: the indentation to have at the beginning
                  if None, it uses the default amount
         """
-        if indent == None:
+        if indent is None:
             indent = self.indent
             # this deals with the fact that the first line is
             # already properly indented
@@ -117,6 +119,7 @@ class SnippetUtil(object):
         """
         def fget(self):
             return self._rv
+
         def fset(self, value):
             self._changed = True
             self._rv = value
@@ -153,7 +156,7 @@ class SnippetUtil(object):
     # Syntatic sugar
     def __add__(self, value):
         """ Appends the given line to rv using mkline. """
-        self.rv += '\n' # handles the first line properly
+        self.rv += '\n'  # handles the first line properly
         self.rv += self.mkline(value)
         return self
 
@@ -207,17 +210,17 @@ class PythonCode(NoneditableTextObject):
             'path': path,
             'cur': ct,
             'res': ct,
-            'snip' : self._snip,
+            'snip': self._snip,
         })
 
         compatible_exec(self._code, self._globals, local_d)
 
-        rv = as_unicode(self._snip.rv if self._snip._rv_changed
-                else as_unicode(local_d['res']))
+        rv = as_unicode(
+            self._snip.rv if self._snip._rv_changed
+            else as_unicode(local_d['res'])
+        )
 
         if ct != rv:
             self.overwrite(rv)
             return False
         return True
-
-
