@@ -1265,6 +1265,7 @@ Contributors listed in chronological order:
    skeept - Jorge Rodrigues
    buztard
    stephenmckinney - Steve McKinney
+   Pedro Algarvio - s0undt3ch
 
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
@@ -1297,6 +1298,7 @@ Contributors listed in chronological order:
    Ferdinand Majerech (kiith-sa)
    Vivien Didelot
    Øystein Walle (osse)
+   Pedro Algarvio (s0undt3ch)
 
 Thank you for your support.
 
