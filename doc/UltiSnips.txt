@@ -1299,6 +1299,7 @@ Contributors listed in chronological order:
    Vivien Didelot
    Øystein Walle (osse)
    Pedro Algarvio (s0undt3ch)
+   Steven Humphrey (shumphrey)
 
 Thank you for your support.
 
