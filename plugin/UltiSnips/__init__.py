@@ -786,9 +786,9 @@ class SnippetManager(object):
         for idx, sttrig in enumerate(self._supertab_keys):
             if trigger.lower() == sttrig.lower():
                 if idx == 0:
-                    feedkey= r"\<c-n>"
+                    feedkey= r"\<Plug>SuperTabForward"
                 elif idx == 1:
-                    feedkey = r"\<c-p>"
+                    feedkey = r"\<Plug>SuperTabBackward"
                 # Use remap mode so SuperTab mappings will be invoked.
                 mode = "m"
                 break

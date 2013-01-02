@@ -1266,6 +1266,7 @@ Contributors listed in chronological order:
    buztard
    stephenmckinney - Steve McKinney
    Pedro Algarvio - s0undt3ch
+   Eric Van Dewoestine - ervandew 
 
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
