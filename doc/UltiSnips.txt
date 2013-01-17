@@ -1301,6 +1301,7 @@ Contributors listed in chronological order:
    Øystein Walle (osse)
    Pedro Algarvio (s0undt3ch)
    Steven Humphrey (shumphrey)
+   Björn Winckler (b4winckler)
 
 Thank you for your support.
 
