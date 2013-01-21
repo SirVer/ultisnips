@@ -437,12 +437,15 @@ snippet filenames and their associated filetype.
 editing any document regardless of the filetype. A date insertion snippet, for
 example, would be fit well in the all.snippets file.
 
-UltiSnips supports Vim's dotted filetype syntax. To illustrate, the filetype
-for a cpp file could be set as follows ":set ft=cpp.c". If there exists
-c.snippets and cpp.c.snippets files in snippet directories snippets from both
-files are activated. CUDA files could have filetypes set to 'cuda.cpp.c'
-Snippets from all three, c.snippets, cpp.c.snippets and cuda.cpp.c.snippets
-are activated for that filetype.
+UltiSnips understands Vim's dotted filetype syntax. For example, if you define
+a dotted filetype for the CUDA C++ framework, e.g. ":set ft=cuda.cpp", then
+UltiSnips will search for and activate snippets for both the cuda and cpp 
+filetypes.
+
+UltiSnips doesn't understand multiple filetypes in snippet filenames, so a
+snippet file named "cuda.cpp.snippets" won't match the "cuda" or "cpp"
+filetypes, which means it won't be activated for files with the dotted
+filetype "cuda.cpp" either.
 
 The extends directive provides an alternative way of combining snippet files.
 When the extends directive is included in a snippet file, it instructs
