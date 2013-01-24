@@ -14,7 +14,7 @@ endsnippet
 
 snippet #if "#if #endif" !b
 #if ${1:0}
-${VISUAL:code}$0
+${VISUAL}${0:${VISUAL/(.*)/(?1::code)/}}
 #endif
 endsnippet
 
@@ -38,7 +38,7 @@ endsnippet
 snippet main "main() (main)"
 int main(int argc, char const *argv[])
 {
-	${0:/* code */}
+	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 	return 0;
 }
 endsnippet
@@ -46,7 +46,7 @@ endsnippet
 snippet for "for int loop (fori)"
 for (${4:size_t} ${2:i} = 0; $2 < ${1:count}; ${3:++$2})
 {
-	${0:/* code */}
+	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 }
 endsnippet
 
@@ -77,7 +77,7 @@ endsnippet
 
 snippet do "do...while loop (do)"
 do {
-	${0:/* code */}
+	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 } while(${1:/* condition */});
 endsnippet
 
@@ -88,18 +88,18 @@ endsnippet
 snippet if "if .. (if)"
 if (${1:/* condition */})
 {
-	${0:/* code */}
+	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 }
 endsnippet
 
 snippet ife "if .. else (ife)"
 if (${1:/* condition */})
 {
-        ${2:/* code */}
+	${2:/* code */}
 }
 else
 {
-        ${3:/* else */}
+	${3:/* else */}
 }
 endsnippet
 
