@@ -1306,6 +1306,7 @@ Contributors listed in chronological order:
    Pedro Algarvio (s0undt3ch)
    Steven Humphrey (shumphrey)
    Björn Winckler (b4winckler)
+   David Brown (Nali4Freedom)
 
 Thank you for your support.
 
