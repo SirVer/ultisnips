@@ -1271,6 +1271,7 @@ Contributors listed in chronological order:
    Pedro Algarvio - s0undt3ch
    Eric Van Dewoestine - ervandew
    Matt Patterson - fidothe
+   Mike Morearty - mmorearty
 
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
