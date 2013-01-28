@@ -1271,6 +1271,7 @@ Contributors listed in chronological order:
    Pedro Algarvio - s0undt3ch
    Eric Van Dewoestine - ervandew
    Matt Patterson - fidothe
+   Mike Morearty - mmorearty
 
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
@@ -1308,6 +1309,7 @@ Contributors listed in chronological order:
    Björn Winckler (b4winckler)
    David Brown (Nali4Freedom)
    Harry Xu (harryxu)
+   Tom Cammann (takac)
 
 Thank you for your support.
 

@@ -37,6 +37,10 @@ snippet /o|v/ "new Object or variable" !br
 ${1:Object} ${2:var} = new ${2}(${3});
 endsnippet
 
+snippet f "field" !b
+${1:private} ${2:String} ${3:`!p snip.rv = t[2].lower()`};
+endsnippet
+
 snippet ab "abstract" b
 abstract 
 endsnippet
@@ -70,9 +74,10 @@ snip.rv = snip.basename or "untitled"`} ${2:extends ${3:Parent} }${4:implements 
 endsnippet
 
 snippet clc "class" b
-public class ${1:`!p
-snip.rv = snip.basename or "untitled"`} {
-	public $1(${2:}) {
+public class `!p
+snip.rv = snip.basename or "untitled"` {
+
+	public `!p snip.rv = snip.basename or "untitled"`($2) {
 		$0
 	}
 }
@@ -126,6 +131,11 @@ for ( int i = 0; i < $1; i++ )`!p nl(snip)`{
 }
 endsnippet
 
+snippet fori "for with int" b
+for ( int i = 0; i < $1; i++ )`!p nl(snip)`{
+	$0
+}
+
 snippet for "for" b
 for ($1; $2; $3)`!p nl(snip)`{
 	$0
@@ -157,18 +167,21 @@ snippet cc "setter body"
 this.${1:var} = $1;
 endsnippet
 
-snippet list "Collections List" b
+snippet list "List"
 List<${1:String}> ${2:list} = new ${3:Array}List<$1>();
 endsnippet
 
-snippet map "Collections Map" b
+snippet map "Map"
 Map<${1:String}, ${2:String}> ${3:map} = new ${4:Hash}Map<$1, $2>();
 endsnippet
 
-snippet set "Collections Set" !b
+snippet set "Set" !b
 Set<${1:String}> ${2:set} = new ${3:Hash}Set<$1>();
 endsnippet
 
+snippet /s(tr)?/ "String" !b
+String 
+endsnippet
 
 snippet cn "Constructor" !b
 public `!p snip.rv = snip.basename or "untitled"`(${1:}) {
@@ -321,10 +334,6 @@ endsnippet
 
 snippet th "throw" b
 throw new $0
-endsnippet
-
-snippet f "field" !b
-${1:private} ${2:String} ${3:`!p snip.rv = t[2].lower()`};
 endsnippet
 
 snippet wh "while" b
