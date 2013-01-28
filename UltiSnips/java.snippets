@@ -20,6 +20,12 @@ def nl(snip):
         snip.rv += " "
 endglobal
 
+snippet cn "public constructor" !b
+public `!p snip.rv = snip.basename or "unknown"`($1) {
+	$0
+}
+endsnippet
+
 snippet sleep "try sleep catch" !b
 try {
 	Thread.sleep(${1:1000});
@@ -47,6 +53,18 @@ endsnippet
 
 snippet as "assert" b
 assert ${1:test}${2/(.+)/(?1: \: ")/}${2:Failure message}${2/(.+)/(?1:")/};$0
+endsnippet
+
+snippet at "assert true" !b
+assertTrue(${1:actual});
+endsnippet
+
+snippet af "assert false" !b
+assertFalse(${1:actual});$0
+endsnippet
+
+snippet ae "assert equals" !b
+assertEquals(${1:expected}, ${2:actual});
 endsnippet
 
 snippet br "break"
@@ -125,16 +143,11 @@ for ($1 $2 : $3)`!p nl(snip)`{
 }
 endsnippet
 
-snippet fori "for with int" b
-for ( int i = 0; i < $1; i++ )`!p nl(snip)`{
+snippet fori "for" b
+for (int ${1:i} = 0; $1 < $2; $1++)`!p nl(snip)`{
 	$0
 }
 endsnippet
-
-snippet fori "for with int" b
-for ( int i = 0; i < $1; i++ )`!p nl(snip)`{
-	$0
-}
 
 snippet for "for" b
 for ($1; $2; $3)`!p nl(snip)`{
@@ -163,23 +176,23 @@ interface ${1:`!p snip.rv = snip.basename or "untitled"`} ${2:extends ${3:Parent
 }
 endsnippet
 
-snippet cc "setter body" 
+snippet cc "constuctor call or setter body" 
 this.${1:var} = $1;
 endsnippet
 
-snippet list "List"
+snippet list "Collections List" b
 List<${1:String}> ${2:list} = new ${3:Array}List<$1>();
 endsnippet
 
-snippet map "Map"
+snippet map "Collections Map" b
 Map<${1:String}, ${2:String}> ${3:map} = new ${4:Hash}Map<$1, $2>();
 endsnippet
 
-snippet set "Set" !b
+snippet set "Collections Set" !b
 Set<${1:String}> ${2:set} = new ${3:Hash}Set<$1>();
 endsnippet
 
-snippet /s(tr)?/ "String" !b
+snippet /s(tr)?/ "String" !br
 String 
 endsnippet
 
@@ -212,6 +225,14 @@ endsnippet
 snippet main "method (main)" b
 public static void main(String[] args)`!p nl(snip)`{
 	$0
+}
+endsnippet
+
+snippet try "try/catch" !b
+try {
+	$1
+} catch(${2:Exception} ${3:e}){
+	${4:e.printStackTrace();}
 }
 endsnippet
 
@@ -306,7 +327,7 @@ endsnippet
 
 snippet sw "switch" b
 switch ($1)`!p nl(snip)`{
-	$0
+	case $2: $0
 }
 endsnippet
 
