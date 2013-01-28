@@ -7,12 +7,35 @@
 # before '{' braces.
 
 global !p
+def junit(snip):
+    if snip.opt("g:ultisnips_java_junit", "") == "3":
+        snip += ""
+    else:
+        snip.rv += "@Test\n\t"
+
 def nl(snip):
     if snip.opt("g:ultisnips_java_brace_style", "") == "nl":
         snip += ""
     else:
         snip.rv += " "
 endglobal
+
+snippet sleep "try sleep catch" !b
+try {
+	Thread.sleep(${1:1000});
+} catch (InterruptedException e){
+	e.printStackTrace();
+}
+endsnippet
+
+snippet /i|n/ "new primitive or int" !br
+${1:int} ${2:i} = ${3:1};
+$0
+endsnippet
+
+snippet /o|v/ "new Object or variable" !br
+${1:Object} ${2:var} = new ${2}(${3});
+endsnippet
 
 snippet ab "abstract" b
 abstract 
@@ -39,19 +62,35 @@ catch (${1:Exception} ${2:e})`!p nl(snip)`{
 }
 endsnippet
 
-snippet cl "class" b
-class ${1:`!p
+snippet cle "class extends" b
+public class ${1:`!p
 snip.rv = snip.basename or "untitled"`} ${2:extends ${3:Parent} }${4:implements ${5:Interface} }{
 	$0
 }
 endsnippet
 
+snippet clc "class" b
+public class ${1:`!p
+snip.rv = snip.basename or "untitled"`} {
+	public $1(${2:}) {
+		$0
+	}
+}
+endsnippet
+
+snippet cl "class" b
+public class ${1:`!p
+snip.rv = snip.basename or "untitled"`} {
+	$0
+}
+endsnippet
+
 snippet cos "constant string" b
-static public final String ${1:var} = "$2";$0
+public static final String ${1:var} = "$2";$0
 endsnippet
 
 snippet co "constant" b
-static public final ${1:String} ${2:var} = $3;$0
+public static final ${1:String} ${2:var} = $3;$0
 endsnippet
 
 snippet de "default" b
@@ -76,7 +115,13 @@ final
 endsnippet
 
 snippet fore "for (each)" b
-for ($1 : $2)`!p nl(snip)`{
+for ($1 $2 : $3)`!p nl(snip)`{
+	$0
+}
+endsnippet
+
+snippet fori "for with int" b
+for ( int i = 0; i < $1; i++ )`!p nl(snip)`{
 	$0
 }
 endsnippet
@@ -99,11 +144,34 @@ $0
 endsnippet
 
 snippet im "import"  b
-import 
+import ${1:java}.${2:util}.$0
 endsnippet
 
 snippet in "interface" b
 interface ${1:`!p snip.rv = snip.basename or "untitled"`} ${2:extends ${3:Parent} }{
+	$0
+}
+endsnippet
+
+snippet cc "setter body" 
+this.${1:var} = $1;
+endsnippet
+
+snippet list "Collections List" b
+List<${1:String}> ${2:list} = new ${3:Array}List<$1>();
+endsnippet
+
+snippet map "Collections Map" b
+Map<${1:String}, ${2:String}> ${3:map} = new ${4:Hash}Map<$1, $2>();
+endsnippet
+
+snippet set "Collections Set" !b
+Set<${1:String}> ${2:set} = new ${3:Hash}Set<$1>();
+endsnippet
+
+
+snippet cn "Constructor" !b
+public `!p snip.rv = snip.basename or "untitled"`(${1:}) {
 	$0
 }
 endsnippet
@@ -134,11 +202,61 @@ public static void main(String[] args)`!p nl(snip)`{
 }
 endsnippet
 
-snippet m "method" b
-${1:void} ${2:method}($3) ${4:throws $5 }{
+snippet mt "method throws" b!
+${1:private} ${2:void} ${3:method}(${4}) ${5:throws $6 }{
 	$0
 }
+endsnippet
 
+snippet m  "method" b
+${1:private} ${2:void} ${3:method}(${4}) {
+	$0
+}
+endsnippet
+
+snippet md "Method With javadoc" !b
+/**
+ * ${7:Short Description}`!p
+import re
+snip.rv = ""
+word = re.compile('\w+ \w+') 
+for i in word.findall(t[4]):
+	snip.rv += "\n\t * @param " + i.split(" ")[1] + " usage..."`
+ * `!p
+if "throws" in t[5]:
+	snip.rv = "\n\t * @throws " + t[6]
+else:
+	snip.rv = ""` `!p
+if not "void" in t[2]:
+	snip.rv = "\n\t * @return object"
+else:
+	snip.rv = ""`
+ **/
+${1:public} ${2:void} ${3:method}($4) ${5:throws $6 }{
+	$0
+}
+endsnippet
+
+snippet /get(ter)?/ "getter" !br
+public ${1:String} get${2:Name}() {
+	return `!p snip.rv = t[2].lower()`;
+}
+endsnippet
+
+snippet /set(ter)?/ "setter" !br
+public void set${1:Name}(${2:String} $1) {
+	return this.`!p snip.rv = t[1].lower()` = `!p snip.rv = t[1].lower()`;
+}
+endsnippet
+
+snippet /se?tge?t|ge?tse?t|gs/ "setter and getter" !br
+public void set${1:Name}(${2:String} `!p snip.rv = t[1].lower()`) {
+	this.`!p snip.rv = t[1].lower()` = `!p snip.rv = t[1].lower()`;
+}
+
+public $2 get$1() {
+	return `!p snip.rv = t[1].lower()`;
+}
 endsnippet
 
 snippet pa "package" b
@@ -190,17 +308,23 @@ public class ${1:`!p snip.rv = snip.basename or "untitled"`} extends ${2:TestCas
 endsnippet
 
 snippet t "test" b
-public void test${1:Name}() throws Exception`!p nl(snip)`{
+`!p junit(snip)`public void test${1:Name}() {
+	$0
+}
+endsnippet
+
+snippet tt "test throws" b
+`!p junit(snip)`public void test${1:Name}() ${2:throws Exception }{
 	$0
 }
 endsnippet
 
 snippet th "throw" b
-throw $0
+throw new $0
 endsnippet
 
-snippet v "variable" b
-${1:String} ${2:var}${3: = ${0:null}};
+snippet f "field" !b
+${1:private} ${2:String} ${3:`!p snip.rv = t[2].lower()`};
 endsnippet
 
 snippet wh "while" b

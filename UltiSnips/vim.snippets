@@ -10,6 +10,10 @@ ${4:" Last Modified: `!v strftime("%B %d, %Y")`}
 $0
 endsnippet
 
+snippet b "Bundle" !b
+Bundle '$0'
+endsnippet
+
 snippet gvar "Global / configuration variable"
 if !exists("g:${1:MyUltraImportantVar}")
 	let g:$1 = ${2:"${3:<tab>}"}
