@@ -18,13 +18,15 @@ def nl(snip):
         snip += ""
     else:
         snip.rv += " "
-endglobal
+def getArgs(group):
+	import re
+	word = re.compile('[a-zA-Z><.]+ \w+')
+	return [i.split(" ") for i in word.findall(group) ]
 
-snippet cn "public constructor" !b
-public `!p snip.rv = snip.basename or "unknown"`($1) {
-	$0
-}
-endsnippet
+def camel(word):
+	return word[0].upper() + word[1:]
+
+endglobal
 
 snippet sleep "try sleep catch" !b
 try {
@@ -40,7 +42,7 @@ $0
 endsnippet
 
 snippet /o|v/ "new Object or variable" !br
-${1:Object} ${2:var} = new ${2}(${3});
+${1:Object} ${2:var} = new $1(${3});
 endsnippet
 
 snippet f "field" !b
@@ -91,7 +93,58 @@ snip.rv = snip.basename or "untitled"`} ${2:extends ${3:Parent} }${4:implements 
 }
 endsnippet
 
-snippet clc "class" b
+snippet clc "class with constructor, fields, setter and getters" !b
+public class `!p
+snip.rv = snip.basename or "untitled"` {
+`!p
+import re
+args = getArgs(t[1])
+if len(args) == 0: snip.rv = ""
+for i in args:
+	snip.rv += "\n\tprivate " + i[0] + " " + i[1]+ ";"
+if len(args) > 0:
+	snip.rv += "\n"`
+	public `!p snip.rv = snip.basename or "unknown"`($1) { `!p
+args = getArgs(t[1])
+for i in args:
+	snip.rv += "\n\t\tthis." + i[1] + " = " + i[1]
+if len(args) == 0:
+	snip.rv += "\n"`
+	}
+`!p
+args = getArgs(t[1])
+if len(args) == 0: snip.rv = ""
+for i in args:
+	snip.rv += "\n\tpublic void set" + camel(i[1]) + "(" + i[0] + " " + i[1] + ") {\n" + "\
+	\tthis." + i[1] + " = " + i[1] + ";\n\t}\n"
+
+	snip.rv += "\n\tpublic " + i[0] + " get" + camel(i[1]) + "() {\
+	\n\t\treturn " + i[1] + ";\n\t}\n"
+`
+}
+endsnippet
+
+snippet clc "class with constucutor, with field names" b
+public class `!p
+snip.rv = snip.basename or "untitled"` {
+`!p
+import re
+args = getArgs(t[1])
+for i in args:
+	snip.rv += "\n\tprivate " + i[0] + " " + i[1]+ ";"
+if len(args) > 0:
+	snip.rv += "\n"`
+	public `!p snip.rv = snip.basename or "unknown"`($1) { `!p
+args = getArgs(t[1])
+for i in args:
+	snip.rv += "\n\t\tthis." + i[1] + " = " + i[1]
+if len(args) == 0:
+	snip.rv += "\n"`
+	}
+}
+endsnippet
+
+snippet clc "class and constrcutor" b
 public class `!p
 snip.rv = snip.basename or "untitled"` {
 
@@ -144,7 +197,7 @@ for ($1 $2 : $3)`!p nl(snip)`{
 endsnippet
 
 snippet fori "for" b
-for (int ${1:i} = 0; $1 < $2; $1++)`!p nl(snip)`{
+for (int ${1:i} = 0; $1 < ${2:10}; $1++)`!p nl(snip)`{
 	$0
 }
 endsnippet
@@ -192,13 +245,30 @@ snippet set "Collections Set" !b
 Set<${1:String}> ${2:set} = new ${3:Hash}Set<$1>();
 endsnippet
 
-snippet /s(tr)?/ "String" !br
+snippet /Str?|str/ "String" !br
 String 
 endsnippet
 
-snippet cn "Constructor" !b
+snippet cn "Constructor" b
 public `!p snip.rv = snip.basename or "untitled"`(${1:}) {
 	$0
+}
+endsnippet
+
+snippet cn "constructor, \w fields + assigments" b
+ `!p
+import re
+args = getArgs(t[1])
+for i in args:
+	snip.rv += "\n\tprivate " + i[0] + " " + i[1]+ ";"
+if len(args) > 0:
+	snip.rv += "\n"`
+public `!p snip.rv = snip.basename or "unknown"`($1) { `!p
+args = getArgs(t[1])
+for i in args:
+	snip.rv += "\n\t\tthis." + i[1] + " = " + i[1]
+if len(args) == 0:
+	snip.rv += "\n"`
 }
 endsnippet
 
@@ -251,11 +321,8 @@ endsnippet
 snippet md "Method With javadoc" !b
 /**
  * ${7:Short Description}`!p
-import re
-snip.rv = ""
-word = re.compile('\w+ \w+') 
-for i in word.findall(t[4]):
-	snip.rv += "\n\t * @param " + i.split(" ")[1] + " usage..."`
+for i in getArgs(t[4]):
+	snip.rv += "\n\t * @param " + i[1] + " usage..."`
  * `!p
 if "throws" in t[5]:
 	snip.rv = "\n\t * @throws " + t[6]

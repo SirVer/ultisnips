@@ -3,3 +3,7 @@ snippet t "Simple tag" b
 	${2:content}
 </${1/(\w+).*/$1/}>
 endsnippet
+
+snippet ti "Inline tag" b
+<${1:tag}>${2:content}</${1/(\w+).*/$1/}>
+endsnippet
