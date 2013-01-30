@@ -107,10 +107,10 @@ if len(args) > 0:
 	public `!p snip.rv = snip.basename or "unknown"`($1) { `!p
 args = getArgs(t[1])
 for i in args:
-	snip.rv += "\n\t\tthis." + i[1] + " = " + i[1]
+	snip.rv += "\n\t\tthis." + i[1] + " = " + i[1] + ";"
 if len(args) == 0:
 	snip.rv += "\n"`
-	}
+	}$0
 `!p
 args = getArgs(t[1])
 if len(args) == 0: snip.rv = ""
@@ -191,7 +191,7 @@ final
 endsnippet
 
 snippet fore "for (each)" b
-for ($1 $2 : $3)`!p nl(snip)`{
+for ($1 : $2)`!p nl(snip)`{
 	$0
 }
 endsnippet
