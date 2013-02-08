@@ -12,6 +12,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    3.1 Commands                                 |UltiSnips-commands|
    3.2 Triggers                                 |UltiSnips-triggers|
       3.2.1 Using your own trigger functions    |UltiSnips-trigger-functions|
+      3.2.2 Path to Python Module               |UltiSnips-python-module-path|
    3.3 Snippet Search Path                      |UltiSnips-snippet-search-path|
    3.4 Warning About Select Mode Mappings       |UltiSnips-warning-smappings|
    3.5 Functions                                |UltiSnips-functions|
@@ -281,6 +282,28 @@ then you define your mapping as >
 
 and if the you can't expand or jump from the current location then the
 alternative function IMAP_Jumpfunc('', 0) is called.
+
+3.2.2 Path to Python module                   *UltiSnips-python-module-path*
+---------------------------
+
+For even more advanced usage, you can directly write python functions
+using UltiSnips python module.
+
+Path to UltiSnips module is stored in g:UltiSnipsPythonPath variable which is
+set automatically.
+
+Usage is as follows: expample function to expand a snippet >
+
+   function! s:Ulti_ExpandSnip()
+   Python << EOF
+   import sys, vim
+   new_path = vim.eval("expand('g:UltiSnipsPythonPath')")
+   sys.path.append(new_path)
+   from UltiSnips import UltiSnips_Manager
+   UltiSnips_Manager.expand()
+   EOF
+   return ""
+   endfunction
 
 3.3 Snippet Search Path                       *UltiSnips-snippet-search-path*
 -----------------------
