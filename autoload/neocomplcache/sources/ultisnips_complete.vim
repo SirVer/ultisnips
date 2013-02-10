@@ -37,6 +37,7 @@ function! s:source.initialize() "{{{
 
   " Map completion function to tab
   exec "inoremap <silent> <tab> <C-R>=g:UltiSnips_Complete()<cr>"
+  exec "snoremap <silent> <tab> <Esc>:call UltiSnips_ExpandSnippetOrJump()<cr>"
 
   call neocomplcache#set_dictionary_helper(
         \ g:neocomplcache_source_rank, 'ultisnips_complete', 8)
