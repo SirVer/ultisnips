@@ -18,6 +18,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       3.5.1 UltiSnips_AddSnippet                |UltiSnips_AddSnippet|
       3.5.2 UltiSnips_Anon                      |UltiSnips_Anon|
    3.6 Missing python support                   |UltiSnips-python-warning|
+   3.7 Neocomplcache integration                |UltiSnips-neocomplcache|
 4. Syntax                                       |UltiSnips-syntax|
    4.1 Adding Snippets                          |UltiSnips-adding-snippets|
       4.1.1 Character Escaping                  |UltiSnips-character-escaping|
@@ -402,6 +403,23 @@ line to your vimrc file.
 
 This may be useful if your Vim configuration files are shared across several
 systems where some of them may not have Vim compiled with python support.
+
+3.7 Neocomplcache integration                       *UltiSnips_neocomplcache*
+-----------------------------
+
+If you are using Neocomplcache UltiSnips will provide integration with it.
+When completing something neocomplcache will show you available
+snippets with a description in completion list.
+
+Also there's a function that can be used for SuperTab or NeoSnippet-like
+<tab> completion - g:UltiSnips_Complete(). If you wish to use it, add
+the following to your .vimrc: >
+
+   let g:UltiSnipsExpandTrigger="<NL>"
+   inoremap <silent> <tab> <C-R>=g:UltiSnips_Complete()<cr>
+   snoremap <silent> <tab> <Esc>:call UltiSnips_ExpandSnippetOrJump()<cr>
+   xnoremap <tab> :call UltiSnips_SaveLastVisualSelection()<cr>gv
+
 
 =============================================================================
 4. Syntax                                                  *UltiSnips-syntax*
