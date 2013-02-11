@@ -411,14 +411,9 @@ If you are using Neocomplcache UltiSnips will provide integration with it.
 When completing something neocomplcache will show you available
 snippets with a description in completion list.
 
-Also there's a function that can be used for SuperTab or NeoSnippet-like
-<tab> completion - g:UltiSnips_Complete(). If you wish to use it, add
-the following to your .vimrc: >
-
-   let g:UltiSnipsExpandTrigger="<NL>"
-   inoremap <silent> <tab> <C-R>=g:UltiSnips_Complete()<cr>
-   snoremap <silent> <tab> <Esc>:call UltiSnips_ExpandSnippetOrJump()<cr>
-   xnoremap <tab> :call UltiSnips_SaveLastVisualSelection()<cr>gv
+Mappings for correct snippet expanding and completing are automatically set
+on g:UltiSnipsExpandTrigger key. For correct behavior snippet expanding and
+jumping is set to one key.
 
 
 =============================================================================
