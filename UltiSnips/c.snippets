@@ -133,4 +133,15 @@ struct ${1:`!p snip.rv = (snip.basename or "name") + "_t"`}
 };
 endsnippet
 
+snippet fun "function" b
+${1:void} ${2:function_name}(${3})
+{
+	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
+}
+endsnippet
+
+snippet fund "function declaration" b
+${1:void} ${2:function_name}(${3});
+endsnippet
+
 # vim:ft=snippets:
