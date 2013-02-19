@@ -2,7 +2,7 @@
 " This provides snippet completion with neocomplcache
 " and proper snippet expanding and jumping
 
-let s:save_cpo = &cpo
+let s:save_cpo = &cpoptions
 set cpo&vim
 
 let s:source = {
@@ -75,7 +75,7 @@ function! neocomplcache#sources#ultisnips_complete#define() "{{{
   return s:source
 endfunction"}}}
 
-let &cpo = s:save_cpo
+let &cpoptions = s:save_cpo
 unlet s:save_cpo
 
 " vim: foldmethod=marker
