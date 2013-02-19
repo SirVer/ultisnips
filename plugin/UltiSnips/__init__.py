@@ -793,8 +793,10 @@ class SnippetManager(object):
                 mode = "m"
                 break
 
-        if feedkey:
+        if feedkey == r"\<Plug>SuperTabForward" or feedkey == r"\<Plug>SuperTabBackward":
             _vim.feedkeys(feedkey, mode)
+        elif feedkey:
+            _vim.command("return %s" % _vim.escape(feedkey))
 
     def _snips(self, before, possible):
         """ Returns all the snippets for the given text
