@@ -11,6 +11,9 @@ let s:source = {
       \}
 
 function! s:source.initialize() "{{{
+  " Append UltiSnips to python path
+  exec g:_uspy "sys.path.append(vim.eval('g:UltiSnipsPythonPath'))"
+
   " Map completion function
   exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
   exec "snoremap <silent> " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips_ExpandSnippetOrJump()<cr>"
@@ -18,6 +21,7 @@ function! s:source.initialize() "{{{
   call neocomplcache#set_dictionary_helper(g:neocomplcache_source_rank, 'ultisnips_complete', 8)
   call neocomplcache#set_completion_length('ultsnips_complete', g:neocomplcache_auto_completion_start_length)
 endfunction"}}}
+
 
 function! s:source.get_keyword_pos(cur_text) "{{{
   return match(a:cur_text, '\S\+$')
@@ -47,7 +51,6 @@ function! s:get_words_list(cur_word, possible)
 python << EOF
 import vim
 import sys
-sys.path.append(vim.eval("g:UltiSnipsPythonPath"))
 from UltiSnips import UltiSnips_Manager
 import UltiSnips._vim as _vim
 cur_word = vim.eval("a:cur_word")
