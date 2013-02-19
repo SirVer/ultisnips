@@ -787,14 +787,15 @@ class SnippetManager(object):
             if trigger.lower() == sttrig.lower():
                 if idx == 0:
                     feedkey= r"\<Plug>SuperTabForward"
+                    mode = "n"
                 elif idx == 1:
                     feedkey = r"\<Plug>SuperTabBackward"
+                    mode = "p"
                 # Use remap mode so SuperTab mappings will be invoked.
-                mode = "m"
                 break
 
         if feedkey == r"\<Plug>SuperTabForward" or feedkey == r"\<Plug>SuperTabBackward":
-            _vim.feedkeys(feedkey, mode)
+            _vim.command("return SuperTab(%s)" % _vim.escape(mode))
         elif feedkey:
             _vim.command("return %s" % _vim.escape(feedkey))
 
