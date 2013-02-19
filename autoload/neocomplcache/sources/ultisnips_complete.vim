@@ -11,16 +11,12 @@ let s:source = {
       \}
 
 function! s:source.initialize() "{{{
-  " Initialize.
-
   " Map completion function
   exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
   exec "snoremap <silent> " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips_ExpandSnippetOrJump()<cr>"
 
-  call neocomplcache#set_dictionary_helper(
-        \ g:neocomplcache_source_rank, 'ultisnips_complete', 8)
-  call neocomplcache#set_completion_length('ultsnips_complete',
-        \ g:neocomplcache_auto_completion_start_length)
+  call neocomplcache#set_dictionary_helper(g:neocomplcache_source_rank, 'ultisnips_complete', 8)
+  call neocomplcache#set_completion_length('ultsnips_complete', g:neocomplcache_auto_completion_start_length)
 endfunction"}}}
 
 function! s:source.get_keyword_pos(cur_text) "{{{
