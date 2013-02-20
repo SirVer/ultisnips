@@ -91,10 +91,11 @@ endsnippet
 
 snippet bbox "A nice box over the full width" b
 `!p
-box = make_box(len(t[1]), 71)
+width = int(vim.eval("&textwidth")) or 71
+box = make_box(len(t[1]), width)
 snip.rv = box[0] + '\n' + box[1]
 `${1:content}`!p
-box = make_box(len(t[1]), 71)
+box = make_box(len(t[1]), width)
 snip.rv = box[2] + '\n' + box[3]`
 $0
 endsnippet
