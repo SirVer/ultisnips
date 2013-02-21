@@ -1335,6 +1335,7 @@ Contributors listed in chronological order:
    Harry Xu (harryxu)
    Tom Cammann (takac)
    melko
+   Sergey Alexandrov (taketwo)
 
 Thank you for your support.
 
