@@ -14,16 +14,16 @@ endsnippet
 
 snippet #if "#if #endif" !b
 #if ${1:0}
-${VISUAL:code}$0
+${VISUAL}${0:${VISUAL/(.*)/(?1::code)/}}
 #endif
 endsnippet
 
-snippet inc "#include <> (inc)"
-#include <${1:.h}>
+snippet inc "#include local header (inc)"
+#include "${1:`!p snip.rv = snip.basename + '.h'`}"
 endsnippet
 
-snippet incl "#include local header (inc)"
-#include "${1:`!p snip.rv = snip.basename + '.h'`}"
+snippet Inc "#include <> (Inc)"
+#include <${1:.h}>
 endsnippet
 
 snippet mark "#pragma mark (mark)"
@@ -35,23 +35,38 @@ ${1:#pragma mark -
 $0
 endsnippet
 
-snippet main "main() (main)"
+snippet m "main() (main)"
 int main() {
 	${0}
 }
 endsnippet
 
-snippet mainf "main() (main)"
-int main(int argc, char const *argv[]) {
-	${0:/* code */}
+snippet main "main() (main)"
+int main(int argc, char const *argv[])
+{
+	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 	return 0;
 }
 endsnippet
 
-snippet for "for int loop (fori)"
-for (${4:size_t} ${2:i} = 0; $2 < ${1:count}; ${3:++$2})
+snippet mainf "main() (main)"
+int main(int argc, char const *argv[]) {
+	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
+	return 0;
+}
+endsnippet
+
+snippet for "for loop (for)"
+for (${2:i} = 0; $2 < ${1:count}; ${3:++$2})
 {
-	${0:/* code */}
+	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
+}
+endsnippet
+
+snippet fori "for int loop (fori)"
+for (${4:int} ${2:i} = 0; $2 < ${1:count}; ${3:++$2})
+{
+	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 }
 endsnippet
 
@@ -80,9 +95,15 @@ snippet td "Typedef"
 typedef ${1:int} ${2:MyCustomType};
 endsnippet
 
+snippet wh "while loop"
+while(${1:/* condition */}) {
+	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
+}
+endsnippet
+
 snippet do "do...while loop (do)"
 do {
-	${0:/* code */}
+	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 } while(${1:/* condition */});
 endsnippet
 
@@ -93,24 +114,36 @@ endsnippet
 snippet if "if .. (if)"
 if (${1:/* condition */})
 {
-	${0:/* code */}
+	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
+}
+endsnippet
+
+snippet el "else .. (else)"
+else {
+	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 }
 endsnippet
 
 snippet ife "if .. else (ife)"
 if (${1:/* condition */})
 {
-        ${2:/* code */}
+	${2:/* code */}
 }
 else
 {
-        ${3:/* else */}
+	${3:/* else */}
 }
 endsnippet
 
 snippet printf "printf .. (printf)"
 printf("${1:%s}\n"${1/([^%]|%%)*(%.)?.*/(?2:, :\);)/}$2${1/([^%]|%%)*(%.)?.*/(?2:\);)/}
 endsnippet
+
+snippet st "struct"
+struct ${1:`!p snip.rv = (snip.basename or "name") + "_t"`}
+{
+	${0:/* data */}
+};
 
 snippet struct "struct"
 typedef struct {

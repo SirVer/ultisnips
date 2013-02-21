@@ -12,6 +12,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    3.1 Commands                                 |UltiSnips-commands|
    3.2 Triggers                                 |UltiSnips-triggers|
       3.2.1 Using your own trigger functions    |UltiSnips-trigger-functions|
+      3.2.2 Path to Python Module               |UltiSnips-python-module-path|
    3.3 Snippet Search Path                      |UltiSnips-snippet-search-path|
    3.4 Warning About Select Mode Mappings       |UltiSnips-warning-smappings|
    3.5 Functions                                |UltiSnips-functions|
@@ -127,7 +128,7 @@ If you are a pathogen user, you can track the official mirror of UltiSnips on
 github: >
 
    $ cd ~/.vim/
-   $ git submodule add https://github.com/sirver/ultisnips bundle/ultisnips
+   $ git submodule add git://github.com/SirVer/ultisnips.git bundle/ultisnips
 
 See the pathogen documentation for more details on how to update a bundle.
 
@@ -240,7 +241,7 @@ vimrc file. >
 3.2.1 Using your own trigger functions           *UltiSnips-trigger-functions*
 --------------------------------------
 
-For advanced users there are four functions that you can map directly to a 
+For advanced users there are four functions that you can map directly to a
 key and that correspond to some of the triggers previously defined:
    g:UltiSnipsExpandTrigger        <--> UltiSnips_ExpandSnippet
    g:UltiSnipsJumpForwardTrigger   <--> UltiSnips_JumpForwards
@@ -281,6 +282,28 @@ then you define your mapping as >
 
 and if the you can't expand or jump from the current location then the
 alternative function IMAP_Jumpfunc('', 0) is called.
+
+3.2.2 Path to Python module                   *UltiSnips-python-module-path*
+---------------------------
+
+For even more advanced usage, you can directly write python functions using
+UltiSnip's python modules.
+
+The path to UltiSnip's python implementation is stored in the
+g:UltiSnipsPythonPath variable which is set automatically on load.
+
+Here is a small example funtion that expands a snippet: >
+
+   function! s:Ulti_ExpandSnip()
+   Python << EOF
+   import sys, vim
+   new_path = vim.eval("expand('g:UltiSnipsPythonPath')")
+   sys.path.append(new_path)
+   from UltiSnips import UltiSnips_Manager
+   UltiSnips_Manager.expand()
+   EOF
+   return ""
+   endfunction
 
 3.3 Snippet Search Path                       *UltiSnips-snippet-search-path*
 -----------------------
@@ -437,12 +460,15 @@ snippet filenames and their associated filetype.
 editing any document regardless of the filetype. A date insertion snippet, for
 example, would be fit well in the all.snippets file.
 
-UltiSnips supports Vim's dotted filetype syntax. To illustrate, the filetype
-for a cpp file could be set as follows ":set ft=cpp.c". If there exists
-c.snippets and cpp.c.snippets files in snippet directories snippets from both
-files are activated. CUDA files could have filetypes set to 'cuda.cpp.c'
-Snippets from all three, c.snippets, cpp.c.snippets and cuda.cpp.c.snippets
-are activated for that filetype.
+UltiSnips understands Vim's dotted filetype syntax. For example, if you define
+a dotted filetype for the CUDA C++ framework, e.g. ":set ft=cuda.cpp", then
+UltiSnips will search for and activate snippets for both the cuda and cpp
+filetypes.
+
+UltiSnips doesn't understand multiple filetypes in snippet filenames, so a
+snippet file named "cuda.cpp.snippets" won't match the "cuda" or "cpp"
+filetypes, which means it won't be activated for files with the dotted
+filetype "cuda.cpp" either.
 
 The extends directive provides an alternative way of combining snippet files.
 When the extends directive is included in a snippet file, it instructs
@@ -551,6 +577,10 @@ The options currently supported are: >
        replaced with spaces.) If this option is set, UltiSnips will ignore the
        Vim settings and insert the tab characters as is. This option is useful
        for snippets involved with tab delimited formats, for example.
+
+   s   Remove whitespace immediately before the cursor at the end of a line
+       before jumping to the next tabstop.  This is useful if there is a
+       tabstop with optional text at the end of a line.
 
 The end line is the 'endsnippet' keyword on a line by itself. >
 
@@ -1255,11 +1285,17 @@ Contributors listed in chronological order:
    iiijjjii - Jim Karsten
    fgalassi - Federico Galassi
    lucapette
-   Psycojoker - Laurent Peuch 
+   Psycojoker - Laurent Peuch
    aschrab - Aaron Schrab
    stardiviner - NagatoPain
    skeept - Jorge Rodrigues
    buztard
+   stephenmckinney - Steve McKinney
+   Pedro Algarvio - s0undt3ch
+   Eric Van Dewoestine - ervandew
+   Matt Patterson - fidothe
+   Mike Morearty - mmorearty
+   Stanislav Golovanov - JazzCore
 
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
@@ -1292,6 +1328,14 @@ Contributors listed in chronological order:
    Ferdinand Majerech (kiith-sa)
    Vivien Didelot
    Øystein Walle (osse)
+   Pedro Algarvio (s0undt3ch)
+   Steven Humphrey (shumphrey)
+   Björn Winckler (b4winckler)
+   David Brown (Nali4Freedom)
+   Harry Xu (harryxu)
+   Tom Cammann (takac)
+   melko
+   Sergey Alexandrov (taketwo)
 
 Thank you for your support.
 
