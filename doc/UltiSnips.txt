@@ -1334,7 +1334,7 @@ Contributors listed in chronological order:
    David Brown (Nali4Freedom)
    Harry Xu (harryxu)
    Tom Cammann (takac)
-   melko
+   Paolo Cretaro (melko)
    Sergey Alexandrov (taketwo)
 
 Thank you for your support.
