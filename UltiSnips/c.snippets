@@ -18,12 +18,12 @@ ${VISUAL:code}$0
 #endif
 endsnippet
 
-snippet inc "#include local header (inc)"
-#include "${1:`!p snip.rv = snip.basename + '.h'`}"
+snippet inc "#include <> (inc)"
+#include <${1:.h}>
 endsnippet
 
-snippet Inc "#include <> (Inc)"
-#include <${1:.h}>
+snippet incl "#include local header (inc)"
+#include "${1:`!p snip.rv = snip.basename + '.h'`}"
 endsnippet
 
 snippet mark "#pragma mark (mark)"
@@ -36,8 +36,13 @@ $0
 endsnippet
 
 snippet main "main() (main)"
-int main(int argc, char const *argv[])
-{
+int main() {
+	${0}
+}
+endsnippet
+
+snippet mainf "main() (main)"
+int main(int argc, char const *argv[]) {
 	${0:/* code */}
 	return 0;
 }
@@ -107,11 +112,16 @@ snippet printf "printf .. (printf)"
 printf("${1:%s}\n"${1/([^%]|%%)*(%.)?.*/(?2:, :\);)/}$2${1/([^%]|%%)*(%.)?.*/(?2:\);)/}
 endsnippet
 
-snippet st "struct"
-struct ${1:`!p snip.rv = (snip.basename or "name") + "_t"`}
-{
-	${0:/* data */}
-};
+snippet struct "struct"
+typedef struct {
+	${0}
+} ${1};
+endsnippet
+
+snippet union "union"
+typedef union {
+	${0}
+} ${1};
 endsnippet
 
 # vim:ft=snippets:
