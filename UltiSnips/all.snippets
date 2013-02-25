@@ -67,16 +67,15 @@ def _get_comment_format():
     return commentformat
 
 
-def make_box(twidth, bwidth = None):
-   if bwidth is None:
-      bwidth = twidth + 2
-   b,m,e,i = _get_comment_format()
-   sline = b + m + bwidth*m + 2*m
-   nspaces = (bwidth - twidth)//2 
-   mlines = i + m + " " + " "*nspaces
-   mlinee = " " + " "*(bwidth-twidth-nspaces) + m
-   eline = i + 2*m + bwidth*m + m + e
-   return sline, mlines, mlinee, eline
+def make_box(twidth, bwidth=None):
+    b, m, e, i = _get_comment_format()
+    bwidth_inner = bwidth - 3 - max(len(b), len(i + e)) if bwidth else twidth + 2
+    sline = b + m + bwidth_inner * m + 2 * m
+    nspaces = (bwidth_inner - twidth) // 2
+    mlines = i + m + " " + " " * nspaces
+    mlinee = " " + " "*(bwidth_inner - twidth - nspaces) + m
+    eline = i + 2 * m + bwidth_inner * m + m + e
+    return sline, mlines, mlinee, eline
 endglobal
 
 snippet box "A nice box with the current comment symbol" b
