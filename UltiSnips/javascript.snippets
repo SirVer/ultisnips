@@ -77,4 +77,42 @@ setTimeout(function() {
 }${2:.bind(${3:this})}, ${1:10});
 endsnippet
 
+# Snippets for Console Debug Output
+
+snippet cl "console.log"
+console.log(${1:"${2:value}"});
+endsnippet
+
+snippet cw "console.warn"
+console.warn(${1:"${2:value}"});
+endsnippet
+
+snippet ce "console.error"
+console.error(${1:"${2:value}"});
+endsnippet
+
+snippet ca "console.assert"
+console.assert(${1:assertion}, ${2:"${3:message}"});
+endsnippet
+
+snippet cgroup "console.group"
+console.group("${1:label}");
+${VISUAL}$0
+console.groupEnd();
+endsnippet
+
+snippet ctime "console.time"
+console.time("${1:label}");
+${VISUAL}$0
+console.timeEnd("$1");
+endsnippet
+
+snippet ctimestamp "console.timestamp"
+console.timeStamp("${1:label}")
+endsnippet
+
+snippet ctrace "console.trace"
+console.trace();
+endsnippet
+
 # vim:ft=snippets:
