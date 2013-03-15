@@ -36,7 +36,7 @@ $0
 endsnippet
 
 snippet main "main() (main)"
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
 	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 	return 0;
