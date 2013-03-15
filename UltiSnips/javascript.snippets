@@ -51,9 +51,9 @@ function ${1:function_name} (${2:argument}) {
 endsnippet
 
 snippet iife "Immediately-Invoked Function Expression (iife)"
-(function (${2:argument}) {
+(function (${1:argument}) {
 	${VISUAL}$0
-}())
+}(${2:$1}));
 endsnippet
 
 snippet ife "if ___ else"
