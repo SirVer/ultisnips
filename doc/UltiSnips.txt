@@ -1296,6 +1296,7 @@ Contributors listed in chronological order:
    Matt Patterson - fidothe
    Mike Morearty - mmorearty
    Stanislav Golovanov - JazzCore
+   David Briscoe - DavidBriscoe
 
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*

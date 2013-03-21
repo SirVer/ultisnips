@@ -12,6 +12,7 @@ syntax include @Viml syntax/vim.vim
 syn match snipComment "^#.*" contains=snipTODO
 syn keyword snipTODO FIXME NOTE NOTES TODO XXX contained
 
+syn match snipDocString '"[^"]*"$'
 syn match snipString '"[^"]*"'
 syn match snipTabsOnly "^\t\+$"
 
@@ -21,7 +22,7 @@ syn match snipKeyword "\(\<\(end\)\?\(snippet\|global\)\>\)\|extends\|clearsnipp
 syn match snipExtends "^extends.*" contains=snipKeyword
 
 " snippet definitions
-syn match snipStart "^snippet.*" contained contains=snipKeyword,snipString
+syn match snipStart "^snippet.*" contained contains=snipKeyword,snipDocString
 syn match snipEnd "^endsnippet" contained contains=snipKeyword
 syn region snipCommand contained keepend start="`" end="`" contains=snipPythonCommand,snipVimLCommand
 syn region snipPythonCommand contained keepend start="`!p" end="`" contained contains=@Python
@@ -43,6 +44,7 @@ syn match snipClear "^clearsnippets"
 
 hi link snipComment      Comment
 hi link snipString       String
+hi link snipDocString    String
 hi link snipTabsOnly     Error
 
 hi link snipKeyword      Keyword
