@@ -1309,6 +1309,7 @@ Contributors listed in chronological order:
    Matt Patterson - fidothe
    Mike Morearty - mmorearty
    Stanislav Golovanov - JazzCore
+   David Briscoe - DavidBriscoe
 
 
 7.2 Snippets                                       *UltiSnips-contrisnippets*
@@ -1349,6 +1350,8 @@ Contributors listed in chronological order:
    Tom Cammann (takac)
    Paolo Cretaro (melko)
    Sergey Alexandrov (taketwo)
+   Jaromír Hradílek (jhradilek)
+   Vangelis Tsoumenis (kioopi)
 
 Thank you for your support.
 
