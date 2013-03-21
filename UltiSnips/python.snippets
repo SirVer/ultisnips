@@ -125,7 +125,7 @@ args = get_args(t[4])
 write_docstring_args(args, snip)
 if args:
     snip.rv += '\n' + snip.mkline('', indent='')
-    snip += '{0} 2 '.format(tripple_quotes(snip))
+    snip += '{0}'.format(tripple_quotes(snip))
 
 write_init_body(args, t[2], snip)
 `
