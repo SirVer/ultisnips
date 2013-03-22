@@ -8,8 +8,7 @@ ${1:v}${1/^.*?(-)?(>)?$/(?2::(?1:>:.))/}begin(), $1${1/^.*?(-)?(>)?$/(?2::(?1:>:
 endsnippet
 
 snippet cl "class .. (class)"
-class ${1:`!p snip.rv = snip.basename or "name"`}
-{
+class ${1:`!p snip.rv = snip.basename or "name"`} {
 public:
 	${1/(\w+).*/$1/} (${2:arguments});
 	virtual ~${1/(\w+).*/$1/} ();
@@ -20,8 +19,7 @@ private:
 endsnippet
 
 snippet ns "namespace .. (namespace)"
-namespace${1/.+/ /m}${1:`!p snip.rv = snip.basename or "name"`}
-{
+namespace${1/.+/ /m}${1:`!p snip.rv = snip.basename or "name"`} {
 	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 }${1/.+/ \/* /m}$1${1/.+/ *\/ /m}
 endsnippet
@@ -47,6 +45,24 @@ endsnippet
 
 snippet tp "template <typename ..> (template)"
 template <typename ${1:_InputIter}>
+endsnippet
+
+############################################################################
+#                                Input/Output           #
+############################################################################
+
+snippet cout "std::cout"
+	std::cout << ${1} << std::endl;${2}
+endsnippet
+
+snippet cin "std::cin"
+	std::cin >> ${1};${2}
+endsnippet
+
+snippet iter "for iterator"
+	for (${1:std::vector}<${2:type}>::${3:const_iterator} ${4:i} = ${5:container}.begin(); $4 != $5.end(); ++$4) {
+		${6}
+	}${7}
 endsnippet
 
 # vim:ft=snippets:
