@@ -35,11 +35,12 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       4.7.1 Replacement String                  |UltiSnips-replacement-string|
       4.7.2 Demos                               |UltiSnips-demos|
    4.8 Clearing snippets                        |UltiSnips-clearing-snippets|
-5. Helping Out                                  |UltiSnips-helping|
-6. Contact                                      |UltiSnips-contact|
-7. Contributors                                 |UltiSnips-contributors|
-   7.1 Patches & Coding                         |UltiSnips-contricoding|
-   7.2 Snippets                                 |UltiSnips-contrisnippets|
+5. Support for other plugins                    |UltiSnips-other-plugins|
+6. Helping Out                                  |UltiSnips-helping|
+7. Contact                                      |UltiSnips-contact|
+8. Contributors                                 |UltiSnips-contributors|
+   8.1 Patches & Coding                         |UltiSnips-contricoding|
+   8.2 Snippets                                 |UltiSnips-contrisnippets|
 
 This plugin only works if 'compatible' is not set.
 {Vi does not have any of these features}
@@ -265,8 +266,8 @@ UltiSnips_JumpBackwards       --> g:ulti_jump_backwards_res (0: fail, 1: success
 
 To see how these return values may come in handy suppose that you want to map
 a key to expand or jump, but if none of these actions is successful you want
-to call another function. Ultisnips already does this automaticall for supertab, but
-this allows you individual fine tuning of your tab key usage.
+to call another function. Ultisnips already does this automatically for
+supertab, but this allows you individual fine tuning of your tab key usage.
 
 Usage is as follows: You define a function >
 
@@ -1212,10 +1213,27 @@ snippets if you wish to replace them. Simply use the '!' option. (See
 |UltiSnips-adding-snippets| for the options).
 
 
-=============================================================================
-5. Helping Out                                            *UltiSnips-helping*
+==============================================================================
+5. Support for other plugins             *UltiSnips-other-plugins*
 
-UltiSnips needs the help of the Vim community to make it better. Please
+Ultisnips has build in support for some common plugins and there are others
+that are aware of UltiSnips and use it to improve the user experience. This is
+an incomplete list - if you want to have your plugin listed here, just sent me
+a pull request.
+
+Supertab - UltiSnips has build in support for Supertab. Just use a recent
+enough version of both plugins and <tab> will either expand a snippet or defer
+to Supertab for expansion.
+
+neocomplcache - Stanislav Golovanov (JazzCore) has made an integration plugin
+to use UltiSnips as engine inside of neocomplcache. You can find his work at
+https://github.com/JazzCore/neocomplcache-ultisnips.
+
+
+=============================================================================
+6. Helping Out                                            *UltiSnips-helping*
+
+UltiSnips needs the help of the Vim community to keep improving. Please
 consider joining this effort by providing new snippets, new features or bug
 reports.
 
@@ -1242,7 +1260,7 @@ It is life changing for me. Maybe it is for you too.
 
 
 =============================================================================
-6. Contact                                                *UltiSnips-contact*
+7. Contact                                                *UltiSnips-contact*
 
 You can reach me at SirVer -AT- gmx -ADOT- de. You can also contact me through
 the UltiSnips launchpad project page at https://launchpad.net/ultisnips/. The
@@ -1253,13 +1271,13 @@ This project aims to be the one-for-all solution for Snippets for Vim. If you
 miss a feature or find a bug, please contact me or file a support ticket.
 
 =============================================================================
-7. Contributors                                      *UltiSnips-contributors*
+8. Contributors                                      *UltiSnips-contributors*
 
 The primary developer of UltiSnips is SirVer (Holger Rapp). The following
 individuals have contributed code and snippets to UltiSnips.
 
 
-7.1 Patches & Coding                                 *UltiSnips-contricoding*
+8.1 Patches & Coding                                 *UltiSnips-contricoding*
 --------------------
 
 Contributors listed in chronological order:
@@ -1299,7 +1317,7 @@ Contributors listed in chronological order:
    David Briscoe - DavidBriscoe
 
 
-7.2 Snippets                                       *UltiSnips-contrisnippets*
+8.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------
 
 Contributors listed in chronological order:
