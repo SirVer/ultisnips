@@ -1339,6 +1339,7 @@ Contributors listed in chronological order:
    Sergey Alexandrov (taketwo)
    Jaromír Hradílek (jhradilek)
    Vangelis Tsoumenis (kioopi)
+   Rudi Grinberg (rgrinberg)
 
 Thank you for your support.
 
