@@ -787,7 +787,7 @@ The 'snip' object provides some properties as well: >
     snip.v:
          Data related to the ${VISUAL} placeholder. The property has two
          attributes:
-             snip.v.mode   ('v', 'V', '^V', see *visual-mode* )
+             snip.v.mode   ('v', 'V', '^V', see |visual-mode| )
              snip.v.text   The text that was selected.
 
     snip.fn:
