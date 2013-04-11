@@ -41,8 +41,9 @@ user { '${1:username}':
     gid        => '${4:gid}',
     comment    => '${5:gecos}',
     home       => '${6:homedirectory}',
+    homeagain       => '$6',
     managehome => false,
-    require    => Group['${7:group'],
+    require    => Group['${7:group}'],
 }
 endsnippet
 
