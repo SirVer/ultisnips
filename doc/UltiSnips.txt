@@ -1358,6 +1358,7 @@ Contributors listed in chronological order:
    Jaromír Hradílek (jhradilek)
    Vangelis Tsoumenis (kioopi)
    Rudi Grinberg (rgrinberg)
+   javipolo
 
 Thank you for your support.
 
