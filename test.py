@@ -62,6 +62,8 @@ EA = "#" # Expand anonymous
 COMPL_KW = chr(24)+chr(14)
 COMPL_ACCEPT = chr(25)
 
+NUMBER_OF_RETRIES_FOR_EACH_TEST = 4
+
 class VimInterface:
     def focus(title=None):
         pass
@@ -199,8 +201,8 @@ class VimInterfaceWindows(VimInterface):
 class _VimTest(unittest.TestCase):
     snippets = ("dummy", "donotdefine")
     snippets_test_file = ("", "", "")  # file type, file name, file content
-    text_before = " --- some text before --- "
-    text_after =  " --- some text after --- "
+    text_before = " --- some text before --- \n\n"
+    text_after =  "\n\n --- some text after --- "
     expected_error = ""
     wanted = ""
     keys = ""
@@ -224,11 +226,10 @@ class _VimTest(unittest.TestCase):
         self.vim.send_keystrokes(s, self.sleeptime)
 
     def check_output(self):
-        wanted = self.text_before + '\n\n' + self.wanted + \
-                '\n\n' + self.text_after
+        wanted = self.text_before + self.wanted + self.text_after
         if self.expected_error:
             wanted = wanted + "\n" + self.expected_error
-        for i in range(4):
+        for i in range(NUMBER_OF_RETRIES_FOR_EACH_TEST):
             if self.output != wanted:
                 # Redo this, but slower
                 self.sleeptime += 0.02
@@ -296,8 +297,8 @@ class _VimTest(unittest.TestCase):
             # Enter insert mode
             self.send("i")
 
-            self.send(self.text_before + '\n\n')
-            self.send('\n\n' + self.text_after)
+            self.send(self.text_before)
+            self.send(self.text_after)
 
             # Go to the middle of the buffer
             self.send(ESC + "ggjj")
@@ -2379,6 +2380,32 @@ class ProperIndenting_AutoIndentAndNewline_ECR(_VimTest):
         self.send(":set autoindent\n")
     def _options_off(self):
         self.send(":set noautoindent\n")
+# Test for bug 1073816
+class ProperIndenting_FirstLineInFile_ECR(_PS_Base):
+    text_before = ""
+    text_after = ""
+    snippets_test_file = ("all", "test_file", r"""
+global !p
+def complete(t, opts):
+  if t:
+    opts = [ m[len(t):] for m in opts if m.startswith(t) ]
+  if len(opts) == 1:
+    return opts[0]
+  elif len(opts) > 1:
+    return "(" + "|".join(opts) + ")"
+  else:
+    return ""
+endglobal
+
+snippet '^#?inc' "#include <>" !r
+#include <$1`!p snip.rv = complete(t[1], ['cassert', 'cstdio', 'cstdlib', 'cstring', 'fstream', 'iostream', 'sstream'])`>
+endsnippet
+        """)
+    keys = "inc" + EX + "foo"
+    wanted = "#include <foo>"
+class ProperIndenting_FirstLineInFileComplete_ECR(ProperIndenting_FirstLineInFile_ECR):
+    keys = "inc" + EX + "cstdl"
+    wanted = "#include <cstdlib>"
 # End: Proper Indenting  #}}}
 # Format options tests  {{{#
 class _FormatoptionsBase(_VimTest):
