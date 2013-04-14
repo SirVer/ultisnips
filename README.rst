@@ -6,7 +6,7 @@ with the official bzr repository over at Launchpad [1] and is meant as a
 convenience for contributors. Send Pull request to this repository, not
 the automatic clone from vim-scripts.
 
-Note that we do not use the Issue tracker here one GitHub because the one on
+Note that we do not use the Issue tracker here on GitHub because the one on
 Launchpad is superior and already has a significant history. Please report
 `issues over there`_.
 
