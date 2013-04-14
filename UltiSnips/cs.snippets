@@ -287,16 +287,11 @@ snippet cw "Console.WriteLine" b
 Console.WriteLine("$1");
 endsnippet
 
-snippet cw1 "Console.WriteLine with 1 param" b
-Console.WriteLine("${1:\{0\}}", ${2:param1});
-endsnippet
-
-snippet cw2 "Console.WriteLine with 2 params" b
-Console.WriteLine("${1:\{0\} \{1\}}", ${2:param1}, ${3:param2});
-endsnippet
-
-snippet cw3 "Console.WriteLine with 3 params" b
-Console.WriteLine("${1:\{0\} \{1\} \{2\}}", ${2:param1}, ${3:param2}, ${4:param3});
+# as you first type comma-separated parameters on the right, {n} values appear in the format string
+snippet cwp "Console.WriteLine with parameters" b
+Console.WriteLine("${2:`!p
+snip.rv = ' '.join(['{' + str(i) + '}' for i in range(t[1].count(','))])
+`}"${1:, something});
 endsnippet
 
 snippet mbox "Message box" b
