@@ -10,28 +10,28 @@
 snippet namespace "namespace" b
 namespace ${1:MyNamespace}
 {
-    ${VISUAL}$0
+	${VISUAL}$0
 }
 endsnippet
 
 snippet class "class" w
 class ${1:MyClass}
 {
-    $0
+	$0
 }
 endsnippet
 
 snippet struct "struct" w
 struct ${1:MyStruct}
 {
-    $0
+	$0
 }
 endsnippet
 
 snippet interface "interface" w
 interface I${1:Interface}
 {
-    $0
+	$0
 }
 endsnippet
 
@@ -106,35 +106,35 @@ endsnippet
 snippet for "for loop" b
 for (int ${1:i} = 0; $1 < ${2:10}; $1++)
 {
-    ${VISUAL}$0
+	${VISUAL}$0
 }
 endsnippet
 
 snippet forr "for loop (reverse)" b
 for (int ${1:i} = ${2:10}; $1 >= 0; $1--)
 {
-    ${VISUAL}$0
+	${VISUAL}$0
 }
 endsnippet
 
 snippet foreach "foreach loop" b
 foreach (${3:var} ${2:item} in ${1:items})
 {
-    ${VISUAL}$0
+	${VISUAL}$0
 }
 endsnippet
 
 snippet while "while loop" b
 while (${1:true})
 {
-    ${VISUAL}$0
+	${VISUAL}$0
 }
 endsnippet
 
 snippet do "do loop" b
 do
 {
-    ${VISUAL}$0
+	${VISUAL}$0
 } while (${1:true});
 endsnippet
 
@@ -146,14 +146,14 @@ endsnippet
 snippet if "if statement" b
 if ($1)
 {
-    ${VISUAL}$0
+	${VISUAL}$0
 }
 endsnippet
 
 snippet ife "if else statement" b
 if ($1)
 {
-    ${VISUAL}$0
+	${VISUAL}$0
 }
 else
 {
@@ -163,39 +163,39 @@ endsnippet
 snippet elif "else if" b
 else if ($1)
 {
-    $0
+	$0
 }
 endsnippet
 
 snippet elseif "else if" b
 else if ($1)
 {
-    $0
+	$0
 }
 endsnippet
 
 snippet ifnn "if not null" b
 if ($1 != null)
 {
-    ${VISUAL}$0
+	${VISUAL}$0
 }
 endsnippet
 
 snippet switch "switch statement" b
 switch (${1:statement})
 {
-    case ${2:value}:
-        break;
+	case ${2:value}:
+		break;
 
-    default:
-        $0break;
+	default:
+		$0break;
 }
 endsnippet
 
 snippet case "case" b
 case ${1:value}:
-    $2
-    break;
+	$2
+	break;
 endsnippet
 
 
@@ -206,28 +206,28 @@ endsnippet
 snippet using "using statement" b
 using (${1:resource})
 {
-    ${VISUAL}$0
+	${VISUAL}$0
 }
 endsnippet
 
 snippet unchecked "unchecked block" b
 unchecked
 {
-    ${VISUAL}$0
+	${VISUAL}$0
 }
 endsnippet
 
 snippet checked "checked block" b
 checked
 {
-    ${VISUAL}$0
+	${VISUAL}$0
 }
 endsnippet
 
 snippet unsafe "unsafe" b
 unsafe
 {
-    ${VISUAL}$0
+	${VISUAL}$0
 }
 endsnippet
 
@@ -239,18 +239,18 @@ endsnippet
 snippet try "try catch block" b
 try
 {
-    ${VISUAL}$0
+	${VISUAL}$0
 }
 catch (${1:Exception} ${2:e})
 {
-    throw;
+	throw;
 }
 endsnippet
 
 snippet tryf "try finally block" b
 try
 {
-    ${VISUAL}$0
+	${VISUAL}$0
 }
 finally
 {
@@ -268,10 +268,10 @@ endsnippet
 
 snippet from "LINQ syntax" b
 var ${1:seq} =
-    from ${2:item1} in ${3:items1}
-    join ${4:item2} in ${5:items2} on $2.${6:prop1} equals $4.${7:prop2}
-    select ${8:$2.prop3}
-    where ${9:clause}
+	from ${2:item1} in ${3:items1}
+	join ${4:item2} in ${5:items2} on $2.${6:prop1} equals $4.${7:prop2}
+	select ${8:$2.prop3}
+	where ${9:clause}
 endsnippet
 
 
@@ -311,12 +311,12 @@ endsnippet
 snippet equals "Equals method" b
 public override bool Equals(object obj)
 {
-    if (obj == null || GetType() != obj.GetType())
-    {
-        return false;
-    }
-    $0
-    return base.Equals(obj);
+	if (obj == null || GetType() != obj.GetType())
+	{
+		return false;
+	}
+	$0
+	return base.Equals(obj);
 }
 endsnippet
 
