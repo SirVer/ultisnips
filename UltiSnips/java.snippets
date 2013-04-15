@@ -7,7 +7,7 @@
 # before '{' braces.
 # Setting "g:ultisnips_java_junit" will change how the test method snippet
 # looks, it is defaulted to junit4, setting this option to 3 will remove the
-# @Test annotation from the method 
+# @Test annotation from the method
 
 global !p
 def junit(snip):
@@ -126,7 +126,7 @@ for i in args:
 }
 endsnippet
 
-snippet clc "class with constucutor, with field names" b
+snippet clc "class with constructor, with field names" b
 public class `!p
 snip.rv = snip.basename or "untitled"` {
 `!p
@@ -145,7 +145,7 @@ if len(args) == 0:
 }
 endsnippet
 
-snippet clc "class and constrcutor" b
+snippet clc "class and constructor" b
 public class `!p
 snip.rv = snip.basename or "untitled"` {
 
@@ -230,7 +230,7 @@ interface ${1:`!p snip.rv = snip.basename or "untitled"`} ${2:extends ${3:Parent
 }
 endsnippet
 
-snippet cc "constuctor call or setter body" 
+snippet cc "constructor call or setter body"
 this.${1:var} = $1;
 endsnippet
 
