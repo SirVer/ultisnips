@@ -1361,6 +1361,7 @@ Contributors listed in chronological order:
    Rudi Grinberg (rgrinberg)
    javipolo
    Matthew Strawbridge (pxc)
+   Josh Strater (jstrater)
 
 Thank you for your support.
 

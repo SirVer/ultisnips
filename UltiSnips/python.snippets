@@ -396,6 +396,31 @@ $1 = property(**$1())
 endsnippet
 
 
+####################
+# If / Else / Elif #
+####################
+snippet if "If" b
+if ${1:condition}:
+   ${2:pass}
+endsnippet
+
+snippet ife "If / Else" b
+if ${1:condition}:
+   ${2:pass}
+else:
+   ${3:pass}
+endsnippet
+
+snippet ifee "If / Elif / Else" b
+if ${1:condition}:
+   ${2:pass}
+elif ${3:condition}:
+   ${4:pass}
+else:
+   ${5:pass}
+endsnippet
+
+
 ##########################
 # Try / Except / Finally #
 ##########################
