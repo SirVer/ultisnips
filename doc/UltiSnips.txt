@@ -1362,6 +1362,7 @@ Contributors listed in chronological order:
    javipolo
    Matthew Strawbridge (pxc)
    Josh Strater (jstrater)
+   jinzhu
 
 Thank you for your support.
 
