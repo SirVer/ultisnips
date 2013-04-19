@@ -3,7 +3,7 @@
 " Description: The Ultimate Snippets solution for Vim
 "
 " Testing Info: {{{
-"   See directions at the top of the test.py script located one
+"   See directions at the top of the test.py script located one 
 "   directory above this file.
 " }}}
 
@@ -46,13 +46,13 @@ if !exists("g:UltiSnipsExpandTrigger")
     let g:UltiSnipsExpandTrigger = "<tab>"
 endif
 
-" The trigger used to display all triggers that could possible
+" The trigger used to display all triggers that could possible 
 " match in the current position.
 if !exists("g:UltiSnipsListSnippets")
     let g:UltiSnipsListSnippets = "<c-tab>"
 endif
 
-" The trigger used to jump forward to the next placeholder.
+" The trigger used to jump forward to the next placeholder. 
 " NOTE: expansion and forward jumping can, but needn't be the same trigger
 if !exists("g:UltiSnipsJumpForwardTrigger")
     let g:UltiSnipsJumpForwardTrigger = "<c-j>"
@@ -80,7 +80,7 @@ if !exists("g:UltiSnipsEditSplit")
     let g:UltiSnipsEditSplit = 'normal'
 endif
 
-" A list of directory names that are searched for snippets.
+" A list of directory names that are searched for snippets. 
 if !exists("g:UltiSnipsSnippetDirectories")
     let g:UltiSnipsSnippetDirectories = [ "UltiSnips" ]
 endif
@@ -230,7 +230,7 @@ function! UltiSnipsFiletypeComplete(arglead, cmdline, cursorpos)
     \   'fnamemodify(v:val, ":t:r")'
     \ )
     call insert(items, 'all')
-    for item in items
+    for item in items 
         if !has_key(ret, item) && item =~ '^'.a:arglead
             let ret[item] = 1
         endif
