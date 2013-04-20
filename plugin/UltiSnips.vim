@@ -107,7 +107,8 @@ function! UltiSnipsEdit(...)
 endfunction
 
 " edit snippets, default of current file type or the specified type
-command! -nargs=? UltiSnipsEdit :call UltiSnipsEdit(<q-args>)
+command! -nargs=? -complete=customlist,UltiSnipsFiletypeComplete UltiSnipsEdit
+    \ :call UltiSnipsEdit(<q-args>)
 
 " Global Commands {{{
 function! UltiSnipsAddFiletypes(filetypes)
@@ -220,6 +221,24 @@ endf
 function! UltiSnips_LeavingBuffer()
     exec g:_uspy "UltiSnips_Manager.leaving_buffer()"
 endf
+" }}}
+" COMPLETE FUNCTIONS {{{
+function! UltiSnipsFiletypeComplete(arglead, cmdline, cursorpos)
+    let ret = {}
+    let items = map(
+    \   split(globpath(&runtimepath, 'syntax/*.vim'), '\n'),
+    \   'fnamemodify(v:val, ":t:r")'
+    \ )
+    call insert(items, 'all')
+    for item in items 
+        if !has_key(ret, item) && item =~ '^'.a:arglead
+            let ret[item] = 1
+        endif
+    endfor
+
+    return sort(keys(ret))
+endfunction
+
 " }}}
 
 "" STARTUP CODE {{{
