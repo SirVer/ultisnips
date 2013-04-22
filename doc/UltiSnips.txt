@@ -1364,6 +1364,7 @@ Contributors listed in chronological order:
    Matthew Strawbridge (pxc)
    Josh Strater (jstrater)
    jinzhu
+   Rene Vergara (ravl1084)
 
 Thank you for your support.
 

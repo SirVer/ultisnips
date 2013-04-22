@@ -4,7 +4,7 @@ extends texmath
 #                             LATEX SNIPPETS                              #
 ###########################################################################
 
-snippet r "\ref{}" w
+snippet r "\\ref{}" w
 \ref{$1}
 endsnippet
 
@@ -120,6 +120,14 @@ snippet subp "Subparagraph" b
 ${0}
 
 % subparagraph $2 (end)
+endsnippet
+
+###############
+#  Utilities  #
+###############
+
+snippet pac "Package" b
+\usepackage[${1:options}]{${2:package}}$0
 endsnippet
 
 # vim:ft=snippets:
