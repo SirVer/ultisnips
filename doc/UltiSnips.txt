@@ -1365,6 +1365,7 @@ Contributors listed in chronological order:
    Josh Strater (jstrater)
    jinzhu
    Rene Vergara (ravl1084)
+   Johan Haals (JHaals)
 
 Thank you for your support.
 
