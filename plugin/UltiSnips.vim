@@ -108,14 +108,15 @@ endfunction
 
 " edit snippets, default of current file type or the specified type
 command! -nargs=? -complete=customlist,UltiSnipsFiletypeComplete UltiSnipsEdit
-    \ :call UltiSnipsEdit(<q-args>)
+    \ :<C-u>call UltiSnipsEdit(<q-args>)
 
 " Global Commands {{{
 function! UltiSnipsAddFiletypes(filetypes)
     exec g:_uspy "UltiSnips_Manager.add_buffer_filetypes('" . a:filetypes . ".all')"
     return ""
 endfunction
-command! -nargs=1 UltiSnipsAddFiletypes :call UltiSnipsAddFiletypes(<q-args>)
+command! -nargs=1 UltiSnipsAddFiletypes -complete=customlist,UltiSnipsFiletypeComplete
+    \ :<C-u>call UltiSnipsAddFiletypes(<q-args>)
 
 "" }}}
 

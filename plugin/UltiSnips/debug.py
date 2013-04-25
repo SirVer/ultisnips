@@ -4,11 +4,16 @@
 __all__ = [ "debug", "echo_to_hierarchy", "print_stack" ]
 
 import sys
+import os
 
 from UltiSnips.compatibility import as_unicode
+if sys.platform.lower().startswith("win"):
+    dump_filename = "C:/windows/temp/ultisnips.log"
+elif sys.platform.lower().startswith("darwin"):
+    dump_filename = os.path.expanduser("~/Library/Log/ultisnips.log")
+else:
+    dump_filename = "/var/log/ultisnips.log"
 
-dump_filename = "/tmp/file.txt" if not sys.platform.lower().startswith("win") \
-        else "C:/windows/temp/ultisnips.txt"
 with open(dump_filename, "w") as dump_file:
     pass # clears the file
 
