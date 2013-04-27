@@ -1044,7 +1044,15 @@ class SnippetManager(object):
         """
         buf_fts = self._filetypes[_vim.buf.nr]
         idx = -1
-        for ft in ft.split("."):
+        fts = ft.split(".")
+
+        # eruby subfiletype
+        if 'eruby' in fts:
+            subft = str(_vim.eval('get(b:,"eruby_subtype", "")'))
+            if subft != '':
+                fts.append(subft)
+
+        for ft in fts:
             ft = ft.strip()
             if not ft: continue
             try:

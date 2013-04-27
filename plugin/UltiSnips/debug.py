@@ -10,7 +10,7 @@ from UltiSnips.compatibility import as_unicode
 if sys.platform.lower().startswith("win"):
     dump_filename = "C:/windows/temp/ultisnips.log"
 elif sys.platform.lower().startswith("darwin"):
-    dump_filename = os.path.expanduser("~/Library/Log/ultisnips.log")
+    dump_filename = os.path.expanduser("~/Library/Logs/ultisnips.log")
 else:
     dump_filename = "/var/log/ultisnips.log"
 
