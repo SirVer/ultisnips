@@ -11,13 +11,6 @@ if exists('did_UltiSnips_vim') || &cp || version < 700
     finish
 endif
 
-" Define dummy version of function called by autocommand setup in
-" ftdetect/UltiSnips.vim.  If the function isn't defined (probably due to
-" using a copy of vim without python support) it will cause an error anytime a
-" new file is opened.
-function! UltiSnips_FileTypeChanged()
-endfunction
-
 if !exists("g:UltiSnipsUsePythonVersion")
     let g:_uspy=":py3 "
     if !has("python3")
@@ -108,14 +101,15 @@ endfunction
 
 " edit snippets, default of current file type or the specified type
 command! -nargs=? -complete=customlist,UltiSnipsFiletypeComplete UltiSnipsEdit
-    \ :call UltiSnipsEdit(<q-args>)
+    \ call UltiSnipsEdit(<q-args>)
 
 " Global Commands {{{
 function! UltiSnipsAddFiletypes(filetypes)
     exec g:_uspy "UltiSnips_Manager.add_buffer_filetypes('" . a:filetypes . ".all')"
     return ""
 endfunction
-command! -nargs=1 UltiSnipsAddFiletypes :call UltiSnipsAddFiletypes(<q-args>)
+command! -nargs=1 -complete=customlist,UltiSnipsFiletypeComplete UltiSnipsAddFiletypes 
+    \ call UltiSnipsAddFiletypes(<q-args>)
 
 "" }}}
 
@@ -256,7 +250,7 @@ exec g:_uspy "UltiSnips_Manager.backward_trigger = vim.eval('g:UltiSnipsJumpBack
 au CursorMovedI * call UltiSnips_CursorMoved()
 au CursorMoved * call UltiSnips_CursorMoved()
 au BufLeave * call UltiSnips_LeavingBuffer()
-
+autocmd FileType * call UltiSnips_FileTypeChanged()
 call UltiSnips_MapKeys()
 
 let did_UltiSnips_vim=1
