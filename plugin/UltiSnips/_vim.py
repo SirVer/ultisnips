@@ -113,11 +113,14 @@ def feedkeys(s, mode='n'):
     """Wrapper around vim's feedkeys function. Mainly for convenience."""
     command(as_unicode(r'call feedkeys("%s", "%s")') % (s, mode))
 
-def new_scratch_buffer(text):
+def new_scratch_buffer(text, ft):
     """Create a new scratch buffer with the text given"""
     command("botright new")
-    command("set ft=text")
-    command("set buftype=nofile")
+    command("resize 20")
+    command("set ft="+ft)
+    command("setlocal winfixheight buftype=nofile noswapfile bufhidden=wipe")
+    command("nnoremap <buffer> Q :<C-u>quit<cr>")
+    command("nnoremap <buffer> <Esc> :<C-u>quit<cr>")
 
     vim.buffers[-1][:] = text.splitlines()
 
