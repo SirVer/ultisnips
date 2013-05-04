@@ -23,15 +23,15 @@ def err_to_scratch_buffer(f):
             return f(self, *args, **kwds)
         except:
             s = \
-"""An error occured. This is either a bug in UltiSnips or a bug in a
-snippet definition. If you think this is a bug, please report it to
-https://bugs.launchpad.net/ultisnips/+filebug.
-
-Following is the full stack trace:
+"""# An error occured. This is either a bug in UltiSnips or a bug in a
+# snippet definition. If you think this is a bug, please report it to
+# https://bugs.launchpad.net/ultisnips/+filebug.
+#
+# Following is the full stack trace:
 """
             s += traceback.format_exc()
             self.leaving_buffer() # Vim sends no WinLeave msg here.
-            _vim.new_scratch_buffer(s)
+            _vim.new_scratch_buffer(s, 'python')
     return wrapper
 
 class _SnippetDictionary(object):
