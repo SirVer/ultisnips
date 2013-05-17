@@ -1369,6 +1369,7 @@ Contributors listed in chronological order:
    Danilo Bargen (dbrgn)
    Bernhard Vallant (lazerscience)
    Von Welch (von)
+   Nikola Petrov (nikolavp)
 
 Thank you for your support.
 
