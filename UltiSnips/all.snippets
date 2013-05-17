@@ -76,6 +76,11 @@ def make_box(twidth, bwidth=None):
     mlinee = " " + " "*(bwidth_inner - twidth - nspaces) + m
     eline = i + 2 * m + bwidth_inner * m + m + e
     return sline, mlines, mlinee, eline
+
+def foldmarker():
+    "Return a tuple of (open fold marker, close fold marker)"
+    return vim.eval("&foldmarker").split(",")
+
 endglobal
 
 snippet box "A nice box with the current comment symbol" b
@@ -97,6 +102,20 @@ snip.rv = box[0] + '\n' + box[1]
 box = make_box(len(t[1]), width)
 snip.rv = box[2] + '\n' + box[3]`
 $0
+endsnippet
+
+snippet fold "Insert a vim fold marker" !b
+`!p snip.rv = _get_comment_format()[0]` ${1:Fold description} `!p snip.rv = foldmarker()[0]`${2:1} `!p snip.rv = _get_comment_format()[2]`
+endsnippet
+
+snippet foldc "Insert a vim fold close marker" !b
+`!p snip.rv = _get_comment_format()[0]` ${2:1}`!p snip.rv = foldmarker()[1]` `!p snip.rv = _get_comment_format()[2]`
+endsnippet
+
+snippet foldp "Insert a vim fold marker pair" !b
+`!p snip.rv = _get_comment_format()[0]` ${1:Fold description} `!p snip.rv = foldmarker()[0]` `!p snip.rv = _get_comment_format()[2]`
+${2:${VISUAL:Content}}
+`!p snip.rv = _get_comment_format()[0]` `!p snip.rv = foldmarker()[1]` $1 `!p snip.rv = _get_comment_format()[2]`
 endsnippet
 
 ##########################
