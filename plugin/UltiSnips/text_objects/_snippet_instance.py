@@ -74,7 +74,6 @@ class SnippetInstance(EditableTextObject):
             raise RuntimeError("The snippets content did not converge: Check for Cyclic dependencies "
                 "or random strings in your snippet. You can use 'if not snip.c' to make sure "
                 "to only expand random output once.")
-
         vc.to_vim()
         self._del_child(vc)
 
@@ -118,7 +117,7 @@ class _VimCursor(NoneditableTextObject):
 
     def __init__(self, parent):
         NoneditableTextObject.__init__(
-            self, parent, _vim.buf.cursor, _vim.buf.cursor, tiebreaker = Position(0,0),
+            self, parent, _vim.buf.cursor, _vim.buf.cursor, tiebreaker = Position(-1,-1),
         )
 
     def to_vim(self):

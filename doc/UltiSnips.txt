@@ -12,6 +12,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    3.1 Commands                                 |UltiSnips-commands|
    3.2 Triggers                                 |UltiSnips-triggers|
       3.2.1 Using your own trigger functions    |UltiSnips-trigger-functions|
+      3.2.2 Path to Python Module               |UltiSnips-python-module-path|
    3.3 Snippet Search Path                      |UltiSnips-snippet-search-path|
    3.4 Warning About Select Mode Mappings       |UltiSnips-warning-smappings|
    3.5 Functions                                |UltiSnips-functions|
@@ -34,11 +35,12 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       4.7.1 Replacement String                  |UltiSnips-replacement-string|
       4.7.2 Demos                               |UltiSnips-demos|
    4.8 Clearing snippets                        |UltiSnips-clearing-snippets|
-5. Helping Out                                  |UltiSnips-helping|
-6. Contact                                      |UltiSnips-contact|
-7. Contributors                                 |UltiSnips-contributors|
-   7.1 Patches & Coding                         |UltiSnips-contricoding|
-   7.2 Snippets                                 |UltiSnips-contrisnippets|
+5. Support for other plugins                    |UltiSnips-other-plugins|
+6. Helping Out                                  |UltiSnips-helping|
+7. Contact                                      |UltiSnips-contact|
+8. Contributors                                 |UltiSnips-contributors|
+   8.1 Patches & Coding                         |UltiSnips-contricoding|
+   8.2 Snippets                                 |UltiSnips-contrisnippets|
 
 This plugin only works if 'compatible' is not set.
 {Vi does not have any of these features}
@@ -85,18 +87,18 @@ They print '1' if the python version is compiled in, '0' if not.
 
 Test if Vim is compiled with python version 2.x: >
     :echo has("python")
-The python version Vim is linked agains can be found with: >
+The python version Vim is linked against can be found with: >
     :py import sys; print(sys.version)
 
 Test if Vim is compiled with python version 3.x: >
     :echo has("python3")
-The python version Vim is linked agains can be found with: >
+The python version Vim is linked against can be found with: >
     :py3 import sys; print(sys.version)
 
-Note that Vim is maybe not using your system wide installed python version, so
+Note that Vim is maybe not using your system-wide installed python version, so
 make sure to check the Python version inside of Vim.
 
-UltiSnips attempts to autodetect which python version is compiled into Vim.
+UltiSnips attempts to auto-detect which python version is compiled into Vim.
 Unfortunately, in some versions of Vim this detection does not work.
 In that case you have to explicitly tell UltiSnips which version to use using
 the 'UltiSnipsUsePythonVersion' global variable.
@@ -127,7 +129,7 @@ If you are a pathogen user, you can track the official mirror of UltiSnips on
 github: >
 
    $ cd ~/.vim/
-   $ git submodule add https://github.com/sirver/ultisnips bundle/ultisnips
+   $ git submodule add git://github.com/SirVer/ultisnips.git bundle/ultisnips
 
 See the pathogen documentation for more details on how to update a bundle.
 
@@ -173,14 +175,14 @@ to runtimepath. See |UltiSnips-using-bzr| for an example.
 ------------
                                                              *:UltiSnipsEdit*
 The UltiSnipsEdit command opens the private snippet definition file for the
-current filetype for editing. If a definition file does not exist a new file
+current filetype for editing. If a definition file does not exist, a new file
 is opened with the appropriate name. Snippet definition files are standard
 text files and can be edited directly. UltiSnipsEdit makes it easier.
 
 There are several variables associated with the UltiSnipsEdit command.
 
                                                         *g:UltiSnipsEditSplit*
-g:UltiSnipsEditSplit        Defines how the edit window is open. Possible
+g:UltiSnipsEditSplit        Defines how the edit window is opened. Possible
                             values:
                             |normal|         Default. Opens in the current window.
                             |horizontal|     Splits the window horizontally.
@@ -196,7 +198,7 @@ g:UltiSnipsSnippetsDir
 
                                                        *:UltiSnipsAddFiletypes*
 The UltiSnipsAddFiletypes command allows for explicit merging of other snippet
-filetypes for the current buffer. For example if you edit a .rst file, but
+filetypes for the current buffer. For example, if you edit a .rst file but
 also want the Lua snippets to be available you can issue the command >
 
    :UltiSnipsAddFiletypes rst.lua
@@ -208,8 +210,8 @@ ftplugin/rails.vim >
 
    :UltiSnipsAddFiletypes rails.ruby
 
-I mention rails first, because I want to edit rails snippet when using
-UltiSnipsEdit and because rails snippet should overwrite equivalent ruby
+I mention rails first because I want to edit rails snippets when using
+UltiSnipsEdit and because rails snippets should overwrite equivalent ruby
 snippets. The priority will now be rails -> ruby -> all. If you have some
 special programming snippets that should have lower priority than your ruby
 snippets you can call >
@@ -240,20 +242,20 @@ vimrc file. >
 3.2.1 Using your own trigger functions           *UltiSnips-trigger-functions*
 --------------------------------------
 
-For advanced users there are four functions that you can map directly to a 
+For advanced users there are four functions that you can map directly to a
 key and that correspond to some of the triggers previously defined:
    g:UltiSnipsExpandTrigger        <--> UltiSnips_ExpandSnippet
    g:UltiSnipsJumpForwardTrigger   <--> UltiSnips_JumpForwards
    g:UltiSnipsJumpBackwardTrigger  <--> UltiSnips_JumpBackwards
 
 If you have g:UltiSnipsExpandTrigger and g:UltiSnipsJumpForwardTrigger set
-to the same value then when the function you are actually going to use is
+to the same value then the function you are actually going to use is
 UltiSnips_ExpandSnippetOrJump.
 
 Each time any of the functions UltiSnips_ExpandSnippet,
 UltiSnips_ExpandSnippet, UltiSnips_JumpBackwards or UltiSnips_JumpBackwards is
-called a global variable is set that contains the corresponding return value
-of the corresponding function.
+called a global variable is set that contains the return value of the
+corresponding function.
 
 The corresponding variables and functions are:
 UltiSnips_ExpandSnippet       --> g:ulti_expand_res (0: fail, 1: success)
@@ -262,10 +264,10 @@ UltiSnips_ExpandSnippetOrJump --> g:ulti_expand_or_jump_res (0: fail,
 UltiSnips_JumpForwards        --> g:ulti_jump_forwards_res (0: fail, 1: success)
 UltiSnips_JumpBackwards       --> g:ulti_jump_backwards_res (0: fail, 1: success)
 
-To see how these return values may come in handy suppose that you want to map
+To see how these return values may come in handy, suppose that you want to map
 a key to expand or jump, but if none of these actions is successful you want
-to call another function. Ultisnips already does this automaticall for supertab, but
-this allows you individual fine tuning of your tab key usage.
+to call another function. UltiSnips already does this automatically for
+supertab, but this allows you individual fine tuning of your Tab key usage.
 
 Usage is as follows: You define a function >
 
@@ -282,12 +284,34 @@ then you define your mapping as >
 and if the you can't expand or jump from the current location then the
 alternative function IMAP_Jumpfunc('', 0) is called.
 
+3.2.2 Path to Python module                   *UltiSnips-python-module-path*
+---------------------------
+
+For even more advanced usage, you can directly write python functions using
+UltiSnip's python modules.
+
+The path to UltiSnip's python implementation is stored in the
+g:UltiSnipsPythonPath variable which is set automatically on load.
+
+Here is a small example funtion that expands a snippet: >
+
+   function! s:Ulti_ExpandSnip()
+   Python << EOF
+   import sys, vim
+   new_path = vim.eval("expand('g:UltiSnipsPythonPath')")
+   sys.path.append(new_path)
+   from UltiSnips import UltiSnips_Manager
+   UltiSnips_Manager.expand()
+   EOF
+   return ""
+   endfunction
+
 3.3 Snippet Search Path                       *UltiSnips-snippet-search-path*
 -----------------------
 
 UltiSnips snippet definition files are stored in one or more directories.
-There are several variables used to indicate those directories and define how
-UltiSnips loads snippets.
+There are several variables used to indicate those directories and to define
+how UltiSnips loads snippets.
 
 Snippet definition files are stored in snippet directories. A snippet
 directory must be a subdirectory of a directory defined in the 'runtimepath'
@@ -382,7 +406,7 @@ An example use case might be this line from a reStructuredText plugin file:
    inoremap <silent> $$ $$<C-R>=UltiSnips_Anon(':latex:\`$1\`', '$$')<cr>
 
 This expands the snippet whenever two $ signs are typed.
-Note: The right hand side of the mapping starts with an immediate retype of
+Note: The right-hand side of the mapping starts with an immediate retype of
 the '$$' trigger and passes '$$' to the function as the trigger argument.
 This is required in order for UltiSnips to have access to the characters
 typed so it can determine if the trigger matches or not.
@@ -435,14 +459,17 @@ snippet filenames and their associated filetype.
 
 * The 'all' filetype is unique. It represents snippets available for use when
 editing any document regardless of the filetype. A date insertion snippet, for
-example, would be fit well in the all.snippets file.
+example, would fit well in the all.snippets file.
 
-UltiSnips supports Vim's dotted filetype syntax. To illustrate, the filetype
-for a cpp file could be set as follows ":set ft=cpp.c". If there exists
-c.snippets and cpp.c.snippets files in snippet directories snippets from both
-files are activated. CUDA files could have filetypes set to 'cuda.cpp.c'
-Snippets from all three, c.snippets, cpp.c.snippets and cuda.cpp.c.snippets
-are activated for that filetype.
+UltiSnips understands Vim's dotted filetype syntax. For example, if you define
+a dotted filetype for the CUDA C++ framework, e.g. ":set ft=cuda.cpp", then
+UltiSnips will search for and activate snippets for both the cuda and cpp
+filetypes.
+
+UltiSnips doesn't understand multiple filetypes in snippet filenames, so a
+snippet file named "cuda.cpp.snippets" won't match the "cuda" or "cpp"
+filetypes, which means it won't be activated for files with the dotted
+filetype "cuda.cpp" either.
 
 The extends directive provides an alternative way of combining snippet files.
 When the extends directive is included in a snippet file, it instructs
@@ -704,7 +731,7 @@ endsnippet
 
  4.4.3 Python:                                             *UltiSnips-python*
 
-By far python interpolation is the most powerful. The syntax is similar to Vim
+Python interpolation is by far the most powerful. The syntax is similar to Vim
 scripts except code is started with '!p'. Python scripts can be run using the
 python shebang '#!/usr/bin/python', but using the '!p' format comes with some
 predefined objects and variables, which can simplify and shorten code. For
@@ -760,7 +787,7 @@ The 'snip' object provides some properties as well: >
     snip.v:
          Data related to the ${VISUAL} placeholder. The property has two
          attributes:
-             snip.v.mode   ('v', 'V', '^V', see *visual-mode* )
+             snip.v.mode   ('v', 'V', '^V', see |visual-mode| )
              snip.v.text   The text that was selected.
 
     snip.fn:
@@ -822,7 +849,7 @@ be center<tab> ->
 
 \end{center}
 
-The second form is a variation of the first, both produce the same result,
+The second form is a variation of the first; both produce the same result,
 but it illustrates how regular expression grouping works. Using regular
 expressions in this manner has some drawbacks:
 1. If you use the <Tab> key for both expanding snippets and completion then
@@ -1090,7 +1117,7 @@ The replacement string can contain $no variables, e.g., $1, which reference
 matched groups in the regular expression. The $0 variable is special and
 yields the whole match. The replacement string can also contain special escape
 sequences: >
-   \u   - Uppercase next letter;
+   \u   - Uppercase next letter
    \l   - Lowercase next letter
    \U   - Uppercase everything till the next \E
    \L   - Lowercase everything till the next \E
@@ -1186,10 +1213,27 @@ snippets if you wish to replace them. Simply use the '!' option. (See
 |UltiSnips-adding-snippets| for the options).
 
 
-=============================================================================
-5. Helping Out                                            *UltiSnips-helping*
+==============================================================================
+5. Support for other plugins             *UltiSnips-other-plugins*
 
-UltiSnips needs the help of the Vim community to make it better. Please
+UltiSnips has built-in support for some common plugins and there are others
+that are aware of UltiSnips and use it to improve the user experience. This is
+an incomplete list - if you want to have your plugin listed here, just sent me
+a pull request.
+
+Supertab - UltiSnips has built-in support for Supertab. Just use a recent
+enough version of both plugins and <tab> will either expand a snippet or defer
+to Supertab for expansion.
+
+neocomplcache - Stanislav Golovanov (JazzCore) has made an integration plugin
+to use UltiSnips as engine inside of neocomplcache. You can find his work at
+https://github.com/JazzCore/neocomplcache-ultisnips.
+
+
+=============================================================================
+6. Helping Out                                            *UltiSnips-helping*
+
+UltiSnips needs the help of the Vim community to keep improving. Please
 consider joining this effort by providing new snippets, new features or bug
 reports.
 
@@ -1212,11 +1256,11 @@ https://bugs.launchpad.net/ultisnips
 
 If you like this plugin, please vote for it on its Vim script page >
     http://www.vim.org/scripts/script.php?script_id=2715
-It is life changing for me. Maybe it is for you too.
+It is life-changing for me. Maybe it is for you too.
 
 
 =============================================================================
-6. Contact                                                *UltiSnips-contact*
+7. Contact                                                *UltiSnips-contact*
 
 You can reach me at SirVer -AT- gmx -ADOT- de. You can also contact me through
 the UltiSnips launchpad project page at https://launchpad.net/ultisnips/. The
@@ -1227,13 +1271,13 @@ This project aims to be the one-for-all solution for Snippets for Vim. If you
 miss a feature or find a bug, please contact me or file a support ticket.
 
 =============================================================================
-7. Contributors                                      *UltiSnips-contributors*
+8. Contributors                                      *UltiSnips-contributors*
 
 The primary developer of UltiSnips is SirVer (Holger Rapp). The following
 individuals have contributed code and snippets to UltiSnips.
 
 
-7.1 Patches & Coding                                 *UltiSnips-contricoding*
+8.1 Patches & Coding                                 *UltiSnips-contricoding*
 --------------------
 
 Contributors listed in chronological order:
@@ -1259,15 +1303,23 @@ Contributors listed in chronological order:
    iiijjjii - Jim Karsten
    fgalassi - Federico Galassi
    lucapette
-   Psycojoker - Laurent Peuch 
+   Psycojoker - Laurent Peuch
    aschrab - Aaron Schrab
    stardiviner - NagatoPain
    skeept - Jorge Rodrigues
    buztard
    stephenmckinney - Steve McKinney
+   Pedro Algarvio - s0undt3ch
+   Eric Van Dewoestine - ervandew
+   Matt Patterson - fidothe
+   Mike Morearty - mmorearty
+   Stanislav Golovanov - JazzCore
+   David Briscoe - DavidBriscoe
+   Keith Welch - paralogiki
+   Zhao Cai - zhaocai
 
 
-7.2 Snippets                                       *UltiSnips-contrisnippets*
+8.2 Snippets                                       *UltiSnips-contrisnippets*
 ------------
 
 Contributors listed in chronological order:
@@ -1297,6 +1349,27 @@ Contributors listed in chronological order:
    Ferdinand Majerech (kiith-sa)
    Vivien Didelot
    Øystein Walle (osse)
+   Pedro Algarvio (s0undt3ch)
+   Steven Humphrey (shumphrey)
+   Björn Winckler (b4winckler)
+   David Brown (Nali4Freedom)
+   Harry Xu (harryxu)
+   Tom Cammann (takac)
+   Paolo Cretaro (melko)
+   Sergey Alexandrov (taketwo)
+   Jaromír Hradílek (jhradilek)
+   Vangelis Tsoumenis (kioopi)
+   Rudi Grinberg (rgrinberg)
+   javipolo
+   Matthew Strawbridge (pxc)
+   Josh Strater (jstrater)
+   jinzhu
+   Rene Vergara (ravl1084)
+   Johan Haals (JHaals)
+   Danilo Bargen (dbrgn)
+   Bernhard Vallant (lazerscience)
+   Von Welch (von)
+   Nikola Petrov (nikolavp)
 
 Thank you for your support.
 

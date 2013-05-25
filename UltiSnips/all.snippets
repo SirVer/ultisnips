@@ -67,16 +67,20 @@ def _get_comment_format():
     return commentformat
 
 
-def make_box(twidth, bwidth = None):
-   if bwidth is None:
-      bwidth = twidth + 2
-   b,m,e,i = _get_comment_format()
-   sline = b + m + bwidth*m + 2*m
-   nspaces = (bwidth - twidth)//2 
-   mlines = i + m + " " + " "*nspaces
-   mlinee = " " + " "*(bwidth-twidth-nspaces) + m
-   eline = i + 2*m + bwidth*m + m + e
-   return sline, mlines, mlinee, eline
+def make_box(twidth, bwidth=None):
+    b, m, e, i = _get_comment_format()
+    bwidth_inner = bwidth - 3 - max(len(b), len(i + e)) if bwidth else twidth + 2
+    sline = b + m + bwidth_inner * m + 2 * m
+    nspaces = (bwidth_inner - twidth) // 2
+    mlines = i + m + " " + " " * nspaces
+    mlinee = " " + " "*(bwidth_inner - twidth - nspaces) + m
+    eline = i + 2 * m + bwidth_inner * m + m + e
+    return sline, mlines, mlinee, eline
+
+def foldmarker():
+    "Return a tuple of (open fold marker, close fold marker)"
+    return vim.eval("&foldmarker").split(",")
+
 endglobal
 
 snippet box "A nice box with the current comment symbol" b
@@ -91,12 +95,27 @@ endsnippet
 
 snippet bbox "A nice box over the full width" b
 `!p
-box = make_box(len(t[1]), 71)
+width = int(vim.eval("&textwidth")) or 71
+box = make_box(len(t[1]), width)
 snip.rv = box[0] + '\n' + box[1]
 `${1:content}`!p
-box = make_box(len(t[1]), 71)
+box = make_box(len(t[1]), width)
 snip.rv = box[2] + '\n' + box[3]`
 $0
+endsnippet
+
+snippet fold "Insert a vim fold marker" !b
+`!p snip.rv = _get_comment_format()[0]` ${1:Fold description} `!p snip.rv = foldmarker()[0]`${2:1} `!p snip.rv = _get_comment_format()[2]`
+endsnippet
+
+snippet foldc "Insert a vim fold close marker" !b
+`!p snip.rv = _get_comment_format()[0]` ${2:1}`!p snip.rv = foldmarker()[1]` `!p snip.rv = _get_comment_format()[2]`
+endsnippet
+
+snippet foldp "Insert a vim fold marker pair" !b
+`!p snip.rv = _get_comment_format()[0]` ${1:Fold description} `!p snip.rv = foldmarker()[0]` `!p snip.rv = _get_comment_format()[2]`
+${2:${VISUAL:Content}}
+`!p snip.rv = _get_comment_format()[0]` `!p snip.rv = foldmarker()[1]` $1 `!p snip.rv = _get_comment_format()[2]`
 endsnippet
 
 ##########################

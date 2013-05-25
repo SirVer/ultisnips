@@ -125,7 +125,7 @@ args = get_args(t[4])
 write_docstring_args(args, snip)
 if args:
     snip.rv += '\n' + snip.mkline('', indent='')
-    snip += '{0} 2 '.format(tripple_quotes(snip))
+    snip += '{0}'.format(tripple_quotes(snip))
 
 write_init_body(args, t[2], snip)
 `
@@ -396,6 +396,31 @@ $1 = property(**$1())
 endsnippet
 
 
+####################
+# If / Else / Elif #
+####################
+snippet if "If" b
+if ${1:condition}:
+   ${2:pass}
+endsnippet
+
+snippet ife "If / Else" b
+if ${1:condition}:
+   ${2:pass}
+else:
+   ${3:pass}
+endsnippet
+
+snippet ifee "If / Elif / Else" b
+if ${1:condition}:
+   ${2:pass}
+elif ${3:condition}:
+   ${4:pass}
+else:
+   ${5:pass}
+endsnippet
+
+
 ##########################
 # Try / Except / Finally #
 ##########################
@@ -442,6 +467,10 @@ endsnippet
 
 snippet pdb "Set PDB breakpoint" b
 import pdb; pdb.set_trace()
+endsnippet
+
+snippet ipdb "Set IPDB breakpoint" b
+import ipdb; ipdb.set_trace()
 endsnippet
 
 snippet ae "Assert equal" b

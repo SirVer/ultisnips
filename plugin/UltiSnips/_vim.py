@@ -80,7 +80,7 @@ def text_to_vim(start, end, text):
 
     # Open any folds this might have created
     buf.cursor = start
-    vim.command("normal zv")
+    vim.command("normal! zv")
 
     return new_end
 
