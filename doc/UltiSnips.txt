@@ -18,6 +18,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    3.5 Functions                                |UltiSnips-functions|
       3.5.1 UltiSnips_AddSnippet                |UltiSnips_AddSnippet|
       3.5.2 UltiSnips_Anon                      |UltiSnips_Anon|
+      3.5.3 UltiSnips_SnippetsInCurrentScope    |UltiSnips_SnippetsInCurrentScope|
    3.6 Missing python support                   |UltiSnips-python-warning|
 4. Syntax                                       |UltiSnips-syntax|
    4.1 Adding Snippets                          |UltiSnips-adding-snippets|
@@ -410,6 +411,51 @@ Note: The right-hand side of the mapping starts with an immediate retype of
 the '$$' trigger and passes '$$' to the function as the trigger argument.
 This is required in order for UltiSnips to have access to the characters
 typed so it can determine if the trigger matches or not.
+
+ 3.5.3 UltiSnips_SnippetsInCurrentScope    *UltiSnips_SnippetsInCurrentScope*
+
+A third function is UltiSnips_SnippetsInCurrentScope which is the equivalent
+of snipmate GetSnipsInCurrentScope function.
+This function simply returns a vim dictionary with the snippets whose trigger
+matches the current word.
+This function does not add any new functionality to ultisnips directly but
+allows to use third party plugins to integrate the current available snippets.
+
+An example of such third party plugin is SnippetCompleteSnipMate which uses
+the function GetSnipsInCurrentScope to integrate the current available
+snippets with user defined abbreviations and provides these and a completion
+menu.
+This script is located in
+http://www.vim.org/scripts/script.php?script_id=4276.
+Note: If you check the above website it lists two dependencies: the
+SnippetComplete plugin and snipmate.
+You do need the SnippetComplete plugin but you obviously don't need snipmate,
+you just have to define the function GetSnipsInCurrentScope. Put the following
+in your vimrc:
+
+function! GetSnipsInCurrentScope()
+  return UltiSnips_SnippetsInCurrentScope()
+endfunction
+
+
+As a second example on how to use this function consider the following
+function and mapping definition:
+
+function! ExpandPossibleShorterSnippet()
+  if len(UltiSnips_SnippetsInCurrentScope()) == 1 "only one candidate...
+    let curr_key = keys(UltiSnips_SnippetsInCurrentScope())[0]
+    normal diw
+    exe "normal a" . curr_key
+    exe "normal a "
+    return 1
+  endif
+  return 0
+endfunction
+inoremap <silent> <C-L> <C-R>=(ExpandPossibleShorterSnippet() == 0? '': UltiSnips_ExpandSnippet())<CR>
+
+If the trigger for your snippet is lorem, you type lor, and you have no other
+snippets whose trigger matches lor then hitting <C-L> will expand to whatever
+lorem expands to.
 
 
 3.6 Warning about missing python support           *UltiSnips-python-warning*

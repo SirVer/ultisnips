@@ -145,6 +145,12 @@ function! UltiSnips_ListSnippets()
     return ""
 endfunction
 
+function! UltiSnips_SnippetsInCurrentScope()
+    let g:current_ulti_dict = {}
+    exec g:_uspy "UltiSnips_Manager.list_snippets_dict()"
+    return g:current_ulti_dict
+endfunction
+
 function! UltiSnips_SaveLastVisualSelection()
     exec g:_uspy "UltiSnips_Manager.save_last_visual_selection()"
     return ""
