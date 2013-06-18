@@ -72,14 +72,14 @@ group { '${1:groupname}':
 endsnippet
 
 snippet user "user resource type" b
-group { '${1:username}':
+user { '${1:username}':
   ensure     => ${2:present},
   uid        => ${3:uid},
   gid        => ${4:gid},
   comment    => ${5:gecos},
   home       => ${6:homedirectory},
   managehome => false,
-  require    => Group['${7:group'],
+  require    => Group['${7:group'}],
 endsnippet
 
 snippet exec "Exec resource type" b
