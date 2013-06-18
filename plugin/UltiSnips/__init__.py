@@ -416,9 +416,10 @@ class Snippet(object):
             v.append(line_ind + line[tabs:])
         v = '\n'.join(v)
 
-        si = SnippetInstance(self, parent, indent, v, start, end, visual_content,
-                last_re = self._last_re, globals = self._globals)
-
+        si = SnippetInstance(
+            self, parent, indent, v, start, end, visual_content,
+            last_re=self._last_re, globals=self._globals
+        )
         return si
 
 class VisualContentPreserver(object):
@@ -516,6 +517,7 @@ class SnippetManager(object):
         self._vstate = VimState()
         self._test_error = test_error
         self._snippets = {}
+        self._shared_globals = {}
         self._filetypes = defaultdict(lambda: ['all'])
         self._visual_content = VisualContentPreserver()
 
@@ -619,8 +621,14 @@ class SnippetManager(object):
 
     @err_to_scratch_buffer
     def add_snippet(self, trigger, value, descr, options, ft = "all", globals = None, fn=None):
+        if globals not in (None, {}) and '!p' in globals:
+            for _global in globals['!p']:
+                signature = hashlib.sha1(_global).hexdigest()
+                if signature not in self._shared_globals:
+                    self._shared_globals[signature] = _global
+
         l = self.snippet_dict(ft).add_snippet(
-            Snippet(trigger, value, descr, options, globals or {}), fn
+            Snippet(trigger, value, descr, options, self._shared_globals), fn
         )
 
     @err_to_scratch_buffer
