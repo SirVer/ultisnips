@@ -331,6 +331,10 @@ If you do not want to use the snippets that come with UltiSnips, define the
 variable accordingly. >
    let g:UltiSnipsSnippetDirectories=["mycoolsnippets"]
 
+You can also redefine the search path on a buffer by buffer basis by setting
+the variable b:UltiSnipsSnippetDirectories.  This variable takes precedence
+over the global variable.
+
 UltiSnips searches in 'runtimepath' for snippet directories but traverses
 'runtimepath' in reverse order (last item first). If you would like to have
 UltiSnips traverse 'runtimepath' in the standard order, add this to your vimrc
@@ -1363,6 +1367,7 @@ Contributors listed in chronological order:
    David Briscoe - DavidBriscoe
    Keith Welch - paralogiki
    Zhao Cai - zhaocai
+   John Szakmeister - jszakmeister
 
 
 8.2 Snippets                                       *UltiSnips-contrisnippets*

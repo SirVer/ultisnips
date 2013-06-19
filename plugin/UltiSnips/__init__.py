@@ -937,7 +937,10 @@ class SnippetManager(object):
         the filetype.
         """
 
-        snippet_dirs = _vim.eval("g:UltiSnipsSnippetDirectories")
+        if _vim.eval("exists('b:UltiSnipsSnippetDirectories')") == "1":
+            snippet_dirs = _vim.eval("b:UltiSnipsSnippetDirectories")
+        else:
+            snippet_dirs = _vim.eval("g:UltiSnipsSnippetDirectories")
         base_snippets = os.path.realpath(os.path.join(__file__, "../../../UltiSnips"))
         ret = []
 
