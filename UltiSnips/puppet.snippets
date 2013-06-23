@@ -42,14 +42,14 @@ endglobal
 #                                                                             #
 ###############################################################################
 
-snippet define "Definition" b
-define ${1:`!p snip.rv = get_module_namespace_and_basename()`} {
+snippet class "Class declaration" b
+class ${1:`!p snip.rv = get_module_namespace_and_basename()`} {
   ${0:# body}
 }
 endsnippet
 
-snippet class "Class declaration" b
-class ${1:`!p snip.rv = get_module_namespace_and_basename()`} {
+snippet define "Definition" b
+define ${1:`!p snip.rv = get_module_namespace_and_basename()`} {
   ${0:# body}
 }
 endsnippet
