@@ -1,0 +1,10 @@
+snippet ifndef
+ifndef ${1}
+  $1 := ${2}
+endif
+endsnippet
+
+snippet phony
+.PHONY : ${1}
+$1: ${2}
+endsnippet

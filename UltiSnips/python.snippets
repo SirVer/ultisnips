@@ -508,4 +508,170 @@ class Test${1:Class}(${2:unittest.TestCase}):
 		${7:pass}
 endsnippet
 
+
+# Django
+
+# Imports
+# TODO: check is exists, write to top 
+
+snippet impmodel
+from django.db import models
+endsnippet
+
+snippet imp_
+from django.utils.translation import ugettext_lazy as _
+endsnippet
+
+snippet impadmin
+from django.contrib import admin
+endsnippet
+
+
+
+# Model Fields
+# todo: replace '_' by ' ' in verbose_name
+
+snippet charf
+${1:name} = models.CharField(_('$1'), max_length=${2}${3:, blank=True, null=True})
+endsnippet
+
+snippet intf
+${1} = models.IntegerField(_('$1'), max_length=${2}${3:, blank=True, null=True})
+endsnippet
+
+snippet textf
+${1:description} = models.TextField(_('$1')${2:, blank=True})
+endsnippet
+
+snippet boolf
+${1} = models.BooleanField(_('$1')${2:, default=True})
+endsnippet
+
+snippet imgf
+${1:image} = models.ImageField(_('$1'), upload_to=${2}${3:, height_field=height, width_field=width})
+endsnippet
+
+snippet filef
+${1:file} = models.FileField(_('$1'), upload_to=${2})
+endsnippet
+
+snippet filepathf
+${1:filepath} = models.FilePathField(_('$1'), path=${2}${3:, max_length=100}${4:, match="*.ext"}${5:, recursive=True}${6:, blank=True, })
+endsnippet
+
+snippet emailf
+${1:email} = models.EmailField(_('$1')${2:, blank=True, null=True})
+endsnippet
+
+snippet datef
+${1:date} = models.DateField(_('$1')${2:, auto_now_add=True, auto_now=True}${3:, blank=True, null=True})
+endsnippet
+
+snippet datetimef
+${1:datetime} = models.DateTimeField(_('$1')${2:, auto_now_add=True, auto_now=True}${3:, blank=True, null=True})
+endsnippet
+
+snippet timef
+${1:time} = models.TimeField(_('$1')${2:, auto_now_add=True, auto_now=True}${3:, blank=True, null=True})
+endsnippet
+
+snippet urlf
+${1:url} = models.URLField(_('$1')${2:, verify_exists=False}${3:, blank=True, null=True})
+endsnippet
+
+snippet autof
+${1} = models.AutoField(${2})
+endsnippet
+
+# Relational Fields
+snippet fk
+${1} = models.ForeignKey(${2}, verbose_name='$1s'${3:, blank=True, null=True})
+endsnippet
+
+snippet m2m
+${1} = models.ManyToManyField(${2}, verbose_name='$1s')
+endsnippet
+
+snippet o2o
+${1} = models.OneToOneField(${2}, verbose_name='$1s'${3:, blank=True, null=True})
+endsnippet
+
+
+
+#snippet comma
+#	#${1:FIELDNAME} = models.CommaSeparatedIntegerField(max_length=${2}${3:, blank=True})
+#snippet decimal
+#	${1:FIELDNAME} = models.DecimalField(max_digits=${2}, decimal_places=${3})
+#snippet float
+#	${1:FIELDNAME} = models.FloatField(${2})
+#snippet image
+#	${1:FIELDNAME} = models.ImageField(upload_to=${2:path/for/upload}${3:, height_field=height, width_field=width}${4:, max_length=100})
+#snippet ip
+#	${1:FIELDNAME} = models.IPAddressField(${2})
+#snippet nullbool
+#	${1:FIELDNAME} = models.NullBooleanField(${2})
+#snippet posint
+#	${1:FIELDNAME} = models.PositiveIntegerField(${2})
+#snippet possmallint
+#	${1:FIELDNAME} = models.PositiveSmallIntegerField(${2})
+#snippet slug
+#	${1:FIELDNAME} = models.SlugField(max_length=${2:50}${3:, blank=True})
+#snippet smallint
+#	${1:FIELDNAME} = models.SmallIntegerField(${2})
+#snippet xml
+#	${1:FIELDNAME} = models.XMLField(schema_path=${2:None}${3:, blank=True})
+
+
+# Classes
+
+snippet model
+class ${1}(models.Model):
+    ${2}
+endsnippet
+
+snippet modelplk
+@models.permalink
+def get_absolute_url(self):
+    return ('${1:view_or_url_name}' ${2})
+endsnippet
+
+snippet form
+class ${1}(forms.Form):
+    ${2} 
+endsnippet
+
+snippet meta
+class Meta:
+    ${1}
+endsnippet
+
+# Admin
+
+snippet admin
+class ${1:ModelName}Admin(admin.ModelAdmin):
+    ${2}
+
+admin.site.register($1, $1Admin)
+endsnippet
+
+snippet tinline
+class ${1:ModelName}Inline(admin.TabularInline):
+    model = $1
+endsnippet
+
+snippet sinline
+class ${1:ModelName}Inline(admin.StackedInline):
+    model = $1
+endsnippet
+
+# Templates
+
+snippet rtr
+return render_to_response(
+    '${1:template_name}.html',
+    {${2}},
+    context_instance=RequestContext(request)
+)
+endsnippet
+
 # vim:ft=snippets:

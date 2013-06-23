@@ -35,9 +35,22 @@ ${1:#pragma mark -
 $0
 endsnippet
 
+snippet m "main() (main)"
+int main() {
+	${0}
+}
+endsnippet
+
 snippet main "main() (main)"
 int main(int argc, char *argv[])
 {
+	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
+	return 0;
+}
+endsnippet
+
+snippet mainf "main() (main)"
+int main(int argc, char const *argv[]) {
 	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 	return 0;
 }
@@ -131,6 +144,17 @@ struct ${1:`!p snip.rv = (snip.basename or "name") + "_t"`}
 {
 	${0:/* data */}
 };
+
+snippet struct "struct"
+typedef struct {
+	${0}
+} ${1};
+endsnippet
+
+snippet union "union"
+typedef union {
+	${0}
+} ${1};
 endsnippet
 
 snippet fun "function" b
