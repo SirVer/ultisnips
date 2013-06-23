@@ -1,5 +1,9 @@
 # Snippets for Puppet
 
+#########################################################################
+#  Python helper code                                                   #
+#########################################################################
+
 global !p
 import vim
 import os.path
@@ -32,12 +36,10 @@ def get_module_namespace_and_basename():
     return "name"
 endglobal
 
-snippet define "Definition" b
-define ${1:`!p snip.rv = get_module_namespace_and_basename()`} {
-  ${0:# body}
-}
-
-endsnippet
+###############################################################################
+#  Puppet Language Constructs                                                 #
+#    See http://docs.puppetlabs.com/puppet/latest/reference/lang_summary.html #
+###############################################################################
 
 snippet class "Class declaration" b
 class ${1:`!p snip.rv = get_module_namespace_and_basename()`} {
@@ -45,17 +47,29 @@ class ${1:`!p snip.rv = get_module_namespace_and_basename()`} {
 }
 endsnippet
 
-snippet File "Defaults for file" b
-File {
-  owner => ${1:username},
-  group => ${2:groupname},
+snippet define "Definition" b
+define ${1:`!p snip.rv = get_module_namespace_and_basename()`} {
+  ${0:# body}
 }
 endsnippet
 
-# Resource types
-snippet package "Package resource type" b
-package { '${1:name}':
-  ensure => ${2:installed},
+#################################################################
+#  Puppet Types                                                 #
+#    See http://docs.puppetlabs.com/references/latest/type.html #
+#################################################################
+
+snippet cron "Cron resource type" b
+cron { '${1:name}':
+  user    => ${2:user},
+  command => '${3:command}',
+  minute  => ${3:minute},
+  hour    => ${4:hour},
+}
+endsnippet
+
+snippet exec "Exec resource type" b
+exec { '${1:command}':
+  refreshonly => true,
 }
 endsnippet
 
@@ -65,10 +79,32 @@ file { '${1:name}':
   mode   => ${3:mode},
 endsnippet
 
+snippet File "Defaults for file" b
+File {
+  owner => ${1:username},
+  group => ${2:groupname},
+}
+endsnippet
+
 snippet group "Group resource type" b
 group { '${1:groupname}':
   ensure => ${3:present},
   gid    => ${2:gid},
+endsnippet
+
+snippet mount "Mount resource type" b
+mount { '${1:path}':
+  device  => '${2:/dev}',
+  fstype  => '${3:filesystem}',
+  ensure  => mounted,
+  options => 'rw,errors=remount-ro',
+}
+endsnippet
+
+snippet package "Package resource type" b
+package { '${1:name}':
+  ensure => ${2:installed},
+}
 endsnippet
 
 snippet user "user resource type" b
@@ -82,30 +118,6 @@ user { '${1:username}':
   require    => Group['${7:group'}],
 endsnippet
 
-snippet exec "Exec resource type" b
-exec { '${1:command}':
-  refreshonly => true,
-}
-endsnippet
-
-snippet cron "Cron resource type" b
-cron { '${1:name}':
-  user    => ${2:user},
-  command => '${3:command}',
-  minute  => ${3:minute},
-  hour    => ${4:hour},
-}
-endsnippet
-
-snippet mount "Mount resource type" b
-mount { '${1:path}':
-  device  => '${2:/dev}',
-  fstype  => '${3:filesystem}',
-  ensure  => mounted,
-  options => 'rw,errors=remount-ro',
-}
-endsnippet
-
 snippet service "Service resource type" b
 service { '${1:name}':
   hasstatus => true,
@@ -117,7 +129,6 @@ endsnippet
 ########################################################################
 #  Puppet Functions                                                    #
 #    See http://docs.puppetlabs.com/references/latest/function.html    #
-#                                                                      #
 ########################################################################
 
 snippet alert "Alert Function" !b
