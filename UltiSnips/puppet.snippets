@@ -28,6 +28,9 @@ def get_module_namespace_and_basename():
             parts = os.path.split(parts[0])
             continue
         if parts[1] == 'manifests':
+          if not namespace:
+            return os.path.split(parts[0])[1]
+          else:
             return os.path.split(parts[0])[1] + '::' + namespace.rstrip(':')
         else:
             namespace = parts[1] + '::' + namespace
