@@ -1875,7 +1875,7 @@ class RecTabStops_MirroredZeroTS_ECR(_VimTest):
     keys = "m" + EX + "m1" + EX + "one" + JF + "two" + \
             JF + "three" + JF + "four" + JF + "end"
     wanted = "[ [ one three three two ] four ]end"
-class RecTabStops_ComplexBug1191617(_PS_Base):
+class RecTabStops_ChildTriggerContainsParentTextObjects(_PS_Base):
     # https://bugs.launchpad.net/ultisnips/+bug/1191617
     snippets_test_file = ("all", "test_file", r"""
 global !p
@@ -1888,24 +1888,14 @@ def complete(t, opts):
 def autocomplete_options(t, string, attr=None):
    return complete(t[1], [opt for opt in attr if opt not in string])
 endglobal
-snippet ff "form_for" w
-form_for ${1:record}${0:, options = \{\}} do |${2:f}|
-endsnippet
-snippet /form_for(?!.*\{.*$)(.*,)/ "form_for options" rw!
-`!p
-auto = autocomplete_options(t, match.group(1), attr=["url: ", "namespace: ", "html: {"])
-snip.rv = "form_for" + match.group(1) + " "`$1`!p if (snip.c != auto) : snip.rv=auto`
-endsnippet
 snippet /form_for(.*){([^|]*)/ "form_for html options" rw!
 `!p
 auto = autocomplete_options(t, match.group(2), attr=["id: ", "class: ", "title:  "])
 snip.rv = "form_for" + match.group(1) + "{"`$1`!p if (snip.c != auto) : snip.rv=auto`
 endsnippet
 """)
-    keys = "ff" + EX + "user" + JF + "u" + JF + "," + EX + "n" + JF + \
-            "some_namespace," + EX + "h" + JF + "i" + EX + "i" + EX
-    wanted = "x a bob b y\nx a jon b y"
-
+    keys = "form_for user, namespace: some_namespace, html: {i" + EX + "i" + EX
+    wanted = "form_for user, namespace: some_namespace, html: {(id: |class: |title:  )d: "
 # End: Recursive (Nested) Snippets  #}}}
 # List Snippets  {{{#
 class _ListAllSnippets(_VimTest):
