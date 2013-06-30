@@ -14,21 +14,19 @@ def get_module_namespace_and_basename():
     * /home/nikolavp/puppet/modules/collectd/manifests/init.pp -> collectd
     * /home/nikolavp/puppet/modules/collectd/manfistes/mysql.pp -> collectd::mysql
     """
+    first_time = True
     current_file_path_without_ext = vim.eval('expand("%:p:r")') or ""
     if not current_file_path_without_ext:
         return "name"
     parts = os.path.split(current_file_path_without_ext)
     namespace = ''
     while parts[0] and parts[0] != '/':
-        # Skip the init.pp files because they don't create a deeper namespace
-        # and are special. Note this might break things like
-        # modules/collectd/init/test.pp. But I am not even sure if puppet will
-        # work for those.
-        if parts[1] == 'init':
+        if parts[1] == 'init' and first_time and not namespace:
+            first_time = False
             parts = os.path.split(parts[0])
             continue
         if parts[1] == 'manifests':
-            return os.path.split(parts[0])[1] + '::' + namespace.rstrip(':')
+            return os.path.split(parts[0])[1] + ('::' + namespace).rstrip(':')
         else:
             namespace = parts[1] + '::' + namespace
         parts = os.path.split(parts[0])
