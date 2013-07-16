@@ -572,6 +572,10 @@ class SnippetManager(object):
         before, after = _vim.buf.current_line_splitted
         snippets = self._snips(before, True)
 
+        if len(snippets) == 0:
+            self._handle_failure(self.backward_trigger)
+            return True
+
         # Sort snippets alphabetically
         snippets.sort(key=lambda x: x.trigger)
 
@@ -792,6 +796,8 @@ class SnippetManager(object):
         Mainly make sure that we play well with SuperTab
         """
         if trigger.lower() == "<tab>":
+            feedkey = "\\" + trigger
+        elif trigger.lower() == "<s-tab>":
             feedkey = "\\" + trigger
         else:
             feedkey = None

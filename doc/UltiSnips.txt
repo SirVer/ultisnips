@@ -1368,6 +1368,7 @@ Contributors listed in chronological order:
    Keith Welch - paralogiki
    Zhao Cai - zhaocai
    John Szakmeister - jszakmeister
+   Jonas Diemer - diemer
 
 
 8.2 Snippets                                       *UltiSnips-contrisnippets*
