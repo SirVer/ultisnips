@@ -113,10 +113,11 @@ endglobal
 
 snippet class "class with docstrings" b
 class ${1:MyClass}(${2:object}):
-	`!p snip.rv = tripple_quotes(snip)`${3:Docstring for $1 }`!p snip.rv = tripple_quotes(snip)`
+
+	`!p snip.rv = tripple_quotes(snip)`${3:Docstring for $1. }`!p snip.rv = tripple_quotes(snip)`
 
 	def __init__(self$4):
-		`!p snip.rv = tripple_quotes(snip)`${5:@todo: to be defined1}`!p
+		`!p snip.rv = tripple_quotes(snip)`${5:@todo: to be defined1.}`!p
 snip.rv = ""
 snip >> 2
 
@@ -135,7 +136,8 @@ endsnippet
 
 snippet slotclass "class with slots and docstrings" b
 class ${1:MyClass}(${2:object}):
-	`!p snip.rv = tripple_quotes(snip)`${3:Docstring for $1 }`!p snip.rv = tripple_quotes(snip)`
+
+	`!p snip.rv = tripple_quotes(snip)`${3:Docstring for $1. }`!p snip.rv = tripple_quotes(snip)`
 `!p
 snip >> 1
 args = get_args(t[4])
@@ -143,7 +145,7 @@ write_slots_args(args, snip)
 `
 
 	def __init__(self$4):
-		`!p snip.rv = tripple_quotes(snip)`${5:@todo: to be defined}`!p
+		`!p snip.rv = tripple_quotes(snip)`${5:@todo: to be defined.}`!p
 snip.rv = ""
 snip >> 2
 
@@ -345,7 +347,7 @@ snippet def "function with docstrings" b
 def ${1:function}(`!p
 if snip.indent:
    snip.rv = 'self' + (", " if len(t[2]) else "")`${2:arg1}):
-	`!p snip.rv = tripple_quotes(snip)`${4:@todo: Docstring for $1}`!p
+	`!p snip.rv = tripple_quotes(snip)`${4:@todo: Docstring for $1.}`!p
 snip.rv = ""
 snip >> 1
 
@@ -382,18 +384,25 @@ endsnippet
 
 snippet rwprop "Read write property" b
 def ${1:name}():
-  `!p snip.rv = tripple_quotes(snip) if t[2] else ''
-`${2:@todo: Docstring for $1}`!p
+	`!p snip.rv = tripple_quotes(snip) if t[2] else ''
+`${2:@todo: Docstring for $1.}`!p
 if t[2]:
-    snip.rv = tripple_quotes(snip)
     snip >> 1
-    snip += ""
+
+	style = get_style(snip)
+	snip.rv += '\n' + snip.mkline('', indent='')
+	snip += format_return(style)
+	snip.rv += '\n' + snip.mkline('', indent='')
+    snip += tripple_quotes(snip)
 else:
-    snip.rv = ""`def fget(self):
+    snip.rv = ""`
+	def fget(self):
 		return self._$1$0
+
 	def fset(self, value):
 		self._$1 = value
 	return locals()
+
 $1 = property(**$1(), doc=$1.__doc__)
 endsnippet
 
@@ -502,7 +511,8 @@ endsnippet
 
 snippet testcase "pyunit testcase" b
 class Test${1:Class}(${2:unittest.TestCase}):
-	`!p snip.rv = tripple_quotes(snip)`${3:Test case docstring}`!p snip.rv = tripple_quotes(snip)`
+
+	`!p snip.rv = tripple_quotes(snip)`${3:Test case docstring.}`!p snip.rv = tripple_quotes(snip)`
 
 	def setUp(self):
 		${4:pass}
