@@ -754,12 +754,13 @@ class SnippetManager(object):
 
     def _check_if_still_inside_snippet(self):
         # Did we leave the snippet with this movement?
-        if self._cs and (
-            not self._cs.start <= _vim.buf.cursor <= self._cs.end
-        ):
-            self._current_snippet_is_done()
-            self._reinit()
-            self._check_if_still_inside_snippet()
+        if self._cs:
+            startExtra = Position(self._cs.start.line, self._cs.start.col-1)
+
+            if not startExtra <= _vim.buf.cursor <= self._cs.end:
+                self._current_snippet_is_done()
+                self._reinit()
+                self._check_if_still_inside_snippet()
 
     def _current_snippet_is_done(self):
         self._csnippets.pop()
