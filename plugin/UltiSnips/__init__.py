@@ -565,7 +565,7 @@ class SnippetManager(object):
                 description = description[1:-1]
 
             _vim.command(as_unicode("let g:current_ulti_dict['{key}'] = '{val}'").format(
-              key=key.replace("'", "''"), val=description))
+              key=key.replace("'", "''"), val=description.replace("'", "''")))
 
     @err_to_scratch_buffer
     def list_snippets(self):
