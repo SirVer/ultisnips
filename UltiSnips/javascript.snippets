@@ -115,4 +115,14 @@ snippet ctrace "console.trace"
 console.trace();
 endsnippet
 
+# RequireJS snippets
+
+snippet def "Boilerplate for calling define" !w
+define(${1:optional_name, }[${2:'jquery'}], ${3:callback});
+endsnippet
+
+snippet req "Boilerplate for calling require" !w
+require([${1:'dependencies'}], ${2:callback});
+endsnippet
+
 # vim:ft=snippets:
