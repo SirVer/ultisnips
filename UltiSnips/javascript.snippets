@@ -115,13 +115,13 @@ snippet ctrace "console.trace"
 console.trace();
 endsnippet
 
-# RequireJS snippets
+# AMD (Asynchronous Module Definition) snippets
 
-snippet def "Boilerplate for calling define" !w
+snippet def "define an AMD module"
 define(${1:optional_name, }[${2:'jquery'}], ${3:callback});
 endsnippet
 
-snippet req "Boilerplate for calling require" !w
+snippet req "require an AMD module"
 require([${1:'dependencies'}], ${2:callback});
 endsnippet
 
