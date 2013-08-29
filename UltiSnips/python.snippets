@@ -33,6 +33,12 @@ endsnippet
 snippet p "print function"
 print(${1})$0
 endsnippet
+
+snippet open "open a file from disk" b
+with open(${1:filename}, '${2:r}') as ${3:file}:
+	${4:pass}
+endsnippet
+
 # The smart def and smart class snippets use a global option called
 # "g:ultisnips_python_style" which, if set to "doxygen" will use doxygen
 # style comments in docstrings.
