@@ -19,6 +19,15 @@ endsnippet
 # COMMON #
 ##########
 
+snippet py "initial python setup" b
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+
+from __future__ import print_function, division, absolute_import, unicode_literals
+import sys
+
+$0
+endsnippet
 # The smart def and smart class snippets use a global option called
 # "g:ultisnips_python_style" which, if set to "doxygen" will use doxygen
 # style comments in docstrings.
