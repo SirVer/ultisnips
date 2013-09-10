@@ -381,7 +381,7 @@ complete definition as listed by the |:smap| command. >
 3.5 Functions                                           *UltiSnips-functions*
 -------------
 
-UltiSnips provides two functions for extending core functionality.
+UltiSnips provides some functions for extending core functionality.
 
 
  3.5.1 UltiSnips_AddSnippet                            *UltiSnips_AddSnippet*
