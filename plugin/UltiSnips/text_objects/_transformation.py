@@ -2,8 +2,11 @@
 # encoding: utf-8
 
 import re
-
+import sys
 from UltiSnips.text_objects._mirror import Mirror
+
+# flag used to display only one time the lack of unidecode
+UNIDECODE_ALERT_RAISED = False
 
 class _CleverReplace(object):
     """
@@ -121,12 +124,15 @@ class TextObjectTransformation(object):
         self._replace = _CleverReplace(token.replace)
 
     def _transform(self, text):
+        global UNIDECODE_ALERT_RAISED
         if self._convert_to_ascii:
             try:
                 import unidecode
                 text = unidecode.unidecode(text)
             except Exception, e:
-                pass
+                if UNIDECODE_ALERT_RAISED == False:
+                    UNIDECODE_ALERT_RAISED = True
+                    sys.stderr.write("Please install unidecode python package in order to be able to make ascii conversions.\n")
         if self._find is None:
             return text
         return self._find.subn(self._replace.replace, text, self._match_this_many)[0]
