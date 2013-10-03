@@ -10,10 +10,12 @@ def testShell(scope, shell):
 # first since they indicate an override by the user.
 def getShell():
     for scope in ["g", "b"]:
-        for shell in ["bash", "sh", "kornshell"]:
+        for shell in ["bash", "posix", "sh", "kornshell"]:
             if testShell(scope, shell) == "1":
                 if shell == "kornshell":
                     return "ksh"
+                if shell == "posix":
+                    return "sh"
                 return shell
     return "sh"
 endglobal
