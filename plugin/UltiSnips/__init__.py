@@ -880,6 +880,8 @@ class SnippetManager(object):
         """ Expands the given snippet, and handles everything
         that needs to be done with it.
         """
+        if _vim.eval("g:UltiSnipsClearJumpTrigger") == "1":
+            _vim.command("call UltiSnips_MapInnerKeys()")
         # Adjust before, maybe the trigger is not the complete word
         text_before = before
         if snippet.matched:

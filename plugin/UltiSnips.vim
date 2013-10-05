@@ -136,18 +136,12 @@ function! CompensateForPUM()
     endif
 endfunction
 function! UltiSnips_ExpandSnippet()
-    if g:UltiSnipsClearJumpTrigger == 1
-        call UltiSnips_MapInnerKeys()
-    endif
     exec g:_uspy "UltiSnips_Manager.expand()"
     return ""
 endfunction
 
 function! UltiSnips_ExpandSnippetOrJump()
     call CompensateForPUM()
-    if g:UltiSnipsClearJumpTrigger == 1
-        call UltiSnips_MapInnerKeys()
-    endif
     exec g:_uspy "UltiSnips_Manager.expand_or_jump()"
     return ""
 endfunction
