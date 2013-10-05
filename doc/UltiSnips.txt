@@ -240,6 +240,20 @@ vimrc file. >
    let g:UltiSnipsJumpForwardTrigger="<tab>"
    let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 
+The mapping of g:UltiSnipsJumpForwardTrigger and g:UltiSnipsJumpBackwardTrigger 
+can be controlled with this option:
+
+                                                *g:UltiSnipsClearJumpTrigger*
+g:UltiSnipsClearJumpTrigger     By default both triggers are global mappings
+                                that are always present. By setting this
+                                variable to 1 the plugin will define <buffer>
+                                mappings only during snippet expansions.
+
+Note that the default value for g:UltiSnipsJumpBackwardTrigger interferes with
+the built-in complete function: |i_CTRL-X_CTRL-K|. A workaround is to add the
+following to your vimrc file. >
+   inoremap <c-x><c-k> <c-x><c-k>
+
 3.2.1 Using your own trigger functions           *UltiSnips-trigger-functions*
 --------------------------------------
 
