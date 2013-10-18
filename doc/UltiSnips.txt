@@ -588,10 +588,13 @@ a word without spaces.
 
 The options currently supported are: >
    !   Overwrite - A snippet with this option will overwrite all previously
-       defined snippets with an identical tab trigger. The default behavior
-       is to display list of snippets matching the tab trigger and let the
-       user pick the one they want. Use this option to overwrite bundled
-       snippets with user defined ones.
+       defined snippets with an identical tab trigger. What previously means
+       in this context depends on the order UltiSnips traverses the
+       'runtimepath'. (Compare g:UltiSnipsDontReverseSearchPath). This might
+       depend on your installation type (Pathogen, Bzr, Vundle). The default
+       behavior is to display list of snippets matching the tab trigger and
+       let the user pick the one they want. Use this option to overwrite
+       bundled snippets with user defined ones.
 
    b   Beginning of line - A snippet with this option is expanded only if the
        tab trigger is the first word on the line. In other words, if only
