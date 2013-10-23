@@ -105,13 +105,14 @@ class _CleverReplace(object):
 
 class TextObjectTransformation(object):
     def __init__(self, token):
+        self._convert_to_ascii = False
+
         self._find = None
         if token.search is None:
             return
 
         flags = 0
         self._match_this_many = 1
-        self._convert_to_ascii = False
         if token.options:
             if "g" in token.options:
                 self._match_this_many = 0
@@ -144,5 +145,3 @@ class Transformation(Mirror, TextObjectTransformation):
 
     def _get_text(self):
         return self._transform(self._ts.current_text)
-
-
