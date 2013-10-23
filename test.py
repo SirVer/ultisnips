@@ -40,6 +40,12 @@ import subprocess
 
 from textwrap import dedent
 
+try:
+    import unidecode
+    UNIDECODE_IMPORTED = True
+except ImportError:
+    UNIDECODE_IMPORTED = False
+
 # Some constants for better reading
 BS = '\x7f'
 ESC = '\x1b'
@@ -1472,6 +1478,16 @@ class Transformation_CleverTransformLongLower_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/(.*)/\L$1\E/}")
     keys = "test" + EX + "HALLO"
     wanted = "HALLO hallo"
+
+if UNIDECODE_IMPORTED:
+    class Transformation_SimpleCaseAsciiResult(_VimTest):
+        snippets = ("ascii", "$1 ${1/(.*)/$1/a}")
+        keys = "ascii" + EX + "éèàçôïÉÈÀÇÔÏ€"
+        wanted = "éèàçôïÉÈÀÇÔÏ€ eeacoiEEACOIEU"
+    class Transformation_LowerCaseAsciiResult(_VimTest):
+        snippets = ("ascii", "$1 ${1/(.*)/\L$1\E/a}")
+        keys = "ascii" + EX + "éèàçôïÉÈÀÇÔÏ€"
+        wanted = "éèàçôïÉÈÀÇÔÏ€ eeacoieeacoieu"
 
 class Transformation_ConditionalInsertionSimple_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/(^a).*/(?0:began with an a)/}")
