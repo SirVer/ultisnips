@@ -1155,6 +1155,11 @@ The options can be any combination of >
    i    - case insensitive
           By default, regular expression matching is case sensitive. With this
           option, matching is done without regard to case.
+   a    - ascii conversion
+          By default, transformation are made on the raw utf-8 string. With
+          this option, matching is done on the corresponding ASCII string
+          instead, for example 'à' will become 'a'.
+          This option required the python package 'unidecode'.
 
 The syntax of regular expressions is beyond the scope of this document. Python
 regular expressions are used internally, so the python 're' module can be used
@@ -1212,6 +1217,18 @@ endsnippet
 title<tab>this is a title ->
 this is a title
 This Is A Title
+
+
+Demo: ASCII transformation
+------------------- SNIP -------------------
+snippet ascii "Replace non ascii chars"
+${1: an accentued text}
+${1/.*/$0/a}
+endsnippet
+------------------- SNAP -------------------
+ascii<tab>à la pêche aux moules
+à la pêche aux moules
+a la peche aux moules
 
 
 Demo: Regular expression grouping
@@ -1372,6 +1389,7 @@ Contributors listed in chronological order:
    Zhao Cai - zhaocai
    John Szakmeister - jszakmeister
    Jonas Diemer - diemer
+   Romain Giot - rgiot
 
 
 8.2 Snippets                                       *UltiSnips-contrisnippets*
