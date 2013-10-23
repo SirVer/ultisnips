@@ -130,7 +130,7 @@ class TextObjectTransformation(object):
             try:
                 import unidecode
                 text = unidecode.unidecode(text)
-            except Exception, e:
+            except Exception as e:
                 if UNIDECODE_ALERT_RAISED == False:
                     UNIDECODE_ALERT_RAISED = True
                     sys.stderr.write("Please install unidecode python package in order to be able to make ascii conversions.\n")
