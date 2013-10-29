@@ -839,6 +839,10 @@ class SnippetManager(object):
         for ft in filetypes:
             found_snippets += self._find_snippets(ft, before, possible)
 
+        if _vim.eval("pumvisible()") != '0':
+            # Keep only those snippets that support popup menu
+            found_snippets = [snip for snip in found_snippets if snip.has_option("m")]
+
         # Search if any of the snippets overwrites the previous
         # Dictionary allows O(1) access for easy overwrites
         snippets = {}
