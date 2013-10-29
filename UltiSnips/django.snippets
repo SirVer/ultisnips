@@ -24,7 +24,7 @@ endsnippet
 snippet block
 {% block ${1} %}
   ${2}
-{% endblock %}
+{% endblock $1 %}
 endsnippet
 
 snippet #
@@ -199,6 +199,10 @@ endsnippet
 
 snippet pluralize
 pluralize:"${1}"
+endsnippet
+
+snippet img "XHTML <img>"
+<img src="${1:imgsrc}">
 endsnippet
 
 snippet removetags
