@@ -873,6 +873,8 @@ class SnippetManager(object):
             # Likely "invalid expression", but might be translated. We have no way
             # of knowing the exact error, therefore, we ignore all errors silently.
             return None
+        except KeyboardInterrupt:
+            return None
 
     def _do_snippet(self, snippet, before, after):
         """ Expands the given snippet, and handles everything
