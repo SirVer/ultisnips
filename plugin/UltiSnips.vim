@@ -88,7 +88,7 @@ endif
 " Should UltiSnips map JumpForwardTrigger and JumpBackwardTrigger only during
 " snippet expansion?
 if !exists("g:UltiSnipsClearJumpTrigger")
-    let g:UltiSnipsClearJumpTrigger = 0
+    let g:UltiSnipsClearJumpTrigger = 1
 endif
 " }}}
 
