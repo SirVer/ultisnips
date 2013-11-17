@@ -31,6 +31,18 @@ const (
 )
 endsnippet
 
+snippet struct "Struct declaration" b
+type ${1:Struct} struct {
+	${0:${VISUAL}}
+}
+endsnippet
+
+snippet interface "Interface declaration" b
+type ${1:Interface} interface {
+	${0:${VISUAL}}
+}
+endsnippet
+
 # statements
 snippet for "For loop" !b
 for ${1:condition}${1/(.+)/ /}{
@@ -102,6 +114,10 @@ snippet vars "Variables declaration" !b
 var (
 	${1:name}${2/(.+)/ /}${2:type}${3: = ${0:value} }
 )
+endsnippet
+
+snippet json "JSON field"
+\`json:"${1:displayName}"\`
 endsnippet
 
 # vim:ft=snippets:
