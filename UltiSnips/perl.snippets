@@ -65,7 +65,7 @@ endsnippet
 snippet class "class"
 package ${1:ClassName};
 
-${2:use base qw(${3:ParentClass});}${2/.+/\n\n/}sub new {
+${2:use parent qw(${3:ParentClass});}${2/.+/\n\n/}sub new {
 	my $class = shift;
 	$class = ref $class if ref $class;
 	my $self = bless {}, $class;
