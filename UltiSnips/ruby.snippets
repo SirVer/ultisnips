@@ -249,16 +249,16 @@ endsnippet
 
 
 
-snippet each_?s(lice)? "<array>.each_slice(n) do |slice| <block> end"
-each_slice(${1:2}) do |${2:slice}|
+snippet "each_?s(lice)?" "<array>.each_slice(n) do |slice| <block> end" r
+${1:elements}.each_slice(${2:2}) do |${3:slice}|
 	${0:# TODO}
 end
 endsnippet
 
 
 
-snippet Each_?s(lice)? "<array>.each_slice(n) { |slice| <block> }"
-each_slice(${1:2}) { |${2:slice}| ${3:# TODO} }
+snippet "Each_?s(lice)?" "<array>.each_slice(n) { |slice| <block> }" r
+${1:elements}.each_slice(${2:2}) { |${3:slice}| ${0:# TODO} }
 endsnippet
 
 
