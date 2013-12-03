@@ -4,7 +4,8 @@
 snippet ife "Conditional if..else (ife)"
 if ($1) {
 	${2:# body...}
-} else {
+} 
+else {
 	${3:# else...}
 }
 
@@ -13,9 +14,11 @@ endsnippet
 snippet ifee "Conditional if..elsif..else (ifee)"
 if ($1) {
 	${2:# body...}
-} elsif ($3) {
+} 
+elsif ($3) {
 	${4:# elsif...}
-} else {
+} 
+else {
 	${5:# else...}
 }
 
@@ -62,7 +65,7 @@ endsnippet
 snippet class "class"
 package ${1:ClassName};
 
-${2:use base qw(${3:ParentClass});}${2/.+/\n\n/}sub new {
+${2:use parent qw(${3:ParentClass});}${2/.+/\n\n/}sub new {
 	my $class = shift;
 	$class = ref $class if ref $class;
 	my $self = bless {}, $class;
@@ -74,11 +77,12 @@ ${2:use base qw(${3:ParentClass});}${2/.+/\n\n/}sub new {
 endsnippet
 
 snippet eval "eval"
+local $@;
 eval {
 	${1:# do something risky...}
 };
-if ($@) {
-	${2:# handle failure...}
+if (my $${2:exception} = $@) {
+	${3:# handle failure...}
 }
 
 endsnippet
