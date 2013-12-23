@@ -315,7 +315,8 @@ class Snippet(object):
             if match and words_prefix:
                 # Require a word boundary between prefix and suffix.
                 boundaryChars = words_prefix[-1:] + words_suffix[:1]
-                match = re.match(r'.\b.', boundaryChars)
+                boundaryChars = boundaryChars.replace('"', '\\"')
+                match = _vim.eval('"%s" =~# "\\\\v.<."' % boundaryChars) != '0'
         elif "i" in self._opts:
             match = words.endswith(self._t)
         else:
@@ -350,7 +351,8 @@ class Snippet(object):
             match = self._re_match(trigger)
         elif "w" in self._opts:
             # Trim non-empty prefix up to word boundary, if present.
-            words_suffix = re.sub(r'^.+\b(.+)$', r'\1', words)
+            qwords = words.replace('"', '\\"')
+            words_suffix = _vim.eval('substitute("%s", "\\\\v^.+<(.+)", "\\\\1", "")' % qwords)
             match = self._t.startswith(words_suffix)
             self._matched = words_suffix
 

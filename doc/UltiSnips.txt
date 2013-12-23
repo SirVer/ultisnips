@@ -612,7 +612,7 @@ The options currently supported are: >
        the tab trigger start matches a word boundary and the tab trigger end
        matches a word boundary. In other words the tab trigger must be
        preceded and followed by non-word characters. Word characters are
-       letters, digits and the underscore. Use this option, for example, to
+       defined by the 'iskeyword' setting. Use this option, for example, to
        permit expansion where the tab trigger follows punctuation without
        expanding suffixes of larger words.
 
