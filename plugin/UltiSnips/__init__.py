@@ -16,6 +16,46 @@ from UltiSnips.text_objects import SnippetInstance
 from UltiSnips.util import IndentUtil
 import UltiSnips._vim as _vim
 
+def _plugin_dir():
+    d = __file__
+    for i in xrange(3):
+        d = os.path.dirname(d)
+
+    return d
+
+def _snippets_dir_is_before_plugin_dir():
+    def no_slash(path):
+        path_dir, path_base = os.path.split(path)
+
+        if path_base == "":
+            return path_dir
+        else:
+            return path
+
+    paths = [ no_slash(os.path.expanduser(p))
+        for p in _vim.eval("&runtimepath").split(',') ]
+
+    home = _vim.eval("$HOME")
+
+    def vim_path_index(suffix):
+        path = no_slash(os.path.join(home, suffix))
+        try:
+            return paths.index(path)
+        except ValueError:
+            return -1
+
+    try:
+        vim_dir_index = max(vim_path_index(".vim"), vim_path_index("vimfiles"))
+        return paths.index(_plugin_dir()) < vim_dir_index
+    except ValueError:
+        return False
+
+def _should_reverse_search_path():
+    if _vim.eval("exists('g:UltiSnipsDontReverseSearchPath')") != "0":
+       return _vim.eval("g:UltiSnipsDontReverseSearchPath") != "0"
+
+    return not _snippets_dir_is_before_plugin_dir()
+
 def err_to_scratch_buffer(f):
     @wraps(f)
     def wrapper(self, *args, **kwds):
@@ -965,7 +1005,7 @@ class SnippetManager(object):
 
         paths = _vim.eval("&runtimepath").split(',')
 
-        if self._should_reverse_search_path():
+        if _should_reverse_search_path():
             paths = paths[::-1]
 
         for rtp in paths:
@@ -982,57 +1022,6 @@ class SnippetManager(object):
                             ret.append(fn)
 
         return ret
-
-    def _plugin_dir(self):
-        def apply_n_times(f, x, n):
-            if n < 1:
-                return x
-            else:
-                return apply_n_times(f, f(x), n - 1)
-
-        return apply_n_times(os.path.dirname, __file__, 3)
-
-    def _snippets_dir_is_before_plugin_dir(self):
-        def no_slash(path):
-            path_dir, path_base = os.path.split(path)
-
-            if path_base == "":
-                return path_dir
-            else:
-                return path
-
-        paths = _vim.eval("&runtimepath").split(',')
-        paths = map(os.path.expanduser, paths)
-        paths = map(no_slash, paths)
-
-        home = _vim.eval("$HOME")
-
-        def path_index_of(p):
-            try:
-                return paths.index(p)
-            except ValueError:
-                return -1
-
-        def vim_path_index(suffix):
-            return path_index_of(no_slash(os.path.join(home, suffix)))
-
-        plugin_dir = self._plugin_dir()
-
-        try:
-            vim1 = vim_path_index(".vim")
-            vim2 = vim_path_index("vimfiles")
-            max_vim_dir_index = max(vim1, vim2)
-            plugin_dir_index = paths.index(plugin_dir)
-            return plugin_dir_index < max_vim_dir_index
-        except ValueError:
-            return False
-
-    def _should_reverse_search_path(self):
-        reverse_setting = \
-           _vim.eval("exists('g:UltiSnipsDontReverseSearchPath')") != "0" and \
-           _vim.eval("g:UltiSnipsDontReverseSearchPath") != "0"
-
-        return reverse_setting or not self._snippets_dir_is_before_plugin_dir()
 
     @property
     def primary_filetype(self):
