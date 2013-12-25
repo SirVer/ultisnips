@@ -17,43 +17,42 @@ from UltiSnips.util import IndentUtil
 import UltiSnips._vim as _vim
 
 def _plugin_dir():
+    """ Calculates the plugin directory for UltiSnips. This depends on the
+    current file being 3 levels deep from the plugin directory, so it needs to
+    be updated if the code moves.
+    """
     d = __file__
     for i in xrange(3):
         d = os.path.dirname(d)
-
     return d
 
 def _snippets_dir_is_before_plugin_dir():
-    def no_slash(path):
-        path_dir, path_base = os.path.split(path)
-
-        if path_base == "":
-            return path_dir
-        else:
-            return path
-
-    paths = [ no_slash(os.path.expanduser(p))
-        for p in _vim.eval("&runtimepath").split(',') ]
-
-    home = _vim.eval("$HOME")
-
+    """ Returns True if the snippets directory comes before the plugin
+    directory in Vim's runtime path. False otherwise.
+    """
     def vim_path_index(suffix):
-        path = no_slash(os.path.join(home, suffix))
+        path = os.path.join(home, suffix).rstrip(os.path.sep)
         try:
             return paths.index(path)
         except ValueError:
             return -1
-
+    paths = [ os.path.expanduser(p).rstrip(os.path.sep)
+        for p in _vim.eval("&runtimepath").split(',') ]
+    home = _vim.eval("$HOME")
     try:
-        vim_dir_index = max(vim_path_index(".vim"), vim_path_index("vimfiles"))
-        return paths.index(_plugin_dir()) < vim_dir_index
+        real_vim_path_index = max(vim_path_index(".vim"), vim_path_index("vimfiles"))
+        return paths.index(_plugin_dir()) < real_vim_path_index
     except ValueError:
         return False
 
 def _should_reverse_search_path():
+    """ If the user defined g:UltiSnipsDontReverseSearchPath then return True
+    or False based on the value of that variable, else defer to
+    _snippets_dir_is_before_plugin_dir to determine whether this is True or
+    False.
+    """
     if _vim.eval("exists('g:UltiSnipsDontReverseSearchPath')") != "0":
        return _vim.eval("g:UltiSnipsDontReverseSearchPath") != "0"
-
     return not _snippets_dir_is_before_plugin_dir()
 
 def err_to_scratch_buffer(f):
