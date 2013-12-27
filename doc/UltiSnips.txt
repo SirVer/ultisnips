@@ -1395,6 +1395,7 @@ Contributors listed in chronological order:
    John Szakmeister - jszakmeister
    Jonas Diemer - diemer
    Romain Giot - rgiot
+   Brian Mock - saikobee
 
 
 8.2 Snippets                                       *UltiSnips-contrisnippets*
@@ -1448,7 +1449,6 @@ Contributors listed in chronological order:
    Bernhard Vallant (lazerscience)
    Von Welch (von)
    Nikola Petrov (nikolavp)
-   Brian Mock (saikobee)
 
 Thank you for your support.
 

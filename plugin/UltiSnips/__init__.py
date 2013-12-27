@@ -22,23 +22,25 @@ def _plugin_dir():
     be updated if the code moves.
     """
     d = __file__
-    for i in xrange(3):
+    for i in xrange(10):
         d = os.path.dirname(d)
-    return d
+        if os.path.isdir(os.path.join(d, "plugin")) and os.path.isdir(os.path.join(d, "doc")):
+            return d
+    raise Exception("Unable to find the plugin directory.")
 
 def _snippets_dir_is_before_plugin_dir():
     """ Returns True if the snippets directory comes before the plugin
     directory in Vim's runtime path. False otherwise.
     """
+    paths = [ os.path.expanduser(p).rstrip(os.path.sep)
+        for p in _vim.eval("&runtimepath").split(',') ]
+    home = _vim.eval("$HOME")
     def vim_path_index(suffix):
         path = os.path.join(home, suffix).rstrip(os.path.sep)
         try:
             return paths.index(path)
         except ValueError:
             return -1
-    paths = [ os.path.expanduser(p).rstrip(os.path.sep)
-        for p in _vim.eval("&runtimepath").split(',') ]
-    home = _vim.eval("$HOME")
     try:
         real_vim_path_index = max(vim_path_index(".vim"), vim_path_index("vimfiles"))
         return paths.index(_plugin_dir()) < real_vim_path_index
