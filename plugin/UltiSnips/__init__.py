@@ -791,6 +791,7 @@ class SnippetManager(object):
                 jumped = self._jump(backwards)
         if jumped:
             self._vstate.remember_position()
+            self._ignore_movements = True
         return jumped
 
     def _handle_failure(self, trigger):
