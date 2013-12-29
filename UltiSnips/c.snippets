@@ -18,12 +18,12 @@ ${VISUAL}${0:${VISUAL/(.*)/(?1::code)/}}
 #endif
 endsnippet
 
-snippet inc "#include local header (inc)"
-#include "${1:`!p snip.rv = snip.basename + '.h'`}"
+snippet #inc "#include <> (Inc)"
+#include <${1:.h}>
 endsnippet
 
-snippet Inc "#include <> (Inc)"
-#include <${1:.h}>
+snippet #Inc "#include local header (inc)"
+#include "${1:`!p snip.rv = snip.basename + '.h'`}"
 endsnippet
 
 snippet mark "#pragma mark (mark)"
@@ -44,15 +44,13 @@ int main(int argc, char *argv[])
 endsnippet
 
 snippet for "for loop (for)"
-for (${2:i} = 0; $2 < ${1:count}; ${3:++$2})
-{
+for (${2:i} = 0; $2 < ${1:count}; ${3:++$2}){
 	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 }
 endsnippet
 
-snippet fori "for int loop (fori)"
-for (${4:int} ${2:i} = 0; $2 < ${1:count}; ${3:++$2})
-{
+snippet fori "for int loop (with declaration)"
+for (${4:int} ${2:i} = 0; $2 < ${1:count}; ${3:++$2}){
 	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 }
 endsnippet
@@ -99,26 +97,35 @@ fprintf(${1:stderr}, "${2:%s}\n"${2/([^%]|%%)*(%.)?.*/(?2:, :\);)/}$3${2/([^%]|%
 endsnippet
 
 snippet if "if .. (if)"
-if (${1:/* condition */})
-{
-	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
+if (${1:/* condition */}){
+	${0:/* code */}
 }
 endsnippet
 
 snippet el "else .. (else)"
 else {
-	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
+	${0:/* code */}
 }
 endsnippet
 
-snippet ife "if .. else (ife)"
-if (${1:/* condition */})
-{
-	${2:/* code */}
+snippet eli "else if .. (else if)"
+else if (${1:/* condition */}) {
+	${0:/* code */}
 }
-else
-{
-	${3:/* else */}
+endsnippet
+
+snippet ifeli "if..else.if .. (ifeli)"
+if (${1:/* condition */}) {
+	${2:/* code */}
+} else if (${3:/* condition */}) {
+	${0:/* code */}
+}
+
+snippet ife "if .. else (ife)"
+if (${1:/* condition */}){
+	${2:/* code */}
+} else{
+	${0:/* else */}
 }
 endsnippet
 
