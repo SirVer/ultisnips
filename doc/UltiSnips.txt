@@ -1390,6 +1390,7 @@ Contributors listed in chronological order:
    John Szakmeister - jszakmeister
    Jonas Diemer - diemer
    Romain Giot - rgiot
+   Sergey Alexandrov - taketwo
 
 
 8.2 Snippets                                       *UltiSnips-contrisnippets*
