@@ -3033,6 +3033,14 @@ class DeleteCurrentTabStop3_JumpAround(_VimTest):
 
 # End: Normal mode editing  #}}}
 
+# 1251994  {{{#
+# Test for bug #1251994
+class Bug1251994(_VimTest):
+    snippets = ("test", "${2:#2} ${1:#1};$0")
+    keys = "  test" + EX + "hello" + JF + "world" + JF + "blub"
+    wanted = "  world hello;blub"
+# End: 1251994  #}}}
+
 class VerifyVimDict1(_VimTest):
     """check:
     correct type (4 means vim dictionary)
