@@ -18,12 +18,12 @@ ${VISUAL}${0:${VISUAL/(.*)/(?1::code)/}}
 #endif
 endsnippet
 
-snippet #inc "#include <> (Inc)"
-#include <${1:.h}>
+snippet inc "#include local header (inc)"
+#include "${1:`!p snip.rv = snip.basename + '.h'`}"
 endsnippet
 
-snippet #Inc "#include local header (inc)"
-#include "${1:`!p snip.rv = snip.basename + '.h'`}"
+snippet Inc "#include <> (Inc)"
+#include <${1:.h}>
 endsnippet
 
 snippet mark "#pragma mark (mark)"
@@ -38,20 +38,22 @@ endsnippet
 snippet main "main() (main)"
 int main(int argc, char *argv[])
 {
-	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
-	return 0;
+        ${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
+        return 0;
 }
 endsnippet
 
 snippet for "for loop (for)"
-for (${2:i} = 0; $2 < ${1:count}; ${3:++$2}){
-	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
+for (${2:i} = 0; $2 < ${1:count}; ${3:++$2})
+{
+        ${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 }
 endsnippet
 
-snippet fori "for int loop (with declaration)"
-for (${4:int} ${2:i} = 0; $2 < ${1:count}; ${3:++$2}){
-	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
+snippet fori "for int loop (fori)"
+for (${4:int} ${2:i} = 0; $2 < ${1:count}; ${3:++$2})
+{
+        ${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 }
 endsnippet
 
@@ -62,10 +64,10 @@ endsnippet
 snippet once "Include header once only guard"
 #ifndef ${1:`!p
 if not snip.c:
-	import random, string
-	name = re.sub(r'[^A-Za-z0-9]+','_', snip.fn).upper()
-	rand = ''.join(random.sample(string.ascii_letters+string.digits, 8))
-	snip.rv = ('%s_%s' % (name,rand)).upper()
+        import random, string
+        name = re.sub(r'[^A-Za-z0-9]+','_', snip.fn).upper()
+        rand = ''.join(random.sample(string.ascii_letters+string.digits, 8))
+        snip.rv = ('%s_%s' % (name,rand)).upper()
 else:
     snip.rv = snip.c`}
 #define $1
@@ -82,13 +84,13 @@ endsnippet
 
 snippet wh "while loop"
 while(${1:/* condition */}) {
-	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
+        ${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 }
 endsnippet
 
 snippet do "do...while loop (do)"
 do {
-	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
+        ${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 } while(${1:/* condition */});
 endsnippet
 
@@ -97,35 +99,47 @@ fprintf(${1:stderr}, "${2:%s}\n"${2/([^%]|%%)*(%.)?.*/(?2:, :\);)/}$3${2/([^%]|%
 endsnippet
 
 snippet if "if .. (if)"
-if (${1:/* condition */}){
-	${0:/* code */}
+if (${1:/* condition */})
+{
+        ${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 }
 endsnippet
 
 snippet el "else .. (else)"
 else {
-	${0:/* code */}
+        ${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 }
 endsnippet
 
-snippet eli "else if .. (else if)"
+snippet eli "else if .. (eli)"
 else if (${1:/* condition */}) {
-	${0:/* code */}
+        ${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 }
 endsnippet
-
-snippet ifeli "if..else.if .. (ifeli)"
-if (${1:/* condition */}) {
-	${2:/* code */}
-} else if (${3:/* condition */}) {
-	${0:/* code */}
-}
 
 snippet ife "if .. else (ife)"
-if (${1:/* condition */}){
+if (${1:/* condition */})
+{
+        ${2:/* code */}
+}
+else
+{
+        ${3:/* else */}
+}
+endsnippet
+
+snippet ifee "if .. else if .. else (ifee)"
+if (${1:/* condition */})
+{
 	${2:/* code */}
-} else{
-	${0:/* else */}
+}
+else if (${3:/* condition */})
+{
+	${4:/* code */}
+}
+else
+{
+	${5:/* code */}
 }
 endsnippet
 
@@ -136,14 +150,14 @@ endsnippet
 snippet st "struct"
 struct ${1:`!p snip.rv = (snip.basename or "name") + "_t"`}
 {
-	${0:/* data */}
+        ${0:/* data */}
 };
 endsnippet
 
 snippet fun "function" b
 ${1:void} ${2:function_name}(${3})
 {
-	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
+        ${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
 }
 endsnippet
 
