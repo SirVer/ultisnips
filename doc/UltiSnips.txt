@@ -335,11 +335,16 @@ You can also redefine the search path on a buffer by buffer basis by setting
 the variable b:UltiSnipsSnippetDirectories.  This variable takes precedence
 over the global variable.
 
-UltiSnips searches in 'runtimepath' for snippet directories but traverses
-'runtimepath' in reverse order (last item first). If you would like to have
-UltiSnips traverse 'runtimepath' in the standard order, add this to your vimrc
+UltiSnips searches in 'runtimepath' for snippet directories and attempts to
+determine if 'runtimepath' should be traversed in normal or reverse order. If
+you would like to override the order UltiSnips detected for 'runtimepath', add
+this to your vimrc
 file: >
+   " Traverse in normal order
    let g:UltiSnipsDontReverseSearchPath="1"
+
+   " Traverse in reverse order
+   let g:UltiSnipsDontReverseSearchPath="0"
 
 By default, whenever a snippet expand is triggered, UltiSnips will check for
 modifications to the snippet file associated with the filetype and reload it
@@ -1391,6 +1396,7 @@ Contributors listed in chronological order:
    Jonas Diemer - diemer
    Romain Giot - rgiot
    Sergey Alexandrov - taketwo
+   Brian Mock - saikobee
 
 
 8.2 Snippets                                       *UltiSnips-contrisnippets*
