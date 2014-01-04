@@ -806,6 +806,9 @@ class SnippetManager(object):
 
     def _current_snippet_is_done(self):
         self._csnippets.pop()
+        if _vim.eval("g:UltiSnipsClearJumpTrigger") != "0":
+           if len(self._csnippets) == 0:
+              _vim.command("call UltiSnips_RestoreInnerKeys()")
 
     def _jump(self, backwards = False):
         jumped = False
@@ -924,6 +927,8 @@ class SnippetManager(object):
         """ Expands the given snippet, and handles everything
         that needs to be done with it.
         """
+        if _vim.eval("g:UltiSnipsClearJumpTrigger") == "1":
+           _vim.command("call UltiSnips_MapInnerKeys()")
         # Adjust before, maybe the trigger is not the complete word
         text_before = before
         if snippet.matched:
