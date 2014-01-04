@@ -32,18 +32,19 @@ def _snippets_dir_is_before_plugin_dir():
     """ Returns True if the snippets directory comes before the plugin
     directory in Vim's runtime path. False otherwise.
     """
-    paths = [ os.path.expanduser(p).rstrip(os.path.sep)
+    paths = [ os.path.realpath(os.path.expanduser(p)).rstrip(os.path.sep)
         for p in _vim.eval("&runtimepath").split(',') ]
     home = _vim.eval("$HOME")
     def vim_path_index(suffix):
-        path = os.path.join(home, suffix).rstrip(os.path.sep)
+        path = os.path.realpath(os.path.join(home, suffix)).rstrip(os.path.sep)
         try:
             return paths.index(path)
         except ValueError:
             return -1
     try:
         real_vim_path_index = max(vim_path_index(".vim"), vim_path_index("vimfiles"))
-        return paths.index(_plugin_dir()) < real_vim_path_index
+        plugin_path_index = paths.index(_plugin_dir())
+        return plugin_path_index < real_vim_path_index
     except ValueError:
         return False
 
