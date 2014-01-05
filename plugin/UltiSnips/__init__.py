@@ -806,9 +806,8 @@ class SnippetManager(object):
 
     def _current_snippet_is_done(self):
         self._csnippets.pop()
-        if _vim.eval("g:UltiSnipsClearJumpTrigger") != "0":
-           if len(self._csnippets) == 0:
-              _vim.command("call UltiSnips_RestoreInnerKeys()")
+        if not self._csnippets and _vim.eval("g:UltiSnipsClearJumpTrigger") != "0":
+            _vim.command("call UltiSnips_RestoreInnerKeys()")
 
     def _jump(self, backwards = False):
         jumped = False
@@ -1177,4 +1176,3 @@ class SnippetManager(object):
 
 
 UltiSnips_Manager = SnippetManager()
-
