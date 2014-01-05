@@ -83,6 +83,18 @@ snippet ca "console.assert"
 console.assert(${1:assertion}, ${2:"${3:message}"});
 endsnippet
 
+snippet cclear "console.clear"
+console.clear();
+endsnippet
+
+snippet cdir "console.dir"
+console.dir(${1:object});
+endsnippet
+
+snippet cdirx "console.dirxml"
+console.dirxml(${1:object});
+endsnippet
+
 snippet ce "console.error"
 console.error(${1:"${2:value}"});
 endsnippet
@@ -93,8 +105,28 @@ ${VISUAL}$0
 console.groupEnd();
 endsnippet
 
+snippet cgroupc "console.groupCollapsed"
+console.groupCollapsed("${1:label}");
+${VISUAL}$0
+console.groupEnd();
+endsnippet
+
+snippet ci "console.info"
+console.info(${1:"${2:value}"});
+endsnippet
+
 snippet cl "console.log"
 console.log(${1:"${2:value}"});
+endsnippet
+
+snippet cprof "console.profile"
+console.profile("${1:label}");
+${VISUAL}$0
+console.profileEnd();
+endsnippet
+
+snippet ctable "console.table"
+console.table(${1:"${2:value}"});
 endsnippet
 
 snippet ctime "console.time"
