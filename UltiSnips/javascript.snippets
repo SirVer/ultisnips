@@ -79,26 +79,22 @@ endsnippet
 
 # Snippets for Console Debug Output
 
-snippet cl "console.log"
-console.log(${1:"${2:value}"});
-endsnippet
-
-snippet cw "console.warn"
-console.warn(${1:"${2:value}"});
+snippet ca "console.assert"
+console.assert(${1:assertion}, ${2:"${3:message}"});
 endsnippet
 
 snippet ce "console.error"
 console.error(${1:"${2:value}"});
 endsnippet
 
-snippet ca "console.assert"
-console.assert(${1:assertion}, ${2:"${3:message}"});
-endsnippet
-
 snippet cgroup "console.group"
 console.group("${1:label}");
 ${VISUAL}$0
 console.groupEnd();
+endsnippet
+
+snippet cl "console.log"
+console.log(${1:"${2:value}"});
 endsnippet
 
 snippet ctime "console.time"
@@ -113,6 +109,10 @@ endsnippet
 
 snippet ctrace "console.trace"
 console.trace();
+endsnippet
+
+snippet cw "console.warn"
+console.warn(${1:"${2:value}"});
 endsnippet
 
 # AMD (Asynchronous Module Definition) snippets
