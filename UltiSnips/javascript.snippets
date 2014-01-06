@@ -79,71 +79,71 @@ endsnippet
 
 # Snippets for Console Debug Output
 
-snippet ca "console.assert"
+snippet ca "console.assert" b
 console.assert(${1:assertion}, ${2:"${3:message}"});
 endsnippet
 
-snippet cclear "console.clear"
+snippet cclear "console.clear" b
 console.clear();
 endsnippet
 
-snippet cdir "console.dir"
+snippet cdir "console.dir" b
 console.dir(${1:object});
 endsnippet
 
-snippet cdirx "console.dirxml"
+snippet cdirx "console.dirxml" b
 console.dirxml(${1:object});
 endsnippet
 
-snippet ce "console.error"
+snippet ce "console.error" b
 console.error(${1:"${2:value}"});
 endsnippet
 
-snippet cgroup "console.group"
+snippet cgroup "console.group" b
 console.group("${1:label}");
 ${VISUAL}$0
 console.groupEnd();
 endsnippet
 
-snippet cgroupc "console.groupCollapsed"
+snippet cgroupc "console.groupCollapsed" b
 console.groupCollapsed("${1:label}");
 ${VISUAL}$0
 console.groupEnd();
 endsnippet
 
-snippet ci "console.info"
+snippet ci "console.info" b
 console.info(${1:"${2:value}"});
 endsnippet
 
-snippet cl "console.log"
+snippet cl "console.log" b
 console.log(${1:"${2:value}"});
 endsnippet
 
-snippet cprof "console.profile"
+snippet cprof "console.profile" b
 console.profile("${1:label}");
 ${VISUAL}$0
 console.profileEnd();
 endsnippet
 
-snippet ctable "console.table"
+snippet ctable "console.table" b
 console.table(${1:"${2:value}"});
 endsnippet
 
-snippet ctime "console.time"
+snippet ctime "console.time" b
 console.time("${1:label}");
 ${VISUAL}$0
 console.timeEnd("$1");
 endsnippet
 
-snippet ctimestamp "console.timeStamp"
+snippet ctimestamp "console.timeStamp" b
 console.timeStamp("${1:label}");
 endsnippet
 
-snippet ctrace "console.trace"
+snippet ctrace "console.trace" b
 console.trace();
 endsnippet
 
-snippet cw "console.warn"
+snippet cw "console.warn" b
 console.warn(${1:"${2:value}"});
 endsnippet
 
