@@ -33,14 +33,14 @@ ${1:class_name}.prototype.${2:method_name} = function(${3:first_argument}) {
 endsnippet
 
 snippet for "for (...) {...} (faster)"
-for (var ${2:i} = ${1:Things}.length - 1; $2 >= 0; $2--) {
-	${3:$1[$2]}${VISUAL}$0
+for (var ${2:i} = ${1:Things.length} - 1; $2 >= 0; $2--) {
+	${3:${1/([^.]+).*/$1/}[$2]}${VISUAL}$0
 }
 endsnippet
 
 snippet for "for (...) {...}"
-for (var ${1:i} = 0, ${2:len} = ${3:Things}.length; $1 < $2; $1++) {
-	${4:${3}[$1]}${VISUAL}$0
+for (var ${1:i} = 0, ${2:len} = ${3:Things.length}; $1 < $2; $1++) {
+	${4:${3/([^.]+).*/$1/}[$1]}${VISUAL}$0
 }
 endsnippet
 
