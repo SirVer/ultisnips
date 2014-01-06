@@ -79,40 +79,72 @@ endsnippet
 
 # Snippets for Console Debug Output
 
-snippet cl "console.log"
-console.log(${1:"${2:value}"});
-endsnippet
-
-snippet cw "console.warn"
-console.warn(${1:"${2:value}"});
-endsnippet
-
-snippet ce "console.error"
-console.error(${1:"${2:value}"});
-endsnippet
-
-snippet ca "console.assert"
+snippet ca "console.assert" b
 console.assert(${1:assertion}, ${2:"${3:message}"});
 endsnippet
 
-snippet cgroup "console.group"
+snippet cclear "console.clear" b
+console.clear();
+endsnippet
+
+snippet cdir "console.dir" b
+console.dir(${1:object});
+endsnippet
+
+snippet cdirx "console.dirxml" b
+console.dirxml(${1:object});
+endsnippet
+
+snippet ce "console.error" b
+console.error(${1:"${2:value}"});
+endsnippet
+
+snippet cgroup "console.group" b
 console.group("${1:label}");
 ${VISUAL}$0
 console.groupEnd();
 endsnippet
 
-snippet ctime "console.time"
+snippet cgroupc "console.groupCollapsed" b
+console.groupCollapsed("${1:label}");
+${VISUAL}$0
+console.groupEnd();
+endsnippet
+
+snippet ci "console.info" b
+console.info(${1:"${2:value}"});
+endsnippet
+
+snippet cl "console.log" b
+console.log(${1:"${2:value}"});
+endsnippet
+
+snippet cprof "console.profile" b
+console.profile("${1:label}");
+${VISUAL}$0
+console.profileEnd();
+endsnippet
+
+snippet ctable "console.table" b
+console.table(${1:"${2:value}"});
+endsnippet
+
+snippet ctime "console.time" b
 console.time("${1:label}");
 ${VISUAL}$0
 console.timeEnd("$1");
 endsnippet
 
-snippet ctimestamp "console.timestamp"
-console.timeStamp("${1:label}")
+snippet ctimestamp "console.timeStamp" b
+console.timeStamp("${1:label}");
 endsnippet
 
-snippet ctrace "console.trace"
+snippet ctrace "console.trace" b
 console.trace();
+endsnippet
+
+snippet cw "console.warn" b
+console.warn(${1:"${2:value}"});
 endsnippet
 
 # AMD (Asynchronous Module Definition) snippets
