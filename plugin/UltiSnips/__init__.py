@@ -22,7 +22,7 @@ def _plugin_dir():
     be updated if the code moves.
     """
     d = __file__
-    for i in xrange(10):
+    for i in range(10):
         d = os.path.dirname(d)
         if os.path.isdir(os.path.join(d, "plugin")) and os.path.isdir(os.path.join(d, "doc")):
             return d
@@ -1173,4 +1173,3 @@ class SnippetManager(object):
 
 
 UltiSnips_Manager = SnippetManager()
-
