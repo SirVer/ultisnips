@@ -112,8 +112,20 @@ else {
 endsnippet
 
 snippet eli "else if .. (eli)"
-else if (${1:/* condition */}) {
-        ${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
+else if (${1:/* condition */})
+{
+	${2:/* else.i */}
+}
+endsnippet
+
+snippet elie "else if.. else (elie)"
+else if (${1:/* condition */})
+{
+	${2:/* else.i */}
+}
+else
+{
+	${3:/* else */}
 }
 endsnippet
 
@@ -131,15 +143,15 @@ endsnippet
 snippet ifee "if .. else if .. else (ifee)"
 if (${1:/* condition */})
 {
-	${2:/* code */}
+        ${2:/* code */}
 }
 else if (${3:/* condition */})
 {
-	${4:/* code */}
+        ${4:/* else.i */}
 }
 else
 {
-	${5:/* code */}
+	${5:/* else */}
 }
 endsnippet
 
