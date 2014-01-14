@@ -966,10 +966,14 @@ class SnippetManager(object):
             return False
         snippets = self._snips(before, False)
 
+        use_first_snippet = False
+        if _vim.eval("exists('g:UltiSnipsAlwaysUseFirstSnippet')") == "1":
+            use_first_snippet = _vim.eval("g:UltiSnipsAlwaysUseFirstSnippet") == "1"
+
         if not snippets:
             # No snippet found
             return False
-        elif len(snippets) == 1:
+        elif len(snippets) == 1 or use_first_snippet:
             snippet = snippets[0]
         else:
             snippet = self._ask_snippets(snippets)
