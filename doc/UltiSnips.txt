@@ -353,6 +353,12 @@ if necessary. This behavior can be disabled as follows: >
 
 |UltiSnips-adding-snippets| explains which files are parsed for a given filetype.
 
+By default, if there are snippets with the same name, UltiSnips will show all
+the snippets with a choice number to pick. If this behavior is not desired, it
+can be disable by setting the value of g:UltiSnipsAlwaysUseFirstSnippet to "1"
+then the first snippet will be used.
+
+   let g:UltiSnipsAlwaysUseFirstSnippet="1"
 
 3.4 Warning About Select Mode Mappings          *UltiSnips-warning-smappings*
 --------------------------------------
