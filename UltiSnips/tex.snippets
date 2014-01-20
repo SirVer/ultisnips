@@ -52,6 +52,18 @@ snippet desc "Description" b
 \end{description}
 endsnippet
 
+##########
+# FIGURE #
+##########
+
+snippet fig "Figure" b
+\begin{figure}
+	\includegraphics[scale=${0:0.8 \textwidth}]{$1}
+	\caption{$3}
+	\label{fig:$4}
+\end{figure}
+endsnippet
+
 #####################################
 # SECTIONS, CHAPTERS AND THEIR LIKE #
 #####################################
