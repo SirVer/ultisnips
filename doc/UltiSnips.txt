@@ -1450,6 +1450,7 @@ Contributors listed in chronological order:
    Bernhard Vallant (lazerscience)
    Von Welch (von)
    Nikola Petrov (nikolavp)
+   Maarten Slagter (slagtermaarten)
 
 Thank you for your support.
 
