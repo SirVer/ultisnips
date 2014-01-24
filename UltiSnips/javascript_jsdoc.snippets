@@ -6,40 +6,40 @@ snippet /* "A JSDoc comment" b
  */
 endsnippet
 
-snippet "@aut(h(o(r)?)?)?" "@author email (First Last)" r
+snippet @au "@author email (First Last)"
 @author ${1:`!v g:snips_author_email`} (${2:`!v g:snips_author`})
 endsnippet
 
-snippet "@li(c(e(n(s(e)?)?)?)?)?" "@license Description" r
+snippet @li "@license Description"
 @license ${1:MIT}$0
 endsnippet
 
-snippet "@fileo(verview)?" "@fileoverview Description" br
+snippet @fileo "@fileoverview Description" b
 /**
  * @fileoverview ${1:${VISUAL:A description of the file}}$0
  */
 endsnippet
 
-snippet "@constr(uctor)?" "@constructor" r
+snippet @constr "@constructor"
 @constructor
 endsnippet
 
-snippet "@p(a(r(a(m)?)?)?)?" "@param {Type} varname Description" r
+snippet @p "@param {Type} varname Description"
 @param {${1:Type}} ${2:varname} ${3:Description}
 endsnippet
 
-snippet "@r(e(t(u(r(n)?)?)?)?)?" "@return {Type} Description" r
+snippet @ret "@return {Type} Description"
 @return {${1:Type}} ${2:Description}
 endsnippet
 
-snippet "@pri(v(a(t(e)?)?)?)?" "@private" r
+snippet @pri "@private"
 @private
 endsnippet
 
-snippet "@ov(e(r(r(i(d(e)?)?)?)?)?)?" "@override" r
+snippet @over "@override"
 @override
 endsnippet
 
-snippet "@(pt|pro(t(e(c(t(e(d)?)?)?)?)?)?)" "@protected" r
+snippet @pro "@protected"
 @protected
 endsnippet
