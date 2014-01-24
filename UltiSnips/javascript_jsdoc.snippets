@@ -2,7 +2,7 @@
 
 snippet /* "A JSDoc comment" b
 /**
- * ${1}${VISUAL}$0
+ * ${1:${VISUAL}}$0
  */
 endsnippet
 
@@ -11,12 +11,12 @@ snippet "@aut(h(o(r)?)?)?" "@author email (First Last)" r
 endsnippet
 
 snippet "@li(c(e(n(s(e)?)?)?)?)?" "@license Description" r
-@license ${1:MIT}${VISUAL}$0
+@license ${1:MIT}$0
 endsnippet
 
 snippet "@fileo(verview)?" "@fileoverview Description" br
 /**
- * @fileoverview ${1}${VISUAL}$0
+ * @fileoverview ${1:${VISUAL:A description of the file}}$0
  */
 endsnippet
 
