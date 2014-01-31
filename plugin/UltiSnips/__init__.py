@@ -553,7 +553,12 @@ class SnippetManager(object):
         self._supertab_keys = None
         self._csnippets = []
 
+        # needed to retain the unnamed register at all times
+        self._unnamed_reg_cached = False
+        self._last_placeholder = None
+
         self.reset()
+
 
     @err_to_scratch_buffer
     def reset(self, test_error=False):
@@ -832,9 +837,22 @@ class SnippetManager(object):
                 self._current_snippet_is_done()
                 jumped = self._jump(backwards)
         if jumped:
+            self._cache_unnamed_register()
             self._vstate.remember_position()
             self._ignore_movements = True
         return jumped
+
+    def _cache_unnamed_register(self):
+        self._unnamed_reg_cached = True
+        unnamed_reg = _vim.eval('@"')
+        if self._last_placeholder != unnamed_reg:
+          self._unnamed_reg_cache = _vim.eval('@"')
+        self._last_placeholder = self._ctab._initial_text
+
+    def restore_unnamed_register(self):
+        if self._unnamed_reg_cached:
+            _vim.command( "let @\"='%s'" % self._unnamed_reg_cache)
+            self._unnamed_register_cached = False
 
     def _handle_failure(self, trigger):
         """
