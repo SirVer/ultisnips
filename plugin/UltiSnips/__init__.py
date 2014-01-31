@@ -846,12 +846,13 @@ class SnippetManager(object):
         self._unnamed_reg_cached = True
         unnamed_reg = _vim.eval('@"')
         if self._last_placeholder != unnamed_reg:
-          self._unnamed_reg_cache = _vim.eval('@"')
+          self._unnamed_reg_cache = unnamed_reg
         self._last_placeholder = self._ctab._initial_text
 
     def restore_unnamed_register(self):
         if self._unnamed_reg_cached:
-            _vim.command( "let @\"='%s'" % self._unnamed_reg_cache)
+            escaped_cache = self._unnamed_reg_cache.replace("'", "''")
+            _vim.command("let @\"='%s'" % escaped_cache)
             self._unnamed_register_cached = False
 
     def _handle_failure(self, trigger):
