@@ -227,6 +227,11 @@ endf
 function! UltiSnips_LeavingBuffer()
     exec g:_uspy "UltiSnips_Manager.leaving_buffer()"
 endf
+
+function! UltiSnips_LeavingInsertMode()
+    exec g:_uspy "UltiSnips_Manager.restore_unnamed_register()"
+endfunction
+
 " }}}
 " COMPLETE FUNCTIONS {{{
 function! UltiSnipsFiletypeComplete(arglead, cmdline, cursorpos)
@@ -262,6 +267,7 @@ exec g:_uspy "UltiSnips_Manager.backward_trigger = vim.eval('g:UltiSnipsJumpBack
 au CursorMovedI * call UltiSnips_CursorMoved()
 au CursorMoved * call UltiSnips_CursorMoved()
 au BufLeave * call UltiSnips_LeavingBuffer()
+au InsertLeave * call UltiSnips_LeavingInsertMode()
 
 call UltiSnips_MapKeys()
 

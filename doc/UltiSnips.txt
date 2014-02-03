@@ -1397,6 +1397,7 @@ Contributors listed in chronological order:
    Romain Giot - rgiot
    Sergey Alexandrov - taketwo
    Brian Mock - saikobee
+   Gernot Höflechner - LFDM
 
 
 8.2 Snippets                                       *UltiSnips-contrisnippets*

@@ -3041,6 +3041,13 @@ class Bug1251994(_VimTest):
     wanted = "  world hello;blub"
 # End: 1251994  #}}}
 
+# Test for Github Pull Request #134 {{{#
+class RetainsTheUnnamedRegister(_VimTest):
+    snippets = ("test", "${1:hello} ${2:world} ${0}")
+    keys = "yank" + ESC + "by4lea test" + EX + "HELLO" + JF + JF + ESC + "p"
+    wanted = "yank HELLO world yank"
+# End: Github Pull Request # 134 #}}}
+
 class VerifyVimDict1(_VimTest):
     """check:
     correct type (4 means vim dictionary)
