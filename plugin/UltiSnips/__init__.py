@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 from functools import wraps
-from collections import deque, defaultdict
+from collections import defaultdict
 import glob
 import hashlib
 import os
@@ -14,6 +14,7 @@ from UltiSnips._diff import diff, guess_edit
 from UltiSnips.geometry import Position
 from UltiSnips.text_objects import SnippetInstance
 from UltiSnips.util import IndentUtil
+from UltiSnips.vim_state import VimState
 import UltiSnips._vim as _vim
 
 def _ask_snippets(snippets):
@@ -556,56 +557,6 @@ class VisualContentPreserver(object):
     @property
     def mode(self):
         return self._mode
-
-class _VimPosition(Position):
-    def __init__(self):
-        pos = _vim.buf.cursor
-        self._mode = _vim.eval("mode()")
-        self._visualmode = _vim.eval("visualmode()")
-        Position.__init__(self, pos.line, pos.col)
-
-    @property
-    def mode(self):
-        return self._mode
-
-    @property
-    def visualmode(self):
-        return self._visualmode
-
-
-class VimState(object):
-    def __init__(self):
-        """
-        This class caches some state information from Vim to better
-        guess what editing tasks the user might have done in the last step
-        """
-        self._poss = deque(maxlen=5)
-        self._lvb = None
-
-    def remember_position(self):
-        self._poss.append(_VimPosition())
-
-    def remember_buffer(self, to):
-        self._lvb = _vim.buf[to.start.line:to.end.line+1]
-        self._lvb_len = len(_vim.buf)
-        self.remember_position()
-
-    @property
-    def diff_in_buffer_length(self):
-        return len(_vim.buf) - self._lvb_len
-
-    @property
-    def pos(self):
-        return self._poss[-1]
-
-    @property
-    def ppos(self):
-        return self._poss[-2]
-
-    @property
-    def remembered_buffer(self):
-        return self._lvb[:]
-
 
 class SnippetManager(object):
     def __init__(self):
