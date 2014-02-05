@@ -83,4 +83,3 @@ else:
 
     def as_vimencoding(s):
         return _vim_enc(s)
-

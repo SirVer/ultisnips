@@ -153,7 +153,7 @@ endfunction
 
 function! UltiSnips_SnippetsInCurrentScope()
     let g:current_ulti_dict = {}
-    exec g:_uspy "UltiSnips_Manager.list_snippets_dict()"
+    exec g:_uspy "UltiSnips_Manager.snippets_in_current_scope()"
     return g:current_ulti_dict
 endfunction
 
@@ -286,10 +286,11 @@ exec g:_uspy "import vim, os, sys"
 exec g:_uspy "new_path = vim.eval('expand(\"<sfile>:h\")')"
 exec g:_uspy "vim.command(\"let g:UltiSnipsPythonPath = '%s'\" % new_path)"
 exec g:_uspy "sys.path.append(new_path)"
-exec g:_uspy "from UltiSnips import UltiSnips_Manager"
-exec g:_uspy "UltiSnips_Manager.expand_trigger = vim.eval('g:UltiSnipsExpandTrigger')"
-exec g:_uspy "UltiSnips_Manager.forward_trigger = vim.eval('g:UltiSnipsJumpForwardTrigger')"
-exec g:_uspy "UltiSnips_Manager.backward_trigger = vim.eval('g:UltiSnipsJumpBackwardTrigger')"
+exec g:_uspy "from UltiSnips import SnippetManager"
+exec g:_uspy "UltiSnips_Manager = SnippetManager(
+    \ vim.eval('g:UltiSnipsExpandTrigger'),
+    \ vim.eval('g:UltiSnipsJumpForwardTrigger'),
+    \ vim.eval('g:UltiSnipsJumpBackwardTrigger'))"
 
 au CursorMovedI * call UltiSnips_CursorMoved()
 au CursorMoved * call UltiSnips_CursorMoved()
