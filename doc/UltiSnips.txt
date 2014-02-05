@@ -1402,6 +1402,7 @@ Contributors listed in chronological order:
    Romain Giot - rgiot
    Sergey Alexandrov - taketwo
    Brian Mock - saikobee
+   Gernot Höflechner - LFDM
 
 
 8.2 Snippets                                       *UltiSnips-contrisnippets*
@@ -1455,6 +1456,7 @@ Contributors listed in chronological order:
    Bernhard Vallant (lazerscience)
    Von Welch (von)
    Nikola Petrov (nikolavp)
+   Maarten Slagter (slagtermaarten)
 
 Thank you for your support.
 

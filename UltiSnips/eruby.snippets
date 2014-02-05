@@ -140,13 +140,13 @@ endsnippet
 snippet ffe "form_for with errors"
 `!p textmate_var('TM_RAILS_TEMPLATE_START_RUBY_EXPR', snip)`error_messages_for :${1:model}`!p textmate_var('TM_RAILS_TEMPLATE_END_RUBY_EXPR', snip)`
 
-`!p textmate_var('TM_RAILS_TEMPLATE_START_RUBY_INLINE', snip)`form_for @${2:$1} do |f|`!p textmate_var('TM_RAILS_TEMPLATE_END_RUBY_INLINE', snip)`
+`!p textmate_var('TM_RAILS_TEMPLATE_START_RUBY_EXPR', snip)`form_for @${2:$1} do |f|`!p textmate_var('TM_RAILS_TEMPLATE_END_RUBY_EXPR', snip)`
   $0
 `!p textmate_var('TM_RAILS_TEMPLATE_END_RUBY_BLOCK', snip)`
 endsnippet
 
 snippet ff "form_for"
-`!p textmate_var('TM_RAILS_TEMPLATE_START_RUBY_INLINE', snip)`form_for @${1:model} do |f|`!p textmate_var('TM_RAILS_TEMPLATE_END_RUBY_INLINE', snip)`
+`!p textmate_var('TM_RAILS_TEMPLATE_START_RUBY_EXPR', snip)`form_for @${1:model} do |f|`!p textmate_var('TM_RAILS_TEMPLATE_END_RUBY_EXPR', snip)`
   $0
 `!p textmate_var('TM_RAILS_TEMPLATE_END_RUBY_BLOCK', snip)`
 endsnippet

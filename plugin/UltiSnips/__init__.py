@@ -22,7 +22,7 @@ def _plugin_dir():
     be updated if the code moves.
     """
     d = __file__
-    for i in xrange(10):
+    for i in range(10):
         d = os.path.dirname(d)
         if os.path.isdir(os.path.join(d, "plugin")) and os.path.isdir(os.path.join(d, "doc")):
             return d
@@ -32,18 +32,19 @@ def _snippets_dir_is_before_plugin_dir():
     """ Returns True if the snippets directory comes before the plugin
     directory in Vim's runtime path. False otherwise.
     """
-    paths = [ os.path.expanduser(p).rstrip(os.path.sep)
+    paths = [ os.path.realpath(os.path.expanduser(p)).rstrip(os.path.sep)
         for p in _vim.eval("&runtimepath").split(',') ]
     home = _vim.eval("$HOME")
     def vim_path_index(suffix):
-        path = os.path.join(home, suffix).rstrip(os.path.sep)
+        path = os.path.realpath(os.path.join(home, suffix)).rstrip(os.path.sep)
         try:
             return paths.index(path)
         except ValueError:
             return -1
     try:
         real_vim_path_index = max(vim_path_index(".vim"), vim_path_index("vimfiles"))
-        return paths.index(_plugin_dir()) < real_vim_path_index
+        plugin_path_index = paths.index(_plugin_dir())
+        return plugin_path_index < real_vim_path_index
     except ValueError:
         return False
 
@@ -552,7 +553,12 @@ class SnippetManager(object):
         self._supertab_keys = None
         self._csnippets = []
 
+        # needed to retain the unnamed register at all times
+        self._unnamed_reg_cached = False
+        self._last_placeholder = None
+
         self.reset()
+
 
     @err_to_scratch_buffer
     def reset(self, test_error=False):
@@ -833,9 +839,23 @@ class SnippetManager(object):
                 self._current_snippet_is_done()
                 jumped = self._jump(backwards)
         if jumped:
+            self._cache_unnamed_register()
             self._vstate.remember_position()
             self._ignore_movements = True
         return jumped
+
+    def _cache_unnamed_register(self):
+        self._unnamed_reg_cached = True
+        unnamed_reg = _vim.eval('@"')
+        if self._last_placeholder != unnamed_reg:
+          self._unnamed_reg_cache = unnamed_reg
+        self._last_placeholder = self._ctab._initial_text
+
+    def restore_unnamed_register(self):
+        if self._unnamed_reg_cached:
+            escaped_cache = self._unnamed_reg_cache.replace("'", "''")
+            _vim.command("let @\"='%s'" % escaped_cache)
+            self._unnamed_register_cached = False
 
     def _handle_failure(self, trigger):
         """

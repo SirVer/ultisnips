@@ -111,6 +111,12 @@ else {
 }
 endsnippet
 
+snippet eli "else if .. (eli)"
+else if (${1:/* condition */}) {
+	${VISUAL}${0:${VISUAL/(.*)/(?1::\/* code *\/)/}}
+}
+endsnippet
+
 snippet ife "if .. else (ife)"
 if (${1:/* condition */})
 {
