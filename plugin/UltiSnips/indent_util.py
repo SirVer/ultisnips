@@ -2,7 +2,6 @@
 # encoding: utf-8
 
 import os
-import types
 
 import UltiSnips._vim as _vim
 

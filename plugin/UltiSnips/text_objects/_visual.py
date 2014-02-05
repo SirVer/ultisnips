@@ -4,7 +4,7 @@
 import re
 
 import UltiSnips._vim as _vim
-from UltiSnips.util import IndentUtil
+from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text_objects._transformation import TextObjectTransformation
 from UltiSnips.text_objects._base import NoneditableTextObject
 
@@ -55,5 +55,3 @@ class Visual(NoneditableTextObject,TextObjectTransformation):
         self._parent._del_child(self)
 
         return True
-
-

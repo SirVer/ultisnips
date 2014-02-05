@@ -5,7 +5,7 @@ import re
 
 from UltiSnips.compatibility import as_unicode
 from UltiSnips.text_objects import SnippetInstance
-from UltiSnips.util import IndentUtil
+from UltiSnips.indent_util import IndentUtil
 import UltiSnips._vim as _vim
 
 
