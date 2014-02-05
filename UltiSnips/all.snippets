@@ -19,7 +19,7 @@ def _parse_comments(s):
     try:
         while True:
             # get the flags and text of a comment part
-            flags,text = i.next().split(':', 1)
+            flags,text = next(i).split(':', 1)
 
             if len(flags) == 0:
                 if len(text) == 1:
@@ -33,11 +33,11 @@ def _parse_comments(s):
                     indent = " " * int(flags[-1])
                 ctriple.append(text)
 
-                flags,text = i.next().split(':', 1)
+                flags,text = next(i).split(':', 1)
                 assert(flags[0] == 'm')
                 ctriple.append(text)
 
-                flags,text = i.next().split(':', 1)
+                flags,text = next(i).split(':', 1)
                 assert(flags[0] == 'e')
                 ctriple.append(text)
                 ctriple.append(indent)
