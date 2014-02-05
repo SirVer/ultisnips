@@ -1046,9 +1046,8 @@ class SnippetManager(object):
 
     @property
     def primary_filetype(self):
-        """ Property for the primary filetype. This filetype
-        will be edited when UltiSnipsEdit is called
-        without any arguments.
+        """ This filetype will be edited when UltiSnipsEdit is called without
+        any arguments.
         """
         return self._filetypes[_vim.buf.nr][0]
 
@@ -1087,16 +1086,12 @@ class SnippetManager(object):
                 os.mkdir(path)
 
             edit = os.path.join(path, filename)
-
         return edit
 
-    # Loading
     def _load_snippets_for(self, ft):
         self.snippet_dict(ft).reset()
-
         for fn in _base_snippet_files_for(ft):
             self._parse_snippets(ft, fn)
-
         # Now load for the parents
         for p in self._snippets[ft].extends:
             if p not in self._snippets:
@@ -1113,10 +1108,8 @@ class SnippetManager(object):
         elif do_hash:
             cur_snips = set(_base_snippet_files_for(ft))
             old_snips = set(self.snippet_dict(ft).files)
-
             if cur_snips - old_snips:
                 return True
-
         return False
 
     def _ensure_loaded(self, ft, checked=None):
