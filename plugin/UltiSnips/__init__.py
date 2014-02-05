@@ -4,14 +4,14 @@
 from functools import wraps
 from collections import defaultdict
 import glob
-import hashlib
 import os
 import re
 import traceback
 
-from UltiSnips.compatibility import as_unicode
 from UltiSnips._diff import diff, guess_edit
+from UltiSnips.compatibility import as_unicode
 from UltiSnips.geometry import Position
+from UltiSnips.snippet_dictionary import SnippetDictionary
 from UltiSnips.text_objects import SnippetInstance
 from UltiSnips.util import IndentUtil
 from UltiSnips.vim_state import VimState
@@ -99,12 +99,6 @@ def _words_for_line(trigger, before, num_words=None):
             before_words = before_words[:left]
         return before[len(before_words):].strip()
 
-def _hash_file(path):
-    """Returns a hashdigest of 'path'"""
-    if not os.path.isfile(path):
-        return False
-    return hashlib.sha1(open(path, "rb").read()).hexdigest()
-
 def _plugin_dir():
     """ Calculates the plugin directory for UltiSnips. This depends on the
     current file being 3 levels deep from the plugin directory, so it needs to
@@ -164,72 +158,6 @@ Following is the full stack trace:
             self.leaving_buffer() # Vim sends no WinLeave msg here.
             _vim.new_scratch_buffer(s)
     return wrapper
-
-class _SnippetDictionary(object):
-    def __init__(self, *args, **kwargs):
-        self._added = []
-        self.reset()
-
-    def add_snippet(self, s, fn=None):
-        if fn:
-            self._snippets.append(s)
-
-            if fn not in self.files:
-                self.addfile(fn)
-        else:
-            self._added.append(s)
-
-    def get_matching_snippets(self, trigger, potentially):
-        """Returns all snippets matching the given trigger."""
-        if not potentially:
-            return [ s for s in self.snippets if s.matches(trigger) ]
-        else:
-            return [ s for s in self.snippets if s.could_match(trigger) ]
-
-    @property
-    def snippets(self):
-        return self._added + self._snippets
-
-    def clear_snippets(self, triggers=[]):
-        """Remove all snippets that match each trigger in triggers.
-            When triggers is empty, removes all snippets.
-        """
-        if triggers:
-            for t in triggers:
-                for s in self.get_matching_snippets(t, potentially=False):
-                    if s in self._snippets:
-                        self._snippets.remove(s)
-                    if s in self._added:
-                        self._added.remove(s)
-        else:
-            self._snippets = []
-            self._added = []
-
-    @property
-    def files(self):
-        return self._files
-
-    def reset(self):
-        self._snippets = []
-        self._extends = []
-        self._files = {}
-
-    def addfile(self, path):
-        self.files[path] = _hash_file(path)
-
-    def needs_update(self):
-        for path, hash in self.files.items():
-            if not hash or hash != _hash_file(path):
-                return True
-        return False
-
-    def extends():
-        def fget(self):
-            return self._extends
-        def fset(self, value):
-            self._extends = value
-        return locals()
-    extends = property(**extends())
 
 class _SnippetsFileParser(object):
     def __init__(self, ft, fn, snip_manager, file_data=None):
@@ -641,7 +569,7 @@ class SnippetManager(object):
 
     def snippet_dict(self, ft):
         if ft not in self._snippets:
-            self._snippets[ft] = _SnippetDictionary()
+            self._snippets[ft] = SnippetDictionary()
         return self._snippets[ft]
 
     @err_to_scratch_buffer
