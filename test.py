@@ -2724,7 +2724,7 @@ class IMMoving_NoExitingEventAtEnd_ECR(_VimTest):
 class IMMoving_ExitWhenOutsideRight_ECR(_VimTest):
     snippets = ("test", r"$1 ${2:blub} ${1:Tab}")
     keys = "hello test this" + ESC + "02f i" + EX + "tab" + ARR_R + JF + "hallo"
-    wanted = "hello tab blub tab hallothis"
+    wanted = "hello tab blub tab " + JF + "hallothis"
 class IMMoving_NotExitingWhenBarelyOutsideLeft_ECR(_VimTest):
     snippets = ("test", r"${1:Hi} ${2:blub}")
     keys = "hello test this" + ESC + "02f i" + EX + "tab" + 3*ARR_L + \
@@ -2734,17 +2734,17 @@ class IMMoving_ExitWhenOutsideLeft_ECR(_VimTest):
     snippets = ("test", r"${1:Hi} ${2:blub}")
     keys = "hello test this" + ESC + "02f i" + EX + "tab" + 4*ARR_L + \
             JF + "hallo"
-    wanted = "hellohallo tab blub this"
+    wanted = "hello" + JF + "hallo tab blub this"
 class IMMoving_ExitWhenOutsideAbove_ECR(_VimTest):
     snippets = ("test", "${1:Hi}\n${2:blub}")
-    keys = "hello test this" + ESC + "02f i" + EX + "tab" + 1*ARR_U + JF + \
-            "\nhallo"
-    wanted = "hallo\nhello tab\nblub this"
+    keys = "hello test this" + ESC + "02f i" + EX + "tab" + 1*ARR_U + "\n" + JF + \
+            "hallo"
+    wanted = JF + "hallo\nhello tab\nblub this"
 class IMMoving_ExitWhenOutsideBelow_ECR(_VimTest):
     snippets = ("test", "${1:Hi}\n${2:blub}")
     keys = "hello test this" + ESC + "02f i" + EX + "tab" + 2*ARR_D + JF + \
             "testhallo\n"
-    wanted = "hello tab\nblub this\ntesthallo"
+    wanted = "hello tab\nblub this\n" + JF + "testhallo"
 # End: Insert Mode Moving  #}}}
 # Undo of Snippet insertion  {{{#
 class Undo_RemoveMultilineSnippet(_VimTest):
