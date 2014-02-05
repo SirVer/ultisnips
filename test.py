@@ -701,24 +701,24 @@ class TabStopTestJumpingRLExampleWithZeroTab_ExceptCorrectResult(_VimTest):
 class TabStopTestJumpingDontJumpToEndIfThereIsTabZero_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo $0 $1")
     keys = "hallo" + EX + "Test" + JF + "Hi" + JF + JF + "du"
-    wanted = "hallo Hidu Test"
+    wanted = "hallo Hi" + 2*JF + "du Test"
 
 class TabStopTestBackwardJumping_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo ${2:End} mitte${1:Beginning}")
     keys = "hallo" + EX + "Somelengthy Text" + JF + "Hi" + JB + \
             "Lets replace it again" + JF + "Blah" + JF + JB*2 + JF
-    wanted = "hallo Blah mitteLets replace it again"
+    wanted = "hallo Blah mitteLets replace it again" + JB*2 + JF
 class TabStopTestBackwardJumping2_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo $2 $1")
     keys = "hallo" + EX + "Somelengthy Text" + JF + "Hi" + JB + \
             "Lets replace it again" + JF + "Blah" + JF + JB*2 + JF
-    wanted = "hallo Blah Lets replace it again"
+    wanted = "hallo Blah Lets replace it again" + JB*2 + JF
 
 class TabStopTestMultilineExpand_ExceptCorrectResult(_VimTest):
     snippets = ("hallo", "hallo $0\nnice $1 work\n$3 $2\nSeem to work")
     keys ="test hallo World" + ESC + "02f i" + EX + "world" + JF + "try" + \
-            JF + "test" + JF + "one more" + JF + JF
-    wanted = "test hallo one more\nnice world work\n" \
+            JF + "test" + JF + "one more" + JF
+    wanted = "test hallo one more" + JF + "\nnice world work\n" \
             "test try\nSeem to work World"
 
 class TabStop_TSInDefaultTextRLExample_OverwriteNone_ECR(_VimTest):
@@ -1185,12 +1185,12 @@ snip.rv = "nothing"` `!p snip.rv = a
 
 class PythonCode_LongerTextThanSource_Chars(_VimTest):
     snippets = ("test", r"""hi`!p snip.rv = "a" * 100`end""")
-    keys = """test""" + EX + JF + "ups"
+    keys = """test""" + EX + "ups"
     wanted = "hi" + 100*"a" + "endups"
 
 class PythonCode_LongerTextThanSource_MultiLine(_VimTest):
     snippets = ("test", r"""hi`!p snip.rv = "a" * 100 + '\n'*100 + "a"*100`end""")
-    keys = """test""" + EX + JF + "ups"
+    keys = """test""" + EX + "ups"
     wanted = "hi" + 100*"a" + 100*"\n" + 100*"a" + "endups"
 
 class PythonCode_AccessKilledTabstop_OverwriteSecond(_VimTest):
@@ -2724,7 +2724,7 @@ class IMMoving_NoExitingEventAtEnd_ECR(_VimTest):
 class IMMoving_ExitWhenOutsideRight_ECR(_VimTest):
     snippets = ("test", r"$1 ${2:blub} ${1:Tab}")
     keys = "hello test this" + ESC + "02f i" + EX + "tab" + ARR_R + JF + "hallo"
-    wanted = "hello tab blub tab hallothis"
+    wanted = "hello tab blub tab " + JF + "hallothis"
 class IMMoving_NotExitingWhenBarelyOutsideLeft_ECR(_VimTest):
     snippets = ("test", r"${1:Hi} ${2:blub}")
     keys = "hello test this" + ESC + "02f i" + EX + "tab" + 3*ARR_L + \
@@ -2734,17 +2734,17 @@ class IMMoving_ExitWhenOutsideLeft_ECR(_VimTest):
     snippets = ("test", r"${1:Hi} ${2:blub}")
     keys = "hello test this" + ESC + "02f i" + EX + "tab" + 4*ARR_L + \
             JF + "hallo"
-    wanted = "hellohallo tab blub this"
+    wanted = "hello" + JF + "hallo tab blub this"
 class IMMoving_ExitWhenOutsideAbove_ECR(_VimTest):
     snippets = ("test", "${1:Hi}\n${2:blub}")
-    keys = "hello test this" + ESC + "02f i" + EX + "tab" + 1*ARR_U + JF + \
-            "\nhallo"
-    wanted = "hallo\nhello tab\nblub this"
+    keys = "hello test this" + ESC + "02f i" + EX + "tab" + 1*ARR_U + "\n" + JF + \
+            "hallo"
+    wanted = JF + "hallo\nhello tab\nblub this"
 class IMMoving_ExitWhenOutsideBelow_ECR(_VimTest):
     snippets = ("test", "${1:Hi}\n${2:blub}")
     keys = "hello test this" + ESC + "02f i" + EX + "tab" + 2*ARR_D + JF + \
             "testhallo\n"
-    wanted = "hello tab\nblub this\ntesthallo"
+    wanted = "hello tab\nblub this\n" + JF + "testhallo"
 # End: Insert Mode Moving  #}}}
 # Undo of Snippet insertion  {{{#
 class Undo_RemoveMultilineSnippet(_VimTest):
@@ -2762,8 +2762,8 @@ class Undo_RemoveWholeSnippet(_VimTest):
     wanted = "first line\n\n\nupsy\n\n\nthird line"
 class JumpForward_DefSnippet(_VimTest):
     snippets = ("test", "${1}\n`!p snip.rv = '\\n'.join(t[1].split())`\n\n${0:pass}")
-    keys = "test" + EX + "a b c" + JF + "shallnot" + JF + "end"
-    wanted = "a b c\na\nb\nc\n\nshallnotend"
+    keys = "test" + EX + "a b c" + JF + "shallnot"
+    wanted = "a b c\na\nb\nc\n\nshallnot"
 class DeleteSnippetInsertion0(_VimTest):
     snippets = ("test", "${1:hello} $1")
     keys = "test" + EX + ESC + "Vkx" + "i\nworld\n"

@@ -84,6 +84,12 @@ endif
 if !exists("g:UltiSnipsSnippetDirectories")
     let g:UltiSnipsSnippetDirectories = [ "UltiSnips" ]
 endif
+
+" Should UltiSnips map JumpForwardTrigger and JumpBackwardTrigger only during
+" snippet expansion?
+if !exists("g:UltiSnipsClearJumpTrigger")
+    let g:UltiSnipsClearJumpTrigger = 1
+endif
 " }}}
 
 " Global Commands {{{
@@ -204,12 +210,16 @@ function! UltiSnips_MapKeys()
     else
         exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=UltiSnips_ExpandSnippet()<cr>"
         exec "snoremap <silent> " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips_ExpandSnippet()<cr>"
-        exec "inoremap <silent> " . g:UltiSnipsJumpForwardTrigger  . " <C-R>=UltiSnips_JumpForwards()<cr>"
-        exec "snoremap <silent> " . g:UltiSnipsJumpForwardTrigger  . " <Esc>:call UltiSnips_JumpForwards()<cr>"
+        if g:UltiSnipsClearJumpTrigger == 0
+            exec "inoremap <silent> " . g:UltiSnipsJumpForwardTrigger  . " <C-R>=UltiSnips_JumpForwards()<cr>"
+            exec "snoremap <silent> " . g:UltiSnipsJumpForwardTrigger  . " <Esc>:call UltiSnips_JumpForwards()<cr>"
+        endif
     endif
     exec 'xnoremap ' . g:UltiSnipsExpandTrigger. ' :call UltiSnips_SaveLastVisualSelection()<cr>gvs'
-    exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=UltiSnips_JumpBackwards()<cr>"
-    exec "snoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <Esc>:call UltiSnips_JumpBackwards()<cr>"
+    if g:UltiSnipsClearJumpTrigger == 0
+        exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=UltiSnips_JumpBackwards()<cr>"
+        exec "snoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <Esc>:call UltiSnips_JumpBackwards()<cr>"
+    endif
     exec "inoremap <silent> " . g:UltiSnipsListSnippets . " <C-R>=UltiSnips_ListSnippets()<cr>"
     exec "snoremap <silent> " . g:UltiSnipsListSnippets . " <Esc>:call UltiSnips_ListSnippets()<cr>"
 
@@ -217,6 +227,23 @@ function! UltiSnips_MapKeys()
     snoremap <silent> <DEL> <c-g>c
     snoremap <silent> <c-h> <c-g>c
 endf
+function! UltiSnips_MapInnerKeys()
+    if g:UltiSnipsExpandTrigger != g:UltiSnipsJumpForwardTrigger
+        exec "inoremap <buffer> <silent> " . g:UltiSnipsJumpForwardTrigger . " <C-R>=UltiSnips_JumpForwards()<cr>"
+        exec "snoremap <buffer> <silent> " . g:UltiSnipsJumpForwardTrigger . " <Esc>:call UltiSnips_JumpForwards()<cr>"
+    endif
+    exec "inoremap <buffer> <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=UltiSnips_JumpBackwards()<cr>"
+    exec "snoremap <buffer> <silent> " . g:UltiSnipsJumpBackwardTrigger . " <Esc>:call UltiSnips_JumpBackwards()<cr>"
+endf
+function! UltiSnips_RestoreInnerKeys()
+    if g:UltiSnipsExpandTrigger != g:UltiSnipsJumpForwardTrigger
+        exec "iunmap <buffer> " . g:UltiSnipsJumpForwardTrigger
+        exec "sunmap <buffer> " . g:UltiSnipsJumpForwardTrigger
+    endif
+    exec "iunmap <buffer> " . g:UltiSnipsJumpBackwardTrigger
+    exec "sunmap <buffer> " . g:UltiSnipsJumpBackwardTrigger
+endf
+
 
 function! UltiSnips_CursorMoved()
     exec g:_uspy "UltiSnips_Manager.cursor_moved()"
