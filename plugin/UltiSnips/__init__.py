@@ -9,12 +9,13 @@ import os
 import re
 import traceback
 
-from UltiSnips.compatibility import as_unicode, byte2col
+from UltiSnips.compatibility import as_unicode
 from UltiSnips._diff import diff, guess_edit
 from UltiSnips.geometry import Position
 from UltiSnips.text_objects import SnippetInstance
 from UltiSnips.util import IndentUtil
 from UltiSnips.vim_state import VimState
+from UltiSnips.visual_content_preserver import VisualContentPreserver
 import UltiSnips._vim as _vim
 
 def _ask_snippets(snippets):
@@ -522,41 +523,6 @@ class Snippet(object):
                 last_re = self._last_re, globals = self._globals)
 
         return si
-
-class VisualContentPreserver(object):
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        self._mode = ""
-        self._text = as_unicode("")
-
-    def conserve(self):
-        sl, sbyte = map(int, (_vim.eval("""line("'<")"""), _vim.eval("""col("'<")""")))
-        el, ebyte = map(int, (_vim.eval("""line("'>")"""), _vim.eval("""col("'>")""")))
-        sc = byte2col(sl, sbyte - 1)
-        ec = byte2col(el, ebyte - 1)
-        self._mode = _vim.eval("visualmode()")
-
-        def _vim_line_with_eol(ln):
-            return _vim.buf[ln] + '\n'
-
-        if sl == el:
-            text = _vim_line_with_eol(sl-1)[sc:ec+1]
-        else:
-            text = _vim_line_with_eol(sl-1)[sc:]
-            for cl in range(sl,el-1):
-                text += _vim_line_with_eol(cl)
-            text += _vim_line_with_eol(el-1)[:ec+1]
-        self._text = text
-
-    @property
-    def text(self):
-        return self._text
-
-    @property
-    def mode(self):
-        return self._mode
 
 class SnippetManager(object):
     def __init__(self):
