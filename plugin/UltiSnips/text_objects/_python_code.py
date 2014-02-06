@@ -5,7 +5,7 @@ import os
 from collections import namedtuple
 
 import UltiSnips._vim as _vim
-from UltiSnips.compatibility import compatible_exec, as_unicode
+from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
 
 from UltiSnips.text_objects._base import NoneditableTextObject
@@ -187,7 +187,7 @@ class PythonCode(NoneditableTextObject):
 
         self._globals = {}
         globals = snippet.globals.get("!p", [])
-        compatible_exec("\n".join(globals).replace("\r\n", "\n"), self._globals)
+        exec("\n".join(globals).replace("\r\n", "\n"), self._globals)
 
         # Add Some convenience to the code
         self._code = "import re, os, vim, string, random\n" + code
@@ -213,7 +213,7 @@ class PythonCode(NoneditableTextObject):
             'snip': self._snip,
         })
 
-        compatible_exec(self._code, self._globals, local_d)
+        exec(self._code, self._globals, local_d)
 
         rv = as_unicode(
             self._snip.rv if self._snip._rv_changed

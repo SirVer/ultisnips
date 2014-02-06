@@ -34,14 +34,13 @@ class VimBuffer(object):
         return len(vim.current.buffer)
 
     @property
-    def current_line_splitted(self):
-        """Returns the text before and after the cursor as a tuple."""
+    def line_till_cursor(self):
+        """Returns the text before the cursor."""
         # Note: we want byte position here
-        lineno, col = vim.current.window.cursor
-
+        _, col = vim.current.window.cursor
         line = vim.current.line
-        before, after = as_unicode(line[:col]), as_unicode(line[col:])
-        return before, after
+        before = as_unicode(line[:col])
+        return before
 
     @property
     def nr(self):

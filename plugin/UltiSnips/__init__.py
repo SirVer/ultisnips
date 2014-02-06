@@ -147,9 +147,10 @@ Following is the full stack trace:
     return wrapper
 
 class SnippetManager(object):
+    """The main entry point for all UltiSnips functionality. All Vim functions
+    call methods in this class."""
+
     def __init__(self, expand_trigger, forward_trigger, backward_trigger):
-        """The main entry point for all UltiSnips functionality. All Vim
-        functions call methods in this class."""
         self.expand_trigger = expand_trigger
         self.forward_trigger = forward_trigger
         self.backward_trigger = backward_trigger
@@ -204,7 +205,7 @@ class SnippetManager(object):
     def snippets_in_current_scope(self):
         """Returns the snippets that could be expanded to Vim as a global
         variable."""
-        before, _ = _vim.buf.current_line_splitted
+        before = _vim.buf.line_till_cursor
         snippets = self._snips(before, True)
 
         # Sort snippets alphabetically
@@ -231,7 +232,7 @@ class SnippetManager(object):
     def list_snippets(self):
         """Shows the snippets that could be expanded to the User and let her
         select one."""
-        before, after = _vim.buf.current_line_splitted
+        before = _vim.buf.line_till_cursor
         snippets = self._snips(before, True)
 
         if len(snippets) == 0:
@@ -248,7 +249,7 @@ class SnippetManager(object):
         if not snippet:
             return True
 
-        self._do_snippet(snippet, before, after)
+        self._do_snippet(snippet, before)
 
         return True
 
@@ -285,47 +286,56 @@ class SnippetManager(object):
         return self._snippets[ft]
 
     @err_to_scratch_buffer
-    def add_snippet(self, trigger, value, descr, options, ft="all", globals=None, fn=None):
+    def add_snippet(self, trigger, value, descr,
+                    options, ft="all", globals=None, fn=None):
         """Add a snippet to the list of known snippets of the given 'ft'."""
-        l = self.snippet_dict(ft).add_snippet(
+        self.snippet_dict(ft).add_snippet(
             Snippet(trigger, value, descr, options, globals or {}), fn
         )
 
     @err_to_scratch_buffer
     def add_snippet_file(self, ft, path):
+        """Add a file to be watched for changes to the 'ft' snippet dict."""
         sd = self.snippet_dict(ft)
         sd.addfile(path)
 
     @err_to_scratch_buffer
-    def expand_anon(self, value, trigger="", descr="", options="", globals=None):
+    def expand_anon(self, value, trigger="", descr="",
+                    options="", globals=None):
+        """Expand an anonymous snippet right here."""
         if globals is None:
             globals = {}
 
-        before, after = _vim.buf.current_line_splitted
+        before = _vim.buf.line_till_cursor
         snip = Snippet(trigger, value, descr, options, globals)
 
         if not trigger or snip.matches(before):
-            self._do_snippet(snip, before, after)
+            self._do_snippet(snip, before)
             return True
         else:
             return False
 
     @err_to_scratch_buffer
-    def clear_snippets(self, triggers = [], ft = "all"):
+    def clear_snippets(self, triggers=None, ft="all"):
+        """Forget all snippets for the given 'ft'. If 'triggers' is given only
+        forget those with the given trigger."""
+        if triggers is None:
+            triggers = []
         if ft in self._snippets:
             self._snippets[ft].clear_snippets(triggers)
 
     @err_to_scratch_buffer
     def add_extending_info(self, ft, parents):
+        """Add the list of 'parents' as being extended by the 'ft'."""
         sd = self.snippet_dict(ft)
-        for p in parents:
-            if p in sd.extends:
+        for parent in parents:
+            if parent in sd.extends:
                 continue
-
-            sd.extends.append(p)
+            sd.extends.append(parent)
 
     @err_to_scratch_buffer
     def cursor_moved(self):
+        """Called whenever the cursor moved."""
         self._vstate.remember_position()
         if _vim.eval("mode()") not in 'in':
             return
@@ -336,7 +346,8 @@ class SnippetManager(object):
 
         if self._csnippets:
             cstart = self._csnippets[0].start.line
-            cend = self._csnippets[0].end.line + self._vstate.diff_in_buffer_length
+            cend = self._csnippets[0].end.line + \
+                   self._vstate.diff_in_buffer_length
             ct = _vim.buf[cstart:cend + 1]
             lt = self._vstate.remembered_buffer
             pos = _vim.buf.cursor
@@ -349,15 +360,17 @@ class SnippetManager(object):
             # remove all equal lines. Then do the same from the front.
             if lt and ct:
                 while (lt[lt_span[1]-1] == ct[ct_span[1]-1] and
-                        self._vstate.ppos.line < initial_line + lt_span[1]-1 and pos.line < initial_line + ct_span[1]-1 and
-                       (lt_span[0] < lt_span[1]) and
-                       (ct_span[0] < ct_span[1])):
+                        self._vstate.ppos.line < initial_line + lt_span[1]-1 and
+                        pos.line < initial_line + ct_span[1]-1 and
+                        (lt_span[0] < lt_span[1]) and
+                        (ct_span[0] < ct_span[1])):
                     ct_span[1] -= 1
                     lt_span[1] -= 1
                 while (lt_span[0] < lt_span[1] and
                        ct_span[0] < ct_span[1] and
                        lt[lt_span[0]] == ct[ct_span[0]] and
-                       self._vstate.ppos.line >= initial_line and pos.line >= initial_line):
+                       self._vstate.ppos.line >= initial_line and
+                       pos.line >= initial_line):
                     ct_span[0] += 1
                     lt_span[0] += 1
                     initial_line += 1
@@ -376,7 +389,9 @@ class SnippetManager(object):
                     es = diff(lt, ct, initial_line)
                 self._csnippets[0].replay_user_edits(es)
             except IndexError:
-                pass # Rather do nothing than throwing an error. It will be correct most of the time
+                # Rather do nothing than throwing an error. It will be correct
+                # most of the time
+                pass
 
         self._check_if_still_inside_snippet()
         if self._csnippets:
@@ -384,10 +399,8 @@ class SnippetManager(object):
             self._vstate.remember_buffer(self._csnippets[0])
 
     def leaving_buffer(self):
-        """
-        Called when the user switches tabs/windows/buffers. It basically means
-        that all snippets must be properly terminated
-        """
+        """Called when the user switches tabs/windows/buffers. It basically
+        means that all snippets must be properly terminated."""
         while len(self._csnippets):
             self._current_snippet_is_done()
         self._reinit()
@@ -397,6 +410,7 @@ class SnippetManager(object):
     # Private/Protect Functions Below #
     ###################################
     def _error(self, msg):
+        """Shows 'msg' as error to the user."""
         msg = _vim.escape("UltiSnips: " + msg)
         if self._test_error:
             msg = msg.replace('"', r'\"')
@@ -412,11 +426,12 @@ class SnippetManager(object):
             _vim.command("echoerr %s" % msg)
 
     def _reinit(self):
+        """Resets transient state."""
         self._ctab = None
         self._ignore_movements = False
 
     def _check_if_still_inside_snippet(self):
-        # Did we leave the snippet with this movement?
+        """Checks if the cursor is outside of the current snippet."""
         if self._cs and (
             not self._cs.start <= _vim.buf.cursor <= self._cs.end
         ):
@@ -425,23 +440,21 @@ class SnippetManager(object):
             self._check_if_still_inside_snippet()
 
     def _current_snippet_is_done(self):
+        """The current snippet should be terminated."""
         self._csnippets.pop()
-        if not self._csnippets and _vim.eval("g:UltiSnipsClearJumpTrigger") != "0":
+        if (not self._csnippets and
+                _vim.eval("g:UltiSnipsClearJumpTrigger") != "0"):
             _vim.command("call UltiSnips_RestoreInnerKeys()")
 
-    def _jump(self, backwards = False):
+    def _jump(self, backwards=False):
+        """Helper method that does the actual jump."""
         jumped = False
         if self._cs:
             self._ctab = self._cs.select_next_tab(backwards)
             if self._ctab:
-                before, after = _vim.buf.current_line_splitted
                 if self._cs.snippet.has_option("s"):
-                    if after == "":
-                        m = re.match(r'(.*?)\s+$', before)
-                        if m:
-                            lineno = _vim.buf.cursor.line
-                            _vim.text_to_vim(Position(lineno, 0), Position(
-                                lineno, len(before)+len(after)), m.group(1))
+                    lineno = _vim.buf.cursor.line
+                    _vim.buf[lineno] = _vim.buf[lineno].rstrip()
                 _vim.select(self._ctab.start, self._ctab.end)
                 jumped = True
                 if self._ctab.no == 0:
@@ -459,22 +472,22 @@ class SnippetManager(object):
         return jumped
 
     def _cache_unnamed_register(self):
+        """Save the unnamed register."""
         self._unnamed_reg_cached = True
         unnamed_reg = _vim.eval('@"')
         if self._last_placeholder != unnamed_reg:
-          self._unnamed_reg_cache = unnamed_reg
-        self._last_placeholder = self._ctab._initial_text
+            self._unnamed_reg_cache = unnamed_reg
+        self._last_placeholder = self._ctab.current_text
 
     def restore_unnamed_register(self):
+        """Restores the unnamed register from the cache."""
         if self._unnamed_reg_cached:
             escaped_cache = self._unnamed_reg_cache.replace("'", "''")
             _vim.command("let @\"='%s'" % escaped_cache)
             self._unnamed_register_cached = False
 
     def _handle_failure(self, trigger):
-        """
-        Mainly make sure that we play well with SuperTab
-        """
+        """Mainly make sure that we play well with SuperTab."""
         if trigger.lower() == "<tab>":
             feedkey = "\\" + trigger
         elif trigger.lower() == "<s-tab>":
@@ -494,7 +507,7 @@ class SnippetManager(object):
         for idx, sttrig in enumerate(self._supertab_keys):
             if trigger.lower() == sttrig.lower():
                 if idx == 0:
-                    feedkey= r"\<Plug>SuperTabForward"
+                    feedkey = r"\<Plug>SuperTabForward"
                     mode = "n"
                 elif idx == 1:
                     feedkey = r"\<Plug>SuperTabBackward"
@@ -502,7 +515,8 @@ class SnippetManager(object):
                 # Use remap mode so SuperTab mappings will be invoked.
                 break
 
-        if feedkey == r"\<Plug>SuperTabForward" or feedkey == r"\<Plug>SuperTabBackward":
+        if (feedkey == r"\<Plug>SuperTabForward" or
+                feedkey == r"\<Plug>SuperTabBackward"):
             _vim.command("return SuperTab(%s)" % _vim.escape(mode))
         elif feedkey:
             _vim.command("return %s" % _vim.escape(feedkey))
@@ -522,24 +536,25 @@ class SnippetManager(object):
         # Search if any of the snippets overwrites the previous
         # Dictionary allows O(1) access for easy overwrites
         snippets = {}
-        for s in found_snippets:
-            if (s.trigger not in snippets) or s.overwrites_previous:
-                snippets[s.trigger] = []
-            snippets[s.trigger].append(s)
+        for snip in found_snippets:
+            if (snip.trigger not in snippets) or snip.overwrites_previous:
+                snippets[snip.trigger] = []
+            snippets[snip.trigger].append(snip)
 
         # Transform dictionary into flat list of snippets
-        selected_snippets = set([item for sublist in snippets.values() for item in sublist])
+        selected_snippets = set(
+                [item for sublist in snippets.values() for item in sublist])
         # Return snippets to their original order
-        snippets = [snip for snip in found_snippets if snip in selected_snippets]
+        snippets = [snip for snip in found_snippets if
+                snip in selected_snippets]
 
         return snippets
 
-    def _do_snippet(self, snippet, before, after):
-        """ Expands the given snippet, and handles everything
-        that needs to be done with it.
-        """
+    def _do_snippet(self, snippet, before):
+        """Expands the given snippet, and handles everything
+        that needs to be done with it."""
         if _vim.eval("g:UltiSnipsClearJumpTrigger") == "1":
-           _vim.command("call UltiSnips_MapInnerKeys()")
+            _vim.command("call UltiSnips_MapInnerKeys()")
         # Adjust before, maybe the trigger is not the complete word
         text_before = before
         if snippet.matched:
@@ -577,7 +592,8 @@ class SnippetManager(object):
         self._jump()
 
     def _try_expand(self):
-        before, after = _vim.buf.current_line_splitted
+        """Try to expand a snippet in the current place."""
+        before = _vim.buf.line_till_cursor
         if not before:
             return False
         snippets = self._snips(before, False)
@@ -590,27 +606,28 @@ class SnippetManager(object):
             snippet = _ask_snippets(snippets)
             if not snippet:
                 return True
-        self._do_snippet(snippet, before, after)
+        self._do_snippet(snippet, before)
         return True
 
     @property
     def _cs(self):
+        """The current snippet or None."""
         if not len(self._csnippets):
             return None
         return self._csnippets[-1]
 
-    def _parse_snippets(self, ft, fn, file_data=None):
-        self.add_snippet_file(ft, fn)
-        SnippetsFileParser(ft, fn, self, file_data).parse()
+    def _parse_snippets(self, ft, filename, file_data=None):
+        """Parse the file 'filename' for the given 'ft'."""
+        self.add_snippet_file(ft, filename)
+        SnippetsFileParser(ft, filename, self, file_data).parse()
 
     @property
     def primary_filetype(self):
-        """ This filetype will be edited when UltiSnipsEdit is called without
-        any arguments.
-        """
+        """This filetype will be edited when UltiSnipsEdit is called without
+        any arguments."""
         return self._filetypes[_vim.buf.nr][0]
 
-    def file_to_edit(self, ft):
+    def file_to_edit(self, ft):  # pylint: disable=no-self-use
         """ Gets a file to edit based on the given filetype.
         If no filetype is given, uses the current filetype from Vim.
 
@@ -650,6 +667,7 @@ class SnippetManager(object):
         return edit
 
     def _load_snippets_for(self, ft):
+        """Load all snippets for the given 'ft'."""
         self.snippet_dict(ft).reset()
         for fn in _base_snippet_files_for(ft):
             self._parse_snippets(ft, fn)
@@ -659,6 +677,8 @@ class SnippetManager(object):
                 self._load_snippets_for(parent_ft)
 
     def _needs_update(self, ft):
+        """Returns true if any files for 'ft' have changed and must be
+        reloaded."""
         do_hash = _vim.eval('exists("g:UltiSnipsDoHash")') == "0" \
                 or _vim.eval("g:UltiSnipsDoHash") != "0"
 
@@ -674,6 +694,8 @@ class SnippetManager(object):
         return False
 
     def _ensure_loaded(self, ft, checked=None):
+        """Make sure that the snippets for 'ft' and everything it extends are
+        loaded."""
         if not checked:
             checked = set([ft])
         elif ft in checked:
@@ -688,22 +710,24 @@ class SnippetManager(object):
             self._ensure_loaded(parent, checked)
 
     def _ensure_all_loaded(self):
+        """Make sure that all filetypes fur the current buffer are loaded."""
         for ft in self._filetypes[_vim.buf.nr]:
             self._ensure_loaded(ft)
 
     def reset_buffer_filetypes(self):
+        """Reset the filetypes for the current buffer."""
         if _vim.buf.nr in self._filetypes:
             del self._filetypes[_vim.buf.nr]
 
     def add_buffer_filetypes(self, ft):
-        """ Checks for changes in the list of snippet files or the contents
-        of the snippet files and reloads them if necessary.
-        """
+        """Checks for changes in the list of snippet files or the contents of
+        the snippet files and reloads them if necessary. """
         buf_fts = self._filetypes[_vim.buf.nr]
         idx = -1
         for ft in ft.split("."):
             ft = ft.strip()
-            if not ft: continue
+            if not ft:
+                continue
             try:
                 idx = buf_fts.index(ft)
             except ValueError:
@@ -711,9 +735,8 @@ class SnippetManager(object):
                 idx += 1
         self._ensure_all_loaded()
 
-    def _find_snippets(self, ft, trigger, potentially = False, seen=None):
-        """
-        Find snippets matching trigger
+    def _find_snippets(self, ft, trigger, potentially=False, seen=None):
+        """Find snippets matching trigger
 
         ft          - file type to search
         trigger     - trigger to match against

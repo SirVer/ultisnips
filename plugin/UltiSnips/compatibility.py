@@ -8,26 +8,24 @@ as many python versions as possible.
 
 import sys
 
-import vim
+import vim  # pylint:disable=import-error
 
-__all__ = ['as_unicode', 'compatible_exec', 'vim_cursor', 'set_vim_cursor']
-
-def _vim_dec(s):
+def _vim_dec(string):
+    """Decode 'string' using &encoding."""
     try:
-        return s.decode(vim.eval("&encoding"))
+        return string.decode(vim.eval("&encoding"))
     except UnicodeDecodeError:
         # At least we tried. There might be some problems down the road now
-        return s
+        return string
 
-def _vim_enc(s):
+def _vim_enc(string):
+    """Encode 'string' using &encoding."""
     try:
-        return s.encode(vim.eval("&encoding"))
+        return string.encode(vim.eval("&encoding"))
     except UnicodeEncodeError:
-        return s
+        return string
 
-if sys.version_info >= (3,0):
-    from UltiSnips.compatibility_py3 import *
-
+if sys.version_info >= (3, 0):
     def col2byte(line, col):
         """
         Convert a valid column index into a byte index inside
@@ -45,16 +43,16 @@ if sys.version_info >= (3,0):
         raw_bytes = _vim_enc(line)[:nbyte]
         return len(_vim_dec(raw_bytes))
 
-    def as_unicode(s):
-        if isinstance(s, bytes):
-            return _vim_dec(s)
-        return str(s)
+    def as_unicode(string):
+        """Return 'string' as unicode instance."""
+        if isinstance(string, bytes):
+            return _vim_dec(string)
+        return str(string)
 
-    def as_vimencoding(s):
-        return s
+    def as_vimencoding(string):
+        """Return 'string' as Vim internal encoding."""
+        return string
 else:
-    from UltiSnips.compatibility_py2 import *
-
     import warnings
     warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -76,10 +74,12 @@ else:
             return nbyte
         return len(_vim_dec(line[:nbyte]))
 
-    def as_unicode(s):
-        if isinstance(s, str):
-            return _vim_dec(s)
-        return unicode(s)
+    def as_unicode(string):
+        """Return 'string' as unicode instance."""
+        if isinstance(string, str):
+            return _vim_dec(string)
+        return unicode(string)
 
-    def as_vimencoding(s):
-        return _vim_enc(s)
+    def as_vimencoding(string):
+        """Return 'string' as unicode instance."""
+        return _vim_enc(string)
