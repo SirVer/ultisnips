@@ -291,15 +291,15 @@ class _VimTest(unittest.TestCase):
 
         for s in self.snippets:
             sv,content = s[:2]
-            descr = ""
+            description = ""
             options = ""
             if len(s) > 2:
-                descr = s[2]
+                description = s[2]
             if len(s) > 3:
                 options = s[3]
 
             self.send_py("UltiSnips_Manager.add_snippet(%r, %r, %r, %r)" %
-                (sv, content, descr, options))
+                (sv, content, description, options))
 
         ft, fn, file_data = self.snippets_test_file
         if ft:

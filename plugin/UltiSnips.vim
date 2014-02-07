@@ -180,21 +180,21 @@ function! UltiSnips_FileTypeChanged()
     return ""
 endfunction
 
-function! UltiSnips_AddSnippet(trigger, value, descr, options, ...)
+function! UltiSnips_AddSnippet(trigger, value, description, options, ...)
     " Takes the same arguments as SnippetManager.add_snippet:
-    " (trigger, value, descr, options, ft = "all", globals = None)
+    " (trigger, value, description, options, ft = "all", globals = None)
     exec g:_uspy "args = vim.eval(\"a:000\")"
     exec g:_uspy "trigger = vim.eval(\"a:trigger\")"
     exec g:_uspy "value = vim.eval(\"a:value\")"
-    exec g:_uspy "descr = vim.eval(\"a:descr\")"
+    exec g:_uspy "description = vim.eval(\"a:description\")"
     exec g:_uspy "options = vim.eval(\"a:options\")"
-    exec g:_uspy "UltiSnips_Manager.add_snippet(trigger, value, descr, options, *args)"
+    exec g:_uspy "UltiSnips_Manager.add_snippet(trigger, value, description, options, *args)"
     return ""
 endfunction
 
 function! UltiSnips_Anon(value, ...)
     " Takes the same arguments as SnippetManager.expand_anon:
-    " (value, trigger="", descr="", options="", globals = None)
+    " (value, trigger="", description="", options="", globals = None)
     exec g:_uspy "args = vim.eval(\"a:000\")"
     exec g:_uspy "value = vim.eval(\"a:value\")"
     exec g:_uspy "UltiSnips_Manager.expand_anon(value, *args)"

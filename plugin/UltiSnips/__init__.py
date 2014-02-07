@@ -285,11 +285,11 @@ class SnippetManager(object):
         return self._snippets[ft]
 
     @err_to_scratch_buffer
-    def add_snippet(self, trigger, value, descr,
+    def add_snippet(self, trigger, value, description,
                     options, ft="all", globals=None, fn=None):
         """Add a snippet to the list of known snippets of the given 'ft'."""
         self.snippet_dict(ft).add_snippet(
-            Snippet(trigger, value, descr, options, globals or {}), fn
+            Snippet(trigger, value, description, options, globals or {}), fn
         )
 
     @err_to_scratch_buffer
@@ -299,14 +299,14 @@ class SnippetManager(object):
         sd.addfile(path)
 
     @err_to_scratch_buffer
-    def expand_anon(self, value, trigger="", descr="",
+    def expand_anon(self, value, trigger="", description="",
                     options="", globals=None):
         """Expand an anonymous snippet right here."""
         if globals is None:
             globals = {}
 
         before = _vim.buf.line_till_cursor
-        snip = Snippet(trigger, value, descr, options, globals)
+        snip = Snippet(trigger, value, description, options, globals)
 
         if not trigger or snip.matches(before):
             self._do_snippet(snip, before)

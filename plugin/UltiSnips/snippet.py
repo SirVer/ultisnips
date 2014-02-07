@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+"""Snippet representation after parsing."""
+
 import re
 
 from UltiSnips.compatibility import as_unicode
@@ -14,7 +16,6 @@ def _words_for_line(trigger, before, num_words=None):
     If num_words is None, then use the number of words in
     'trigger'.
     """
-    words = ''
     if not len(before):
         return ''
 
@@ -33,27 +34,29 @@ def _words_for_line(trigger, before, num_words=None):
 
 
 class Snippet(object):
+    """Represents a snippet as parsed from a file."""
+
     _INDENT = re.compile(r"^[ \t]*")
     _TABS = re.compile(r"^\t*")
 
-    def __init__(self, trigger, value, descr, options, globals):
-        """Represents a snippet as parsed from a file."""
-        self._t = as_unicode(trigger)
-        self._v = as_unicode(value)
-        self._d = as_unicode(descr)
+    def __init__(self, trigger, value, description, options, globals):
+        self._trigger = as_unicode(trigger)
+        self._value = as_unicode(value)
+        self._description = as_unicode(description)
         self._opts = options
         self._matched = ""
         self._last_re = None
         self._globals = globals
 
     def __repr__(self):
-        return "Snippet(%s,%s,%s)" % (self._t, self._d, self._opts)
+        return "Snippet(%s,%s,%s)" % (
+                self._trigger, self._description, self._opts)
 
     def _re_match(self, trigger):
         """ Test if a the current regex trigger matches
         `trigger`. If so, set _last_re and _matched.
         """
-        for match in re.finditer(self._t, trigger):
+        for match in re.finditer(self._trigger, trigger):
             if match.end() != len(trigger):
                 continue
             else:
@@ -68,6 +71,7 @@ class Snippet(object):
         return opt in self._opts
 
     def matches(self, trigger):
+        """Returns True if this snippet matches 'trigger'."""
         # If user supplies both "w" and "i", it should perhaps be an
         # error, but if permitted it seems that "w" should take precedence
         # (since matching at word boundary and within a word == matching at word
@@ -78,28 +82,28 @@ class Snippet(object):
         if trigger and trigger.rstrip() != trigger:
             return False
 
-        words = _words_for_line(self._t, trigger)
+        words = _words_for_line(self._trigger, trigger)
 
         if "r" in self._opts:
             match = self._re_match(trigger)
         elif "w" in self._opts:
-            words_len = len(self._t)
+            words_len = len(self._trigger)
             words_prefix = words[:-words_len]
             words_suffix = words[-words_len:]
-            match = (words_suffix == self._t)
+            match = (words_suffix == self._trigger)
             if match and words_prefix:
                 # Require a word boundary between prefix and suffix.
-                boundaryChars = words_prefix[-1:] + words_suffix[:1]
-                boundaryChars = boundaryChars.replace('"', '\\"')
-                match = _vim.eval('"%s" =~# "\\\\v.<."' % boundaryChars) != '0'
+                boundary_chars = words_prefix[-1:] + words_suffix[:1]
+                boundary_chars = boundary_chars.replace('"', '\\"')
+                match = _vim.eval('"%s" =~# "\\\\v.<."' % boundary_chars) != '0'
         elif "i" in self._opts:
-            match = words.endswith(self._t)
+            match = words.endswith(self._trigger)
         else:
-            match = (words == self._t)
+            match = (words == self._trigger)
 
         # By default, we match the whole trigger
         if match and not self._matched:
-            self._matched = self._t
+            self._matched = self._trigger
 
         # Ensure the match was on a word boundry if needed
         if "b" in self._opts and match:
@@ -107,10 +111,10 @@ class Snippet(object):
             if text_before.strip(" \t") != '':
                 self._matched = ""
                 return False
-
         return match
 
     def could_match(self, trigger):
+        """Return True if this snippet could match the (partial) 'trigger'."""
         self._matched = ""
 
         # List all on whitespace.
@@ -119,7 +123,7 @@ class Snippet(object):
         if trigger and trigger.rstrip() is not trigger:
             return False
 
-        words = _words_for_line(self._t, trigger)
+        words = _words_for_line(self._trigger, trigger)
 
         if "r" in self._opts:
             # Test for full match only
@@ -127,8 +131,9 @@ class Snippet(object):
         elif "w" in self._opts:
             # Trim non-empty prefix up to word boundary, if present.
             qwords = words.replace('"', '\\"')
-            words_suffix = _vim.eval('substitute("%s", "\\\\v^.+<(.+)", "\\\\1", "")' % qwords)
-            match = self._t.startswith(words_suffix)
+            words_suffix = _vim.eval(
+                    'substitute("%s", "\\\\v^.+<(.+)", "\\\\1", "")' % qwords)
+            match = self._trigger.startswith(words_suffix)
             self._matched = words_suffix
 
             # TODO: list_snippets() function cannot handle partial-trigger
@@ -138,9 +143,9 @@ class Snippet(object):
         elif "i" in self._opts:
             # TODO: It is hard to define when a inword snippet could match,
             # therefore we check only for full-word trigger.
-            match = self._t.startswith(words)
+            match = self._trigger.startswith(words)
         else:
-            match = self._t.startswith(words)
+            match = self._trigger.startswith(words)
 
         # By default, we match the words from the trigger
         if match and not self._matched:
@@ -157,28 +162,35 @@ class Snippet(object):
 
     @property
     def overwrites_previous(self):
+        """Does this snippet overwrite previous with the same trigger?"""
         return "!" in self._opts
 
     @property
     def description(self):
-        return ("(%s) %s" % (self._t, self._d)).strip()
+        """Descriptive text for this snippet."""
+        return ("(%s) %s" % (self._trigger, self._description)).strip()
 
     @property
     def trigger(self):
-        return self._t
+        """The trigger text for the snippet."""
+        return self._trigger
 
     @property
     def matched(self):
-        """ The last text that was matched. """
+        """The last text that matched this snippet in match() or
+        could_match()."""
         return self._matched
 
     def launch(self, text_before, visual_content, parent, start, end):
+        """Launch this snippet, overwriting the text 'start' to 'end' and
+        keeping the 'text_before' on the launch line. 'Parent' is the parent
+        snippet instance if any."""
         indent = self._INDENT.match(text_before).group(0)
-        lines = (self._v + "\n").splitlines()
+        lines = (self._value + "\n").splitlines()
         ind_util = IndentUtil()
 
         # Replace leading tabs in the snippet definition via proper indenting
-        v = []
+        snippet_definition = []
         for line_num, line in enumerate(lines):
             if "t" in self._opts:
                 tabs = 0
@@ -190,10 +202,11 @@ class Snippet(object):
             if line_num != 0:
                 line_ind = indent + line_ind
 
-            v.append(line_ind + line[tabs:])
-        v = '\n'.join(v)
+            snippet_definition.append(line_ind + line[tabs:])
+        snippet_definition = '\n'.join(snippet_definition)
 
-        si = SnippetInstance(self, parent, indent, v, start, end, visual_content,
-                last_re = self._last_re, globals = self._globals)
+        si = SnippetInstance(self, parent, indent, snippet_definition, start,
+                end, visual_content, last_re=self._last_re,
+                globals=self._globals)
 
         return si
