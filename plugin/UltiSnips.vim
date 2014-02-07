@@ -283,9 +283,10 @@ endfunction
 
 " Expand our path
 exec g:_uspy "import vim, os, sys"
-exec g:_uspy "new_path = vim.eval('expand(\"<sfile>:h\")')"
+exec g:_uspy "new_path = os.path.abspath(os.path.join(
+    \ vim.eval('expand(\"<sfile>:h\")'), '..', 'pythonx'))"
 exec g:_uspy "vim.command(\"let g:UltiSnipsPythonPath = '%s'\" % new_path)"
-exec g:_uspy "sys.path.append(new_path)"
+exec g:_uspy "if not hasattr(vim, 'VIM_SPECIAL_PATH'): sys.path.append(new_path)"
 exec g:_uspy "from UltiSnips import SnippetManager"
 exec g:_uspy "UltiSnips_Manager = SnippetManager(
     \ vim.eval('g:UltiSnipsExpandTrigger'),

@@ -296,16 +296,11 @@ alternative function IMAP_Jumpfunc('', 0) is called.
 For even more advanced usage, you can directly write python functions using
 UltiSnip's python modules.
 
-The path to UltiSnip's python implementation is stored in the
-g:UltiSnipsPythonPath variable which is set automatically on load.
-
 Here is a small example funtion that expands a snippet: >
 
    function! s:Ulti_ExpandSnip()
    Python << EOF
    import sys, vim
-   new_path = vim.eval("expand('g:UltiSnipsPythonPath')")
-   sys.path.append(new_path)
    from UltiSnips import UltiSnips_Manager
    UltiSnips_Manager.expand()
    EOF
@@ -945,15 +940,10 @@ wow<tab>Hello World ->
 Hello World                                                     HELLO WORLD
 
 Python global functions can be stored in a python module and then imported.
-This makes global functions easily accessible to all snippet files.
-
-First, add the directory modules are stored in to the python search path. For
-example, add this line to your vimrc file. >
-
-   py import sys; sys.path.append("/home/sirver/.vim/python")
-
-Now, import modules from this directory using a global snippet in your snippet
-file >
+This makes global functions easily accessible to all snippet files. Since Vim
+7.4 you can just drop python files into ~/.vim/pythonx and you an import them
+directly inside your snippets. For example to use
+~/.vim/pythonx/my_snippets_helpers.py  >
 
    global !p
    from my_snippet_helpers import *
