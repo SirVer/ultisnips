@@ -457,7 +457,7 @@ class SnippetManager(object):
                     _vim.buf[lineno] = _vim.buf[lineno].rstrip()
                 _vim.select(self._ctab.start, self._ctab.end)
                 jumped = True
-                if self._ctab.no == 0:
+                if self._ctab.number == 0:
                     self._current_snippet_is_done()
             else:
                 # This really shouldn't happen, because a snippet should

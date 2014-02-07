@@ -298,7 +298,7 @@ class EditableTextObject(TextObject):
 
         # If this is a tabstop, delete it
         try:
-            del self._tabstops[c.no]
+            del self._tabstops[c.number]
         except AttributeError:
             pass
 
@@ -309,4 +309,3 @@ class NoneditableTextObject(TextObject):
 
     def _update(self, done, not_done):
         return True
-

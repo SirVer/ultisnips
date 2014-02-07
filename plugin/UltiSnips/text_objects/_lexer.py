@@ -2,8 +2,8 @@
 # encoding: utf-8
 
 """
-Not really a Lexer in the classical sense, but code to hack Snippet Definitions
-into Logical Units called Tokens.
+Not really a lexer in the classical sense, but code to convert snippet
+definitions into logical units called Tokens.
 """
 
 import string
@@ -13,12 +13,14 @@ from UltiSnips.geometry import Position
 from UltiSnips.compatibility import as_unicode
 
 __all__ = [
-    "tokenize", "EscapeCharToken", "VisualToken", "TransformationToken", "TabStopToken",
-    "MirrorToken", "PythonCodeToken", "VimLCodeToken", "ShellCodeToken"
+    "tokenize", "EscapeCharToken", "VisualToken", "TransformationToken",
+    "TabStopToken", "MirrorToken", "PythonCodeToken", "VimLCodeToken",
+    "ShellCodeToken"
 ]
 
-# Helper Classes  {{{
 class _TextIterator(object):
+    """Helper class to make iterating over text easier."""
+
     def __init__(self, text, offset):
         self._text = as_unicode(text)
         self._line = offset.line
@@ -27,9 +29,11 @@ class _TextIterator(object):
         self._idx = 0
 
     def __iter__(self):
+        """Iterator interface."""
         return self
 
     def next(self):
+        """Returns the next character. Part of the iterator interface."""
         if self._idx >= len(self._text):
             raise StopIteration
 
@@ -43,7 +47,8 @@ class _TextIterator(object):
 
         return rv
 
-    def peek(self, count = 1):
+    def peek(self, count=1):
+        """Returns the next 'count' characters without advancing the stream."""
         if count > 1: # This might return '' if nothing is found
             return self._text[self._idx:self._idx + count]
         try:
@@ -53,22 +58,22 @@ class _TextIterator(object):
 
     @property
     def pos(self):
+        """Current position in the text."""
         return Position(self._line, self._col)
 
-def unescape(s):
+def _unescape(text):
+    """Removes escaping from 'text'."""
     rv = ""
     i = 0
-    while i < len(s):
-        if i+1 < len(s) and s[i] == '\\':
-            rv += s[i+1]
+    while i < len(text):
+        if i+1 < len(text) and text[i] == '\\':
+            rv += text[i+1]
             i += 1
         else:
-            rv += s[i]
+            rv += text[i]
         i += 1
     return rv
 
-# End: Helper Classes  }}}
-# Helper functions  {{{
 def _parse_number(stream):
     """
     Expects the stream to contain a number next, returns the number
@@ -93,11 +98,14 @@ def _parse_till_closing_brace(stream):
         if EscapeCharToken.starts_here(stream, '{}'):
             rv += stream.next() + stream.next()
         else:
-            c = stream.next()
-            if c == '{': in_braces += 1
-            elif c == '}': in_braces -= 1
-            if in_braces == 0: break
-            rv += c
+            char = stream.next()
+            if char == '{':
+                in_braces += 1
+            elif char == '}':
+                in_braces -= 1
+            if in_braces == 0:
+                break
+            rv += char
     return rv
 
 def _parse_till_unescaped_char(stream, chars):
@@ -110,37 +118,45 @@ def _parse_till_unescaped_char(stream, chars):
     rv = ""
     while True:
         escaped = False
-        for c in chars:
-            if EscapeCharToken.starts_here(stream, c):
+        for char in chars:
+            if EscapeCharToken.starts_here(stream, char):
                 rv += stream.next() + stream.next()
                 escaped = True
         if not escaped:
-            c = stream.next()
-            if c in chars: break
-            rv += c
-    return rv, c
-# End: Helper functions  }}}
+            char = stream.next()
+            if char in chars:
+                break
+            rv += char
+    return rv, char
 
-# Tokens  {{{
 class Token(object):
+    """Represents a Token as parsed from a snippet definition."""
+
     def __init__(self, gen, indent):
         self.initial_text = as_unicode("")
         self.start = gen.pos
         self._parse(gen, indent)
         self.end = gen.pos
 
+    def _parse(self, stream, indent):
+        """Parses the token from 'stream' with the current 'indent'."""
+        pass # Does nothing
+
 class TabStopToken(Token):
+    """${1:blub}"""
     CHECK = re.compile(r'^\${\d+[:}]')
 
     @classmethod
-    def starts_here(klass, stream):
-        return klass.CHECK.match(stream.peek(10)) is not None
+    def starts_here(cls, stream):
+        """Returns true if this token starts at the current position in
+        'stream'."""
+        return cls.CHECK.match(stream.peek(10)) is not None
 
     def _parse(self, stream, indent):
         stream.next() # $
         stream.next() # {
 
-        self.no = _parse_number(stream)
+        self.number = _parse_number(stream)
 
         if stream.peek() == ":":
             stream.next()
@@ -148,32 +164,36 @@ class TabStopToken(Token):
 
     def __repr__(self):
         return "TabStopToken(%r,%r,%r,%r)" % (
-            self.start, self.end, self.no, self.initial_text
+            self.start, self.end, self.number, self.initial_text
         )
 
 class VisualToken(Token):
+    """${VISUAL}"""
     CHECK = re.compile(r"^\${VISUAL[:}/]")
 
     @classmethod
-    def starts_here(klass, stream):
-        return klass.CHECK.match(stream.peek(10)) is not None
+    def starts_here(cls, stream):
+        """Returns true if this token starts at the current position in
+        'stream'."""
+        return cls.CHECK.match(stream.peek(10)) is not None
 
     def _parse(self, stream, indent):
-        for i in range(8): # ${VISUAL
+        for _ in range(8): # ${VISUAL
             stream.next()
 
         if stream.peek() == ":":
             stream.next()
-        self.alternative_text, c = _parse_till_unescaped_char(stream, '/}')
-        self.alternative_text = unescape(self.alternative_text)
+        self.alternative_text, char = _parse_till_unescaped_char(stream, '/}')
+        self.alternative_text = _unescape(self.alternative_text)
 
-        if c == '/': # Transformation going on
+        if char == '/': # Transformation going on
             try:
                 self.search = _parse_till_unescaped_char(stream, '/')[0]
                 self.replace = _parse_till_unescaped_char(stream, '/')[0]
                 self.options = _parse_till_closing_brace(stream)
             except StopIteration:
-                raise RuntimeError("Invalid ${VISUAL} transformation! Forgot to escape a '/'?")
+                raise RuntimeError(
+                    "Invalid ${VISUAL} transformation! Forgot to escape a '/'?")
         else:
             self.search = None
             self.replace = None
@@ -185,17 +205,21 @@ class VisualToken(Token):
         )
 
 class TransformationToken(Token):
+    """${1/match/replace/options}"""
+
     CHECK = re.compile(r'^\${\d+\/')
 
     @classmethod
-    def starts_here(klass, stream):
-        return klass.CHECK.match(stream.peek(10)) is not None
+    def starts_here(cls, stream):
+        """Returns true if this token starts at the current position in
+        'stream'."""
+        return cls.CHECK.match(stream.peek(10)) is not None
 
     def _parse(self, stream, indent):
         stream.next() # $
         stream.next() # {
 
-        self.no = _parse_number(stream)
+        self.number = _parse_number(stream)
 
         stream.next() # /
 
@@ -205,28 +229,34 @@ class TransformationToken(Token):
 
     def __repr__(self):
         return "TransformationToken(%r,%r,%r,%r,%r)" % (
-            self.start, self.end, self.no, self.search, self.replace
+            self.start, self.end, self.number, self.search, self.replace
         )
 
 class MirrorToken(Token):
+    """$1"""
     CHECK = re.compile(r'^\$\d+')
 
     @classmethod
-    def starts_here(klass, stream):
-        return klass.CHECK.match(stream.peek(10)) is not None
+    def starts_here(cls, stream):
+        """Returns true if this token starts at the current position in
+        'stream'."""
+        return cls.CHECK.match(stream.peek(10)) is not None
 
     def _parse(self, stream, indent):
         stream.next() # $
-        self.no = _parse_number(stream)
+        self.number = _parse_number(stream)
 
     def __repr__(self):
         return "MirrorToken(%r,%r,%r)" % (
-            self.start, self.end, self.no
+            self.start, self.end, self.number
         )
 
 class EscapeCharToken(Token):
+    """\\n"""
     @classmethod
-    def starts_here(klass, stream, chars = '{}\$`'):
+    def starts_here(cls, stream, chars=r'{}\$`'):
+        """Returns true if this token starts at the current position in
+        'stream'."""
         cs = stream.peek(2)
         if len(cs) == 2 and cs[0] == '\\' and cs[1] in chars:
             return True
@@ -241,8 +271,11 @@ class EscapeCharToken(Token):
         )
 
 class ShellCodeToken(Token):
+    """`! echo "hi"`"""
     @classmethod
-    def starts_here(klass, stream):
+    def starts_here(cls, stream):
+        """Returns true if this token starts at the current position in
+        'stream'."""
         return stream.peek(1) == '`'
 
     def _parse(self, stream, indent):
@@ -255,14 +288,17 @@ class ShellCodeToken(Token):
         )
 
 class PythonCodeToken(Token):
+    """`!p snip.rv = "Hi"`"""
     CHECK = re.compile(r'^`!p\s')
 
     @classmethod
-    def starts_here(klass, stream):
-        return klass.CHECK.match(stream.peek(4)) is not None
+    def starts_here(cls, stream):
+        """Returns true if this token starts at the current position in
+        'stream'."""
+        return cls.CHECK.match(stream.peek(4)) is not None
 
     def _parse(self, stream, indent):
-        for i in range(3):
+        for _ in range(3):
             stream.next() # `!p
         if stream.peek() in '\t ':
             stream.next()
@@ -285,14 +321,17 @@ class PythonCodeToken(Token):
         )
 
 class VimLCodeToken(Token):
+    """`!v g:hi`"""
     CHECK = re.compile(r'^`!v\s')
 
     @classmethod
-    def starts_here(klass, stream):
-        return klass.CHECK.match(stream.peek(4)) is not None
+    def starts_here(cls, stream):
+        """Returns true if this token starts at the current position in
+        'stream'."""
+        return cls.CHECK.match(stream.peek(4)) is not None
 
     def _parse(self, stream, indent):
-        for i in range(4):
+        for _ in range(4):
             stream.next() # `!v
         self.code = _parse_till_unescaped_char(stream, '`')[0]
 
@@ -302,30 +341,27 @@ class VimLCodeToken(Token):
         )
 
 class EndOfTextToken(Token):
-    def _parse(self, stream, indent):
-        pass # Does nothing
-
+    """Appears at the end of the text."""
     def __repr__(self):
         return "EndOfText(%r)" % self.end
-# End: Tokens  }}}
 
 __ALLOWED_TOKENS = [
-    EscapeCharToken, VisualToken, TransformationToken, TabStopToken, MirrorToken,
-    PythonCodeToken, VimLCodeToken, ShellCodeToken
+    EscapeCharToken, VisualToken, TransformationToken, TabStopToken,
+    MirrorToken, PythonCodeToken, VimLCodeToken, ShellCodeToken
 ]
 def tokenize(text, indent, offset):
+    """Returns an iterator of tokens of 'text'['offset':] which is assumed to
+    have 'indent' as the whitespace of the begging of the lines."""
     stream = _TextIterator(text, offset)
-
     try:
         while True:
             done_something = False
-            for t in __ALLOWED_TOKENS:
-                if t.starts_here(stream):
-                    yield t(stream, indent)
+            for token in __ALLOWED_TOKENS:
+                if token.starts_here(stream):
+                    yield token(stream, indent)
                     done_something = True
                     break
             if not done_something:
                 stream.next()
     except StopIteration:
         yield EndOfTextToken(stream, indent)
-

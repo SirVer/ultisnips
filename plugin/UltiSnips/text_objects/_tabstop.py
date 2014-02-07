@@ -12,19 +12,17 @@ class TabStop(EditableTextObject):
     """
     def __init__(self, parent, token, start = None, end = None):
         if start is not None:
-            self._no = token
+            self._number = token
             EditableTextObject.__init__(self, parent, start, end)
         else:
-            self._no = token.no
+            self._number = token.number
             EditableTextObject.__init__(self, parent, token)
-        parent._tabstops[self._no] = self
+        parent._tabstops[self._number] = self
 
     @property
-    def no(self):
-        return self._no
+    def number(self):
+        return self._number
 
     @property
     def is_killed(self):
         return self._parent is None
-
-

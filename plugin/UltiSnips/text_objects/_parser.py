@@ -55,17 +55,17 @@ class TOParser(object):
     def _resolve_ambiguity(self, all_tokens, seen_ts):
         for parent, token in all_tokens:
             if isinstance(token, MirrorToken):
-                if token.no not in seen_ts:
-                    seen_ts[token.no] = TabStop(parent, token)
+                if token.number not in seen_ts:
+                    seen_ts[token.number] = TabStop(parent, token)
                 else:
-                    Mirror(parent, seen_ts[token.no], token)
+                    Mirror(parent, seen_ts[token.number], token)
 
     def _create_objects_with_links_to_tabs(self, all_tokens, seen_ts):
         for parent, token in all_tokens:
             if isinstance(token, TransformationToken):
-                if token.no not in seen_ts:
-                    raise RuntimeError("Tabstop %i is not known but is used by a Transformation" % token.no)
-                Transformation(parent, seen_ts[token.no], token)
+                if token.number not in seen_ts:
+                    raise RuntimeError("Tabstop %i is not known but is used by a Transformation" % token.number)
+                Transformation(parent, seen_ts[token.number], token)
 
     def _do_parse(self, all_tokens, seen_ts):
         tokens = list(tokenize(self._text, self._indent, self._parent_to.start))
@@ -75,7 +75,7 @@ class TOParser(object):
 
             if isinstance(token, TabStopToken):
                 ts = TabStop(self._parent_to, token)
-                seen_ts[token.no] = ts
+                seen_ts[token.number] = ts
 
                 k = TOParser(ts, token.initial_text, self._indent)
                 k._do_parse(all_tokens, seen_ts)
@@ -83,5 +83,3 @@ class TOParser(object):
                 klass = self.TOKEN2TO.get(token.__class__, None)
                 if klass is not None:
                     klass(self._parent_to, token)
-
-
