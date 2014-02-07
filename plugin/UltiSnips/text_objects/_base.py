@@ -1,12 +1,41 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import vim
-
 import UltiSnips._vim as _vim
 from UltiSnips.geometry import Position
 
 __all__ = ["TextObject", "EditableTextObject", "NoneditableTextObject"]
+
+def _calc_end(lines, start):
+    if len(lines) == 1:
+        new_end = start + Position(0,len(lines[0]))
+    else:
+        new_end = Position(start.line + len(lines)-1, len(lines[-1]))
+    return new_end
+
+def _text_to_vim(start, end, text):
+    """Copy the given text to the current buffer, overwriting the span 'start'
+    to 'end'."""
+    lines = text.split('\n')
+
+    new_end = _calc_end(lines, start)
+
+    before = _vim.buf[start.line][:start.col]
+    after = _vim.buf[end.line][end.col:]
+
+    new_lines = []
+    if len(lines):
+        new_lines.append(before + lines[0])
+        new_lines.extend(lines[1:])
+        new_lines[-1] += after
+    _vim.buf[start.line:end.line + 1] = new_lines
+
+    # Open any folds this might have created
+    _vim.buf.cursor = start
+    _vim.command("normal! zv")
+
+    return new_end
+
 
 class TextObject(object):
     """
@@ -40,7 +69,7 @@ class TextObject(object):
         # not want to mess with their positions
         if self.current_text == gtext: return
         old_end = self._end
-        self._end = _vim.text_to_vim(
+        self._end = _text_to_vim(
                 self._start, self._end, gtext or self._initial_text)
         if self._parent:
             self._parent._child_has_moved(

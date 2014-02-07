@@ -526,7 +526,7 @@ class SnippetManager(object):
         possible matches.
         """
         self._ensure_all_loaded()
-        filetypes = self._filetypes[_vim.buf.nr][::-1]
+        filetypes = self._filetypes[_vim.buf.number][::-1]
 
         found_snippets = []
         for ft in filetypes:
@@ -624,7 +624,7 @@ class SnippetManager(object):
     def primary_filetype(self):
         """This filetype will be edited when UltiSnipsEdit is called without
         any arguments."""
-        return self._filetypes[_vim.buf.nr][0]
+        return self._filetypes[_vim.buf.number][0]
 
     def file_to_edit(self, ft):  # pylint: disable=no-self-use
         """ Gets a file to edit based on the given filetype.
@@ -710,18 +710,18 @@ class SnippetManager(object):
 
     def _ensure_all_loaded(self):
         """Make sure that all filetypes fur the current buffer are loaded."""
-        for ft in self._filetypes[_vim.buf.nr]:
+        for ft in self._filetypes[_vim.buf.number]:
             self._ensure_loaded(ft)
 
     def reset_buffer_filetypes(self):
         """Reset the filetypes for the current buffer."""
-        if _vim.buf.nr in self._filetypes:
-            del self._filetypes[_vim.buf.nr]
+        if _vim.buf.number in self._filetypes:
+            del self._filetypes[_vim.buf.number]
 
     def add_buffer_filetypes(self, ft):
         """Checks for changes in the list of snippet files or the contents of
         the snippet files and reloads them if necessary. """
-        buf_fts = self._filetypes[_vim.buf.nr]
+        buf_fts = self._filetypes[_vim.buf.number]
         idx = -1
         for ft in ft.split("."):
             ft = ft.strip()
@@ -730,7 +730,7 @@ class SnippetManager(object):
             try:
                 idx = buf_fts.index(ft)
             except ValueError:
-                self._filetypes[_vim.buf.nr].insert(idx + 1, ft)
+                self._filetypes[_vim.buf.number].insert(idx + 1, ft)
                 idx += 1
         self._ensure_all_loaded()
 

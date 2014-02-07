@@ -42,6 +42,7 @@ disable=
    too-many-instance-attributes, 
    too-many-public-methods, 
    too-few-public-methods,
+   too-many-branches,
 
 
 [REPORTS]
