@@ -16,8 +16,7 @@ from UltiSnips.geometry import Position
 from UltiSnips.snippet import Snippet
 from UltiSnips.snippet_dictionary import SnippetDictionary
 from UltiSnips.snippets_file_parser import SnippetsFileParser
-from UltiSnips.vim_state import VimState
-from UltiSnips.visual_content_preserver import VisualContentPreserver
+from UltiSnips.vim_state import VimState, VisualContentPreserver
 import UltiSnips._vim as _vim
 
 def _ask_snippets(snippets):
