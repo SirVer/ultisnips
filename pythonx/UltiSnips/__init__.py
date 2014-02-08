@@ -653,7 +653,8 @@ class SnippetManager(object):
 
     def _load_snippets_for(self, ft):
         """Load all snippets for the given 'ft'."""
-        del self._snippets[ft]
+        if ft in self._snippets:
+            del self._snippets[ft]
         for fn in _base_snippet_files_for(ft):
             self._parse_snippets(ft, fn)
         # Now load for the parents
