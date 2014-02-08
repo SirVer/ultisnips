@@ -9,7 +9,7 @@ from UltiSnips.position import Position
 import UltiSnips._vim as _vim
 from UltiSnips.text_objects._base import EditableTextObject, \
         NoneditableTextObject
-from UltiSnips.text_objects._parser import TOParser
+from UltiSnips.text_objects._parser import parse_text_object
 
 class SnippetInstance(EditableTextObject):
     """See module docstring."""
@@ -29,7 +29,7 @@ class SnippetInstance(EditableTextObject):
 
         EditableTextObject.__init__(self, parent, start, end, initial_text)
 
-        TOParser(self, initial_text, indent).parse(True)
+        parse_text_object(self, initial_text, indent)
 
         self.update_textobjects()
 
