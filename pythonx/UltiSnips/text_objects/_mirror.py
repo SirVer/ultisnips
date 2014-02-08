@@ -12,7 +12,7 @@ class Mirror(NoneditableTextObject):
 
         self._ts = tabstop
 
-    def _update(self, done, not_done):
+    def _update(self, done):
         if self._ts.is_killed:
             self.overwrite("")
             self._parent._del_child(self)
@@ -26,5 +26,3 @@ class Mirror(NoneditableTextObject):
 
     def _get_text(self):
         return self._ts.current_text
-
-

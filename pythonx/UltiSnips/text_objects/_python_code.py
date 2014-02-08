@@ -54,7 +54,7 @@ class SnippetUtil(object):
 
         :amount: the amount by which to shift.
         """
-        self.indent += " " * self._ind.sw * amount
+        self.indent += " " * self._ind.shiftwidth * amount
 
     def unshift(self, amount=1):
         """ Unshift the indentation level.
@@ -63,7 +63,7 @@ class SnippetUtil(object):
 
         :amount: the amount by which to unshift.
         """
-        by = -self._ind.sw * amount
+        by = -self._ind.shiftwidth * amount
         try:
             self.indent = self.indent[:by]
         except IndexError:
@@ -194,7 +194,7 @@ class PythonCode(NoneditableTextObject):
 
         NoneditableTextObject.__init__(self, parent, token)
 
-    def _update(self, done, not_done):
+    def _update(self, done):
         path = _vim.eval('expand("%")')
         if path is None:
             path = ""

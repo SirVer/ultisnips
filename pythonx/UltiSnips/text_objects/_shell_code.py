@@ -55,7 +55,7 @@ class ShellCode(NoneditableTextObject):
         self._code = token.code.replace("\\`", "`")
         self._tmpdir = _get_tmp()
 
-    def _update(self, done, not_done):
+    def _update(self, done):
         if not self._tmpdir:
             output = "Unable to find executable tmp directory, check noexec on /tmp"
         else:
@@ -65,4 +65,3 @@ class ShellCode(NoneditableTextObject):
         self._parent._del_child(self)
 
         return True
-

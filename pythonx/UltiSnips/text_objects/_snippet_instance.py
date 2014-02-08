@@ -66,14 +66,17 @@ class SnippetInstance(EditableTextObject):
 
         counter = 10
         while (done != not_done) and counter:
-            for obj in sorted(not_done - done): # Order matters for python locals!
-                if obj._update(done, not_done):
+            # Order matters for python locals!
+            for obj in sorted(not_done - done):
+                if obj._update(done):
                     done.add(obj)
             counter -= 1
         if counter == 0:
-            raise RuntimeError("The snippets content did not converge: Check for Cyclic dependencies "
-                "or random strings in your snippet. You can use 'if not snip.c' to make sure "
-                "to only expand random output once.")
+            raise RuntimeError(
+                "The snippets content did not converge: Check for Cyclic "
+                "dependencies or random strings in your snippet. You can use "
+                "'if not snip.c' to make sure to only expand random output "
+                "once.")
         vc.to_vim()
         self._del_child(vc)
 
@@ -123,4 +126,3 @@ class _VimCursor(NoneditableTextObject):
     def to_vim(self):
         assert(self._start == self._end)
         _vim.buf.cursor = self._start
-

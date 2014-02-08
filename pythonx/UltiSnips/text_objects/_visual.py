@@ -33,7 +33,7 @@ class Visual(NoneditableTextObject,TextObjectTransformation):
         NoneditableTextObject.__init__(self, parent, token)
         TextObjectTransformation.__init__(self, token)
 
-    def _update(self, done, not_done):
+    def _update(self, done):
         if self._mode != "v":
             # Keep the indent for Line/Block Selection
             text_before = _vim.buf[self.start.line][:self.start.col]
