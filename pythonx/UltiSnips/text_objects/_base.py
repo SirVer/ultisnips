@@ -6,8 +6,6 @@
 import UltiSnips._vim as _vim
 from UltiSnips.geometry import Position
 
-__all__ = ["TextObject", "EditableTextObject", "NoneditableTextObject"]
-
 def _calc_end(text, start):
     """Calculate the end position of the 'text' starting at 'start."""
     if len(text) == 1:
@@ -39,7 +37,9 @@ def _text_to_vim(start, end, text):
 
     return new_end
 
-
+# These classes use their subclasses a lot and we really do not want to expose
+# their functions more globally.
+# pylint: disable=protected-access
 class TextObject(object):
     """Represents any object in the text that has a span in any ways."""
 
@@ -129,6 +129,13 @@ class TextObject(object):
                 self._end.diff(old_end)
             )
 
+    def _update(self, done):
+        """Update this object inside the Vim Buffer.
+
+        Return False if you need to be called again for this edit cycle.
+        Otherwise return True.
+        """
+        raise NotImplementedError("Must be implemented by subclasses.")
 
 class EditableTextObject(TextObject):
     """
@@ -137,7 +144,6 @@ class EditableTextObject(TextObject):
     """
     def __init__(self, *args, **kwargs):
         TextObject.__init__(self, *args, **kwargs)
-
         self._childs = []
         self._tabstops = {}
 
@@ -145,8 +151,13 @@ class EditableTextObject(TextObject):
     # Properties #
     ##############
     @property
+    def childs(self):
+        """List of all childs."""
+        return self._childs
+
+    @property
     def _editable_childs(self):
-        """All childs that are EditableTextObject s"""
+        """List of all childs that are EditableTextObjects"""
         return [child for child in self._childs if
                 isinstance(child, EditableTextObject)]
 
@@ -229,7 +240,8 @@ class EditableTextObject(TextObject):
         # We have to handle this ourselves
         delta = Position(1, 0) if text == "\n" else Position(0, len(text))
         if ctype == "D":
-            if self._start == self._end: # Makes no sense to delete in empty textobject
+             # Makes no sense to delete in empty textobject
+            if self._start == self._end:
                 return
             delta.line *= -1
             delta.col *= -1
@@ -323,11 +335,6 @@ class EditableTextObject(TextObject):
             return self._parent._get_tabstop(self, number)
 
     def _update(self, done):
-        """Update this object inside the Vim Buffer.
-
-        Return False if you need to be called again for this edit cycle.
-        Otherwise return True.
-        """
         if all((child in done) for child in self._childs):
             assert self not in done
             done.add(self)

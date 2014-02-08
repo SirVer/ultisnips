@@ -12,12 +12,6 @@ import re
 from UltiSnips.geometry import Position
 from UltiSnips.compatibility import as_unicode
 
-__all__ = [
-    "tokenize", "EscapeCharToken", "VisualToken", "TransformationToken",
-    "TabStopToken", "MirrorToken", "PythonCodeToken", "VimLCodeToken",
-    "ShellCodeToken"
-]
-
 class _TextIterator(object):
     """Helper class to make iterating over text easier."""
 

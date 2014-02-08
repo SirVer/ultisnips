@@ -14,8 +14,6 @@ from UltiSnips.text_objects._transformation import Transformation
 from UltiSnips.text_objects._viml_code import VimLCode
 from UltiSnips.text_objects._visual import Visual
 
-__all__ = ["TOParser"]
-
 class TOParser(object):
     TOKEN2TO = {
         EscapeCharToken: EscapedChar,
@@ -47,7 +45,7 @@ class TOParser(object):
             m1 = Position(mark.line, mark.col)
             TabStop(self._parent_to, 0, mark, m1)
 
-        self._parent_to.replace_initital_text()
+        self._parent_to.replace_initial_text()
 
     #####################
     # Private Functions #

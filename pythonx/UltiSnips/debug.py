@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-__all__ = [ "debug", "echo_to_hierarchy", "print_stack" ]
-
 import sys
 
 from UltiSnips.compatibility import as_unicode
@@ -36,4 +34,3 @@ def print_stack():
     import traceback
     with open(dump_filename, "ab") as dump_file:
         traceback.print_stack(file=dump_file)
-

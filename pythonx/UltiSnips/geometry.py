@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-__all__ = [ "Position" ]
-
 class Position(object):
     def __init__(self, line, col):
         self.line = line
@@ -79,4 +77,3 @@ class Position(object):
 
     def __repr__(self):
         return "(%i,%i)" % (self._line, self._col)
-

@@ -1,25 +1,26 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+"""A Snippet instance is an instance of a Snippet Definition. That is, when the
+user expands a snippet, a SnippetInstance is created to keep track of the
+corresponding TextObjects. The Snippet itself is also a TextObject. """
+
 from UltiSnips.geometry import Position
 import UltiSnips._vim as _vim
 
-from UltiSnips.text_objects._base import EditableTextObject, NoneditableTextObject
+from UltiSnips.text_objects._base import EditableTextObject, \
+        NoneditableTextObject
 from UltiSnips.text_objects._parser import TOParser
 
 class SnippetInstance(EditableTextObject):
-    """
-    A Snippet instance is an instance of a Snippet Definition. That is,
-    when the user expands a snippet, a SnippetInstance is created to
-    keep track of the corresponding TextObjects. The Snippet itself is
-    also a TextObject because it has a start an end
-    """
+    """See module docstring."""
 
-    def __init__(self, snippet, parent, indent, initial_text, start, end, visual_content, last_re, globals):
+    def __init__(self, snippet, parent, indent, initial_text,
+            start, end, visual_content, last_re, globals):
         if start is None:
-            start = Position(0,0)
+            start = Position(0, 0)
         if end is None:
-            end = Position(0,0)
+            end = Position(0, 0)
         self.snippet = snippet
         self._cts = 0
 
@@ -33,14 +34,14 @@ class SnippetInstance(EditableTextObject):
 
         self.update_textobjects()
 
-    def replace_initital_text(self):
+    def replace_initial_text(self):
+        """Puts the initial text of all text elements into Vim."""
         def _place_initial_text(obj):
+            """recurses on the childs to do the work."""
             obj.overwrite()
-
             if isinstance(obj, EditableTextObject):
-                for c in obj._childs:
-                    _place_initial_text(c)
-
+                for child in obj._childs:
+                    _place_initial_text(child)
         _place_initial_text(self)
 
     def replay_user_edits(self, cmds):
@@ -54,13 +55,13 @@ class SnippetInstance(EditableTextObject):
         the users edits have been replayed. This might also move the Cursor
         """
         vc = _VimCursor(self)
-
         done = set()
         not_done = set()
         def _find_recursive(obj):
+            """Finds all text objects and puts them into 'not_done'."""
             if isinstance(obj, EditableTextObject):
-                for c in obj._childs:
-                    _find_recursive(c)
+                for child in obj._childs:
+                    _find_recursive(child)
             not_done.add(obj)
         _find_recursive(self)
 
@@ -71,7 +72,7 @@ class SnippetInstance(EditableTextObject):
                 if obj._update(done):
                     done.add(obj)
             counter -= 1
-        if counter == 0:
+        if not counter:
             raise RuntimeError(
                 "The snippets content did not converge: Check for Cyclic "
                 "dependencies or random strings in your snippet. You can use "
@@ -80,7 +81,8 @@ class SnippetInstance(EditableTextObject):
         vc.to_vim()
         self._del_child(vc)
 
-    def select_next_tab(self, backwards = False):
+    def select_next_tab(self, backwards=False):
+        """Selects the next tabstop or the previous if 'backwards' is True."""
         if self._cts is None:
             return
 
@@ -107,22 +109,23 @@ class SnippetInstance(EditableTextObject):
     def _get_tabstop(self, requester, no):
         # SnippetInstances are completely self contained, therefore, we do not
         # need to ask our parent for Tabstops
-        p = self._parent
+        cached_parent = self._parent
         self._parent = None
         rv = EditableTextObject._get_tabstop(self, requester, no)
-        self._parent = p
-
+        self._parent = cached_parent
         return rv
 
 
 class _VimCursor(NoneditableTextObject):
-    """Helper class to keep track of the Vim Cursor"""
+    """Helper class to keep track of the Vim Cursor when text objects expand
+    and move."""
 
     def __init__(self, parent):
         NoneditableTextObject.__init__(
-            self, parent, _vim.buf.cursor, _vim.buf.cursor, tiebreaker = Position(-1,-1),
-        )
+            self, parent, _vim.buf.cursor, _vim.buf.cursor,
+            tiebreaker=Position(-1, -1))
 
     def to_vim(self):
-        assert(self._start == self._end)
+        """Moves the cursor in the Vim to our position."""
+        assert self._start == self._end
         _vim.buf.cursor = self._start
