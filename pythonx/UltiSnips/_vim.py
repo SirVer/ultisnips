@@ -8,9 +8,9 @@ import re
 import vim  # pylint:disable=import-error
 from vim import error  # pylint:disable=import-error,unused-import
 
-from UltiSnips.geometry import Position
 from UltiSnips.compatibility import col2byte, byte2col, \
         as_unicode, as_vimencoding
+from UltiSnips.position import Position
 
 class VimBuffer(object):
     """Wrapper around the current Vim buffer."""

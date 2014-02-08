@@ -5,7 +5,7 @@ from collections import defaultdict
 import sys
 
 from UltiSnips import _vim
-from UltiSnips.geometry import Position
+from UltiSnips.position import Position
 
 def is_complete_edit(initial_line, a, b, cmds):
     buf = a[:]
@@ -171,4 +171,3 @@ def diff(a, b, sline = 0):
                         (("D",line, col, a[x]),) )
                     )
         cost += 1
-

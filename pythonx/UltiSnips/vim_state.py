@@ -6,7 +6,7 @@
 from collections import deque
 
 from UltiSnips.compatibility import as_unicode, byte2col
-from UltiSnips.geometry import Position
+from UltiSnips.position import Position
 import UltiSnips._vim as _vim
 
 class VimPosition(Position):

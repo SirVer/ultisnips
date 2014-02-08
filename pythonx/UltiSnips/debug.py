@@ -1,36 +1,43 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+"""Convenience methods that help with debugging. They should never be used in
+production code."""
+
 import sys
 
 from UltiSnips.compatibility import as_unicode
 
-dump_filename = "/tmp/file.txt" if not sys.platform.lower().startswith("win") \
+DUMP_FILENAME = "/tmp/file.txt" if not sys.platform.lower().startswith("win") \
         else "C:/windows/temp/ultisnips.txt"
-with open(dump_filename, "w") as dump_file:
+with open(DUMP_FILENAME, "w"):
     pass # clears the file
 
-def echo_to_hierarchy(to):
-    par = to
-    while par._parent: par = par._parent
+def echo_to_hierarchy(text_object):
+    """Outputs the given 'text_object' and its childs hierarchically."""
+    # pylint:disable=protected-access
+    parent = text_object
+    while parent._parent:
+        parent = parent._parent
 
-    def _do_print(to, indent=""):
-        debug(indent + as_unicode(to))
-
+    def _do_print(text_object, indent=""):
+        """prints recursively."""
+        debug(indent + as_unicode(text_object))
         try:
-            for c in to._childs:
-                _do_print(c, indent=indent + "  ")
+            for child in text_object._childs:
+                _do_print(child, indent=indent + "  ")
         except AttributeError:
             pass
+    _do_print(parent)
 
-    _do_print(par)
-
-def debug(s):
-    s = as_unicode(s)
-    with open(dump_filename, "ab") as dump_file:
-        dump_file.write((s + '\n').encode("utf-8"))
+def debug(msg):
+    """Dumb 'msg' into the debug file."""
+    msg = as_unicode(msg)
+    with open(DUMP_FILENAME, "ab") as dump_file:
+        dump_file.write((msg + '\n').encode("utf-8"))
 
 def print_stack():
+    """Dump a stack trace into the debug file."""
     import traceback
-    with open(dump_filename, "ab") as dump_file:
+    with open(DUMP_FILENAME, "ab") as dump_file:
         traceback.print_stack(file=dump_file)

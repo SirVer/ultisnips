@@ -9,8 +9,9 @@ definitions into logical units called Tokens.
 import string
 import re
 
-from UltiSnips.geometry import Position
 from UltiSnips.compatibility import as_unicode
+from UltiSnips.position import Position
+from UltiSnips.escaping import unescape
 
 class _TextIterator(object):
     """Helper class to make iterating over text easier."""
@@ -54,19 +55,6 @@ class _TextIterator(object):
     def pos(self):
         """Current position in the text."""
         return Position(self._line, self._col)
-
-def _unescape(text):
-    """Removes escaping from 'text'."""
-    rv = ""
-    i = 0
-    while i < len(text):
-        if i+1 < len(text) and text[i] == '\\':
-            rv += text[i+1]
-            i += 1
-        else:
-            rv += text[i]
-        i += 1
-    return rv
 
 def _parse_number(stream):
     """
@@ -178,7 +166,7 @@ class VisualToken(Token):
         if stream.peek() == ":":
             stream.next()
         self.alternative_text, char = _parse_till_unescaped_char(stream, '/}')
-        self.alternative_text = _unescape(self.alternative_text)
+        self.alternative_text = unescape(self.alternative_text)
 
         if char == '/': # Transformation going on
             try:

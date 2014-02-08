@@ -12,7 +12,7 @@ import traceback
 
 from UltiSnips._diff import diff, guess_edit
 from UltiSnips.compatibility import as_unicode
-from UltiSnips.geometry import Position
+from UltiSnips.position import Position
 from UltiSnips.snippet import Snippet
 from UltiSnips.snippet_dictionary import SnippetDictionary
 from UltiSnips.snippets_file_parser import SnippetsFileParser
@@ -155,7 +155,6 @@ class SnippetManager(object):
         self.backward_trigger = backward_trigger
         self._supertab_keys = None
         self._csnippets = []
-
         self.reset()
 
     @err_to_scratch_buffer
@@ -163,7 +162,7 @@ class SnippetManager(object):
         """Reset the class to the state it had directly after creation."""
         self._vstate = VimState()
         self._test_error = test_error
-        self._snippets = {}
+        self._snippets = defaultdict(lambda: SnippetDictionary())
         self._filetypes = defaultdict(lambda: ['all'])
         self._visual_content = VisualContentPreserver()
 
@@ -277,26 +276,13 @@ class SnippetManager(object):
         """
         self._visual_content.conserve()
 
-    # TODO(sirver): replace through defaultdict
-    def snippet_dict(self, ft):
-        """Makes sure that ft is in self._snippets."""
-        if ft not in self._snippets:
-            self._snippets[ft] = SnippetDictionary()
-        return self._snippets[ft]
-
     @err_to_scratch_buffer
     def add_snippet(self, trigger, value, description,
                     options, ft="all", globals=None, fn=None):
         """Add a snippet to the list of known snippets of the given 'ft'."""
-        self.snippet_dict(ft).add_snippet(
+        self._snippets[ft].add_snippet(
             Snippet(trigger, value, description, options, globals or {}), fn
         )
-
-    @err_to_scratch_buffer
-    def add_snippet_file(self, ft, path):
-        """Add a file to be watched for changes to the 'ft' snippet dict."""
-        sd = self.snippet_dict(ft)
-        sd.addfile(path)
 
     @err_to_scratch_buffer
     def expand_anon(self, value, trigger="", description="",
@@ -326,7 +312,7 @@ class SnippetManager(object):
     @err_to_scratch_buffer
     def add_extending_info(self, ft, parents):
         """Add the list of 'parents' as being extended by the 'ft'."""
-        sd = self.snippet_dict(ft)
+        sd = self._snippets[ft]
         for parent in parents:
             if parent in sd.extends:
                 continue
@@ -616,8 +602,9 @@ class SnippetManager(object):
         return self._csnippets[-1]
 
     def _parse_snippets(self, ft, filename, file_data=None):
-        """Parse the file 'filename' for the given 'ft'."""
-        self.add_snippet_file(ft, filename)
+        """Parse the file 'filename' for the given 'ft' and watch it for
+        changes in the future."""
+        self._snippets[ft].addfile(filename)
         SnippetsFileParser(ft, filename, self, file_data).parse()
 
     @property
@@ -667,7 +654,7 @@ class SnippetManager(object):
 
     def _load_snippets_for(self, ft):
         """Load all snippets for the given 'ft'."""
-        self.snippet_dict(ft).reset()
+        del self._snippets[ft]
         for fn in _base_snippet_files_for(ft):
             self._parse_snippets(ft, fn)
         # Now load for the parents
@@ -683,11 +670,11 @@ class SnippetManager(object):
 
         if ft not in self._snippets:
             return True
-        elif do_hash and self.snippet_dict(ft).needs_update():
+        elif do_hash and self._snippets[ft].has_any_file_changed():
             return True
         elif do_hash:
             cur_snips = set(_base_snippet_files_for(ft))
-            old_snips = set(self.snippet_dict(ft).files)
+            old_snips = set(self._snippets[ft].files)
             if cur_snips - old_snips:
                 return True
         return False
@@ -705,7 +692,7 @@ class SnippetManager(object):
         if self._needs_update(ft):
             self._load_snippets_for(ft)
 
-        for parent in self.snippet_dict(ft).extends:
+        for parent in self._snippets[ft].extends:
             self._ensure_loaded(parent, checked)
 
     def _ensure_all_loaded(self):
@@ -746,12 +733,12 @@ class SnippetManager(object):
         if not snips:
             return []
         if not seen:
-            seen = []
-        seen.append(ft)
+            seen = set()
+        seen.add(ft)
         parent_results = []
         for parent_ft in snips.extends:
             if parent_ft not in seen:
-                seen.append(parent_ft)
+                seen.add(parent_ft)
                 parent_results += self._find_snippets(parent_ft, trigger,
                         potentially, seen)
         return parent_results + snips.get_matching_snippets(

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from UltiSnips.geometry import Position
 from UltiSnips.text_objects._lexer import tokenize, EscapeCharToken, VisualToken, \
     TransformationToken, TabStopToken, MirrorToken, PythonCodeToken, \
     VimLCodeToken, ShellCodeToken
+from UltiSnips.position import Position
 from UltiSnips.text_objects._escaped_char import EscapedChar
 from UltiSnips.text_objects._mirror import Mirror
 from UltiSnips.text_objects._python_code import PythonCode

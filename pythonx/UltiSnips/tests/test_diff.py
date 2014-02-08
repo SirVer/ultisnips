@@ -6,7 +6,7 @@ import unittest
 import os.path as p, sys; sys.path.append(p.join(p.dirname(__file__), ".."))
 
 from _diff import diff, guess_edit
-from geometry import Position
+from position import Position
 
 
 def transform(a, cmds):
@@ -184,7 +184,3 @@ if __name__ == '__main__':
    unittest.main()
    # k = TestEditScript()
    # unittest.TextTestRunner().run(k)
-
-
-
-

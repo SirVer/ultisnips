@@ -1,109 +1,105 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+"""Implements TabStop transformations."""
+
 import re
 import sys
 from UltiSnips.text_objects._mirror import Mirror
+from UltiSnips.escaping import unescape, fill_in_whitespace
+
+def _find_closing_brace(string, start_pos):
+    """Finds the corresponding closing brace after start_pos."""
+    bracks_open = 1
+    for idx, char in enumerate(string[start_pos:]):
+        if char == '(':
+            if string[idx+start_pos-1] != '\\':
+                bracks_open += 1
+        elif char == ')':
+            if string[idx+start_pos-1] != '\\':
+                bracks_open -= 1
+            if not bracks_open:
+                return start_pos+idx+1
+
+def _split_conditional(string):
+    """Split the given conditional 'string' into its arguments."""
+    bracks_open = 0
+    args = []
+    carg = ""
+    for idx, char in enumerate(string):
+        if char == '(':
+            if string[idx-1] != '\\':
+                bracks_open += 1
+        elif char == ')':
+            if string[idx-1] != '\\':
+                bracks_open -= 1
+        elif char == ':' and not bracks_open and not string[idx-1] == '\\':
+            args.append(carg)
+            carg = ""
+            continue
+        carg += char
+    args.append(carg)
+    return args
+
+def _replace_conditional(match, string):
+    """Replaces a conditional match in a transformation."""
+    conditional_match = _CONDITIONAL.search(string)
+    while conditional_match:
+        start = conditional_match.start()
+        end = _find_closing_brace(string, start+4)
+        args = _split_conditional(string[start+4:end-1])
+        rv = ""
+        if match.group(int(conditional_match.group(1))):
+            rv = unescape(_replace_conditional(match, args[0]))
+        elif len(args) > 1:
+            rv = unescape(_replace_conditional(match, args[1]))
+        string = string[:start] + rv + string[end:]
+        conditional_match = _CONDITIONAL.search(string)
+    return string
+
+_ONE_CHAR_CASE_SWITCH = re.compile(r"\\([ul].)", re.DOTALL)
+_LONG_CASEFOLDINGS = re.compile(r"\\([UL].*?)\\E", re.DOTALL)
+_DOLLAR = re.compile(r"\$(\d+)", re.DOTALL)
+_CONDITIONAL = re.compile(r"\(\?(\d+):", re.DOTALL)
+class _CleverReplace(object):
+    """Mimics TextMates replace syntax."""
+
+    def __init__(self, expression):
+        self._expression = expression
+
+    def replace(self, match):
+        """Replaces 'match' through the correct replacement string."""
+        transformed = self._expression
+        # Replace all $? with capture groups
+        transformed = _DOLLAR.subn(
+                lambda m: match.group(int(m.group(1))), transformed)[0]
+
+        # Replace Case switches
+        def _one_char_case_change(match):
+            """Replaces one character case changes."""
+            if match.group(1)[0] == 'u':
+                return match.group(1)[-1].upper()
+            else:
+                return match.group(1)[-1].lower()
+        transformed = _ONE_CHAR_CASE_SWITCH.subn(
+                _one_char_case_change, transformed)[0]
+
+        def _multi_char_case_change(match):
+            """Replaces multi character case changes."""
+            if match.group(1)[0] == 'U':
+                return match.group(1)[1:].upper()
+            else:
+                return match.group(1)[1:].lower()
+        transformed = _LONG_CASEFOLDINGS.subn(
+                _multi_char_case_change, transformed)[0]
+        transformed = _replace_conditional(match, transformed)
+        return unescape(fill_in_whitespace(transformed))
 
 # flag used to display only one time the lack of unidecode
 UNIDECODE_ALERT_RAISED = False
-
-class _CleverReplace(object):
-    """
-    This class mimics TextMates replace syntax
-    """
-    _DOLLAR = re.compile(r"\$(\d+)", re.DOTALL)
-    _SIMPLE_CASEFOLDINGS = re.compile(r"\\([ul].)", re.DOTALL)
-    _LONG_CASEFOLDINGS = re.compile(r"\\([UL].*?)\\E", re.DOTALL)
-    _CONDITIONAL = re.compile(r"\(\?(\d+):", re.DOTALL)
-
-    _UNESCAPE = re.compile(r'\\[^ntrab]')
-    _SCHARS_ESCPAE = re.compile(r'\\[ntrab]')
-
-    def __init__(self, s):
-        self._s = s
-
-    def _scase_folding(self, m):
-        if m.group(1)[0] == 'u':
-            return m.group(1)[-1].upper()
-        else:
-            return m.group(1)[-1].lower()
-    def _lcase_folding(self, m):
-        if m.group(1)[0] == 'U':
-            return m.group(1)[1:].upper()
-        else:
-            return m.group(1)[1:].lower()
-
-    def _replace_conditional(self, match, v):
-        def _find_closingbrace(v,start_pos):
-            bracks_open = 1
-            for idx, c in enumerate(v[start_pos:]):
-                if c == '(':
-                    if v[idx+start_pos-1] != '\\':
-                        bracks_open += 1
-                elif c == ')':
-                    if v[idx+start_pos-1] != '\\':
-                        bracks_open -= 1
-                    if not bracks_open:
-                        return start_pos+idx+1
-        m = self._CONDITIONAL.search(v)
-
-        def _part_conditional(v):
-            bracks_open = 0
-            args = []
-            carg = ""
-            for idx, c in enumerate(v):
-                if c == '(':
-                    if v[idx-1] != '\\':
-                        bracks_open += 1
-                elif c == ')':
-                    if v[idx-1] != '\\':
-                        bracks_open -= 1
-                elif c == ':' and not bracks_open and not v[idx-1] == '\\':
-                    args.append(carg)
-                    carg = ""
-                    continue
-                carg += c
-            args.append(carg)
-            return args
-
-        while m:
-            start = m.start()
-            end = _find_closingbrace(v,start+4)
-            args = _part_conditional(v[start+4:end-1])
-
-            rv = ""
-            if match.group(int(m.group(1))):
-                rv = self._unescape(self._replace_conditional(match,args[0]))
-            elif len(args) > 1:
-                rv = self._unescape(self._replace_conditional(match,args[1]))
-
-            v = v[:start] + rv + v[end:]
-
-            m = self._CONDITIONAL.search(v)
-        return v
-
-    def _unescape(self, v):
-        return self._UNESCAPE.subn(lambda m: m.group(0)[-1], v)[0]
-    def _schar_escape(self, v):
-        return self._SCHARS_ESCPAE.subn(lambda m: eval(r"'\%s'" % m.group(0)[-1]), v)[0]
-
-    def replace(self, match):
-        start, end = match.span()
-
-        tv = self._s
-
-        # Replace all $? with capture groups
-        tv = self._DOLLAR.subn(lambda m: match.group(int(m.group(1))), tv)[0]
-
-        # Replace CaseFoldings
-        tv = self._SIMPLE_CASEFOLDINGS.subn(self._scase_folding, tv)[0]
-        tv = self._LONG_CASEFOLDINGS.subn(self._lcase_folding, tv)[0]
-        tv = self._replace_conditional(match, tv)
-
-        return self._unescape(self._schar_escape(tv))
-
 class TextObjectTransformation(object):
+    """Base class for Transformations and ${VISUAL}."""
+
     def __init__(self, token):
         self._convert_to_ascii = False
 
@@ -125,20 +121,26 @@ class TextObjectTransformation(object):
         self._replace = _CleverReplace(token.replace)
 
     def _transform(self, text):
-        global UNIDECODE_ALERT_RAISED
+        """Do the actual transform on the given text."""
+        global UNIDECODE_ALERT_RAISED  # pylint:disable=global-statement
         if self._convert_to_ascii:
             try:
                 import unidecode
                 text = unidecode.unidecode(text)
-            except Exception as e:
+            except Exception:  # pylint:disable=broad-except
                 if UNIDECODE_ALERT_RAISED == False:
                     UNIDECODE_ALERT_RAISED = True
-                    sys.stderr.write("Please install unidecode python package in order to be able to make ascii conversions.\n")
+                    sys.stderr.write(
+                        "Please install unidecode python package in order to "
+                        "be able to make ascii conversions.\n")
         if self._find is None:
             return text
-        return self._find.subn(self._replace.replace, text, self._match_this_many)[0]
+        return self._find.subn(
+                self._replace.replace, text, self._match_this_many)[0]
 
 class Transformation(Mirror, TextObjectTransformation):
+    """See module docstring."""
+
     def __init__(self, parent, ts, token):
         Mirror.__init__(self, parent, ts, token)
         TextObjectTransformation.__init__(self, token)

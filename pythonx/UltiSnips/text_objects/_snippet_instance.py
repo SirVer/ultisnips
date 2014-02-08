@@ -5,9 +5,8 @@
 user expands a snippet, a SnippetInstance is created to keep track of the
 corresponding TextObjects. The Snippet itself is also a TextObject. """
 
-from UltiSnips.geometry import Position
+from UltiSnips.position import Position
 import UltiSnips._vim as _vim
-
 from UltiSnips.text_objects._base import EditableTextObject, \
         NoneditableTextObject
 from UltiSnips.text_objects._parser import TOParser

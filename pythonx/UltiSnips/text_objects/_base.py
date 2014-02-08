@@ -4,7 +4,7 @@
 """Base classes for all text objects."""
 
 import UltiSnips._vim as _vim
-from UltiSnips.geometry import Position
+from UltiSnips.position import Position
 
 def _calc_end(text, start):
     """Calculate the end position of the 'text' starting at 'start."""
@@ -126,7 +126,7 @@ class TextObject(object):
         if self._parent:
             self._parent._child_has_moved(
                 self._parent._childs.index(self), min(old_end, self._end),
-                self._end.diff(old_end)
+                self._end.delta(old_end)
             )
 
     def _update(self, done):

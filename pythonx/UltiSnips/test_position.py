@@ -2,15 +2,14 @@
 # encoding: utf-8
 
 import unittest
-import os.path as p, sys; sys.path.append(p.join(p.dirname(__file__), ".."))
 
-from geometry import Position
+from position import Position
 
 class _MPBase(object):
     def runTest(self):
         obj = Position(*self.obj)
-        for pivot, diff, wanted in self.steps:
-            obj.move(Position(*pivot), Position(*diff))
+        for pivot, delta, wanted in self.steps:
+            obj.move(Position(*pivot), Position(*delta))
             self.assertEqual(Position(*wanted), obj)
 
 class MovePosition_DelSameLine(_MPBase, unittest.TestCase):
