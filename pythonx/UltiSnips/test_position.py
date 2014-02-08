@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+# pylint: skip-file
+
 import unittest
 
 from position import Position

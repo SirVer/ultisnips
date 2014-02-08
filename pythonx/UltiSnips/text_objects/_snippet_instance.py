@@ -13,6 +13,7 @@ from UltiSnips.text_objects._parser import parse_text_object
 
 class SnippetInstance(EditableTextObject):
     """See module docstring."""
+    # pylint:disable=protected-access
 
     def __init__(self, snippet, parent, indent, initial_text,
             start, end, visual_content, last_re, globals):

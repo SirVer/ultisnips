@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+"""A ${VISUAL} placeholder that will use the text that was last visually
+selected and insert it here. If there was no text visually selected, this will
+be the empty string. """
+
 import re
 
 import UltiSnips._vim as _vim
@@ -8,13 +12,9 @@ from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text_objects._transformation import TextObjectTransformation
 from UltiSnips.text_objects._base import NoneditableTextObject
 
-class Visual(NoneditableTextObject,TextObjectTransformation):
-    """
-    A ${VISUAL} placeholder that will use the text that was last visually
-    selected and insert it here. If there was no text visually selected,
-    this will be the empty string
-    """
-    __REPLACE_NON_WS = re.compile(r"[^ \t]")
+_REPLACE_NON_WS = re.compile(r"[^ \t]")
+class Visual(NoneditableTextObject, TextObjectTransformation):
+    """See module docstring."""
 
     def __init__(self, parent, token):
         # Find our containing snippet for visual_content
@@ -25,7 +25,7 @@ class Visual(NoneditableTextObject,TextObjectTransformation):
                 self._mode = snippet.visual_content.mode
                 break
             except AttributeError:
-                snippet = snippet._parent
+                snippet = snippet._parent  # pylint:disable=protected-access
         if not self._text:
             self._text = token.alternative_text
             self._mode = "v"
@@ -37,7 +37,7 @@ class Visual(NoneditableTextObject,TextObjectTransformation):
         if self._mode != "v":
             # Keep the indent for Line/Block Selection
             text_before = _vim.buf[self.start.line][:self.start.col]
-            indent = self.__REPLACE_NON_WS.sub(" ", text_before)
+            indent = _REPLACE_NON_WS.sub(" ", text_before)
             iu = IndentUtil()
             indent = iu.indent_to_spaces(indent)
             indent = iu.spaces_to_indent(indent)
@@ -52,6 +52,6 @@ class Visual(NoneditableTextObject,TextObjectTransformation):
 
         text = self._transform(text)
         self.overwrite(text)
-        self._parent._del_child(self)
+        self._parent._del_child(self)  # pylint:disable=protected-access
 
         return True

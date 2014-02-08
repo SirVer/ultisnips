@@ -1,7 +1,5 @@
 [MASTER]
 
-msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"
-
 # Python code to execute, usually for sys.path manipulation such as
 # pygtk.require().
 init-hook='import sys; sys.path.append("pythonx/")'
@@ -38,13 +36,14 @@ disable=
    attribute-defined-outside-init,
    fixme,
    redefined-builtin,
-   too-many-arguments,
-   too-many-instance-attributes, 
-   too-many-public-methods, 
    too-few-public-methods,
+   too-many-arguments,
    too-many-branches,
-   too-many-statements,
+   too-many-instance-attributes, 
    too-many-locals,
+   too-many-public-methods, 
+   too-many-return-statements,
+   too-many-statements,
 
 
 [REPORTS]
@@ -56,6 +55,9 @@ output-format=text
 
 # Tells whether to display a full report or only the messages
 reports=yes
+
+msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"
+
 
 
 [BASIC]
@@ -99,7 +101,7 @@ class-attribute-rgx=([A-Za-z_][A-Za-z0-9_]{2,30}|(__.*__))$
 inlinevar-rgx=[A-Za-z_][A-Za-z0-9_]*$
 
 # Good variable names which should always be accepted, separated by a comma
-good-names=i,j,k,ex,Run,_
+good-names=i,j,a,b,x,y,k,ex,Run,_
 
 # Bad variable names which should always be refused, separated by a comma
 bad-names=foo,bar,baz,toto,tutu,tata

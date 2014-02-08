@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import unittest
+# pylint: skip-file
 
-import os.path as p, sys; sys.path.append(p.join(p.dirname(__file__), ".."))
+import unittest
 
 from _diff import diff, guess_edit
 from position import Position

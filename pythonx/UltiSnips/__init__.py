@@ -145,6 +145,9 @@ Following is the full stack trace:
             _vim.new_scratch_buffer(msg)
     return wrapper
 
+
+# TODO(sirver): This class has too many responsibilities - it should not also
+# care for the parsing and managing of parsed snippets.
 class SnippetManager(object):
     """The main entry point for all UltiSnips functionality. All Vim functions
     call methods in this class."""
@@ -162,7 +165,7 @@ class SnippetManager(object):
         """Reset the class to the state it had directly after creation."""
         self._vstate = VimState()
         self._test_error = test_error
-        self._snippets = defaultdict(lambda: SnippetDictionary())
+        self._snippets = defaultdict(SnippetDictionary)
         self._filetypes = defaultdict(lambda: ['all'])
         self._visual_content = VisualContentPreserver()
 
@@ -390,11 +393,8 @@ class SnippetManager(object):
             self._current_snippet_is_done()
         self._reinit()
 
-
-    ###################################
-    # Private/Protect Functions Below #
-    ###################################
-    def _error(self, msg):
+    # TODO(sirver): This is only used by SnippetsFileParser
+    def report_error(self, msg):
         """Shows 'msg' as error to the user."""
         msg = _vim.escape("UltiSnips: " + msg)
         if self._test_error:
@@ -410,6 +410,9 @@ class SnippetManager(object):
         else:
             _vim.command("echoerr %s" % msg)
 
+    ###################################
+    # Private/Protect Functions Below #
+    ###################################
     def _reinit(self):
         """Resets transient state."""
         self._ctab = None

@@ -1,11 +1,17 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+"""Parsing of snippet files."""
+
 import re
 import UltiSnips._vim as _vim
 
-# TODO(sirver): This could just as well be a function.
+# TODO(sirver): This could just as well be a function. Also the
+# interface should change to a stream of events - so that it does
+# not need knowledge of SnippetManager.
 class SnippetsFileParser(object):
+    """Does the actual parsing."""
+
     def __init__(self, ft, fn, snip_manager, file_data=None):
         """Parser 'fn' as filetype 'ft'."""
         self._sm = snip_manager
@@ -19,33 +25,27 @@ class SnippetsFileParser(object):
         self._idx = 0
 
     def _error(self, msg):
+        """Reports 'msg' as an error."""
         fn = _vim.eval("""fnamemodify(%s, ":~:.")""" % _vim.escape(self._fn))
-        self._sm._error("%s in %s(%d)" % (msg, fn, self._idx + 1))
+        self._sm.report_error("%s in %s(%d)" % (msg, fn, self._idx + 1))
 
     def _line(self):
-        if self._idx < len(self._lines):
-            line = self._lines[self._idx]
-        else:
-            line = ""
-        return line
+        """The current line or the empty string."""
+        return self._lines[self._idx] if self._idx < len(self._lines) else ""
 
     def _line_head_tail(self):
+        """Returns (first word, rest) of the current line."""
         parts = re.split(r"\s+", self._line().rstrip(), maxsplit=1)
         parts.append('')
         return parts[:2]
 
-    def _line_head(self):
-        return self._line_head_tail()[0]
-
-    def _line_tail(self):
-        return self._line_head_tail()[1]
-
     def _goto_next_line(self):
+        """Advances to and returns the next line."""
         self._idx += 1
         return self._line()
 
     def _parse_first(self, line):
-        """ Parses the first line of the snippet definition. Returns the
+        """Parses the first line of the snippet definition. Returns the
         snippet type, trigger, description, and options in a tuple in that
         order.
         """
@@ -80,10 +80,10 @@ class SnippetsFileParser(object):
                 cs = ""
             else:
                 cs = cs[1:-1]
-
         return (snip, cs, cdescr, coptions)
 
     def _parse_snippet(self):
+        """Parses the snippet that begins at the current line."""
         line = self._line()
 
         (snip, trig, desc, opts) = self._parse_first(line)
@@ -109,17 +109,19 @@ class SnippetsFileParser(object):
                 self._globals[trig] = []
             self._globals[trig].append(cv)
         elif snip == "snippet":
-            self._sm.add_snippet(trig, cv, desc, opts, self._ft, self._globals, fn=self._fn)
+            self._sm.add_snippet(
+                trig, cv, desc, opts, self._ft, self._globals, fn=self._fn)
         else:
             self._error("Invalid snippet type: '%s'" % snip)
 
     def parse(self):
+        """Parses the given file."""
         while self._line():
             head, tail = self._line_head_tail()
             if head == "extends":
                 if tail:
                     self._sm.add_extending_info(self._ft,
-                        [ p.strip() for p in tail.split(',') ])
+                        [p.strip() for p in tail.split(',')])
                 else:
                     self._error("'extends' without file types")
             elif head in ("snippet", "global"):
