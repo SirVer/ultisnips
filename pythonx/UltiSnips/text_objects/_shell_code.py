@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+"""Implements `echo hi` shell code interpolation."""
+
 import os
 import platform
-import subprocess
+from subprocess import Popen, PIPE
 import stat
 import tempfile
 
-from UltiSnips.compatibility import as_unicode
 from UltiSnips.text_objects._base import NoneditableTextObject
 
 def _chomp(string):
-    """Rather than rstrip(), remove only the last newline and preserve purposeful whitespace"""
+    """Rather than rstrip(), remove only the last newline and preserve
+    purposeful whitespace."""
     if len(string) and string[-1] == '\n':
         string = string[:-1]
     if len(string) and string[-1] == '\r':
@@ -32,36 +34,37 @@ def _run_shell_command(cmd, tmpdir):
     os.chmod(path, stat.S_IRWXU)
 
     # Execute the file and read stdout
-    proc = subprocess.Popen(path, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = Popen(path, shell=True, stdout=PIPE, stderr=PIPE)
     proc.wait()
-    stdout, stderr = proc.communicate()
-
+    stdout, _ = proc.communicate()
     os.unlink(path)
     return _chomp(stdout.encode('utf-8'))
 
 def _get_tmp():
-    """Find an executable tmp directory"""
+    """Find an executable tmp directory."""
     userdir = os.path.expanduser("~")
-    for testdir in [tempfile.gettempdir(), os.path.join(userdir, '.cache'), os.path.join(userdir, '.tmp'), userdir]:
-        if not os.path.exists(testdir) or not _run_shell_command('echo success', testdir) == 'success':
+    for testdir in [tempfile.gettempdir(), os.path.join(userdir, '.cache'),
+            os.path.join(userdir, '.tmp'), userdir]:
+        if (not os.path.exists(testdir) or
+                not _run_shell_command('echo success', testdir) == 'success'):
             continue
         return testdir
     return ''
 
 class ShellCode(NoneditableTextObject):
+    """See module docstring."""
+
     def __init__(self, parent, token):
         NoneditableTextObject.__init__(self, parent, token)
-
         self._code = token.code.replace("\\`", "`")
         self._tmpdir = _get_tmp()
 
     def _update(self, done):
         if not self._tmpdir:
-            output = "Unable to find executable tmp directory, check noexec on /tmp"
+            output = \
+                "Unable to find executable tmp directory, check noexec on /tmp"
         else:
             output = _run_shell_command(self._code, self._tmpdir)
-
         self.overwrite(output)
-        self._parent._del_child(self)
-
+        self._parent._del_child(self)  # pylint:disable=protected-access
         return True
