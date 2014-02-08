@@ -41,7 +41,7 @@ def _ask_snippets(snippets):
         return None
 
 def _base_snippet_files_for(ft, default=True):
-    """ Returns a list of snippet files matching the given filetype (ft).
+    """Returns a list of snippet files matching the given filetype (ft).
     If default is set to false, it doesn't include shipped files.
 
     Searches through each path in 'runtimepath' in reverse order,
@@ -76,15 +76,11 @@ def _base_snippet_files_for(ft, default=True):
                 for fn in glob.glob(os.path.join(pth, pattern % ft)):
                     if fn not in ret:
                         ret.append(fn)
-
     return ret
 
 
 def _plugin_dir():
-    """ Calculates the plugin directory for UltiSnips. This depends on the
-    current file being 3 levels deep from the plugin directory, so it needs to
-    be updated if the code moves.
-    """
+    """Calculates the plugin directory for UltiSnips."""
     directory = __file__
     for _ in range(10):
         directory = os.path.dirname(directory)
