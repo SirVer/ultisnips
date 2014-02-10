@@ -31,6 +31,29 @@ class VimState(object):
         self._poss = deque(maxlen=5)
         self._lvb = None
 
+        self._text_to_expect = None
+        self._unnamed_reg_cache = None
+        self._unnamed_reg_cached = False
+
+    def remember_unnamed_register(self, text_to_expect):
+        """Save the unnamed register. 'text_to_expect' is text that we expect
+        to be currently contained in the register - this could be text from the
+        tabstop that was selected and might have been overwritten. We will not
+        cash that then."""
+        self._unnamed_reg_cached = True
+        unnamed_reg = _vim.eval('@"')
+        if unnamed_reg != self._text_to_expect:
+            self._unnamed_reg_cache = unnamed_reg
+        self._text_to_expect = text_to_expect
+
+    def restore_unnamed_register(self):
+        """Restores the unnamed register and forgets what we cached."""
+        if not self._unnamed_reg_cached:
+            return
+        escaped_cache = self._unnamed_reg_cache.replace("'", "''")
+        _vim.command("let @\"='%s'" % escaped_cache)
+        self._unnamed_reg_cached = False
+
     def remember_position(self):
         """Remember the current position as a previous pose."""
         self._poss.append(VimPosition())

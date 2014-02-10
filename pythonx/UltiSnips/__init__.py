@@ -168,10 +168,6 @@ class SnippetManager(object):
         while len(self._csnippets):
             self._current_snippet_is_done()
 
-        # needed to retain the unnamed register at all times
-        self._unnamed_reg_cached = False
-        self._last_placeholder = None
-
         self._reinit()
 
     @err_to_scratch_buffer
@@ -439,25 +435,14 @@ class SnippetManager(object):
                 self._current_snippet_is_done()
                 jumped = self._jump(backwards)
         if jumped:
-            self._cache_unnamed_register()
             self._vstate.remember_position()
+            self._vstate.remember_unnamed_register(self._ctab.current_text)
             self._ignore_movements = True
         return jumped
 
-    def _cache_unnamed_register(self):
-        """Save the unnamed register."""
-        self._unnamed_reg_cached = True
-        unnamed_reg = _vim.eval('@"')
-        if self._last_placeholder != unnamed_reg:
-            self._unnamed_reg_cache = unnamed_reg
-        self._last_placeholder = self._ctab.current_text
-
-    def restore_unnamed_register(self):
-        """Restores the unnamed register from the cache."""
-        if self._unnamed_reg_cached:
-            escaped_cache = self._unnamed_reg_cache.replace("'", "''")
-            _vim.command("let @\"='%s'" % escaped_cache)
-            self._unnamed_reg_cached = False
+    def leaving_insert_mode(self):
+        """Called whenever we leave the insert mode."""
+        self._vstate.restore_unnamed_register()
 
     def _handle_failure(self, trigger):
         """Mainly make sure that we play well with SuperTab."""
