@@ -2687,7 +2687,7 @@ class LeaveTrailingWhitespace(_VimTest):
     snippets = ("test", """Hello \t ${1:default}\n$2""")
     wanted = """Hello \t \nGoodbye"""
     keys = "test" + EX + BS + JF + "Goodbye"
-# End: Trailing whitespace }}}#
+# End: Trailing whitespace #}}}
 
 # Cursor Movement  {{{#
 class CursorMovement_Multiline_ECR(_VimTest):
@@ -3043,11 +3043,15 @@ class Bug1251994(_VimTest):
     wanted = "  world hello;blub"
 # End: 1251994  #}}}
 
-# Test for Github Pull Request #134 {{{#
+# Test for Github Pull Request #134 - Retain unnamed register {{{#
 class RetainsTheUnnamedRegister(_VimTest):
     snippets = ("test", "${1:hello} ${2:world} ${0}")
     keys = "yank" + ESC + "by4lea test" + EX + "HELLO" + JF + JF + ESC + "p"
     wanted = "yank HELLO world yank"
+class RetainsTheUnnamedRegister_ButOnlyOnce(_VimTest):
+    snippets = ("test", "${1:hello} ${2:world} ${0}")
+    keys = "blahfasel" + ESC + "v" + 4*ARR_L + "xotest" + EX + ESC + ARR_U + "v0xo" + ESC + "p"
+    wanted = "\nblah\nhello world "
 # End: Github Pull Request # 134 #}}}
 
 class VerifyVimDict1(_VimTest):
