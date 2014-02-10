@@ -457,7 +457,7 @@ class SnippetManager(object):
         if self._unnamed_reg_cached:
             escaped_cache = self._unnamed_reg_cache.replace("'", "''")
             _vim.command("let @\"='%s'" % escaped_cache)
-            self._unnamed_register_cached = False
+            self._unnamed_reg_cached = False
 
     def _handle_failure(self, trigger):
         """Mainly make sure that we play well with SuperTab."""
