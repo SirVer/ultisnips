@@ -728,7 +728,6 @@ class SnippetManager(object):
             except ValueError:
                 self._filetypes[_vim.buf.number].insert(idx + 1, ft)
                 idx += 1
-        self._ensure_all_loaded()
 
     def _find_snippets(self, ft, trigger, potentially=False, seen=None):
         """Find snippets matching trigger
