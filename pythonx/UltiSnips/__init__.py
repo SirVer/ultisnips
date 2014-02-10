@@ -594,7 +594,7 @@ class SnippetManager(object):
         changes in the future. 'file_data' can be injected in tests."""
         self._snippets[ft].addfile(filename)
         if file_data is None:
-            file_data = file_data.read()
+            file_data = open(filename, "r").read()
         for event, data in parse_snippets_file(file_data):
             if event == "error":
                 msg, line_index = data
