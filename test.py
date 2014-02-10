@@ -358,7 +358,7 @@ class ParseSnippets_MissingEndSnippet(_PS_Base):
     keys = "testsnip" + EX
     wanted = "testsnip" + EX
     expected_error = dedent("""
-        UltiSnips: Missing 'endsnippet' for 'testsnip' in test_file(5)
+        UltiSnips: Missing 'endsnippet' for 'testsnip' in test_file(4)
         """).strip()
 
 class ParseSnippets_UnknownDirective(_PS_Base):
