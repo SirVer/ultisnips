@@ -101,7 +101,7 @@ def feedkeys(keys, mode='n'):
 def new_scratch_buffer(text):
     """Create a new scratch buffer with the text given"""
     command("botright new")
-    command("set ft=text")
+    command("set ft=")
     command("set buftype=nofile")
 
     vim.current.buffer[:] = text.splitlines()
