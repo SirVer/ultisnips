@@ -256,7 +256,7 @@ function! UltiSnips_LeavingBuffer()
 endf
 
 function! UltiSnips_LeavingInsertMode()
-    exec g:_uspy "UltiSnips_Manager.restore_unnamed_register()"
+    exec g:_uspy "UltiSnips_Manager.leaving_insert_mode()"
 endfunction
 
 " }}}
