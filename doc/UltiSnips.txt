@@ -16,9 +16,9 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    3.3 Snippet Search Path                      |UltiSnips-snippet-search-path|
    3.4 Warning About Select Mode Mappings       |UltiSnips-warning-smappings|
    3.5 Functions                                |UltiSnips-functions|
-      3.5.1 UltiSnips_AddSnippet                |UltiSnips_AddSnippet|
-      3.5.2 UltiSnips_Anon                      |UltiSnips_Anon|
-      3.5.3 UltiSnips_SnippetsInCurrentScope    |UltiSnips_SnippetsInCurrentScope|
+      3.5.1 UltiSnips#AddSnippet                |UltiSnips#AddSnippet|
+      3.5.2 UltiSnips#Anon                      |UltiSnips#Anon|
+      3.5.3 UltiSnips#SnippetsInCurrentScope    |UltiSnips#SnippetsInCurrentScope|
    3.6 Missing python support                   |UltiSnips-python-warning|
 4. Syntax                                       |UltiSnips-syntax|
    4.1 Adding Snippets                          |UltiSnips-adding-snippets|
@@ -250,25 +250,25 @@ following to your vimrc file. >
 
 For advanced users there are four functions that you can map directly to a
 key and that correspond to some of the triggers previously defined:
-   g:UltiSnipsExpandTrigger        <--> UltiSnips_ExpandSnippet
-   g:UltiSnipsJumpForwardTrigger   <--> UltiSnips_JumpForwards
-   g:UltiSnipsJumpBackwardTrigger  <--> UltiSnips_JumpBackwards
+   g:UltiSnipsExpandTrigger        <--> UltiSnips#ExpandSnippet
+   g:UltiSnipsJumpForwardTrigger   <--> UltiSnips#JumpForwards
+   g:UltiSnipsJumpBackwardTrigger  <--> UltiSnips#JumpBackwards
 
 If you have g:UltiSnipsExpandTrigger and g:UltiSnipsJumpForwardTrigger set
 to the same value then the function you are actually going to use is
-UltiSnips_ExpandSnippetOrJump.
+UltiSnips#ExpandSnippetOrJump.
 
-Each time any of the functions UltiSnips_ExpandSnippet,
-UltiSnips_ExpandSnippet, UltiSnips_JumpBackwards or UltiSnips_JumpBackwards is
+Each time any of the functions UltiSnips#ExpandSnippet,
+UltiSnips#ExpandSnippet, UltiSnips#JumpBackwards or UltiSnips#JumpBackwards is
 called a global variable is set that contains the return value of the
 corresponding function.
 
 The corresponding variables and functions are:
-UltiSnips_ExpandSnippet       --> g:ulti_expand_res (0: fail, 1: success)
-UltiSnips_ExpandSnippetOrJump --> g:ulti_expand_or_jump_res (0: fail,
+UltiSnips#ExpandSnippet       --> g:ulti_expand_res (0: fail, 1: success)
+UltiSnips#ExpandSnippetOrJump --> g:ulti_expand_or_jump_res (0: fail,
                                                     1: expand, 2: jump)
-UltiSnips_JumpForwards        --> g:ulti_jump_forwards_res (0: fail, 1: success)
-UltiSnips_JumpBackwards       --> g:ulti_jump_backwards_res (0: fail, 1: success)
+UltiSnips#JumpForwards        --> g:ulti_jump_forwards_res (0: fail, 1: success)
+UltiSnips#JumpBackwards       --> g:ulti_jump_backwards_res (0: fail, 1: success)
 
 To see how these return values may come in handy, suppose that you want to map
 a key to expand or jump, but if none of these actions is successful you want
@@ -279,7 +279,7 @@ Usage is as follows: You define a function >
 
    let g:ulti_expand_or_jump_res = 0 "default value, just set once
    function! Ulti_ExpandOrJump_and_getRes()
-     call UltiSnips_ExpandSnippetOrJump()
+     call UltiSnips#ExpandSnippetOrJump()
      return g:ulti_expand_or_jump_res
    endfunction
 
@@ -389,9 +389,9 @@ complete definition as listed by the |:smap| command. >
 UltiSnips provides some functions for extending core functionality.
 
 
- 3.5.1 UltiSnips_AddSnippet                            *UltiSnips_AddSnippet*
+ 3.5.1 UltiSnips#AddSnippet                            *UltiSnips#AddSnippet*
 
-The first function is UltiSnips_AddSnippet(trigger, value, description,
+The first function is UltiSnips#AddSnippet(trigger, value, description,
 options, ...). It adds a new snippet with the provided trigger, value,
 description, and options to the current list of snippets. See
 |UltiSnips-syntax| for details on the meaning of the function arguments. All
@@ -399,21 +399,21 @@ arguments are strings. An optional fifth argument can be used to specify the
 filetype for the new snippet.
 
 
- 3.5.2 UltiSnips_Anon                                        *UltiSnips_Anon*
+ 3.5.2 UltiSnips#Anon                                        *UltiSnips#Anon*
 
-The second function is UltiSnips_Anon(value, ...). It expands an anonymous
+The second function is UltiSnips#Anon(value, ...). It expands an anonymous
 snippet. Anonymous snippets are defined on the spot, expanded and immediately
 discarded again. Anonymous snippets are not added to the global list of
 snippets, so they cannot be expanded a second time unless the function is
 called again. The function takes three optional arguments, in order: trigger,
 description, options. Arguments coincide with the arguments of the
-|UltiSnips_AddSnippet| function of the same name. The trigger and options
+|UltiSnips#AddSnippet| function of the same name. The trigger and options
 arguments can change the way the snippet expands. The description is unused at
 this point.
 
 An example use case might be this line from a reStructuredText plugin file:
 
-   inoremap <silent> $$ $$<C-R>=UltiSnips_Anon(':latex:\`$1\`', '$$')<cr>
+   inoremap <silent> $$ $$<C-R>=UltiSnips#Anon(':latex:\`$1\`', '$$')<cr>
 
 This expands the snippet whenever two $ signs are typed.
 Note: The right-hand side of the mapping starts with an immediate retype of
@@ -421,9 +421,9 @@ the '$$' trigger and passes '$$' to the function as the trigger argument.
 This is required in order for UltiSnips to have access to the characters
 typed so it can determine if the trigger matches or not.
 
- 3.5.3 UltiSnips_SnippetsInCurrentScope    *UltiSnips_SnippetsInCurrentScope*
+ 3.5.3 UltiSnips#SnippetsInCurrentScope    *UltiSnips#SnippetsInCurrentScope*
 
-A third function is UltiSnips_SnippetsInCurrentScope which is the equivalent
+A third function is UltiSnips#SnippetsInCurrentScope which is the equivalent
 of snipmate GetSnipsInCurrentScope function.
 This function simply returns a vim dictionary with the snippets whose trigger
 matches the current word.
@@ -443,7 +443,7 @@ you just have to define the function GetSnipsInCurrentScope. Put the following
 in your vimrc:
 
 function! GetSnipsInCurrentScope()
-  return UltiSnips_SnippetsInCurrentScope()
+  return UltiSnips#SnippetsInCurrentScope()
 endfunction
 
 
@@ -451,8 +451,8 @@ As a second example on how to use this function consider the following
 function and mapping definition:
 
 function! ExpandPossibleShorterSnippet()
-  if len(UltiSnips_SnippetsInCurrentScope()) == 1 "only one candidate...
-    let curr_key = keys(UltiSnips_SnippetsInCurrentScope())[0]
+  if len(UltiSnips#SnippetsInCurrentScope()) == 1 "only one candidate...
+    let curr_key = keys(UltiSnips#SnippetsInCurrentScope())[0]
     normal diw
     exe "normal a" . curr_key
     exe "normal a "
@@ -460,7 +460,7 @@ function! ExpandPossibleShorterSnippet()
   endif
   return 0
 endfunction
-inoremap <silent> <C-L> <C-R>=(ExpandPossibleShorterSnippet() == 0? '': UltiSnips_ExpandSnippet())<CR>
+inoremap <silent> <C-L> <C-R>=(ExpandPossibleShorterSnippet() == 0? '': UltiSnips#ExpandSnippet())<CR>
 
 If the trigger for your snippet is lorem, you type lor, and you have no other
 snippets whose trigger matches lor then hitting <C-L> will expand to whatever

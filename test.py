@@ -2305,7 +2305,7 @@ class MultiWord_SnippetOptions_ExpandWordSnippets_ExpandSuffix(
 class _AnonBase(_VimTest):
     args = ""
     def _options_on(self):
-        self.send(":inoremap <silent> " + EA + ' <C-R>=UltiSnips_Anon('
+        self.send(":inoremap <silent> " + EA + ' <C-R>=UltiSnips#Anon('
                 + self.args + ')<cr>\n')
     def _options_off(self):
         self.send(":iunmap <silent> " + EA + '\n')
@@ -2358,7 +2358,7 @@ class Anon_Trigger_Opts(_AnonBase):
 class _AddFuncBase(_VimTest):
     args = ""
     def _options_on(self):
-        self.send(":call UltiSnips_AddSnippet("
+        self.send(":call UltiSnips#AddSnippet("
                 + self.args + ')\n')
 
 class AddFunc_Simple(_AddFuncBase):
@@ -3063,9 +3063,9 @@ class VerifyVimDict1(_VimTest):
     """
 
     snippets = ('testâ', 'abc123ά', '123\'êabc')
-    keys = ('test=(type(UltiSnips_SnippetsInCurrentScope()) . len(UltiSnips_SnippetsInCurrentScope()) . ' +
-       'UltiSnips_SnippetsInCurrentScope()["testâ"]' + ')\n' +
-       '=len(UltiSnips_SnippetsInCurrentScope())\n')
+    keys = ('test=(type(UltiSnips#SnippetsInCurrentScope()) . len(UltiSnips#SnippetsInCurrentScope()) . ' +
+       'UltiSnips#SnippetsInCurrentScope()["testâ"]' + ')\n' +
+       '=len(UltiSnips#SnippetsInCurrentScope())\n')
 
     wanted = 'test41123\'êabc0'
 
@@ -3076,7 +3076,7 @@ class VerifyVimDict2(_VimTest):
 
     snippets = ('te"stâ', 'abc123ά', '123êabc')
     akey = "'te{}stâ'".format('"')
-    keys = ('te"=(UltiSnips_SnippetsInCurrentScope()[{}]'.format(akey) + ')\n')
+    keys = ('te"=(UltiSnips#SnippetsInCurrentScope()[{}]'.format(akey) + ')\n')
     wanted = 'te"123êabc'
 
 class VerifyVimDict3(_VimTest):
@@ -3086,7 +3086,7 @@ class VerifyVimDict3(_VimTest):
 
     snippets = ("te'stâ", 'abc123ά', '123êabc')
     akey = '"te{}stâ"'.format("'")
-    keys = ("te'=(UltiSnips_SnippetsInCurrentScope()[{}]".format(akey) + ')\n')
+    keys = ("te'=(UltiSnips#SnippetsInCurrentScope()[{}]".format(akey) + ')\n')
     wanted = "te'123êabc"
 
 ###########################################################################
