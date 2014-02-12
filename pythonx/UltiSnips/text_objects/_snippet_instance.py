@@ -37,10 +37,10 @@ class SnippetInstance(EditableTextObject):
     def replace_initial_text(self):
         """Puts the initial text of all text elements into Vim."""
         def _place_initial_text(obj):
-            """recurses on the childs to do the work."""
+            """recurses on the children to do the work."""
             obj.overwrite()
             if isinstance(obj, EditableTextObject):
-                for child in obj._childs:
+                for child in obj._children:
                     _place_initial_text(child)
         _place_initial_text(self)
 
@@ -60,7 +60,7 @@ class SnippetInstance(EditableTextObject):
         def _find_recursive(obj):
             """Finds all text objects and puts them into 'not_done'."""
             if isinstance(obj, EditableTextObject):
-                for child in obj._childs:
+                for child in obj._children:
                     _find_recursive(child)
             not_done.add(obj)
         _find_recursive(self)

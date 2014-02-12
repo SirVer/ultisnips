@@ -14,7 +14,7 @@ with open(DUMP_FILENAME, "w"):
     pass # clears the file
 
 def echo_to_hierarchy(text_object):
-    """Outputs the given 'text_object' and its childs hierarchically."""
+    """Outputs the given 'text_object' and its children hierarchically."""
     # pylint:disable=protected-access
     parent = text_object
     while parent._parent:
@@ -24,7 +24,7 @@ def echo_to_hierarchy(text_object):
         """prints recursively."""
         debug(indent + as_unicode(text_object))
         try:
-            for child in text_object._childs:
+            for child in text_object._children:
                 _do_print(child, indent=indent + "  ")
         except AttributeError:
             pass
