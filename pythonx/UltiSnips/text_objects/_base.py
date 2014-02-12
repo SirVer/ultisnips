@@ -115,7 +115,7 @@ class TextObject(object):
         length information. If 'gtext' is None use the initial text of this
         object.
         """
-        # We explicitly do not want to move our childs around here as we
+        # We explicitly do not want to move our children around here as we
         # either have non or we are replacing text initially which means we do
         # not want to mess with their positions
         if self.current_text == gtext:
@@ -125,7 +125,7 @@ class TextObject(object):
                 self._start, self._end, gtext or self._initial_text)
         if self._parent:
             self._parent._child_has_moved(
-                self._parent._childs.index(self), min(old_end, self._end),
+                self._parent._children.index(self), min(old_end, self._end),
                 self._end.delta(old_end)
             )
 
@@ -144,21 +144,21 @@ class EditableTextObject(TextObject):
     """
     def __init__(self, *args, **kwargs):
         TextObject.__init__(self, *args, **kwargs)
-        self._childs = []
+        self._children = []
         self._tabstops = {}
 
     ##############
     # Properties #
     ##############
     @property
-    def childs(self):
-        """List of all childs."""
-        return self._childs
+    def children(self):
+        """List of all children."""
+        return self._children
 
     @property
-    def _editable_childs(self):
-        """List of all childs that are EditableTextObjects"""
-        return [child for child in self._childs if
+    def _editable_children(self):
+        """List of all children that are EditableTextObjects"""
+        return [child for child in self._children if
                 isinstance(child, EditableTextObject)]
 
     ####################
@@ -166,9 +166,9 @@ class EditableTextObject(TextObject):
     ####################
     def find_parent_for_new_to(self, pos):
         """Figure out the parent object for something at 'pos'."""
-        for childs in self._editable_childs:
-            if childs._start <= pos < childs._end:
-                return childs.find_parent_for_new_to(pos)
+        for children in self._editable_children:
+            if children._start <= pos < children._end:
+                return children.find_parent_for_new_to(pos)
         return self
 
     ###############################
@@ -182,7 +182,7 @@ class EditableTextObject(TextObject):
 
         to_kill = set()
         new_cmds = []
-        for child in self._childs:
+        for child in self._children:
             if ctype == "I": # Insertion
                 if (child._start < pos <
                         Position(child._end.line, child._end.col) and
@@ -247,7 +247,7 @@ class EditableTextObject(TextObject):
             delta.col *= -1
         pivot = Position(line, col)
         idx = -1
-        for cidx, child in enumerate(self._childs):
+        for cidx, child in enumerate(self._children):
             if child._start < pivot <= child._end:
                 idx = cidx
         self._child_has_moved(idx, pivot, delta)
@@ -255,7 +255,7 @@ class EditableTextObject(TextObject):
     def _move(self, pivot, diff):
         TextObject._move(self, pivot, diff)
 
-        for child in self._childs:
+        for child in self._children:
             child._move(pivot, diff)
 
     def _child_has_moved(self, idx, pivot, diff):
@@ -263,12 +263,12 @@ class EditableTextObject(TextObject):
         'diff'."""
         self._end.move(pivot, diff)
 
-        for child in self._childs[idx+1:]:
+        for child in self._children[idx+1:]:
             child._move(pivot, diff)
 
         if self._parent:
             self._parent._child_has_moved(
-                self._parent._childs.index(self), pivot, diff
+                self._parent._children.index(self), pivot, diff
             )
 
     def _get_next_tab(self, number):
@@ -285,7 +285,7 @@ class EditableTextObject(TextObject):
                 break
             i += 1
 
-        child = [c._get_next_tab(number) for c in self._editable_childs]
+        child = [c._get_next_tab(number) for c in self._editable_children]
         child = [c for c in child if c]
 
         possible_sol += child
@@ -310,7 +310,7 @@ class EditableTextObject(TextObject):
                 break
             i -= 1
 
-        child = [c._get_prev_tab(number) for c in self._editable_childs]
+        child = [c._get_prev_tab(number) for c in self._editable_children]
         child = [c for c in child if c]
 
         possible_sol += child
@@ -325,7 +325,7 @@ class EditableTextObject(TextObject):
         interested in this."""
         if number in self._tabstops:
             return self._tabstops[number]
-        for child in self._editable_childs:
+        for child in self._editable_children:
             if child is requester:
                 continue
             rv = child._get_tabstop(self, number)
@@ -335,20 +335,20 @@ class EditableTextObject(TextObject):
             return self._parent._get_tabstop(self, number)
 
     def _update(self, done):
-        if all((child in done) for child in self._childs):
+        if all((child in done) for child in self._children):
             assert self not in done
             done.add(self)
         return True
 
     def _add_child(self, child):
         """Add 'child' as a new child of this text object."""
-        self._childs.append(child)
-        self._childs.sort()
+        self._children.append(child)
+        self._children.sort()
 
     def _del_child(self, child):
         """Delete this 'child'."""
         child._parent = None
-        self._childs.remove(child)
+        self._children.remove(child)
 
         # If this is a tabstop, delete it
         try:

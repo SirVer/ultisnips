@@ -60,8 +60,8 @@ def _do_parse(all_tokens, seen_ts, parent_to, text, indent):
 
 def parse_text_object(parent_to, text, indent):
     """Parses a text object from 'text' assuming the current 'indent'. Will
-    instantiate all the objects and link them as childs to parent_to. Will also
-    put the initial text into Vim."""
+    instantiate all the objects and link them as children to parent_to. Will
+    also put the initial text into Vim."""
     seen_ts = {}
     all_tokens = []
 
