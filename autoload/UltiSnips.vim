@@ -13,6 +13,11 @@ endif
 function! UltiSnips_FileTypeChanged()
 endfunction
 
+" Kludge to make sure that if the python module is loaded first, all of this
+" initialization in this file is indeed done.
+function! UltiSnips#EnsureAutoloadScriptWasRun()
+endfunction
+
 if !exists("g:UltiSnipsUsePythonVersion")
     let g:_uspy=":py3 "
     if !has("python3")
@@ -274,10 +279,6 @@ exec g:_uspy "new_path = os.path.abspath(os.path.join(
     \ vim.eval('expand(\"<sfile>:h\")'), '..', 'pythonx'))"
 exec g:_uspy "vim.command(\"let g:UltiSnipsPythonPath = '%s'\" % new_path)"
 exec g:_uspy "if not hasattr(vim, 'VIM_SPECIAL_PATH'): sys.path.append(new_path)"
-exec g:_uspy "from UltiSnips import SnippetManager"
-exec g:_uspy "UltiSnips_Manager = SnippetManager(
-    \ vim.eval('g:UltiSnipsExpandTrigger'),
-    \ vim.eval('g:UltiSnipsJumpForwardTrigger'),
-    \ vim.eval('g:UltiSnipsJumpBackwardTrigger'))"
+exec g:_uspy "from UltiSnips import UltiSnips_Manager"
 
 let did_UltiSnips_autoload=1
