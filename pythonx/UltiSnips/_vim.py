@@ -104,7 +104,7 @@ def new_scratch_buffer(text):
     vim.command("set ft=")
     vim.command("set buftype=nofile")
 
-    vim.current.buffer[:] = text.splitlines()
+    vim.buffers[len(vim.buffers)-1][:] = text.splitlines()
 
     feedkeys(r"\<Esc>")
 
