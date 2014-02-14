@@ -27,8 +27,8 @@ class _TextIterator(object):
         """Iterator interface."""
         return self
 
-    def next(self):
-        """Returns the next character. Part of the iterator interface."""
+    def __next__(self):
+        """Returns the next character."""
         if self._idx >= len(self._text):
             raise StopIteration
 
@@ -39,8 +39,8 @@ class _TextIterator(object):
         else:
             self._col += 1
         self._idx += 1
-
         return rv
+    next = __next__  # for python2
 
     def peek(self, count=1):
         """Returns the next 'count' characters without advancing the stream."""
@@ -63,7 +63,7 @@ def _parse_number(stream):
     """
     rv = ""
     while stream.peek() and stream.peek() in string.digits:
-        rv += stream.next()
+        rv += next(stream)
 
     return int(rv)
 
@@ -78,9 +78,9 @@ def _parse_till_closing_brace(stream):
     in_braces = 1
     while True:
         if EscapeCharToken.starts_here(stream, '{}'):
-            rv += stream.next() + stream.next()
+            rv += next(stream) + next(stream)
         else:
-            char = stream.next()
+            char = next(stream)
             if char == '{':
                 in_braces += 1
             elif char == '}':
@@ -102,10 +102,10 @@ def _parse_till_unescaped_char(stream, chars):
         escaped = False
         for char in chars:
             if EscapeCharToken.starts_here(stream, char):
-                rv += stream.next() + stream.next()
+                rv += next(stream) + next(stream)
                 escaped = True
         if not escaped:
-            char = stream.next()
+            char = next(stream)
             if char in chars:
                 break
             rv += char
@@ -135,13 +135,13 @@ class TabStopToken(Token):
         return cls.CHECK.match(stream.peek(10)) is not None
 
     def _parse(self, stream, indent):
-        stream.next() # $
-        stream.next() # {
+        next(stream) # $
+        next(stream) # {
 
         self.number = _parse_number(stream)
 
         if stream.peek() == ":":
-            stream.next()
+            next(stream)
         self.initial_text = _parse_till_closing_brace(stream)
 
     def __repr__(self):
@@ -161,10 +161,10 @@ class VisualToken(Token):
 
     def _parse(self, stream, indent):
         for _ in range(8): # ${VISUAL
-            stream.next()
+            next(stream)
 
         if stream.peek() == ":":
-            stream.next()
+            next(stream)
         self.alternative_text, char = _parse_till_unescaped_char(stream, '/}')
         self.alternative_text = unescape(self.alternative_text)
 
@@ -198,12 +198,12 @@ class TransformationToken(Token):
         return cls.CHECK.match(stream.peek(10)) is not None
 
     def _parse(self, stream, indent):
-        stream.next() # $
-        stream.next() # {
+        next(stream) # $
+        next(stream) # {
 
         self.number = _parse_number(stream)
 
-        stream.next() # /
+        next(stream) # /
 
         self.search = _parse_till_unescaped_char(stream, '/')[0]
         self.replace = _parse_till_unescaped_char(stream, '/')[0]
@@ -225,7 +225,7 @@ class MirrorToken(Token):
         return cls.CHECK.match(stream.peek(10)) is not None
 
     def _parse(self, stream, indent):
-        stream.next() # $
+        next(stream) # $
         self.number = _parse_number(stream)
 
     def __repr__(self):
@@ -244,8 +244,8 @@ class EscapeCharToken(Token):
             return True
 
     def _parse(self, stream, indent):
-        stream.next() # \
-        self.initial_text = stream.next()
+        next(stream) # \
+        self.initial_text = next(stream)
 
     def __repr__(self):
         return "EscapeCharToken(%r,%r,%r)" % (
@@ -261,7 +261,7 @@ class ShellCodeToken(Token):
         return stream.peek(1) == '`'
 
     def _parse(self, stream, indent):
-        stream.next() # `
+        next(stream) # `
         self.code = _parse_till_unescaped_char(stream, '`')[0]
 
     def __repr__(self):
@@ -281,9 +281,9 @@ class PythonCodeToken(Token):
 
     def _parse(self, stream, indent):
         for _ in range(3):
-            stream.next() # `!p
+            next(stream) # `!p
         if stream.peek() in '\t ':
-            stream.next()
+            next(stream)
 
         code = _parse_till_unescaped_char(stream, '`')[0]
 
@@ -314,7 +314,7 @@ class VimLCodeToken(Token):
 
     def _parse(self, stream, indent):
         for _ in range(4):
-            stream.next() # `!v
+            next(stream) # `!v
         self.code = _parse_till_unescaped_char(stream, '`')[0]
 
     def __repr__(self):
@@ -344,6 +344,6 @@ def tokenize(text, indent, offset):
                     done_something = True
                     break
             if not done_something:
-                stream.next()
+                next(stream)
     except StopIteration:
         yield EndOfTextToken(stream, indent)

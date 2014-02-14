@@ -96,7 +96,10 @@ class VimInterface:
         tries = 50
         while tries:
             if os.path.exists(fn):
-                return open(fn,"r").read()[:-1]
+                if sys.version_info >= (3,0):
+                    return open(fn,"r", encoding="utf-8").read()[:-1]
+                else:
+                    return open(fn,"r").read()[:-1]
             time.sleep(.05)
             tries -= 1
 

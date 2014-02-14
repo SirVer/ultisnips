@@ -15,15 +15,16 @@ class _LineIterator(object):
     def __iter__(self):
         return self
 
+    def __next__(self):
+        """Returns the next line."""
+        self._line_index, line = next(self._lines)
+        return line
+    next = __next__  # for python2
+
     @property
     def line_index(self):
         """The 1 based line index in the current file."""
         return self._line_index
-
-    def next(self):
-        """Returns the next line."""
-        self._line_index, line = next(self._lines)
-        return line
 
 def _handle_snippet_or_global(line, lines, globals):
     """Parses the snippet that begins at the current line."""
