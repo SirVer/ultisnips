@@ -6,14 +6,13 @@
 import hashlib
 import os
 
-
 def _hash_file(path):
     """Returns a hashdigest of 'path'"""
     if not os.path.isfile(path):
         return False
     return hashlib.sha1(open(path, "rb").read()).hexdigest()
 
-
+# TODO(sirver): This class should not hash any files nor keep track of extends.
 class SnippetDictionary(object):
     """See module docstring."""
 

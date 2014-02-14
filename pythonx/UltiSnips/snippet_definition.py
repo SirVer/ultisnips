@@ -33,7 +33,7 @@ def _words_for_line(trigger, before, num_words=None):
         return before[len(before_words):].strip()
 
 
-class Snippet(object):
+class SnippetDefinition(object):
     """Represents a snippet as parsed from a file."""
 
     _INDENT = re.compile(r"^[ \t]*")
@@ -49,7 +49,7 @@ class Snippet(object):
         self._globals = globals
 
     def __repr__(self):
-        return "Snippet(%s,%s,%s)" % (
+        return "SnippetDefinition(%s,%s,%s)" % (
                 self._trigger, self._description, self._opts)
 
     def _re_match(self, trigger):

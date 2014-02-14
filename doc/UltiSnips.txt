@@ -346,11 +346,6 @@ file: >
    " Traverse in reverse order
    let g:UltiSnipsDontReverseSearchPath="0"
 
-By default, whenever a snippet expand is triggered, UltiSnips will check for
-modifications to the snippet file associated with the filetype and reload it
-if necessary. This behavior can be disabled as follows: >
-   let g:UltiSnipsDoHash=0
-
 |UltiSnips-adding-snippets| explains which files are parsed for a given filetype.
 
 
