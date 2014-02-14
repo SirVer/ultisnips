@@ -260,10 +260,6 @@ function! UltiSnips#CursorMoved()
     exec g:_uspy "UltiSnips_Manager.cursor_moved()"
 endf
 
-function! UltiSnips#EnteredInsertMode()
-    exec g:_uspy "UltiSnips_Manager.entered_insert_mode()"
-endf
-
 function! UltiSnips#LeavingBuffer()
     exec g:_uspy "UltiSnips_Manager.leaving_buffer()"
 endf
