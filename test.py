@@ -72,6 +72,15 @@ COMPL_ACCEPT = chr(25)
 
 NUMBER_OF_RETRIES_FOR_EACH_TEST = 4
 
+def RunningOnWindows():
+    if platform.system() == "Windows":
+        return "Does not work on Windows."
+
+def NoUnidecodeAvailable():
+    if not UNIDECODE_IMPORTED:
+        return "unidecode is not available."
+
+
 class VimInterface:
     def focus(title=None):
         pass
@@ -219,8 +228,8 @@ class _VimTest(unittest.TestCase):
     keys = ""
     sleeptime = 0.00
     output = None
-
-    skip_on_windows = False
+    # Skip this test for the given reason or None for not skipping it.
+    skip_if = lambda self: None
 
     def send(self,s):
         self.vim.send(s)
@@ -264,14 +273,10 @@ class _VimTest(unittest.TestCase):
     def _options_off(self):
         pass
 
-    def _skip(self, reason):
-        if hasattr(self, "skipTest"):
-            self.skipTest(reason)
-
     def setUp(self):
-        system = platform.system()
-        if self.skip_on_windows and system == "Windows":
-            return self._skip("Running on windows")
+        reason_for_skipping = self.skip_if()
+        if reason_for_skipping is not None:
+            return self.skipTest(reason_for_skipping)
 
         # Escape for good measure
         self.send(ESC + ESC + ESC)
@@ -850,43 +855,43 @@ class TabStopNavigatingInInsertModeSimple_ExceptCorrectResult(_VimTest):
 # End: TabStop Tests  #}}}
 # ShellCode Interpolation  {{{#
 class TabStop_Shell_SimpleExample(_VimTest):
-    skip_on_windows = True
+    skip_if = lambda self: RunningOnWindows()
     snippets = ("test", "hi `echo hallo` you!")
     keys = "test" + EX + "and more"
     wanted = "hi hallo you!and more"
 class TabStop_Shell_WithUmlauts(_VimTest):
-    skip_on_windows = True
+    skip_if = lambda self: RunningOnWindows()
     snippets = ("test", "hi `echo höüäh` you!")
     keys = "test" + EX + "and more"
     wanted = "hi höüäh you!and more"
 class TabStop_Shell_TextInNextLine(_VimTest):
-    skip_on_windows = True
+    skip_if = lambda self: RunningOnWindows()
     snippets = ("test", "hi `echo hallo`\nWeiter")
     keys = "test" + EX + "and more"
     wanted = "hi hallo\nWeiterand more"
 class TabStop_Shell_InDefValue_Leave(_VimTest):
-    skip_on_windows = True
+    skip_if = lambda self: RunningOnWindows()
     snippets = ("test", "Hallo ${1:now `echo fromecho`} end")
     keys = "test" + EX + JF + "and more"
     wanted = "Hallo now fromecho endand more"
 class TabStop_Shell_InDefValue_Overwrite(_VimTest):
-    skip_on_windows = True
+    skip_if = lambda self: RunningOnWindows()
     snippets = ("test", "Hallo ${1:now `echo fromecho`} end")
     keys = "test" + EX + "overwrite" + JF + "and more"
     wanted = "Hallo overwrite endand more"
 class TabStop_Shell_TestEscapedChars_Overwrite(_VimTest):
-    skip_on_windows = True
+    skip_if = lambda self: RunningOnWindows()
     snippets = ("test", r"""`echo \`echo "\\$hi"\``""")
     keys = "test" + EX
     wanted = "$hi"
 class TabStop_Shell_TestEscapedCharsAndShellVars_Overwrite(_VimTest):
-    skip_on_windows = True
+    skip_if = lambda self: RunningOnWindows()
     snippets = ("test", r"""`hi="blah"; echo \`echo "$hi"\``""")
     keys = "test" + EX
     wanted = "blah"
 
 class TabStop_Shell_ShebangPython(_VimTest):
-    skip_on_windows = True
+    skip_if = lambda self: RunningOnWindows()
     snippets = ("test", """Hallo ${1:now `#!/usr/bin/env python
 print "Hallo Welt"
 `} end""")
@@ -1486,15 +1491,16 @@ class Transformation_CleverTransformLongLower_ExceptCorrectResult(_VimTest):
     keys = "test" + EX + "HALLO"
     wanted = "HALLO hallo"
 
-if UNIDECODE_IMPORTED:
-    class Transformation_SimpleCaseAsciiResult(_VimTest):
-        snippets = ("ascii", "$1 ${1/(.*)/$1/a}")
-        keys = "ascii" + EX + "éèàçôïÉÈÀÇÔÏ€"
-        wanted = "éèàçôïÉÈÀÇÔÏ€ eeacoiEEACOIEU"
-    class Transformation_LowerCaseAsciiResult(_VimTest):
-        snippets = ("ascii", "$1 ${1/(.*)/\L$1\E/a}")
-        keys = "ascii" + EX + "éèàçôïÉÈÀÇÔÏ€"
-        wanted = "éèàçôïÉÈÀÇÔÏ€ eeacoieeacoieu"
+class Transformation_SimpleCaseAsciiResult(_VimTest):
+    skip_if = lambda self: NoUnidecodeAvailable()
+    snippets = ("ascii", "$1 ${1/(.*)/$1/a}")
+    keys = "ascii" + EX + "éèàçôïÉÈÀÇÔÏ€"
+    wanted = "éèàçôïÉÈÀÇÔÏ€ eeacoiEEACOIEU"
+class Transformation_LowerCaseAsciiResult(_VimTest):
+    skip_if = lambda self: NoUnidecodeAvailable()
+    snippets = ("ascii", "$1 ${1/(.*)/\L$1\E/a}")
+    keys = "ascii" + EX + "éèàçôïÉÈÀÇÔÏ€"
+    wanted = "éèàçôïÉÈÀÇÔÏ€ eeacoieeacoieu"
 
 class Transformation_ConditionalInsertionSimple_ExceptCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/(^a).*/(?0:began with an a)/}")
@@ -2074,7 +2080,7 @@ class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand2(_VimTest):
     keys = "-test" + EX
     wanted = "-Expand me!"
 class SnippetOptions_ExpandInwordSnippetsWithOtherChars_Expand3(_VimTest):
-    skip_on_windows = True   # SendKeys can't send UTF characters
+    skip_if = lambda self: RunningOnWindows()
     snippets = (("test", "Expand me!", "", "i"), )
     keys = "ßßtest" + EX
     wanted = "ßßExpand me!"
@@ -2398,7 +2404,7 @@ class RecTabStopsWithExpandtab_SpecialIndentProblem_ECR(_ExpandTabs):
     # changes made 'manually', while the other vim version seem to do so. Since
     # the fault is not with UltiSnips, we simply skip this test on windows
     # completely.
-    skip_on_windows = True
+    skip_if = lambda self: RunningOnWindows()
     snippets = (
         ("m1", "Something"),
         ("m", "\t$0"),
@@ -2554,7 +2560,7 @@ hi4Hello"""
 
 # Test for bug 871357 #
 class TestLangmapWithUtf8_ExceptCorrectResult(_VimTest):
-    skip_on_windows = True   # SendKeys can't send UTF characters
+    skip_if = lambda self: RunningOnWindows()  # SendKeys can't send UTF characters
     snippets = ("testme",
 """my snipped ${1:some_default}
 and a mirror: $1
@@ -2960,7 +2966,7 @@ class Snippet_With_DoubleQuote_List(_VimTest):
 # End: Quotes in Snippets  #}}}
 # Umlauts and Special Chars  {{{#
 class _UmlautsBase(_VimTest):
-    skip_on_windows = True   # SendKeys can't send UTF characters
+    skip_if = lambda self: RunningOnWindows()  # SendKeys can't send UTF characters
 
 class Snippet_With_Umlauts_List(_UmlautsBase):
     snippets = _snip_quote('ü')
