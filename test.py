@@ -1227,6 +1227,11 @@ class PythonVisual_LineSelect_Simple(_VimTest):
     keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX
     wanted = "hVhello\nnice\nworld\nb"
 
+# Tests for https://bugs.launchpad.net/bugs/1259349
+class Python_WeirdScoping_Error(_VimTest):
+    snippets = ("test", "h`!p import re; snip.rv = '%i' % len([re.search for i in 'aiiia'])`b")
+    keys = "test" + EX
+    wanted = "h5b"
 # End: New Implementation  #}}}
 # End: PythonCode Interpolation  #}}}
 # Mirrors  {{{#

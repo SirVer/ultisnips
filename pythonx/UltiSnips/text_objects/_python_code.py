@@ -162,7 +162,6 @@ class PythonCode(NoneditableTextObject):
     """See module docstring."""
 
     def __init__(self, parent, token):
-        code = token.code.replace("\\`", "`")
 
         # Find our containing snippet for snippet local data
         snippet = parent
@@ -176,39 +175,31 @@ class PythonCode(NoneditableTextObject):
                 snippet = snippet._parent  # pylint:disable=protected-access
         self._snip = SnippetUtil(token.indent, mode, text)
 
-        self._globals = {}
-        globals = snippet.globals.get("!p", [])
-        exec("\n".join(globals).replace("\r\n", "\n"), self._globals)  # pylint:disable=exec-used
-
-        # Add Some convenience to the code
-        self._code = "import re, os, vim, string, random\n" + code
-
+        self._code = "\n".join((
+            "import re, os, vim, string, random",
+            "\n".join(snippet.globals.get("!p", [])).replace("\r\n", "\n"),
+            token.code.replace("\\`", "`")
+        ))
         NoneditableTextObject.__init__(self, parent, token)
 
     def _update(self, done):
-        path = _vim.eval('expand("%")')
-        if path is None:
-            path = ""
-        fn = os.path.basename(path)
-
+        path = _vim.eval('expand("%")') or ""
         ct = self.current_text
-        self._snip._reset(ct)  # pylint:disable=protected-access
-        local_d = self._locals
-
-        local_d.update({
+        self._locals.update({
             't': _Tabs(self._parent),
-            'fn': fn,
+            'fn': os.path.basename(path),
             'path': path,
             'cur': ct,
             'res': ct,
             'snip': self._snip,
         })
+        self._snip._reset(ct)  # pylint:disable=protected-access
 
-        exec(self._code, self._globals, local_d)  # pylint:disable=exec-used
+        exec(self._code, self._locals)  # pylint:disable=exec-used
 
         rv = as_unicode(
             self._snip.rv if self._snip._rv_changed  # pylint:disable=protected-access
-            else as_unicode(local_d['res'])
+            else as_unicode(self._locals['res'])
         )
 
         if ct != rv:
