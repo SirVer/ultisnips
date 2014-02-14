@@ -9,6 +9,7 @@ from subprocess import Popen, PIPE
 import stat
 import tempfile
 
+from UltiSnips.compatibility import as_unicode
 from UltiSnips.text_objects._base import NoneditableTextObject
 
 def _chomp(string):
@@ -38,7 +39,7 @@ def _run_shell_command(cmd, tmpdir):
     proc.wait()
     stdout, _ = proc.communicate()
     os.unlink(path)
-    return _chomp(stdout.encode('utf-8'))
+    return _chomp(as_unicode(stdout))
 
 def _get_tmp():
     """Find an executable tmp directory."""

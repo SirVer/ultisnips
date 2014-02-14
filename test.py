@@ -221,8 +221,6 @@ class _VimTest(unittest.TestCase):
     output = None
 
     skip_on_windows = False
-    skip_on_linux = False
-    skip_on_mac = False
 
     def send(self,s):
         self.vim.send(s)
@@ -274,10 +272,6 @@ class _VimTest(unittest.TestCase):
         system = platform.system()
         if self.skip_on_windows and system == "Windows":
             return self._skip("Running on windows")
-        if self.skip_on_linux and system == "Linux":
-            return self._skip("Running on Linux")
-        if self.skip_on_mac and system == "Darwin":
-            return self._skip("Running on Darwin/Mac")
 
         # Escape for good measure
         self.send(ESC + ESC + ESC)
@@ -860,6 +854,11 @@ class TabStop_Shell_SimpleExample(_VimTest):
     snippets = ("test", "hi `echo hallo` you!")
     keys = "test" + EX + "and more"
     wanted = "hi hallo you!and more"
+class TabStop_Shell_WithUmlauts(_VimTest):
+    skip_on_windows = True
+    snippets = ("test", "hi `echo höüäh` you!")
+    keys = "test" + EX + "and more"
+    wanted = "hi höüäh you!and more"
 class TabStop_Shell_TextInNextLine(_VimTest):
     skip_on_windows = True
     snippets = ("test", "hi `echo hallo`\nWeiter")
