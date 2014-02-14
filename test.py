@@ -227,8 +227,11 @@ class _VimTest(unittest.TestCase):
     def send_py(self,s):
         # Do not delete the file so that Vim can safely read it.
         with tempfile.NamedTemporaryFile(
-            prefix="UltiSnips_Python",suffix=".py", delete=False
+            prefix="UltiSnips_Python", suffix=".py", delete=False
         ) as temporary_file:
+            if sys.version_info >= (3,0):
+                s = s.encode("utf-8")
+
             temporary_file.write(s)
             temporary_file.close()
 
@@ -3154,6 +3157,10 @@ if __name__ == '__main__':
     vim.send(""":let g:UltiSnipsJumpForwardTrigger="?"\n""")
     vim.send(""":let g:UltiSnipsJumpBackwardTrigger="+"\n""")
     vim.send(""":let g:UltiSnipsListSnippets="@"\n""")
+    if sys.version_info >= (3,0):
+        vim.send(""":let g:UltiSnipsUsePythonVersion="3"\n""")
+    else:
+        vim.send(""":let g:UltiSnipsUsePythonVersion="2"\n""")
 
     # Now, source our runtime
     vim.send(":so plugin/UltiSnips.vim\n")
