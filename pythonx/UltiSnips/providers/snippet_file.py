@@ -96,7 +96,7 @@ class SnippetSyntaxError(RuntimeError):
             msg, filename, line_index))
 
 class UltiSnipsFileProvider(SnippetProvider):
-    """Manages all snippets definitons found in rtp."""
+    """Manages all snippets definitions found in rtp."""
 
     def get_snippets(self, filetypes, before, possible):
         for ft in filetypes:
@@ -157,6 +157,8 @@ class UltiSnipsFileProvider(SnippetProvider):
                         _vim.escape(filename))
                 raise SnippetSyntaxError(filename, line_index, msg)
             elif event == "clearsnippets":
+                # TODO(sirver): clear snippets should clear for
+                # more providers, not only ultisnips files.
                 triggers, = data
                 self._snippets[ft].clear_snippets(triggers)
             elif event == "extends":
