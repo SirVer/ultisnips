@@ -387,11 +387,10 @@ UltiSnips provides some functions for extending core functionality.
  3.5.1 UltiSnips#AddSnippet                            *UltiSnips#AddSnippet*
 
 The first function is UltiSnips#AddSnippet(trigger, value, description,
-options, ...). It adds a new snippet with the provided trigger, value,
+options, filetyp="all"). It adds a new snippet with the provided trigger, value,
 description, and options to the current list of snippets. See
 |UltiSnips-syntax| for details on the meaning of the function arguments. All
-arguments are strings. An optional fifth argument can be used to specify the
-filetype for the new snippet.
+arguments are strings.
 
 
  3.5.2 UltiSnips#Anon                                        *UltiSnips#Anon*
