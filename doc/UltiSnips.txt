@@ -124,6 +124,9 @@ permission to use his snippets.
 =============================================================================
 2. Installation and Updating                       *UltiSnips-installnupdate*
 
+The recommended way of getting ultisnips is to track SirVer/ultisnips on
+github. The master branch is always stable.
+
 Using Pathogen:                                     *UltiSnips-using-pathogen*
 
 If you are a pathogen user, you can track the official mirror of UltiSnips on
@@ -135,19 +138,10 @@ github: >
 See the pathogen documentation for more details on how to update a bundle.
 
 
-Using Bzr:                                               *UltiSnips-using-bzr*
+Using a downloaded packet:               *UltiSnips-using-a-downloaded-packet*
 
-To track the main repository on github, you will need bzr
-(http://bazaar-vcs.org/). bzr is available in all major Linux distributions
-(packaged as bzr or bazaar) and can be easily installed under Mac OS X: >
-   $ pip install bzr
-
-Using bzr, checkout UltiSnips into a directory of your choice. >
-   $ cd ~/.vim/
-   $ bzr get lp:ultisnips ultisnips_rep
-
-Then add this directory to your Vim runtime path by adding this line to your
-vimrc file. >
+Download the packet and unpack into a directory of your choice. Then add this
+directory to your Vim runtime path by adding this line to your vimrc file. >
    set runtimepath+=~/.vim/ultisnips_rep
 
 UltiSnips also needs that Vim sources files from the ftdetect/ directory.
@@ -159,15 +153,6 @@ therefore have to symlink/copy the files: >
 Restart Vim and UltiSnips should work. To access the help, use >
    :helptags ~/.vim/ultisnips_rep/doc
    :help UltiSnips
-
-To update an installation, simply pull the latest revision: >
-   $ cd ~/.vim/ultisnips_rep
-   $ bzr pull
-
-Using a downloaded packet:               *UltiSnips-using-a-downloaded-packet*
-
-Download the packet and unpack into a directory of your choice. Add the path
-to runtimepath. See |UltiSnips-using-bzr| for an example.
 
 =============================================================================
 3. Settings & Commands                                   *UltiSnips-settings*
@@ -1285,6 +1270,9 @@ that are aware of UltiSnips and use it to improve the user experience. This is
 an incomplete list - if you want to have your plugin listed here, just sent me
 a pull request.
 
+YouCompleteMe - comes with out of the box completion support for UltiSnips. It
+offers a really nice completion dialogue for snippets.
+
 Supertab - UltiSnips has built-in support for Supertab. Just use a recent
 enough version of both plugins and <tab> will either expand a snippet or defer
 to Supertab for expansion.
@@ -1305,8 +1293,6 @@ You can contribute snippets or patches in various ways. The methods are listed
 below in order of convenience for me. Please be as convenient as you
 can be :)
 
-* Clone the repository on launchpad (bzr clone lp:ultisnips), make fixes, push
-  the branch and send a merge request on launchpad.
 * Clone the repository on GitHub (git clone git@github.com:SirVer/ultisnips.git),
   make your changes and send a pull request on GitHub.
 * Make a patch, report a bug/feature request (see below) and attach the patch
@@ -1315,8 +1301,7 @@ can be :)
 * Send me an Email with the changed files only.
 
 You can contribute by fixing or reporting bugs in our issue tracker:
-https://bugs.launchpad.net/ultisnips
-
+https://github.com/sirver/ultisnips/issues
 
 If you like this plugin, please vote for it on its Vim script page >
     http://www.vim.org/scripts/script.php?script_id=2715
@@ -1326,10 +1311,7 @@ It is life-changing for me. Maybe it is for you too.
 =============================================================================
 7. Contact                                                *UltiSnips-contact*
 
-You can reach me at SirVer -AT- gmx -ADOT- de. You can also contact me through
-the UltiSnips launchpad project page at https://launchpad.net/ultisnips/. The
-launchpad project has an 'Answers' page where you can ask me questions and a
-bug tracker where you can report bugs and issues.
+You can reach me at SirVer -AT- gmx -ADOT- de.
 
 This project aims to be the one-for-all solution for Snippets for Vim. If you
 miss a feature or find a bug, please contact me or file a support ticket.

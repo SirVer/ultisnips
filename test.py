@@ -1915,7 +1915,7 @@ class RecTabStops_MirroredZeroTS_ECR(_VimTest):
             JF + "three" + JF + "four" + JF + "end"
     wanted = "[ [ one three three two ] four ]end"
 class RecTabStops_ChildTriggerContainsParentTextObjects(_VimTest):
-    # https://bugs.launchpad.net/ultisnips/+bug/1191617
+    # https://bugs.launchpad.net/bugs/1191617
     snippets_test_file = ("all", r"""
 global !p
 def complete(t, opts):
@@ -2502,8 +2502,8 @@ longer text that
 should wrapend"""
 
 
+# Tests for https://bugs.launchpad.net/bugs/719998
 class FOTextAfter_ExceptCorrectResult(_FormatoptionsBase):
-    """Testcase for lp:719998"""
     snippets = ("test", "${1:longer expand}after\nstart$1end")
     keys = ("test" + EX + "This is a longer snippet that should wrap properly "
             "and the mirror below should work as well")
@@ -2520,7 +2520,6 @@ the mirror below
 should work as wellend"""
 
 class FOWrapOnLongWord_ExceptCorrectResult(_FormatoptionsBase):
-    """Testcase for lp:719998"""
     snippets = ("test", "${1:longer expand}after\nstart$1end")
     keys = ("test" + EX + "This is a longersnippet that should wrap properly")
     wanted = \

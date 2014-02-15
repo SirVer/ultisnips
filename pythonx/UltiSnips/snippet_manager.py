@@ -50,7 +50,7 @@ def err_to_scratch_buffer(func):
             msg = \
 """An error occured. This is either a bug in UltiSnips or a bug in a
 snippet definition. If you think this is a bug, please report it to
-https://bugs.launchpad.net/ultisnips/+filebug.
+https://github.com/SirVer/ultisnips/issues/new.
 
 Following is the full stack trace:
 """
