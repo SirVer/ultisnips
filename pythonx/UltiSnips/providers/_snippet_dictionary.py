@@ -35,15 +35,11 @@ class SnippetDictionary(object):
     def get_matching_snippets(self, trigger, potentially):
         """Returns all snippets matching the given trigger. If 'potentially' is
         true, returns all that could_match()."""
+        all_snippets = self._added + self._snippets
         if not potentially:
-            return [s for s in self.snippets if s.matches(trigger)]
+            return [s for s in all_snippets if s.matches(trigger)]
         else:
-            return [s for s in self.snippets if s.could_match(trigger)]
-
-    @property
-    def snippets(self):
-        """Returns all snippets in this dictionary."""
-        return self._added + self._snippets
+            return [s for s in all_snippets if s.could_match(trigger)]
 
     def clear_snippets(self, triggers=None):
         """Remove all snippets that match each trigger in 'triggers'. When
