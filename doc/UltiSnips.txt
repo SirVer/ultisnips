@@ -920,7 +920,7 @@ Hello World                                                     HELLO WORLD
 
 Python global functions can be stored in a python module and then imported.
 This makes global functions easily accessible to all snippet files. Since Vim
-7.4 you can just drop python files into ~/.vim/pythonx and you an import them
+7.4 you can just drop python files into ~/.vim/pythonx and import them
 directly inside your snippets. For example to use
 ~/.vim/pythonx/my_snippets_helpers.py  >
 
@@ -960,16 +960,15 @@ Thanks for suggesting UltiSnips!
 Yours sincerely,
 Paul
 
-
 You can use <c-j> to jump to the next tabstop, and <c-k> to jump to the
 previous. The <Tab> key was not used for jumping forward because many people
 (myself included) use <Tab> for completion. See |UltiSnips-triggers| for
 help on defining different keys for tabstops.
 
-Many times it is useful to have some default text for a tabstop. The default
-text may be a value commonly used for the variable component, or it may be a
-word or phrase that reminds you what is expected for the variable component.
-To include default text, the syntax is '${1:value}'.
+It is often useful to have some default text for a tabstop. The default text
+may be a value commonly used for the variable component, or it may be a word
+or phrase that reminds you what is expected for the variable component. To
+include default text, the syntax is '${1:value}'.
 
 The following example illustrates a snippet for the shell 'case' statement.
 The tabstops use default values to remind the user of what value is expected.
@@ -991,7 +990,6 @@ esac
 Sometimes it is useful to have a tabstop within a tabstop. To do this, simply
 include the nested tabstop as part of the default text. Consider the following
 example illustrating an HTML anchor snippet.
-
 
 ------------------- SNIP -------------------
 snippet a
@@ -1054,7 +1052,6 @@ a<tab>http://www.google.com<c-j><BS><c-j>Google ->
 <a href="http://www.google.com">
     Google
 </a>
-
 
 The default text of tabstops can also contain mirrors, transformations or
 interpolation.
@@ -1314,13 +1311,14 @@ It is life-changing for me. Maybe it is for you too.
 You can reach me at SirVer -AT- gmx -ADOT- de.
 
 This project aims to be the one-for-all solution for Snippets for Vim. If you
-miss a feature or find a bug, please contact me or file a support ticket.
+miss a feature or find a bug, please contact me or add an issues to our issues
+tracker.
 
 =============================================================================
 8. Contributors                                      *UltiSnips-contributors*
 
 The primary developer of UltiSnips is SirVer (Holger Rapp). The following
-individuals have contributed code and snippets to UltiSnips.
+individuals have contributed to UltiSnips.
 
 
 8.1 Patches & Coding                                 *UltiSnips-contricoding*
