@@ -84,12 +84,6 @@ endif
 if !exists("g:UltiSnipsSnippetDirectories")
     let g:UltiSnipsSnippetDirectories = [ "UltiSnips" ]
 endif
-
-" Should UltiSnips map JumpForwardTrigger and JumpBackwardTrigger only during
-" snippet expansion?
-if !exists("g:UltiSnipsClearJumpTrigger")
-    let g:UltiSnipsClearJumpTrigger = 1
-endif
 " }}}
 
 
@@ -153,16 +147,8 @@ function! UltiSnips#MapKeys()
     else
         exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=UltiSnips#ExpandSnippet()<cr>"
         exec "snoremap <silent> " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips#ExpandSnippet()<cr>"
-        if g:UltiSnipsClearJumpTrigger == 0
-            exec "inoremap <silent> " . g:UltiSnipsJumpForwardTrigger  . " <C-R>=UltiSnips#JumpForwards()<cr>"
-            exec "snoremap <silent> " . g:UltiSnipsJumpForwardTrigger  . " <Esc>:call UltiSnips#JumpForwards()<cr>"
-        endif
     endif
     exec 'xnoremap ' . g:UltiSnipsExpandTrigger. ' :call UltiSnips#SaveLastVisualSelection()<cr>gvs'
-    if g:UltiSnipsClearJumpTrigger == 0
-        exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=UltiSnips#JumpBackwards()<cr>"
-        exec "snoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <Esc>:call UltiSnips#JumpBackwards()<cr>"
-    endif
     exec "inoremap <silent> " . g:UltiSnipsListSnippets . " <C-R>=UltiSnips#ListSnippets()<cr>"
     exec "snoremap <silent> " . g:UltiSnipsListSnippets . " <Esc>:call UltiSnips#ListSnippets()<cr>"
 

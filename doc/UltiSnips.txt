@@ -225,9 +225,13 @@ vimrc file. >
    let g:UltiSnipsJumpForwardTrigger="<tab>"
    let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 
-Note that the default value for g:UltiSnipsJumpBackwardTrigger interferes with
-the built-in complete function: |i_CTRL-X_CTRL-K|. A workaround is to add the
-following to your vimrc file. >
+UltiSnips will only map the jump triggers while a snippet is active to
+interfer as little as possible with other mappings. 
+
+The default value for g:UltiSnipsJumpBackwardTrigger interferes with the
+built-in complete function: |i_CTRL-X_CTRL-K|. A workaround is to add the
+following to your vimrc file or switching to a plugin like Supertab or
+YouCompleteMe. >
    inoremap <c-x><c-k> <c-x><c-k>
 
 3.2.1 Using your own trigger functions           *UltiSnips-trigger-functions*
