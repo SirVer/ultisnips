@@ -13,11 +13,6 @@ endif
 function! UltiSnips_FileTypeChanged()
 endfunction
 
-" Kludge to make sure that if the python module is loaded first, all of this
-" initialization in this file is indeed done.
-function! UltiSnips#WasRun()
-endfunction
-
 if !exists("g:UltiSnipsUsePythonVersion")
     let g:_uspy=":py3 "
     if !has("python3")
