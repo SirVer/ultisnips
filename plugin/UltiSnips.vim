@@ -50,7 +50,7 @@ au CursorMoved * call UltiSnips#CursorMoved()
 au BufLeave * call UltiSnips#LeavingBuffer()
 au InsertLeave * call UltiSnips#LeavingInsertMode()
 
-call UltiSnips#MapKeys()
+call UltiSnips#map_keys#MapKeys()
 
 let did_UltiSnips_plugin=1
 

@@ -328,7 +328,7 @@ class SnippetManager(object):
         """The current snippet should be terminated."""
         self._csnippets.pop()
         if not self._csnippets:
-            _vim.command("call UltiSnips#RestoreInnerKeys()")
+            _vim.command("call UltiSnips#map_keys#RestoreInnerKeys()")
 
     def _jump(self, backwards=False):
         """Helper method that does the actual jump."""
@@ -408,7 +408,7 @@ class SnippetManager(object):
     def _do_snippet(self, snippet, before):
         """Expands the given snippet, and handles everything
         that needs to be done with it."""
-        _vim.command("call UltiSnips#MapInnerKeys()")
+        _vim.command("call UltiSnips#map_keys#MapInnerKeys()")
 
         # Adjust before, maybe the trigger is not the complete word
         text_before = before

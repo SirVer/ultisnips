@@ -15,7 +15,7 @@ endfunction
 
 " Kludge to make sure that if the python module is loaded first, all of this
 " initialization in this file is indeed done.
-function! UltiSnips#EnsureAutoloadScriptWasRun()
+function! UltiSnips#WasRun()
 endfunction
 
 if !exists("g:UltiSnipsUsePythonVersion")
@@ -37,54 +37,6 @@ else
         let g:_uspy=":py3 "
     endif
 endif
-
-" Global Variables {{{
-
-" The trigger used to expand a snippet.
-" NOTE: expansion and forward jumping can, but needn't be the same trigger
-if !exists("g:UltiSnipsExpandTrigger")
-    let g:UltiSnipsExpandTrigger = "<tab>"
-endif
-
-" The trigger used to display all triggers that could possible
-" match in the current position.
-if !exists("g:UltiSnipsListSnippets")
-    let g:UltiSnipsListSnippets = "<c-tab>"
-endif
-
-" The trigger used to jump forward to the next placeholder.
-" NOTE: expansion and forward jumping can, but needn't be the same trigger
-if !exists("g:UltiSnipsJumpForwardTrigger")
-    let g:UltiSnipsJumpForwardTrigger = "<c-j>"
-endif
-
-" The trigger to jump backward inside a snippet
-if !exists("g:UltiSnipsJumpBackwardTrigger")
-    let g:UltiSnipsJumpBackwardTrigger = "<c-k>"
-endif
-
-" Should UltiSnips unmap select mode mappings automagically?
-if !exists("g:UltiSnipsRemoveSelectModeMappings")
-    let g:UltiSnipsRemoveSelectModeMappings = 1
-end
-
-" If UltiSnips should remove Mappings, which should be ignored
-if !exists("g:UltiSnipsMappingsToIgnore")
-    let g:UltiSnipsMappingsToIgnore = []
-endif
-
-" UltiSnipsEdit will use this variable to decide if a new window
-" is opened when editing. default is "normal", allowed are also
-" "vertical", "horizontal"
-if !exists("g:UltiSnipsEditSplit")
-    let g:UltiSnipsEditSplit = 'normal'
-endif
-
-" A list of directory names that are searched for snippets.
-if !exists("g:UltiSnipsSnippetDirectories")
-    let g:UltiSnipsSnippetDirectories = [ "UltiSnips" ]
-endif
-" }}}
 
 
 " FUNCTIONS {{{
@@ -137,43 +89,6 @@ function! UltiSnips#FileTypeComplete(arglead, cmdline, cursorpos)
 
     return sort(keys(ret))
 endfunction
-
-function! UltiSnips#MapKeys()
-    " Map the keys correctly
-    if g:UltiSnipsExpandTrigger == g:UltiSnipsJumpForwardTrigger
-
-        exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=UltiSnips#ExpandSnippetOrJump()<cr>"
-        exec "snoremap <silent> " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips#ExpandSnippetOrJump()<cr>"
-    else
-        exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=UltiSnips#ExpandSnippet()<cr>"
-        exec "snoremap <silent> " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips#ExpandSnippet()<cr>"
-    endif
-    exec 'xnoremap ' . g:UltiSnipsExpandTrigger. ' :call UltiSnips#SaveLastVisualSelection()<cr>gvs'
-    exec "inoremap <silent> " . g:UltiSnipsListSnippets . " <C-R>=UltiSnips#ListSnippets()<cr>"
-    exec "snoremap <silent> " . g:UltiSnipsListSnippets . " <Esc>:call UltiSnips#ListSnippets()<cr>"
-
-    snoremap <silent> <BS> <c-g>c
-    snoremap <silent> <DEL> <c-g>c
-    snoremap <silent> <c-h> <c-g>c
-endf
-
-function! UltiSnips#MapInnerKeys()
-    if g:UltiSnipsExpandTrigger != g:UltiSnipsJumpForwardTrigger
-        exec "inoremap <buffer> <silent> " . g:UltiSnipsJumpForwardTrigger . " <C-R>=UltiSnips#JumpForwards()<cr>"
-        exec "snoremap <buffer> <silent> " . g:UltiSnipsJumpForwardTrigger . " <Esc>:call UltiSnips#JumpForwards()<cr>"
-    endif
-    exec "inoremap <buffer> <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=UltiSnips#JumpBackwards()<cr>"
-    exec "snoremap <buffer> <silent> " . g:UltiSnipsJumpBackwardTrigger . " <Esc>:call UltiSnips#JumpBackwards()<cr>"
-endf
-
-function! UltiSnips#RestoreInnerKeys()
-    if g:UltiSnipsExpandTrigger != g:UltiSnipsJumpForwardTrigger
-        exec "iunmap <buffer> " . g:UltiSnipsJumpForwardTrigger
-        exec "sunmap <buffer> " . g:UltiSnipsJumpForwardTrigger
-    endif
-    exec "iunmap <buffer> " . g:UltiSnipsJumpBackwardTrigger
-    exec "sunmap <buffer> " . g:UltiSnipsJumpBackwardTrigger
-endf
 
 function! UltiSnips#ExpandSnippet()
     exec g:_uspy "UltiSnips_Manager.expand()"

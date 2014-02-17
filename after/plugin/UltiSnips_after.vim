@@ -4,10 +4,10 @@
 "              Supertab)
 " Last Modified: July 27, 2009
 
-if exists('did_UltiSnips_after') || &cp || version < 700 || !exists("did_UltiSnips_vim") || !has("python")
+if exists('did_UltiSnips_after') || &cp || version < 700
 	finish
 endif
 
-call UltiSnips#MapKeys()
+call UltiSnips#map_keys#MapKeys()
 
 let did_UltiSnips_after=1
