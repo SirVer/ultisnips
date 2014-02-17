@@ -84,18 +84,13 @@ def no_unidecode_available():
 def random_string(n):
     return ''.join(random.choice(string.ascii_lowercase) for x in range(n))
 
+def silent_call(cmd):
+    """Calls 'cmd' and returns the exit value."""
+    return subprocess.call(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+
 class VimInterface:
     def focus(title=None):
         pass
-
-    def send_keystrokes(self, str, sleeptime):
-        """
-        Send the keystrokes to vim via screen. Pause after each char, so
-        vim can handle this
-        """
-        for c in str:
-            self.send(c)
-            time.sleep(sleeptime)
 
     def get_buffer_data(self):
         handle, fn = tempfile.mkstemp(prefix="UltiSnips_Test",suffix=".txt")
@@ -130,7 +125,6 @@ class VimInterfaceScreen(VimInterface):
         if sys.version_info >= (3,0):
             s = s.encode("utf-8")
 
-        silent_call = lambda cmd: subprocess.call(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         while True:
             rv = 0
             if len(s) > 30:
@@ -153,6 +147,29 @@ class VimInterfaceScreen(VimInterface):
         # If the output doesn't match the input, need to do additional escaping
         if output != string:
             self.need_screen_escapes = 1
+
+class VimInterfaceTmux(VimInterface):
+    def __init__(self, session):
+        self.session = session
+        self._check_version()
+
+    def send(self, s):
+        # I did not find any documentation on what needs escaping when sending
+        # to tmux, but it seems like this is all that is needed for now.
+        s = s.replace(';', r'\;')
+
+        if sys.version_info >= (3,0):
+            s = s.encode("utf-8")
+        silent_call(["tmux", "send-keys", "-t", self.session, "-l", s])
+
+    def _check_version(self):
+        stdout, _ = subprocess.Popen(["tmux", "-V"],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        if sys.version_info >= (3,0):
+            stdout = stdout.decode("utf-8")
+        m = re.match(r"tmux (\d+).(\d+)", stdout)
+        if not m or not (int(m.group(1)), int(m.group(2))) >= (1, 9):
+            raise RuntimeError("Need at least tmux 1.9, you have %s." % stdout.strip())
 
 class VimInterfaceWindows(VimInterface):
     BRACES = re.compile("([}{])")
@@ -253,9 +270,6 @@ class _VimTest(unittest.TestCase):
             else:
                 self.send(":py3file %s\n" % temporary_file.name)
 
-    def send_keystrokes(self,s):
-        self.vim.send_keystrokes(s, self.sleeptime)
-
     def check_output(self):
         wanted = self.text_before + self.wanted + self.text_after
         if self.expected_error:
@@ -343,8 +357,10 @@ class _VimTest(unittest.TestCase):
 
             self.send("i")
 
-            # Execute the command
-            self.send_keystrokes(self.keys)
+            # Execute the command, but leave Vim some time to react.
+            for c in self.keys:
+                self.vim.send(c)
+                time.sleep(self.sleeptime)
 
             self.send(ESC)
 
@@ -2549,7 +2565,7 @@ hi4"""
     def _options_off(self):
         self.send(":set langmap=\n")
 
-# Test for bug 501727 #
+# Test for https://bugs.launchpad.net/bugs/501727 #
 class TestNonEmptyLangmapWithSemi_ExceptCorrectResult(_VimTest):
     snippets = ("testme",
 """my snipped ${1:some_default}
@@ -3121,12 +3137,15 @@ if __name__ == '__main__':
     def parse_args():
         p = optparse.OptionParser("%prog [OPTIONS] <test case names to run>")
 
-        p.set_defaults(session="vim", interrupt=False, verbose=False)
+        p.set_defaults(session="vim", interrupt=False,
+                verbose=False, interface="screen")
 
         p.add_option("-v", "--verbose", dest="verbose", action="store_true",
             help="print name of tests as they are executed")
+        p.add_option("--interface", type=str,
+                help="interface to vim to use on Mac and or Linux [screen|tmux].")
         p.add_option("-s", "--session", dest="session",  metavar="SESSION",
-            help="send commands to screen session SESSION [%default]")
+            help="session parameters for the terminal multiplexer SESSION [%default]")
         p.add_option("-i", "--interrupt", dest="interrupt",
             action="store_true",
             help="Stop after defining the snippet. This allows the user " \
@@ -3135,6 +3154,9 @@ if __name__ == '__main__':
         )
 
         o, args = p.parse_args()
+        if o.interface not in ("screen", "tmux"):
+            p.error("--interface must be [screen|tmux].")
+
         return o, args
 
     options,selected_tests = parse_args()
@@ -3146,7 +3168,12 @@ if __name__ == '__main__':
     if platform.system() == "Windows":
         vim = VimInterfaceWindows()
     else:
-        vim = VimInterfaceScreen(options.session)
+        if options.interface == "screen":
+            vim = VimInterfaceScreen(options.session)
+        elif options.interface == "tmux":
+            vim = VimInterfaceTmux(options.session)
+
+
 
     vim.focus()
 
