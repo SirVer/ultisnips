@@ -19,11 +19,10 @@ def _parse_comments(s):
     try:
         while True:
             # get the flags and text of a comment part
-            flags,text = next(i).split(':', 1)
+            flags, text = next(i).split(':', 1)
 
             if len(flags) == 0:
-                if len(text) == 1:
-                    rv.append((text,text,text, ""))
+					  rv.append((text, text, text, ""))
             # parse 3-part comment, but ignore those with O flag
             elif flags[0] == 's' and 'O' not in flags:
                 ctriple = []
@@ -43,38 +42,26 @@ def _parse_comments(s):
                 ctriple.append(indent)
 
                 rv.append(ctriple)
-
             elif flags[0] == 'b':
                 if len(text) == 1:
                     rv.insert(0, (text,text,text, ""))
-
     except StopIteration:
        return rv
 
 def _get_comment_format():
     """ Returns a 4-element tuple representing the comment format for
     the current file. """
-
-    ft = vim.eval("&filetype")
-    # check if the comment dict has the format for the current file
-    if ft in _commentDict:
-        return _commentDict[ft]
-
-    # otherwise parse vim's comments and add it for later use
-    commentformat = _parse_comments(vim.eval("&comments"))[0]
-    _commentDict[ft] = commentformat
-
-    return commentformat
+    return _parse_comments(vim.eval("&comments"))[0]
 
 
 def make_box(twidth, bwidth=None):
     b, m, e, i = _get_comment_format()
     bwidth_inner = bwidth - 3 - max(len(b), len(i + e)) if bwidth else twidth + 2
-    sline = b + m + bwidth_inner * m + 2 * m
+    sline = b + m + bwidth_inner * m[0] + 2 * m[0]
     nspaces = (bwidth_inner - twidth) // 2
     mlines = i + m + " " + " " * nspaces
     mlinee = " " + " "*(bwidth_inner - twidth - nspaces) + m
-    eline = i + 2 * m + bwidth_inner * m + m + e
+    eline = i + m + bwidth_inner * m[0] + 2 * m[0] + e
     return sline, mlines, mlinee, eline
 
 def foldmarker():

@@ -175,7 +175,7 @@ class PythonCode(NoneditableTextObject):
                 snippet = snippet._parent  # pylint:disable=protected-access
         self._snip = SnippetUtil(token.indent, mode, text)
 
-        self._code = "\n".join((
+        self._codes = ((
             "import re, os, vim, string, random",
             "\n".join(snippet.globals.get("!p", [])).replace("\r\n", "\n"),
             token.code.replace("\\`", "`")
@@ -195,7 +195,8 @@ class PythonCode(NoneditableTextObject):
         })
         self._snip._reset(ct)  # pylint:disable=protected-access
 
-        exec(self._code, self._locals)  # pylint:disable=exec-used
+        for code in self._codes:
+            exec(code, self._locals)  # pylint:disable=exec-used
 
         rv = as_unicode(
             self._snip.rv if self._snip._rv_changed  # pylint:disable=protected-access
