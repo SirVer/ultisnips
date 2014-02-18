@@ -12,61 +12,61 @@ Automatically filled during usage"""
 _commentDict = { }
 
 def _parse_comments(s):
-    """ Parses vim's comments option to extract comment format """
-    i = iter(s.split(","))
+	""" Parses vim's comments option to extract comment format """
+	i = iter(s.split(","))
 
-    rv = []
-    try:
-        while True:
-            # get the flags and text of a comment part
-            flags, text = next(i).split(':', 1)
+	rv = []
+	try:
+		while True:
+			# get the flags and text of a comment part
+			flags, text = next(i).split(':', 1)
 
-            if len(flags) == 0:
-					  rv.append((text, text, text, ""))
-            # parse 3-part comment, but ignore those with O flag
-            elif flags[0] == 's' and 'O' not in flags:
-                ctriple = []
-                indent = ""
+			if len(flags) == 0:
+				rv.append((text, text, text, ""))
+			# parse 3-part comment, but ignore those with O flag
+			elif flags[0] == 's' and 'O' not in flags:
+				ctriple = []
+				indent = ""
 
-                if flags[-1] in string.digits:
-                    indent = " " * int(flags[-1])
-                ctriple.append(text)
+				if flags[-1] in string.digits:
+					indent = " " * int(flags[-1])
+				ctriple.append(text)
 
-                flags,text = next(i).split(':', 1)
-                assert(flags[0] == 'm')
-                ctriple.append(text)
+				flags,text = next(i).split(':', 1)
+				assert(flags[0] == 'm')
+				ctriple.append(text)
 
-                flags,text = next(i).split(':', 1)
-                assert(flags[0] == 'e')
-                ctriple.append(text)
-                ctriple.append(indent)
+				flags,text = next(i).split(':', 1)
+				assert(flags[0] == 'e')
+				ctriple.append(text)
+				ctriple.append(indent)
 
-                rv.append(ctriple)
-            elif flags[0] == 'b':
-                if len(text) == 1:
-                    rv.insert(0, (text,text,text, ""))
-    except StopIteration:
-       return rv
+				rv.append(ctriple)
+			elif flags[0] == 'b':
+				if len(text) == 1:
+					rv.insert(0, (text,text,text, ""))
+	except StopIteration:
+		return rv
 
 def _get_comment_format():
-    """ Returns a 4-element tuple representing the comment format for
-    the current file. """
-    return _parse_comments(vim.eval("&comments"))[0]
+	""" Returns a 4-element tuple representing the comment format for
+	the current file. """
+	return _parse_comments(vim.eval("&comments"))[0]
 
 
 def make_box(twidth, bwidth=None):
-    b, m, e, i = _get_comment_format()
-    bwidth_inner = bwidth - 3 - max(len(b), len(i + e)) if bwidth else twidth + 2
-    sline = b + m + bwidth_inner * m[0] + 2 * m[0]
-    nspaces = (bwidth_inner - twidth) // 2
-    mlines = i + m + " " + " " * nspaces
-    mlinee = " " + " "*(bwidth_inner - twidth - nspaces) + m
-    eline = i + m + bwidth_inner * m[0] + 2 * m[0] + e
-    return sline, mlines, mlinee, eline
+	b, m, e, i = _get_comment_format()
+	bwidth_inner = bwidth - 3 - max(len(b), len(i + e)) if bwidth else twidth + 2
+	sline = b + m + bwidth_inner * m[0] + 2 * m[0]
+	nspaces = (bwidth_inner - twidth) // 2
+	mlines = i + m + " " + " " * nspaces
+	mlinee = " " + " "*(bwidth_inner - twidth - nspaces) + m
+	eline = i + m + bwidth_inner * m[0] + 2 * m[0] + e
+	return sline, mlines, mlinee, eline
 
 def foldmarker():
-    "Return a tuple of (open fold marker, close fold marker)"
-    return vim.eval("&foldmarker").split(",")
+	"Return a tuple of (open fold marker, close fold marker)"
+	return vim.eval("&foldmarker").split(",")
 
 endglobal
 

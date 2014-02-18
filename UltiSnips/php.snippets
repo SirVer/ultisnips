@@ -99,7 +99,7 @@ snippet getter "PHP Class Getter" !b
  */
 public function get${1/\w+\s*/\u$0/}()
 {
-    return $this->$1;$2
+	return $this->$1;$2
 }
 $4
 endsnippet
@@ -110,8 +110,8 @@ snippet setter "PHP Class Setter" !b
  */
 public function set${1/\w+\s*/\u$0/}($$1)
 {
-    $this->$1 = $$1;$3
-    ${4:return $this;}
+	$this->$1 = $$1;$3
+	${4:return $this;}
 }
 $0
 endsnippet
@@ -122,7 +122,7 @@ snippet gs "PHP Class Getter Setter" !b
  */
 public function get${1/(\w+)\s*;/\u$1/}()
 {
-    return $this->${1/(\w+)\s*;/$1/};$2
+	return $this->${1/(\w+)\s*;/$1/};$2
 }
 
 /*
@@ -130,8 +130,8 @@ public function get${1/(\w+)\s*;/\u$1/}()
  */
 public function set${1/(\w+)\s*;/\u$1/}($${1/(\w+)\s*;/$1/})
 {
-    $this->${1/(\w+)\s*;/$1/} = $${1/(\w+)\s*;/$1/};$3
-    ${4:return $this;}
+	$this->${1/(\w+)\s*;/$1/} = $${1/(\w+)\s*;/$1/};$3
+	${4:return $this;}
 }
 $0
 endsnippet
@@ -139,7 +139,7 @@ endsnippet
 snippet pub "Public function" !b
 public function ${1:name}(${2:$param})
 {
-    ${VISUAL}${3:return null;}
+	${VISUAL}${3:return null;}
 }
 $0
 endsnippet
@@ -147,7 +147,7 @@ endsnippet
 snippet pro "Protected function" !b
 protected function ${1:name}(${2:$param})
 {
-    ${VISUAL}${3:return null;}
+	${VISUAL}${3:return null;}
 }
 $0
 endsnippet
@@ -155,7 +155,7 @@ endsnippet
 snippet pri "Private function" !b
 private function ${1:name}(${2:$param})
 {
-    ${VISUAL}${3:return null;}
+	${VISUAL}${3:return null;}
 }
 $0
 endsnippet
@@ -163,7 +163,7 @@ endsnippet
 snippet pubs "Public static function" !b
 public static function ${1:name}(${2:$param})
 {
-    ${VISUAL}${3:return null;}
+	${VISUAL}${3:return null;}
 }
 $0
 endsnippet
@@ -171,7 +171,7 @@ endsnippet
 snippet pros "Protected static function" !b
 protected static function ${1:name}(${2:$param})
 {
-    ${VISUAL}${3:return null;}
+	${VISUAL}${3:return null;}
 }
 $0
 endsnippet
@@ -179,7 +179,7 @@ endsnippet
 snippet pris "Private static function" !b
 private static function ${1:name}(${2:$param})
 {
-    ${VISUAL}${3:return null;}
+	${VISUAL}${3:return null;}
 }
 $0
 endsnippet
@@ -187,14 +187,14 @@ endsnippet
 snippet fu "Function snip" !b
 function ${1:name}(${2:$param})
 {
-    ${VISUAL}${3:return null;}
+	${VISUAL}${3:return null;}
 }
 $0
 endsnippet
 
 snippet fore "Foreach loop"
 foreach ($${1:variable} as $${3:value}){
-    ${VISUAL}${4}
+	${VISUAL}${4}
 }
 $0
 endsnippet
@@ -206,9 +206,9 @@ endsnippet
 
 snippet ife "if else"
 if (${1:/* condition */}) {
-    ${2:// code...}
+	${2:// code...}
 } else {
-    ${3:// code...}
+	${3:// code...}
 }
 $0
 endsnippet
@@ -220,10 +220,10 @@ snippet class "Class declaration template" !b
  */
 class $1
 {
-    public function ${3:__construct}(${4:$options})
-    {
-        ${4:// code}
-    }
+	public function ${3:__construct}(${4:$options})
+	{
+		${4:// code}
+	}
 }
 $0
 endsnippet
@@ -254,8 +254,8 @@ snippet sfa "Symfony 2 Controller action"
 */
 public function $1Action($2)
 {
-    $3
-    return ${4:array();}$0
+	$3
+	return ${4:array();}$0
 }
 endsnippet
 

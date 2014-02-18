@@ -11,16 +11,16 @@
 
 global !p
 def junit(snip):
-    if snip.opt("g:ultisnips_java_junit", "") == "3":
-        snip += ""
-    else:
-        snip.rv += "@Test\n\t"
+	if snip.opt("g:ultisnips_java_junit", "") == "3":
+		snip += ""
+	else:
+		snip.rv += "@Test\n\t"
 
 def nl(snip):
-    if snip.opt("g:ultisnips_java_brace_style", "") == "nl":
-        snip += ""
-    else:
-        snip.rv += " "
+	if snip.opt("g:ultisnips_java_brace_style", "") == "nl":
+		snip += ""
+	else:
+		snip.rv += " "
 def getArgs(group):
 	import re
 	word = re.compile('[a-zA-Z><.]+ \w+')
@@ -53,7 +53,7 @@ ${1:private} ${2:String} ${3:`!p snip.rv = t[2].lower()`};
 endsnippet
 
 snippet ab "abstract" b
-abstract 
+abstract $0
 endsnippet
 
 snippet as "assert" b
@@ -188,7 +188,7 @@ else`!p nl(snip)`{
 endsnippet
 
 snippet fi "final" b
-final 
+final $0
 endsnippet
 
 snippet fore "for (each)" b
@@ -247,7 +247,7 @@ Set<${1:String}> ${2:set} = new ${3:Hash}Set<$1>();
 endsnippet
 
 snippet /Str?|str/ "String" !br
-String 
+String $0
 endsnippet
 
 snippet cn "Constructor" b
@@ -257,7 +257,7 @@ public `!p snip.rv = snip.basename or "untitled"`(${1:}) {
 endsnippet
 
 snippet cn "constructor, \w fields + assigments" b
- `!p
+	`!p
 args = getArgs(t[1])
 for i in args:
 	snip.rv += "\n\tprivate " + i[0] + " " + i[1]+ ";"
@@ -361,7 +361,7 @@ public $2 get$1() {
 endsnippet
 
 snippet pa "package" b
-package 
+package $0
 endsnippet
 
 snippet p "print" b
@@ -373,23 +373,23 @@ System.out.println($1);$0
 endsnippet
 
 snippet pr "private" b
-private 
+private $0
 endsnippet
 
 snippet po "protected" b
-protected 
+protected $0
 endsnippet
 
 snippet pu "public" b
-public 
+public $0
 endsnippet
 
 snippet re "return" b
-return 
+return $0
 endsnippet
 
 snippet st "static"
-static 
+static $0
 endsnippet
 
 snippet sw "switch" b
@@ -399,7 +399,7 @@ switch ($1)`!p nl(snip)`{
 endsnippet
 
 snippet sy "synchronized"
-synchronized 
+synchronized $0
 endsnippet
 
 snippet tc "test case"
