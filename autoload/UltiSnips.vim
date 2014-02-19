@@ -130,9 +130,10 @@ function! UltiSnips#FileTypeChanged()
     return ""
 endfunction
 
+
 function! UltiSnips#AddSnippet(trigger, value, description, options, ...)
-    " Takes the same arguments as SnippetManager.add_snippet:
-    " (trigger, value, description, options, ft = "all", globals = None)
+    " Takes the same arguments as SnippetManager.add_snippet.
+    echoerr "Deprecated UltiSnips#AddSnippet called. Please use UltiSnips#AddSnippetWithPriority." | sleep 1
     exec g:_uspy "args = vim.eval(\"a:000\")"
     exec g:_uspy "trigger = vim.eval(\"a:trigger\")"
     exec g:_uspy "value = vim.eval(\"a:value\")"
@@ -142,9 +143,20 @@ function! UltiSnips#AddSnippet(trigger, value, description, options, ...)
     return ""
 endfunction
 
+function! UltiSnips#AddSnippetWithPriority(trigger, value, description, options, filetype, priority)
+    exec g:_uspy "trigger = vim.eval(\"a:trigger\")"
+    exec g:_uspy "value = vim.eval(\"a:value\")"
+    exec g:_uspy "description = vim.eval(\"a:description\")"
+    exec g:_uspy "options = vim.eval(\"a:options\")"
+    exec g:_uspy "filetype = vim.eval(\"a:filetype\")"
+    exec g:_uspy "priority = vim.eval(\"a:priority\")"
+    exec g:_uspy "UltiSnips_Manager.add_snippet(trigger, value, description, options, filetype, priority)"
+    return ""
+endfunction
+
 function! UltiSnips#Anon(value, ...)
     " Takes the same arguments as SnippetManager.expand_anon:
-    " (value, trigger="", description="", options="", globals = None)
+    " (value, trigger="", description="", options="")
     exec g:_uspy "args = vim.eval(\"a:000\")"
     exec g:_uspy "value = vim.eval(\"a:value\")"
     exec g:_uspy "UltiSnips_Manager.expand_anon(value, *args)"

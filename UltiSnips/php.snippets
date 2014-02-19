@@ -1,3 +1,5 @@
+priority -50
+
 ## Snippets from SnipMate, taken from
 ## https://github.com/scrooloose/snipmate-snippets.git
 
@@ -93,7 +95,7 @@ snippet var "var"
 var_export(${1});${2}
 endsnippet
 
-snippet getter "PHP Class Getter" !b
+snippet getter "PHP Class Getter" b
 /*
  * Getter for $1
  */
@@ -104,7 +106,7 @@ public function get${1/\w+\s*/\u$0/}()
 $4
 endsnippet
 
-snippet setter "PHP Class Setter" !b
+snippet setter "PHP Class Setter" b
 /*
  * Setter for $1
  */
@@ -116,7 +118,7 @@ public function set${1/\w+\s*/\u$0/}($$1)
 $0
 endsnippet
 
-snippet gs "PHP Class Getter Setter" !b
+snippet gs "PHP Class Getter Setter" b
 /*
  * Getter for ${1/(\w+)\s*;/$1/}
  */
@@ -136,7 +138,7 @@ public function set${1/(\w+)\s*;/\u$1/}($${1/(\w+)\s*;/$1/})
 $0
 endsnippet
 
-snippet pub "Public function" !b
+snippet pub "Public function" b
 public function ${1:name}(${2:$param})
 {
 	${VISUAL}${3:return null;}
@@ -144,7 +146,7 @@ public function ${1:name}(${2:$param})
 $0
 endsnippet
 
-snippet pro "Protected function" !b
+snippet pro "Protected function" b
 protected function ${1:name}(${2:$param})
 {
 	${VISUAL}${3:return null;}
@@ -152,7 +154,7 @@ protected function ${1:name}(${2:$param})
 $0
 endsnippet
 
-snippet pri "Private function" !b
+snippet pri "Private function" b
 private function ${1:name}(${2:$param})
 {
 	${VISUAL}${3:return null;}
@@ -160,7 +162,7 @@ private function ${1:name}(${2:$param})
 $0
 endsnippet
 
-snippet pubs "Public static function" !b
+snippet pubs "Public static function" b
 public static function ${1:name}(${2:$param})
 {
 	${VISUAL}${3:return null;}
@@ -168,7 +170,7 @@ public static function ${1:name}(${2:$param})
 $0
 endsnippet
 
-snippet pros "Protected static function" !b
+snippet pros "Protected static function" b
 protected static function ${1:name}(${2:$param})
 {
 	${VISUAL}${3:return null;}
@@ -176,7 +178,7 @@ protected static function ${1:name}(${2:$param})
 $0
 endsnippet
 
-snippet pris "Private static function" !b
+snippet pris "Private static function" b
 private static function ${1:name}(${2:$param})
 {
 	${VISUAL}${3:return null;}
@@ -184,7 +186,7 @@ private static function ${1:name}(${2:$param})
 $0
 endsnippet
 
-snippet fu "Function snip" !b
+snippet fu "Function snip" b
 function ${1:name}(${2:$param})
 {
 	${VISUAL}${3:return null;}
@@ -199,7 +201,7 @@ foreach ($${1:variable} as $${3:value}){
 $0
 endsnippet
 
-snippet new "New class instance" !b
+snippet new "New class instance" b
 $$1 = new $1($2);
 $0
 endsnippet
@@ -213,7 +215,7 @@ if (${1:/* condition */}) {
 $0
 endsnippet
 
-snippet class "Class declaration template" !b
+snippet class "Class declaration template" b
 /**
  * Class ${1:`!p snip.rv=snip.fn.split('.')[0]`}
  * @author ${2:`!v g:snips_author`}

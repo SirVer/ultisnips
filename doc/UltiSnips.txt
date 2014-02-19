@@ -16,7 +16,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    3.3 Snippet Search Path                      |UltiSnips-snippet-search-path|
    3.4 Warning About Select Mode Mappings       |UltiSnips-warning-smappings|
    3.5 Functions                                |UltiSnips-functions|
-      3.5.1 UltiSnips#AddSnippet                |UltiSnips#AddSnippet|
+      3.5.1 UltiSnips#AddSnippetWithPriority    |UltiSnips#AddSnippetWithPriority|
       3.5.2 UltiSnips#Anon                      |UltiSnips#Anon|
       3.5.3 UltiSnips#SnippetsInCurrentScope    |UltiSnips#SnippetsInCurrentScope|
    3.6 Missing python support                   |UltiSnips-python-warning|
@@ -373,13 +373,14 @@ complete definition as listed by the |:smap| command. >
 UltiSnips provides some functions for extending core functionality.
 
 
- 3.5.1 UltiSnips#AddSnippet                            *UltiSnips#AddSnippet*
+ 3.5.1 UltiSnips#AddSnippetWithPriority    *UltiSnips#AddSnippetWithPriority*
 
-The first function is UltiSnips#AddSnippet(trigger, value, description,
-options, filetyp="all"). It adds a new snippet with the provided trigger, value,
+The first function is UltiSnips#AddSnippetWithPriority(trigger, value, description,
+options, filetyp, priority). It adds a new snippet with the provided trigger, value,
 description, and options to the current list of snippets. See
-|UltiSnips-syntax| for details on the meaning of the function arguments. All
-arguments are strings.
+|UltiSnips-syntax| for details on the meaning of the function arguments. The
+Priority is a number that defines which snippet should be preferred over
+others. See the priority keyword in|UltiSnips-add-snippets|.
 
 
  3.5.2 UltiSnips#Anon                                        *UltiSnips#Anon*
@@ -390,9 +391,9 @@ discarded again. Anonymous snippets are not added to the global list of
 snippets, so they cannot be expanded a second time unless the function is
 called again. The function takes three optional arguments, in order: trigger,
 description, options. Arguments coincide with the arguments of the
-|UltiSnips#AddSnippet| function of the same name. The trigger and options
-arguments can change the way the snippet expands. The description is unused at
-this point.
+|UltiSnips#AddSnippetWithPriority| function of the same name. The trigger and
+options arguments can change the way the snippet expands. The description is
+unused at this point.
 
 An example use case might be this line from a reStructuredText plugin file:
 
@@ -504,14 +505,13 @@ a dotted filetype for the CUDA C++ framework, e.g. ":set ft=cuda.cpp", then
 UltiSnips will search for and activate snippets for both the cuda and cpp
 filetypes.
 
-UltiSnips doesn't understand multiple filetypes in snippet filenames, so a
-snippet file named "cuda.cpp.snippets" won't match the "cuda" or "cpp"
-filetypes, which means it won't be activated for files with the dotted
-filetype "cuda.cpp" either.
+The snippets file syntax is simple. All lines starting with a # character are
+considered comments. Comments are ignored by UltiSnips. Use them to document
+snippets.
 
-The extends directive provides an alternative way of combining snippet files.
-When the extends directive is included in a snippet file, it instructs
-UltiSnips to include all snippets from the indicated filetypes.
+A line beginning with the keyword 'extends' provides a way of combining
+snippet files. When the 'extends' directive is included in a snippet file, it
+instructs UltiSnips to include all snippets from the indicated filetypes.
 
 The syntax looks like this: >
    extends ft1, ft2, ft3
@@ -520,12 +520,17 @@ For example, the first line in cpp.snippets looks like this: >
    extends c
 When UltiSnips activates snippets for a cpp file, it first looks for all c
 snippets and activates them as well. This is a convenient way to create
-specialized snippet files from more general ones. Multiple "extends" lines are
+specialized snippet files from more general ones. Multiple 'extends' lines are
 permitted in a snippet file, and they can be included anywhere in the file.
 
-The snippets file syntax is simple. All lines starting with a # character are
-considered comments. Comments are ignored by UltiSnips. Use them to document
-snippets.
+
+A line beginning with the keyword 'priority' sets the priority for all
+snippets defined in the current file after this line. The default priority for
+a file is always 0. When a snippet should be expanded, UltiSnips will collect
+all snippet definitons from all sources that match the trigger and keep only
+the ones with the highest priority. For example, all shipped snippets have a
+priority < 0, so that user defined snippets always overwrite shipped snippets.
+
 
 A line beginning with the keyword 'snippet' marks the beginning of snippet
 definition and a line starting with  the keyword 'endsnippet' marks the end.
@@ -575,15 +580,6 @@ single characters. The 'options' characters for a snippet are combined into
 a word without spaces.
 
 The options currently supported are: >
-   !   Overwrite - A snippet with this option will overwrite all previously
-       defined snippets with an identical tab trigger. What previously means
-       in this context depends on the order UltiSnips traverses the
-       'runtimepath'. (Compare g:UltiSnipsDontReverseSearchPath). This might
-       depend on your installation type (Pathogen, Bzr, Vundle). The default
-       behavior is to display list of snippets matching the tab trigger and
-       let the user pick the one they want. Use this option to overwrite
-       bundled snippets with user defined ones.
-
    b   Beginning of line - A snippet with this option is expanded only if the
        tab trigger is the first word on the line. In other words, if only
        whitespace precedes the tab trigger, expand. The default is to expand

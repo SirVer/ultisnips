@@ -327,16 +327,19 @@ class _VimTest(unittest.TestCase):
             self.snippets = ( self.snippets, )
 
         for s in self.snippets:
-            sv,content = s[:2]
+            sv, content = s[:2]
             description = ""
             options = ""
+            priority = 0
             if len(s) > 2:
                 description = s[2]
             if len(s) > 3:
                 options = s[3]
+            if len(s) > 4:
+                priority = s[4]
 
-            self.send_py("UltiSnips_Manager.add_snippet(%r, %r, %r, %r)" %
-                (sv, content, description, options))
+            self.send_py("UltiSnips_Manager.add_snippet(%r, %r, %r, %r, priority=%i)" %
+                (sv, content, description, options, priority))
 
         ft, file_data = self.snippets_test_file
         self._temporary_directory = ""
@@ -402,6 +405,22 @@ class ParseSnippets_UnknownDirective(_VimTest):
     keys = "testsnip" + EX
     wanted = "testsnip" + EX
     expected_error = r"Invalid line 'unknown directive' in \S+:2"
+
+class ParseSnippets_InvalidPriorityLine(_VimTest):
+    snippets_test_file = ("all", r"""
+        priority - 50
+        """)
+    keys = "testsnip" + EX
+    wanted = "testsnip" + EX
+    expected_error = r"Invalid priority '- 50' in \S+:2"
+
+class ParseSnippets_InvalidPriorityLine1(_VimTest):
+    snippets_test_file = ("all", r"""
+        priority
+        """)
+    keys = "testsnip" + EX
+    wanted = "testsnip" + EX
+    expected_error = r"Invalid priority '' in \S+:2"
 
 class ParseSnippets_ExtendsWithoutFiletype(_VimTest):
     snippets_test_file = ("all", r"""
@@ -2034,33 +2053,86 @@ class Multiple_ManySnippetsOneTrigger_ECR(_VimTest):
     keys = "test" + EX + " " + ESC + ESC + "ahi"
     wanted = "testhi"
 # End: Selecting Between Same Triggers  #}}}
-# Snippet Options  {{{#
-class SnippetOptions_OverwriteExisting_ECR(_VimTest):
+# Snippet Priority  {{{#
+class SnippetPriorities_MultiWordTriggerOverwriteExisting(_VimTest):
+    snippets = (
+     ("test me", "${1:Hallo}", "Types Hallo"),
+     ("test me", "${1:World}", "Types World"),
+     ("test me", "We overwrite", "Overwrite the two", "", 1),
+    )
+    keys = "test me" + EX
+    wanted = "We overwrite"
+class SnippetPriorities_DoNotCareAboutNonMatchings(_VimTest):
+    snippets = (
+     ("test1", "Hallo", "Types Hallo"),
+     ("test2", "We overwrite", "Overwrite the two", "", 1),
+    )
+    keys = "test1" + EX
+    wanted = "Hallo"
+class SnippetPriorities_OverwriteExisting(_VimTest):
     snippets = (
      ("test", "${1:Hallo}", "Types Hallo"),
      ("test", "${1:World}", "Types World"),
-     ("test", "We overwrite", "Overwrite the two", "!"),
+     ("test", "We overwrite", "Overwrite the two", "", 1),
     )
     keys = "test" + EX
     wanted = "We overwrite"
-class SnippetOptions_OverwriteTwice_ECR(_VimTest):
+class SnippetPriorities_OverwriteTwice_ECR(_VimTest):
     snippets = (
         ("test", "${1:Hallo}", "Types Hallo"),
         ("test", "${1:World}", "Types World"),
-        ("test", "We overwrite", "Overwrite the two", "!"),
-        ("test", "again", "Overwrite again", "!"),
+        ("test", "We overwrite", "Overwrite the two", "", 1),
+        ("test", "again", "Overwrite again", "", 2),
     )
     keys = "test" + EX
     wanted = "again"
-class SnippetOptions_OverwriteThenChoose_ECR(_VimTest):
+class SnippetPriorities_OverwriteThenChoose_ECR(_VimTest):
     snippets = (
         ("test", "${1:Hallo}", "Types Hallo"),
         ("test", "${1:World}", "Types World"),
-        ("test", "We overwrite", "Overwrite the two", "!"),
-        ("test", "No overwrite", "Not overwritten", ""),
+        ("test", "We overwrite", "Overwrite the two", "", 1),
+        ("test", "No overwrite", "Not overwritten", "", 1),
     )
     keys = "test" + EX + "1\n\n" + "test" + EX + "2\n"
     wanted = "We overwrite\nNo overwrite"
+class SnippetPriorities_AddedHasHigherThanFile(_VimTest):
+    snippets_test_file = ("all", r"""
+        snippet test "Test Snippet" b
+        This is a test snippet
+        endsnippet
+        """)
+    snippets = (
+        ("test", "We overwrite", "Overwrite the two", "", 1),
+    )
+    keys = "test" + EX
+    wanted = "We overwrite"
+class SnippetPriorities_FileHasHigherThanAdded(_VimTest):
+    snippets_test_file = ("all", r"""
+        snippet test "Test Snippet" b
+        This is a test snippet
+        endsnippet
+        """)
+    snippets = (
+        ("test", "We do not overwrite", "Overwrite the two", "", -1),
+    )
+    keys = "test" + EX
+    wanted = "This is a test snippet"
+class SnippetPriorities_FileHasHigherThanAdded(_VimTest):
+    snippets_test_file = ("all", r"""
+        priority -3
+        snippet test "Test Snippet" b
+        This is a test snippet
+        endsnippet
+        """)
+    snippets = (
+        ("test", "We overwrite", "Overwrite the two", "", -5),
+    )
+    keys = "test" + EX
+    wanted = "This is a test snippet"
+# End: Snippet Priority  #}}}
+
+
+# Snippet Options  {{{#
 class SnippetOptions_OnlyExpandWhenWSInFront_Expand(_VimTest):
     snippets = ("test", "Expand me!", "", "b")
     keys = "test" + EX
@@ -2278,14 +2350,6 @@ class MultiWordSnippet_Simple(_VimTest):
     snippets = ("test me", "Expand me!")
     keys = "test me" + EX
     wanted = "Expand me!"
-class MultiWord_SnippetOptions_OverwriteExisting_ECR(_VimTest):
-    snippets = (
-     ("test me", "${1:Hallo}", "Types Hallo"),
-     ("test me", "${1:World}", "Types World"),
-     ("test me", "We overwrite", "Overwrite the two", "!"),
-    )
-    keys = "test me" + EX
-    wanted = "We overwrite"
 class MultiWord_SnippetOptions_OnlyExpandWhenWSInFront_Expand(_VimTest):
     snippets = ("test it", "Expand me!", "", "b")
     keys = "test it" + EX
@@ -2395,16 +2459,16 @@ class Anon_Trigger_Opts(_AnonBase):
 class _AddFuncBase(_VimTest):
     args = ""
     def _options_on(self):
-        self.send(":call UltiSnips#AddSnippet("
+        self.send(":call UltiSnips#AddSnippetWithPriority("
                 + self.args + ')\n')
 
 class AddFunc_Simple(_AddFuncBase):
-    args = '"test", "simple expand", "desc", ""'
+    args = '"test", "simple expand", "desc", "", "all", 0'
     keys = "abc test" + EX
     wanted = "abc simple expand"
 
 class AddFunc_Opt(_AddFuncBase):
-    args = '".*test", "simple expand", "desc", "r"'
+    args = '".*test", "simple expand", "desc", "r", "all", 0'
     keys = "abc test" + EX
     wanted = "simple expand"
 # End: AddSnippet Function  #}}}

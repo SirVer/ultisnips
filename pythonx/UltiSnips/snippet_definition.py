@@ -39,7 +39,8 @@ class SnippetDefinition(object):
     _INDENT = re.compile(r"^[ \t]*")
     _TABS = re.compile(r"^\t*")
 
-    def __init__(self, trigger, value, description, options, globals):
+    def __init__(self, priority, trigger, value, description, options, globals):
+        self._priority = priority
         self._trigger = as_unicode(trigger)
         self._value = as_unicode(value)
         self._description = as_unicode(description)
@@ -49,8 +50,8 @@ class SnippetDefinition(object):
         self._globals = globals
 
     def __repr__(self):
-        return "SnippetDefinition(%s,%s,%s)" % (
-                self._trigger, self._description, self._opts)
+        return "SnippetDefinition(%r,%s,%s,%s)" % (
+                self._priority, self._trigger, self._description, self._opts)
 
     def _re_match(self, trigger):
         """ Test if a the current regex trigger matches
@@ -161,14 +162,15 @@ class SnippetDefinition(object):
         return match
 
     @property
-    def overwrites_previous(self):
-        """Does this snippet overwrite previous with the same trigger?"""
-        return "!" in self._opts
-
-    @property
     def description(self):
         """Descriptive text for this snippet."""
         return ("(%s) %s" % (self._trigger, self._description)).strip()
+
+    @property
+    def priority(self):
+        """The snippets priority, which defines which snippet will be preferred
+        over others with the same trigger."""
+        return self._priority
 
     @property
     def trigger(self):

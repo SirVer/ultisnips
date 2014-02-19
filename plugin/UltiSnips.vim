@@ -43,7 +43,7 @@ function! UltiSnips_JumpForwards()
 endfunction
 
 function! UltiSnips_AddSnippet(...)
-    echoerr "Deprecated UltiSnips_AddSnippet called. Please use UltiSnips#AddSnippet." | sleep 1
+    echoerr "Deprecated UltiSnips_AddSnippet called. Please use UltiSnips#AddSnippetWithPriority." | sleep 1
     return call(function('UltiSnips#AddSnippet'), a:000)
 endfunction
 

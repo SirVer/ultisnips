@@ -1,5 +1,7 @@
 # Simple shortcuts
 
+priority -50
+
 snippet imp "import (imp)" b
 import ${1:std.stdio};
 endsnippet
@@ -265,11 +267,11 @@ this(${1:/*args*/})
 }
 endsnippet
 
-snippet get "getter property (get)" !
+snippet get "getter property (get)"
 @property ${1:/*type*/} ${2:/*member_name*/}() const pure nothrow {return ${3:$2_};}
 endsnippet
 
-snippet set "setter property (set)" !
+snippet set "setter property (set)"
 @property void ${1:/*member_name*/}(${2:/*type*/} rhs) pure nothrow {${3:$1_} = rhs;}
 endsnippet
 
@@ -490,10 +492,9 @@ endsnippet
 # Comments
 
 
-snippet todo "TODO (todo)" !
+snippet todo "TODO (todo)"
 // TODO: ${1}
 endsnippet
-
 
 
 # DDoc

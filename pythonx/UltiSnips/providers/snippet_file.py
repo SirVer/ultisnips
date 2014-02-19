@@ -148,6 +148,7 @@ class UltiSnipsFileProvider(SnippetProvider):
     def _parse_snippets(self, ft, filename):
         """Parse the file 'filename' for the given 'ft' and watch it for
         changes in the future. 'file_data' can be injected in tests."""
+        current_snippet_priority = 0
         self._snippets[ft].addfile(filename)
         file_data = open(filename, "r").read()
         for event, data in parse_snippets_file(file_data):
@@ -167,11 +168,14 @@ class UltiSnipsFileProvider(SnippetProvider):
                 filetypes, = data
                 self._add_extending_info(ft, filetypes)
             elif event == "snippet":
-                trigger, value, description, options, globals = data
+                trigger, value, description, options, global_pythons = data
                 self._snippets[ft].add_snippet(
-                    SnippetDefinition(trigger, value, description, options,
-                        globals), filename
+                    SnippetDefinition(current_snippet_priority, trigger, value,
+                        description, options, global_pythons), filename
                 )
+            elif event == "priority":
+                priority, = data
+                current_snippet_priority = priority
             else:
                 assert False, "Unhandled %s: %r" % (event, data)
 

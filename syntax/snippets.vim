@@ -17,7 +17,7 @@ syn match snipString '"[^"]*"'
 syn match snipTabsOnly "^\t\+$"
 syn match snipLeadingSpaces "^\t* \+"
 
-syn match snipKeyword "\(\<\(end\)\?\(snippet\|global\)\>\)\|extends\|clearsnippets" contained
+syn match snipKeyword "\(\<\(end\)\?\(snippet\|global\)\>\)\|extends\|clearsnippets\|priority" contained
 
 " extends definitions
 syn match snipExtends "^extends.*" contains=snipKeyword
@@ -40,6 +40,7 @@ syn region snipGlobal fold keepend start="^global" end="^endglobal" contains=sni
 
 " snippet clearing
 syn match snipClear "^clearsnippets"
+syn match snipPriority "^priority"
 
 " highlighting rules
 
@@ -66,5 +67,6 @@ hi link snipGlobalEnd        Statement
 hi link snipGlobal           Normal
 
 hi link snipClear            Statement
+hi link snipPriority         Statement
 
 let b:current_syntax = "snippet"

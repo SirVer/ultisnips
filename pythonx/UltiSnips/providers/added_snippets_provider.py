@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-"""Handles manually added snippets through UltiSnips#AddSnippet or
-UltiSnips_Manager.add_snippet()."""
+"""Handles manually added snippets UltiSnips_Manager.add_snippet()."""
 
 from UltiSnips.providers._base import SnippetProvider
 

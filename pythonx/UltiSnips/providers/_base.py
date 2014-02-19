@@ -20,23 +20,7 @@ class SnippetProvider(object):
         found_snippets = []
         for ft in filetypes:
             found_snippets += self._find_snippets(ft, before, possible)
-
-        # Search if any of the snippets overwrites the previous
-        # Dictionary allows O(1) access for easy overwrites
-        snippets = {}
-        for snip in found_snippets:
-            if (snip.trigger not in snippets) or snip.overwrites_previous:
-                snippets[snip.trigger] = []
-            snippets[snip.trigger].append(snip)
-
-        # Transform dictionary into flat list of snippets
-        selected_snippets = set(
-                [item for sublist in snippets.values() for item in sublist])
-        # Return snippets to their original order
-        snippets = [snip for snip in found_snippets if
-                snip in selected_snippets]
-
-        return snippets
+        return found_snippets
 
     def _find_snippets(self, ft, trigger, potentially=False, seen=None):
         """Find snippets matching 'trigger' for 'ft'. If 'potentially' is True,

@@ -115,5 +115,11 @@ def parse_snippets_file(data):
                 yield snippet
         elif head == "clearsnippets":
             yield "clearsnippets", (tail.split(),)
+        elif head == "priority":
+            try:
+                priority = int(tail.split()[0])
+                yield "priority", (priority,)
+            except (ValueError, IndexError):
+                yield "error", ("Invalid priority %r" % tail, lines.line_index)
         elif head and not head.startswith('#'):
             yield "error", ("Invalid line %r" % line.rstrip(), lines.line_index)

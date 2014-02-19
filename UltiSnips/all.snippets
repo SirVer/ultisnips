@@ -1,6 +1,8 @@
 # This file contains snippets that are always defined. I personally
 # have snippets for signatures and often needed texts
 
+priority -50
+
 ##############
 # NICE BOXES #
 ##############
@@ -91,15 +93,15 @@ snip.rv = box[2] + '\n' + box[3]`
 $0
 endsnippet
 
-snippet fold "Insert a vim fold marker" !b
+snippet fold "Insert a vim fold marker" b
 `!p snip.rv = _get_comment_format()[0]` ${1:Fold description} `!p snip.rv = foldmarker()[0]`${2:1} `!p snip.rv = _get_comment_format()[2]`
 endsnippet
 
-snippet foldc "Insert a vim fold close marker" !b
+snippet foldc "Insert a vim fold close marker" b
 `!p snip.rv = _get_comment_format()[0]` ${2:1}`!p snip.rv = foldmarker()[1]` `!p snip.rv = _get_comment_format()[2]`
 endsnippet
 
-snippet foldp "Insert a vim fold marker pair" !b
+snippet foldp "Insert a vim fold marker pair" b
 `!p snip.rv = _get_comment_format()[0]` ${1:Fold description} `!p snip.rv = foldmarker()[0]` `!p snip.rv = _get_comment_format()[2]`
 ${2:${VISUAL:Content}}
 `!p snip.rv = _get_comment_format()[0]` `!p snip.rv = foldmarker()[1]` $1 `!p snip.rv = _get_comment_format()[2]`

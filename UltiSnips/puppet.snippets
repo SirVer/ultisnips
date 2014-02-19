@@ -1,4 +1,4 @@
-# Snippets for Puppet
+priority -50
 
 #########################################################################
 #  Python helper code                                                   #
@@ -129,23 +129,23 @@ endsnippet
 #    See http://docs.puppetlabs.com/references/latest/function.html    #
 ########################################################################
 
-snippet alert "Alert Function" !b
+snippet alert "Alert Function" b
 alert("${1:message}")${0}
 endsnippet
 
-snippet crit "Crit Function" !b
+snippet crit "Crit Function" b
 crit("${1:message}")${0}
 endsnippet
 
-snippet debug "Debug Function" !b
+snippet debug "Debug Function" b
 debug("${1:message}")${0}
 endsnippet
 
-snippet defined "Defined Function" !b
+snippet defined "Defined Function" b
 defined(${1:Resource}["${2:name}"])${0}
 endsnippet
 
-snippet emerg "Emerg Function" !b
+snippet emerg "Emerg Function" b
 emerg("${1:message}")${0}
 endsnippet
 
@@ -161,7 +161,7 @@ snippet extlookup "Extlookup with defaults and custom data file" b
 $${1:Variable} = extlookup("${2:Lookup}", ${3:Default}, ${4:Data Source})${0}
 endsnippet
 
-snippet fail "Fail Function" !b
+snippet fail "Fail Function" b
 fail("${1:message}")${0}
 endsnippet
 
@@ -193,39 +193,39 @@ snippet hiera_include "Hiera Include Function" b
 hiera_include("${1:Lookup}")${0}
 endsnippet
 
-snippet include "Include Function" !b
+snippet include "Include Function" b
 include ${1:classname}${0}
 endsnippet
 
-snippet info "Info Function" !b
+snippet info "Info Function" b
 info("${1:message}")${0}
 endsnippet
 
-snippet inline_template "Inline Template Function" !b
+snippet inline_template "Inline Template Function" b
 inline_template("<%= ${1:template} %>")${0}
 endsnippet
 
-snippet notice "Notice Function" !b
+snippet notice "Notice Function" b
 notice("${1:message}")${0}
 endsnippet
 
-snippet realize "Realize Function" !b
+snippet realize "Realize Function" b
 realize(${1:Resource}["${2:name}"])${0}
 endsnippet
 
-snippet regsubst "Regsubst Function" !b
+snippet regsubst "Regsubst Function" b
 regsubst($${1:Target}, '${2:regexp}', '${3:replacement}')${0}
 endsnippet
 
-snippet split "Split Function" !b
+snippet split "Split Function" b
 $${1:Variable} = split($${1:Target}, '${2:regexp}')${0}
 endsnippet
 
-snippet versioncmp "Version Compare Function" !b
+snippet versioncmp "Version Compare Function" b
 $${1:Variable} = versioncmp('${1:version}', '${2:version}')${0}
 endsnippet
 
-snippet warning "Warning Function" !b
+snippet warning "Warning Function" b
 warning("${1:message}")${0}
 endsnippet
 

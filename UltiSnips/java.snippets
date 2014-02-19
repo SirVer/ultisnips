@@ -1,6 +1,4 @@
-###########################################################################
-#                            TEXTMATE SNIPPETS                            #
-###########################################################################
+priority -50
 
 # Many of the snippets here use a global option called
 # "g:ultisnips_java_brace_style" which, if set to "nl" will put a newline
@@ -31,7 +29,7 @@ def camel(word):
 
 endglobal
 
-snippet sleep "try sleep catch" !b
+snippet sleep "try sleep catch" b
 try {
 	Thread.sleep(${1:1000});
 } catch (InterruptedException e){
@@ -39,16 +37,16 @@ try {
 }
 endsnippet
 
-snippet /i|n/ "new primitive or int" !br
+snippet /i|n/ "new primitive or int" br
 ${1:int} ${2:i} = ${3:1};
 $0
 endsnippet
 
-snippet /o|v/ "new Object or variable" !br
+snippet /o|v/ "new Object or variable" br
 ${1:Object} ${2:var} = new $1(${3});
 endsnippet
 
-snippet f "field" !b
+snippet f "field" b
 ${1:private} ${2:String} ${3:`!p snip.rv = t[2].lower()`};
 endsnippet
 
@@ -60,15 +58,15 @@ snippet as "assert" b
 assert ${1:test}${2/(.+)/(?1: \: ")/}${2:Failure message}${2/(.+)/(?1:")/};$0
 endsnippet
 
-snippet at "assert true" !b
+snippet at "assert true" b
 assertTrue(${1:actual});
 endsnippet
 
-snippet af "assert false" !b
+snippet af "assert false" b
 assertFalse(${1:actual});$0
 endsnippet
 
-snippet ae "assert equals" !b
+snippet ae "assert equals" b
 assertEquals(${1:expected}, ${2:actual});
 endsnippet
 
@@ -96,7 +94,7 @@ snip.rv = snip.basename or "untitled"`} ${2:extends ${3:Parent} }${4:implements 
 }
 endsnippet
 
-snippet clc "class with constructor, fields, setter and getters" !b
+snippet clc "class with constructor, fields, setter and getters" b
 public class `!p
 snip.rv = snip.basename or "untitled"` {
 `!p
@@ -242,11 +240,11 @@ snippet map "Collections Map" b
 Map<${1:String}, ${2:String}> ${3:map} = new ${4:Hash}Map<$1, $2>();
 endsnippet
 
-snippet set "Collections Set" !b
+snippet set "Collections Set" b
 Set<${1:String}> ${2:set} = new ${3:Hash}Set<$1>();
 endsnippet
 
-snippet /Str?|str/ "String" !br
+snippet /Str?|str/ "String" br
 String $0
 endsnippet
 
@@ -298,7 +296,7 @@ public static void main(String[] args)`!p nl(snip)`{
 }
 endsnippet
 
-snippet try "try/catch" !b
+snippet try "try/catch" b
 try {
 	$1
 } catch(${2:Exception} ${3:e}){
@@ -306,7 +304,7 @@ try {
 }
 endsnippet
 
-snippet mt "method throws" b!
+snippet mt "method throws" b
 ${1:private} ${2:void} ${3:method}(${4}) ${5:throws $6 }{
 	$0
 }
@@ -318,7 +316,7 @@ ${1:private} ${2:void} ${3:method}(${4}) {
 }
 endsnippet
 
-snippet md "Method With javadoc" !b
+snippet md "Method With javadoc" b
 /**
  * ${7:Short Description}`!p
 for i in getArgs(t[4]):
@@ -338,19 +336,19 @@ ${1:public} ${2:void} ${3:method}($4) ${5:throws $6 }{
 }
 endsnippet
 
-snippet /get(ter)?/ "getter" !br
+snippet /get(ter)?/ "getter" br
 public ${1:String} get${2:Name}() {
 	return `!p snip.rv = t[2].lower()`;
 }
 endsnippet
 
-snippet /set(ter)?/ "setter" !br
+snippet /set(ter)?/ "setter" br
 public void set${1:Name}(${2:String} $1) {
 	return this.`!p snip.rv = t[1].lower()` = `!p snip.rv = t[1].lower()`;
 }
 endsnippet
 
-snippet /se?tge?t|ge?tse?t|gs/ "setter and getter" !br
+snippet /se?tge?t|ge?tse?t|gs/ "setter and getter" br
 public void set${1:Name}(${2:String} `!p snip.rv = t[1].lower()`) {
 	this.`!p snip.rv = t[1].lower()` = `!p snip.rv = t[1].lower()`;
 }
