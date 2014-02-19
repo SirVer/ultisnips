@@ -396,15 +396,21 @@ class SnippetManager(object):
         possible matches.
         """
         filetypes = self._filetypes[_vim.buf.number][::-1]
-        snippets = []
+        matching_snippets = defaultdict(list)
         for provider in self._snippet_providers:
-            snippets.extend(provider.get_snippets(filetypes, before, possible))
-        if not snippets:
+            for snippet in provider.get_snippets(filetypes, before, possible):
+                matching_snippets[snippet.trigger].append(snippet)
+        if not matching_snippets:
             return []
 
-        # Only keep the snippets with the highest priority.
-        highest_priority = max(snip.priority for snip in snippets)
-        return [s for s in snippets if s.priority == highest_priority]
+        # Now filter duplicates and only keep the one with the highest
+        # priority. Only keep the snippets with the highest priority.
+        snippets = []
+        for snippets_with_trigger in matching_snippets.values():
+            highest_priority = max(s.priority for s in snippets_with_trigger)
+            snippets.extend(s for s in snippets_with_trigger
+                    if s.priority == highest_priority)
+        return snippets
 
     def _do_snippet(self, snippet, before):
         """Expands the given snippet, and handles everything
