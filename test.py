@@ -71,8 +71,6 @@ EA = "#" # Expand anonymous
 COMPL_KW = chr(24)+chr(14)
 COMPL_ACCEPT = chr(25)
 
-NUMBER_OF_RETRIES_FOR_EACH_TEST = 4
-
 def running_on_windows():
     if platform.system() == "Windows":
         return "Does not work on Windows."
@@ -275,7 +273,7 @@ class _VimTest(unittest.TestCase):
         if self.expected_error:
             self.assertRegexpMatches(self.output, self.expected_error)
             return
-        for i in range(NUMBER_OF_RETRIES_FOR_EACH_TEST):
+        for i in range(self.retries):
             if self.output != wanted:
                 # Redo this, but slower
                 self.sleeptime += 0.02
@@ -3202,7 +3200,7 @@ if __name__ == '__main__':
         p = optparse.OptionParser("%prog [OPTIONS] <test case names to run>")
 
         p.set_defaults(session="vim", interrupt=False,
-                verbose=False, interface="screen")
+                verbose=False, interface="screen", retries=4)
 
         p.add_option("-v", "--verbose", dest="verbose", action="store_true",
             help="print name of tests as they are executed")
@@ -3216,6 +3214,10 @@ if __name__ == '__main__':
              "to interactively test the snippet in vim. You must give " \
              "exactly one test case on the cmdline. The test will always fail."
         )
+        p.add_option("-r", "--retries", dest="retries", type=int,
+                help="How often should each test be retried before it is "
+                "considered failed. Works around flakyness in the terminal "
+                "multiplexer and race conditions in writing to the file system.")
 
         o, args = p.parse_args()
         if o.interface not in ("screen", "tmux"):
@@ -3236,8 +3238,6 @@ if __name__ == '__main__':
             vim = VimInterfaceScreen(options.session)
         elif options.interface == "tmux":
             vim = VimInterfaceTmux(options.session)
-
-
 
     vim.focus()
 
@@ -3280,12 +3280,12 @@ if __name__ == '__main__':
         for test in s:
             test.vim = vim
             test.interrupt = options.interrupt
+            test.retries = options.retries
             if len(selected_tests):
                 id = test.id().split('.')[1]
                 if not any([ id.startswith(t) for t in selected_tests ]):
                     continue
             suite.addTest(test)
-
 
     if options.verbose:
         v = 2
