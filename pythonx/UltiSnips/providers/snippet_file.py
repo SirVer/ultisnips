@@ -21,39 +21,6 @@ def _plugin_dir():
             return directory
     raise Exception("Unable to find the plugin directory.")
 
-def _snippets_dir_is_before_plugin_dir():
-    """ Returns True if the snippets directory comes before the plugin
-    directory in Vim's runtime path. False otherwise.
-    """
-    paths = [os.path.realpath(os.path.expanduser(p)).rstrip(os.path.sep)
-        for p in _vim.eval("&runtimepath").split(',')]
-    home = _vim.eval("$HOME")
-    def vim_path_index(suffix):
-        """Returns index of 'suffix' in 'paths' or -1 if it is not found."""
-        path = os.path.realpath(os.path.join(home, suffix)).rstrip(os.path.sep)
-        try:
-            return paths.index(path)
-        except ValueError:
-            return -1
-    try:
-        real_vim_path_index = max(
-                vim_path_index(".vim"), vim_path_index("vimfiles"))
-        plugin_path_index = paths.index(_plugin_dir())
-        return plugin_path_index < real_vim_path_index
-    except ValueError:
-        return False
-
-def _should_reverse_search_path():
-    """ If the user defined g:UltiSnipsDontReverseSearchPath then return True
-    or False based on the value of that variable, else defer to
-    _snippets_dir_is_before_plugin_dir to determine whether this is True or
-    False.
-    """
-    if _vim.eval("exists('g:UltiSnipsDontReverseSearchPath')") != "0":
-        return _vim.eval("g:UltiSnipsDontReverseSearchPath") != "0"
-    return not _snippets_dir_is_before_plugin_dir()
-
-
 def base_snippet_files_for(ft, default=True):
     """Returns a list of snippet files matching the given filetype (ft).
     If default is set to false, it doesn't include shipped files.
@@ -70,9 +37,6 @@ def base_snippet_files_for(ft, default=True):
         snippet_dirs = _vim.eval("g:UltiSnipsSnippetDirectories")
 
     paths = _vim.eval("&runtimepath").split(',')
-    if _should_reverse_search_path():
-        paths = paths[::-1]
-
     base_snippets = os.path.realpath(os.path.join(_plugin_dir(), "UltiSnips"))
     ret = []
     for rtp in paths:

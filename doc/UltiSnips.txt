@@ -321,19 +321,8 @@ variable accordingly. >
    let g:UltiSnipsSnippetDirectories=["mycoolsnippets"]
 
 You can also redefine the search path on a buffer by buffer basis by setting
-the variable b:UltiSnipsSnippetDirectories.  This variable takes precedence
+the variable b:UltiSnipsSnippetDirectories. This variable takes precedence
 over the global variable.
-
-UltiSnips searches in 'runtimepath' for snippet directories and attempts to
-determine if 'runtimepath' should be traversed in normal or reverse order. If
-you would like to override the order UltiSnips detected for 'runtimepath', add
-this to your vimrc
-file: >
-   " Traverse in normal order
-   let g:UltiSnipsDontReverseSearchPath="1"
-
-   " Traverse in reverse order
-   let g:UltiSnipsDontReverseSearchPath="0"
 
 |UltiSnips-adding-snippets| explains which files are parsed for a given filetype.
 
