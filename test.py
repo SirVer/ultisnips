@@ -1734,6 +1734,10 @@ class Visual_LineSelect_CheckIndentWithTS_NoOverwrite(_VimTest):
     snippets = ("test", "beg\n\t${0:${VISUAL}}\nend")
     keys = "hello\nnice\nworld" + ESC + "Vkk" + EX + "test" + EX
     wanted = "beg\n\thello\n\tnice\n\tworld\nend"
+class Visual_LineSelect_DedentLine(_VimTest):
+    snippets = ("if", "if {\n\t${VISUAL}$0\n}")
+    keys = "if" + EX + "one\n\ttwo\n\tthree" + ESC + ARR_U*2 + "V" + ARR_D + EX + "\tif" + EX
+    wanted = "if {\n\tif {\n\t\tone\n\t\ttwo\n\t}\n\tthree\n}"
 
 class VisualTransformation_SelectOneWord(_VimTest):
     snippets = ("test", r"h${VISUAL/./\U$0\E/g}b")
