@@ -10,7 +10,7 @@ endif
 " ftdetect/UltiSnips.vim. If the function isn't defined (probably due to
 " using a copy of vim without python support) it will cause an error anytime a
 " new file is opened.
-function! UltiSnips_FileTypeChanged()
+function! UltiSnips#FileTypeChanged()
 endfunction
 
 if !exists("g:UltiSnipsUsePythonVersion")

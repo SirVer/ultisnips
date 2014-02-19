@@ -17,6 +17,11 @@ command! -nargs=? -complete=customlist,UltiSnips#FileTypeComplete UltiSnipsEdit
 command! -nargs=1 UltiSnipsAddFiletypes :call UltiSnips#AddFiletypes(<q-args>)
 
 " Backwards compatible functions. Prefer the ones in autoload/.
+function! UltiSnips_FileTypeChanged()
+    echoerr "Deprecated UltiSnips_FileTypeChanged called. Please use UltiSnips#FileTypeChanged." | sleep 1
+    return UltiSnips#FileTypeChanged()
+endfunction
+
 function! UltiSnips_ExpandSnippet()
     echoerr "Deprecated UltiSnips_ExpandSnippet called. Please use UltiSnips#ExpandSnippet." | sleep 1
     return UltiSnips#ExpandSnippet()
