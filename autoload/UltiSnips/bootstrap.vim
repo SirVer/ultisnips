@@ -1,10 +1,10 @@
 let s:SourcedFile=expand("<sfile>")
 
 function! UltiSnips#bootstrap#Bootstrap()
-   if exists('did_UltiSnips_bootstrap')
+   if exists('s:did_UltiSnips_bootstrap')
       return
    endif
-   let did_UltiSnips_bootstrap=1
+   let s:did_UltiSnips_bootstrap=1
 
    if !exists("g:UltiSnipsUsePythonVersion")
        let g:_uspy=":py3 "
@@ -13,6 +13,7 @@ function! UltiSnips#bootstrap#Bootstrap()
                if !exists("g:UltiSnipsNoPythonWarning")
                    echo  "UltiSnips requires py >= 2.6 or any py3"
                endif
+               unlet g:_uspy
                finish
            endif
            let g:_uspy=":py "
