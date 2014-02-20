@@ -1,5 +1,40 @@
-" Kludge to make sure that this file is really run.
-function! UltiSnips#variables#WasRun()
+let s:SourcedFile=expand("<sfile>")
+
+function! UltiSnips#bootstrap#Bootstrap()
+   if exists('did_UltiSnips_bootstrap')
+      return
+   endif
+   let did_UltiSnips_bootstrap=1
+
+   if !exists("g:UltiSnipsUsePythonVersion")
+       let g:_uspy=":py3 "
+       if !has("python3")
+           if !has("python")
+               if !exists("g:UltiSnipsNoPythonWarning")
+                   echo  "UltiSnips requires py >= 2.6 or any py3"
+               endif
+               finish
+           endif
+           let g:_uspy=":py "
+       endif
+       let g:UltiSnipsUsePythonVersion = "<tab>"
+   else
+       if g:UltiSnipsUsePythonVersion == 2
+           let g:_uspy=":py "
+       else
+           let g:_uspy=":py3 "
+       endif
+   endif
+
+   " Expand our path
+   exec g:_uspy "import vim, os, sys"
+   exec g:_uspy "sourced_file = vim.eval('s:SourcedFile')"
+   exec g:_uspy "while not os.path.exists(os.path.join(sourced_file, 'pythonx')):
+      \ sourced_file = os.path.dirname(sourced_file)"
+   exec g:_uspy "module_path = os.path.join(sourced_file, 'pythonx')"
+   exec g:_uspy "vim.command(\"let g:UltiSnipsPythonPath = '%s'\" % module_path)"
+   exec g:_uspy "if not hasattr(vim, 'VIM_SPECIAL_PATH'): sys.path.append(module_path)"
+   exec g:_uspy "from UltiSnips import UltiSnips_Manager"
 endfunction
 
 " The trigger used to expand a snippet.

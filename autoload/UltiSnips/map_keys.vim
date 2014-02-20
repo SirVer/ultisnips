@@ -1,4 +1,4 @@
-call UltiSnips#variables#WasRun()
+call UltiSnips#bootstrap#Bootstrap()
 
 function! UltiSnips#map_keys#MapKeys()
     " Map the keys correctly
