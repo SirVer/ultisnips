@@ -72,8 +72,20 @@ class SnippetManager(object):
         self.forward_trigger = forward_trigger
         self.backward_trigger = backward_trigger
         self._supertab_keys = None
+
         self._csnippets = []
-        self._reset()
+        self._buffer_filetypes = defaultdict(lambda: ['all'])
+
+        self._vstate = VimState()
+        self._visual_content = VisualContentPreserver()
+
+        self._snippet_providers = [
+            AddedSnippetsProvider(),
+            UltiSnipsFileProvider()
+        ]
+        self._added_snippets_provider = self._snippet_providers[0]
+
+        self._reinit()
 
     @err_to_scratch_buffer
     def jump_forwards(self):
@@ -189,13 +201,13 @@ class SnippetManager(object):
 
     def reset_buffer_filetypes(self):
         """Reset the filetypes for the current buffer."""
-        if _vim.buf.number in self._filetypes:
-            del self._filetypes[_vim.buf.number]
+        if _vim.buf.number in self._buffer_filetypes:
+            del self._buffer_filetypes[_vim.buf.number]
 
     def add_buffer_filetypes(self, ft):
         """Checks for changes in the list of snippet files or the contents of
         the snippet files and reloads them if necessary. """
-        buf_fts = self._filetypes[_vim.buf.number]
+        buf_fts = self._buffer_filetypes[_vim.buf.number]
         idx = -1
         for ft in ft.split("."):
             ft = ft.strip()
@@ -204,7 +216,7 @@ class SnippetManager(object):
             try:
                 idx = buf_fts.index(ft)
             except ValueError:
-                self._filetypes[_vim.buf.number].insert(idx + 1, ft)
+                self._buffer_filetypes[_vim.buf.number].insert(idx + 1, ft)
                 idx += 1
 
     @err_to_scratch_buffer
@@ -273,23 +285,6 @@ class SnippetManager(object):
             self._vstate.remember_buffer(self._csnippets[0])
 
     @err_to_scratch_buffer
-    def _reset(self):
-        """Reset the class to the state it had directly after creation."""
-        self._vstate = VimState()
-        self._filetypes = defaultdict(lambda: ['all'])
-        self._visual_content = VisualContentPreserver()
-        self._snippet_providers = [
-            AddedSnippetsProvider(),
-            UltiSnipsFileProvider()
-        ]
-        self._added_snippets_provider = self._snippet_providers[0]
-
-        while len(self._csnippets):
-            self._current_snippet_is_done()
-
-        self._reinit()
-
-    @err_to_scratch_buffer
     def _save_last_visual_selection(self):
         """
         This is called when the expand trigger is pressed in visual mode.
@@ -297,7 +292,6 @@ class SnippetManager(object):
         ${VISUAL} in case it will be needed.
         """
         self._visual_content.conserve()
-
 
     def _leaving_buffer(self):
         """Called when the user switches tabs/windows/buffers. It basically
@@ -395,7 +389,7 @@ class SnippetManager(object):
         before the cursor. If possible is True, then get all
         possible matches.
         """
-        filetypes = self._filetypes[_vim.buf.number][::-1]
+        filetypes = self._buffer_filetypes[_vim.buf.number][::-1]
         matching_snippets = defaultdict(list)
         for provider in self._snippet_providers:
             for snippet in provider.get_snippets(filetypes, before, possible):
@@ -478,12 +472,11 @@ class SnippetManager(object):
             return None
         return self._csnippets[-1]
 
-
     @property
     def _primary_filetype(self):
         """This filetype will be edited when UltiSnipsEdit is called without
         any arguments."""
-        return self._filetypes[_vim.buf.number][0]
+        return self._buffer_filetypes[_vim.buf.number][0]
 
     # TODO(sirver): this should talk directly to the UltiSnipsFileProvider.
     def _file_to_edit(self, ft):  # pylint: disable=no-self-use

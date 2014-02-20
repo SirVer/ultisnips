@@ -2,27 +2,22 @@
 # encoding: utf-8
 #
 # To execute this test requires two terminals, one for running Vim and one
-# for executing the test script.  Both terminals should have their current
+# for executing the test script. Both terminals should have their current
 # working directories set to this directory (the one containing this test.py
 # script).
 #
 # In one terminal, launch a GNU ``screen`` session named ``vim``:
 #   $ screen -S vim
 #
-# Within this new session, launch Vim with the absolute bare minimum settings
-# to ensure a consistent test environment:
-#  $ vim -u NONE
-#
-# The '-u NONE' disables normal .vimrc and .gvimrc processing (note
-# that '-u NONE' implies '-U NONE').
-#
-# All other settings are configured by the test script.
-#
 # Now, from another terminal, launch the testsuite:
 #    $ ./test.py
 #
-# The testsuite will use ``screen`` to inject commands into the Vim under test,
-# and will compare the resulting output to expected results.
+# For each test, the test.py script will launch vim with a vimrc, run the test,
+# compare the output and exit vim again. The keys are send using screen.
+#
+# NOTE: The tessuite is not working under Windows right now as I have no access
+# to a windows system for fixing it. Volunteers welcome. Here are some comments
+# from the last time I got the test suite running under windows.
 #
 # Under windows, COM's SendKeys is used to send keystrokes to the gvim window.
 # Note that Gvim must use english keyboard input (choose in windows registry)
@@ -71,6 +66,8 @@ EA = "#" # Expand anonymous
 COMPL_KW = chr(24)+chr(14)
 COMPL_ACCEPT = chr(25)
 
+PYTHON3 = sys.version_info >= (3,0)
+
 def running_on_windows():
     if platform.system() == "Windows":
         return "Does not work on Windows."
@@ -79,6 +76,16 @@ def no_unidecode_available():
     if not UNIDECODE_IMPORTED:
         return "unidecode is not available."
 
+def is_process_running(pid):
+    """Returns true if a process with pid is running, false otherwise."""
+    # from http://stackoverflow.com/questions/568271/how-to-check-if-there-exists-a-process-with-a-given-pid
+    try:
+        os.kill(pid, 0)
+    except OSError:
+        return False
+    else:
+        return True
+
 def random_string(n):
     return ''.join(random.choice(string.ascii_lowercase) for x in range(n))
 
@@ -86,10 +93,7 @@ def silent_call(cmd):
     """Calls 'cmd' and returns the exit value."""
     return subprocess.call(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
-class VimInterface:
-    def focus(title=None):
-        pass
-
+class VimInterface(object):
     def get_buffer_data(self):
         handle, fn = tempfile.mkstemp(prefix="UltiSnips_Test",suffix=".txt")
         os.close(handle)
@@ -101,11 +105,11 @@ class VimInterface:
         tries = 50
         while tries:
             if os.path.exists(fn):
-                if sys.version_info >= (3,0):
+                if PYTHON3:
                     return open(fn,"r", encoding="utf-8").read()[:-1]
                 else:
                     return open(fn,"r").read()[:-1]
-            time.sleep(.05)
+            time.sleep(.01)
             tries -= 1
 
 class VimInterfaceScreen(VimInterface):
@@ -120,7 +124,7 @@ class VimInterfaceScreen(VimInterface):
             repl = lambda m: '\\' + m.group(0)
             s = re.sub( r"[$^#\\']", repl, s )
 
-        if sys.version_info >= (3,0):
+        if PYTHON3:
             s = s.encode("utf-8")
 
         while True:
@@ -134,17 +138,17 @@ class VimInterfaceScreen(VimInterface):
             time.sleep(.2)
 
     def detect_parsing(self):
-        # Clear the buffer
-        self.send("bggVGd")
+        self.send(""" vim -u NONE\r\n""")  # Space to exclude from shell history
+        time.sleep(1)
 
         # Send a string where the interpretation will depend on version of screen
         string = "$TERM"
         self.send("i" + string + ESC)
         output = self.get_buffer_data()
-
         # If the output doesn't match the input, need to do additional escaping
         if output != string:
             self.need_screen_escapes = 1
+        self.send(ESC + ":q!\n")
 
 class VimInterfaceTmux(VimInterface):
     def __init__(self, session):
@@ -156,14 +160,14 @@ class VimInterfaceTmux(VimInterface):
         # to tmux, but it seems like this is all that is needed for now.
         s = s.replace(';', r'\;')
 
-        if sys.version_info >= (3,0):
+        if PYTHON3:
             s = s.encode("utf-8")
         silent_call(["tmux", "send-keys", "-t", self.session, "-l", s])
 
     def _check_version(self):
         stdout, _ = subprocess.Popen(["tmux", "-V"],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-        if sys.version_info >= (3,0):
+        if PYTHON3:
             stdout = stdout.decode("utf-8")
         m = re.match(r"tmux (\d+).(\d+)", stdout)
         if not m or not (int(m.group(1)), int(m.group(2))) >= (1, 9):
@@ -236,6 +240,19 @@ class VimInterfaceWindows(VimInterface):
 
         self.shell.SendKeys(seq)
 
+def create_temp_file(prefix, suffix, content):
+    """Create a file in a temporary place with the given 'prefix'
+    and the given 'suffix' containing 'content'. The file is never
+    deleted. Returns the name of the temporary file."""
+    with tempfile.NamedTemporaryFile(
+        prefix=prefix, suffix=suffix, delete=False
+    ) as temporary_file:
+        if PYTHON3:
+            s = s.encode("utf-8")
+        temporary_file.write(content)
+        temporary_file.close()
+        return temporary_file.name
+
 class _VimTest(unittest.TestCase):
     snippets = ("dummy", "donotdefine")
     files = {}
@@ -245,30 +262,12 @@ class _VimTest(unittest.TestCase):
     wanted = ""
     keys = ""
     sleeptime = 0.00
-    output = None
+    output = ""
     # Skip this test for the given reason or None for not skipping it.
     skip_if = lambda self: None
 
-    def send(self,s):
-        self.vim.send(s)
-
-    def send_py(self,s):
-        # Do not delete the file so that Vim can safely read it.
-        with tempfile.NamedTemporaryFile(
-            prefix="UltiSnips_Python", suffix=".py", delete=False
-        ) as temporary_file:
-            if sys.version_info >= (3,0):
-                s = s.encode("utf-8")
-
-            temporary_file.write(s)
-            temporary_file.close()
-
-            if sys.version_info < (3,0):
-                self.send(":pyfile %s\n" % temporary_file.name)
-            else:
-                self.send(":py3file %s\n" % temporary_file.name)
-
-    def check_output(self):
+    def runTest(self):
+        # Only checks the output. All work is done in setUp().
         wanted = self.text_before + self.wanted + self.text_after
         if self.expected_error:
             self.assertRegexpMatches(self.output, self.expected_error)
@@ -277,54 +276,68 @@ class _VimTest(unittest.TestCase):
             if self.output != wanted:
                 # Redo this, but slower
                 self.sleeptime += 0.02
-                self.send(ESC)
+                self.tearDown()
                 self.setUp()
         self.assertEqual(self.output, wanted)
 
-    def runTest(self): self.check_output()
-
-    def _options_on(self):
+    def _extra_options(self, vim_config):
+        """Adds extra lines to the vim_config list."""
         pass
 
-    def _options_off(self):
-        pass
+    def _before_test(self):
+        """Send these keys before the test runs. Used for buffer local
+        variables and other options."""
+        return ""
 
     def _create_file(self, file_path, content):
-        """Creates a file in the runtimepath that is created for this test."""
-        if not self._temporary_directory:
-            self._temporary_directory = tempfile.mkdtemp(prefix="UltiSnips_Test")
-            self.vim.send(""":set runtimepath=$VIMRUNTIME,.,%s\n""" % self._temporary_directory)
+        """Creates a file in the runtimepath that is created for this test.
+        Returns the absolute path to the file."""
         abs_path = os.path.join(self._temporary_directory, *file_path.split("/"))
         try:
             os.makedirs(os.path.dirname(abs_path))
         except OSError:
             pass
-        with open(abs_path, "w") as file_handle:
-            file_handle.write(dedent(content + "\n"))
+
+        content = dedent(content + "\n")
+        if PYTHON3:
+            with open(abs_path, "w", encoding="utf-8") as file_handle:
+                file_handle.write(content)
+        else:
+            with open(abs_path, "w") as file_handle:
+                file_handle.write(content)
+        return abs_path
 
     def setUp(self):
         reason_for_skipping = self.skip_if()
         if reason_for_skipping is not None:
             return self.skipTest(reason_for_skipping)
 
-        # Escape for good measure
-        self.send(ESC + ESC + ESC)
+        self._temporary_directory = tempfile.mkdtemp(prefix="UltiSnips_Test")
 
-        # Close all scratch buffers
-        self.send(":silent! close\n")
+        vim_config = []
+        # Vim parameters.
+        vim_config.append('set nocompatible')
+        vim_config.append('set clipboard=""')
+        vim_config.append('set encoding=utf-8')
+        vim_config.append('set fileencoding=utf-8')
+        vim_config.append('set buftype=nofile')
+        vim_config.append('set runtimepath=$VIMRUNTIME,.,%s' % self._temporary_directory)
+        vim_config.append('set shortmess=at')
+        vim_config.append('let g:UltiSnipsExpandTrigger="<tab>"')
+        vim_config.append('let g:UltiSnipsJumpForwardTrigger="?"')
+        vim_config.append('let g:UltiSnipsJumpBackwardTrigger="+"')
+        vim_config.append('let g:UltiSnipsListSnippets="@"')
+        vim_config.append('let g:UltiSnipsUsePythonVersion="%i"' % (3 if PYTHON3 else 2))
+        vim_config.append('let g:UltiSnipsSnippetDirectories=["us"]')
 
-        # Reset UltiSnips
-        self.send_py("UltiSnips_Manager._reset()")
+        # Now activate UltiSnips.
+        vim_config.append('so plugin/UltiSnips.vim')
 
-        # Make it unlikely that we do parse any shipped snippets.
-        self.send(":let g:UltiSnipsSnippetDirectories=['us']\n")
-
-        # Clear the buffer
-        self.send("bggVGd")
+        # Finally, add the snippets and some configuration for the test.
+        vim_config.append("%s << EOF" % ("py3" if PYTHON3 else "py"))
 
         if len(self.snippets) and not isinstance(self.snippets[0],tuple):
             self.snippets = ( self.snippets, )
-
         for s in self.snippets:
             sv, content = s[:2]
             description = ""
@@ -336,43 +349,58 @@ class _VimTest(unittest.TestCase):
                 options = s[3]
             if len(s) > 4:
                 priority = s[4]
+            vim_config.append("UltiSnips_Manager.add_snippet(%r, %r, %r, %r, priority=%i)" % (
+                    sv, content, description, options, priority))
 
-            self.send_py("UltiSnips_Manager.add_snippet(%r, %r, %r, %r, priority=%i)" %
-                (sv, content, description, options, priority))
+        # fill buffer with default text and place cursor in between.
+        prefilled_text = (self.text_before + self.text_after).splitlines()
+        vim_config.append("vim.current.buffer[:] = %r\n" % prefilled_text)
+        vim_config.append("vim.current.window.cursor = (max(len(vim.current.buffer)//2, 1), 0)")
 
-        self._temporary_directory = ""
+        # Create a file to signalize to the test runner that we are done with starting Vim.
+        vim_pid_file = os.path.join(self._temporary_directory, "vim.pid")
+        done_file = os.path.join(self._temporary_directory, "loading_done")
+        vim_config.append("with open('%s', 'w') as pid_file: pid_file.write(vim.eval('getpid()'))" %
+                vim_pid_file)
+        vim_config.append("with open('%s', 'w') as done_file: pass" % done_file)
+
+        # End of python stuff.
+        vim_config.append("EOF")
+
+        self._extra_options(vim_config)
+
         for name, content in self.files.items():
             self._create_file(name, content)
 
+        # Now launch Vim.
+        self._create_file("vim_config.vim", os.linesep.join(vim_config))
+        # Note the shell to exclude it from shell history.
+        self.vim.send(""" vim -u %s\r\n""" % os.path.join(
+            self._temporary_directory, "vim_config.vim"))
+        while True:
+            if os.path.exists(done_file):
+                self._vim_pid = int(open(vim_pid_file, "r").read())
+                break
+            time.sleep(.01)
+
+        self._before_test()
+
         if not self.interrupt:
-            # Enter insert mode
-            self.send("i")
-
-            self.send(self.text_before)
-            self.send(self.text_after)
-
-            # Go to the middle of the buffer
-            self.send(ESC + "ggjj")
-
-            self._options_on()
-
-            self.send("i")
-
-            # Execute the command, but leave Vim some time to react.
-            for c in self.keys:
+            # Go into insert mode and type the keys but leave Vim some time to
+            # react.
+            for c in 'i' + self.keys:
                 self.vim.send(c)
                 time.sleep(self.sleeptime)
-
-            self.send(ESC)
-
-            self._options_off()
-
             self.output = self.vim.get_buffer_data()
 
     def tearDown(self):
-        if self._temporary_directory:
-            self.vim.send(""":set runtimepath=$VIMRUNTIME,.\n""")
-            shutil.rmtree(self._temporary_directory)
+        if self.interrupt:
+            print("Working directory: %s" % (self._temporary_directory))
+            return
+        shutil.rmtree(self._temporary_directory)
+        self.vim.send(3*ESC + ":qa!\n")
+        while is_process_running(self._vim_pid):
+            time.sleep(.05)
 
 ###########################################################################
 #                            BEGINNING OF TEST                            #
@@ -603,10 +631,8 @@ class SimpleExpandTwice_ExceptCorrectResult(_SimpleExpands):
 class SimpleExpandNewLineAndBackspae_ExceptCorrectResult(_SimpleExpands):
     keys = "hallo" + EX + "\nHallo Welt!\n\n\b\b\b\b\b"
     wanted = "Hallo Welt!\nHallo We"
-    def _options_on(self):
-        self.send(":set backspace=eol,start\n")
-    def _options_off(self):
-        self.send(":set backspace=\n")
+    def _extra_options(self, vim_config):
+        vim_config.append("set backspace=eol,start")
 
 class SimpleExpandTypeAfterExpand_ExceptCorrectResult(_SimpleExpands):
     keys = "hallo" + EX + "and again"
@@ -1124,12 +1150,9 @@ i0
 	End"""
 
 class PythonCode_IndentEtSw(_VimTest):
-    def _options_on(self):
-        self.send(":set sw=3\n")
-        self.send(":set expandtab\n")
-    def _options_off(self):
-        self.send(":set sw=8\n")
-        self.send(":set noexpandtab\n")
+    def _extra_options(self, vim_config):
+        vim_config.append("set sw=3")
+        vim_config.append("set expandtab")
     snippets = ("test", r"""hi
 `!p snip.rv = "i1"
 snip >> 1
@@ -1149,12 +1172,9 @@ i0
    End"""
 
 class PythonCode_IndentEtSwOffset(_VimTest):
-    def _options_on(self):
-        self.send(":set sw=3\n")
-        self.send(":set expandtab\n")
-    def _options_off(self):
-        self.send(":set sw=8\n")
-        self.send(":set noexpandtab\n")
+    def _extra_options(self, vim_config):
+        vim_config.append("set sw=3")
+        vim_config.append("set expandtab")
     snippets = ("test", r"""hi
 `!p snip.rv = "i1"
 snip >> 1
@@ -1174,12 +1194,9 @@ End""")
     End"""
 
 class PythonCode_IndentNoetSwTs(_VimTest):
-    def _options_on(self):
-        self.send(":set sw=3\n")
-        self.send(":set ts=4\n")
-    def _options_off(self):
-        self.send(":set sw=8\n")
-        self.send(":set ts=8\n")
+    def _extra_options(self, vim_config):
+        vim_config.append("set sw=3")
+        vim_config.append("set ts=4")
     snippets = ("test", r"""hi
 `!p snip.rv = "i1"
 snip >> 1
@@ -1200,10 +1217,8 @@ i0
 
 # Test using 'opt'
 class PythonCode_OptExists(_VimTest):
-    def _options_on(self):
-        self.send(':let g:UStest="yes"\n')
-    def _options_off(self):
-        self.send(":unlet g:UStest\n")
+    def _extra_options(self, vim_config):
+        vim_config.append('let g:UStest="yes"')
     snippets = ("test", r"""hi `!p snip.rv = snip.opt("g:UStest") or "no"` End""")
     keys = """test""" + EX
     wanted = """hi yes End"""
@@ -2220,52 +2235,35 @@ class No_Tab_Expand_Leading_Tabs(_No_Tab_Expand):
     keys = "\ttest" + EX
     wanted = "\t\t\tExpand\tme!\t"
 class No_Tab_Expand_No_TS(_No_Tab_Expand):
-    def _options_on(self):
-        self.send(":set sw=3\n")
-        self.send(":set sts=3\n")
-    def _options_off(self):
-        self.send(":set sw=8\n")
-        self.send(":set sts=0\n")
+    def _extra_options(self, vim_config):
+        vim_config.append("set sw=3")
+        vim_config.append("set sts=3")
     keys = "test" + EX
     wanted = "\t\tExpand\tme!\t"
 class No_Tab_Expand_ET(_No_Tab_Expand):
-    def _options_on(self):
-        self.send(":set sw=3\n")
-        self.send(":set expandtab\n")
-    def _options_off(self):
-        self.send(":set sw=8\n")
-        self.send(":set noexpandtab\n")
+    def _extra_options(self, vim_config):
+        vim_config.append("set sw=3")
+        vim_config.append("set expandtab")
     keys = "test" + EX
     wanted = "\t\tExpand\tme!\t"
 class No_Tab_Expand_ET_Leading_Spaces(_No_Tab_Expand):
-    def _options_on(self):
-        self.send(":set sw=3\n")
-        self.send(":set expandtab\n")
-    def _options_off(self):
-        self.send(":set sw=8\n")
-        self.send(":set noexpandtab\n")
+    def _extra_options(self, vim_config):
+        vim_config.append("set sw=3")
+        vim_config.append("set expandtab")
     keys = "  test" + EX
     wanted = "  \t\tExpand\tme!\t"
 class No_Tab_Expand_ET_SW(_No_Tab_Expand):
-    def _options_on(self):
-        self.send(":set sw=8\n")
-        self.send(":set expandtab\n")
-    def _options_off(self):
-        self.send(":set sw=8\n")
-        self.send(":set noexpandtab\n")
+    def _extra_options(self, vim_config):
+        vim_config.append("set sw=8")
+        vim_config.append("set expandtab")
     keys = "test" + EX
     wanted = "\t\tExpand\tme!\t"
 class No_Tab_Expand_ET_SW_TS(_No_Tab_Expand):
-    def _options_on(self):
-        self.send(":set sw=3\n")
-        self.send(":set sts=3\n")
-        self.send(":set ts=3\n")
-        self.send(":set expandtab\n")
-    def _options_off(self):
-        self.send(":set sw=8\n")
-        self.send(":set ts=8\n")
-        self.send(":set sts=0\n")
-        self.send(":set noexpandtab\n")
+    def _extra_options(self, vim_config):
+        vim_config.append("set sw=3")
+        vim_config.append("set sts=3")
+        vim_config.append("set ts=3")
+        vim_config.append("set expandtab")
     keys = "test" + EX
     wanted = "\t\tExpand\tme!\t"
 
@@ -2284,10 +2282,8 @@ snip.rv = repr(snip.rv)
 End""")
 
 class No_Tab_Expand_RealWorld(_TabExpand_RealWorld,_VimTest):
-    def _options_on(self):
-        self.send(":set noexpandtab\n")
-    def _options_off(self):
-        self.send(":set noexpandtab\n")
+    def _extra_options(self, vim_config):
+        vim_config.append("set noexpandtab")
     keys = "\t\thi" + EX
     wanted = """\t\thi
 \t\ti1
@@ -2407,11 +2403,9 @@ class MultiWord_SnippetOptions_ExpandWordSnippets_ExpandSuffix(
 # Anonymous Expansion  {{{#
 class _AnonBase(_VimTest):
     args = ""
-    def _options_on(self):
-        self.send(":inoremap <silent> " + EA + ' <C-R>=UltiSnips#Anon('
-                + self.args + ')<cr>\n')
-    def _options_off(self):
-        self.send(":iunmap <silent> " + EA + '\n')
+    def _extra_options(self, vim_config):
+        vim_config.append("inoremap <silent> %s <C-R>=UltiSnips#Anon(%s)<cr>"
+                % (EA, self.args))
 
 class Anon_NoTrigger_Simple(_AnonBase):
     args = '"simple expand"'
@@ -2460,9 +2454,9 @@ class Anon_Trigger_Opts(_AnonBase):
 # AddSnippet Function  {{{#
 class _AddFuncBase(_VimTest):
     args = ""
-    def _options_on(self):
-        self.send(":call UltiSnips#AddSnippetWithPriority("
-                + self.args + ')\n')
+    def _extra_options(self, vim_config):
+        vim_config.append(":call UltiSnips#AddSnippetWithPriority(%s)" %
+                self.args)
 
 class AddFunc_Simple(_AddFuncBase):
     args = '"test", "simple expand", "desc", "", "all", 0'
@@ -2477,12 +2471,9 @@ class AddFunc_Opt(_AddFuncBase):
 
 # ExpandTab  {{{#
 class _ExpandTabs(_VimTest):
-    def _options_on(self):
-        self.send(":set sw=3\n")
-        self.send(":set expandtab\n")
-    def _options_off(self):
-        self.send(":set sw=8\n")
-        self.send(":set noexpandtab\n")
+    def _extra_options(self, vim_config):
+        vim_config.append("set sw=3")
+        vim_config.append("set expandtab")
 
 class RecTabStopsWithExpandtab_SimpleExample_ECR(_ExpandTabs):
     snippets = ("m", "\tBlaahblah \t\t  ")
@@ -2503,14 +2494,10 @@ class RecTabStopsWithExpandtab_SpecialIndentProblem_ECR(_ExpandTabs):
     )
     keys = "m" + EX + "m1" + EX + '\nHallo'
     wanted = "   Something\n        Hallo"
-    def _options_on(self):
-        _ExpandTabs._options_on(self)
-        self.send(":set indentkeys=o,O,*<Return>,<>>,{,}\n")
-        self.send(":set indentexpr=8\n")
-    def _options_off(self):
-        _ExpandTabs._options_off(self)
-        self.send(":set indentkeys=\n")
-        self.send(":set indentexpr=\n")
+    def _extra_options(self, vim_config):
+        _ExpandTabs._extra_options(self, vim_config)
+        vim_config.append("set indentkeys=o,O,*<Return>,<>>,{,}")
+        vim_config.append("set indentexpr=8")
 # End: ExpandTab  #}}}
 # Proper Indenting  {{{#
 class ProperIndenting_SimpleCase_ECR(_VimTest):
@@ -2525,10 +2512,8 @@ class ProperIndenting_AutoIndentAndNewline_ECR(_VimTest):
     snippets = ("test", "hui")
     keys = "    test" + EX + "\n"+ "blah"
     wanted = "    hui\n    blah"
-    def _options_on(self):
-        self.send(":set autoindent\n")
-    def _options_off(self):
-        self.send(":set noautoindent\n")
+    def _extra_options(self, vim_config):
+        vim_config.append("set autoindent")
 # Test for bug 1073816
 class ProperIndenting_FirstLineInFile_ECR(_VimTest):
     text_before = ""
@@ -2558,12 +2543,9 @@ class ProperIndenting_FirstLineInFileComplete_ECR(ProperIndenting_FirstLineInFil
 # End: Proper Indenting  #}}}
 # Format options tests  {{{#
 class _FormatoptionsBase(_VimTest):
-    def _options_on(self):
-        self.send(":set tw=20\n")
-        self.send(":set fo=lrqntc\n")
-    def _options_off(self):
-        self.send(":set tw=0\n")
-        self.send(":set fo=tcq\n")
+    def _extra_options(self, vim_config):
+        vim_config.append("set tw=20")
+        vim_config.append("set fo=lrqntc")
 
 class FOSimple_Break_ExceptCorrectResult(_FormatoptionsBase):
     snippets = ("test", "${1:longer expand}\n$1\n$0", "", "f")
@@ -2625,11 +2607,8 @@ $0""")
 and a mirror: hi1
 hi2...hi3
 hi4"""
-
-    def _options_on(self):
-        self.send(":set langmap=dj,rk,nl,ln,jd,kr,DJ,RK,NL,LN,JD,KR\n")
-    def _options_off(self):
-        self.send(":set langmap=\n")
+    def _extra_options(self, vim_config):
+        vim_config.append("set langmap=dj,rk,nl,ln,jd,kr,DJ,RK,NL,LN,JD,KR")
 
 # Test for https://bugs.launchpad.net/bugs/501727 #
 class TestNonEmptyLangmapWithSemi_ExceptCorrectResult(_VimTest):
@@ -2644,10 +2623,8 @@ and a mirror: hi;
 hi2...hi3
 hi4Hello"""
 
-    def _options_on(self):
-        self.send(":set langmap=\\\\;;A\n")
-    def _options_off(self):
-        self.send(":set langmap=\n")
+    def _before_test(self):
+        self.vim.send(":set langmap=\\\\;;A\n")
 
 # Test for bug 871357 #
 class TestLangmapWithUtf8_ExceptCorrectResult(_VimTest):
@@ -2663,11 +2640,9 @@ and a mirror: hi1
 hi2...hi3
 hi4"""
 
-    def _options_on(self):
-        self.send(":set langmap=йq,цw,уe,кr,еt,нy,гu,шi,щo,зp,х[,ъ],фa,ыs,вd,аf,пg,рh,оj,лk,дl,ж\\;,э',яz,чx,сc,мv,иb,тn,ьm,ю.,ё',ЙQ,ЦW,УE,КR,ЕT,НY,ГU,ШI,ЩO,ЗP,Х\{,Ъ\},ФA,ЫS,ВD,АF,ПG,РH,ОJ,ЛK,ДL,Ж\:,Э\",ЯZ,ЧX,СC,МV,ИB,ТN,ЬM,Б\<,Ю\>\n")
+    def _before_test(self):
+        self.vim.send(":set langmap=йq,цw,уe,кr,еt,нy,гu,шi,щo,зp,х[,ъ],фa,ыs,вd,аf,пg,рh,оj,лk,дl,ж\\;,э',яz,чx,сc,мv,иb,тn,ьm,ю.,ё',ЙQ,ЦW,УE,КR,ЕT,НY,ГU,ШI,ЩO,ЗP,Х\{,Ъ\},ФA,ЫS,ВD,АF,ПG,РH,ОJ,ЛK,ДL,Ж\:,Э\",ЯZ,ЧX,СC,МV,ИB,ТN,ЬM,Б\<,Ю\>\n")
 
-    def _options_off(self):
-        self.send(":set langmap=\n")
 # End: Langmap Handling  #}}}
 # Unmap SelectMode Mappings  {{{#
 # Test for bug 427298 #
@@ -2680,11 +2655,9 @@ class _SelectModeMappings(_VimTest):
     do_unmapping = True
     ignores = []
 
-    def _options_on(self):
-        self.send(":let g:UltiSnipsRemoveSelectModeMappings=%i\n" %
-                  int(self.do_unmapping))
-        self.send(":let g:UltiSnipsMappingsToIgnore=%s\n" %
-                  repr(self.ignores))
+    def _extra_options(self, vim_config):
+        vim_config.append(":let g:UltiSnipsRemoveSelectModeMappings=%i" % int(self.do_unmapping))
+        vim_config.append(":let g:UltiSnipsMappingsToIgnore=%s" % repr(self.ignores))
 
         if not isinstance(self.maps[0], tuple):
             self.maps = (self.maps,)
@@ -2693,21 +2666,10 @@ class _SelectModeMappings(_VimTest):
 
         for key, m in self.maps:
             if not len(key): continue
-            self.send(":smap %s %s\n" % (key,m))
+            vim_config.append(":smap %s %s" % (key,m))
         for key, m in self.buffer_maps:
             if not len(key): continue
-            self.send(":smap <buffer> %s %s\n" % (key,m))
-
-    def _options_off(self):
-        for key, m in self.maps:
-            if not len(key): continue
-            self.send(":silent! sunmap %s\n" % key)
-        for key, m in self.buffer_maps:
-            if not len(key): continue
-            self.send(":silent! sunmap <buffer> %s\n" % key)
-
-        self.send(":let g:UltiSnipsRemoveSelectModeMappings=1\n")
-        self.send(":let g:UltiSnipsMappingsToIgnore= []\n")
+            vim_config.append(":smap <buffer> %s %s" % (key,m))
 
 class SelectModeMappings_RemoveBeforeSelecting_ECR(_SelectModeMappings):
     maps = ("H", "x")
@@ -2735,13 +2697,9 @@ class SelectModeMappings_BufferLocalMappings_ECR(_SelectModeMappings):
 # End: Unmap SelectMode Mappings  #}}}
 # Folding Interaction  {{{#
 class FoldingEnabled_SnippetWithFold_ExpectNoFolding(_VimTest):
-    def _options_on(self):
-        self.send(":set foldlevel=0\n")
-        self.send(":set foldmethod=marker\n")
-    def _options_off(self):
-        self.send(":set foldlevel=0\n")
-        self.send(":set foldmethod=manual\n")
-
+    def _extra_options(self, vim_config):
+        vim_config.append("set foldlevel=0")
+        vim_config.append("set foldmethod=marker")
     snippets = ("test", r"""Hello {{{
 ${1:Welt} }}}""")
     keys = "test" + EX + "Ball"
@@ -2764,16 +2722,12 @@ class Fold_DeleteMiddleLine_ECR(_VimTest):
     wanted = "# hi  {{{\n\n# End: hi  }}}"
 
 class PerlSyntaxFold(_VimTest):
-    def _options_on(self):
-        self.send(":set foldlevel=0\n")
-        self.send(":syntax enable\n")
-        self.send(":set foldmethod=syntax\n")
-        self.send(":let g:perl_fold = 1\n")
-        self.send(":so $VIMRUNTIME/syntax/perl.vim\n")
-    def _options_off(self):
-        self.send(":set foldmethod=manual\n")
-        self.send(":syntax clear\n")
-
+    def _extra_options(self, vim_config):
+        vim_config.append("set foldlevel=0")
+        vim_config.append("syntax enable")
+        vim_config.append("set foldmethod=syntax")
+        vim_config.append("let g:perl_fold = 1")
+        vim_config.append("so $VIMRUNTIME/syntax/perl.vim")
     snippets = ("test", r"""package ${1:`!v printf('c%02d', 3)`};
 ${0}
 1;""")
@@ -2798,11 +2752,8 @@ class CursorMovement_Multiline_ECR(_VimTest):
     wanted = "this is something\nvery nice\nnot " \
             "this is something\nvery nice\nnotmore text"
 class CursorMovement_BS_InEditMode(_VimTest):
-    def _options_on(self):
-        self.send(":set backspace=eol,indent,start\n")
-
-    def _options_off(self):
-        self.send(":set backspace=\n")
+    def _extra_options(self, vim_config):
+        vim_config.append("set backspace=eol,indent,start")
     snippets = ("<trh", "<tr>\n\t<th>$1</th>\n\t$2\n</tr>\n$3")
     keys = "<trh" + EX + "blah" + JF + BS + BS + JF + "end"
     wanted = "<tr>\n\t<th>blah</th>\n</tr>\nend"
@@ -3096,11 +3047,8 @@ class Snippet_With_Umlauts_Python(_UmlautsBase):
 # End: Umlauts and Special Chars  #}}}
 # Exclusive Selection  {{{#
 class _ES_Base(_VimTest):
-    def _options_on(self):
-        self.send(":set selection=exclusive\n")
-    def _options_off(self):
-        self.send(":set selection=inclusive\n")
-
+    def _extra_options(self, vim_config):
+        vim_config.append("set selection=exclusive")
 class ExclusiveSelection_SimpleTabstop_Test(_ES_Base):
     snippets = ("test", "h${1:blah}w $1")
     keys = "test" + EX + "ui" + JF
@@ -3231,52 +3179,18 @@ if __name__ == '__main__':
 
     options,selected_tests = parse_args()
 
-    # The next line doesn't work in python 2.3
     test_loader = unittest.TestLoader()
     all_test_suites = test_loader.loadTestsFromModule(__import__("test"))
 
     if platform.system() == "Windows":
-        vim = VimInterfaceWindows()
+        raise RuntimeError("TODO: TestSuite is broken under windows. Volunteers wanted!.")
+        # vim = VimInterfaceWindows()
+        vim.focus()
     else:
         if options.interface == "screen":
             vim = VimInterfaceScreen(options.session)
         elif options.interface == "tmux":
             vim = VimInterfaceTmux(options.session)
-
-    vim.focus()
-
-    vim.send(ESC)
-
-    # Ensure we are not running in VI-compatible mode.
-    vim.send(""":set nocompatible\n""")
-
-    # Do not mess with the X clipboard
-    vim.send(""":set clipboard=""\n""")
-
-    # Set encoding and fileencodings
-    vim.send(""":set encoding=utf-8\n""")
-    vim.send(""":set fileencoding=utf-8\n""")
-
-    # Tell vim not to complain about quitting without writing
-    vim.send(""":set buftype=nofile\n""")
-
-    # Ensure runtimepath includes only Vim's own runtime files
-    # and those of the UltiSnips directory under test ('.').
-    vim.send(""":set runtimepath=$VIMRUNTIME,.\n""")
-
-    # Set the options
-    vim.send(""":let g:UltiSnipsExpandTrigger="<tab>"\n""")
-    vim.send(""":let g:UltiSnipsJumpForwardTrigger="?"\n""")
-    vim.send(""":let g:UltiSnipsJumpBackwardTrigger="+"\n""")
-    vim.send(""":let g:UltiSnipsListSnippets="@"\n""")
-    if sys.version_info >= (3,0):
-        vim.send(""":let g:UltiSnipsUsePythonVersion="3"\n""")
-    else:
-        vim.send(""":let g:UltiSnipsUsePythonVersion="2"\n""")
-
-    # Now, source our runtime
-    vim.send(":so plugin/UltiSnips.vim\n")
-    time.sleep(2) # Parsing and initializing UltiSnips takes a while.
 
     # Inform all test case which screen session to use
     suite = unittest.TestSuite()
