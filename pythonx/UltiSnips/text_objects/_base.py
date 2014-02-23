@@ -3,7 +3,7 @@
 
 """Base classes for all text objects."""
 
-import UltiSnips._vim as _vim
+from UltiSnips import _vim
 from UltiSnips.position import Position
 
 def _calc_end(text, start):

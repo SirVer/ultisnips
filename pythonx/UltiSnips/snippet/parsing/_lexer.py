@@ -11,7 +11,7 @@ import re
 
 from UltiSnips.compatibility import as_unicode
 from UltiSnips.position import Position
-from UltiSnips.escaping import unescape
+from UltiSnips.text import unescape
 
 class _TextIterator(object):
     """Helper class to make iterating over text easier."""
@@ -327,18 +327,15 @@ class EndOfTextToken(Token):
     def __repr__(self):
         return "EndOfText(%r)" % self.end
 
-__ALLOWED_TOKENS = [
-    EscapeCharToken, VisualToken, TransformationToken, TabStopToken,
-    MirrorToken, PythonCodeToken, VimLCodeToken, ShellCodeToken
-]
-def tokenize(text, indent, offset):
+def tokenize(text, indent, offset, allowed_tokens):
     """Returns an iterator of tokens of 'text'['offset':] which is assumed to
-    have 'indent' as the whitespace of the begging of the lines."""
+    have 'indent' as the whitespace of the begging of the lines. Only
+    'allowed_tokens' are considered to be valid tokens."""
     stream = _TextIterator(text, offset)
     try:
         while True:
             done_something = False
-            for token in __ALLOWED_TOKENS:
+            for token in allowed_tokens:
                 if token.starts_here(stream):
                     yield token(stream, indent)
                     done_something = True

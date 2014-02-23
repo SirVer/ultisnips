@@ -254,7 +254,7 @@ def create_temp_file(prefix, suffix, content):
         return temporary_file.name
 
 class _VimTest(unittest.TestCase):
-    snippets = ("dummy", "donotdefine")
+    snippets = ()
     files = {}
     text_before = " --- some text before --- \n\n"
     text_after =  "\n\n --- some text after --- "
@@ -329,6 +329,7 @@ class _VimTest(unittest.TestCase):
         vim_config.append('let g:UltiSnipsListSnippets="@"')
         vim_config.append('let g:UltiSnipsUsePythonVersion="%i"' % (3 if PYTHON3 else 2))
         vim_config.append('let g:UltiSnipsSnippetDirectories=["us"]')
+        vim_config.append('filetype plugin on')
 
         # Now activate UltiSnips.
         vim_config.append('so plugin/UltiSnips.vim')
@@ -621,28 +622,28 @@ endsnippet
 class _SimpleExpands(_VimTest):
     snippets = ("hallo", "Hallo Welt!")
 
-class SimpleExpand_ExceptCorrectResult(_SimpleExpands):
+class SimpleExpand_ExpectCorrectResult(_SimpleExpands):
     keys = "hallo" + EX
     wanted = "Hallo Welt!"
-class SimpleExpandTwice_ExceptCorrectResult(_SimpleExpands):
+class SimpleExpandTwice_ExpectCorrectResult(_SimpleExpands):
     keys = "hallo" + EX + '\nhallo' + EX
     wanted = "Hallo Welt!\nHallo Welt!"
 
-class SimpleExpandNewLineAndBackspae_ExceptCorrectResult(_SimpleExpands):
+class SimpleExpandNewLineAndBackspae_ExpectCorrectResult(_SimpleExpands):
     keys = "hallo" + EX + "\nHallo Welt!\n\n\b\b\b\b\b"
     wanted = "Hallo Welt!\nHallo We"
     def _extra_options(self, vim_config):
         vim_config.append("set backspace=eol,start")
 
-class SimpleExpandTypeAfterExpand_ExceptCorrectResult(_SimpleExpands):
+class SimpleExpandTypeAfterExpand_ExpectCorrectResult(_SimpleExpands):
     keys = "hallo" + EX + "and again"
     wanted = "Hallo Welt!and again"
 
-class SimpleExpandTypeAndDelete_ExceptCorrectResult(_SimpleExpands):
+class SimpleExpandTypeAndDelete_ExpectCorrectResult(_SimpleExpands):
     keys = "na du hallo" + EX + "and again\b\b\b\b\bblub"
     wanted = "na du Hallo Welt!and blub"
 
-class DoNotExpandAfterSpace_ExceptCorrectResult(_SimpleExpands):
+class DoNotExpandAfterSpace_ExpectCorrectResult(_SimpleExpands):
     keys = "hallo " + EX
     wanted = "hallo " + EX
 
@@ -651,18 +652,18 @@ class ExitSnippetModeAfterTabstopZero(_VimTest):
     keys = "test" + EX + EX
     wanted = "SimpleText" + EX
 
-class ExpandInTheMiddleOfLine_ExceptCorrectResult(_SimpleExpands):
+class ExpandInTheMiddleOfLine_ExpectCorrectResult(_SimpleExpands):
     keys = "Wie hallo gehts" + ESC + "bhi" + EX
     wanted = "Wie Hallo Welt! gehts"
-class MultilineExpand_ExceptCorrectResult(_VimTest):
+class MultilineExpand_ExpectCorrectResult(_VimTest):
     snippets = ("hallo", "Hallo Welt!\nUnd Wie gehts")
     keys = "Wie hallo gehts" + ESC + "bhi" + EX
     wanted = "Wie Hallo Welt!\nUnd Wie gehts gehts"
-class MultilineExpandTestTyping_ExceptCorrectResult(_VimTest):
+class MultilineExpandTestTyping_ExpectCorrectResult(_VimTest):
     snippets = ("hallo", "Hallo Welt!\nUnd Wie gehts")
     wanted = "Wie Hallo Welt!\nUnd Wie gehtsHuiui! gehts"
     keys = "Wie hallo gehts" + ESC + "bhi" + EX + "Huiui!"
-class SimpleExpandEndingWithNewline_ExceptCorrectResult(_VimTest):
+class SimpleExpandEndingWithNewline_ExpectCorrectResult(_VimTest):
     snippets = ("hallo", "Hallo Welt\n")
     keys = "hallo" + EX + "\nAnd more"
     wanted = "Hallo Welt\n\nAnd more"
@@ -670,28 +671,28 @@ class SimpleExpandEndingWithNewline_ExceptCorrectResult(_VimTest):
 
 # End: Simple Expands  #}}}
 # TabStop Tests  {{{#
-class TabStopSimpleReplace_ExceptCorrectResult(_VimTest):
+class TabStopSimpleReplace_ExpectCorrectResult(_VimTest):
     snippets = ("hallo", "hallo ${0:End} ${1:Beginning}")
     keys = "hallo" + EX + "na" + JF + "Du Nase"
     wanted = "hallo Du Nase na"
-class TabStopSimpleReplaceReversed_ExceptCorrectResult(_VimTest):
+class TabStopSimpleReplaceReversed_ExpectCorrectResult(_VimTest):
     snippets = ("hallo", "hallo ${1:End} ${0:Beginning}")
     keys = "hallo" + EX + "na" + JF + "Du Nase"
     wanted = "hallo na Du Nase"
-class TabStopSimpleReplaceSurrounded_ExceptCorrectResult(_VimTest):
+class TabStopSimpleReplaceSurrounded_ExpectCorrectResult(_VimTest):
     snippets = ("hallo", "hallo ${0:End} a small feed")
     keys = "hallo" + EX + "Nase"
     wanted = "hallo Nase a small feed"
-class TabStopSimpleReplaceSurrounded1_ExceptCorrectResult(_VimTest):
+class TabStopSimpleReplaceSurrounded1_ExpectCorrectResult(_VimTest):
     snippets = ("hallo", "hallo $0 a small feed")
     keys = "hallo" + EX + "Nase"
     wanted = "hallo Nase a small feed"
-class TabStop_Exit_ExceptCorrectResult(_VimTest):
+class TabStop_Exit_ExpectCorrectResult(_VimTest):
     snippets = ("echo", "$0 run")
     keys = "echo" + EX + "test"
     wanted = "test run"
 
-class TabStopNoReplace_ExceptCorrectResult(_VimTest):
+class TabStopNoReplace_ExpectCorrectResult(_VimTest):
     snippets = ("echo", "echo ${1:Hallo}")
     keys = "echo" + EX
     wanted = "echo Hallo"
@@ -751,41 +752,41 @@ class TabStopEscapingWhenSelectedNoCharTS_ECR(_VimTest):
     keys = "test" + EX + ESC + "0ihi"
     wanted = "hisnip "
 
-class TabStopWithOneChar_ExceptCorrectResult(_VimTest):
+class TabStopWithOneChar_ExpectCorrectResult(_VimTest):
     snippets = ("hallo", "nothing ${1:i} hups")
     keys = "hallo" + EX + "ship"
     wanted = "nothing ship hups"
 
-class TabStopTestJumping_ExceptCorrectResult(_VimTest):
+class TabStopTestJumping_ExpectCorrectResult(_VimTest):
     snippets = ("hallo", "hallo ${2:End} mitte ${1:Beginning}")
     keys = "hallo" + EX + JF + "Test" + JF + "Hi"
     wanted = "hallo Test mitte BeginningHi"
-class TabStopTestJumping2_ExceptCorrectResult(_VimTest):
+class TabStopTestJumping2_ExpectCorrectResult(_VimTest):
     snippets = ("hallo", "hallo $2 $1")
     keys = "hallo" + EX + JF + "Test" + JF + "Hi"
     wanted = "hallo Test Hi"
-class TabStopTestJumpingRLExampleWithZeroTab_ExceptCorrectResult(_VimTest):
+class TabStopTestJumpingRLExampleWithZeroTab_ExpectCorrectResult(_VimTest):
     snippets = ("test", "each_byte { |${1:byte}| $0 }")
     keys = "test" + EX + JF + "Blah"
     wanted = "each_byte { |byte| Blah }"
 
-class TabStopTestJumpingDontJumpToEndIfThereIsTabZero_ExceptCorrectResult(_VimTest):
+class TabStopTestJumpingDontJumpToEndIfThereIsTabZero_ExpectCorrectResult(_VimTest):
     snippets = ("hallo", "hallo $0 $1")
     keys = "hallo" + EX + "Test" + JF + "Hi" + JF + JF + "du"
     wanted = "hallo Hi" + 2*JF + "du Test"
 
-class TabStopTestBackwardJumping_ExceptCorrectResult(_VimTest):
+class TabStopTestBackwardJumping_ExpectCorrectResult(_VimTest):
     snippets = ("hallo", "hallo ${2:End} mitte${1:Beginning}")
     keys = "hallo" + EX + "Somelengthy Text" + JF + "Hi" + JB + \
             "Lets replace it again" + JF + "Blah" + JF + JB*2 + JF
     wanted = "hallo Blah mitteLets replace it again" + JB*2 + JF
-class TabStopTestBackwardJumping2_ExceptCorrectResult(_VimTest):
+class TabStopTestBackwardJumping2_ExpectCorrectResult(_VimTest):
     snippets = ("hallo", "hallo $2 $1")
     keys = "hallo" + EX + "Somelengthy Text" + JF + "Hi" + JB + \
             "Lets replace it again" + JF + "Blah" + JF + JB*2 + JF
     wanted = "hallo Blah Lets replace it again" + JB*2 + JF
 
-class TabStopTestMultilineExpand_ExceptCorrectResult(_VimTest):
+class TabStopTestMultilineExpand_ExpectCorrectResult(_VimTest):
     snippets = ("hallo", "hallo $0\nnice $1 work\n$3 $2\nSeem to work")
     keys ="test hallo World" + ESC + "02f i" + EX + "world" + JF + "try" + \
             JF + "test" + JF + "one more" + JF
@@ -912,7 +913,7 @@ class TabStop_Multiline_DelFirstOverwriteSecond_Overwrite(_VimTest):
     keys = "test" + EX + BS + JF + "Nothing"
     wanted = "hi  Nothing  Nothing world"
 
-class TabStopNavigatingInInsertModeSimple_ExceptCorrectResult(_VimTest):
+class TabStopNavigatingInInsertModeSimple_ExpectCorrectResult(_VimTest):
     snippets = ("hallo", "Hallo ${1:WELT} ups")
     keys = "hallo" + EX + "haselnut" + 2*ARR_L + "hips" + JF + "end"
     wanted = "Hallo haselnhipsut upsend"
@@ -1288,62 +1289,62 @@ class Python_WeirdScoping_Error(_VimTest):
 # End: New Implementation  #}}}
 # End: PythonCode Interpolation  #}}}
 # Mirrors  {{{#
-class TextTabStopTextAfterTab_ExceptCorrectResult(_VimTest):
+class TextTabStopTextAfterTab_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 Hinten\n$1")
     keys = "test" + EX + "hallo"
     wanted = "hallo Hinten\nhallo"
-class TextTabStopTextBeforeTab_ExceptCorrectResult(_VimTest):
+class TextTabStopTextBeforeTab_ExpectCorrectResult(_VimTest):
     snippets = ("test", "Vorne $1\n$1")
     keys = "test" + EX + "hallo"
     wanted = "Vorne hallo\nhallo"
-class TextTabStopTextSurroundedTab_ExceptCorrectResult(_VimTest):
+class TextTabStopTextSurroundedTab_ExpectCorrectResult(_VimTest):
     snippets = ("test", "Vorne $1 Hinten\n$1")
     keys = "test" + EX + "hallo test"
     wanted = "Vorne hallo test Hinten\nhallo test"
 
-class TextTabStopTextBeforeMirror_ExceptCorrectResult(_VimTest):
+class TextTabStopTextBeforeMirror_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1\nVorne $1")
     keys = "test" + EX + "hallo"
     wanted = "hallo\nVorne hallo"
-class TextTabStopAfterMirror_ExceptCorrectResult(_VimTest):
+class TextTabStopAfterMirror_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1\n$1 Hinten")
     keys = "test" + EX + "hallo"
     wanted = "hallo\nhallo Hinten"
-class TextTabStopSurroundMirror_ExceptCorrectResult(_VimTest):
+class TextTabStopSurroundMirror_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1\nVorne $1 Hinten")
     keys = "test" + EX + "hallo welt"
     wanted = "hallo welt\nVorne hallo welt Hinten"
-class TextTabStopAllSurrounded_ExceptCorrectResult(_VimTest):
+class TextTabStopAllSurrounded_ExpectCorrectResult(_VimTest):
     snippets = ("test", "ObenVorne $1 ObenHinten\nVorne $1 Hinten")
     keys = "test" + EX + "hallo welt"
     wanted = "ObenVorne hallo welt ObenHinten\nVorne hallo welt Hinten"
 
-class MirrorBeforeTabstopLeave_ExceptCorrectResult(_VimTest):
+class MirrorBeforeTabstopLeave_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1:this is it} $1")
     keys = "test" + EX
     wanted = "this is it this is it this is it"
-class MirrorBeforeTabstopOverwrite_ExceptCorrectResult(_VimTest):
+class MirrorBeforeTabstopOverwrite_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1:this is it} $1")
     keys = "test" + EX + "a"
     wanted = "a a a"
 
-class TextTabStopSimpleMirrorMultiline_ExceptCorrectResult(_VimTest):
+class TextTabStopSimpleMirrorMultiline_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1\n$1")
     keys = "test" + EX + "hallo"
     wanted = "hallo\nhallo"
-class SimpleMirrorMultilineMany_ExceptCorrectResult(_VimTest):
+class SimpleMirrorMultilineMany_ExpectCorrectResult(_VimTest):
     snippets = ("test", "    $1\n$1\na$1b\n$1\ntest $1 mich")
     keys = "test" + EX + "hallo"
     wanted = "    hallo\nhallo\nahallob\nhallo\ntest hallo mich"
-class MultilineTabStopSimpleMirrorMultiline_ExceptCorrectResult(_VimTest):
+class MultilineTabStopSimpleMirrorMultiline_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1\n\n$1\n\n$1")
     keys = "test" + EX + "hallo Du\nHi"
     wanted = "hallo Du\nHi\n\nhallo Du\nHi\n\nhallo Du\nHi"
-class MultilineTabStopSimpleMirrorMultiline1_ExceptCorrectResult(_VimTest):
+class MultilineTabStopSimpleMirrorMultiline1_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1\n$1\n$1")
     keys = "test" + EX + "hallo Du\nHi"
     wanted = "hallo Du\nHi\nhallo Du\nHi\nhallo Du\nHi"
-class MultilineTabStopSimpleMirrorDeleteInLine_ExceptCorrectResult(_VimTest):
+class MultilineTabStopSimpleMirrorDeleteInLine_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1\n$1\n$1")
     keys = "test" + EX + "hallo Du\nHi\b\bAch Blah"
     wanted = "hallo Du\nAch Blah\nhallo Du\nAch Blah\nhallo Du\nAch Blah"
@@ -1352,16 +1353,16 @@ class TextTabStopSimpleMirrorMultilineMirrorInFront_ECR(_VimTest):
     keys = "test" + EX + "hallo\nagain"
     wanted = "hallo\nagain\nhallo\nagain"
 
-class SimpleMirrorDelete_ExceptCorrectResult(_VimTest):
+class SimpleMirrorDelete_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1\n$1")
     keys = "test" + EX + "hallo\b\b"
     wanted = "hal\nhal"
 
-class SimpleMirrorSameLine_ExceptCorrectResult(_VimTest):
+class SimpleMirrorSameLine_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 $1")
     keys = "test" + EX + "hallo"
     wanted = "hallo hallo"
-class SimpleMirrorSameLine_InText_ExceptCorrectResult(_VimTest):
+class SimpleMirrorSameLine_InText_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 $1")
     keys = "ups test blah" + ESC + "02f i" + EX + "hallo"
     wanted = "ups hallo hallo blah"
@@ -1373,76 +1374,76 @@ class SimpleMirrorSameLineBeforeTabDefVal_DelB4Typing_ECR(_VimTest):
     snippets = ("test", "$1 ${1:replace me}")
     keys = "test" + EX + BS + "hallo foo"
     wanted = "hallo foo hallo foo"
-class SimpleMirrorSameLineMany_ExceptCorrectResult(_VimTest):
+class SimpleMirrorSameLineMany_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 $1 $1 $1")
     keys = "test" + EX + "hallo du"
     wanted = "hallo du hallo du hallo du hallo du"
-class SimpleMirrorSameLineManyMultiline_ExceptCorrectResult(_VimTest):
+class SimpleMirrorSameLineManyMultiline_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 $1 $1 $1")
     keys = "test" + EX + "hallo du\nwie gehts"
     wanted = "hallo du\nwie gehts hallo du\nwie gehts hallo du\nwie gehts" \
             " hallo du\nwie gehts"
-class SimpleMirrorDeleteSomeEnterSome_ExceptCorrectResult(_VimTest):
+class SimpleMirrorDeleteSomeEnterSome_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1\n$1")
     keys = "test" + EX + "hallo\b\bhups"
     wanted = "halhups\nhalhups"
 
-class SimpleTabstopWithDefaultSimpelType_ExceptCorrectResult(_VimTest):
+class SimpleTabstopWithDefaultSimpelType_ExpectCorrectResult(_VimTest):
     snippets = ("test", "ha ${1:defa}\n$1")
     keys = "test" + EX + "world"
     wanted = "ha world\nworld"
-class SimpleTabstopWithDefaultComplexType_ExceptCorrectResult(_VimTest):
+class SimpleTabstopWithDefaultComplexType_ExpectCorrectResult(_VimTest):
     snippets = ("test", "ha ${1:default value} $1\nanother: $1 mirror")
     keys = "test" + EX + "world"
     wanted = "ha world world\nanother: world mirror"
-class SimpleTabstopWithDefaultSimpelKeep_ExceptCorrectResult(_VimTest):
+class SimpleTabstopWithDefaultSimpelKeep_ExpectCorrectResult(_VimTest):
     snippets = ("test", "ha ${1:defa}\n$1")
     keys = "test" + EX
     wanted = "ha defa\ndefa"
-class SimpleTabstopWithDefaultComplexKeep_ExceptCorrectResult(_VimTest):
+class SimpleTabstopWithDefaultComplexKeep_ExpectCorrectResult(_VimTest):
     snippets = ("test", "ha ${1:default value} $1\nanother: $1 mirror")
     keys = "test" + EX
     wanted = "ha default value default value\nanother: default value mirror"
 
-class TabstopWithMirrorManyFromAll_ExceptCorrectResult(_VimTest):
+class TabstopWithMirrorManyFromAll_ExpectCorrectResult(_VimTest):
     snippets = ("test", "ha $5 ${1:blub} $4 $0 ${2:$1.h} $1 $3 ${4:More}")
     keys = "test" + EX + "hi" + JF + "hu" + JF + "hub" + JF + "hulla" + \
             JF + "blah" + JF + "end"
     wanted = "ha blah hi hulla end hu hi hub hulla"
-class TabstopWithMirrorInDefaultNoType_ExceptCorrectResult(_VimTest):
+class TabstopWithMirrorInDefaultNoType_ExpectCorrectResult(_VimTest):
     snippets = ("test", "ha ${1:blub} ${2:$1.h}")
     keys = "test" + EX
     wanted = "ha blub blub.h"
-class TabstopWithMirrorInDefaultNoType1_ExceptCorrectResult(_VimTest):
+class TabstopWithMirrorInDefaultNoType1_ExpectCorrectResult(_VimTest):
     snippets = ("test", "ha ${1:blub} ${2:$1}")
     keys = "test" + EX
     wanted = "ha blub blub"
-class TabstopWithMirrorInDefaultTwiceAndExtra_ExceptCorrectResult(_VimTest):
+class TabstopWithMirrorInDefaultTwiceAndExtra_ExpectCorrectResult(_VimTest):
     snippets = ("test", "ha $1 ${2:$1.h $1.c}\ntest $1")
     keys = "test" + EX + "stdin"
     wanted = "ha stdin stdin.h stdin.c\ntest stdin"
-class TabstopWithMirrorInDefaultMultipleLeave_ExceptCorrectResult(_VimTest):
+class TabstopWithMirrorInDefaultMultipleLeave_ExpectCorrectResult(_VimTest):
     snippets = ("test", "ha $1 ${2:snip} ${3:$1.h $2}")
     keys = "test" + EX + "stdin"
     wanted = "ha stdin snip stdin.h snip"
-class TabstopWithMirrorInDefaultMultipleOverwrite_ExceptCorrectResult(_VimTest):
+class TabstopWithMirrorInDefaultMultipleOverwrite_ExpectCorrectResult(_VimTest):
     snippets = ("test", "ha $1 ${2:snip} ${3:$1.h $2}")
     keys = "test" + EX + "stdin" + JF + "do snap"
     wanted = "ha stdin do snap stdin.h do snap"
-class TabstopWithMirrorInDefaultOverwrite_ExceptCorrectResult(_VimTest):
+class TabstopWithMirrorInDefaultOverwrite_ExpectCorrectResult(_VimTest):
     snippets = ("test", "ha $1 ${2:$1.h}")
     keys = "test" + EX + "stdin" + JF + "overwritten"
     wanted = "ha stdin overwritten"
-class TabstopWithMirrorInDefaultOverwrite1_ExceptCorrectResult(_VimTest):
+class TabstopWithMirrorInDefaultOverwrite1_ExpectCorrectResult(_VimTest):
     snippets = ("test", "ha $1 ${2:$1}")
     keys = "test" + EX + "stdin" + JF + "overwritten"
     wanted = "ha stdin overwritten"
-class TabstopWithMirrorInDefaultNoOverwrite1_ExceptCorrectResult(_VimTest):
+class TabstopWithMirrorInDefaultNoOverwrite1_ExpectCorrectResult(_VimTest):
     snippets = ("test", "ha $1 ${2:$1}")
     keys = "test" + EX + "stdin" + JF + JF + "end"
     wanted = "ha stdin stdinend"
 
-class MirrorRealLifeExample_ExceptCorrectResult(_VimTest):
+class MirrorRealLifeExample_ExpectCorrectResult(_VimTest):
     snippets = (
         ("for", "for(size_t ${2:i} = 0; $2 < ${1:count}; ${3:++$2})" \
          "\n{\n\t${0:/* code */}\n}"),
@@ -1477,15 +1478,15 @@ class Mirror_TestKillTabstop_Kill(_VimTest):
 
 # End: Mirrors  #}}}
 # Transformations  {{{#
-class Transformation_SimpleCase_ExceptCorrectResult(_VimTest):
+class Transformation_SimpleCase_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/foo/batzl/}")
     keys = "test" + EX + "hallo foo boy"
     wanted = "hallo foo boy hallo batzl boy"
-class Transformation_SimpleCaseNoTransform_ExceptCorrectResult(_VimTest):
+class Transformation_SimpleCaseNoTransform_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/foo/batzl/}")
     keys = "test" + EX + "hallo"
     wanted = "hallo hallo"
-class Transformation_SimpleCaseTransformInFront_ExceptCorrectResult(_VimTest):
+class Transformation_SimpleCaseTransformInFront_ExpectCorrectResult(_VimTest):
     snippets = ("test", "${1/foo/batzl/} $1")
     keys = "test" + EX + "hallo foo"
     wanted = "hallo batzl hallo foo"
@@ -1523,28 +1524,28 @@ class Transformation_InsideTabOvertype_ECR(_VimTest):
     wanted = "sometext overwrite"
 
 
-class Transformation_Backreference_ExceptCorrectResult(_VimTest):
+class Transformation_Backreference_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/([ab])oo/$1ull/}")
     keys = "test" + EX + "foo boo aoo"
     wanted = "foo boo aoo foo bull aoo"
-class Transformation_BackreferenceTwice_ExceptCorrectResult(_VimTest):
+class Transformation_BackreferenceTwice_ExpectCorrectResult(_VimTest):
     snippets = ("test", r"$1 ${1/(dead) (par[^ ]*)/this $2 is a bit $1/}")
     keys = "test" + EX + "dead parrot"
     wanted = "dead parrot this parrot is a bit dead"
 
-class Transformation_CleverTransformUpercaseChar_ExceptCorrectResult(_VimTest):
+class Transformation_CleverTransformUpercaseChar_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/(.)/\\u$1/}")
     keys = "test" + EX + "hallo"
     wanted = "hallo Hallo"
-class Transformation_CleverTransformLowercaseChar_ExceptCorrectResult(_VimTest):
+class Transformation_CleverTransformLowercaseChar_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/(.*)/\l$1/}")
     keys = "test" + EX + "Hallo"
     wanted = "Hallo hallo"
-class Transformation_CleverTransformLongUpper_ExceptCorrectResult(_VimTest):
+class Transformation_CleverTransformLongUpper_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/(.*)/\\U$1\E/}")
     keys = "test" + EX + "hallo"
     wanted = "hallo HALLO"
-class Transformation_CleverTransformLongLower_ExceptCorrectResult(_VimTest):
+class Transformation_CleverTransformLongLower_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/(.*)/\L$1\E/}")
     keys = "test" + EX + "HALLO"
     wanted = "HALLO hallo"
@@ -1560,15 +1561,15 @@ class Transformation_LowerCaseAsciiResult(_VimTest):
     keys = "ascii" + EX + "éèàçôïÉÈÀÇÔÏ€"
     wanted = "éèàçôïÉÈÀÇÔÏ€ eeacoieeacoieu"
 
-class Transformation_ConditionalInsertionSimple_ExceptCorrectResult(_VimTest):
+class Transformation_ConditionalInsertionSimple_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/(^a).*/(?0:began with an a)/}")
     keys = "test" + EX + "a some more text"
     wanted = "a some more text began with an a"
-class Transformation_CIBothDefinedNegative_ExceptCorrectResult(_VimTest):
+class Transformation_CIBothDefinedNegative_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/(?:(^a)|(^b)).*/(?1:yes:no)/}")
     keys = "test" + EX + "b some"
     wanted = "b some no"
-class Transformation_CIBothDefinedPositive_ExceptCorrectResult(_VimTest):
+class Transformation_CIBothDefinedPositive_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/(?:(^a)|(^b)).*/(?1:yes:no)/}")
     keys = "test" + EX + "a some"
     wanted = "a some yes"
@@ -1782,15 +1783,15 @@ class VisualTransformation_InDefaultText_LineSelect_Overwrite(_VimTest):
 # End: ${VISUAL}  #}}}
 
 # Recursive (Nested) Snippets  {{{#
-class RecTabStops_SimpleCase_ExceptCorrectResult(_VimTest):
+class RecTabStops_SimpleCase_ExpectCorrectResult(_VimTest):
     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
     keys = "m" + EX + "m" + EX + "hello" + JF + "world" + JF + "ups" + JF + "end"
     wanted = "[ [ hello  world ]ups  end ]"
-class RecTabStops_SimpleCaseLeaveSecondSecond_ExceptCorrectResult(_VimTest):
+class RecTabStops_SimpleCaseLeaveSecondSecond_ExpectCorrectResult(_VimTest):
     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
     keys = "m" + EX + "m" + EX + "hello" + JF + "world" + JF + JF + JF + "end"
     wanted = "[ [ hello  world ]  sec ]end"
-class RecTabStops_SimpleCaseLeaveFirstSecond_ExceptCorrectResult(_VimTest):
+class RecTabStops_SimpleCaseLeaveFirstSecond_ExpectCorrectResult(_VimTest):
     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
     keys = "m" + EX + "m" + EX + "hello" + JF + JF + JF + "world" + JF + "end"
     wanted = "[ [ hello  sec ]  world ]end"
@@ -1882,12 +1883,12 @@ class RecTabStops_MirrorInnerSnippet_ECR(_VimTest):
     keys = "m" + EX + "m1" + EX + "Hallo" + JF + "Hi" + JF + "endone" + JF + "two" + JF + "totalend"
     wanted = "[ ASnip Hallo ASnip Hi ASnipendone two ] ASnip Hallo ASnip Hi ASnipendonetotalend"
 
-class RecTabStops_NotAtBeginningOfTS_ExceptCorrectResult(_VimTest):
+class RecTabStops_NotAtBeginningOfTS_ExpectCorrectResult(_VimTest):
     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
     keys = "m" + EX + "hello m" + EX + "hi" + JF + "two" + JF + "ups" + JF + "three" + \
             JF + "end"
     wanted = "[ hello [ hi  two ]ups  three ]end"
-class RecTabStops_InNewlineInTabstop_ExceptCorrectResult(_VimTest):
+class RecTabStops_InNewlineInTabstop_ExpectCorrectResult(_VimTest):
     snippets = ("m", "[ ${1:first}  ${2:sec} ]")
     keys = "m" + EX + "hello\nm" + EX + "hi" + JF + "two" + JF + "ups" + JF + "three" + \
             JF + "end"
@@ -1995,23 +1996,23 @@ class _ListAllSnippets(_VimTest):
                  ("aloha", "OHEEEE",   "Say OHEE"),
                )
 
-class ListAllAvailable_NothingTyped_ExceptCorrectResult(_ListAllSnippets):
+class ListAllAvailable_NothingTyped_ExpectCorrectResult(_ListAllSnippets):
     keys = "" + LS + "3\n"
     wanted = "BLAAH"
-class ListAllAvailable_SpaceInFront_ExceptCorrectResult(_ListAllSnippets):
+class ListAllAvailable_SpaceInFront_ExpectCorrectResult(_ListAllSnippets):
     keys = " " + LS + "3\n"
     wanted = " BLAAH"
-class ListAllAvailable_BraceInFront_ExceptCorrectResult(_ListAllSnippets):
+class ListAllAvailable_BraceInFront_ExpectCorrectResult(_ListAllSnippets):
     keys = "} " + LS + "3\n"
     wanted = "} BLAAH"
-class ListAllAvailable_testtyped_ExceptCorrectResult(_ListAllSnippets):
+class ListAllAvailable_testtyped_ExpectCorrectResult(_ListAllSnippets):
     keys = "hallo test" + LS + "2\n"
     wanted = "hallo BLAAH"
-class ListAllAvailable_testtypedSecondOpt_ExceptCorrectResult(_ListAllSnippets):
+class ListAllAvailable_testtypedSecondOpt_ExpectCorrectResult(_ListAllSnippets):
     keys = "hallo test" + LS + "1\n"
     wanted = "hallo TEST ONE"
 
-class ListAllAvailable_NonDefined_NoExceptionShouldBeRaised(_ListAllSnippets):
+class ListAllAvailable_NonDefined_NoExpectionShouldBeRaised(_ListAllSnippets):
     keys = "hallo qualle" + LS + "Hi"
     wanted = "hallo qualleHi"
 # End: List Snippets  #}}}
@@ -2547,14 +2548,14 @@ class _FormatoptionsBase(_VimTest):
         vim_config.append("set tw=20")
         vim_config.append("set fo=lrqntc")
 
-class FOSimple_Break_ExceptCorrectResult(_FormatoptionsBase):
+class FOSimple_Break_ExpectCorrectResult(_FormatoptionsBase):
     snippets = ("test", "${1:longer expand}\n$1\n$0", "", "f")
     keys = "test" + EX + "This is a longer text that should wrap as formatoptions are  enabled" + JF + "end"
     wanted = "This is a longer\ntext that should\nwrap as\nformatoptions are\nenabled\n" + \
         "This is a longer\ntext that should\nwrap as\nformatoptions are\nenabled\n" + "end"
 
 
-class FOTextBeforeAndAfter_ExceptCorrectResult(_FormatoptionsBase):
+class FOTextBeforeAndAfter_ExpectCorrectResult(_FormatoptionsBase):
     snippets = ("test", "Before${1:longer expand}After\nstart$1end")
     keys = "test" + EX + "This is a longer text that should wrap"
     wanted = \
@@ -2567,7 +2568,7 @@ should wrapend"""
 
 
 # Tests for https://bugs.launchpad.net/bugs/719998
-class FOTextAfter_ExceptCorrectResult(_FormatoptionsBase):
+class FOTextAfter_ExpectCorrectResult(_FormatoptionsBase):
     snippets = ("test", "${1:longer expand}after\nstart$1end")
     keys = ("test" + EX + "This is a longer snippet that should wrap properly "
             "and the mirror below should work as well")
@@ -2583,7 +2584,7 @@ wrap properly and
 the mirror below
 should work as wellend"""
 
-class FOWrapOnLongWord_ExceptCorrectResult(_FormatoptionsBase):
+class FOWrapOnLongWord_ExpectCorrectResult(_FormatoptionsBase):
     snippets = ("test", "${1:longer expand}after\nstart$1end")
     keys = ("test" + EX + "This is a longersnippet that should wrap properly")
     wanted = \
@@ -2596,7 +2597,7 @@ should wrap properlyend"""
 # End: Format options tests  #}}}
 # Langmap Handling  {{{#
 # Test for bug 501727 #
-class TestNonEmptyLangmap_ExceptCorrectResult(_VimTest):
+class TestNonEmptyLangmap_ExpectCorrectResult(_VimTest):
     snippets = ("testme",
 """my snipped ${1:some_default}
 and a mirror: $1
@@ -2611,7 +2612,7 @@ hi4"""
         vim_config.append("set langmap=dj,rk,nl,ln,jd,kr,DJ,RK,NL,LN,JD,KR")
 
 # Test for https://bugs.launchpad.net/bugs/501727 #
-class TestNonEmptyLangmapWithSemi_ExceptCorrectResult(_VimTest):
+class TestNonEmptyLangmapWithSemi_ExpectCorrectResult(_VimTest):
     snippets = ("testme",
 """my snipped ${1:some_default}
 and a mirror: $1
@@ -2627,7 +2628,7 @@ hi4Hello"""
         self.vim.send(":set langmap=\\\\;;A\n")
 
 # Test for bug 871357 #
-class TestLangmapWithUtf8_ExceptCorrectResult(_VimTest):
+class TestLangmapWithUtf8_ExpectCorrectResult(_VimTest):
     skip_if = lambda self: running_on_windows()  # SendKeys can't send UTF characters
     snippets = ("testme",
 """my snipped ${1:some_default}
@@ -3084,15 +3085,12 @@ class DeleteCurrentTabStop3_JumpAround(_VimTest):
     wanted = "hello\nendworld"
 
 # End: Normal mode editing  #}}}
-
-# 1251994  {{{#
-# Test for bug #1251994
+# Test for bug 1251994  {{{#
 class Bug1251994(_VimTest):
     snippets = ("test", "${2:#2} ${1:#1};$0")
     keys = "  test" + EX + "hello" + JF + "world" + JF + "blub"
     wanted = "  world hello;blub"
 # End: 1251994  #}}}
-
 # Test for Github Pull Request #134 - Retain unnamed register {{{#
 class RetainsTheUnnamedRegister(_VimTest):
     snippets = ("test", "${1:hello} ${2:world} ${0}")
@@ -3103,6 +3101,112 @@ class RetainsTheUnnamedRegister_ButOnlyOnce(_VimTest):
     keys = "blahfasel" + ESC + "v" + 4*ARR_L + "xotest" + EX + ESC + ARR_U + "v0xo" + ESC + "p"
     wanted = "\nblah\nhello world "
 # End: Github Pull Request # 134 #}}}
+# snipMate support  {{{#
+class snipMate_SimpleSnippet(_VimTest):
+    files = { "snippets/_.snippets": """
+snippet hello
+\tThis is a test snippet
+\t# With a comment
+"""}
+    keys = "hello" + EX
+    wanted = "This is a test snippet\n# With a comment"
+class snipMate_OtherFiletype(_VimTest):
+    files = { "snippets/blubi.snippets": """
+snippet hello
+\tworked
+"""}
+    keys = "hello" + EX + ESC + ":set ft=blubi\nohello" + EX
+    wanted = "hello" + EX + "\nworked"
+class snipMate_MultiMatches(_VimTest):
+    files = { "snippets/_.snippets": """
+snippet hello The first snippet."
+\tone
+snippet hello The second snippet.
+\ttwo
+"""}
+    keys = "hello" + EX + "2\n"
+    wanted = "two"
+class snipMate_SimpleSnippetSubDirectory(_VimTest):
+    files = { "snippets/_/blub.snippets": """
+snippet hello
+\tThis is a test snippet
+"""}
+    keys = "hello" + EX
+    wanted = "This is a test snippet"
+class snipMate_SimpleSnippetInSnippetFile(_VimTest):
+    files = {
+        "snippets/_/hello.snippet": """This is a stand alone snippet""",
+        "snippets/_/hello1.snippet": """This is two stand alone snippet""",
+        "snippets/_/hello2/this_is_my_cool_snippet.snippet": """Three""",
+    }
+    keys = "hello" + EX + "\nhello1" + EX + "\nhello2" + EX
+    wanted = "This is a stand alone snippet\nThis is two stand alone snippet\nThree"
+class snipMate_Interpolation(_VimTest):
+    files = { "snippets/_.snippets": """
+snippet test
+\tla`printf('c%02d', 3)`lu
+"""}
+    keys = "test" + EX
+    wanted = "lac03lu"
+class snipMate_InterpolationWithSystem(_VimTest):
+    files = { "snippets/_.snippets": """
+snippet test
+\tla`system('echo -ne öäü')`lu
+"""}
+    keys = "test" + EX
+    wanted = "laöäülu"
+class snipMate_TestMirrors(_VimTest):
+    files = { "snippets/_.snippets": """
+snippet for
+\tfor (${2:i}; $2 < ${1:count}; $1++) {
+\t\t${4}
+\t}
+"""}
+    keys = "for" + EX + "blub" + JF + "j" + JF + "hi"
+    wanted = "for (j; j < blub; blub++) {\n\thi\n}"
+class snipMate_TestMirrorsInPlaceholders(_VimTest):
+    files = { "snippets/_.snippets": """
+snippet opt
+\t<option value="${1:option}">${2:$1}</option>
+"""}
+    keys = "opt" + EX + "some" + JF + JF + "ende"
+    wanted = """<option value="some">some</option>ende"""
+class snipMate_TestMirrorsInPlaceholders_Overwrite(_VimTest):
+    files = { "snippets/_.snippets": """
+snippet opt
+\t<option value="${1:option}">${2:$1}</option>
+"""}
+    keys = "opt" + EX + "some" + JF + "not" + JF + "ende"
+    wanted = """<option value="some">not</option>ende"""
+class snipMate_Visual_Simple(_VimTest):
+    files = { "snippets/_.snippets": """
+snippet v
+\th${VISUAL}b
+"""}
+    keys = "blablub" + ESC + "0v6l" + EX + "v" + EX
+    wanted = "hblablubb"
+class snipMate_NoNestedTabstops(_VimTest):
+    files = { "snippets/_.snippets": """
+snippet test
+\th$${1:${2:blub}}$$
+"""}
+    keys = "test" + EX + JF + "hi"
+    wanted = "h$${2:blub}$$hi"
+class snipMate_Extends(_VimTest):
+    files = { "snippets/a.snippets": """
+extends b
+snippet test
+\tblub
+""", "snippets/b.snippets": """
+snippet test1
+\tblah
+"""
+}
+    keys = ESC + ":set ft=a\n" + "itest1" + EX
+    wanted = "blah"
+# End: snipMate support  #}}}
+
+
 
 class VerifyVimDict1(_VimTest):
     """check:

@@ -6,10 +6,10 @@
 import os
 from collections import namedtuple
 
+from UltiSnips import _vim
 from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text_objects._base import NoneditableTextObject
-import UltiSnips._vim as _vim
 
 
 class _Tabs(object):

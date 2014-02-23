@@ -8,14 +8,14 @@ from functools import wraps
 import os
 import traceback
 
+from UltiSnips import _vim
 from UltiSnips._diff import diff, guess_edit
 from UltiSnips.compatibility import as_unicode
 from UltiSnips.position import Position
-from UltiSnips.providers import UltiSnipsFileProvider, \
-        base_snippet_files_for, AddedSnippetsProvider
-from UltiSnips.snippet_definition import SnippetDefinition
+from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
+from UltiSnips.snippet.source import UltiSnipsFileSource, SnipMateFileSource, \
+        base_snippet_files_for, AddedSnippetsSource
 from UltiSnips.vim_state import VimState, VisualContentPreserver
-import UltiSnips._vim as _vim
 
 def _ask_snippets(snippets):
     """ Given a list of snippets, ask the user which one they
@@ -80,8 +80,9 @@ class SnippetManager(object):
         self._visual_content = VisualContentPreserver()
 
         self._snippet_providers = [
-            AddedSnippetsProvider(),
-            UltiSnipsFileProvider()
+            AddedSnippetsSource(),
+            SnipMateFileSource(),
+            UltiSnipsFileSource()
         ]
         self._added_snippets_provider = self._snippet_providers[0]
 
@@ -183,15 +184,16 @@ class SnippetManager(object):
     def add_snippet(self, trigger, value, description,
             options, ft="all", priority=0):
         """Add a snippet to the list of known snippets of the given 'ft'."""
-        self._added_snippets_provider.add_snippet(ft, SnippetDefinition(
-            priority, trigger, value, description, options, {})
-        )
+        self._added_snippets_provider.add_snippet(ft,
+                UltiSnipsSnippetDefinition(priority, trigger, value,
+                    description, options, {}))
 
     @err_to_scratch_buffer
     def expand_anon(self, value, trigger="", description="", options=""):
         """Expand an anonymous snippet right here."""
         before = _vim.buf.line_till_cursor
-        snip = SnippetDefinition(0, trigger, value, description, options, {})
+        snip = UltiSnipsSnippetDefinition(0, trigger, value, description,
+                options, {})
 
         if not trigger or snip.matches(before):
             self._do_snippet(snip, before)
@@ -478,7 +480,7 @@ class SnippetManager(object):
         any arguments."""
         return self._buffer_filetypes[_vim.buf.number][0]
 
-    # TODO(sirver): this should talk directly to the UltiSnipsFileProvider.
+    # TODO(sirver): this should talk directly to the UltiSnipsFileSource.
     def _file_to_edit(self, ft):  # pylint: disable=no-self-use
         """ Gets a file to edit based on the given filetype.
         If no filetype is given, uses the current filetype from Vim.

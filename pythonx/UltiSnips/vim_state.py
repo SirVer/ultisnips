@@ -5,9 +5,9 @@
 
 from collections import deque
 
+from UltiSnips import _vim
 from UltiSnips.compatibility import as_unicode, byte2col
 from UltiSnips.position import Position
-import UltiSnips._vim as _vim
 
 class VimPosition(Position):
     """Represents the current position in the buffer, together with some status

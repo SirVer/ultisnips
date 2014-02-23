@@ -8,7 +8,7 @@ be the empty string. """
 import re
 import textwrap
 
-import UltiSnips._vim as _vim
+from UltiSnips import _vim
 from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text_objects._transformation import TextObjectTransformation
 from UltiSnips.text_objects._base import NoneditableTextObject

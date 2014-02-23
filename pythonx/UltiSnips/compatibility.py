@@ -26,6 +26,10 @@ def _vim_enc(string):
         return string
 
 if sys.version_info >= (3, 0):
+    def open_ascii_file(filename, mode):
+        """Opens a file in "r" mode."""
+        return open(filename, mode, encoding="utf-8")
+
     def col2byte(line, col):
         """
         Convert a valid column index into a byte index inside
@@ -55,6 +59,9 @@ if sys.version_info >= (3, 0):
 else:
     import warnings
     warnings.filterwarnings("ignore", category=DeprecationWarning)
+    def open_ascii_file(filename, mode):
+        """Opens a file in "r" mode."""
+        return open(filename, mode)
 
     def col2byte(line, col):
         """

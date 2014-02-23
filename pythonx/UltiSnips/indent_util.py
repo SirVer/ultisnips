@@ -3,7 +3,7 @@
 
 """See module doc."""
 
-import UltiSnips._vim as _vim
+from UltiSnips import _vim
 
 class IndentUtil(object):
     """Utility class for dealing properly with indentation. """

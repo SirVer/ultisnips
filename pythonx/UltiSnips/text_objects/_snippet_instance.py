@@ -5,17 +5,16 @@
 user expands a snippet, a SnippetInstance is created to keep track of the
 corresponding TextObjects. The Snippet itself is also a TextObject. """
 
+from UltiSnips import _vim
 from UltiSnips.position import Position
-import UltiSnips._vim as _vim
 from UltiSnips.text_objects._base import EditableTextObject, \
         NoneditableTextObject
-from UltiSnips.text_objects._parser import parse_text_object
 
 class SnippetInstance(EditableTextObject):
     """See module docstring."""
     # pylint:disable=protected-access
 
-    def __init__(self, snippet, parent, indent, initial_text,
+    def __init__(self, snippet, parent, initial_text,
             start, end, visual_content, last_re, globals):
         if start is None:
             start = Position(0, 0)
@@ -29,10 +28,6 @@ class SnippetInstance(EditableTextObject):
         self.visual_content = visual_content
 
         EditableTextObject.__init__(self, parent, start, end, initial_text)
-
-        parse_text_object(self, initial_text, indent)
-
-        self.update_textobjects()
 
     def replace_initial_text(self):
         """Puts the initial text of all text elements into Vim."""

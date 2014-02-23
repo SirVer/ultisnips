@@ -5,6 +5,7 @@
 
 # TODO(sirver): these should register themselves with the Manager, so that
 # other plugins can extend them more easily.
-from UltiSnips.providers.snippet_file import UltiSnipsFileProvider, \
+from UltiSnips.snippet.source.added import AddedSnippetsSource
+from UltiSnips.snippet.source.file.snipmate import SnipMateFileSource
+from UltiSnips.snippet.source.file.ultisnips import UltiSnipsFileSource, \
     base_snippet_files_for
-from UltiSnips.providers.added_snippets_provider import AddedSnippetsProvider

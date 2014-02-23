@@ -5,9 +5,9 @@
 
 from collections import defaultdict
 
-from UltiSnips.providers._snippet_dictionary import SnippetDictionary
+from UltiSnips.snippet.source._snippet_dictionary import SnippetDictionary
 
-class SnippetProvider(object):
+class SnippetSource(object):
     """See module docstring."""
 
     def __init__(self):

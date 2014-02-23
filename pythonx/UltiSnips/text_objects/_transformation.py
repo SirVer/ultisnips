@@ -5,8 +5,9 @@
 
 import re
 import sys
+
+from UltiSnips.text import unescape, fill_in_whitespace
 from UltiSnips.text_objects._mirror import Mirror
-from UltiSnips.escaping import unescape, fill_in_whitespace
 
 def _find_closing_brace(string, start_pos):
     """Finds the corresponding closing brace after start_pos."""

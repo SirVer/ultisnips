@@ -3,7 +3,7 @@
 
 """Implements `!v ` VimL interpolation."""
 
-import UltiSnips._vim as _vim
+from UltiSnips import _vim
 from UltiSnips.text_objects._base import NoneditableTextObject
 
 class VimLCode(NoneditableTextObject):

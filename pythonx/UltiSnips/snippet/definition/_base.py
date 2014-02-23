@@ -5,11 +5,10 @@
 
 import re
 
+from UltiSnips import _vim
 from UltiSnips.compatibility import as_unicode
-from UltiSnips.text_objects import SnippetInstance
 from UltiSnips.indent_util import IndentUtil
-import UltiSnips._vim as _vim
-
+from UltiSnips.text_objects import SnippetInstance
 
 def _words_for_line(trigger, before, num_words=None):
     """ Gets the final 'num_words' words from 'before'.
@@ -32,14 +31,14 @@ def _words_for_line(trigger, before, num_words=None):
             before_words = before_words[:left]
         return before[len(before_words):].strip()
 
-
 class SnippetDefinition(object):
     """Represents a snippet as parsed from a file."""
 
     _INDENT = re.compile(r"^[ \t]*")
     _TABS = re.compile(r"^\t*")
 
-    def __init__(self, priority, trigger, value, description, options, globals):
+    def __init__(self, priority, trigger, value, description,
+            options, globals):
         self._priority = priority
         self._trigger = as_unicode(trigger)
         self._value = as_unicode(value)
@@ -50,7 +49,7 @@ class SnippetDefinition(object):
         self._globals = globals
 
     def __repr__(self):
-        return "SnippetDefinition(%r,%s,%s,%s)" % (
+        return "_SnippetDefinition(%r,%s,%s,%s)" % (
                 self._priority, self._trigger, self._description, self._opts)
 
     def _re_match(self, trigger):
@@ -70,6 +69,28 @@ class SnippetDefinition(object):
     def has_option(self, opt):
         """ Check if the named option is set """
         return opt in self._opts
+
+    @property
+    def description(self):
+        """Descriptive text for this snippet."""
+        return ("(%s) %s" % (self._trigger, self._description)).strip()
+
+    @property
+    def priority(self):
+        """The snippets priority, which defines which snippet will be preferred
+        over others with the same trigger."""
+        return self._priority
+
+    @property
+    def trigger(self):
+        """The trigger text for the snippet."""
+        return self._trigger
+
+    @property
+    def matched(self):
+        """The last text that matched this snippet in match() or
+        could_match()."""
+        return self._matched
 
     def matches(self, trigger):
         """Returns True if this snippet matches 'trigger'."""
@@ -161,27 +182,10 @@ class SnippetDefinition(object):
 
         return match
 
-    @property
-    def description(self):
-        """Descriptive text for this snippet."""
-        return ("(%s) %s" % (self._trigger, self._description)).strip()
-
-    @property
-    def priority(self):
-        """The snippets priority, which defines which snippet will be preferred
-        over others with the same trigger."""
-        return self._priority
-
-    @property
-    def trigger(self):
-        """The trigger text for the snippet."""
-        return self._trigger
-
-    @property
-    def matched(self):
-        """The last text that matched this snippet in match() or
-        could_match()."""
-        return self._matched
+    def instantiate(self, snippet_instance, initial_text, indent):
+        """Parses the content of this snippet and brings the corresponding text
+        objects alive inside of Vim."""
+        raise NotImplementedError()
 
     def launch(self, text_before, visual_content, parent, start, end):
         """Launch this snippet, overwriting the text 'start' to 'end' and
@@ -192,23 +196,23 @@ class SnippetDefinition(object):
         ind_util = IndentUtil()
 
         # Replace leading tabs in the snippet definition via proper indenting
-        snippet_definition = []
+        initial_text = []
         for line_num, line in enumerate(lines):
             if "t" in self._opts:
                 tabs = 0
             else:
                 tabs = len(self._TABS.match(line).group(0))
-
             line_ind = ind_util.ntabs_to_proper_indent(tabs)
-
             if line_num != 0:
                 line_ind = indent + line_ind
 
-            snippet_definition.append(line_ind + line[tabs:])
-        snippet_definition = '\n'.join(snippet_definition)
+            initial_text.append(line_ind + line[tabs:])
+        initial_text = '\n'.join(initial_text)
 
-        si = SnippetInstance(self, parent, indent, snippet_definition, start,
-                end, visual_content, last_re=self._last_re,
-                globals=self._globals)
+        snippet_instance = SnippetInstance(
+                self, parent, initial_text, start, end, visual_content,
+                last_re=self._last_re, globals=self._globals)
+        self.instantiate(snippet_instance, initial_text, indent)
 
-        return si
+        snippet_instance.update_textobjects()
+        return snippet_instance

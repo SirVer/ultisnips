@@ -36,7 +36,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       4.7.1 Replacement String                  |UltiSnips-replacement-string|
       4.7.2 Demos                               |UltiSnips-demos|
    4.8 Clearing snippets                        |UltiSnips-clearing-snippets|
-5. Support for other plugins                    |UltiSnips-other-plugins|
+5. UltiSnips and Other Plugins                  |UltiSnips-other-plugins|
 6. Helping Out                                  |UltiSnips-helping|
 7. Contact                                      |UltiSnips-contact|
 8. Contributors                                 |UltiSnips-contributors|
@@ -516,7 +516,7 @@ permitted in a snippet file, and they can be included anywhere in the file.
 A line beginning with the keyword 'priority' sets the priority for all
 snippets defined in the current file after this line. The default priority for
 a file is always 0. When a snippet should be expanded, UltiSnips will collect
-all snippet definitons from all sources that match the trigger and keep only
+all snippet definitions from all sources that match the trigger and keep only
 the ones with the highest priority. For example, all shipped snippets have a
 priority < 0, so that user defined snippets always overwrite shipped snippets.
 
@@ -1249,12 +1249,16 @@ snippets if you wish to replace them. Simply use the '!' option. (See
 
 
 ==============================================================================
-5. Support for other plugins             *UltiSnips-other-plugins*
+5. UltiSnips and Other Plugins                      *UltiSnips-other-plugins*
 
 UltiSnips has built-in support for some common plugins and there are others
 that are aware of UltiSnips and use it to improve the user experience. This is
 an incomplete list - if you want to have your plugin listed here, just sent me
 a pull request.
+
+snipMate - UltiSnips is a drop in, bug-for-bug replacement for snipMate. It
+has many more features, but switching is trivial, you just need to track
+UltiSnips instead of snipMate.
 
 YouCompleteMe - comes with out of the box completion support for UltiSnips. It
 offers a really nice completion dialogue for snippets.
