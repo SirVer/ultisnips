@@ -77,7 +77,8 @@ def _parse_snippet(line, lines):
     trigger, description = head_tail(line[len("snippet"):].lstrip())
     content = ""
     while True:
-        if not lines.peek().startswith('\t'):
+        next_line = lines.peek()
+        if next_line is None or not next_line.startswith('\t'):
             break
         content += next(lines)[1:] # strip first tab
     content = content[:-1]  # Chomp the last newline
