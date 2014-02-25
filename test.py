@@ -3106,15 +3106,13 @@ class snipMate_SimpleSnippet(_VimTest):
     files = { "snippets/_.snippets": """
 snippet hello
 \tThis is a test snippet
-\t# With a comment
-"""}
+\t# With a comment"""}
     keys = "hello" + EX
     wanted = "This is a test snippet\n# With a comment"
 class snipMate_OtherFiletype(_VimTest):
     files = { "snippets/blubi.snippets": """
 snippet hello
-\tworked
-"""}
+\tworked"""}
     keys = "hello" + EX + ESC + ":set ft=blubi\nohello" + EX
     wanted = "hello" + EX + "\nworked"
 class snipMate_MultiMatches(_VimTest):
@@ -3122,15 +3120,13 @@ class snipMate_MultiMatches(_VimTest):
 snippet hello The first snippet."
 \tone
 snippet hello The second snippet.
-\ttwo
-"""}
+\ttwo"""}
     keys = "hello" + EX + "2\n"
     wanted = "two"
 class snipMate_SimpleSnippetSubDirectory(_VimTest):
     files = { "snippets/_/blub.snippets": """
 snippet hello
-\tThis is a test snippet
-"""}
+\tThis is a test snippet"""}
     keys = "hello" + EX
     wanted = "This is a test snippet"
 class snipMate_SimpleSnippetInSnippetFile(_VimTest):
@@ -3144,15 +3140,13 @@ class snipMate_SimpleSnippetInSnippetFile(_VimTest):
 class snipMate_Interpolation(_VimTest):
     files = { "snippets/_.snippets": """
 snippet test
-\tla`printf('c%02d', 3)`lu
-"""}
+\tla`printf('c%02d', 3)`lu"""}
     keys = "test" + EX
     wanted = "lac03lu"
 class snipMate_InterpolationWithSystem(_VimTest):
     files = { "snippets/_.snippets": """
 snippet test
-\tla`system('echo -ne öäü')`lu
-"""}
+\tla`system('echo -ne öäü')`lu"""}
     keys = "test" + EX
     wanted = "laöäülu"
 class snipMate_TestMirrors(_VimTest):
@@ -3160,50 +3154,55 @@ class snipMate_TestMirrors(_VimTest):
 snippet for
 \tfor (${2:i}; $2 < ${1:count}; $1++) {
 \t\t${4}
-\t}
-"""}
+\t}"""}
     keys = "for" + EX + "blub" + JF + "j" + JF + "hi"
     wanted = "for (j; j < blub; blub++) {\n\thi\n}"
 class snipMate_TestMirrorsInPlaceholders(_VimTest):
     files = { "snippets/_.snippets": """
 snippet opt
-\t<option value="${1:option}">${2:$1}</option>
-"""}
+\t<option value="${1:option}">${2:$1}</option>"""}
     keys = "opt" + EX + "some" + JF + JF + "ende"
     wanted = """<option value="some">some</option>ende"""
 class snipMate_TestMirrorsInPlaceholders_Overwrite(_VimTest):
     files = { "snippets/_.snippets": """
 snippet opt
-\t<option value="${1:option}">${2:$1}</option>
-"""}
+\t<option value="${1:option}">${2:$1}</option>"""}
     keys = "opt" + EX + "some" + JF + "not" + JF + "ende"
     wanted = """<option value="some">not</option>ende"""
 class snipMate_Visual_Simple(_VimTest):
     files = { "snippets/_.snippets": """
 snippet v
-\th${VISUAL}b
-"""}
+\th${VISUAL}b"""}
     keys = "blablub" + ESC + "0v6l" + EX + "v" + EX
     wanted = "hblablubb"
 class snipMate_NoNestedTabstops(_VimTest):
     files = { "snippets/_.snippets": """
 snippet test
-\th$${1:${2:blub}}$$
-"""}
+\th$${1:${2:blub}}$$"""}
     keys = "test" + EX + JF + "hi"
     wanted = "h$${2:blub}$$hi"
 class snipMate_Extends(_VimTest):
     files = { "snippets/a.snippets": """
 extends b
 snippet test
-\tblub
-""", "snippets/b.snippets": """
+\tblub""", "snippets/b.snippets": """
 snippet test1
-\tblah
-"""
+\tblah"""
 }
     keys = ESC + ":set ft=a\n" + "itest1" + EX
     wanted = "blah"
+class snipMate_EmptyLinesContinueSnippets(_VimTest):
+    files = { "snippets/_.snippets": """
+snippet test
+\tblub
+
+\tblah
+
+snippet test1
+\ta"""
+}
+    keys = "test" + EX
+    wanted = "blub\n\nblah\n"
 # End: snipMate support  #}}}
 
 

@@ -78,9 +78,14 @@ def _parse_snippet(line, lines):
     content = ""
     while True:
         next_line = lines.peek()
-        if next_line is None or not next_line.startswith('\t'):
+        if next_line is None:
             break
-        content += next(lines)[1:] # strip first tab
+        if next_line.strip() and not next_line.startswith('\t'):
+            break
+        line = next(lines)
+        if line[0] == '\t':
+            line = line[1:]
+        content += line
     content = content[:-1]  # Chomp the last newline
     return "snippet", (SnipMateSnippetDefinition(
         trigger, content, description),)
