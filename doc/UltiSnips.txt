@@ -308,7 +308,7 @@ directory must be a subdirectory of a directory defined in the 'runtimepath'
 option. The variable g:UltiSnipsSnippetDirectories defines a list of names
 used for snippet directories. The default is shown below. >
 
-   g:UltiSnipsSnippetDirectories          ["UltiSnips"]
+   let g:UltiSnipsSnippetDirectories=["UltiSnips"]
 
 UltiSnips will search each 'runtimepath' directory for the subdirectory names
 defined in g:UltiSnipsSnippetDirectories in the order they are defined. For
@@ -316,8 +316,8 @@ example, if you keep your snippets in a .vim subdirectory called
 "mycoolsnippets" and you want to make use of the default snippets that come
 with UltiSnips, add the following to your vimrc file. >
    let g:UltiSnipsSnippetDirectories=["UltiSnips", "mycoolsnippets"]
-If you do not want to use the snippets that come with UltiSnips, define the
-variable accordingly. >
+If you do not want to use the third party snippets that come with plugins,
+define the variable accordingly: >
    let g:UltiSnipsSnippetDirectories=["mycoolsnippets"]
 
 You can also redefine the search path on a buffer by buffer basis by setting
@@ -1256,9 +1256,13 @@ that are aware of UltiSnips and use it to improve the user experience. This is
 an incomplete list - if you want to have your plugin listed here, just sent me
 a pull request.
 
-snipMate - UltiSnips is a drop in, bug-for-bug replacement for snipMate. It
-has many more features, but switching is trivial, you just need to track
-UltiSnips instead of snipMate.
+                                                    *UltiSnips-snipMate*
+
+snipMate - UltiSnips is a drop in replacement for snipMate. It has many more
+features, so porting snippets is still a good idea, but switching has low
+friction now. UltiSnips is trying hard to truly emulate snipMate, for example
+recursive tabstops are not supported in snipMate snippets (but of course in
+UltiSnips snippets).
 
 YouCompleteMe - comes with out of the box completion support for UltiSnips. It
 offers a really nice completion dialogue for snippets.
