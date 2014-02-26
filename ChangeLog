@@ -1,4 +1,33 @@
-version 2.2:
+dev:
+	- Organisational changes: The project is now hosted on github.
+	- UltiSnips is now a drop in replacement for snipMate - it parses snipMate
+	  snippets and expands them emulating snipMates smaller feature set.
+	- New keyword in snippet files: priority defines which snippets should
+	  overwrite others. This deprecates the '!' option.
+	  *UltiSnips-adding-snippets*
+	- Remove common whitespace of visual line selections before inserting in an
+	  indented tabstop.
+	- Functions now indicates if it did any work. *UltiSnips-trigger-functions*
+	- New option 's' which strips trailing whitespace before jumping to next
+	  tabstop 
+	- New option 'a' which converts non-ascii characters into ascii characters
+	  in transformations. 
+	- For python extensions: UltiSnips adds itself to the sys.path and can be
+	  easily imported if it is available. *UltiSnips-python-module-path*
+	- Filetype tab completion for UltiSnipsEdit.
+	- A new function giving programmatic access to the snippets currently
+	  available for expansion for other plugins integrating with UltiSnips.
+	  *UltiSnips_SnippetsInCurrentScope*
+	- The keymaps for jumping in snippets are now only mapped when a snippet is
+	  active, allowing them to be used for something else otherwise.
+	- Expanding and jumping no longer overwrites the unnamed register.
+	- Support for overwriting the snippet directory name on a per buffer basis
+	  to support per project snippets. *UltiSnips-snippet-search-path* 
+	- New or improved snippets: all, bib, c, cpp, cs, d, django, eruby, go,
+	  haskell, html, html, htmljinja, java, javascript, js, ledger, ocaml,
+	  perl, php, puppet, python, ruby, scss, sh, tex, vim, xml, zsh,
+
+version 2.2 (01-Sep-2012):
 	- Support to silence Python-not-found warnings. *UltiSnips-python-warning*
 	- Matchit support for snippet files.
 	- Improvements to syntax file.
@@ -9,12 +38,12 @@ version 2.2:
 	  json, html, coffee, coffee_jasmine, javascript_jasmine, ruby, php,
 	  markdown.
 
-version 2.1:
+version 2.1 (14-Feb-2012):
 	- Python interpolation access to text from visual selection via snip.v.
 	- Support for transformations of ${VISUAL} texts.
 	- New or improved snippets: python, tex, texmath, ruby, rails, html, django
 	
-version 2.0:
+version 2.0 (05-Feb-2012):
 	- Backwards incompatible change: Support for normal mode editing. Snippets
 	  are no longer exited when leaving insert mode but only by leaving the
 	  text span of the snippets. This allows usage of normal mode commands and
@@ -28,20 +57,20 @@ version 2.0:
 	- Full support for :py3. UltiSnips now works with python >= 2.6 or >= 3.2.
 	- New or improved snippets: python, all
 
-version 1.6:
+version 1.6 (30-Dec-2011):
 	- Significant speed improvements and a few bugs fixed.
 	- Better handling of non ASCII chars in snippets by assuming UTF-8 encoding
 	  when no other information is available.
 	- Contributions for UltiSnips are now also accepted on GitHub: https://github.com/SirVer/ultisnips/
 	- New or improved snippets: ruby, rails, xhtml
 
-version 1.5:
+version 1.5 (24-Sep-2011):
 	- Some critical bug fixes for new vim versions.
 	- New or improved snippets: tex, texmath, python, jinja2, go, puppet, xhtml
 	- Configuration of search path for snippets *UltiSnips-snippet-search-path* 
 	- New parser implementation: A little faster, more flexible and less bugged.
 
-version 1.4:
+version 1.4 (17-Jul-2011):
 	- New or improved snippets: php, html, djangohtml, mako, lua 
 	- Snippets are now listed alphabetically by their trigger, no longer in
 	  order of appearance
@@ -55,7 +84,7 @@ version 1.4:
 	- snippets definition files now have the filetype 'snippets'. It used to be
 	  'snippet'.
 
-version 1.3:
+version 1.3 (14-Feb-2011):
 	- Erlang snippets (g0rdin)
 	- Other VimScripts can now define and immediately expand anonymous snippets
 	  ( *UltiSnips_Anon* ) (Ryan Wooden)
@@ -68,7 +97,7 @@ version 1.3:
 	  missing. (Rupa Deadwyler)
 	- Added UltiSnipsReset and UltiSnipsEdit (Idea by JCEB)
 
-version 1.2:
+version 1.2 (24-Aug-2010):
 	- many bugs were fixed
 	- smode mappings for printable characters are now removed before expanding a
 	  snippet. This is configurable. *UltiSnips-warning-smappings*
@@ -87,7 +116,7 @@ version 1.2:
 	  in c, but a c trigger is valuable for cpp. 
 	- UltiSnips now adheres to expandtab and tabstop options of vim
 
-version 1.1:
+version 1.1 (21-Jul-2009):
 	- Made triggers configurable. You can also use the same trigger for
 	  expanding and tabbing. The TextMate configuration <tab> and <s-tab> is now
 	  possible.
