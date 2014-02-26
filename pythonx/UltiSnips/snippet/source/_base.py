@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-"""Base class for snippet providers."""
+"""Base class for snippet sources."""
 
 from collections import defaultdict
 
@@ -33,7 +33,7 @@ class SnippetSource(object):
         seen.add(ft)
         parent_results = []
         # TODO(sirver): extends information is not bound to one
-        # provider. It should be tracked further up.
+        # source. It should be tracked further up.
         for parent_ft in snips.extends:
             if parent_ft not in seen:
                 seen.add(parent_ft)

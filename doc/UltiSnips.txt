@@ -180,7 +180,9 @@ g:UltiSnipsSnippetsDir
                             files are stored in. For example, if the variable
                             is set to "~/.vim/mydir/UltiSnips" and the current
                             'filetype' is "cpp", then :UltiSnipsEdit will open
-                            "~/.vim/mydir/UltiSnips/cpp.snippets".
+                            "~/.vim/mydir/UltiSnips/cpp.snippets". Note that
+                            directories named "snippets" are reserved for
+                            snipMate snippets and cannot be used.
 
                                                        *:UltiSnipsAddFiletypes*
 The UltiSnipsAddFiletypes command allows for explicit merging of other snippet
@@ -306,7 +308,8 @@ how UltiSnips loads snippets.
 Snippet definition files are stored in snippet directories. A snippet
 directory must be a subdirectory of a directory defined in the 'runtimepath'
 option. The variable g:UltiSnipsSnippetDirectories defines a list of names
-used for snippet directories. The default is shown below. >
+used for snippet directories. Note that "snippets" is reserved for snipMate
+snippets and cannot be used. The default is shown below. >
 
    let g:UltiSnipsSnippetDirectories=["UltiSnips"]
 

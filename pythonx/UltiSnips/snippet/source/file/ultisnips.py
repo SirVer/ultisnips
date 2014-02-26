@@ -43,6 +43,11 @@ def base_snippet_files_for(ft, default=True):
     ret = []
     for rtp in _vim.eval("&runtimepath").split(','):
         for snippet_dir in snippet_dirs:
+            if snippet_dir == "snippets":
+                raise RuntimeError(
+                    "You have 'snippets' in UltiSnipsSnippetDirectories. This "
+                    "directory is reserved for snipMate snippets. Use another "
+                    "directory for UltiSnips snippets.")
             pth = os.path.realpath(os.path.expanduser(
                 os.path.join(rtp, snippet_dir)))
             patterns = ["%s.snippets", "%s_*.snippets", os.path.join("%s", "*")]

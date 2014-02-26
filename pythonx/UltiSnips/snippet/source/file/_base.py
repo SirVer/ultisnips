@@ -95,12 +95,12 @@ class SnippetFileSource(SnippetSource):
                 raise SnippetSyntaxError(filename, line_index, msg)
             elif event == "clearsnippets":
                 # TODO(sirver): clear snippets should clear for
-                # more providers, not only ultisnips files.
+                # more sources, not only ultisnips files.
                 triggers, = data
                 self._snippets[ft].clear_snippets(triggers)
             elif event == "extends":
                 # TODO(sirver): extends information is more global
-                # than one snippet provider.
+                # than one snippet source.
                 filetypes, = data
                 self._add_extending_info(ft, filetypes)
             elif event == "snippet":

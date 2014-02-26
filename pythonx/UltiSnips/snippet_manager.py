@@ -79,12 +79,12 @@ class SnippetManager(object):
         self._vstate = VimState()
         self._visual_content = VisualContentPreserver()
 
-        self._snippet_providers = [
-            AddedSnippetsSource(),
+        self._added_snippets_source = AddedSnippetsSource()
+        self._snippet_sources = [
+            UltiSnipsFileSource(),
+            self._added_snippets_source,
             SnipMateFileSource(),
-            UltiSnipsFileSource()
         ]
-        self._added_snippets_provider = self._snippet_providers[0]
 
         self._reinit()
 
@@ -184,7 +184,7 @@ class SnippetManager(object):
     def add_snippet(self, trigger, value, description,
             options, ft="all", priority=0):
         """Add a snippet to the list of known snippets of the given 'ft'."""
-        self._added_snippets_provider.add_snippet(ft,
+        self._added_snippets_source.add_snippet(ft,
                 UltiSnipsSnippetDefinition(priority, trigger, value,
                     description, options, {}))
 
@@ -393,8 +393,8 @@ class SnippetManager(object):
         """
         filetypes = self._buffer_filetypes[_vim.buf.number][::-1]
         matching_snippets = defaultdict(list)
-        for provider in self._snippet_providers:
-            for snippet in provider.get_snippets(filetypes, before, possible):
+        for source in self._snippet_sources:
+            for snippet in source.get_snippets(filetypes, before, possible):
                 matching_snippets[snippet.trigger].append(snippet)
         if not matching_snippets:
             return []
@@ -499,7 +499,7 @@ class SnippetManager(object):
             snipdir = _vim.eval("g:UltiSnipsSnippetsDir")
             edit = os.path.join(snipdir, filename)
         elif existing:
-            edit = existing[-1] # last sourced/highest priority
+            edit = existing[-1] # last sourced
         else:
             home = _vim.eval("$HOME")
             rtp = [os.path.realpath(os.path.expanduser(p))
