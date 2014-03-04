@@ -76,6 +76,10 @@ def no_unidecode_available():
     if not UNIDECODE_IMPORTED:
         return "unidecode is not available."
 
+def not_testing_with_other_plugins(self):
+    if self.plugins and not self.test_plugins:
+        return "Not testing integration with other plugins."
+
 def is_process_running(pid):
     """Returns true if a process with pid is running, false otherwise."""
     # from http://stackoverflow.com/questions/568271/how-to-check-if-there-exists-a-process-with-a-given-pid
@@ -86,12 +90,45 @@ def is_process_running(pid):
     else:
         return True
 
-def random_string(n):
-    return ''.join(random.choice(string.ascii_lowercase) for x in range(n))
-
 def silent_call(cmd):
     """Calls 'cmd' and returns the exit value."""
     return subprocess.call(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+
+def create_directory(dirname):
+    """Creates 'dirname' and its parents if it does not exist."""
+    try:
+        os.makedirs(dirname)
+    except OSError:
+        pass
+
+def plugin_cache_dir():
+    """The directory that we check out our bundles to."""
+    return os.path.join(tempfile.gettempdir(), "UltiSnips_test_vim_plugins")
+
+def clone_plugin(plugin):
+    """Clone the given plugin into our plugin directory."""
+    dirname = os.path.join(plugin_cache_dir(), os.path.basename(plugin))
+    if os.path.exists(dirname):
+        print "Skip cloning of %s. Already there." % plugin
+        return
+    create_directory(dirname)
+    print "Cloning %s." % plugin
+    subprocess.call(["git", "clone", "--recursive",
+        "--depth", "1", "https://github.com/%s" % plugin, dirname])
+
+    if plugin == "Valloric/YouCompleteMe":
+        ## CLUTCH: this plugin needs something extra.
+        subprocess.call(os.path.join(dirname, "./install.sh"), cwd=dirname)
+
+def setup_other_plugins(all_plugins):
+    """Creates /tmp/UltiSnips_test_vim_plugins and clones all plugins into this."""
+    clone_plugin("tpope/vim-pathogen")
+    for plugin in all_plugins:
+        clone_plugin(plugin)
+
+
+def random_string(n):
+    return ''.join(random.choice(string.ascii_lowercase) for x in range(n))
 
 class VimInterface(object):
     def get_buffer_data(self):
@@ -263,8 +300,9 @@ class _VimTest(unittest.TestCase):
     keys = ""
     sleeptime = 0.00
     output = ""
+    plugins = []
     # Skip this test for the given reason or None for not skipping it.
-    skip_if = lambda self: None
+    skip_if = not_testing_with_other_plugins
 
     def runTest(self):
         # Only checks the output. All work is done in setUp().
@@ -293,10 +331,7 @@ class _VimTest(unittest.TestCase):
         """Creates a file in the runtimepath that is created for this test.
         Returns the absolute path to the file."""
         abs_path = os.path.join(self._temporary_directory, *file_path.split("/"))
-        try:
-            os.makedirs(os.path.dirname(abs_path))
-        except OSError:
-            pass
+        create_directory(os.path.dirname(abs_path))
 
         content = dedent(content + "\n")
         if PYTHON3:
@@ -307,6 +342,12 @@ class _VimTest(unittest.TestCase):
                 file_handle.write(content)
         return abs_path
 
+    def _link_file(self, source, relative_destination):
+        """Creates a link from 'source' to the 'relative_destination' in our temp dir."""
+        absdir = os.path.join(self._temporary_directory, relative_destination)
+        create_directory(absdir)
+        os.symlink(source, os.path.join(absdir, os.path.basename(source)))
+
     def setUp(self):
         reason_for_skipping = self.skip_if()
         if reason_for_skipping is not None:
@@ -315,13 +356,23 @@ class _VimTest(unittest.TestCase):
         self._temporary_directory = tempfile.mkdtemp(prefix="UltiSnips_Test")
 
         vim_config = []
-        # Vim parameters.
+
         vim_config.append('set nocompatible')
+        vim_config.append('set runtimepath=$VIMRUNTIME,.,%s' % self._temporary_directory)
+
+        if self.plugins:
+            self._link_file(os.path.join(plugin_cache_dir(), "vim-pathogen", "autoload"), ".")
+            for plugin in self.plugins:
+                self._link_file(os.path.join(plugin_cache_dir(), os.path.basename(plugin)), "bundle")
+            vim_config.append("execute pathogen#infect()")
+
+        # Vim parameters.
+        vim_config.append('syntax on')
+        vim_config.append('filetype plugin indent on')
         vim_config.append('set clipboard=""')
         vim_config.append('set encoding=utf-8')
         vim_config.append('set fileencoding=utf-8')
         vim_config.append('set buftype=nofile')
-        vim_config.append('set runtimepath=$VIMRUNTIME,.,%s' % self._temporary_directory)
         vim_config.append('set shortmess=at')
         vim_config.append('let g:UltiSnipsExpandTrigger="<tab>"')
         vim_config.append('let g:UltiSnipsJumpForwardTrigger="?"')
@@ -329,7 +380,8 @@ class _VimTest(unittest.TestCase):
         vim_config.append('let g:UltiSnipsListSnippets="@"')
         vim_config.append('let g:UltiSnipsUsePythonVersion="%i"' % (3 if PYTHON3 else 2))
         vim_config.append('let g:UltiSnipsSnippetDirectories=["us"]')
-        vim_config.append('filetype plugin on')
+
+        self._extra_options(vim_config)
 
         # Now activate UltiSnips.
         vim_config.append('so plugin/UltiSnips.vim')
@@ -367,8 +419,6 @@ class _VimTest(unittest.TestCase):
 
         # End of python stuff.
         vim_config.append("EOF")
-
-        self._extra_options(vim_config)
 
         for name, content in self.files.items():
             self._create_file(name, content)
@@ -3204,9 +3254,7 @@ snippet test1
     keys = "test" + EX
     wanted = "blub\n\nblah\n"
 # End: snipMate support  #}}}
-
-
-
+# SnippetsInCurrentScope  {{{#
 class VerifyVimDict1(_VimTest):
     """check:
     correct type (4 means vim dictionary)
@@ -3241,6 +3289,28 @@ class VerifyVimDict3(_VimTest):
     akey = '"te{}stâ"'.format("'")
     keys = ("te'=(UltiSnips#SnippetsInCurrentScope()[{}]".format(akey) + ')\n')
     wanted = "te'123êabc"
+# End: SnippetsInCurrentScope  #}}}
+
+# Plugin: YouCompleteMe  {{{#
+class YouCompleteMe_IntegrationTest(_VimTest):
+    plugins = ["Valloric/YouCompleteMe"]
+    snippets = ("superlongtrigger", "Hello")
+    keys = "superlo\ty"
+    wanted = "Hello"
+
+    def _extra_options(self, vim_config):
+        # Not sure why, but I need to make a new tab for this to work.
+        vim_config.append('let g:UltiSnipsExpandTrigger="y"')
+        vim_config.append('tabnew')
+
+    def _before_test(self):
+        self.vim.send(":set ft=python\n")
+        # Give ycm a chance to catch up.
+        time.sleep(1)
+
+
+
+# End: Plugin: YouCompleteMe  #}}}
 
 ###########################################################################
 #                               END OF TEST                               #
@@ -3255,10 +3325,12 @@ if __name__ == '__main__':
         p = optparse.OptionParser("%prog [OPTIONS] <test case names to run>")
 
         p.set_defaults(session="vim", interrupt=False,
-                verbose=False, interface="screen", retries=4)
+                verbose=False, interface="screen", retries=4, plugins=False)
 
         p.add_option("-v", "--verbose", dest="verbose", action="store_true",
             help="print name of tests as they are executed")
+        p.add_option("--plugins", action="store_true",
+            help="Run integration tests with other Vim plugins.")
         p.add_option("--interface", type=str,
                 help="interface to vim to use on Mac and or Linux [screen|tmux].")
         p.add_option("-s", "--session", dest="session",  metavar="SESSION",
@@ -3297,16 +3369,23 @@ if __name__ == '__main__':
 
     # Inform all test case which screen session to use
     suite = unittest.TestSuite()
+    all_other_plugins = set()
     for s in all_test_suites:
         for test in s:
             test.vim = vim
             test.interrupt = options.interrupt
             test.retries = options.retries
+            test.test_plugins = options.plugins
+            all_other_plugins.update(test.plugins)
+
             if len(selected_tests):
                 id = test.id().split('.')[1]
                 if not any([ id.startswith(t) for t in selected_tests ]):
                     continue
             suite.addTest(test)
+
+    if options.plugins:
+        setup_other_plugins(all_other_plugins)
 
     if options.verbose:
         v = 2
