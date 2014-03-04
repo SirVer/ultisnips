@@ -40,8 +40,6 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
 6. Helping Out                                  |UltiSnips-helping|
 7. Contact                                      |UltiSnips-contact|
 8. Contributors                                 |UltiSnips-contributors|
-   8.1 Patches & Coding                         |UltiSnips-contricoding|
-   8.2 Snippets                                 |UltiSnips-contrisnippets|
 
 This plugin only works if 'compatible' is not set.
 {Vi does not have any of these features}
@@ -135,6 +133,10 @@ github: >
    $ cd ~/.vim/
    $ git submodule add git://github.com/SirVer/ultisnips.git bundle/ultisnips
 
+If you also want the default snippets, also track >
+
+   $ git submodule add https://github.com/honza/vim-snippets.git
+
 See the pathogen documentation for more details on how to update a bundle.
 
 
@@ -153,6 +155,9 @@ therefore have to symlink/copy the files: >
 Restart Vim and UltiSnips should work. To access the help, use >
    :helptags ~/.vim/ultisnips_rep/doc
    :help UltiSnips
+
+UltiSnips comes without snippets. The default snippets can be found here:
+https://github.com/honza/vim-snippets
 
 =============================================================================
 3. Settings & Commands                                   *UltiSnips-settings*
@@ -1318,13 +1323,7 @@ tracker.
 8. Contributors                                      *UltiSnips-contributors*
 
 The primary developer of UltiSnips is SirVer (Holger Rapp). The following
-individuals have contributed to UltiSnips.
-
-
-8.1 Patches & Coding                                 *UltiSnips-contricoding*
---------------------
-
-Contributors listed in chronological order:
+individuals have contributed to UltiSnips (in chronological order):
 
    JCEB - Jan Christoph Ebersbach
    Michael Henry
@@ -1368,60 +1367,6 @@ Contributors listed in chronological order:
    Brian Mock - saikobee
    Gernot Höflechner - LFDM
    Marcelo D Montu - mMontu
-
-
-8.2 Snippets                                       *UltiSnips-contrisnippets*
-------------
-
-Contributors listed in chronological order:
-
-   Alec Thomas
-   Ryan Wooden
-   Ches Martin
-   Gordin (g0rdin)
-   Jan Mollowitz (phux)
-   Georgi Valkov (gvalkov)
-   Miek Gieben (miek)
-   Aldis Berjoza (graudeejs)
-   Jorge Rodrigues (skeept)
-   Martin Grenfell (scrooloose)
-   Laughedelic
-   Anthony Wilson (anthonywilson)
-   Nick Anderson (nickanderson)
-   Timothy Mellor (mellort)
-   Chris Lasher (gotgenes)
-   Chen Houwu (chenhouwu)
-   Harry Zhxu (harryzhxu)
-   Pavel Puchkin (neoascetic)
-   Jacek Wysocki (exu)
-   Alexander Kondratskiy (KholdStare)
-   Martin Krauskopf (martin-krauskopf)
-   Theocrite (theocrite)
-   Ferdinand Majerech (kiith-sa)
-   Vivien Didelot
-   Øystein Walle (osse)
-   Pedro Algarvio (s0undt3ch)
-   Steven Humphrey (shumphrey)
-   Björn Winckler (b4winckler)
-   David Brown (Nali4Freedom)
-   Harry Xu (harryxu)
-   Tom Cammann (takac)
-   Paolo Cretaro (melko)
-   Sergey Alexandrov (taketwo)
-   Jaromír Hradílek (jhradilek)
-   Vangelis Tsoumenis (kioopi)
-   Rudi Grinberg (rgrinberg)
-   javipolo
-   Matthew Strawbridge (pxc)
-   Josh Strater (jstrater)
-   jinzhu
-   Rene Vergara (ravl1084)
-   Johan Haals (JHaals)
-   Danilo Bargen (dbrgn)
-   Bernhard Vallant (lazerscience)
-   Von Welch (von)
-   Nikola Petrov (nikolavp)
-   Maarten Slagter (slagtermaarten)
 
 Thank you for your support.
 
