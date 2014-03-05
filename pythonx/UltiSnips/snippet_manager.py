@@ -79,12 +79,12 @@ class SnippetManager(object):
         self._vstate = VimState()
         self._visual_content = VisualContentPreserver()
 
+        self._snippet_sources = []
+
         self._added_snippets_source = AddedSnippetsSource()
-        self._snippet_sources = [
-            UltiSnipsFileSource(),
-            self._added_snippets_source,
-            SnipMateFileSource(),
-        ]
+        self.register_snippet_source("ultisnips_files", UltiSnipsFileSource())
+        self.register_snippet_source("added", self._added_snippets_source)
+        self.register_snippet_source("snipmate_files", SnipMateFileSource())
 
         self._reinit()
 
@@ -200,6 +200,21 @@ class SnippetManager(object):
             return True
         else:
             return False
+
+    def register_snippet_source(self, name, snippet_source):
+      """Registers a new 'snippet_source' with the given 'name'. The given class
+      must be an instance of SnippetSource. This source will be queried for
+      snippets."""
+      self._snippet_sources.append((name, snippet_source))
+
+    def unregister_snippet_source(self, name):
+      """Unregister the source with the given 'name'. Does nothing if it is not
+      registered."""
+      for index, (source_name, _) in enumerate(self._snippet_sources):
+        if name == source_name:
+          self._snippet_sources = \
+              self._snippet_sources[:index] + self._snippet_sources[index+1:]
+          break
 
     def reset_buffer_filetypes(self):
         """Reset the filetypes for the current buffer."""
@@ -393,7 +408,7 @@ class SnippetManager(object):
         """
         filetypes = self._buffer_filetypes[_vim.buf.number][::-1]
         matching_snippets = defaultdict(list)
-        for source in self._snippet_sources:
+        for _, source in self._snippet_sources:
             for snippet in source.get_snippets(filetypes, before, possible):
                 matching_snippets[snippet.trigger].append(snippet)
         if not matching_snippets:

@@ -37,6 +37,8 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       4.7.2 Demos                               |UltiSnips-demos|
    4.8 Clearing snippets                        |UltiSnips-clearing-snippets|
 5. UltiSnips and Other Plugins                  |UltiSnips-other-plugins|
+   5.1 Existing Integrations                    |UltiSnips-integrations|
+   5.2 Extending UltiSnips                      |UltiSnips-extending|
 6. Helping Out                                  |UltiSnips-helping|
 7. Contact                                      |UltiSnips-contact|
 8. Contributors                                 |UltiSnips-contributors|
@@ -1259,6 +1261,9 @@ snippets if you wish to replace them. Simply use the '!' option. (See
 ==============================================================================
 5. UltiSnips and Other Plugins                      *UltiSnips-other-plugins*
 
+5.1 Existing Integrations                            *UltiSnips-integrations*
+-------------------------
+
 UltiSnips has built-in support for some common plugins and there are others
 that are aware of UltiSnips and use it to improve the user experience. This is
 an incomplete list - if you want to have your plugin listed here, just sent me
@@ -1283,6 +1288,14 @@ neocomplcache - Stanislav Golovanov (JazzCore) has made an integration plugin
 to use UltiSnips as engine inside of neocomplcache. You can find his work at
 https://github.com/JazzCore/neocomplcache-ultisnips.
 
+5.2 Extending UltiSnips                               *UltiSnips-extending*
+-------------------------
+
+UltiSnips allows other plugins to add new snippets on the fly. Since UltiSnips
+is written in python, the integration is also on a python basis. A small
+example can be found in `test.py`, search for AddNewSnippetSource. Please
+contact me on github if you integrate UltiSnips with your plugin so it can be
+listed in the docs.
 
 =============================================================================
 6. Helping Out                                            *UltiSnips-helping*

@@ -322,9 +322,11 @@ class _VimTest(unittest.TestCase):
                 self.setUp()
         self.assertEqual(self.output, wanted)
 
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         """Adds extra lines to the vim_config list."""
-        pass
+
+    def _extra_options_post_init(self, vim_config):
+        """Adds extra lines to the vim_config list."""
 
     def _before_test(self):
         """Send these keys before the test runs. Used for buffer local
@@ -392,10 +394,12 @@ class _VimTest(unittest.TestCase):
         vim_config.append('let g:UltiSnipsUsePythonVersion="%i"' % (3 if PYTHON3 else 2))
         vim_config.append('let g:UltiSnipsSnippetDirectories=["us"]')
 
-        self._extra_options(vim_config)
+        self._extra_options_pre_init(vim_config)
 
         # Now activate UltiSnips.
-        vim_config.append('so plugin/UltiSnips.vim')
+        vim_config.append('call UltiSnips#bootstrap#Bootstrap()')
+
+        self._extra_options_post_init(vim_config)
 
         # Finally, add the snippets and some configuration for the test.
         vim_config.append("%s << EOF" % ("py3" if PYTHON3 else "py"))
@@ -693,7 +697,7 @@ class SimpleExpandTwice_ExpectCorrectResult(_SimpleExpands):
 class SimpleExpandNewLineAndBackspae_ExpectCorrectResult(_SimpleExpands):
     keys = "hallo" + EX + "\nHallo Welt!\n\n\b\b\b\b\b"
     wanted = "Hallo Welt!\nHallo We"
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("set backspace=eol,start")
 
 class SimpleExpandTypeAfterExpand_ExpectCorrectResult(_SimpleExpands):
@@ -1212,7 +1216,7 @@ i0
 	End"""
 
 class PythonCode_IndentEtSw(_VimTest):
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("set sw=3")
         vim_config.append("set expandtab")
     snippets = ("test", r"""hi
@@ -1234,7 +1238,7 @@ i0
    End"""
 
 class PythonCode_IndentEtSwOffset(_VimTest):
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("set sw=3")
         vim_config.append("set expandtab")
     snippets = ("test", r"""hi
@@ -1256,7 +1260,7 @@ End""")
     End"""
 
 class PythonCode_IndentNoetSwTs(_VimTest):
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("set sw=3")
         vim_config.append("set ts=4")
     snippets = ("test", r"""hi
@@ -1279,7 +1283,7 @@ i0
 
 # Test using 'opt'
 class PythonCode_OptExists(_VimTest):
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append('let g:UStest="yes"')
     snippets = ("test", r"""hi `!p snip.rv = snip.opt("g:UStest") or "no"` End""")
     keys = """test""" + EX
@@ -2297,31 +2301,31 @@ class No_Tab_Expand_Leading_Tabs(_No_Tab_Expand):
     keys = "\ttest" + EX
     wanted = "\t\t\tExpand\tme!\t"
 class No_Tab_Expand_No_TS(_No_Tab_Expand):
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("set sw=3")
         vim_config.append("set sts=3")
     keys = "test" + EX
     wanted = "\t\tExpand\tme!\t"
 class No_Tab_Expand_ET(_No_Tab_Expand):
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("set sw=3")
         vim_config.append("set expandtab")
     keys = "test" + EX
     wanted = "\t\tExpand\tme!\t"
 class No_Tab_Expand_ET_Leading_Spaces(_No_Tab_Expand):
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("set sw=3")
         vim_config.append("set expandtab")
     keys = "  test" + EX
     wanted = "  \t\tExpand\tme!\t"
 class No_Tab_Expand_ET_SW(_No_Tab_Expand):
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("set sw=8")
         vim_config.append("set expandtab")
     keys = "test" + EX
     wanted = "\t\tExpand\tme!\t"
 class No_Tab_Expand_ET_SW_TS(_No_Tab_Expand):
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("set sw=3")
         vim_config.append("set sts=3")
         vim_config.append("set ts=3")
@@ -2344,7 +2348,7 @@ snip.rv = repr(snip.rv)
 End""")
 
 class No_Tab_Expand_RealWorld(_TabExpand_RealWorld,_VimTest):
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("set noexpandtab")
     keys = "\t\thi" + EX
     wanted = """\t\thi
@@ -2465,7 +2469,7 @@ class MultiWord_SnippetOptions_ExpandWordSnippets_ExpandSuffix(
 # Anonymous Expansion  {{{#
 class _AnonBase(_VimTest):
     args = ""
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("inoremap <silent> %s <C-R>=UltiSnips#Anon(%s)<cr>"
                 % (EA, self.args))
 
@@ -2516,7 +2520,7 @@ class Anon_Trigger_Opts(_AnonBase):
 # AddSnippet Function  {{{#
 class _AddFuncBase(_VimTest):
     args = ""
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append(":call UltiSnips#AddSnippetWithPriority(%s)" %
                 self.args)
 
@@ -2533,7 +2537,7 @@ class AddFunc_Opt(_AddFuncBase):
 
 # ExpandTab  {{{#
 class _ExpandTabs(_VimTest):
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("set sw=3")
         vim_config.append("set expandtab")
 
@@ -2556,8 +2560,8 @@ class RecTabStopsWithExpandtab_SpecialIndentProblem_ECR(_ExpandTabs):
     )
     keys = "m" + EX + "m1" + EX + '\nHallo'
     wanted = "   Something\n        Hallo"
-    def _extra_options(self, vim_config):
-        _ExpandTabs._extra_options(self, vim_config)
+    def _extra_options_pre_init(self, vim_config):
+        _ExpandTabs._extra_options_pre_init(self, vim_config)
         vim_config.append("set indentkeys=o,O,*<Return>,<>>,{,}")
         vim_config.append("set indentexpr=8")
 # End: ExpandTab  #}}}
@@ -2574,7 +2578,7 @@ class ProperIndenting_AutoIndentAndNewline_ECR(_VimTest):
     snippets = ("test", "hui")
     keys = "    test" + EX + "\n"+ "blah"
     wanted = "    hui\n    blah"
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("set autoindent")
 # Test for bug 1073816
 class ProperIndenting_FirstLineInFile_ECR(_VimTest):
@@ -2605,7 +2609,7 @@ class ProperIndenting_FirstLineInFileComplete_ECR(ProperIndenting_FirstLineInFil
 # End: Proper Indenting  #}}}
 # Format options tests  {{{#
 class _FormatoptionsBase(_VimTest):
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("set tw=20")
         vim_config.append("set fo=lrqntc")
 
@@ -2669,7 +2673,7 @@ $0""")
 and a mirror: hi1
 hi2...hi3
 hi4"""
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("set langmap=dj,rk,nl,ln,jd,kr,DJ,RK,NL,LN,JD,KR")
 
 # Test for https://bugs.launchpad.net/bugs/501727 #
@@ -2717,7 +2721,7 @@ class _SelectModeMappings(_VimTest):
     do_unmapping = True
     ignores = []
 
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append(":let g:UltiSnipsRemoveSelectModeMappings=%i" % int(self.do_unmapping))
         vim_config.append(":let g:UltiSnipsMappingsToIgnore=%s" % repr(self.ignores))
 
@@ -2759,7 +2763,7 @@ class SelectModeMappings_BufferLocalMappings_ECR(_SelectModeMappings):
 # End: Unmap SelectMode Mappings  #}}}
 # Folding Interaction  {{{#
 class FoldingEnabled_SnippetWithFold_ExpectNoFolding(_VimTest):
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("set foldlevel=0")
         vim_config.append("set foldmethod=marker")
     snippets = ("test", r"""Hello {{{
@@ -2784,7 +2788,7 @@ class Fold_DeleteMiddleLine_ECR(_VimTest):
     wanted = "# hi  {{{\n\n# End: hi  }}}"
 
 class PerlSyntaxFold(_VimTest):
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("set foldlevel=0")
         vim_config.append("syntax enable")
         vim_config.append("set foldmethod=syntax")
@@ -2814,7 +2818,7 @@ class CursorMovement_Multiline_ECR(_VimTest):
     wanted = "this is something\nvery nice\nnot " \
             "this is something\nvery nice\nnotmore text"
 class CursorMovement_BS_InEditMode(_VimTest):
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("set backspace=eol,indent,start")
     snippets = ("<trh", "<tr>\n\t<th>$1</th>\n\t$2\n</tr>\n$3")
     keys = "<trh" + EX + "blah" + JF + BS + BS + JF + "end"
@@ -3109,7 +3113,7 @@ class Snippet_With_Umlauts_Python(_UmlautsBase):
 # End: Umlauts and Special Chars  #}}}
 # Exclusive Selection  {{{#
 class _ES_Base(_VimTest):
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append("set selection=exclusive")
 class ExclusiveSelection_SimpleTabstop_Test(_ES_Base):
     snippets = ("test", "h${1:blah}w $1")
@@ -3301,6 +3305,38 @@ class VerifyVimDict3(_VimTest):
     keys = ("te'=(UltiSnips#SnippetsInCurrentScope()[{}]".format(akey) + ')\n')
     wanted = "te'123êabc"
 # End: SnippetsInCurrentScope  #}}}
+# Snippet Source  {{{#
+class AddNewSnippetSource(_VimTest):
+    keys = ( "blumba" + EX + ESC +
+      ":%(python)s UltiSnips_Manager.register_snippet_source(" +
+          "'temp', MySnippetSource())\n" +
+      "oblumba" + EX + ESC +
+      ":%(python)s UltiSnips_Manager.unregister_snippet_source('temp')\n" +
+      "oblumba" + EX ) % { 'python': 'py3' if PYTHON3 else 'py' }
+    wanted = (
+      "blumba" + EX + "\n" +
+      "this is a dynamic snippet" + "\n" +
+      "blumba" + EX
+    )
+
+    def _extra_options_post_init(self, vim_config):
+        self._create_file("snippet_source.py","""
+from UltiSnips.snippet.source import SnippetSource
+from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
+
+class MySnippetSource(SnippetSource):
+  def get_snippets(self, filetypes, before, possible):
+    if before.endswith('blumba'):
+      return [
+          UltiSnipsSnippetDefinition(
+              -100, "blumba", "this is a dynamic snippet", "", "", {})
+        ]
+    return []
+""")
+        pyfile = 'py3file' if PYTHON3 else 'pyfile'
+        vim_config.append("%s %s" % (pyfile, os.path.join(
+            self._temporary_directory, "snippet_source.py")))
+# End: Snippet Source  #}}}
 
 # Plugin: YouCompleteMe  {{{#
 class YouCompleteMe_IntegrationTest(_VimTest):
@@ -3315,7 +3351,7 @@ class YouCompleteMe_IntegrationTest(_VimTest):
     keys = "superlo\ty"
     wanted = "Hello"
 
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         # Not sure why, but I need to make a new tab for this to work.
         vim_config.append('let g:UltiSnipsExpandTrigger="y"')
         vim_config.append('tabnew')
@@ -3325,7 +3361,6 @@ class YouCompleteMe_IntegrationTest(_VimTest):
         # Give ycm a chance to catch up.
         time.sleep(1)
 # End: Plugin: YouCompleteMe  #}}}
-
 # Plugin: Neocomplete {{{#
 class Neocomplete_BugTest(_VimTest):
     # Test for https://github.com/SirVer/ultisnips/issues/228
@@ -3337,7 +3372,7 @@ class Neocomplete_BugTest(_VimTest):
     keys = "iab\\ t" + EX
     wanted = "iab\\ Hello"
 
-    def _extra_options(self, vim_config):
+    def _extra_options_pre_init(self, vim_config):
         vim_config.append(r'set iskeyword+=\\ ')
         vim_config.append('let g:neocomplete#enable_at_startup = 1')
         vim_config.append('let g:neocomplete#enable_smart_case = 1')

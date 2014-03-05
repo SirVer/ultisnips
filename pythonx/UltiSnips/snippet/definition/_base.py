@@ -49,6 +49,10 @@ class SnippetDefinition(object):
         self._last_re = None
         self._globals = globals
 
+        # Make sure that we actually match our trigger in case we are
+        # immediately expanded.
+        self.matches(self._trigger)
+
     def __repr__(self):
         return "_SnippetDefinition(%r,%s,%s,%s)" % (
                 self._priority, self._trigger, self._description, self._opts)

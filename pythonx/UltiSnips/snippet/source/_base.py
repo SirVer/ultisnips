@@ -14,9 +14,13 @@ class SnippetSource(object):
         self._snippets = defaultdict(SnippetDictionary)
 
     def get_snippets(self, filetypes, before, possible):
-        """Returns the snippets for all 'filetypes' (in order) and their
-        parents matching the text 'before'. If 'possible' is true, a partial
-        match is enough."""
+        """Returns the snippets for all 'filetypes' (in order) and their parents
+        matching the text 'before'. If 'possible' is true, a partial match is
+        enough. Base classes can override this method to provide means of
+        creating snippets on the fly.
+
+        Returns a list of SnippetDefinition s.
+        """
         found_snippets = []
         for ft in filetypes:
             found_snippets += self._find_snippets(ft, before, possible)
