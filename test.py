@@ -3324,10 +3324,27 @@ class YouCompleteMe_IntegrationTest(_VimTest):
         self.vim.send(":set ft=python\n")
         # Give ycm a chance to catch up.
         time.sleep(1)
-
-
-
 # End: Plugin: YouCompleteMe  #}}}
+
+# Plugin: Neocomplete {{{#
+class Neocomplete_BugTest(_VimTest):
+    # Test for https://github.com/SirVer/ultisnips/issues/228
+    def skip_if(self):
+        if "+lua" not in self.version:
+            return "Needs +lua"
+    plugins = ["Shougo/neocomplete.vim"]
+    snippets = ("t", "Hello", "", "w")
+    keys = "iab\\ t" + EX
+    wanted = "iab\\ Hello"
+
+    def _extra_options(self, vim_config):
+        vim_config.append(r'set iskeyword+=\\ ')
+        vim_config.append('let g:neocomplete#enable_at_startup = 1')
+        vim_config.append('let g:neocomplete#enable_smart_case = 1')
+        vim_config.append('let g:neocomplete#enable_camel_case = 1')
+        vim_config.append('let g:neocomplete#enable_auto_delimiter = 1')
+        vim_config.append('let g:neocomplete#enable_refresh_always = 1')
+# End: Plugin: Neocomplete  #}}}
 
 ###########################################################################
 #                               END OF TEST                               #

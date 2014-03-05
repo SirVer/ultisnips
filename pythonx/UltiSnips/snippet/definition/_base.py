@@ -8,6 +8,7 @@ import re
 from UltiSnips import _vim
 from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
+from UltiSnips.text import escape
 from UltiSnips.text_objects import SnippetInstance
 
 def _words_for_line(trigger, before, num_words=None):
@@ -115,8 +116,7 @@ class SnippetDefinition(object):
             match = (words_suffix == self._trigger)
             if match and words_prefix:
                 # Require a word boundary between prefix and suffix.
-                boundary_chars = words_prefix[-1:] + words_suffix[:1]
-                boundary_chars = boundary_chars.replace('"', '\\"')
+                boundary_chars = escape(words_prefix[-1:] + words_suffix[:1], r'\"')
                 match = _vim.eval('"%s" =~# "\\\\v.<."' % boundary_chars) != '0'
         elif "i" in self._opts:
             match = words.endswith(self._trigger)
@@ -152,7 +152,7 @@ class SnippetDefinition(object):
             match = self._re_match(trigger)
         elif "w" in self._opts:
             # Trim non-empty prefix up to word boundary, if present.
-            qwords = words.replace('"', '\\"')
+            qwords = escape(words, r'\"')
             words_suffix = _vim.eval(
                     'substitute("%s", "\\\\v^.+<(.+)", "\\\\1", "")' % qwords)
             match = self._trigger.startswith(words_suffix)

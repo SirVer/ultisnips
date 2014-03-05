@@ -16,6 +16,16 @@ def unescape(text):
         i += 1
     return rv
 
+def escape(text, chars):
+    """Escapes all characters in 'chars' in text using backspaces."""
+    rv = ""
+    for char in text:
+        if char in chars:
+            rv += '\\'
+        rv += char
+    return rv
+
+
 def fill_in_whitespace(text):
     """Returns 'text' with escaped whitespace replaced through whitespaces."""
     text = text.replace(r"\n", "\n")
