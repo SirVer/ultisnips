@@ -72,13 +72,13 @@ def running_on_windows():
     if platform.system() == "Windows":
         return "Does not work on Windows."
 
+def python3():
+    if PYTHON3:
+        return "Test does not work on python3."
+
 def no_unidecode_available():
     if not UNIDECODE_IMPORTED:
         return "unidecode is not available."
-
-def not_testing_with_other_plugins(self):
-    if self.plugins and not self.test_plugins:
-        return "Not testing integration with other plugins."
 
 def is_process_running(pid):
     """Returns true if a process with pid is running, false otherwise."""
@@ -109,10 +109,10 @@ def clone_plugin(plugin):
     """Clone the given plugin into our plugin directory."""
     dirname = os.path.join(plugin_cache_dir(), os.path.basename(plugin))
     if os.path.exists(dirname):
-        print "Skip cloning of %s. Already there." % plugin
+        print("Skip cloning of %s. Already there." % plugin)
         return
     create_directory(dirname)
-    print "Cloning %s." % plugin
+    print("Cloning %s." % plugin)
     subprocess.call(["git", "clone", "--recursive",
         "--depth", "1", "https://github.com/%s" % plugin, dirname])
 
@@ -126,6 +126,12 @@ def setup_other_plugins(all_plugins):
     for plugin in all_plugins:
         clone_plugin(plugin)
 
+def read_text_file(filename):
+    """Reads the contens of a text file."""
+    if PYTHON3:
+        return open(filename,"r", encoding="utf-8").read()
+    else:
+        return open(filename,"r").read()
 
 def random_string(n):
     return ''.join(random.choice(string.ascii_lowercase) for x in range(n))
@@ -142,10 +148,7 @@ class VimInterface(object):
         tries = 50
         while tries:
             if os.path.exists(fn):
-                if PYTHON3:
-                    return open(fn,"r", encoding="utf-8").read()[:-1]
-                else:
-                    return open(fn,"r").read()[:-1]
+                return read_text_file(fn)[:-1]
             time.sleep(.01)
             tries -= 1
 
@@ -302,7 +305,8 @@ class _VimTest(unittest.TestCase):
     output = ""
     plugins = []
     # Skip this test for the given reason or None for not skipping it.
-    skip_if = not_testing_with_other_plugins
+    skip_if = lambda self: None
+    version = None  # Will be set to vim --version output
 
     def runTest(self):
         # Only checks the output. All work is done in setUp().
@@ -349,6 +353,14 @@ class _VimTest(unittest.TestCase):
         os.symlink(source, os.path.join(absdir, os.path.basename(source)))
 
     def setUp(self):
+        if not _VimTest.version:
+            _VimTest.version, _ = subprocess.Popen(["vim", "--version"],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+            if PYTHON3:
+                _VimTest.version = stdout.decode("utf-8")
+
+        if self.plugins and not self.test_plugins:
+            return self.skipTest("Not testing integration with other plugins.")
         reason_for_skipping = self.skip_if()
         if reason_for_skipping is not None:
             return self.skipTest(reason_for_skipping)
@@ -356,7 +368,6 @@ class _VimTest(unittest.TestCase):
         self._temporary_directory = tempfile.mkdtemp(prefix="UltiSnips_Test")
 
         vim_config = []
-
         vim_config.append('set nocompatible')
         vim_config.append('set runtimepath=$VIMRUNTIME,.,%s' % self._temporary_directory)
 
@@ -3293,6 +3304,12 @@ class VerifyVimDict3(_VimTest):
 
 # Plugin: YouCompleteMe  {{{#
 class YouCompleteMe_IntegrationTest(_VimTest):
+    def skip_if(self):
+        r = python3()
+        if r:
+            return r
+        if "7.4" not in self.version:
+            return "Needs Vim 7.4."
     plugins = ["Valloric/YouCompleteMe"]
     snippets = ("superlongtrigger", "Hello")
     keys = "superlo\ty"
