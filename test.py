@@ -357,7 +357,7 @@ class _VimTest(unittest.TestCase):
             _VimTest.version, _ = subprocess.Popen(["vim", "--version"],
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
             if PYTHON3:
-                _VimTest.version = stdout.decode("utf-8")
+                _VimTest.version = _VimTest.version.decode("utf-8")
 
         if self.plugins and not self.test_plugins:
             return self.skipTest("Not testing integration with other plugins.")
@@ -3363,6 +3363,8 @@ if __name__ == '__main__':
 
         p.add_option("-v", "--verbose", dest="verbose", action="store_true",
             help="print name of tests as they are executed")
+        p.add_option("--clone-plugins", action="store_true",
+            help="Only clones dependant plugins and exits the test runner.")
         p.add_option("--plugins", action="store_true",
             help="Run integration tests with other Vim plugins.")
         p.add_option("--interface", type=str,
@@ -3386,45 +3388,51 @@ if __name__ == '__main__':
 
         return o, args
 
-    options,selected_tests = parse_args()
+    def main():
+        options,selected_tests = parse_args()
 
-    test_loader = unittest.TestLoader()
-    all_test_suites = test_loader.loadTestsFromModule(__import__("test"))
+        test_loader = unittest.TestLoader()
+        all_test_suites = test_loader.loadTestsFromModule(__import__("test"))
 
-    if platform.system() == "Windows":
-        raise RuntimeError("TODO: TestSuite is broken under windows. Volunteers wanted!.")
-        # vim = VimInterfaceWindows()
-        vim.focus()
-    else:
-        if options.interface == "screen":
-            vim = VimInterfaceScreen(options.session)
-        elif options.interface == "tmux":
-            vim = VimInterfaceTmux(options.session)
+        vim = None
+        if not options.clone_plugins:
+            if platform.system() == "Windows":
+                raise RuntimeError("TODO: TestSuite is broken under windows. Volunteers wanted!.")
+                # vim = VimInterfaceWindows()
+                vim.focus()
+            else:
+                if options.interface == "screen":
+                    vim = VimInterfaceScreen(options.session)
+                elif options.interface == "tmux":
+                    vim = VimInterfaceTmux(options.session)
 
-    # Inform all test case which screen session to use
-    suite = unittest.TestSuite()
-    all_other_plugins = set()
-    for s in all_test_suites:
-        for test in s:
-            test.vim = vim
-            test.interrupt = options.interrupt
-            test.retries = options.retries
-            test.test_plugins = options.plugins
-            all_other_plugins.update(test.plugins)
+        suite = unittest.TestSuite()
+        all_other_plugins = set()
+        for s in all_test_suites:
+            for test in s:
+                test.interrupt = options.interrupt
+                test.retries = options.retries
+                test.test_plugins = options.plugins
+                test.vim = vim
+                all_other_plugins.update(test.plugins)
 
-            if len(selected_tests):
-                id = test.id().split('.')[1]
-                if not any([ id.startswith(t) for t in selected_tests ]):
-                    continue
-            suite.addTest(test)
+                if len(selected_tests):
+                    id = test.id().split('.')[1]
+                    if not any([ id.startswith(t) for t in selected_tests ]):
+                        continue
+                suite.addTest(test)
 
-    if options.plugins:
-        setup_other_plugins(all_other_plugins)
+        if options.plugins or options.clone_plugins:
+            setup_other_plugins(all_other_plugins)
+            if options.clone_plugins:
+                return
 
-    if options.verbose:
-        v = 2
-    else:
-        v = 1
-    res = unittest.TextTestRunner(verbosity=v).run(suite)
+        if options.verbose:
+            v = 2
+        else:
+            v = 1
+        res = unittest.TextTestRunner(verbosity=v).run(suite)
+
+    main()
 
 # vim:fileencoding=utf-8:foldmarker={{{#,#}}}:
