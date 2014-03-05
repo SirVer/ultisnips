@@ -1,10 +1,11 @@
+let s:save_cpo = &cpo
+set cpo&vim
+
 let s:source = {
       \ 'name' : 'ultisnips',
-      \ 'kind' : 'manual',
+      \ 'kind' : 'keyword',
+      \ 'rank' : 8,
       \ 'mark' : '[U]',
-      \ 'min_pattern_length' : 1,
-      \ 'is_volatile' : 1,
-      \ 'rank' : 10,
       \}
 
 function! s:source.gather_candidates(context)
@@ -14,3 +15,6 @@ endfunction
 function! neocomplete#sources#ultisnips#define()
   return s:source
 endfunction
+
+let &cpo = s:save_cpo
+unlet s:save_cpo
