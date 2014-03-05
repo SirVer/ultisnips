@@ -3380,6 +3380,26 @@ class Neocomplete_BugTest(_VimTest):
         vim_config.append('let g:neocomplete#enable_auto_delimiter = 1')
         vim_config.append('let g:neocomplete#enable_refresh_always = 1')
 # End: Plugin: Neocomplete  #}}}
+# Plugin: Supertab {{{#
+class SuperTab_SimpleTest(_VimTest):
+    plugins = ["ervandew/supertab"]
+    snippets = ("long", "Hello", "", "w")
+    keys = ( "longtextlongtext\n" +
+        "longt" + EX + "\n" +  # Should complete word
+        "long" + EX )  # Should expand
+    wanted = "longtextlongtext\nlongtextlongtext\nHello"
+
+    def _before_test(self):
+        # Make sure that UltiSnips has the keymap
+        self.vim.send(":call UltiSnips#map_keys#MapKeys()\n")
+
+    def _extra_options_post_init(self, vim_config):
+        assert EX == "\t"  # Otherwise this test needs changing.
+        vim_config.append('let g:SuperTabDefaultCompletionType = "<c-p>"')
+        vim_config.append('let g:SuperTabRetainCompletionDuration = "insert"')
+        vim_config.append('let g:SuperTabLongestHighlight = 1')
+        vim_config.append('let g:SuperTabCrMapping = 0')
+# End: Plugin: Supertab   #}}}
 
 ###########################################################################
 #                               END OF TEST                               #
