@@ -94,8 +94,6 @@ class SnippetFileSource(SnippetSource):
                         _vim.escape(filename))
                 raise SnippetSyntaxError(filename, line_index, msg)
             elif event == "clearsnippets":
-                # TODO(sirver): clear snippets should clear for
-                # more sources, not only ultisnips files.
                 triggers, = data
                 self._snippets[ft].clear_snippets(triggers)
             elif event == "extends":

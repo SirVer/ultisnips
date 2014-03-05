@@ -12,14 +12,6 @@ from UltiSnips.snippet.source.file._base import SnippetFileSource
 from UltiSnips.snippet.source.file._common import handle_extends
 from UltiSnips.text import LineIterator, head_tail
 
-# TODO(sirver): garbas/snipMate supports guard expressions. I could not figure
-# out how the work though and therefore did not implement them. They should be
-# fairly straightforward to add if I understand their purpose correctly.
-
-# TODO(sirver): the snipMate docs state that a snippet without description gets
-# overwritten by one with the same trigger but without description. I find this
-# silly and will only implement if people start complaining.
-
 def _splitall(path):
     """Split 'path' into all its components."""
     # From http://my.safaribooksonline.com/book/programming/
