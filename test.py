@@ -108,11 +108,11 @@ def plugin_cache_dir():
 def clone_plugin(plugin):
     """Clone the given plugin into our plugin directory."""
     dirname = os.path.join(plugin_cache_dir(), os.path.basename(plugin))
+    print("Cloning %s -> %s" % (plugin, dirname))
     if os.path.exists(dirname):
         print("Skip cloning of %s. Already there." % plugin)
         return
     create_directory(dirname)
-    print("Cloning %s." % plugin)
     subprocess.call(["git", "clone", "--recursive",
         "--depth", "1", "https://github.com/%s" % plugin, dirname])
 
