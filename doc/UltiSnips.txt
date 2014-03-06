@@ -1280,13 +1280,12 @@ UltiSnips snippets).
 YouCompleteMe - comes with out of the box completion support for UltiSnips. It
 offers a really nice completion dialogue for snippets.
 
+neocomplete - UltiSnips ships with a source for neocomplete and therefore
+offers out of the box completion dialogue support for it too.
+
 Supertab - UltiSnips has built-in support for Supertab. Just use a recent
 enough version of both plugins and <tab> will either expand a snippet or defer
 to Supertab for expansion.
-
-neocomplcache - Stanislav Golovanov (JazzCore) has made an integration plugin
-to use UltiSnips as engine inside of neocomplcache. You can find his work at
-https://github.com/JazzCore/neocomplcache-ultisnips.
 
 5.2 Extending UltiSnips                               *UltiSnips-extending*
 -------------------------
