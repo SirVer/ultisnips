@@ -6,6 +6,7 @@
 from collections import defaultdict
 from functools import wraps
 import os
+import platform
 import traceback
 
 from UltiSnips import _vim
@@ -14,23 +15,20 @@ from UltiSnips.compatibility import as_unicode
 from UltiSnips.position import Position
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
 from UltiSnips.snippet.source import UltiSnipsFileSource, SnipMateFileSource, \
-        base_snippet_files_for, AddedSnippetsSource
+        find_all_snippet_files, find_snippet_files, AddedSnippetsSource
 from UltiSnips.vim_state import VimState, VisualContentPreserver
 
-def _ask_snippets(snippets):
-    """ Given a list of snippets, ask the user which one they
-    want to use, and return it.
-    """
-    display = [as_unicode("%i: %s") % (i+1, s.description) for
-            i, s in enumerate(snippets)]
+def _ask_user(a, formatted):
+    """Asks the user using inputlist() and returns the selected element or
+    None."""
     try:
-        rv = _vim.eval("inputlist(%s)" % _vim.escape(display))
+        rv = _vim.eval("inputlist(%s)" % _vim.escape(formatted))
         if rv is None or rv == '0':
             return None
         rv = int(rv)
-        if rv > len(snippets):
-            rv = len(snippets)
-        return snippets[rv-1]
+        if rv > len(a):
+            rv = len(a)
+        return a[rv-1]
     except _vim.error:
         # Likely "invalid expression", but might be translated. We have no way
         # of knowing the exact error, therefore, we ignore all errors silently.
@@ -38,6 +36,13 @@ def _ask_snippets(snippets):
     except KeyboardInterrupt:
         return None
 
+def _ask_snippets(snippets):
+    """ Given a list of snippets, ask the user which one they
+    want to use, and return it.
+    """
+    display = [as_unicode("%i: %s") % (i+1, s.description) for
+            i, s in enumerate(snippets)]
+    return _ask_user(snippets, display)
 
 def err_to_scratch_buffer(func):
     """Decorator that will catch any Exception that 'func' throws and displays
@@ -495,42 +500,43 @@ class SnippetManager(object):
         any arguments."""
         return self._buffer_filetypes[_vim.buf.number][0]
 
-    # TODO(sirver): this should talk directly to the UltiSnipsFileSource.
-    def _file_to_edit(self, ft):  # pylint: disable=no-self-use
-        """ Gets a file to edit based on the given filetype.
-        If no filetype is given, uses the current filetype from Vim.
-
-        Checks 'g:UltiSnipsSnippetsDir' and uses it if it exists
-        If a non-shipped file already exists, it uses it.
-        Otherwise uses a file in ~/.vim/ or ~/vimfiles
+    def _file_to_edit(self, ft, bang):  # pylint: disable=no-self-use
+        """Returns a file to be edited for the given ft. If 'bang' is empty
+        only private files in g:UltiSnipsSnippetsDir are considered, otherwise
+        all files are considered and the user gets to choose.
         """
         # This method is not using self, but is called by UltiSnips.vim and is
         # therefore in this class because it is the facade to Vim.
-        edit = None
-        existing = base_snippet_files_for(ft, False)
-        filename = ft + ".snippets"
+        potentials = set()
 
         if _vim.eval("exists('g:UltiSnipsSnippetsDir')") == "1":
-            snipdir = _vim.eval("g:UltiSnipsSnippetsDir")
-            edit = os.path.join(snipdir, filename)
-        elif existing:
-            edit = existing[-1] # last sourced
+            snippet_dir = _vim.eval("g:UltiSnipsSnippetsDir")
         else:
-            home = _vim.eval("$HOME")
-            rtp = [os.path.realpath(os.path.expanduser(p))
-                    for p in _vim.eval("&rtp").split(",")]
-            snippet_dirs = ["UltiSnips"] + \
-                    _vim.eval("g:UltiSnipsSnippetDirectories")
-            us = snippet_dirs[-1]
+            if platform.system() == "Windows":
+                snippet_dir = os.path.join(_vim.eval("$HOME"),
+                        "_vimfiles", "UltiSnips")
+            else:
+                snippet_dir = os.path.join(_vim.eval("$HOME"),
+                        ".vim", "UltiSnips")
+        potentials.update(find_snippet_files(ft, snippet_dir))
+        potentials.add(os.path.join(snippet_dir, ft + '.snippets'))
 
-            path = os.path.join(home, ".vim", us)
-            for dirname in [".vim", "vimfiles"]:
-                pth = os.path.join(home, dirname)
-                if pth in rtp:
-                    path = os.path.join(pth, us)
+        if bang:
+            potentials.update(find_all_snippet_files(ft))
 
-            if not os.path.isdir(path):
-                os.mkdir(path)
+        potentials = set(os.path.realpath(p) for p in potentials)
 
-            edit = os.path.join(path, filename)
+        if len(potentials) > 1:
+            files = sorted(potentials)
+            formatted = [as_unicode('%i: %s') % (i, fn) for
+                    i, fn in enumerate(files, 1)]
+            edit = _ask_user(files, formatted)
+            if edit is None:
+                return ""
+        else:
+            edit = potentials.pop()
+
+        dirname = os.path.dirname(edit)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
         return edit

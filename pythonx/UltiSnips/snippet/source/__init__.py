@@ -7,4 +7,4 @@ from UltiSnips.snippet.source._base import SnippetSource
 from UltiSnips.snippet.source.added import AddedSnippetsSource
 from UltiSnips.snippet.source.file.snipmate import SnipMateFileSource
 from UltiSnips.snippet.source.file.ultisnips import UltiSnipsFileSource, \
-    base_snippet_files_for
+    find_all_snippet_files, find_snippet_files

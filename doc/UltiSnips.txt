@@ -167,10 +167,10 @@ https://github.com/honza/vim-snippets
 3.1 Commands                                             *UltiSnips-commands*
 ------------
                                                              *:UltiSnipsEdit*
-The UltiSnipsEdit command opens the private snippet definition file for the
-current filetype for editing. If a definition file does not exist, a new file
-is opened with the appropriate name. Snippet definition files are standard
-text files and can be edited directly. UltiSnipsEdit makes it easier.
+The UltiSnipsEdit command opens a private snippet definition file for the
+current filetype. If no snippet file exists, a new file is created. If used as
+UltiSnipsEdit! all public snippet files are taken into account too. If
+multiple files match the search, the user gets to choose the file.
 
 There are several variables associated with the UltiSnipsEdit command.
 
@@ -190,6 +190,7 @@ g:UltiSnipsSnippetsDir
                             "~/.vim/mydir/UltiSnips/cpp.snippets". Note that
                             directories named "snippets" are reserved for
                             snipMate snippets and cannot be used.
+
 
                                                        *:UltiSnipsAddFiletypes*
 The UltiSnipsAddFiletypes command allows for explicit merging of other snippet

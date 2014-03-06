@@ -30,13 +30,17 @@ function! s:compensate_for_pum()
     endif
 endfunction
 
-function! UltiSnips#Edit(...)
+function! UltiSnips#Edit(bang, ...)
     if a:0 == 1 && a:1 != ''
         let type = a:1
     else
         exec g:_uspy "vim.command(\"let type = '%s'\" % UltiSnips_Manager._primary_filetype)"
     endif
-    exec g:_uspy "vim.command(\"let file = '%s'\" % UltiSnips_Manager._file_to_edit(vim.eval(\"type\")))"
+    exec g:_uspy "vim.command(\"let file = '%s'\" % UltiSnips_Manager._file_to_edit(vim.eval(\"type\"), vim.eval('a:bang')))"
+
+    if !len(file)
+       return
+    endif
 
     let mode = 'e'
     if exists('g:UltiSnipsEditSplit')
