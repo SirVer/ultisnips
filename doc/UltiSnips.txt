@@ -1381,6 +1381,7 @@ individuals have contributed to UltiSnips (in chronological order):
    Gernot Höflechner - LFDM
    Marcelo D Montu - mMontu
    Karl Yngve Lervåg - lervag
+   petobens
 
 Thank you for your support.
 
