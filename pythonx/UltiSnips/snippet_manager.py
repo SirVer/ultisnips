@@ -524,7 +524,8 @@ class SnippetManager(object):
         if bang:
             potentials.update(find_all_snippet_files(ft))
 
-        potentials = set(os.path.realpath(p) for p in potentials)
+        potentials = set(os.path.realpath(os.path.expanduser(p))
+                for p in potentials)
 
         if len(potentials) > 1:
             files = sorted(potentials)
