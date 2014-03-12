@@ -4,7 +4,7 @@ UltiSnips
 UltiSnips is the ultimate solution for snippets in Vim. It has tons of features
 and is very fast.
 
-![GIF Demo](http://raw.github.com/SirVer/ultisnips/master/doc/demo.gif)
+![GIF Demo](https://raw.github.com/SirVer/ultisnips/master/doc/demo.gif)
 
 In this demo I am editing a python file. I first expand the `#!` snippet, then
 the `class` snippet. The completion menu comes from
