@@ -8,14 +8,16 @@ and is very fast.
 
 In this demo I am editing a python file. I first expand the `#!` snippet, then
 the `class` snippet. The completion menu comes from
-[YouCompleteMe](https://github.com/Valloric/YouCompleteMe). I can jump through
-placeholders and add text while the snippet inserts text in other places
-automatically: when I add a `Animal` as a base class, `__init__` gets updated to
-call the base class constructor. When I add arguments to the constructor, they
-automatically get assigned to instance variables. I then insert my personal
-snippet for `print` debugging. Note that I left insert mode, inserted another
-snippet and went back to add an additional argument to `__init__` and the class
-snippet was still active and added another instance variable.
+[YouCompleteMe](https://github.com/Valloric/YouCompleteMe), UltiSnips also
+integrates with [neocomplete](https://github.com/Shougo/neocomplete.vim). I can
+jump through placeholders and add text while the snippet inserts text in other
+places automatically: when I add `Animal` as a base class, `__init__` gets
+updated to call the base class constructor. When I add arguments to the
+constructor, they automatically get assigned to instance variables. I then
+insert my personal snippet for `print` debugging. Note that I left insert mode,
+inserted another snippet and went back to add an additional argument to
+`__init__` and the class snippet was still active and added another instance
+variable.
 
 The official home of UltiSnips is at <https://github.com/sirver/ultisnips>.
 Please add pull requests and issues there.
