@@ -1,11 +1,24 @@
 UltiSnips
 =========
 
-The official home of UltiSnips is at <https://github.com/sirver/ultisnips>.
-Please add pull requests and issues there.
-
 UltiSnips is the ultimate solution for snippets in Vim. It has tons of features
 and is very fast.
+
+![GIF Demo](http://raw.github.com/SirVer/ultisnips/master/doc/demo.gif)
+
+In this demo I am editing a python file. I first expand the `#!` snippet, then
+the `class` snippet. The completion menu comes from
+[YouCompleteMe](https://github.com/Valloric/YouCompleteMe). I can jump through
+placeholders and add text while the snippet inserts text in other places
+automatically: when I add a `Animal` as a base class, `__init__` gets updated to
+call the base class constructor. When I add arguments to the constructor, they
+automatically get assigned to instance variables. I then insert my personal
+snippet for `print` debugging. Note that I left insert mode, inserted another
+snippet and went back to add an additional argument to `__init__` and the class
+snippet was still active and added another instance variable.
+
+The official home of UltiSnips is at <https://github.com/sirver/ultisnips>.
+Please add pull requests and issues there.
 
 Quick Start
 -----------
