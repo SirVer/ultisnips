@@ -76,6 +76,7 @@ class SnippetManager(object):
         self.expand_trigger = expand_trigger
         self.forward_trigger = forward_trigger
         self.backward_trigger = backward_trigger
+        self._inner_mappings_in_place = False
         self._supertab_keys = None
 
         self._csnippets = []
@@ -207,19 +208,19 @@ class SnippetManager(object):
             return False
 
     def register_snippet_source(self, name, snippet_source):
-      """Registers a new 'snippet_source' with the given 'name'. The given class
-      must be an instance of SnippetSource. This source will be queried for
-      snippets."""
-      self._snippet_sources.append((name, snippet_source))
+        """Registers a new 'snippet_source' with the given 'name'. The given
+        class must be an instance of SnippetSource. This source will be queried
+        for snippets."""
+        self._snippet_sources.append((name, snippet_source))
 
     def unregister_snippet_source(self, name):
-      """Unregister the source with the given 'name'. Does nothing if it is not
-      registered."""
-      for index, (source_name, _) in enumerate(self._snippet_sources):
-        if name == source_name:
-          self._snippet_sources = \
-              self._snippet_sources[:index] + self._snippet_sources[index+1:]
-          break
+        """Unregister the source with the given 'name'. Does nothing if it is
+        not registered."""
+        for index, (source_name, _) in enumerate(self._snippet_sources):
+            if name == source_name:
+                self._snippet_sources = self._snippet_sources[:index] + \
+                        self._snippet_sources[index+1:]
+                break
 
     def reset_buffer_filetypes(self):
         """Reset the filetypes for the current buffer."""
@@ -244,6 +245,8 @@ class SnippetManager(object):
     @err_to_scratch_buffer
     def _cursor_moved(self):
         """Called whenever the cursor moved."""
+        if not self._csnippets and self._inner_mappings_in_place:
+            self._unmap_inner_keys()
         self._vstate.remember_position()
         if _vim.eval("mode()") not in 'in':
             return
@@ -306,6 +309,36 @@ class SnippetManager(object):
             self._csnippets[0].update_textobjects()
             self._vstate.remember_buffer(self._csnippets[0])
 
+    def _map_inner_keys(self):
+        """Map keys that should only be defined when a snippet is active."""
+        if self.expand_trigger != self.forward_trigger:
+            _vim.command("inoremap <buffer> <silent> " + self.forward_trigger +
+                    " <C-R>=UltiSnips#JumpForwards()<cr>")
+            _vim.command("snoremap <buffer> <silent> " + self.forward_trigger +
+                    " <Esc>:call UltiSnips#JumpForwards()<cr>")
+        _vim.command("inoremap <buffer> <silent> " + self.backward_trigger +
+                " <C-R>=UltiSnips#JumpBackwards()<cr>")
+        _vim.command("snoremap <buffer> <silent> " + self.backward_trigger +
+                " <Esc>:call UltiSnips#JumpBackwards()<cr>")
+        self._inner_mappings_in_place = True
+
+    def _unmap_inner_keys(self):
+        """Unmap keys that should not be active when no snippet is active."""
+        if not self._inner_mappings_in_place:
+            return
+        try:
+            if self.expand_trigger != self.forward_trigger:
+                _vim.command("iunmap <buffer> %s" % self.forward_trigger)
+                _vim.command("sunmap <buffer> %s" % self.forward_trigger)
+            _vim.command("iunmap <buffer> %s" % self.backward_trigger)
+            _vim.command("sunmap <buffer> %s" % self.backward_trigger)
+            self._inner_mappings_in_place = False
+        except _vim.error:
+            # This happens when a preview window was opened. This issues
+            # CursorMoved, but not BufLeave. We have no way to unmap, until we
+            # are back in our buffer
+            pass
+
     @err_to_scratch_buffer
     def _save_last_visual_selection(self):
         """
@@ -340,7 +373,7 @@ class SnippetManager(object):
         """The current snippet should be terminated."""
         self._csnippets.pop()
         if not self._csnippets:
-            _vim.command("call UltiSnips#map_keys#RestoreInnerKeys()")
+            self._unmap_inner_keys()
 
     def _jump(self, backwards=False):
         """Helper method that does the actual jump."""
@@ -431,7 +464,7 @@ class SnippetManager(object):
     def _do_snippet(self, snippet, before):
         """Expands the given snippet, and handles everything
         that needs to be done with it."""
-        _vim.command("call UltiSnips#map_keys#MapInnerKeys()")
+        self._map_inner_keys()
 
         # Adjust before, maybe the trigger is not the complete word
         text_before = before

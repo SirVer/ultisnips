@@ -120,7 +120,8 @@ class SnippetDefinition(object):
             match = (words_suffix == self._trigger)
             if match and words_prefix:
                 # Require a word boundary between prefix and suffix.
-                boundary_chars = escape(words_prefix[-1:] + words_suffix[:1], r'\"')
+                boundary_chars = escape(words_prefix[-1:] + \
+                        words_suffix[:1], r'\"')
                 match = _vim.eval('"%s" =~# "\\\\v.<."' % boundary_chars) != '0'
         elif "i" in self._opts:
             match = words.endswith(self._trigger)
