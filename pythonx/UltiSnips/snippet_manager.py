@@ -527,16 +527,10 @@ class SnippetManager(object):
             return None
         return self._csnippets[-1]
 
-    @property
-    def _primary_filetype(self):
-        """This filetype will be edited when UltiSnipsEdit is called without
-        any arguments."""
-        return self._buffer_filetypes[_vim.buf.number][0]
-
-    def _file_to_edit(self, ft, bang):  # pylint: disable=no-self-use
-        """Returns a file to be edited for the given ft. If 'bang' is empty
-        only private files in g:UltiSnipsSnippetsDir are considered, otherwise
-        all files are considered and the user gets to choose.
+    def _file_to_edit(self, requested_ft, bang):  # pylint: disable=no-self-use
+        """Returns a file to be edited for the given requested_ft. If 'bang' is
+        empty only private files in g:UltiSnipsSnippetsDir are considered,
+        otherwise all files are considered and the user gets to choose.
         """
         # This method is not using self, but is called by UltiSnips.vim and is
         # therefore in this class because it is the facade to Vim.
@@ -551,11 +545,22 @@ class SnippetManager(object):
             else:
                 snippet_dir = os.path.join(_vim.eval("$HOME"),
                         ".vim", "UltiSnips")
-        potentials.update(find_snippet_files(ft, snippet_dir))
-        potentials.add(os.path.join(snippet_dir, ft + '.snippets'))
 
-        if bang:
-            potentials.update(find_all_snippet_files(ft))
+        filetypes = []
+        if requested_ft:
+            filetypes.append(requested_ft)
+        else:
+            if bang:
+                filetypes.extend(self._buffer_filetypes[_vim.buf.number])
+            else:
+                filetypes.append(self._buffer_filetypes[_vim.buf.number][0])
+
+        for ft in filetypes:
+            potentials.update(find_snippet_files(ft, snippet_dir))
+            potentials.add(os.path.join(snippet_dir,
+                ft + '.snippets'))
+            if bang:
+                potentials.update(find_all_snippet_files(ft))
 
         potentials = set(os.path.realpath(os.path.expanduser(p))
                 for p in potentials)
@@ -564,13 +569,13 @@ class SnippetManager(object):
             files = sorted(potentials)
             formatted = [as_unicode('%i: %s') % (i, fn) for
                     i, fn in enumerate(files, 1)]
-            edit = _ask_user(files, formatted)
-            if edit is None:
+            file_to_edit = _ask_user(files, formatted)
+            if file_to_edit is None:
                 return ""
         else:
-            edit = potentials.pop()
+            file_to_edit = potentials.pop()
 
-        dirname = os.path.dirname(edit)
+        dirname = os.path.dirname(file_to_edit)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
-        return edit
+        return file_to_edit

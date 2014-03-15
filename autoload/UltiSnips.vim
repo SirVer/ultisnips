@@ -34,7 +34,7 @@ function! UltiSnips#Edit(bang, ...)
     if a:0 == 1 && a:1 != ''
         let type = a:1
     else
-        exec g:_uspy "vim.command(\"let type = '%s'\" % UltiSnips_Manager._primary_filetype)"
+        let type = ""
     endif
     exec g:_uspy "vim.command(\"let file = '%s'\" % UltiSnips_Manager._file_to_edit(vim.eval(\"type\"), vim.eval('a:bang')))"
 
