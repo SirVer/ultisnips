@@ -35,7 +35,8 @@ if sys.version_info >= (3, 0):
         Convert a valid column index into a byte index inside
         of vims buffer.
         """
-        pre_chars = vim.current.buffer[line-1][:col]
+        # We pad the line so that selecting the +1 st column still works.
+        pre_chars = (vim.current.buffer[line-1] + "  ")[:col]
         return len(_vim_enc(pre_chars))
 
     def byte2col(line, nbyte):
@@ -68,7 +69,8 @@ else:
         Convert a valid column index into a byte index inside
         of vims buffer.
         """
-        pre_chars = _vim_dec(vim.current.buffer[line-1])[:col]
+        # We pad the line so that selecting the +1 st column still works.
+        pre_chars = _vim_dec(vim.current.buffer[line-1] + "  ")[:col]
         return len(_vim_enc(pre_chars))
 
     def byte2col(line, nbyte):

@@ -108,74 +108,42 @@ def new_scratch_buffer(text):
 
     feedkeys(r"\<Esc>")
 
+def virtual_position(line, col):
+    """Runs the position through virtcol() and returns the result."""
+    nbytes = col2byte(line, col)
+    return line, int(eval('virtcol([%d, %d])' % (line, nbytes)))
+
 def select(start, end):
     """Select the span in Select mode"""
-
     _unmap_select_mode_mapping()
 
-    delta = end - start
-    lineno, col = start.line, start.col
-
-    col = col2byte(lineno + 1, col)
-    vim.current.window.cursor = lineno + 1, col
+    col = col2byte(start.line + 1, start.col)
+    vim.current.window.cursor = start.line + 1, col
 
     move_cmd = ""
     if eval("mode()") != 'n':
         move_cmd += r"\<Esc>"
 
-    # Case 1: Zero Length Tabstops
-    if delta.line == delta.col == 0:
+    if start == end:
+        # Zero Length Tabstops, use 'i' or 'a'.
         if col == 0 or eval("mode()") not in 'i' and \
-                col < len(buf[lineno]):
+                col < len(buf[start.line]):
             move_cmd += "i"
         else:
             move_cmd += "a"
     else:
-        # Case 2a: Non zero length
-        # If a tabstop immediately starts with a newline, the selection must
-        # start after the last character in the current line. But if we are in
-        # insert mode and <Esc> out of it, we cannot go past the last character
-        # with move_one_right and therefore cannot visual-select this newline.
-        # We have to hack around this by adding an extra space which we can
-        # select.  Note that this problem could be circumvent by selecting the
-        # tab backwards (that is starting at the end); one would not need to
-        # modify the line for this. This creates other trouble though
-        if col >= len(buf[lineno]):
-            buf[lineno] += " "
-
-        if delta.line:
-            move_lines = "%ij" % delta.line
+        # Non zero length, use Visual selection.
+        move_cmd += "v"
+        if "inclusive" in eval("&selection"):
+            if end.col == 0:
+                move_cmd += "%iG$" % end.line
+            else:
+                move_cmd += "%iG%i|" % virtual_position(end.line + 1, end.col)
         else:
-            move_lines = ""
-        # Depending on the current mode and position, we
-        # might need to move escape out of the mode and this
-        # will move our cursor one left
-        if col != 0 and eval("mode()") == 'i':
-            move_one_right = "l"
-        else:
-            move_one_right = ""
-
-        # After moving to the correct line, we go back to column 0
-        # and select right from there. Note that the we have to select
-        # one column less since Vim's visual selection is including the
-        # ending while Python slicing is excluding the ending.
-        inclusive = "inclusive" in eval("&selection")
-        if end.col == 0:
-            # Selecting should end at beginning of line -> Select the
-            # previous line till its end
-            do_select = "k$"
-            if not inclusive:
-                do_select += "j0"
-        elif end.col > 1:
-            do_select = "0%il" % (end.col-1 if inclusive else end.col)
-        else:
-            do_select = "0" if inclusive else "0l"
-
-        move_cmd += _LangMapTranslator().translate(
-            r"%sv%s%s\<c-g>" % (move_one_right, move_lines, do_select)
-        )
-
-    feedkeys(move_cmd)
+            move_cmd += "%iG%i|" % virtual_position(end.line + 1, end.col + 1)
+        move_cmd += "o%iG%i|o\\<c-g>" % virtual_position(
+                start.line + 1, start.col + 1)
+    feedkeys(_LangMapTranslator().translate(move_cmd))
 
 def _unmap_select_mode_mapping():
     """This function unmaps select mode mappings if so wished by the user.

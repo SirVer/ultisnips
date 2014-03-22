@@ -497,6 +497,8 @@ class SnippetManager(object):
         self._visual_content.reset()
         self._csnippets.append(si)
 
+        si.update_textobjects()
+
         self._ignore_movements = True
         self._vstate.remember_buffer(self._csnippets[0])
 

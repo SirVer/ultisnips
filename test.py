@@ -740,6 +740,10 @@ class TabStopSimpleReplace_ExpectCorrectResult(_VimTest):
     snippets = ("hallo", "hallo ${0:End} ${1:Beginning}")
     keys = "hallo" + EX + "na" + JF + "Du Nase"
     wanted = "hallo Du Nase na"
+class TabStopSimpleReplaceZeroLengthTabstops_ExpectCorrectResult(_VimTest):
+    snippets = ("test", r":latex:\`$1\`$0")
+    keys = "test" + EX + "Hello" + JF + "World"
+    wanted = ":latex:`Hello`World"
 class TabStopSimpleReplaceReversed_ExpectCorrectResult(_VimTest):
     snippets = ("hallo", "hallo ${1:End} ${0:Beginning}")
     keys = "hallo" + EX + "na" + JF + "Du Nase"
@@ -3156,6 +3160,16 @@ class Bug1251994(_VimTest):
     keys = "  test" + EX + "hello" + JF + "world" + JF + "blub"
     wanted = "  world hello;blub"
 # End: 1251994  #}}}
+# Test for https://github.com/SirVer/ultisnips/issues/157 (virtualedit) {{{#
+class VirtualEdit(_VimTest):
+    snippets = ("pd", "padding: ${1:0}px")
+    keys = "\t\t\tpd" + EX + "2"
+    wanted = "\t\t\tpadding: 2px"
+
+    def _extra_options_pre_init(self, vim_config):
+        vim_config.append('set virtualedit=all')
+        vim_config.append('set noexpandtab')
+# End: 1251994  #}}}
 # Test for Github Pull Request #134 - Retain unnamed register {{{#
 class RetainsTheUnnamedRegister(_VimTest):
     snippets = ("test", "${1:hello} ${2:world} ${0}")
@@ -3339,7 +3353,7 @@ class MySnippetSource(SnippetSource):
 # End: Snippet Source  #}}}
 
 # Plugin: YouCompleteMe  {{{#
-class YouCompleteMe_IntegrationTest(_VimTest):
+class Plugin_YouCompleteMe_IntegrationTest(_VimTest):
     def skip_if(self):
         r = python3()
         if r:
@@ -3362,7 +3376,7 @@ class YouCompleteMe_IntegrationTest(_VimTest):
         time.sleep(1)
 # End: Plugin: YouCompleteMe  #}}}
 # Plugin: Neocomplete {{{#
-class Neocomplete_BugTest(_VimTest):
+class Plugin_Neocomplete_BugTest(_VimTest):
     # Test for https://github.com/SirVer/ultisnips/issues/228
     def skip_if(self):
         if "+lua" not in self.version:
@@ -3381,7 +3395,7 @@ class Neocomplete_BugTest(_VimTest):
         vim_config.append('let g:neocomplete#enable_refresh_always = 1')
 # End: Plugin: Neocomplete  #}}}
 # Plugin: Supertab {{{#
-class SuperTab_SimpleTest(_VimTest):
+class Plugin_SuperTab_SimpleTest(_VimTest):
     plugins = ["ervandew/supertab"]
     snippets = ("long", "Hello", "", "w")
     keys = ( "longtextlongtext\n" +

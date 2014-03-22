@@ -28,3 +28,7 @@ class TabStop(EditableTextObject):
         """True if this tabstop has been typed over and the user therefore can
         no longer jump to it."""
         return self._parent is None
+
+    def __repr__(self):
+        return "TabStop(%s,%r->%r,%r)" % (self.number, self._start,
+                self._end, self.current_text)
