@@ -47,8 +47,9 @@ def find_all_snippet_files(ft):
                     ret.add(fn)
     return ret
 
-def _handle_snippet_or_global(line, lines, python_globals, priority):
+def _handle_snippet_or_global(filename, line, lines, python_globals, priority):
     """Parses the snippet that begins at the current line."""
+    start_line_index = lines.line_index
     descr = ""
     opts = ""
 
@@ -96,11 +97,12 @@ def _handle_snippet_or_global(line, lines, python_globals, priority):
         python_globals[trig].append(content)
     elif snip == "snippet":
         return "snippet", (UltiSnipsSnippetDefinition(priority, trig, content,
-            descr, opts, python_globals),)
+            descr, opts, python_globals,
+            "%s:%i" % (filename, start_line_index)),)
     else:
         return "error", ("Invalid snippet type: '%s'" % snip, lines.line_index)
 
-def _parse_snippets_file(data):
+def _parse_snippets_file(data, filename):
     """Parse 'data' assuming it is a snippet file. Yields events in the
     file."""
 
@@ -113,7 +115,7 @@ def _parse_snippets_file(data):
 
         head, tail = head_tail(line)
         if head in ("snippet", "global"):
-            snippet = _handle_snippet_or_global(line, lines,
+            snippet = _handle_snippet_or_global(filename, line, lines,
                     python_globals, current_priority)
             if snippet is not None:
                 yield snippet
@@ -136,5 +138,5 @@ class UltiSnipsFileSource(SnippetFileSource):
         return find_all_snippet_files(ft)
 
     def _parse_snippet_file(self, filedata, filename):
-        for event, data in _parse_snippets_file(filedata):
+        for event, data in _parse_snippets_file(filedata, filename):
             yield event, data

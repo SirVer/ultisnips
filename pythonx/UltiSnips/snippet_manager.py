@@ -41,8 +41,8 @@ def _ask_snippets(snippets):
     """ Given a list of snippets, ask the user which one they
     want to use, and return it.
     """
-    display = [as_unicode("%i: %s") % (i+1, escape(s.description, '\\')) for
-            i, s in enumerate(snippets)]
+    display = [as_unicode("%i: %s (%s)") % (i+1, escape(s.description, '\\'),
+        s.location) for i, s in enumerate(snippets)]
     return _ask_user(snippets, display)
 
 def err_to_scratch_buffer(func):
@@ -193,14 +193,14 @@ class SnippetManager(object):
         """Add a snippet to the list of known snippets of the given 'ft'."""
         self._added_snippets_source.add_snippet(ft,
                 UltiSnipsSnippetDefinition(priority, trigger, value,
-                    description, options, {}))
+                    description, options, {}, "added"))
 
     @err_to_scratch_buffer
     def expand_anon(self, value, trigger="", description="", options=""):
         """Expand an anonymous snippet right here."""
         before = _vim.buf.line_till_cursor
         snip = UltiSnipsSnippetDefinition(0, trigger, value, description,
-                options, {})
+                options, {}, "")
 
         if not trigger or snip.matches(before):
             self._do_snippet(snip, before)

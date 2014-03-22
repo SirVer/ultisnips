@@ -39,7 +39,7 @@ class SnippetDefinition(object):
     _TABS = re.compile(r"^\t*")
 
     def __init__(self, priority, trigger, value, description,
-            options, globals):
+            options, globals, location):
         self._priority = priority
         self._trigger = as_unicode(trigger)
         self._value = as_unicode(value)
@@ -48,6 +48,7 @@ class SnippetDefinition(object):
         self._matched = ""
         self._last_re = None
         self._globals = globals
+        self._location = location
 
         # Make sure that we actually match our trigger in case we are
         # immediately expanded.
@@ -96,6 +97,11 @@ class SnippetDefinition(object):
         """The last text that matched this snippet in match() or
         could_match()."""
         return self._matched
+
+    @property
+    def location(self):
+        """Where this snippet was defined."""
+        return self._location
 
     def matches(self, trigger):
         """Returns True if this snippet matches 'trigger'."""

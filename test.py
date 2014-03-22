@@ -3343,7 +3343,7 @@ class MySnippetSource(SnippetSource):
     if before.endswith('blumba'):
       return [
           UltiSnipsSnippetDefinition(
-              -100, "blumba", "this is a dynamic snippet", "", "", {})
+              -100, "blumba", "this is a dynamic snippet", "", "", {}, "blub")
         ]
     return []
 """)
