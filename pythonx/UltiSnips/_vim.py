@@ -117,6 +117,10 @@ def select(start, end):
     """Select the span in Select mode"""
     _unmap_select_mode_mapping()
 
+    selection = eval("&selection")
+    if "old" in selection:
+        raise RuntimeError("selection=old does not work with UltiSnips :(.")
+
     col = col2byte(start.line + 1, start.col)
     vim.current.window.cursor = start.line + 1, col
 
@@ -134,7 +138,7 @@ def select(start, end):
     else:
         # Non zero length, use Visual selection.
         move_cmd += "v"
-        if "inclusive" in eval("&selection"):
+        if "inclusive" in selection:
             if end.col == 0:
                 move_cmd += "%iG$" % end.line
             else:
