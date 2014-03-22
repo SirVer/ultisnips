@@ -350,10 +350,11 @@ class EditableTextObject(TextObject):
         child._parent = None
         self._children.remove(child)
 
-        # If this is a tabstop, delete it
+        # If this is a tabstop, delete it. Might have been deleted already if
+        # it was nested.
         try:
             del self._tabstops[child.number]
-        except AttributeError:
+        except (AttributeError, KeyError):
             pass
 
 class NoneditableTextObject(TextObject):
