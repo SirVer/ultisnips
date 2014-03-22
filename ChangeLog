@@ -1,31 +1,39 @@
-dev:
-	- Organisational changes: The project is now hosted on github.
+version 3.0 (02-Mar-2014):
+	- Organisational changes: The project is now hosted on github. Snippets are
+	  now shipped separately - please track honza/vim-snippets.
 	- UltiSnips is now a drop in replacement for snipMate - it parses snipMate
 	  snippets and expands them emulating snipMates smaller feature set.
+	- Filetype tab completion for UltiSnipsEdit.
+	- UltiSnipsEdit now only edits private snippet files. Use UltiSnipsEdit! if
+	  you want to edit shipped files.
+	- New option 's' which strips trailing whitespace before jumping to next
+	  tabstop 
+	- New option 'a' which converts non-ascii characters into ascii characters
+	  in transformations. 
 	- New keyword in snippet files: priority defines which snippets should
 	  overwrite others. This deprecates the '!' option.
 	  *UltiSnips-adding-snippets*
 	- Remove common whitespace of visual line selections before inserting in an
 	  indented tabstop.
-	- Functions now indicates if it did any work. *UltiSnips-trigger-functions*
-	- New option 's' which strips trailing whitespace before jumping to next
-	  tabstop 
-	- New option 'a' which converts non-ascii characters into ascii characters
-	  in transformations. 
-	- For python extensions: UltiSnips adds itself to the sys.path and can be
-	  easily imported if it is available. *UltiSnips-python-module-path*
-	- Filetype tab completion for UltiSnipsEdit.
-	- A new function giving programmatic access to the snippets currently
-	  available for expansion for other plugins integrating with UltiSnips.
-	  *UltiSnips_SnippetsInCurrentScope*
+	- Support for overwriting the snippet directory name on a per buffer basis
+	  to support per project snippets. *UltiSnips-snippet-search-path* 
 	- The keymaps for jumping in snippets are now only mapped when a snippet is
 	  active, allowing them to be used for something else otherwise.
 	- Expanding and jumping no longer overwrites the unnamed register.
-	- Support for overwriting the snippet directory name on a per buffer basis
-	  to support per project snippets. *UltiSnips-snippet-search-path* 
-	- New or improved snippets: all, bib, c, cpp, cs, d, django, eruby, go,
-	  haskell, html, html, htmljinja, java, javascript, js, ledger, ocaml,
-	  perl, php, puppet, python, ruby, scss, sh, tex, vim, xml, zsh,
+	- Integration with Valloric/YouCompleteMe and Shougo/neocomplete.vim.
+	- Other plugins can add sources for snippets to create snippets on the fly.
+	  *UltiSnips-extending*
+	- Vim functions now indicates if it did any work.
+	  *UltiSnips-trigger-functions*
+	- For python extensions: UltiSnips adds itself to the sys.path and can be
+	  easily imported if it is available. *UltiSnips-python-module-path*
+	- A new function giving programmatic access to the snippets currently
+	  available for expansion for other plugins integrating with UltiSnips.
+	  *UltiSnips_SnippetsInCurrentScope*
+	- New or improved snippets (now in a different repo): all, bib, c, cpp, cs,
+	  d, django, eruby, go, haskell, html, html, htmljinja, java, javascript,
+	  js, ledger, ocaml, perl, php, puppet, python, ruby, scss, sh, tex, vim,
+	  xml, zsh.
 
 version 2.2 (01-Sep-2012):
 	- Support to silence Python-not-found warnings. *UltiSnips-python-warning*
