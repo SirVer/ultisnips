@@ -16,6 +16,7 @@ from UltiSnips.position import Position
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
 from UltiSnips.snippet.source import UltiSnipsFileSource, SnipMateFileSource, \
         find_all_snippet_files, find_snippet_files, AddedSnippetsSource
+from UltiSnips.text import escape
 from UltiSnips.vim_state import VimState, VisualContentPreserver
 
 def _ask_user(a, formatted):
@@ -40,7 +41,7 @@ def _ask_snippets(snippets):
     """ Given a list of snippets, ask the user which one they
     want to use, and return it.
     """
-    display = [as_unicode("%i: %s") % (i+1, s.description) for
+    display = [as_unicode("%i: %s") % (i+1, escape(s.description, '\\')) for
             i, s in enumerate(snippets)]
     return _ask_user(snippets, display)
 
