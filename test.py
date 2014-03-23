@@ -3282,6 +3282,18 @@ snippet test1
 }
     keys = "test" + EX
     wanted = "blub\n\nblah\n"
+class snipMate_OverwrittenByRegExpTrigger(_VimTest):
+    files = { "snippets/_.snippets": """
+snippet def
+\tsnipmate
+""",
+    "us/all.snippets": r"""
+snippet "(de)?f" "blub" r
+ultisnips
+endsnippet
+""" }
+    keys = "def" + EX
+    wanted = "ultisnips"
 # End: snipMate support  #}}}
 # SnippetsInCurrentScope  {{{#
 class VerifyVimDict1(_VimTest):

@@ -440,27 +440,33 @@ class SnippetManager(object):
         elif feedkey:
             _vim.command("return %s" % _vim.escape(feedkey))
 
-    def _snips(self, before, possible):
-        """ Returns all the snippets for the given text
-        before the cursor. If possible is True, then get all
-        possible matches.
-        """
+    def _snips(self, before, partial):
+        """Returns all the snippets for the given text before the cursor. If
+        partial is True, then get also return partial matches. """
         filetypes = self._buffer_filetypes[_vim.buf.number][::-1]
         matching_snippets = defaultdict(list)
         for _, source in self._snippet_sources:
-            for snippet in source.get_snippets(filetypes, before, possible):
+            for snippet in source.get_snippets(filetypes, before, partial):
                 matching_snippets[snippet.trigger].append(snippet)
         if not matching_snippets:
             return []
 
         # Now filter duplicates and only keep the one with the highest
-        # priority. Only keep the snippets with the highest priority.
+        # priority.
         snippets = []
         for snippets_with_trigger in matching_snippets.values():
             highest_priority = max(s.priority for s in snippets_with_trigger)
             snippets.extend(s for s in snippets_with_trigger
                     if s.priority == highest_priority)
-        return snippets
+
+        # For partial matches we are done, but if we want to expand a snippet,
+        # we have to go over them again and only keep those with the maximum
+        # priority.
+        if partial:
+            return snippets
+
+        highest_priority = max(s.priority for s in snippets)
+        return [s for s in snippets if s.priority == highest_priority]
 
     def _do_snippet(self, snippet, before):
         """Expands the given snippet, and handles everything
