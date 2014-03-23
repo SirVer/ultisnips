@@ -1255,8 +1255,8 @@ clearsnippets trigger1 trigger2
 UltiSnips comes with a set of default snippets for many file types. If you
 would rather not have some of them defined, you can use 'clearsnippets' in
 your personal snippets files to remove them. Note: you do not need to remove
-snippets if you wish to replace them. Simply use the '!' option. (See
-|UltiSnips-adding-snippets| for the options).
+snippets if you wish to replace them, simply override with your own snippet
+using the same tab trigger.
 
 
 ==============================================================================
@@ -1267,12 +1267,12 @@ snippets if you wish to replace them. Simply use the '!' option. (See
 
 UltiSnips has built-in support for some common plugins and there are others
 that are aware of UltiSnips and use it to improve the user experience. This is
-an incomplete list - if you want to have your plugin listed here, just sent me
+an incomplete list - if you want to have your plugin listed here, just send me
 a pull request.
 
                                                     *UltiSnips-snipMate*
 
-snipMate - UltiSnips is a drop in replacement for snipMate. It has many more
+snipMate - UltiSnips is a drop-in replacement for snipMate. It has many more
 features, so porting snippets is still a good idea, but switching has low
 friction now. UltiSnips is trying hard to truly emulate snipMate, for example
 recursive tabstops are not supported in snipMate snippets (but of course in
@@ -1382,6 +1382,7 @@ individuals have contributed to UltiSnips (in chronological order):
    Marcelo D Montu - mMontu
    Karl Yngve Lervåg - lervag
    Pedro Ferrari - petobens
+   Ches Martin - ches
 
 Thank you for your support.
 
