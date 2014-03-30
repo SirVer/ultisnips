@@ -42,7 +42,7 @@ def _ask_snippets(snippets):
     want to use, and return it.
     """
     display = [as_unicode("%i: %s (%s)") % (i+1, escape(s.description, '\\'),
-        s.location) for i, s in enumerate(snippets)]
+        escape(s.location, '\\')) for i, s in enumerate(snippets)]
     return _ask_user(snippets, display)
 
 def err_to_scratch_buffer(func):
