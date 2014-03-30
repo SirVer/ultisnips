@@ -24,6 +24,8 @@ def _vim_enc(string):
         return string.encode(vim.eval("&encoding"))
     except UnicodeEncodeError:
         return string
+    except UnicodeDecodeError:
+        return string
 
 if sys.version_info >= (3, 0):
     def open_ascii_file(filename, mode):
