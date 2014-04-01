@@ -1284,6 +1284,16 @@ offers a really nice completion dialogue for snippets.
 neocomplete - UltiSnips ships with a source for neocomplete and therefore
 offers out of the box completion dialogue support for it too.
 
+unite - similarly to neocomplete UltiSnips now has a source for unite.
+As an example of how you can use the unite source add the following mappings to
+your vimrc:
+
+    nnoremap <silent> <F12> :Unite -start-insert ultisnips<CR>
+    inoremap <silent> <F12> <ESC>:Unite -start-insert ultisnips<CR>
+
+Then typing <F12> in either insert or normal mode you will get unite interface
+with matching snippets. Pressing enter will expand the corresponding snippet.
+
 Supertab - UltiSnips has built-in support for Supertab. Just use a recent
 enough version of both plugins and <tab> will either expand a snippet or defer
 to Supertab for expansion.
