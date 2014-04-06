@@ -1383,6 +1383,7 @@ individuals have contributed to UltiSnips (in chronological order):
    Karl Yngve Lervåg - lervag
    Pedro Ferrari - petobens
    Ches Martin - ches
+   Christian - Oberon00
 
 Thank you for your support.
 
