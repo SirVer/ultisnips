@@ -16,6 +16,10 @@ endfunction
 
 call UltiSnips#bootstrap#Bootstrap()
 if !exists("g:_uspy")
+   " Delete the autocommands defined in plugin/UltiSnips.vim.
+   augroup UltiSnips
+       au!
+   augroup END
    finish
 end
 
