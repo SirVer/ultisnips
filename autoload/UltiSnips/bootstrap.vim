@@ -14,7 +14,7 @@ function! UltiSnips#bootstrap#Bootstrap()
                    echo  "UltiSnips requires py >= 2.6 or any py3"
                endif
                unlet g:_uspy
-               finish
+               return
            endif
            let g:_uspy=":py "
        endif

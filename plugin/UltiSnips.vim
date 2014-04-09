@@ -57,10 +57,13 @@ function! UltiSnips_Anon(...)
     return call(function('UltiSnips#Anon'), a:000)
 endfunction
 
-au CursorMovedI * call UltiSnips#CursorMoved()
-au CursorMoved * call UltiSnips#CursorMoved()
-au BufLeave * call UltiSnips#LeavingBuffer()
-au InsertLeave * call UltiSnips#LeavingInsertMode()
+augroup UltiSnips
+    au!
+    au CursorMovedI * call UltiSnips#CursorMoved()
+    au CursorMoved * call UltiSnips#CursorMoved()
+    au BufLeave * call UltiSnips#LeavingBuffer()
+    au InsertLeave * call UltiSnips#LeavingInsertMode()
+augroup END
 
 call UltiSnips#map_keys#MapKeys()
 
