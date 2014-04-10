@@ -8,14 +8,30 @@ endif
 let did_UltiSnips_autoload=1
 
 " Define dummy version of function called by autocommand setup in
-" ftdetect/UltiSnips.vim. If the function isn't defined (probably due to
-" using a copy of vim without python support) it will cause an error anytime a
-" new file is opened.
+" ftdetect/UltiSnips.vim and plugin/UltiSnips.vim.
+" If the function isn't defined (probably due to using a copy of vim
+" without python support) it would cause an error.
 function! UltiSnips#FileTypeChanged()
+endfunction
+function! UltiSnips#CursorMoved()
+endfunction
+function! UltiSnips#CursorMoved()
+endfunction
+function! UltiSnips#LeavingBuffer()
+endfunction
+function! UltiSnips#LeavingInsertMode()
 endfunction
 
 call UltiSnips#bootstrap#Bootstrap()
 if !exists("g:_uspy")
+   " Delete the autocommands defined in plugin/UltiSnips.vim and
+   " ftdetect/UltiSnips.vim.
+   augroup UltiSnips
+       au!
+   augroup END
+   augroup UltiSnipsFileType
+       au!
+   augroup END
    finish
 end
 
