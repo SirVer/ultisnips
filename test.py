@@ -3406,6 +3406,20 @@ class Plugin_Neocomplete_BugTest(_VimTest):
         vim_config.append('let g:neocomplete#enable_auto_delimiter = 1')
         vim_config.append('let g:neocomplete#enable_refresh_always = 1')
 # End: Plugin: Neocomplete  #}}}
+# Plugin: unite {{{#
+class Plugin_unite_BugTest(_VimTest):
+    plugins = ["Shougo/unite.vim"]
+    snippets = ("t", "Hello", "", "w")
+    keys = "iab\\ t=UltiSnipsCallUnite()\n"
+    wanted = "iab\\ Hello "
+
+    def _extra_options_pre_init(self, vim_config):
+        vim_config.append(r'set iskeyword+=\\ ')
+        vim_config.append('function! UltiSnipsCallUnite()')
+        vim_config.append('  Unite -start-insert -winheight=100 -immediately -no-empty ultisnips')
+        vim_config.append('  return ""')
+        vim_config.append('endfunction')
+# End: Plugin: unite  #}}}
 # Plugin: Supertab {{{#
 class Plugin_SuperTab_SimpleTest(_VimTest):
     plugins = ["ervandew/supertab"]
