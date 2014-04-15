@@ -236,7 +236,7 @@ vimrc file. >
    let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 
 UltiSnips will only map the jump triggers while a snippet is active to
-interfer as little as possible with other mappings. 
+interfer as little as possible with other mappings.
 
 The default value for g:UltiSnipsJumpBackwardTrigger interferes with the
 built-in complete function: |i_CTRL-X_CTRL-K|. A workaround is to add the
@@ -1283,6 +1283,22 @@ offers a really nice completion dialogue for snippets.
 
 neocomplete - UltiSnips ships with a source for neocomplete and therefore
 offers out of the box completion dialogue support for it too.
+
+unite - UltiSnips has a source for unite. As an example of how you can use the
+it add the following function and mappings to your vimrc: >
+
+  function! UltiSnipsCallUnite()
+    Unite -start-insert -winheight=100 -immediately -no-empty ultisnips
+    return ''
+  endfunction
+
+  inoremap <silent> <F12> <C-R>=(pumvisible()? "\<LT>C-E>":"")<CR><C-R>=UltiSnipsCallUnite()<CR>
+  nnoremap <silent> <F12> a<C-R>=(pumvisible()? "\<LT>C-E>":"")<CR><C-R>=UltiSnipsCallUnite()<CR>
+
+When typing <F12> in either insert or normal mode you will get the unite
+interface with matching snippets. Pressing enter will expand the corresponding
+snippet. If only one snippet matches the text in front of the cursor will be
+expanded when you press the <F12> key.
 
 Supertab - UltiSnips has built-in support for Supertab. Just use a recent
 enough version of both plugins and <tab> will either expand a snippet or defer
