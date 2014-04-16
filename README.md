@@ -29,10 +29,10 @@ This assumes you are using [Vundle](https://github.com/gmarik/Vundle.vim). Adapt
 for your plugin manager of choice. Put this into your `.vimrc`.
 
     " Track the engine.
-    Bundle 'SirVer/ultisnips'
+    Plugin 'SirVer/ultisnips'
 
     " Snippets are separated from the engine. Add this if you want them:
-    Bundle 'honza/vim-snippets'
+    Plugin 'honza/vim-snippets'
 
     " Trigger configuration. Do not use <tab> if you use https://github.com/Valloric/YouCompleteMe.
     let g:UltiSnipsExpandTrigger="<tab>"
