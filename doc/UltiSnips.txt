@@ -1285,7 +1285,7 @@ neocomplete - UltiSnips ships with a source for neocomplete and therefore
 offers out of the box completion dialogue support for it too.
 
 unite - UltiSnips has a source for unite. As an example of how you can use
-it add the following function and mappings to your vimrc:
+it add the following function and mappings to your vimrc: >
 
   function! UltiSnipsCallUnite()
     Unite -start-insert -winheight=100 -immediately -no-empty ultisnips
