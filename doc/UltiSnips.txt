@@ -289,6 +289,9 @@ then you define your mapping as >
 and if the you can't expand or jump from the current location then the
 alternative function IMAP_Jumpfunc('', 0) is called.
 
+If you don't want UltiSnips to create any mappings for you set
+    let g:UltiSnipsNoMappings = 1
+
 3.2.2 Path to Python module                   *UltiSnips-python-module-path*
 ---------------------------
 
