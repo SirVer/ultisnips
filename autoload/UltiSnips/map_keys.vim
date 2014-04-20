@@ -6,6 +6,11 @@ function! UltiSnips#map_keys#MapKeys()
         return
     endif
 
+    if exists('g:UltiSnipsNoMappings')
+        " Do not map the keys if the user has set this variable
+        return
+    endif
+
     " Map the keys correctly
     if g:UltiSnipsExpandTrigger == g:UltiSnipsJumpForwardTrigger
 
