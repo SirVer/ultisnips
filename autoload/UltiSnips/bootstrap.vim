@@ -38,6 +38,11 @@ function! UltiSnips#bootstrap#Bootstrap()
    exec g:_uspy "from UltiSnips import UltiSnips_Manager"
 endfunction
 
+" Should UltiSnips expand a snippet in Visual mode?
+if !exists("g:UltiSnipsTriggerInVisualMode")
+    let g:UltiSnipsTriggerInVisualMode = 1
+endif
+
 " The trigger used to expand a snippet.
 " NOTE: expansion and forward jumping can, but needn't be the same trigger
 if !exists("g:UltiSnipsExpandTrigger")
