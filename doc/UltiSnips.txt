@@ -238,6 +238,10 @@ vimrc file. >
 UltiSnips will only map the jump triggers while a snippet is active to
 interfer as little as possible with other mappings.
 
+You can control whether UltiSnips should expand a snippet in Visual mode by
+setting the global variable g:UltiSnipsTriggerInVisualMode (defaults to 1):
+   let g:UltiSnipsTriggerInVisualMode = 0
+
 The default value for g:UltiSnipsJumpBackwardTrigger interferes with the
 built-in complete function: |i_CTRL-X_CTRL-K|. A workaround is to add the
 following to your vimrc file or switching to a plugin like Supertab or
