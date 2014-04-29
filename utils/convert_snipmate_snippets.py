@@ -10,6 +10,9 @@ import os
 import argparse
 
 def convert_snippet_contents(content):
+    " Replace snipMate's Filename() with vim-snippets' version "
+    content = content.replace('`Filename()', '`vim_snippets#Filename()')
+
     " If the snippet contains snipmate style substitutions, convert them to ultisnips style "
     content = re.sub("`([^`]+`)", "`!v \g<1>", content)
     return content
