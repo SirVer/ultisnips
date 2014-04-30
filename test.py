@@ -3134,6 +3134,27 @@ class ExclusiveSelection_RealWorldCase_Test(_ES_Base):
 	// code
 }"""
 # End: Exclusive Selection  #}}}
+
+# Old Selection {{{#
+class _OS_Base(_VimTest):
+    def _extra_options_pre_init(self, vim_config):
+        vim_config.append("set selection=old")
+class OldSelection_SimpleTabstop_Test(_OS_Base):
+    snippets =("test", "h${1:blah}w $1")
+    keys = "test" + EX + "ui" + JF
+    wanted = "huiw ui"
+
+class OldSelection_RealWorldCase_Test(_OS_Base):
+    snippets = ("for",
+"""for ($${1:i} = ${2:0}; $$1 < ${3:count}; $$1${4:++}) {
+	${5:// code}
+}""")
+    keys = "for" + EX + "k" + JF
+    wanted = """for ($k = 0; $k < count; $k++) {
+	// code
+}"""
+# End: Old Selection #}}}
+
 # Normal mode editing  {{{#
 # Test for bug #927844
 class DeleteLastTwoLinesInSnippet(_VimTest):
