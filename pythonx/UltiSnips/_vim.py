@@ -118,8 +118,6 @@ def select(start, end):
     _unmap_select_mode_mapping()
 
     selection = eval("&selection")
-    if "old" in selection:
-        raise RuntimeError("selection=old does not work with UltiSnips :(.")
 
     col = col2byte(start.line + 1, start.col)
     vim.current.window.cursor = start.line + 1, col
@@ -143,6 +141,8 @@ def select(start, end):
                 move_cmd += "%iG$" % end.line
             else:
                 move_cmd += "%iG%i|" % virtual_position(end.line + 1, end.col)
+        elif "old" in selection:
+            move_cmd += "%iG%i|" % virtual_position(end.line + 1, end.col)
         else:
             move_cmd += "%iG%i|" % virtual_position(end.line + 1, end.col + 1)
         move_cmd += "o%iG%i|o\\<c-g>" % virtual_position(

@@ -1401,6 +1401,8 @@ individuals have contributed to UltiSnips (in chronological order):
    Ches Martin - ches
    Christian - Oberon00
    Andrew Ruder - aeruder
+   Mathias Fußenegger - mfussenegger
+
 
 Thank you for your support.
 
