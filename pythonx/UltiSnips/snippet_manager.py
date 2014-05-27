@@ -576,7 +576,7 @@ class SnippetManager(object):
 
         if len(potentials) > 1:
             files = sorted(potentials)
-            formatted = [as_unicode('%i: %s') % (i, fn) for
+            formatted = [as_unicode('%i: %s') % (i, escape(fn, '\\')) for
                     i, fn in enumerate(files, 1)]
             file_to_edit = _ask_user(files, formatted)
             if file_to_edit is None:
