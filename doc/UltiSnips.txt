@@ -1238,25 +1238,15 @@ clearsnippets
 ------------------- SNAP -------------------
 
 Without arguments, 'clearsnippets' removes all snippets defined up to that
-point far for the current file type.  Just a reminder, by default UltiSnips
-traverses 'runtimepath' in reverse order, so 'clearsnippets' removes snippet
-definitions appearing in files in 'runtimepath' after the '.snippets' file in
-which it is encountered.
+point for the current file type. 
 
 To clear one or more specific snippet, provide the names of the snippets as
 arguments to the 'clearsnippets' command. The following example will clear
 the snippets 'trigger1' and 'trigger2'.
 
-
 ------------------- SNIP -------------------
 clearsnippets trigger1 trigger2
 ------------------- SNAP -------------------
-
-UltiSnips comes with a set of default snippets for many file types. If you
-would rather not have some of them defined, you can use 'clearsnippets' in
-your personal snippets files to remove them. Note: you do not need to remove
-snippets if you wish to replace them, simply override with your own snippet
-using the same tab trigger.
 
 
 ==============================================================================
