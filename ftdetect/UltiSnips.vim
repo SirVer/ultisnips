@@ -3,6 +3,6 @@
 if has("autocmd")
    augroup UltiSnipsFileType
       au!
-      autocmd FileType * if exists('*UltiSnips#FileTypeChanged')|call UltiSnips#FileTypeChanged()|endif
+      autocmd FileType * call UltiSnips#FileTypeChanged()
    augroup END
 endif
