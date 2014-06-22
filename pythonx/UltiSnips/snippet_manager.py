@@ -93,6 +93,8 @@ class SnippetManager(object):
         self.register_snippet_source("added", self._added_snippets_source)
         self.register_snippet_source("snipmate_files", SnipMateFileSource())
 
+        self._cache_snippets_ft = {}
+
         self._reinit()
 
     @err_to_scratch_buffer
@@ -194,6 +196,11 @@ class SnippetManager(object):
         self._added_snippets_source.add_snippet(ft,
                 UltiSnipsSnippetDefinition(priority, trigger, value,
                     description, options, {}, "added"))
+
+        # Invalidate cache.
+        for filetypes in self._cache_snippets_ft:
+            if ft in filetypes:
+                del(self._cache_snippets_ft[filetypes])
 
     @err_to_scratch_buffer
     def expand_anon(self, value, trigger="", description="", options=""):
@@ -467,6 +474,21 @@ class SnippetManager(object):
 
         highest_priority = max(s.priority for s in snippets)
         return [s for s in snippets if s.priority == highest_priority]
+
+
+    def get_snippets(self, filetypes=None):
+        """Returns all the snippets for a given list of filetypes
+        (defaulting to current buffer)."""
+        if filetypes is None:
+            filetypes = self._buffer_filetypes[_vim.buf.number][::-1]
+        filetypes = tuple(filetypes)
+
+        try:
+            return self._cache_snippets_ft[filetypes]
+        except KeyError:
+            self._cache_snippets_ft[filetypes] = self._snips('', True)
+        return self._cache_snippets_ft[filetypes]
+
 
     def _do_snippet(self, snippet, before):
         """Expands the given snippet, and handles everything
