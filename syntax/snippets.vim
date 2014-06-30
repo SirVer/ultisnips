@@ -32,7 +32,8 @@ syn match snipKeyword "\(\<\(end\)\?\(snippet\|global\)\>\)\|extends\|clearsnipp
 
 " Extends {{{2
 
-syn match snipExtends "^extends.*" contains=snipKeyword
+syn match snipExtends "^extends\%(\s.*\|$\)" contains=snipExtendsKeyword
+syn match snipExtendsKeyword "^extends" contained
 
 " Definitions {{{2
 
@@ -64,11 +65,14 @@ syn region snipGlobal fold keepend start="^global" end="^endglobal" contains=sni
 
 " priority {{{3
 
-syn match snipPriority "^priority"
+syn match snipPriority "^priority\%(\s.*\|$\)" contains=snipPriorityKeyword
+syn match snipPriorityKeyword "^priority" contained nextgroup=snipPriorityValue skipwhite
+syn match snipPriorityValue "-\?\d\+" contained
 
 " Snippt Clearing {{{2
 
-syn match snipClear "^clearsnippets"
+syn match snipClear "^clearsnippets\%(\s.*\|$\)" contains=snipClearKeyword
+syn match snipClearKeyword "^clearsnippets" contained
 
 " Highlight groups {{{1
 
@@ -80,7 +84,7 @@ hi def link snipTabsOnly         Error
 
 hi def link snipKeyword          Keyword
 
-hi def link snipExtends          Statement
+hi def link snipExtendsKeyword   Keyword
 
 hi def link snipStart            Statement
 hi def link snipEnd              snipStart
@@ -102,8 +106,10 @@ hi def link snipGlobalStart      Statement
 hi def link snipGlobalEnd        Statement
 hi def link snipGlobal           Normal
 
-hi def link snipClear            Statement
-hi def link snipPriority         Statement
+hi def link snipPriorityKeyword  Keyword
+hi def link snipPriorityValue    Number
+
+hi def link snipClearKeyword     Keyword
 
 " }}}1
 
