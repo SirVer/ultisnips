@@ -21,14 +21,9 @@ unlet b:current_syntax
 syn match snipComment "^#.*" contains=snipTODO display
 syn keyword snipTODO contained display FIXME NOTE NOTES TODO XXX
 
-" Miscellaneous {{{2
+" Errors {{{2
 
-syn match snipDocString '"[^"]*"$'
-syn match snipString '"[^"]*"'
-syn match snipTabsOnly "^\t\+$"
-syn match snipLeadingSpaces "^\t* \+"
-
-syn match snipKeyword "\(\<\(end\)\?\(snippet\|global\)\>\)\|extends\|clearsnippets\|priority" contained
+syn match snipLeadingSpaces "^\t* \+" contained
 
 " Extends {{{2
 
@@ -42,7 +37,7 @@ syn match snipExtendsKeyword "^extends" contained display
 syn region snipSnippet start="^snippet\_s" end="^endsnippet\s*$" contains=snipSnippetHeader fold keepend
 syn match snipSnippetHeader "^.*$" nextgroup=snipSnippetBody,snipSnippetFooter skipnl contained contains=snipSnippetHeaderKeyword
 syn match snipSnippetHeaderKeyword "^snippet" contained nextgroup=snipSnippetTrigger skipwhite
-syn region snipSnippetBody start="\_." end="^\zeendsnippet\s*$" contained contains=snipTabsOnly,snipLeadingSpaces,snipCommand,snipVarExpansion,snipVar,snipVisual nextgroup=snipSnippetFooter
+syn region snipSnippetBody start="\_." end="^\zeendsnippet\s*$" contained contains=snipLeadingSpaces,snipCommand,snipVarExpansion,snipVar,snipVisual nextgroup=snipSnippetFooter
 syn match snipSnippetFooter "^endsnippet.*" contained contains=snipSnippetFooterKeyword
 syn match snipSnippetFooterKeyword "^endsnippet" contained
 
@@ -91,14 +86,14 @@ syn region snipVarExpansion matchgroup=Define start="\${\d*" end="}" contained c
 
 syn region snipGlobal start="^global\_s" end="^endglobal\s*$" contains=snipGlobalHeader fold keepend
 syn match snipGlobalHeader "^.*$" nextgroup=snipGlobalBody,snipGlobalFooter skipnl contained contains=snipGlobalHeaderKeyword
-syn region snipGlobalBody start="\_." end="^\zeendglobal\s*$" contained contains=snipTabsOnly,snipLeadingSpaces nextgroup=snipGlobalFooter
+syn region snipGlobalBody start="\_." end="^\zeendglobal\s*$" contained contains=snipLeadingSpaces nextgroup=snipGlobalFooter
 
 " Python (!p) {{{4
 
 syn region snipGlobal start=,^global\s\+!p\%(\s\+"[^"]*\%("\s\+[^"[:space:]]\+\|"\)\=\)\=\s*$, end=,^endglobal\s*$, contains=snipGlobalPHeader fold keepend
 syn match snipGlobalPHeader "^.*$" nextgroup=snipGlobalPBody,snipGlobalFooter skipnl contained contains=snipGlobalHeaderKeyword
 syn match snipGlobalHeaderKeyword "^global" contained nextgroup=snipSnippetTrigger skipwhite
-syn region snipGlobalPBody start="\_." end="^\zeendglobal\s*$" contained contains=snipTabsOnly,snipLeadingSpaces,@Python nextgroup=snipGlobalFooter
+syn region snipGlobalPBody start="\_." end="^\zeendglobal\s*$" contained contains=@Python nextgroup=snipGlobalFooter
 
 " Common {{{4
 
@@ -119,10 +114,9 @@ syn match snipClearKeyword "^clearsnippets" contained display
 " Highlight groups {{{1
 
 hi def link snipComment          Comment
-hi def link snipLeadingSpaces    Error
+hi def snipLeadingSpaces term=reverse ctermfg=15 ctermbg=4 gui=reverse guifg=#dc322f
 hi def link snipString           String
 hi def link snipDocString        String
-hi def link snipTabsOnly         Error
 
 hi def link snipKeyword          Keyword
 
