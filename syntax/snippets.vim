@@ -46,6 +46,32 @@ syn region snipSnippetBody start="\_." end="^\zeendsnippet\s*$" contained contai
 syn match snipSnippetFooter "^endsnippet.*" contained contains=snipSnippetFooterKeyword
 syn match snipSnippetFooterKeyword "^endsnippet" contained
 
+" The current parser is a bit lax about parsing. For example, given this:
+"   snippet foo"bar"
+" it treats `foo"bar"` as the trigger. But with this:
+"   snippet foo"bar baz"
+" it treats `foo` as the trigger and "bar baz" as the description.
+" I think this is an accident. Instead, we'll assume the description must
+" be surrounded by spaces. That means we'll treat
+"   snippet foo"bar"
+" as a trigger `foo"bar"` and
+"   snippet foo"bar baz"
+" as an attempted multiword snippet `foo"bar baz"` that is invalid.
+" NB: UltiSnips parses right-to-left, which Vim doesn't support, so that makes
+" the following patterns very complicated.
+syn match snipSnippetTrigger "\S\+" contained nextgroup=snipSnippetDocString,snipSnippetTriggerInvalid skipwhite
+" We want to match a trailing " as the start of a doc comment, but we also
+" want to allow for using " as the delimiter in a multiword/pattern snippet.
+" So we have to define this twice, once in the general case that matches a
+" trailing " as the doc comment, and once for the case of the multiword
+" delimiter using " that has more constraints
+syn match snipSnippetTrigger ,\([^"[:space:]]\).\{-}\1\%(\s*$\)\@!\ze\%(\s\+"[^"]*\%("\s\+[^"[:space:]]\+\|"\)\=\)\=\s*$, contained nextgroup=snipSnippetDocString skipwhite
+syn match snipSnippetTrigger ,".\{-}"\ze\%(\s\+"\%(\s*\S\)\@=[^"]*\%("\s\+[^"[:space:]]\+\|"\)\=\)\=\s*$, contained nextgroup=snipSnippetDocString skipwhite
+syn match snipSnippetTriggerInvalid ,\S\@=.\{-}\S\ze\%(\s\+"[^"]*\%("\s\+[^"[:space:]]\+\s*\|"\s*\)\=\|\s*\)$, contained nextgroup=snipSnippetDocString skipwhite
+syn match snipSnippetDocString ,"[^"]*\%("\ze\s*\%(\s[^"[:space:]]\+\s*\)\=\)\=$, contained nextgroup=snipSnippetOptions skipwhite
+syn match snipSnippetOptions ,\S\+, contained contains=snipSnippetOptionFlag
+syn match snipSnippetOptionFlag ,[biwrts], contained
+
 " Command substitution {{{4
 
 syn region snipCommand keepend matchgroup=snipCommandDelim start="`" skip="\\[{}\\$`]" end="`" contains=snipPythonCommand,snipVimLCommand,snipShellCommand
@@ -69,7 +95,7 @@ syn region snipGlobalBody start="\_." end="^\zeendglobal\s*$" contained contains
 
 " Python (!p) {{{4
 
-syn region snipGlobal start="^global\s\+!p\_s\@=" end="^endglobal\s*$" contains=snipGlobalPHeader fold keepend
+syn region snipGlobal start=,^global\s\+!p\%(\s\+"[^"]*\%("\s\+[^"[:space:]]\+\|"\)\=\)\=\s*$, end=,^endglobal\s*$, contains=snipGlobalPHeader fold keepend
 syn match snipGlobalPHeader "^.*$" nextgroup=snipGlobalPBody,snipGlobalFooter skipnl contained contains=snipGlobalHeaderKeyword
 syn match snipGlobalHeaderKeyword "^global" contained nextgroup=snipSnippetTrigger skipwhite
 syn region snipGlobalPBody start="\_." end="^\zeendglobal\s*$" contained contains=snipTabsOnly,snipLeadingSpaces,@Python nextgroup=snipGlobalFooter
@@ -104,6 +130,11 @@ hi def link snipExtendsKeyword   snipKeyword
 
 hi def link snipSnippetHeaderKeyword snipKeyword
 hi def link snipSnippetFooterKeyword snipKeyword
+
+hi def link snipSnippetTrigger        Identifier
+hi def link snipSnippetTriggerInvalid Error
+hi def link snipSnippetDocString      String
+hi def link snipSnippetOptionFlag     Special
 
 hi def link snipGlobalHeaderKeyword  snipKeyword
 hi def link snipGlobalFooterKeyword  snipKeyword
