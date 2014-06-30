@@ -25,9 +25,9 @@ syn match snipExtends "^extends.*" contains=snipKeyword
 " snippet definitions
 syn match snipStart "^snippet.*" contained contains=snipKeyword,snipDocString
 syn match snipEnd "^endsnippet" contained contains=snipKeyword
-syn region snipCommand contained keepend start="`" end="`" contains=snipPythonCommand,snipVimLCommand
-syn region snipPythonCommand contained keepend start="`!p" end="`" contained contains=@Python
-syn region snipVimLCommand contained keepend start="`!v" end="`" contained contains=@Viml
+syn region snipCommand keepend start="`" end="`" contains=snipPythonCommand,snipVimLCommand
+syn region snipPythonCommand keepend start="`!p" end="`" contained contains=@Python
+syn region snipVimLCommand keepend start="`!v" end="`" contained contains=@Viml
 syn match snipVar "\$\d*" contained
 syn region snipVisual matchgroup=Define start="\${VISUAL" end="}" contained
 syn region snipVarExpansion matchgroup=Define start="\${\d*" end="}" contained contains=snipVar,snipVarExpansion,snipCommand
@@ -44,29 +44,31 @@ syn match snipPriority "^priority"
 
 " highlighting rules
 
-hi link snipComment          Comment
-hi link snipLeadingSpaces    Error
-hi link snipString           String
-hi link snipDocString        String
-hi link snipTabsOnly         Error
+hi def link snipComment          Comment
+hi def link snipLeadingSpaces    Error
+hi def link snipString           String
+hi def link snipDocString        String
+hi def link snipTabsOnly         Error
 
-hi link snipKeyword          Keyword
+hi def link snipKeyword          Keyword
 
-hi link snipExtends          Statement
+hi def link snipExtends          Statement
 
-hi link snipStart            Statement
-hi link snipEnd              Statement
-hi link snipCommand          Special
-hi link snipVar              StorageClass
-hi link snipVarExpansion     Normal
-hi link snipVisual           Normal
-hi link snippet              Normal
+hi def link snipStart            Statement
+hi def link snipEnd              snipStart
+hi def link snipCommand          Special
+hi def link snipPythonCommand    snipCommand
+hi def link snipVimLCommand      snipCommand
+hi def link snipVar              StorageClass
+hi def link snipVarExpansion     Normal
+hi def link snipVisual           Normal
+hi def link snippet              Normal
 
-hi link snipGlobalStart      Statement
-hi link snipGlobalEnd        Statement
-hi link snipGlobal           Normal
+hi def link snipGlobalStart      Statement
+hi def link snipGlobalEnd        Statement
+hi def link snipGlobal           Normal
 
-hi link snipClear            Statement
-hi link snipPriority         Statement
+hi def link snipClear            Statement
+hi def link snipPriority         Statement
 
 let b:current_syntax = "snippet"
