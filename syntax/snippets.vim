@@ -18,8 +18,8 @@ unlet b:current_syntax
 
 " Comments {{{2
 
-syn match snipComment "^#.*" contains=snipTODO
-syn keyword snipTODO FIXME NOTE NOTES TODO XXX contained
+syn match snipComment "^#.*" contains=snipTODO display
+syn keyword snipTODO contained display FIXME NOTE NOTES TODO XXX
 
 " Miscellaneous {{{2
 
@@ -32,8 +32,8 @@ syn match snipKeyword "\(\<\(end\)\?\(snippet\|global\)\>\)\|extends\|clearsnipp
 
 " Extends {{{2
 
-syn match snipExtends "^extends\%(\s.*\|$\)" contains=snipExtendsKeyword
-syn match snipExtendsKeyword "^extends" contained
+syn match snipExtends "^extends\%(\s.*\|$\)" contains=snipExtendsKeyword display
+syn match snipExtendsKeyword "^extends" contained display
 
 " Definitions {{{2
 
@@ -65,14 +65,14 @@ syn region snipGlobal fold keepend start="^global" end="^endglobal" contains=sni
 
 " priority {{{3
 
-syn match snipPriority "^priority\%(\s.*\|$\)" contains=snipPriorityKeyword
-syn match snipPriorityKeyword "^priority" contained nextgroup=snipPriorityValue skipwhite
-syn match snipPriorityValue "-\?\d\+" contained
+syn match snipPriority "^priority\%(\s.*\|$\)" contains=snipPriorityKeyword display
+syn match snipPriorityKeyword "^priority" contained nextgroup=snipPriorityValue skipwhite display
+syn match snipPriorityValue "-\?\d\+" contained display
 
 " Snippt Clearing {{{2
 
-syn match snipClear "^clearsnippets\%(\s.*\|$\)" contains=snipClearKeyword
-syn match snipClearKeyword "^clearsnippets" contained
+syn match snipClear "^clearsnippets\%(\s.*\|$\)" contains=snipClearKeyword display
+syn match snipClearKeyword "^clearsnippets" contained display
 
 " Highlight groups {{{1
 
