@@ -40,8 +40,8 @@ syn match snipExtendsKeyword "^extends" contained display
 " snippet {{{3
 
 syn region snipSnippet start="^snippet\_s" end="^endsnippet\s*$" contains=snipSnippetHeader fold keepend
-syn match snipSnippetHeader "^.*$" nextgroup=snipSnippetBody skipnl contained contains=snipSnippetHeaderKeyword
-syn match snipSnippetHeaderKeyword "^snippet" contained nextgroup=snipSnippetTrigger
+syn match snipSnippetHeader "^.*$" nextgroup=snipSnippetBody,snipSnippetFooter skipnl contained contains=snipSnippetHeaderKeyword
+syn match snipSnippetHeaderKeyword "^snippet" contained nextgroup=snipSnippetTrigger skipwhite
 syn region snipSnippetBody start="\_." end="^\zeendsnippet\s*$" contained contains=snipTabsOnly,snipLeadingSpaces,snipCommand,snipVarExpansion,snipVar,snipVisual nextgroup=snipSnippetFooter
 syn match snipSnippetFooter "^endsnippet.*" contained contains=snipSnippetFooterKeyword
 syn match snipSnippetFooterKeyword "^endsnippet" contained
@@ -62,18 +62,22 @@ syn region snipVarExpansion matchgroup=Define start="\${\d*" end="}" contained c
 " global {{{3
 
 " Generic (non-Python) {{{4
+
 syn region snipGlobal start="^global\_s" end="^endglobal\s*$" contains=snipGlobalHeader fold keepend
-syn match snipGlobalHeader "^.*$" nextgroup=snipGlobalBody skipnl contained contains=snipGlobalHeaderKeyword
-syn match snipGlobalHeaderKeyword "^global" contained nextgroup=snipSnippetTrigger
+syn match snipGlobalHeader "^.*$" nextgroup=snipGlobalBody,snipGlobalFooter skipnl contained contains=snipGlobalHeaderKeyword
 syn region snipGlobalBody start="\_." end="^\zeendglobal\s*$" contained contains=snipTabsOnly,snipLeadingSpaces nextgroup=snipGlobalFooter
-syn match snipGlobalFooter "^endglobal.*" contained contains=snipGlobalFooterKeyword
-syn match snipGlobalFooterKeyword "^endglobal" contained
 
 " Python (!p) {{{4
 
 syn region snipGlobal start="^global\s\+!p\_s\@=" end="^endglobal\s*$" contains=snipGlobalPHeader fold keepend
-syn match snipGlobalPHeader "^.*$" nextgroup=snipGlobalPBody skipnl contained contains=snipGlobalHeaderKeyword
+syn match snipGlobalPHeader "^.*$" nextgroup=snipGlobalPBody,snipGlobalFooter skipnl contained contains=snipGlobalHeaderKeyword
+syn match snipGlobalHeaderKeyword "^global" contained nextgroup=snipSnippetTrigger skipwhite
 syn region snipGlobalPBody start="\_." end="^\zeendglobal\s*$" contained contains=snipTabsOnly,snipLeadingSpaces,@Python nextgroup=snipGlobalFooter
+
+" Common {{{4
+
+syn match snipGlobalFooter "^endglobal.*" contained contains=snipGlobalFooterKeyword
+syn match snipGlobalFooterKeyword "^endglobal" contained
 
 " priority {{{3
 
