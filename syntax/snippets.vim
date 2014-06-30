@@ -27,9 +27,9 @@ syn match snipExtends "^extends.*" contains=snipKeyword
 " snippet definitions
 syn match snipStart "^snippet.*" contained contains=snipKeyword,snipDocString
 syn match snipEnd "^endsnippet" contained contains=snipKeyword
-syn region snipCommand keepend start="`" end="`" contains=snipPythonCommand,snipVimLCommand
-syn region snipPythonCommand keepend start="`!p" end="`" contained contains=@Python
-syn region snipVimLCommand keepend start="`!v" end="`" contained contains=@Viml
+syn region snipCommand keepend start="`" skip="\\[{}\\$`]" end="`" contains=snipPythonCommand,snipVimLCommand
+syn region snipPythonCommand keepend start="`!p" skip="\\[{}\\$`]" end="`" contained contains=@Python
+syn region snipVimLCommand keepend start="`!v" skip="\\[{}\\$`]" end="`" contained contains=@Viml
 syn match snipVar "\$\d*" contained
 syn region snipVisual matchgroup=Define start="\${VISUAL" end="}" contained
 syn region snipVarExpansion matchgroup=Define start="\${\d*" end="}" contained contains=snipVar,snipVarExpansion,snipCommand
