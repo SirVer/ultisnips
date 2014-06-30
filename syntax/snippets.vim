@@ -9,6 +9,8 @@ syntax include @Python syntax/python.vim
 unlet b:current_syntax
 syntax include @Viml syntax/vim.vim
 unlet b:current_syntax
+syntax include @Shell syntax/sh.vim
+unlet b:current_syntax
 
 " global matches
 syn match snipComment "^#.*" contains=snipTODO
@@ -27,9 +29,12 @@ syn match snipExtends "^extends.*" contains=snipKeyword
 " snippet definitions
 syn match snipStart "^snippet.*" contained contains=snipKeyword,snipDocString
 syn match snipEnd "^endsnippet" contained contains=snipKeyword
-syn region snipCommand keepend start="`" skip="\\[{}\\$`]" end="`" contains=snipPythonCommand,snipVimLCommand
-syn region snipPythonCommand keepend start="`!p" skip="\\[{}\\$`]" end="`" contained contains=@Python
-syn region snipVimLCommand keepend start="`!v" skip="\\[{}\\$`]" end="`" contained contains=@Viml
+
+syn region snipCommand keepend matchgroup=snipCommandDelim start="`" skip="\\[{}\\$`]" end="`" contains=snipPythonCommand,snipVimLCommand,snipShellCommand
+syn region snipShellCommand start="\ze\_." skip="\\[{}\\$`]" end="\ze`" contained contains=@Shell
+syn region snipPythonCommand matchgroup=snipPythonCommandP start="`\@<=!p\_s" skip="\\[{}\\$`]" end="\ze`" contained contains=@Python
+syn region snipVimLCommand matchgroup=snipVimLCommandV start="`\@<=!v\_s" skip="\\[{}\\$`]" end="\ze`" contained contains=@Viml
+
 syn match snipVar "\$\d*" contained
 syn region snipVisual matchgroup=Define start="\${VISUAL" end="}" contained
 syn region snipVarExpansion matchgroup=Define start="\${\d*" end="}" contained contains=snipVar,snipVarExpansion,snipCommand
@@ -58,9 +63,15 @@ hi def link snipExtends          Statement
 
 hi def link snipStart            Statement
 hi def link snipEnd              snipStart
+
 hi def link snipCommand          Special
+hi def link snipCommandDelim     snipCommand
+hi def link snipShellCommand     snipCommand
 hi def link snipPythonCommand    snipCommand
 hi def link snipVimLCommand      snipCommand
+hi def link snipPythonCommandP   PreProc
+hi def link snipVimLCommandV     PreProc
+
 hi def link snipVar              StorageClass
 hi def link snipVarExpansion     Normal
 hi def link snipVisual           Normal
