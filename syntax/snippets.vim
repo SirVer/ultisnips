@@ -61,9 +61,19 @@ syn region snipVarExpansion matchgroup=Define start="\${\d*" end="}" contained c
 
 " global {{{3
 
-syn match snipGlobalStart "^global.*" contained contains=snipKeyword,snipString
-syn match snipGlobalEnd "^endglobal" contained contains=snipKeyword
-syn region snipGlobal fold keepend start="^global" end="^endglobal" contains=snipGlobalStart,snipGlobalEnd,snipLeadingSpaces,snipTabsOnly,snipCommand,snipVarExpansion,snipVar,@Python
+" Generic (non-Python) {{{4
+syn region snipGlobal start="^global\_s" end="^endglobal\s*$" contains=snipGlobalHeader fold keepend
+syn match snipGlobalHeader "^.*$" nextgroup=snipGlobalBody skipnl contained contains=snipGlobalHeaderKeyword
+syn match snipGlobalHeaderKeyword "^global" contained nextgroup=snipSnippetTrigger
+syn region snipGlobalBody start="\_." end="^\zeendglobal\s*$" contained contains=snipTabsOnly,snipLeadingSpaces nextgroup=snipGlobalFooter
+syn match snipGlobalFooter "^endglobal.*" contained contains=snipGlobalFooterKeyword
+syn match snipGlobalFooterKeyword "^endglobal" contained
+
+" Python (!p) {{{4
+
+syn region snipGlobal start="^global\s\+!p\_s\@=" end="^endglobal\s*$" contains=snipGlobalPHeader fold keepend
+syn match snipGlobalPHeader "^.*$" nextgroup=snipGlobalPBody skipnl contained contains=snipGlobalHeaderKeyword
+syn region snipGlobalPBody start="\_." end="^\zeendglobal\s*$" contained contains=snipTabsOnly,snipLeadingSpaces,@Python nextgroup=snipGlobalFooter
 
 " priority {{{3
 
@@ -86,13 +96,13 @@ hi def link snipTabsOnly         Error
 
 hi def link snipKeyword          Keyword
 
-hi def link snipExtendsKeyword   Keyword
+hi def link snipExtendsKeyword   snipKeyword
 
 hi def link snipSnippetHeaderKeyword snipKeyword
 hi def link snipSnippetFooterKeyword snipKeyword
 
-hi def link snipStart            Statement
-hi def link snipEnd              snipStart
+hi def link snipGlobalHeaderKeyword  snipKeyword
+hi def link snipGlobalFooterKeyword  snipKeyword
 
 hi def link snipCommand          Special
 hi def link snipCommandDelim     snipCommand
@@ -106,10 +116,6 @@ hi def link snipVar              StorageClass
 hi def link snipVarExpansion     Normal
 hi def link snipVisual           Normal
 hi def link snipSnippet          Normal
-
-hi def link snipGlobalStart      Statement
-hi def link snipGlobalEnd        Statement
-hi def link snipGlobal           Normal
 
 hi def link snipPriorityKeyword  Keyword
 hi def link snipPriorityValue    Number
