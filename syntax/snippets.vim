@@ -39,10 +39,12 @@ syn match snipExtendsKeyword "^extends" contained display
 
 " snippet {{{3
 
-syn region snipSnippet fold keepend start="^snippet" end="^endsnippet" contains=snipStart,snipEnd,snipTabsOnly,snipLeadingSpaces,snipCommand,snipVarExpansion,snipVar,snipVisual
-
-syn match snipStart "^snippet.*" contained contains=snipKeyword,snipDocString
-syn match snipEnd "^endsnippet" contained contains=snipKeyword
+syn region snipSnippet start="^snippet\_s" end="^endsnippet\s*$" contains=snipSnippetHeader fold keepend
+syn match snipSnippetHeader "^.*$" nextgroup=snipSnippetBody skipnl contained contains=snipSnippetHeaderKeyword
+syn match snipSnippetHeaderKeyword "^snippet" contained nextgroup=snipSnippetTrigger
+syn region snipSnippetBody start="\_." end="^\zeendsnippet\s*$" contained contains=snipTabsOnly,snipLeadingSpaces,snipCommand,snipVarExpansion,snipVar,snipVisual nextgroup=snipSnippetFooter
+syn match snipSnippetFooter "^endsnippet.*" contained contains=snipSnippetFooterKeyword
+syn match snipSnippetFooterKeyword "^endsnippet" contained
 
 " Command substitution {{{4
 
@@ -85,6 +87,9 @@ hi def link snipTabsOnly         Error
 hi def link snipKeyword          Keyword
 
 hi def link snipExtendsKeyword   Keyword
+
+hi def link snipSnippetHeaderKeyword snipKeyword
+hi def link snipSnippetFooterKeyword snipKeyword
 
 hi def link snipStart            Statement
 hi def link snipEnd              snipStart
