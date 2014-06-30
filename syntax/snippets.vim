@@ -6,7 +6,9 @@ if exists("b:current_syntax")
 endif
 
 syntax include @Python syntax/python.vim
+unlet b:current_syntax
 syntax include @Viml syntax/vim.vim
+unlet b:current_syntax
 
 " global matches
 syn match snipComment "^#.*" contains=snipTODO
