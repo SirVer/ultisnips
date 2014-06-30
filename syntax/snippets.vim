@@ -73,4 +73,4 @@ hi def link snipGlobal           Normal
 hi def link snipClear            Statement
 hi def link snipPriority         Statement
 
-let b:current_syntax = "snippet"
+let b:current_syntax = "snippets"
