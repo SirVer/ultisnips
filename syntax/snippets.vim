@@ -114,9 +114,8 @@ syn match snipClearKeyword "^clearsnippets" contained display
 " Highlight groups {{{1
 
 hi def link snipComment          Comment
+hi def link snipTODO             Todo
 hi def snipLeadingSpaces term=reverse ctermfg=15 ctermbg=4 gui=reverse guifg=#dc322f
-hi def link snipString           String
-hi def link snipDocString        String
 
 hi def link snipKeyword          Keyword
 
