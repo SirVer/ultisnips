@@ -69,11 +69,17 @@ syn match snipSnippetOptionFlag ,[biwrts], contained
 
 " Command substitution {{{4
 
-syn region snipCommand keepend matchgroup=snipCommandDelim start="`" skip="\\[{}\\$`]" end="`" contains=snipPythonCommand,snipVimLCommand,snipShellCommand
+syn region snipCommand keepend matchgroup=snipCommandDelim start="`" skip="\\[{}\\$`]" end="`" contains=snipPythonCommand,snipVimLCommand,snipShellCommand,snipCommandSyntaxOverride
 syn region snipShellCommand start="\ze\_." skip="\\[{}\\$`]" end="\ze`" contained contains=@Shell
 syn region snipPythonCommand matchgroup=snipPythonCommandP start="`\@<=!p\_s" skip="\\[{}\\$`]" end="\ze`" contained contains=@Python
 syn region snipVimLCommand matchgroup=snipVimLCommandV start="`\@<=!v\_s" skip="\\[{}\\$`]" end="\ze`" contained contains=@Viml
 syn cluster snipTokens add=snipCommand
+
+" unfortunately due to the balanced braces parsing of commands, if a { occurs
+" in the command, we need to prevent the embedded syntax highlighting.
+" Otherwise, we can't track the balanced braces properly.
+
+syn region snipCommandSyntaxOverride start="\%(\\[{}\\$`]\|\_[^`"{]\)*\ze{" skip="\\[{}\\$`]" end="\ze`" contained contains=snipBalancedBraces transparent
 
 " Tab Stops {{{4
 
@@ -84,9 +90,9 @@ syn match snipMirror "\$\d\+" contained
 syn cluster snipTokens add=snipMirror
 
 syn region snipTabStop matchgroup=snipTabStop start="\${\d\+[:}]\@=" end="}" contained contains=snipTabStopDefault
-syn region snipTabStopDefault matchgroup=snipTabStop start=":" end="\ze}" contained contains=snipTabStopEscape,snipTabStop,snipBalancedBraces
+syn region snipTabStopDefault matchgroup=snipTabStop start=":" skip="\\[{}]" end="\ze}" contained contains=snipTabStopEscape,snipBalancedBraces,@snipTokens keepend
 syn match snipTabStopEscape "\\[{}]" contained
-syn region snipBalancedBraces start="{" end="}" contained transparent
+syn region snipBalancedBraces start="{" end="}" contained transparent extend
 syn cluster snipTokens add=snipTabStop
 
 syn region snipVisual matchgroup=snipVisual start="\${VISUAL[:}/]\@=" end="}" contained contains=snipVisualDefault,snipTransformationPattern
