@@ -7,6 +7,7 @@ setlocal foldlevel=99
 setlocal commentstring=#%s
 
 setlocal noexpandtab
+setlocal autoindent nosmartindent nocindent
 
 " Define match words for use with matchit plugin
 " http://www.vim.org/scripts/script.php?script_id=39
