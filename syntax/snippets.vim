@@ -37,7 +37,7 @@ syn match snipExtendsKeyword "^extends" contained display
 syn region snipSnippet start="^snippet\_s" end="^endsnippet\s*$" contains=snipSnippetHeader fold keepend
 syn match snipSnippetHeader "^.*$" nextgroup=snipSnippetBody,snipSnippetFooter skipnl contained contains=snipSnippetHeaderKeyword
 syn match snipSnippetHeaderKeyword "^snippet" contained nextgroup=snipSnippetTrigger skipwhite
-syn region snipSnippetBody start="\_." end="^\zeendsnippet\s*$" contained contains=snipLeadingSpaces,snipCommand,snipVarExpansion,snipVar,snipVisual nextgroup=snipSnippetFooter
+syn region snipSnippetBody start="\_." end="^\zeendsnippet\s*$" contained contains=snipLeadingSpaces,@snipTokens nextgroup=snipSnippetFooter
 syn match snipSnippetFooter "^endsnippet.*" contained contains=snipSnippetFooterKeyword
 syn match snipSnippetFooterKeyword "^endsnippet" contained
 
@@ -73,12 +73,32 @@ syn region snipCommand keepend matchgroup=snipCommandDelim start="`" skip="\\[{}
 syn region snipShellCommand start="\ze\_." skip="\\[{}\\$`]" end="\ze`" contained contains=@Shell
 syn region snipPythonCommand matchgroup=snipPythonCommandP start="`\@<=!p\_s" skip="\\[{}\\$`]" end="\ze`" contained contains=@Python
 syn region snipVimLCommand matchgroup=snipVimLCommandV start="`\@<=!v\_s" skip="\\[{}\\$`]" end="\ze`" contained contains=@Viml
+syn cluster snipTokens add=snipCommand
 
-" Variables {{{4
+" Tab Stops {{{4
 
-syn match snipVar "\$\d*" contained
-syn region snipVisual matchgroup=Define start="\${VISUAL" end="}" contained
-syn region snipVarExpansion matchgroup=Define start="\${\d*" end="}" contained contains=snipVar,snipVarExpansion,snipCommand
+syn match snipEscape "\\[{}\\$`]" contained
+syn cluster snipTokens add=snipEscape
+
+syn match snipMirror "\$\d\+" contained
+syn cluster snipTokens add=snipMirror
+
+syn region snipTabStop matchgroup=snipTabStop start="\${\d\+[:}]\@=" end="}" contained contains=snipTabStopDefault
+syn region snipTabStopDefault matchgroup=snipTabStop start=":" end="\ze}" contained contains=snipTabStopEscape,snipTabStop,snipBalancedBraces
+syn match snipTabStopEscape "\\[{}]" contained
+syn region snipBalancedBraces start="{" end="}" contained transparent
+syn cluster snipTokens add=snipTabStop
+
+syn region snipVisual matchgroup=snipVisual start="\${VISUAL[:}/]\@=" end="}" contained contains=snipVisualDefault,snipTransformationPattern
+syn region snipVisualDefault matchgroup=snipVisual start=":" end="\ze[}/]" contained contains=snipTabStopEscape nextgroup=snipTransformationPattern
+syn cluster snipTokens add=snipVisual
+
+syn region snipTransformation matchgroup=snipTransformation start="\${\d\/\@=" end="}" contained contains=snipTransformationPattern
+syn region snipTransformationPattern matchgroup=snipTransformationPatternDelim start="/" end="\ze/" contained contains=snipTransformationEscape nextgroup=snipTransformationReplace skipnl
+syn region snipTransformationReplace matchgroup=snipTransformationPatternDelim start="/" end="/" contained contains=snipTransformationEscape nextgroup=snipTransformationOptions skipnl
+syn region snipTransformationOptions start="\ze[^}]" end="\ze}" contained contains=snipTabStopEscape
+syn match snipTransformationEscape "\\/" contained
+syn cluster snipTokens add=snipTransformation
 
 " global {{{3
 
@@ -140,10 +160,19 @@ hi def link snipVimLCommand      snipCommand
 hi def link snipPythonCommandP   PreProc
 hi def link snipVimLCommandV     PreProc
 
-hi def link snipVar              StorageClass
-hi def link snipVarExpansion     Normal
-hi def link snipVisual           Normal
-hi def link snipSnippet          Normal
+hi def link snipEscape                     Special
+hi def link snipMirror                     StorageClass
+hi def link snipTabStop                    Define
+hi def link snipTabStopDefault             String
+hi def link snipTabStopEscape              Special
+hi def link snipVisual                     snipTabStop
+hi def link snipVisualDefault              snipTabStopDefault
+hi def link snipTransformation             snipTabStop
+hi def link snipTransformationPattern      String
+hi def link snipTransformationPatternDelim Operator
+hi def link snipTransformationReplace      String
+hi def link snipTransformationEscape       snipEscape
+hi def link snipTransformationOptions      Operator
 
 hi def link snipPriorityKeyword  Keyword
 hi def link snipPriorityValue    Number
