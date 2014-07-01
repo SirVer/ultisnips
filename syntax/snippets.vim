@@ -155,7 +155,6 @@ hi def link snipGlobalFooterKeyword  snipKeyword
 hi def link snipCommand          Special
 hi def link snipCommandDelim     snipCommand
 hi def link snipShellCommand     snipCommand
-hi def link snipPythonCommand    snipCommand
 hi def link snipVimLCommand      snipCommand
 hi def link snipPythonCommandP   PreProc
 hi def link snipVimLCommandV     PreProc
