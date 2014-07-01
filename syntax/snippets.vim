@@ -5,6 +5,15 @@ if exists("b:current_syntax")
   finish
 endif
 
+if expand("%:p:h:t") == "snippets" && search("^endsnippet", "nw") == 0
+            \ && !exists("b:ultisnips_override_snipmate")
+    " this appears to be a snipmate file
+    " It's in a directory called snippets/ and there's no endsnippet keyword
+    " anywhere in the file.
+    source <sfile>:h/snippets_snipmate.vim
+    finish
+endif
+
 " Embedded Syntaxes {{{1
 
 syntax include @Python syntax/python.vim
@@ -69,11 +78,12 @@ syn match snipSnippetOptionFlag ,[biwrts], contained
 
 " Command substitution {{{4
 
-syn region snipCommand keepend matchgroup=snipCommandDelim start="`" skip="\\[{}\\$`]" end="`" contains=snipPythonCommand,snipVimLCommand,snipShellCommand,snipCommandSyntaxOverride
+syn region snipCommand keepend matchgroup=snipCommandDelim start="`" skip="\\[{}\\$`]" end="`" contained contains=snipPythonCommand,snipVimLCommand,snipShellCommand,snipCommandSyntaxOverride
 syn region snipShellCommand start="\ze\_." skip="\\[{}\\$`]" end="\ze`" contained contains=@Shell
 syn region snipPythonCommand matchgroup=snipPythonCommandP start="`\@<=!p\_s" skip="\\[{}\\$`]" end="\ze`" contained contains=@Python
 syn region snipVimLCommand matchgroup=snipVimLCommandV start="`\@<=!v\_s" skip="\\[{}\\$`]" end="\ze`" contained contains=@Viml
 syn cluster snipTokens add=snipCommand
+syn cluster snipTabStopTokens add=snipCommand
 
 " unfortunately due to the balanced braces parsing of commands, if a { occurs
 " in the command, we need to prevent the embedded syntax highlighting.
@@ -85,19 +95,23 @@ syn region snipCommandSyntaxOverride start="\%(\\[{}\\$`]\|\_[^`"{]\)*\ze{" skip
 
 syn match snipEscape "\\[{}\\$`]" contained
 syn cluster snipTokens add=snipEscape
+syn cluster snipTabStopTokens add=snipEscape
 
 syn match snipMirror "\$\d\+" contained
 syn cluster snipTokens add=snipMirror
+syn cluster snipTabStopTokens add=snipMirror
 
 syn region snipTabStop matchgroup=snipTabStop start="\${\d\+[:}]\@=" end="}" contained contains=snipTabStopDefault
-syn region snipTabStopDefault matchgroup=snipTabStop start=":" skip="\\[{}]" end="\ze}" contained contains=snipTabStopEscape,snipBalancedBraces,@snipTokens keepend
+syn region snipTabStopDefault matchgroup=snipTabStop start=":" skip="\\[{}]" end="\ze}" contained contains=snipTabStopEscape,snipBalancedBraces,@snipTabStopTokens keepend
 syn match snipTabStopEscape "\\[{}]" contained
 syn region snipBalancedBraces start="{" end="}" contained transparent extend
 syn cluster snipTokens add=snipTabStop
+syn cluster snipTabStopTokens add=snipTabStop
 
 syn region snipVisual matchgroup=snipVisual start="\${VISUAL[:}/]\@=" end="}" contained contains=snipVisualDefault,snipTransformationPattern
 syn region snipVisualDefault matchgroup=snipVisual start=":" end="\ze[}/]" contained contains=snipTabStopEscape nextgroup=snipTransformationPattern
 syn cluster snipTokens add=snipVisual
+syn cluster snipTabStopTokens add=snipVisual
 
 syn region snipTransformation matchgroup=snipTransformation start="\${\d\/\@=" end="}" contained contains=snipTransformationPattern
 syn region snipTransformationPattern matchgroup=snipTransformationPatternDelim start="/" end="\ze/" contained contains=snipTransformationEscape nextgroup=snipTransformationReplace skipnl
@@ -105,6 +119,7 @@ syn region snipTransformationReplace matchgroup=snipTransformationPatternDelim s
 syn region snipTransformationOptions start="\ze[^}]" end="\ze}" contained contains=snipTabStopEscape
 syn match snipTransformationEscape "\\/" contained
 syn cluster snipTokens add=snipTransformation
+syn cluster snipTabStopTokens add=snipTransformation
 
 " global {{{3
 
