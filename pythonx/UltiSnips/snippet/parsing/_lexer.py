@@ -253,7 +253,7 @@ class EscapeCharToken(Token):
         )
 
 class ShellCodeToken(Token):
-    """`! echo "hi"`"""
+    """`echo "hi"`"""
     @classmethod
     def starts_here(cls, stream):
         """Returns true if this token starts at the current position in

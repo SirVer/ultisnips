@@ -1392,6 +1392,7 @@ individuals have contributed to UltiSnips (in chronological order):
    Christian - Oberon00
    Andrew Ruder - aeruder
    Mathias Fußenegger - mfussenegger
+   Kevin Ballard - kballard
 
 
 Thank you for your support.
