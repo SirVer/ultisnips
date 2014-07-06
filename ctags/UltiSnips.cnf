@@ -1,0 +1,3 @@
+--langdef=UltiSnips
+--langmap=UltiSnips:.snippets
+--regex-UltiSnips=/^snippet (.*)/\1/s,snippet/
