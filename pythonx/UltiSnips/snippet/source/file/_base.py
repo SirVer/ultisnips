@@ -31,10 +31,9 @@ class SnippetFileSource(SnippetSource):
         self._files_for_ft = defaultdict(set)
         self._file_hashes = defaultdict(lambda: None)
 
-    def get_snippets(self, filetypes, before, possible):
+    def ensure(self, filetypes):
         for ft in filetypes:
             self._ensure_loaded(ft, set())
-        return SnippetSource.get_snippets(self, filetypes, before, possible)
 
     def _get_all_snippet_files_for(self, ft):
         """Returns a set of all files that define snippets for 'ft'."""
@@ -94,8 +93,8 @@ class SnippetFileSource(SnippetSource):
                         _vim.escape(filename))
                 raise SnippetSyntaxError(filename, line_index, msg)
             elif event == "clearsnippets":
-                triggers, = data
-                self._snippets[ft].clear_snippets(triggers)
+                priority, triggers = data
+                self._snippets[ft].clear_snippets(priority, triggers)
             elif event == "extends":
                 # TODO(sirver): extends information is more global
                 # than one snippet source.

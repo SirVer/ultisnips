@@ -445,9 +445,25 @@ class SnippetManager(object):
         partial is True, then get also return partial matches. """
         filetypes = self._buffer_filetypes[_vim.buf.number][::-1]
         matching_snippets = defaultdict(list)
+        clear_priority = None
+        cleared = {}
+        # Collect cleared information fomr sources.
+        for _, source in self._snippet_sources:
+            source.ensure(filetypes)
+            sclear_priority = source.get_clear_priority(filetypes)
+            if sclear_priority is not None and (clear_priority is None
+                    or sclear_priority > clear_priority):
+                clear_priority = sclear_priority
+            for key, value in source.get_cleared(filetypes).items():
+                if key not in cleared or value > cleared[key]:
+                    cleared[key] = value
+
         for _, source in self._snippet_sources:
             for snippet in source.get_snippets(filetypes, before, partial):
-                matching_snippets[snippet.trigger].append(snippet)
+                if ((clear_priority is None or snippet.priority > clear_priority)
+                        and (snippet.trigger not in cleared or
+                        snippet.priority > cleared[snippet.trigger])):
+                    matching_snippets[snippet.trigger].append(snippet)
         if not matching_snippets:
             return []
 

@@ -13,6 +13,9 @@ class SnippetSource(object):
     def __init__(self):
         self._snippets = defaultdict(SnippetDictionary)
 
+    def ensure(self, filetypes):
+        pass
+
     def get_snippets(self, filetypes, before, possible):
         """Returns the snippets for all 'filetypes' (in order) and their parents
         matching the text 'before'. If 'possible' is true, a partial match is
@@ -25,6 +28,45 @@ class SnippetSource(object):
         for ft in filetypes:
             found_snippets += self._find_snippets(ft, before, possible)
         return found_snippets
+
+    def get_clear_priority(self, filetypes, seen=None):
+        priority = None
+        if not seen:
+            seen = set()
+        for ft in filetypes:
+            seen.add(ft)
+            snippets = self._snippets[ft]
+            if priority is None or snippets._clear_priority > priority:
+                priority = snippets._clear_priority
+        todo_parent_fts = []
+        for ft in filetypes:
+            extends = self._snippets[ft].extends
+            havnt_seen = filter(lambda ft: ft not in seen, extends)
+            seen.update(havnt_seen)
+            todo_parent_fts.extend(havnt_seen)
+        if todo_parent_fts:
+            return max(priority, self.get_clear_priority(todo_parent_fts, seen))
+        return priority
+
+    def get_cleared(self, filetypes, seen=None):
+        cleared = {}
+        if not seen:
+            seen = set()
+        for ft in filetypes:
+            seen.add(ft)
+            snippets = self._snippets[ft]
+            for key, value in snippets._cleared.items():
+                if key not in cleared or value > cleared[key]:
+                    cleared[key] = value
+        todo_parent_fts = []
+        for ft in filetypes:
+            extends = self._snippets[ft].extends
+            havnt_seen = filter(lambda ft: ft not in seen, extends)
+            seen.update(havnt_seen)
+            todo_parent_fts.extend(havnt_seen)
+        if todo_parent_fts:
+            cleared.update(self.get_cleared(todo_parent_fts, seen))
+        return cleared
 
     def _find_snippets(self, ft, trigger, potentially=False, seen=None):
         """Find snippets matching 'trigger' for 'ft'. If 'potentially' is True,
