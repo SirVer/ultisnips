@@ -30,13 +30,13 @@ class SnippetDictionary(object):
         """Mark snippets as cleared with priority.  When 'triggers' is
         None, then it updated the clear_priority."""
         if not triggers:
-          if self._clear_priority is None or priority > self._clear_priority:
-            self._clear_priority = priority
+            if self._clear_priority is None or priority > self._clear_priority:
+                self._clear_priority = priority
         else:
-          for trigger in triggers:
-            if (trigger not in self._cleared or
-                priority > self._cleared[trigger]):
-              self._cleared[trigger] = priority
+            for trigger in triggers:
+                if (trigger not in self._cleared or
+                        priority > self._cleared[trigger]):
+                    self._cleared[trigger] = priority
 
     @property
     def extends(self):
