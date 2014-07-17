@@ -184,11 +184,15 @@ class VimInterfaceScreen(VimInterface):
         # Send a string where the interpretation will depend on version of screen
         string = "$TERM"
         self.send("i" + string + ESC)
+        # too fast makes the buffer differ from string even in
+        # non-escape mode
+        time.sleep(1)
         output = self.get_buffer_data()
         # If the output doesn't match the input, need to do additional escaping
         if output != string:
             self.need_screen_escapes = 1
         self.send(ESC + ":q!\n")
+        time.sleep(0.2) # prevent from losing the first vim test case
 
 class VimInterfaceTmux(VimInterface):
     def __init__(self, session):
