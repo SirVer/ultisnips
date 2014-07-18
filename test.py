@@ -29,10 +29,8 @@
 from textwrap import dedent
 import os
 import platform
-import random
 import re
 import shutil
-import string
 import subprocess
 import sys
 import tempfile
@@ -144,7 +142,7 @@ def wait_until_file_exists(file_path, times=None, interval=0.01):
 
 class TempFileManager(object):
     def __init__(self, name=""):
-        self._temp_dir = tempfile.mkdtemp(prefix="UltiSnips_" + name)
+        self._temp_dir = tempfile.mkdtemp(prefix="UltiSnipsTest_" + name)
 
     def name_temp(self, file_path):
         return os.path.join(self._temp_dir, file_path)
@@ -181,6 +179,36 @@ class VimInterface(TempFileManager):
         if wait_until_file_exists(buffer_path, 50):
             return read_text_file(buffer_path)[:-1]
 
+    def send(self, s):
+        raise NotImplementedError()
+
+    def launch(self, config=[]):
+        pid_file = self.name_temp("vim.pid")
+        done_file = self.name_temp("loading_done")
+        if os.path.exists(done_file):
+            os.remove(done_file)
+
+        post_config = []
+        post_config.append("%s << EOF" % ("py3" if PYTHON3 else "py"))
+        post_config.append("import vim")
+        post_config.append("with open('%s', 'w') as pid_file: pid_file.write(vim.eval('getpid()'))" % pid_file)
+        post_config.append("with open('%s', 'w') as done_file: pass" % done_file)
+        post_config.append("EOF")
+
+        config_path = self.write_temp("vim_config.vim",
+                dedent(os.linesep.join(config + post_config) + "\n"))
+
+        # Note the space to exclude it from shell history.
+        self.send(""" vim -u %s\r\n""" % config_path)
+        wait_until_file_exists(done_file)
+        self._vim_pid = int(open(pid_file, "r").read())
+
+    def leave_with_wait(self):
+        self.send(3*ESC + ":qa!\n")
+        while is_process_running(self._vim_pid):
+            time.sleep(.05)
+
+
 class VimInterfaceScreen(VimInterface):
     def __init__(self, session):
         VimInterface.__init__(self, "Screen")
@@ -208,9 +236,7 @@ class VimInterfaceScreen(VimInterface):
             time.sleep(.2)
 
     def detect_parsing(self):
-        self.send(""" vim -u NONE\r\n""")  # Space to exclude from shell history
-        time.sleep(1)
-
+        self.launch()
         # Send a string where the interpretation will depend on version of screen
         string = "$TERM"
         self.send("i" + string + ESC)
@@ -218,10 +244,7 @@ class VimInterfaceScreen(VimInterface):
         # If the output doesn't match the input, need to do additional escaping
         if output != string:
             self.need_screen_escapes = 1
-        self.send(ESC + ":q!\n")
-        # Make sure that vim is closed, preventing from losing the first
-        # vim test case
-        time.sleep(0.2)
+        self.leave_with_wait()
 
 class VimInterfaceTmux(VimInterface):
     def __init__(self, session):
@@ -331,7 +354,7 @@ class _VimTest(unittest.TestCase, TempFileManager):
 
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)
-        TempFileManager.__init__(self, "Test")
+        TempFileManager.__init__(self, "Case")
 
     def runTest(self):
         # Only checks the output. All work is done in setUp().
@@ -349,14 +372,16 @@ class _VimTest(unittest.TestCase, TempFileManager):
 
     def _extra_options_pre_init(self, vim_config):
         """Adds extra lines to the vim_config list."""
+        pass
 
     def _extra_options_post_init(self, vim_config):
         """Adds extra lines to the vim_config list."""
+        pass
 
     def _before_test(self):
         """Send these keys before the test runs. Used for buffer local
         variables and other options."""
-        return ""
+        pass
 
     def _create_file(self, file_path, content):
         """Creates a file in the runtimepath that is created for this test.
@@ -438,25 +463,13 @@ class _VimTest(unittest.TestCase, TempFileManager):
         vim_config.append("vim.current.buffer[:] = %r\n" % prefilled_text)
         vim_config.append("vim.current.window.cursor = (max(len(vim.current.buffer)//2, 1), 0)")
 
-        # Create a file to signalize to the test runner that we are done with starting Vim.
-        vim_pid_file = self.name_temp("vim.pid")
-        done_file = self.name_temp("loading_done")
-        vim_config.append("with open('%s', 'w') as pid_file: pid_file.write(vim.eval('getpid()'))" %
-                vim_pid_file)
-        vim_config.append("with open('%s', 'w') as done_file: pass" % done_file)
-
         # End of python stuff.
         vim_config.append("EOF")
 
         for name, content in self.files.items():
             self._create_file(name, content)
 
-        # Now launch Vim.
-        vim_config_path = self._create_file("vim_config.vim", os.linesep.join(vim_config))
-        # Note the shell to exclude it from shell history.
-        self.vim.send(""" vim -u %s\r\n""" % vim_config_path)
-        wait_until_file_exists(done_file)
-        self._vim_pid = int(open(vim_pid_file, "r").read())
+        self.vim.launch(vim_config)
 
         self._before_test()
 
@@ -472,9 +485,7 @@ class _VimTest(unittest.TestCase, TempFileManager):
         if self.interrupt:
             print("Working directory: %s" % (self._temp_dir))
             return
-        self.vim.send(3*ESC + ":qa!\n")
-        while is_process_running(self._vim_pid):
-            time.sleep(.05)
+        self.vim.leave_with_wait()
         self.clear_temp()
 
 ###########################################################################
