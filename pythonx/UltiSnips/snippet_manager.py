@@ -379,15 +379,20 @@ class SnippetManager(object):
     def _jump(self, backwards=False):
         """Helper method that does the actual jump."""
         jumped = False
+        near = False
         if self._cs:
-            self._ctab = self._cs.select_next_tab(backwards)
-            if self._ctab:
+            newctab = self._cs.select_next_tab(backwards)
+            if newctab:
                 if self._cs.snippet.has_option("s"):
                     lineno = _vim.buf.cursor.line
                     _vim.buf[lineno] = _vim.buf[lineno].rstrip()
-                _vim.select(self._ctab.start, self._ctab.end)
+                _vim.select(newctab.start, newctab.end)
                 jumped = True
-                if self._ctab.number == 0:
+                if (self._ctab is not None
+                        and newctab.start - self._ctab.end == Position(0, 1)
+                        and newctab.end - newctab.start == Position(0, 1)):
+                    near = True
+                if newctab.number == 0:
                     self._current_snippet_is_done()
             else:
                 # This really shouldn't happen, because a snippet should
@@ -395,10 +400,12 @@ class SnippetManager(object):
                 # Cleanup by removing current snippet and recursing.
                 self._current_snippet_is_done()
                 jumped = self._jump(backwards)
+            self._ctab = newctab
         if jumped:
             self._vstate.remember_position()
             self._vstate.remember_unnamed_register(self._ctab.current_text)
-            self._ignore_movements = True
+            if not near:
+                self._ignore_movements = True
         return jumped
 
     def _leaving_insert_mode(self):
@@ -506,7 +513,6 @@ class SnippetManager(object):
 
         si.update_textobjects()
 
-        self._ignore_movements = True
         self._vstate.remember_buffer(self._csnippets[0])
 
         self._jump()
