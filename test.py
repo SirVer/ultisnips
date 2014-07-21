@@ -9,6 +9,9 @@
 # In one terminal, launch a GNU ``screen`` session named ``vim``:
 #   $ screen -S vim
 #
+# Or the following if you use ``tmux``:
+#   $ tmux new -s vim
+#
 # Now, from another terminal, launch the testsuite:
 #    $ ./test.py
 #
@@ -248,6 +251,7 @@ class VimInterfaceScreen(VimInterface):
 
 class VimInterfaceTmux(VimInterface):
     def __init__(self, session):
+        VimInterface.__init__(self, "Tmux")
         self.session = session
         self._check_version()
 
@@ -266,8 +270,8 @@ class VimInterfaceTmux(VimInterface):
         if PYTHON3:
             stdout = stdout.decode("utf-8")
         m = re.match(r"tmux (\d+).(\d+)", stdout)
-        if not m or not (int(m.group(1)), int(m.group(2))) >= (1, 9):
-            raise RuntimeError("Need at least tmux 1.9, you have %s." % stdout.strip())
+        #if not m or not (int(m.group(1)), int(m.group(2))) >= (1, 9):
+        #    raise RuntimeError("Need at least tmux 1.9, you have %s." % stdout.strip())
 
 class VimInterfaceWindows(VimInterface):
     BRACES = re.compile("([}{])")
