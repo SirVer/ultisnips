@@ -287,8 +287,8 @@ class VimInterfaceTmux(VimInterface):
         if PYTHON3:
             stdout = stdout.decode("utf-8")
         m = re.match(r"tmux (\d+).(\d+)", stdout)
-        #if not m or not (int(m.group(1)), int(m.group(2))) >= (1, 9):
-        #    raise RuntimeError("Need at least tmux 1.9, you have %s." % stdout.strip())
+        if not m or not (int(m.group(1)), int(m.group(2))) >= (1, 8):
+            raise RuntimeError("Need at least tmux 1.8, you have %s." % stdout.strip())
 
 class VimInterfaceWindows(VimInterface):
     BRACES = re.compile("([}{])")
