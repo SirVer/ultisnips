@@ -1393,6 +1393,7 @@ individuals have contributed to UltiSnips (in chronological order):
    Andrew Ruder - aeruder
    Mathias Fußenegger - mfussenegger
    Kevin Ballard - kballard
+   Ahbong Chang - cwahbong
 
 
 Thank you for your support.
