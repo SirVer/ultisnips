@@ -447,9 +447,11 @@ class SnippetManager(object):
         matching_snippets = defaultdict(list)
         clear_priority = None
         cleared = {}
-        # Collect cleared information fomr sources.
         for _, source in self._snippet_sources:
             source.ensure(filetypes)
+
+        # Collect cleared information from sources.
+        for _, source in self._snippet_sources:
             sclear_priority = source.get_clear_priority(filetypes)
             if sclear_priority is not None and (clear_priority is None
                     or sclear_priority > clear_priority):

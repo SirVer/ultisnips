@@ -12,6 +12,7 @@ class SnippetSource(object):
 
     def __init__(self):
         self._snippets = defaultdict(SnippetDictionary)
+        self._extends = defaultdict(set)
 
     def ensure(self, filetypes):
         pass
@@ -31,7 +32,7 @@ class SnippetSource(object):
                 snips = self._snippets[ft]
                 result.extend(snips.get_matching_snippets(before, possible))
             return result
-        return __inner(filetypes) + __inner(self._extends_all(filetypes))
+        return __inner(self.get_deep_extends(filetypes))
 
     def get_clear_priority(self, filetypes):
         def __inner(fts):
@@ -42,14 +43,7 @@ class SnippetSource(object):
                 if pri is None or snippets._clear_priority > pri:
                     pri = snippets._clear_priority
             return pri
-        priority = __inner(filetypes)
-        deep_clear_priority = __inner(self._extends_all(filetypes))
-        if deep_clear_priority is None:
-            return priority
-        elif priority is None:
-            return deep_clear_priority
-        else:
-            return max(priority, deep_clear_priority)
+        return __inner(self.get_deep_extends(filetypes))
 
     def get_cleared(self, filetypes):
         def __inner(fts):
@@ -61,20 +55,18 @@ class SnippetSource(object):
                     if key not in cleared or value > cleared[key]:
                         cleared[key] = value
             return cleared
-        return dict(__inner(filetypes).items() + __inner(self._extends_all(filetypes)).items())
+        return __inner(self.get_deep_extends(filetypes))
 
-    def _extends_all(self, filetypes, seen=None):
-        """Return deep extends dependency, excluding the filetype itself
-        """
-        if seen is None:
-            seen = set(filetypes)
+    def update_extends(self, child_ft, parent_fts):
+        self._extends[child_ft].update(parent_fts)
 
-        shallow_extends = set()
-        for filetype in filetypes:
-            ft_extends = self._snippets[filetype].extends
-            havnt_seen = set(filter(lambda ft: ft not in seen, ft_extends))
-            seen.update(havnt_seen)
-            shallow_extends.update(havnt_seen)
-        if not shallow_extends:
-            return shallow_extends
-        return shallow_extends | self._extends_all(shallow_extends, seen)
+    def get_deep_extends(self, root_filetypes):
+        seen = set(root_filetypes)
+        l = list(set(root_filetypes))
+        while l:
+            top = l.pop()
+            for ft in self._extends[top]:
+                if ft not in seen:
+                    seen.add(ft)
+                    l.append(ft)
+        return seen

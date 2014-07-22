@@ -3,13 +3,11 @@
 
 """Implements a container for parsed snippets."""
 
-# TODO(sirver): This class should not keep track of extends.
 class SnippetDictionary(object):
     """See module docstring."""
 
     def __init__(self):
         self._snippets = []
-        self._extends = []
         self._cleared = {}
         self._clear_priority = None
 
@@ -37,8 +35,3 @@ class SnippetDictionary(object):
                 if (trigger not in self._cleared or
                         priority > self._cleared[trigger]):
                     self._cleared[trigger] = priority
-
-    @property
-    def extends(self):
-        """The list of filetypes this filetype extends."""
-        return self._extends
