@@ -144,13 +144,24 @@ def wait_until_file_exists(file_path, times=None, interval=0.01):
     return False
 
 class TempFileManager(object):
+    """A TempFileManager keeps a unique prefix path for temp
+    files.  A temp file, or a name for a temp file generate by a
+    TempFileManager always belongs to the same directory.
+    """
     def __init__(self, name=""):
+        """The unique prefix path is UltiSnipsTest_{name}XXXXXX.
+        """
         self._temp_dir = tempfile.mkdtemp(prefix="UltiSnipsTest_" + name)
 
     def name_temp(self, file_path):
+        """Get the absolute path of a temp file by given file path.
+        """
         return os.path.join(self._temp_dir, file_path)
 
     def write_temp(self, file_path, content):
+        """Write the content to a temp file by given file path inside
+        the _temp_dir, and return the absolute path of that file.
+        """
         abs_path = self.name_temp(file_path)
         create_directory(os.path.dirname(abs_path))
         if PYTHON3:
@@ -162,12 +173,18 @@ class TempFileManager(object):
         return abs_path
 
     def unique_name_temp(self, suffix="", prefix=""):
+        """Generate a unique name for a temp file with given suffix and
+        prefix, and return full absolute path.
+        """
         file_handler, abspath = tempfile.mkstemp(suffix, prefix, self._temp_dir)
         os.close(file_handler)
         os.remove(abspath)
         return abspath
 
     def clear_temp(self):
+        """Clear the temp file directory, but the directory itself is
+        not removed.
+        """
         shutil.rmtree(self._temp_dir)
         create_directory(self._temp_dir)
 
