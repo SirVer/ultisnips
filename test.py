@@ -9,6 +9,9 @@
 # In one terminal, launch a GNU ``screen`` session named ``vim``:
 #   $ screen -S vim
 #
+# Or the following if you use ``tmux``:
+#   $ tmux new -s vim
+#
 # Now, from another terminal, launch the testsuite:
 #    $ ./test.py
 #
@@ -29,10 +32,8 @@
 from textwrap import dedent
 import os
 import platform
-import random
 import re
 import shutil
-import string
 import subprocess
 import sys
 import tempfile
@@ -133,27 +134,104 @@ def read_text_file(filename):
     else:
         return open(filename,"r").read()
 
-def random_string(n):
-    return ''.join(random.choice(string.ascii_lowercase) for x in range(n))
+def wait_until_file_exists(file_path, times=None, interval=0.01):
+    while times is None or times:
+        if os.path.exists(file_path):
+            return True
+        time.sleep(interval)
+        if times is not None:
+            times -= 1
+    return False
 
-class VimInterface(object):
+class TempFileManager(object):
+    """A TempFileManager keeps a unique prefix path for temp
+    files.  A temp file, or a name for a temp file generate by a
+    TempFileManager always belongs to the same directory.
+    """
+    def __init__(self, name=""):
+        """The unique prefix path is UltiSnipsTest_{name}XXXXXX.
+        """
+        self._temp_dir = tempfile.mkdtemp(prefix="UltiSnipsTest_" + name)
+
+    def name_temp(self, file_path):
+        """Get the absolute path of a temp file by given file path.
+        """
+        return os.path.join(self._temp_dir, file_path)
+
+    def write_temp(self, file_path, content):
+        """Write the content to a temp file by given file path inside
+        the _temp_dir, and return the absolute path of that file.
+        """
+        abs_path = self.name_temp(file_path)
+        create_directory(os.path.dirname(abs_path))
+        if PYTHON3:
+            with open(abs_path, "w", encoding="utf-8") as f:
+                f.write(content)
+        else:
+            with open(abs_path, "w") as f:
+                f.write(content)
+        return abs_path
+
+    def unique_name_temp(self, suffix="", prefix=""):
+        """Generate a unique name for a temp file with given suffix and
+        prefix, and return full absolute path.
+        """
+        file_handler, abspath = tempfile.mkstemp(suffix, prefix, self._temp_dir)
+        os.close(file_handler)
+        os.remove(abspath)
+        return abspath
+
+    def clear_temp(self):
+        """Clear the temp file directory, but the directory itself is
+        not removed.
+        """
+        shutil.rmtree(self._temp_dir)
+        create_directory(self._temp_dir)
+
+
+class VimInterface(TempFileManager):
+    def __init__(self, name=""):
+        TempFileManager.__init__(self, name)
+
     def get_buffer_data(self):
-        handle, fn = tempfile.mkstemp(prefix="UltiSnips_Test",suffix=".txt")
-        os.close(handle)
-        os.unlink(fn)
+        buffer_path = self.unique_name_temp(prefix="buffer_")
+        self.send(ESC + ":w! %s\n" % buffer_path)
+        if wait_until_file_exists(buffer_path, 50):
+            return read_text_file(buffer_path)[:-1]
 
-        self.send(ESC + ":w! %s\n" % fn)
+    def send(self, s):
+        raise NotImplementedError()
 
-        # Read the output, chop the trailing newline
-        tries = 50
-        while tries:
-            if os.path.exists(fn):
-                return read_text_file(fn)[:-1]
-            time.sleep(.01)
-            tries -= 1
+    def launch(self, config=[]):
+        pid_file = self.name_temp("vim.pid")
+        done_file = self.name_temp("loading_done")
+        if os.path.exists(done_file):
+            os.remove(done_file)
+
+        post_config = []
+        post_config.append("%s << EOF" % ("py3" if PYTHON3 else "py"))
+        post_config.append("import vim")
+        post_config.append("with open('%s', 'w') as pid_file: pid_file.write(vim.eval('getpid()'))" % pid_file)
+        post_config.append("with open('%s', 'w') as done_file: pass" % done_file)
+        post_config.append("EOF")
+
+        config_path = self.write_temp("vim_config.vim",
+                dedent(os.linesep.join(config + post_config) + "\n"))
+
+        # Note the space to exclude it from shell history.
+        self.send(""" vim -u %s\r\n""" % config_path)
+        wait_until_file_exists(done_file)
+        self._vim_pid = int(open(pid_file, "r").read())
+
+    def leave_with_wait(self):
+        self.send(3*ESC + ":qa!\n")
+        while is_process_running(self._vim_pid):
+            time.sleep(.05)
+
 
 class VimInterfaceScreen(VimInterface):
     def __init__(self, session):
+        VimInterface.__init__(self, "Screen")
         self.session = session
         self.need_screen_escapes = 0
         self.detect_parsing()
@@ -178,9 +256,7 @@ class VimInterfaceScreen(VimInterface):
             time.sleep(.2)
 
     def detect_parsing(self):
-        self.send(""" vim -u NONE\r\n""")  # Space to exclude from shell history
-        time.sleep(1)
-
+        self.launch()
         # Send a string where the interpretation will depend on version of screen
         string = "$TERM"
         self.send("i" + string + ESC)
@@ -188,10 +264,11 @@ class VimInterfaceScreen(VimInterface):
         # If the output doesn't match the input, need to do additional escaping
         if output != string:
             self.need_screen_escapes = 1
-        self.send(ESC + ":q!\n")
+        self.leave_with_wait()
 
 class VimInterfaceTmux(VimInterface):
     def __init__(self, session):
+        VimInterface.__init__(self, "Tmux")
         self.session = session
         self._check_version()
 
@@ -210,8 +287,8 @@ class VimInterfaceTmux(VimInterface):
         if PYTHON3:
             stdout = stdout.decode("utf-8")
         m = re.match(r"tmux (\d+).(\d+)", stdout)
-        if not m or not (int(m.group(1)), int(m.group(2))) >= (1, 9):
-            raise RuntimeError("Need at least tmux 1.9, you have %s." % stdout.strip())
+        if not m or not (int(m.group(1)), int(m.group(2))) >= (1, 8):
+            raise RuntimeError("Need at least tmux 1.8, you have %s." % stdout.strip())
 
 class VimInterfaceWindows(VimInterface):
     BRACES = re.compile("([}{])")
@@ -280,20 +357,8 @@ class VimInterfaceWindows(VimInterface):
 
         self.shell.SendKeys(seq)
 
-def create_temp_file(prefix, suffix, content):
-    """Create a file in a temporary place with the given 'prefix'
-    and the given 'suffix' containing 'content'. The file is never
-    deleted. Returns the name of the temporary file."""
-    with tempfile.NamedTemporaryFile(
-        prefix=prefix, suffix=suffix, delete=False
-    ) as temporary_file:
-        if PYTHON3:
-            s = s.encode("utf-8")
-        temporary_file.write(content)
-        temporary_file.close()
-        return temporary_file.name
 
-class _VimTest(unittest.TestCase):
+class _VimTest(unittest.TestCase, TempFileManager):
     snippets = ()
     files = {}
     text_before = " --- some text before --- \n\n"
@@ -307,6 +372,10 @@ class _VimTest(unittest.TestCase):
     # Skip this test for the given reason or None for not skipping it.
     skip_if = lambda self: None
     version = None  # Will be set to vim --version output
+
+    def __init__(self, *args, **kwargs):
+        unittest.TestCase.__init__(self, *args, **kwargs)
+        TempFileManager.__init__(self, "Case")
 
     def runTest(self):
         # Only checks the output. All work is done in setUp().
@@ -324,33 +393,25 @@ class _VimTest(unittest.TestCase):
 
     def _extra_options_pre_init(self, vim_config):
         """Adds extra lines to the vim_config list."""
+        pass
 
     def _extra_options_post_init(self, vim_config):
         """Adds extra lines to the vim_config list."""
+        pass
 
     def _before_test(self):
         """Send these keys before the test runs. Used for buffer local
         variables and other options."""
-        return ""
+        pass
 
     def _create_file(self, file_path, content):
         """Creates a file in the runtimepath that is created for this test.
         Returns the absolute path to the file."""
-        abs_path = os.path.join(self._temporary_directory, *file_path.split("/"))
-        create_directory(os.path.dirname(abs_path))
-
-        content = dedent(content + "\n")
-        if PYTHON3:
-            with open(abs_path, "w", encoding="utf-8") as file_handle:
-                file_handle.write(content)
-        else:
-            with open(abs_path, "w") as file_handle:
-                file_handle.write(content)
-        return abs_path
+        return self.write_temp(file_path, dedent(content + "\n"))
 
     def _link_file(self, source, relative_destination):
         """Creates a link from 'source' to the 'relative_destination' in our temp dir."""
-        absdir = os.path.join(self._temporary_directory, relative_destination)
+        absdir = self.name_temp(relative_destination)
         create_directory(absdir)
         os.symlink(source, os.path.join(absdir, os.path.basename(source)))
 
@@ -367,11 +428,9 @@ class _VimTest(unittest.TestCase):
         if reason_for_skipping is not None:
             return self.skipTest(reason_for_skipping)
 
-        self._temporary_directory = tempfile.mkdtemp(prefix="UltiSnips_Test")
-
         vim_config = []
         vim_config.append('set nocompatible')
-        vim_config.append('set runtimepath=$VIMRUNTIME,.,%s' % self._temporary_directory)
+        vim_config.append('set runtimepath=$VIMRUNTIME,.,%s' % self._temp_dir)
 
         if self.plugins:
             self._link_file(os.path.join(plugin_cache_dir(), "vim-pathogen", "autoload"), ".")
@@ -425,29 +484,13 @@ class _VimTest(unittest.TestCase):
         vim_config.append("vim.current.buffer[:] = %r\n" % prefilled_text)
         vim_config.append("vim.current.window.cursor = (max(len(vim.current.buffer)//2, 1), 0)")
 
-        # Create a file to signalize to the test runner that we are done with starting Vim.
-        vim_pid_file = os.path.join(self._temporary_directory, "vim.pid")
-        done_file = os.path.join(self._temporary_directory, "loading_done")
-        vim_config.append("with open('%s', 'w') as pid_file: pid_file.write(vim.eval('getpid()'))" %
-                vim_pid_file)
-        vim_config.append("with open('%s', 'w') as done_file: pass" % done_file)
-
         # End of python stuff.
         vim_config.append("EOF")
 
         for name, content in self.files.items():
             self._create_file(name, content)
 
-        # Now launch Vim.
-        self._create_file("vim_config.vim", os.linesep.join(vim_config))
-        # Note the shell to exclude it from shell history.
-        self.vim.send(""" vim -u %s\r\n""" % os.path.join(
-            self._temporary_directory, "vim_config.vim"))
-        while True:
-            if os.path.exists(done_file):
-                self._vim_pid = int(open(vim_pid_file, "r").read())
-                break
-            time.sleep(.01)
+        self.vim.launch(vim_config)
 
         self._before_test()
 
@@ -461,12 +504,10 @@ class _VimTest(unittest.TestCase):
 
     def tearDown(self):
         if self.interrupt:
-            print("Working directory: %s" % (self._temporary_directory))
+            print("Working directory: %s" % (self._temp_dir))
             return
-        shutil.rmtree(self._temporary_directory)
-        self.vim.send(3*ESC + ":qa!\n")
-        while is_process_running(self._vim_pid):
-            time.sleep(.05)
+        self.vim.leave_with_wait()
+        self.clear_temp()
 
 ###########################################################################
 #                            BEGINNING OF TEST                            #
@@ -3381,8 +3422,7 @@ class MySnippetSource(SnippetSource):
     return []
 """)
         pyfile = 'py3file' if PYTHON3 else 'pyfile'
-        vim_config.append("%s %s" % (pyfile, os.path.join(
-            self._temporary_directory, "snippet_source.py")))
+        vim_config.append("%s %s" % (pyfile, self.name_temp("snippet_source.py")))
 # End: Snippet Source  #}}}
 
 # Plugin: YouCompleteMe  {{{#
