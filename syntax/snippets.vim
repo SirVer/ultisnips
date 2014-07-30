@@ -16,12 +16,16 @@ endif
 
 " Embedded Syntaxes {{{1
 
-syntax include @Python syntax/python.vim
-unlet b:current_syntax
-syntax include @Viml syntax/vim.vim
-unlet b:current_syntax
-syntax include @Shell syntax/sh.vim
-unlet b:current_syntax
+try
+   syntax include @Python syntax/python.vim
+   unlet b:current_syntax
+   syntax include @Viml syntax/vim.vim
+   unlet b:current_syntax
+   syntax include @Shell syntax/sh.vim
+   unlet b:current_syntax
+catch /E403/
+   " Ignore errors about syntax files that can't be loaded more than once
+endtry
 
 " Syntax definitions {{{1
 
