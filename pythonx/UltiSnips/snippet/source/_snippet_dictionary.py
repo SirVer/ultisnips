@@ -25,8 +25,8 @@ class SnippetDictionary(object):
             return [s for s in all_snippets if s.could_match(trigger)]
 
     def clear_snippets(self, priority, triggers):
-        """Mark snippets as cleared with priority.  When 'triggers' is
-        None, then it updated the clear_priority."""
+        """Clear the snippets by mark them as cleared.  If trigger is
+        None, it updates the value of clear priority instead."""
         if not triggers:
             if self._clear_priority is None or priority > self._clear_priority:
                 self._clear_priority = priority
