@@ -1237,12 +1237,23 @@ directive.
 clearsnippets
 ------------------- SNAP -------------------
 
-Without arguments, 'clearsnippets' removes all snippets defined up to that
-point for the current file type. 
+'clearsnippets' removes all snippets with a priority lower than the current
+one. For example, the following cleares all snippets that have priority <= 1,
+even though the example snippet is defined after the 'clearsnippets'.
 
-To clear one or more specific snippet, provide the names of the snippets as
-arguments to the 'clearsnippets' command. The following example will clear
-the snippets 'trigger1' and 'trigger2'.
+------------------- SNIP -------------------
+priority 1
+clearsnippets
+
+priority -1
+snippet example "Cleared example"
+	This will never be expanded.
+endsnippet
+------------------- SNAP -------------------
+
+To clear one or more specific snippet, provide the triggers of the snippets as
+arguments to the 'clearsnippets' command. The following example will clear the
+snippets 'trigger1' and 'trigger2'.
 
 ------------------- SNIP -------------------
 clearsnippets trigger1 trigger2
