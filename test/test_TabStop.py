@@ -251,3 +251,8 @@ class TabStopNavigatingInInsertModeSimple_ExpectCorrectResult(_VimTest):
     snippets = ("hallo", "Hallo ${1:WELT} ups")
     keys = "hallo" + EX + "haselnut" + 2*ARR_L + "hips" + JF + "end"
     wanted = "Hallo haselnhipsut upsend"
+
+class TabStop_CROnlyOnSelectedNear(_VimTest):
+    snippets = ("test", "t$1t${2: }t{\n\t$0\n}")
+    keys = "test" + EX + JF + "\n" + JF + "t"
+    wanted = "tt\nt{\n\tt\n}"

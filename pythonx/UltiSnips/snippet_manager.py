@@ -379,15 +379,23 @@ class SnippetManager(object):
     def _jump(self, backwards=False):
         """Helper method that does the actual jump."""
         jumped = False
+        # If next tab has length 1 and the distance between itself and
+        # self._ctab is 1 then there is 1 less CursorMove events.  We
+        # cannot ignore next movement in such case.
+        ntab_short_and_near = False
         if self._cs:
-            self._ctab = self._cs.select_next_tab(backwards)
-            if self._ctab:
+            ntab = self._cs.select_next_tab(backwards)
+            if ntab:
                 if self._cs.snippet.has_option("s"):
                     lineno = _vim.buf.cursor.line
                     _vim.buf[lineno] = _vim.buf[lineno].rstrip()
-                _vim.select(self._ctab.start, self._ctab.end)
+                _vim.select(ntab.start, ntab.end)
                 jumped = True
-                if self._ctab.number == 0:
+                if (self._ctab is not None
+                        and ntab.start - self._ctab.end == Position(0, 1)
+                        and ntab.end - ntab.start == Position(0, 1)):
+                    ntab_short_and_near = True
+                if ntab.number == 0:
                     self._current_snippet_is_done()
             else:
                 # This really shouldn't happen, because a snippet should
@@ -395,10 +403,12 @@ class SnippetManager(object):
                 # Cleanup by removing current snippet and recursing.
                 self._current_snippet_is_done()
                 jumped = self._jump(backwards)
+            self._ctab = ntab
         if jumped:
             self._vstate.remember_position()
             self._vstate.remember_unnamed_register(self._ctab.current_text)
-            self._ignore_movements = True
+            if not ntab_short_and_near:
+                self._ignore_movements = True
         return jumped
 
     def _leaving_insert_mode(self):
@@ -506,7 +516,6 @@ class SnippetManager(object):
 
         si.update_textobjects()
 
-        self._ignore_movements = True
         self._vstate.remember_buffer(self._csnippets[0])
 
         self._jump()
