@@ -3,13 +3,13 @@
 
 """Implements a container for parsed snippets."""
 
-# TODO(sirver): This class should not keep track of extends.
 class SnippetDictionary(object):
     """See module docstring."""
 
     def __init__(self):
         self._snippets = []
-        self._extends = []
+        self._cleared = {}
+        self._clear_priority = None
 
     def add_snippet(self, snippet):
         """Add 'snippet' to this dictionary."""
@@ -24,18 +24,14 @@ class SnippetDictionary(object):
         else:
             return [s for s in all_snippets if s.could_match(trigger)]
 
-    def clear_snippets(self, triggers):
-        """Remove all snippets that match each trigger in 'triggers'. When
-        'triggers' is None, empties this dictionary completely."""
+    def clear_snippets(self, priority, triggers):
+        """Clear the snippets by mark them as cleared.  If trigger is
+        None, it updates the value of clear priority instead."""
         if not triggers:
-            self._snippets = []
-            return
-        for trigger in triggers:
-            for snippet in self.get_matching_snippets(trigger, False):
-                if snippet in self._snippets:
-                    self._snippets.remove(snippet)
-
-    @property
-    def extends(self):
-        """The list of filetypes this filetype extends."""
-        return self._extends
+            if self._clear_priority is None or priority > self._clear_priority:
+                self._clear_priority = priority
+        else:
+            for trigger in triggers:
+                if (trigger not in self._cleared or
+                        priority > self._cleared[trigger]):
+                    self._cleared[trigger] = priority
