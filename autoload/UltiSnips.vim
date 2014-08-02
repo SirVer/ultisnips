@@ -42,7 +42,7 @@ function! s:compensate_for_pum()
     """ to explicitly check for the presence of the popup menu, and update
     """ the vim-state accordingly.
     if pumvisible()
-        exec g:_uspy "UltiSnips_Manager._cursor_moved()"
+        exec g:_uspy "UltiSnips_Manager.cursor_moved()"
     endif
 endfunction
 
@@ -52,7 +52,7 @@ function! UltiSnips#Edit(bang, ...)
     else
         let type = ""
     endif
-    exec g:_uspy "vim.command(\"let file = '%s'\" % UltiSnips_Manager._file_to_edit(vim.eval(\"type\"), vim.eval('a:bang')))"
+    exec g:_uspy "vim.command(\"let file = '%s'\" % UltiSnips_Manager.file_to_edit(vim.eval(\"type\"), vim.eval('a:bang')))"
 
     if !len(file)
        return
@@ -113,7 +113,7 @@ function! UltiSnips#SnippetsInCurrentScope()
 endfunction
 
 function! UltiSnips#SaveLastVisualSelection()
-    exec g:_uspy "UltiSnips_Manager._save_last_visual_selection()"
+    exec g:_uspy "UltiSnips_Manager.save_last_visual_selection()"
     return ""
 endfunction
 
@@ -130,8 +130,7 @@ function! UltiSnips#JumpForwards()
 endfunction
 
 function! UltiSnips#FileTypeChanged()
-    exec g:_uspy "UltiSnips_Manager.reset_buffer_filetypes()"
-    exec g:_uspy "UltiSnips_Manager.add_buffer_filetypes('" . &ft . "')"
+    exec g:_uspy "UltiSnips_Manager.filetype_changed()"
     return ""
 endfunction
 
@@ -170,14 +169,14 @@ endfunction
 
 
 function! UltiSnips#CursorMoved()
-    exec g:_uspy "UltiSnips_Manager._cursor_moved()"
+    exec g:_uspy "UltiSnips_Manager.cursor_moved()"
 endf
 
 function! UltiSnips#LeavingBuffer()
-    exec g:_uspy "UltiSnips_Manager._leaving_buffer()"
+    exec g:_uspy "UltiSnips_Manager.leaving_buffer()"
 endf
 
 function! UltiSnips#LeavingInsertMode()
-    exec g:_uspy "UltiSnips_Manager._leaving_insert_mode()"
+    exec g:_uspy "UltiSnips_Manager.leaving_insert_mode()"
 endfunction
 " }}}
