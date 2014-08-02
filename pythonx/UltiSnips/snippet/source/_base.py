@@ -12,6 +12,20 @@ class SnippetSource(object):
 
     def __init__(self):
         self._snippets = defaultdict(SnippetDictionary)
+        self._extends = defaultdict(set)
+
+    def ensure(self, filetypes):
+        """Update/reload the snippets in the source when needed.  It makes sure
+        that the snippets are not outdated.
+        """
+        pass
+
+    def _get_existing_deep_extends(self, base_filetypes):
+        """Helper for get all existing filetypes extended by base
+        filetypes.
+        """
+        deep_extends = self.get_deep_extends(base_filetypes)
+        return [ft for ft in deep_extends if ft in self._snippets]
 
     def get_snippets(self, filetypes, before, possible):
         """Returns the snippets for all 'filetypes' (in order) and their parents
@@ -21,27 +35,51 @@ class SnippetSource(object):
 
         Returns a list of SnippetDefinition s.
         """
-        found_snippets = []
-        for ft in filetypes:
-            found_snippets += self._find_snippets(ft, before, possible)
-        return found_snippets
+        result = []
+        for ft in self._get_existing_deep_extends(filetypes):
+            snips = self._snippets[ft]
+            result.extend(snips.get_matching_snippets(before, possible))
+        return result
 
-    def _find_snippets(self, ft, trigger, potentially=False, seen=None):
-        """Find snippets matching 'trigger' for 'ft'. If 'potentially' is True,
-        partial matches are enough."""
-        snips = self._snippets.get(ft, None)
-        if not snips:
-            return []
-        if not seen:
-            seen = set()
-        seen.add(ft)
-        parent_results = []
-        # TODO(sirver): extends information is not bound to one
-        # source. It should be tracked further up.
-        for parent_ft in snips.extends:
-            if parent_ft not in seen:
-                seen.add(parent_ft)
-                parent_results += self._find_snippets(parent_ft, trigger,
-                        potentially, seen)
-        return parent_results + snips.get_matching_snippets(
-            trigger, potentially)
+    def get_clear_priority(self, filetypes):
+        """Get maximum clearsnippets priority without arguments for specified
+        filetypes, if any.  It returns None if there are no clearsnippets.
+        """
+        pri = None
+        for ft in self._get_existing_deep_extends(filetypes):
+            snippets = self._snippets[ft]
+            if pri is None or snippets._clear_priority > pri:
+                pri = snippets._clear_priority
+        return pri
+
+    def get_cleared(self, filetypes):
+        """Get a set of cleared snippets marked by clearsnippets with arguments
+        for specified filetypes.
+        """
+        cleared = {}
+        for ft in self._get_existing_deep_extends(filetypes):
+            snippets = self._snippets[ft]
+            for key, value in snippets._cleared.items():
+                if key not in cleared or value > cleared[key]:
+                    cleared[key] = value
+        return cleared
+
+    def update_extends(self, child_ft, parent_fts):
+        """Update the extending relation by given child filetype and
+        its parent filetypes.
+        """
+        self._extends[child_ft].update(parent_fts)
+
+    def get_deep_extends(self, base_filetypes):
+        """Get a list of filetypes that is either directed or indirected
+        extended by given base filetypes.  Note that the returned list
+        include the root filetype itself.
+        """
+        seen = set(base_filetypes)
+        todo_fts = list(set(base_filetypes))
+        while todo_fts:
+            todo_ft = todo_fts.pop()
+            unseen_extends = set(ft for ft in self._extends[todo_ft] if ft not in seen)
+            seen.update(unseen_extends)
+            todo_fts.extend(unseen_extends)
+        return seen

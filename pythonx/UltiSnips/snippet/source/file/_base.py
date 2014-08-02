@@ -31,10 +31,10 @@ class SnippetFileSource(SnippetSource):
         self._files_for_ft = defaultdict(set)
         self._file_hashes = defaultdict(lambda: None)
 
-    def get_snippets(self, filetypes, before, possible):
-        for ft in filetypes:
-            self._ensure_loaded(ft, set())
-        return SnippetSource.get_snippets(self, filetypes, before, possible)
+    def ensure(self, filetypes):
+        for ft in self.get_deep_extends(filetypes):
+            if self._needs_update(ft):
+                self._load_snippets_for(ft)
 
     def _get_all_snippet_files_for(self, ft):
         """Returns a set of all files that define snippets for 'ft'."""
@@ -43,19 +43,6 @@ class SnippetFileSource(SnippetSource):
     def _parse_snippet_file(self, filedata, filename):
         """Parses 'filedata' as a snippet file and yields events."""
         raise NotImplementedError()
-
-    def _ensure_loaded(self, ft, already_loaded):
-        """Make sure that the snippets for 'ft' and everything it extends are
-        loaded."""
-        if ft in already_loaded:
-            return
-        already_loaded.add(ft)
-
-        if self._needs_update(ft):
-            self._load_snippets_for(ft)
-
-        for parent in self._snippets[ft].extends:
-            self._ensure_loaded(parent, already_loaded)
 
     def _needs_update(self, ft):
         """Returns true if any files for 'ft' have changed and must be
@@ -75,11 +62,12 @@ class SnippetFileSource(SnippetSource):
         """Load all snippets for the given 'ft'."""
         if ft in self._snippets:
             del self._snippets[ft]
+            del self._extends[ft]
         for fn in self._files_for_ft[ft]:
             self._parse_snippets(ft, fn)
         # Now load for the parents
-        for parent_ft in self._snippets[ft].extends:
-            if parent_ft not in self._snippets:
+        for parent_ft in self.get_deep_extends([ft]):
+            if parent_ft != ft and self._needs_update(parent_ft):
                 self._load_snippets_for(parent_ft)
 
     def _parse_snippets(self, ft, filename):
@@ -94,23 +82,15 @@ class SnippetFileSource(SnippetSource):
                         _vim.escape(filename))
                 raise SnippetSyntaxError(filename, line_index, msg)
             elif event == "clearsnippets":
-                triggers, = data
-                self._snippets[ft].clear_snippets(triggers)
+                priority, triggers = data
+                self._snippets[ft].clear_snippets(priority, triggers)
             elif event == "extends":
                 # TODO(sirver): extends information is more global
                 # than one snippet source.
                 filetypes, = data
-                self._add_extending_info(ft, filetypes)
+                self.update_extends(ft, filetypes)
             elif event == "snippet":
                 snippet, = data
                 self._snippets[ft].add_snippet(snippet)
             else:
                 assert False, "Unhandled %s: %r" % (event, data)
-
-    def _add_extending_info(self, ft, parents):
-        """Add the list of 'parents' as being extended by the 'ft'."""
-        sd = self._snippets[ft]
-        for parent in parents:
-            if parent in sd.extends:
-                continue
-            sd.extends.append(parent)

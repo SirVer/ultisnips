@@ -122,7 +122,7 @@ def _parse_snippets_file(data, filename):
         elif head == "extends":
             yield handle_extends(tail, lines.line_index)
         elif head == "clearsnippets":
-            yield "clearsnippets", (tail.split(),)
+            yield "clearsnippets", (current_priority, tail.split())
         elif head == "priority":
             try:
                 current_priority = int(tail.split()[0])

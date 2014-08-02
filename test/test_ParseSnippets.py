@@ -64,6 +64,8 @@ class ParseSnippets_ClearAll(_VimTest):
 
 class ParseSnippets_ClearOne(_VimTest):
     files = { "us/all.snippets": r"""
+        clearsnippets toclear
+
         snippet testsnip "Test snippet"
         This is a test.
         endsnippet
@@ -71,14 +73,14 @@ class ParseSnippets_ClearOne(_VimTest):
         snippet toclear "Snippet to clear"
         Do not expand.
         endsnippet
-
-        clearsnippets toclear
         """}
     keys = "toclear" + EX + "\n" + "testsnip" + EX
     wanted = "toclear" + EX + "\n" + "This is a test."
 
 class ParseSnippets_ClearTwo(_VimTest):
     files = { "us/all.snippets": r"""
+        clearsnippets testsnip toclear
+
         snippet testsnip "Test snippet"
         This is a test.
         endsnippet
@@ -86,8 +88,6 @@ class ParseSnippets_ClearTwo(_VimTest):
         snippet toclear "Snippet to clear"
         Do not expand.
         endsnippet
-
-        clearsnippets testsnip toclear
         """}
     keys = "toclear" + EX + "\n" + "testsnip" + EX
     wanted = "toclear" + EX + "\n" + "testsnip" + EX
