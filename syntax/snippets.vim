@@ -105,7 +105,7 @@ syn match snipMirror "\$\d\+" contained
 syn cluster snipTokens add=snipMirror
 syn cluster snipTabStopTokens add=snipMirror
 
-syn region snipTabStop matchgroup=snipTabStop start="\${\d\+[:}]\@=" end="}" contained contains=snipTabStopDefault
+syn region snipTabStop matchgroup=snipTabStop start="\${\d\+[:}]\@=" end="}" contained contains=snipTabStopDefault extend
 syn region snipTabStopDefault matchgroup=snipTabStop start=":" skip="\\[{}]" end="\ze}" contained contains=snipTabStopEscape,snipBalancedBraces,@snipTabStopTokens keepend
 syn match snipTabStopEscape "\\[{}]" contained
 syn region snipBalancedBraces start="{" end="}" contained transparent extend
