@@ -64,6 +64,11 @@ function! UltiSnips#Edit(bang, ...)
             let mode = 'vs'
         elseif g:UltiSnipsEditSplit == 'horizontal'
             let mode = 'sp'
+        elseif g:UltiSnipsEditSplit == 'context'
+            let mode = 'vs'
+            if winwidth(0) <= 2 * (&tw ? &tw : 80)
+                let mode = 'sp'
+            endif
         endif
     endif
     exe ':'.mode.' '.file
