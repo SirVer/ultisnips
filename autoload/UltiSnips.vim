@@ -66,7 +66,7 @@ function! UltiSnips#Edit(bang, ...)
             let mode = 'sp'
         endif
     endif
-    exe ':'.mode.' '.file
+    exe ':'.mode.' '.escape(file, ' \')
 endfunction
 
 function! UltiSnips#AddFiletypes(filetypes)
