@@ -180,6 +180,8 @@ g:UltiSnipsEditSplit        Defines how the edit window is opened. Possible
                             |normal|         Default. Opens in the current window.
                             |horizontal|     Splits the window horizontally.
                             |vertical|       Splits the window vertically.
+                            |context|        Splits the window vertically or
+                                           horizontally depending on context.
 
                                                         *g:UltiSnipsSnippetsDir*
 g:UltiSnipsSnippetsDir
