@@ -71,7 +71,7 @@ function! UltiSnips#Edit(bang, ...)
             endif
         endif
     endif
-    exe ':'.mode.' '.escape(file, ' \')
+    exe ':'.mode.' '.escape(file, ' ')
 endfunction
 
 function! UltiSnips#AddFiletypes(filetypes)
