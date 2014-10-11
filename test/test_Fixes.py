@@ -30,4 +30,17 @@ class RetainsTheUnnamedRegister_ButOnlyOnce(_VimTest):
     wanted = "\nblah\nhello world "
 # End: Github Pull Request # 134 #}}}
 
+# Test to ensure that shiftwidth follows tabstop when it's set to zero post
+# version 7.3.693. Prior to that version a shiftwidth of zero effectively
+# removes tabs.
+class ShiftWidthZero(_VimTest):
+  def _extra_options_pre_init(self, vim_config):
+    vim_config += [
+        "if exists('*shiftwidth')",
+        "  set shiftwidth=0",
+        "endif",
+    ]
+  snippets = ("test", "\t${1}${0}")
+  keys = "test" + EX + "foo"
+  wanted = "\tfoo"
 

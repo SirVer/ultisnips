@@ -1409,6 +1409,7 @@ individuals have contributed to UltiSnips (in chronological order):
    Mathias Fußenegger - mfussenegger
    Kevin Ballard - kballard
    Ahbong Chang - cwahbong
+   Glenn Griffin - ggriffiniii
 
 
 Thank you for your support.
