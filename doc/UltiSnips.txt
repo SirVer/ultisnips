@@ -221,6 +221,8 @@ The priority will then be rails -> ruby -> programming -> all.
 3.2 Triggers                                             *UltiSnips-triggers*
 ------------
 
+                           *g:UltiSnipsExpandTrigger* *g:UltiSnipsListSnippets*
+               *g:UltiSnipsJumpForwardTrigger* *g:UltiSnipsJumpBackwardTrigger*
 You can define the keys used to trigger UltiSnips actions by setting global
 variables. Variables define the keys used to expand a snippet, jump forward
 and jump backwards within a snippet, and list all available snippets in the
