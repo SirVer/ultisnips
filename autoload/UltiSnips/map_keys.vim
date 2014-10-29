@@ -22,4 +22,5 @@ function! UltiSnips#map_keys#MapKeys()
     snoremap <silent> <BS> <c-g>c
     snoremap <silent> <DEL> <c-g>c
     snoremap <silent> <c-h> <c-g>c
+    snoremap <c-r> <c-g>"_c<c-r>
 endf
