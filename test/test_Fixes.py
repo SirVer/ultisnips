@@ -43,4 +43,3 @@ class ShiftWidthZero(_VimTest):
   snippets = ("test", "\t${1}${0}")
   keys = "test" + EX + "foo"
   wanted = "\tfoo"
-

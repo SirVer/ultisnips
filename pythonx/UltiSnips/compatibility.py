@@ -72,6 +72,8 @@ else:
         """Encode 'string' using &encoding."""
         try:
             return string.encode(vim.eval("&encoding"))
+        except UnicodeDecodeError:
+            return string
         except UnicodeEncodeError:
             return string
 
