@@ -16,8 +16,17 @@
 # Now, from another terminal, launch the testsuite:
 #    $ ./test_all.py
 #
+# Note: if you want to Vim against the Python 3 bindings, you must launch the
+# test suite using Python 3.  For example:
+#    $ python3 ./test_all.py
+#
 # For each test, the test.py script will launch vim with a vimrc, run the test,
 # compare the output and exit vim again. The keys are send using screen.
+#
+# To limit the tests that are executed, specify a pattern to be used to match
+# the beginning of the test name.  For instance, the following will execute all
+# tests that start with "SimpleExpand":
+#    $ ./test_all.py SimpleExpand
 #
 # NOTE: The test suite is not working under Windows right now as I have no
 # access to a windows system for fixing it. Volunteers welcome. Here are some
