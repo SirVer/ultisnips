@@ -341,7 +341,8 @@ class VimTestCase(unittest.TestCase, TempFileManager):
 
         vim_config = []
         vim_config.append('set nocompatible')
-        vim_config.append('set runtimepath=$VIMRUNTIME,.,%s' % self._temp_dir)
+        vim_config.append('set runtimepath=$VIMRUNTIME,%s,%s' % (
+            os.path.dirname(os.path.dirname(__file__)), self._temp_dir))
 
         if self.plugins:
             self._link_file(os.path.join(plugin_cache_dir(), "vim-pathogen", "autoload"), ".")
