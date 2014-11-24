@@ -31,9 +31,16 @@ class VimState(object):
         self._poss = deque(maxlen=5)
         self._lvb = None
 
-        self._text_to_expect = None
-        self._unnamed_reg_cache = None
+        self._text_to_expect = ""
         self._unnamed_reg_cached = False
+
+        # We store the cached value of the unnamed register in Vim directly to
+        # avoid any Unicode issues with saving and restoring the unnamed
+        # register across the Python bindings.  The unnamed register can contain
+        # data that cannot be coerced to Unicode, and so a simple vim.eval('@"')
+        # fails badly.  Keeping the cached value in Vim directly, sidesteps the
+        # problem.
+        _vim.command('let g:_ultisnips_unnamed_reg_cache = ""')
 
     def remember_unnamed_register(self, text_to_expect):
         """Save the unnamed register. 'text_to_expect' is text that we expect
@@ -41,17 +48,17 @@ class VimState(object):
         this could be text from the tabstop that was selected and might have
         been overwritten. We will not cash that then."""
         self._unnamed_reg_cached = True
-        unnamed_reg = _vim.eval('@"')
-        if unnamed_reg != self._text_to_expect:
-            self._unnamed_reg_cache = unnamed_reg
+        escaped_text = self._text_to_expect.replace("'", "''")
+        res = int(_vim.eval('@" != ' + "'" + escaped_text + "'"))
+        if res:
+            _vim.command('let g:_ultisnips_unnamed_reg_cache = @"')
         self._text_to_expect = text_to_expect
 
     def restore_unnamed_register(self):
         """Restores the unnamed register and forgets what we cached."""
         if not self._unnamed_reg_cached:
             return
-        escaped_cache = self._unnamed_reg_cache.replace("'", "''")
-        _vim.command("let @\"='%s'" % escaped_cache)
+        _vim.command('let @" = g:_ultisnips_unnamed_reg_cache')
         self._unnamed_reg_cached = False
 
     def remember_position(self):

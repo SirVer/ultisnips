@@ -44,3 +44,27 @@ class ShiftWidthZero(_VimTest):
   keys = "test" + EX + "foo"
   wanted = "\tfoo"
 
+# Test for https://github.com/SirVer/ultisnips/issues/171 {{{#
+# Make sure that we don't crash when trying to save and restore the clipboard
+# when it contains data that we can't coerce into Unicode.
+class NonUnicodeDataInUnnamedRegister(_VimTest):
+    snippets = ("test", "hello")
+    keys = "test" + EX + ESC + \
+            "\n".join([":redir @a",
+                       ":messages",
+                       ":redir END",
+                       (":if match(@a, 'Error') != -1 | " +
+                        "call setline('.', 'error detected') | " +
+                        "3put a | " +
+                        "endif"),
+                       ""])
+    wanted = "hello"
+
+    def _before_test(self):
+        # The string below was the one a user had on their clipboard when
+        # encountering the UnicodeDecodeError and could not be coerced into
+        # unicode.
+        self.vim.send(
+                ':let @" = "\\x80kdI{\\x80@7 1},' +
+                '\\x80kh\\x80kh\\x80kd\\x80kdq\\x80kb\\x1b"\n')
+# End: #171  #}}}
