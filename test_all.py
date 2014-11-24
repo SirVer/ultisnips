@@ -19,9 +19,9 @@
 # For each test, the test.py script will launch vim with a vimrc, run the test,
 # compare the output and exit vim again. The keys are send using screen.
 #
-# NOTE: The tessuite is not working under Windows right now as I have no access
-# to a windows system for fixing it. Volunteers welcome. Here are some comments
-# from the last time I got the test suite running under windows.
+# NOTE: The test suite is not working under Windows right now as I have no
+# access to a windows system for fixing it. Volunteers welcome. Here are some
+# comments from the last time I got the test suite running under windows.
 #
 # Under windows, COM's SendKeys is used to send keystrokes to the gvim window.
 # Note that Gvim must use english keyboard input (choose in windows registry)

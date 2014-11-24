@@ -46,7 +46,7 @@ class VimState(object):
         """Save the unnamed register. 'text_to_expect' is text that we expect
         to be contained in the register the next time this method is called -
         this could be text from the tabstop that was selected and might have
-        been overwritten. We will not cash that then."""
+        been overwritten. We will not cache that then."""
         self._unnamed_reg_cached = True
         escaped_text = self._text_to_expect.replace("'", "''")
         res = int(_vim.eval('@" != ' + "'" + escaped_text + "'"))
