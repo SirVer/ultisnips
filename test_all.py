@@ -16,12 +16,21 @@
 # Now, from another terminal, launch the testsuite:
 #    $ ./test_all.py
 #
+# Note: if you want to Vim against the Python 3 bindings, you must launch the
+# test suite using Python 3.  For example:
+#    $ python3 ./test_all.py
+#
 # For each test, the test.py script will launch vim with a vimrc, run the test,
 # compare the output and exit vim again. The keys are send using screen.
 #
-# NOTE: The tessuite is not working under Windows right now as I have no access
-# to a windows system for fixing it. Volunteers welcome. Here are some comments
-# from the last time I got the test suite running under windows.
+# To limit the tests that are executed, specify a pattern to be used to match
+# the beginning of the test name.  For instance, the following will execute all
+# tests that start with "SimpleExpand":
+#    $ ./test_all.py SimpleExpand
+#
+# NOTE: The test suite is not working under Windows right now as I have no
+# access to a windows system for fixing it. Volunteers welcome. Here are some
+# comments from the last time I got the test suite running under windows.
 #
 # Under windows, COM's SendKeys is used to send keystrokes to the gvim window.
 # Note that Gvim must use english keyboard input (choose in windows registry)
