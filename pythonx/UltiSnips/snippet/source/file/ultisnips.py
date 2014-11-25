@@ -30,10 +30,13 @@ def find_all_snippet_files(ft):
         snippet_dirs = _vim.eval("b:UltiSnipsSnippetDirectories")
     else:
         snippet_dirs = _vim.eval("g:UltiSnipsSnippetDirectories")
-
+    if len(snippet_dirs) == 1 and os.path.isabs(snippet_dirs[0]):
+        check_dirs = ['']
+    else:
+        check_dirs = _vim.eval("&runtimepath").split(',')
     patterns = ["%s.snippets", "%s_*.snippets", os.path.join("%s", "*")]
     ret = set()
-    for rtp in _vim.eval("&runtimepath").split(','):
+    for rtp in check_dirs:
         for snippet_dir in snippet_dirs:
             if snippet_dir == "snippets":
                 raise RuntimeError(
