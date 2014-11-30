@@ -263,9 +263,9 @@ to the same value then the function you are actually going to use is
 UltiSnips#ExpandSnippetOrJump.
 
 Each time any of the functions UltiSnips#ExpandSnippet,
-UltiSnips#ExpandSnippet, UltiSnips#JumpBackwards or UltiSnips#JumpBackwards is
-called a global variable is set that contains the return value of the
-corresponding function.
+UltiSnips#ExpandSnippetOrJump, UltiSnips#JumpForwards or
+UltiSnips#JumpBackwards is called a global variable is set that contains the
+return value of the corresponding function.
 
 The corresponding variables and functions are:
 UltiSnips#ExpandSnippet       --> g:ulti_expand_res (0: fail, 1: success)
