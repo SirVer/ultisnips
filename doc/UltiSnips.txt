@@ -931,7 +931,7 @@ directly inside your snippets. For example to use
 
    global !p
    from my_snippet_helpers import *
-   endglobals
+   endglobal
 
 
 4.4 Tabstops and Placeholders   *UltiSnips-tabstops* *UltiSnips-placeholders*
