@@ -189,9 +189,22 @@ g:UltiSnipsSnippetsDir
                             files are stored in. For example, if the variable
                             is set to "~/.vim/mydir/UltiSnips" and the current
                             'filetype' is "cpp", then :UltiSnipsEdit will open
-                            "~/.vim/mydir/UltiSnips/cpp.snippets". Note that
-                            directories named "snippets" are reserved for
-                            snipMate snippets and cannot be used.
+                            "~/.vim/mydir/UltiSnips/cpp.snippets". If only one
+                            directory is specified in this variable and this
+                            directory is specified by absolute path,
+                            UltiSnips will not look for snippets in
+                            &runtimepath, which can lead to significant
+                            speedup.  Note that directories named "snippets"
+                            are reserved for snipMate snippets and cannot be used.
+
+                                                        *g:UltiSnipsDisableSnipMate*
+g:UltiSnipsDisableSnipMate
+                            Disable looking for SnipMate snippets in
+                            &runtimepath. Defaults to "0", so UltiSnips will
+                            look for SnipMate snippets. If you use only
+                            UltiSnips snippets, you probably want to set this
+                            variable to "1". Disabling SnipMate lookup can
+                            speedup UltiSnips.
 
 
                                                        *:UltiSnipsAddFiletypes*
