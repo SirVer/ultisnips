@@ -578,6 +578,9 @@ class SnippetManager(object):
             if platform.system() == "Windows":
                 snippet_dir = os.path.join(_vim.eval("$HOME"),
                         "vimfiles", "UltiSnips")
+            elif _vim.eval("has('nvim')") == "1":
+                snippet_dir = os.path.join(_vim.eval("$HOME"),
+                        ".nvim", "UltiSnips")
             else:
                 snippet_dir = os.path.join(_vim.eval("$HOME"),
                         ".vim", "UltiSnips")
