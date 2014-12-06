@@ -193,6 +193,13 @@ g:UltiSnipsSnippetsDir
                             directories named "snippets" are reserved for
                             snipMate snippets and cannot be used.
 
+                                                        *g:UltiSnipsSnippetDirectories*
+g:UltiSnipsSnippetDirectories
+                            Defines the directories for looking for snippets.
+                            Do not mix up this variable with previous one.
+                            More information about that variable can
+                            be found at section |UltiSnips-snippet-search-path|.
+
                                                         *g:UltiSnipsEnableSnipMate*
 g:UltiSnipsEnableSnipMate
                             Enable looking for SnipMate snippets in
@@ -349,6 +356,15 @@ the variable b:UltiSnipsSnippetDirectories. This variable takes precedence
 over the global variable.
 
 |UltiSnips-adding-snippets| explains which files are parsed for a given filetype.
+
+If only one directory is specified in this variable and this directory is
+specified by absolute path, UltiSnips will not look for snippets in
+&runtimepath, which can lead to significant speedup. So, the common case is:
+
+    let g:UltiSnipsSnippetDirectories=[$HOME.'/.vim/UltiSnips']
+
+However, you will not able to use snippets that are shipped with third party
+plugins out of the box. You'll need to copy them into your chosen directory.
 
 
 3.4 Warning About Select Mode Mappings          *UltiSnips-warning-smappings*
