@@ -1419,6 +1419,7 @@ individuals have contributed to UltiSnips (in chronological order):
    Kevin Ballard - kballard
    Ahbong Chang - cwahbong
    Glenn Griffin - ggriffiniii
+   Michael - Pyrohh
    Stanislav Seletskiy - seletskiy
 
 
