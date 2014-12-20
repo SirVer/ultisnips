@@ -193,6 +193,14 @@ g:UltiSnipsSnippetsDir
                             directories named "snippets" are reserved for
                             snipMate snippets and cannot be used.
 
+                                                        *g:UltiSnipsEnableSnipMate*
+g:UltiSnipsEnableSnipMate
+                            Enable looking for SnipMate snippets in
+                            &runtimepath. UltiSnips will search only for
+                            directories named 'snippets' while looking for
+                            SnipMate snippets. Defaults to "1", so UltiSnips
+                            will look for SnipMate snippets.
+
 
                                                        *:UltiSnipsAddFiletypes*
 The UltiSnipsAddFiletypes command allows for explicit merging of other snippet
@@ -1411,6 +1419,7 @@ individuals have contributed to UltiSnips (in chronological order):
    Kevin Ballard - kballard
    Ahbong Chang - cwahbong
    Glenn Griffin - ggriffiniii
+   Stanislav Seletskiy - seletskiy
 
 
 Thank you for your support.
