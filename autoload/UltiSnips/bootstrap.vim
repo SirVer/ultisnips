@@ -82,3 +82,8 @@ endif
 if !exists("g:UltiSnipsSnippetDirectories")
     let g:UltiSnipsSnippetDirectories = [ "UltiSnips" ]
 endif
+
+" Enable or Disable snipmate snippet expansion.
+if !exists("g:UltiSnipsEnableSnipMate")
+    let g:UltiSnipsEnableSnipMate = 1
+endif
