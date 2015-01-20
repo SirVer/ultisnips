@@ -47,28 +47,32 @@ import unittest
 from test.constant import *
 from test.vim_interface import *
 
+
 def plugin_cache_dir():
     """The directory that we check out our bundles to."""
-    return os.path.join(tempfile.gettempdir(), "UltiSnips_test_vim_plugins")
+    return os.path.join(tempfile.gettempdir(), 'UltiSnips_test_vim_plugins')
+
 
 def clone_plugin(plugin):
     """Clone the given plugin into our plugin directory."""
     dirname = os.path.join(plugin_cache_dir(), os.path.basename(plugin))
-    print("Cloning %s -> %s" % (plugin, dirname))
+    print('Cloning %s -> %s' % (plugin, dirname))
     if os.path.exists(dirname):
-        print("Skip cloning of %s. Already there." % plugin)
+        print('Skip cloning of %s. Already there.' % plugin)
         return
     create_directory(dirname)
-    subprocess.call(["git", "clone", "--recursive",
-        "--depth", "1", "https://github.com/%s" % plugin, dirname])
+    subprocess.call(['git', 'clone', '--recursive',
+                     '--depth', '1', 'https://github.com/%s' % plugin, dirname])
 
-    if plugin == "Valloric/YouCompleteMe":
-        ## CLUTCH: this plugin needs something extra.
-        subprocess.call(os.path.join(dirname, "./install.sh"), cwd=dirname)
+    if plugin == 'Valloric/YouCompleteMe':
+        # CLUTCH: this plugin needs something extra.
+        subprocess.call(os.path.join(dirname, './install.sh'), cwd=dirname)
+
 
 def setup_other_plugins(all_plugins):
-    """Creates /tmp/UltiSnips_test_vim_plugins and clones all plugins into this."""
-    clone_plugin("tpope/vim-pathogen")
+    """Creates /tmp/UltiSnips_test_vim_plugins and clones all plugins into
+    this."""
+    clone_plugin('tpope/vim-pathogen')
     for plugin in all_plugins:
         clone_plugin(plugin)
 
@@ -76,35 +80,35 @@ if __name__ == '__main__':
     import optparse
 
     def parse_args():
-        p = optparse.OptionParser("%prog [OPTIONS] <test case names to run>")
+        p = optparse.OptionParser('%prog [OPTIONS] <test case names to run>')
 
-        p.set_defaults(session="vim", interrupt=False,
-                verbose=False, interface="screen", retries=4, plugins=False)
+        p.set_defaults(session='vim', interrupt=False,
+                       verbose=False, interface='screen', retries=4, plugins=False)
 
-        p.add_option("-v", "--verbose", dest="verbose", action="store_true",
-            help="print name of tests as they are executed")
-        p.add_option("--clone-plugins", action="store_true",
-            help="Only clones dependant plugins and exits the test runner.")
-        p.add_option("--plugins", action="store_true",
-            help="Run integration tests with other Vim plugins.")
-        p.add_option("--interface", type=str,
-                help="interface to vim to use on Mac and or Linux [screen|tmux].")
-        p.add_option("-s", "--session", dest="session",  metavar="SESSION",
-            help="session parameters for the terminal multiplexer SESSION [%default]")
-        p.add_option("-i", "--interrupt", dest="interrupt",
-            action="store_true",
-            help="Stop after defining the snippet. This allows the user " \
-             "to interactively test the snippet in vim. You must give " \
-             "exactly one test case on the cmdline. The test will always fail."
-        )
-        p.add_option("-r", "--retries", dest="retries", type=int,
-                help="How often should each test be retried before it is "
-                "considered failed. Works around flakyness in the terminal "
-                "multiplexer and race conditions in writing to the file system.")
+        p.add_option('-v', '--verbose', dest='verbose', action='store_true',
+                     help='print name of tests as they are executed')
+        p.add_option('--clone-plugins', action='store_true',
+                     help='Only clones dependant plugins and exits the test runner.')
+        p.add_option('--plugins', action='store_true',
+                     help='Run integration tests with other Vim plugins.')
+        p.add_option('--interface', type=str,
+                     help='interface to vim to use on Mac and or Linux [screen|tmux].')
+        p.add_option('-s', '--session', dest='session', metavar='SESSION',
+                     help='session parameters for the terminal multiplexer SESSION [%default]')
+        p.add_option('-i', '--interrupt', dest='interrupt',
+                     action='store_true',
+                     help='Stop after defining the snippet. This allows the user '
+                     'to interactively test the snippet in vim. You must give '
+                     'exactly one test case on the cmdline. The test will always fail.'
+                     )
+        p.add_option('-r', '--retries', dest='retries', type=int,
+                     help='How often should each test be retried before it is '
+                     'considered failed. Works around flakyness in the terminal '
+                     'multiplexer and race conditions in writing to the file system.')
 
         o, args = p.parse_args()
-        if o.interface not in ("screen", "tmux"):
-            p.error("--interface must be [screen|tmux].")
+        if o.interface not in ('screen', 'tmux'):
+            p.error('--interface must be [screen|tmux].')
 
         return o, args
 
@@ -118,20 +122,21 @@ if __name__ == '__main__':
         return flatten
 
     def main():
-        options,selected_tests = parse_args()
+        options, selected_tests = parse_args()
 
-        all_test_suites = unittest.defaultTestLoader.discover(start_dir="test")
+        all_test_suites = unittest.defaultTestLoader.discover(start_dir='test')
 
         vim = None
         if not options.clone_plugins:
-            if platform.system() == "Windows":
-                raise RuntimeError("TODO: TestSuite is broken under windows. Volunteers wanted!.")
+            if platform.system() == 'Windows':
+                raise RuntimeError(
+                    'TODO: TestSuite is broken under windows. Volunteers wanted!.')
                 # vim = VimInterfaceWindows()
                 vim.focus()
             else:
-                if options.interface == "screen":
+                if options.interface == 'screen':
                     vim = VimInterfaceScreen(options.session)
-                elif options.interface == "tmux":
+                elif options.interface == 'tmux':
                     vim = VimInterfaceTmux(options.session)
 
         all_other_plugins = set()
@@ -148,7 +153,7 @@ if __name__ == '__main__':
 
             if len(selected_tests):
                 id = test.id().split('.')[1]
-                if not any([ id.startswith(t) for t in selected_tests ]):
+                if not any([id.startswith(t) for t in selected_tests]):
                     continue
             tests.add(test)
         suite.addTests(tests)

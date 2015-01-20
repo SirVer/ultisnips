@@ -12,13 +12,13 @@ ARR_D = '\x1bOB'
 SEQUENCES = [ARR_L, ARR_R, ARR_U, ARR_D]
 
 # Defined Constants
-JF = "?" # Jump forwards
-JB = "+" # Jump backwards
-LS = "@" # List snippets
-EX = "\t" # EXPAND
-EA = "#" # Expand anonymous
+JF = '?'  # Jump forwards
+JB = '+'  # Jump backwards
+LS = '@'  # List snippets
+EX = '\t'  # EXPAND
+EA = '#'  # Expand anonymous
 
 COMPL_KW = chr(24) + chr(14)
 COMPL_ACCEPT = chr(25)
 
-PYTHON3 = sys.version_info >= (3,0)
+PYTHON3 = sys.version_info >= (3, 0)

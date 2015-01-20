@@ -4,7 +4,9 @@
 """Represents a Position in a text file: (0 based line index, 0 based column
 index) and provides methods for moving them around."""
 
+
 class Position(object):
+
     """See module docstring."""
 
     def __init__(self, line, col):
@@ -13,7 +15,7 @@ class Position(object):
 
     def move(self, pivot, delta):
         """'pivot' is the position of the first changed character, 'delta' is
-        how text after it moved"""
+        how text after it moved."""
         if self < pivot:
             return
         if delta.line == 0:
@@ -62,4 +64,4 @@ class Position(object):
         return (self.line, self.col) <= (other.line, other.col)
 
     def __repr__(self):
-        return "(%i,%i)" % (self.line, self.col)
+        return '(%i,%i)' % (self.line, self.col)

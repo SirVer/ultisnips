@@ -13,66 +13,78 @@ from UltiSnips.text_objects._base import NoneditableTextObject
 
 
 class _Tabs(object):
+
     """Allows access to tabstop content via t[] inside of python code."""
+
     def __init__(self, to):
         self._to = to
 
     def __getitem__(self, no):
-        ts = self._to._get_tabstop(self._to, int(no))  # pylint:disable=protected-access
+        ts = self._to._get_tabstop(
+            self._to,
+            int(no))  # pylint:disable=protected-access
         if ts is None:
-            return ""
+            return ''
         return ts.current_text
 
 _VisualContent = namedtuple('_VisualContent', ['mode', 'text'])
 
+
 class SnippetUtil(object):
-    """Provides easy access to indentation, etc. This is the 'snip' object in
-    python code."""
+
+    """Provides easy access to indentation, etc.
+
+    This is the 'snip' object in python code.
+
+    """
 
     def __init__(self, initial_indent, vmode, vtext):
         self._ind = IndentUtil()
         self._visual = _VisualContent(vmode, vtext)
         self._initial_indent = self._ind.indent_to_spaces(initial_indent)
-        self._reset("")
+        self._reset('')
 
     def _reset(self, cur):
         """Gets the snippet ready for another update.
+
         :cur: the new value for c.
+
         """
         self._ind.reset()
         self._cur = cur
-        self._rv = ""
+        self._rv = ''
         self._changed = False
         self.reset_indent()
 
     def shift(self, amount=1):
-        """Shifts the indentation level.
-        Note that this uses the shiftwidth because thats what code
-        formatters use.
+        """Shifts the indentation level. Note that this uses the shiftwidth
+        because thats what code formatters use.
 
         :amount: the amount by which to shift.
+
         """
-        self.indent += " " * self._ind.shiftwidth * amount
+        self.indent += ' ' * self._ind.shiftwidth * amount
 
     def unshift(self, amount=1):
-        """Unshift the indentation level.
-        Note that this uses the shiftwidth because thats what code
-        formatters use.
+        """Unshift the indentation level. Note that this uses the shiftwidth
+        because thats what code formatters use.
 
         :amount: the amount by which to unshift.
+
         """
         by = -self._ind.shiftwidth * amount
         try:
             self.indent = self.indent[:by]
         except IndexError:
-            self.indent = ""
+            self.indent = ''
 
-    def mkline(self, line="", indent=None):
+    def mkline(self, line='', indent=None):
         """Creates a properly set up line.
 
         :line: the text to add
         :indent: the indentation to have at the beginning
                  if None, it uses the default amount
+
         """
         if indent is None:
             indent = self.indent
@@ -82,7 +94,7 @@ class SnippetUtil(object):
                 try:
                     indent = indent[len(self._initial_indent):]
                 except IndexError:
-                    indent = ""
+                    indent = ''
             indent = self._ind.spaces_to_indent(indent)
 
         return indent + line
@@ -95,22 +107,25 @@ class SnippetUtil(object):
     @property
     def fn(self):  # pylint:disable=no-self-use,invalid-name
         """The filename."""
-        return _vim.eval('expand("%:t")') or ""
+        return _vim.eval('expand("%:t")') or ''
 
     @property
     def basename(self):  # pylint:disable=no-self-use
         """The filename without extension."""
-        return _vim.eval('expand("%:t:r")') or ""
+        return _vim.eval('expand("%:t:r")') or ''
 
     @property
     def ft(self):  # pylint:disable=invalid-name
         """The filetype."""
-        return self.opt("&filetype", "")
+        return self.opt('&filetype', '')
 
     @property
     def rv(self):  # pylint:disable=invalid-name
-        """The return value. The text to insert at the location of the
-        placeholder."""
+        """The return value.
+
+        The text to insert at the location of the placeholder.
+
+        """
         return self._rv
 
     @rv.setter
@@ -131,12 +146,12 @@ class SnippetUtil(object):
 
     @property
     def v(self):  # pylint:disable=invalid-name
-        """Content of visual expansions"""
+        """Content of visual expansions."""
         return self._visual
 
     def opt(self, option, default=None):  # pylint:disable=no-self-use
         """Gets a Vim variable."""
-        if _vim.eval("exists('%s')" % option) == "1":
+        if _vim.eval("exists('%s')" % option) == '1':
             try:
                 return _vim.eval(option)
             except _vim.error:
@@ -159,6 +174,7 @@ class SnippetUtil(object):
 
 
 class PythonCode(NoneditableTextObject):
+
     """See module docstring."""
 
     def __init__(self, parent, token):
@@ -176,14 +192,14 @@ class PythonCode(NoneditableTextObject):
         self._snip = SnippetUtil(token.indent, mode, text)
 
         self._codes = ((
-            "import re, os, vim, string, random",
-            "\n".join(snippet.globals.get("!p", [])).replace("\r\n", "\n"),
-            token.code.replace("\\`", "`")
+            'import re, os, vim, string, random',
+            '\n'.join(snippet.globals.get('!p', [])).replace('\r\n', '\n'),
+            token.code.replace('\\`', '`')
         ))
         NoneditableTextObject.__init__(self, parent, token)
 
     def _update(self, done):
-        path = _vim.eval('expand("%")') or ""
+        path = _vim.eval('expand("%")') or ''
         ct = self.current_text
         self._locals.update({
             't': _Tabs(self._parent),

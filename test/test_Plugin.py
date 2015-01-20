@@ -3,11 +3,12 @@ import sys
 from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
-PYTHON3 = sys.version_info >= (3,0)
+PYTHON3 = sys.version_info >= (3, 0)
+
 
 def python3():
     if PYTHON3:
-        return "Test does not work on python3."
+        return 'Test does not work on python3.'
 
 # Plugin: YouCompleteMe  {{{#
 # TODO(sirver): disabled because it fails right now.
@@ -15,9 +16,9 @@ def python3():
     # def skip_if(self):
         # r = python3()
         # if r:
-            # return r
+        # return r
         # if "7.4" not in self.version:
-            # return "Needs Vim 7.4."
+        # return "Needs Vim 7.4."
     # plugins = ["Valloric/YouCompleteMe"]
     # snippets = ("superlongtrigger", "Hello")
     # keys = "superlo\ty"
@@ -34,15 +35,18 @@ def python3():
         # time.sleep(1)
 # End: Plugin: YouCompleteMe  #}}}
 # Plugin: Neocomplete {{{#
+
+
 class Plugin_Neocomplete_BugTest(_VimTest):
     # Test for https://github.com/SirVer/ultisnips/issues/228
+
     def skip_if(self):
-        if "+lua" not in self.version:
-            return "Needs +lua"
-    plugins = ["Shougo/neocomplete.vim"]
-    snippets = ("t", "Hello", "", "w")
-    keys = "iab\\ t" + EX
-    wanted = "iab\\ Hello"
+        if '+lua' not in self.version:
+            return 'Needs +lua'
+    plugins = ['Shougo/neocomplete.vim']
+    snippets = ('t', 'Hello', '', 'w')
+    keys = 'iab\\ t' + EX
+    wanted = 'iab\\ Hello'
 
     def _extra_options_pre_init(self, vim_config):
         vim_config.append(r'set iskeyword+=\\ ')
@@ -53,34 +57,39 @@ class Plugin_Neocomplete_BugTest(_VimTest):
         vim_config.append('let g:neocomplete#enable_refresh_always = 1')
 # End: Plugin: Neocomplete  #}}}
 # Plugin: unite {{{#
+
+
 class Plugin_unite_BugTest(_VimTest):
-    plugins = ["Shougo/unite.vim"]
-    snippets = ("t", "Hello", "", "w")
-    keys = "iab\\ t=UltiSnipsCallUnite()\n"
-    wanted = "iab\\ Hello "
+    plugins = ['Shougo/unite.vim']
+    snippets = ('t', 'Hello', '', 'w')
+    keys = 'iab\\ t=UltiSnipsCallUnite()\n'
+    wanted = 'iab\\ Hello '
 
     def _extra_options_pre_init(self, vim_config):
         vim_config.append(r'set iskeyword+=\\ ')
         vim_config.append('function! UltiSnipsCallUnite()')
-        vim_config.append('  Unite -start-insert -winheight=100 -immediately -no-empty ultisnips')
+        vim_config.append(
+            '  Unite -start-insert -winheight=100 -immediately -no-empty ultisnips')
         vim_config.append('  return ""')
         vim_config.append('endfunction')
 # End: Plugin: unite  #}}}
 # Plugin: Supertab {{{#
+
+
 class Plugin_SuperTab_SimpleTest(_VimTest):
-    plugins = ["ervandew/supertab"]
-    snippets = ("long", "Hello", "", "w")
-    keys = ( "longtextlongtext\n" +
-        "longt" + EX + "\n" +  # Should complete word
-        "long" + EX )  # Should expand
-    wanted = "longtextlongtext\nlongtextlongtext\nHello"
+    plugins = ['ervandew/supertab']
+    snippets = ('long', 'Hello', '', 'w')
+    keys = ('longtextlongtext\n' +
+            'longt' + EX + '\n' +  # Should complete word
+            'long' + EX)  # Should expand
+    wanted = 'longtextlongtext\nlongtextlongtext\nHello'
 
     def _before_test(self):
         # Make sure that UltiSnips has the keymap
-        self.vim.send(":call UltiSnips#map_keys#MapKeys()\n")
+        self.vim.send(':call UltiSnips#map_keys#MapKeys()\n')
 
     def _extra_options_post_init(self, vim_config):
-        assert EX == "\t"  # Otherwise this test needs changing.
+        assert EX == '\t'  # Otherwise this test needs changing.
         vim_config.append('let g:SuperTabDefaultCompletionType = "<c-p>"')
         vim_config.append('let g:SuperTabRetainCompletionDuration = "insert"')
         vim_config.append('let g:SuperTabLongestHighlight = 1')

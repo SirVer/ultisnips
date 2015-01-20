@@ -6,13 +6,15 @@
 from UltiSnips import _vim
 from UltiSnips.position import Position
 
+
 def _calc_end(text, start):
     """Calculate the end position of the 'text' starting at 'start."""
     if len(text) == 1:
         new_end = start + Position(0, len(text[0]))
     else:
-        new_end = Position(start.line + len(text)-1, len(text[-1]))
+        new_end = Position(start.line + len(text) - 1, len(text[-1]))
     return new_end
+
 
 def _text_to_vim(start, end, text):
     """Copy the given text to the current buffer, overwriting the span 'start'
@@ -33,30 +35,33 @@ def _text_to_vim(start, end, text):
 
     # Open any folds this might have created
     _vim.buf.cursor = start
-    _vim.command("normal! zv")
+    _vim.command('normal! zv')
 
     return new_end
 
 # These classes use their subclasses a lot and we really do not want to expose
 # their functions more globally.
 # pylint: disable=protected-access
+
+
 class TextObject(object):
+
     """Represents any object in the text that has a span in any ways."""
 
     def __init__(self, parent, token, end=None,
-            initial_text="", tiebreaker=None):
+                 initial_text='', tiebreaker=None):
         self._parent = parent
 
-        if end is not None: # Took 4 arguments
+        if end is not None:  # Took 4 arguments
             self._start = token
             self._end = end
             self._initial_text = initial_text
-        else: # Initialize from token
+        else:  # Initialize from token
             self._start = token.start
             self._end = token.end
             self._initial_text = token.initial_text
         self._tiebreaker = tiebreaker or Position(
-                self._start.line, self._end.line)
+            self._start.line, self._end.line)
         if parent is not None:
             parent._add_child(self)
 
@@ -67,27 +72,27 @@ class TextObject(object):
 
     def __lt__(self, other):
         me_tuple = (self.start.line, self.start.col,
-                self._tiebreaker.line, self._tiebreaker.col)
+                    self._tiebreaker.line, self._tiebreaker.col)
         other_tuple = (other._start.line, other._start.col,
-                other._tiebreaker.line, other._tiebreaker.col)
+                       other._tiebreaker.line, other._tiebreaker.col)
         return me_tuple < other_tuple
 
     def __le__(self, other):
         me_tuple = (self._start.line, self._start.col,
-                self._tiebreaker.line, self._tiebreaker.col)
+                    self._tiebreaker.line, self._tiebreaker.col)
         other_tuple = (other._start.line, other._start.col,
-                other._tiebreaker.line, other._tiebreaker.col)
+                       other._tiebreaker.line, other._tiebreaker.col)
         return me_tuple <= other_tuple
 
     def __repr__(self):
-        ct = ""
+        ct = ''
         try:
             ct = self.current_text
         except IndexError:
-            ct = "<err>"
+            ct = '<err>'
 
-        return "%s(%r->%r,%r)" % (self.__class__.__name__,
-                self._start, self._end, ct)
+        return '%s(%r->%r,%r)' % (self.__class__.__name__,
+                                  self._start, self._end, ct)
 
     @property
     def current_text(self):
@@ -96,7 +101,7 @@ class TextObject(object):
             return _vim.buf[self._start.line][self._start.col:self._end.col]
         else:
             lines = [_vim.buf[self._start.line][self._start.col:]]
-            lines.extend(_vim.buf[self._start.line+1:self._end.line])
+            lines.extend(_vim.buf[self._start.line + 1:self._end.line])
             lines.append(_vim.buf[self._end.line][:self._end.col])
             return '\n'.join(lines)
 
@@ -112,8 +117,10 @@ class TextObject(object):
 
     def overwrite(self, gtext=None):
         """Overwrite the text of this object in the Vim Buffer and update its
-        length information. If 'gtext' is None use the initial text of this
-        object.
+        length information.
+
+        If 'gtext' is None use the initial text of this object.
+
         """
         # We explicitly do not want to move our children around here as we
         # either have non or we are replacing text initially which means we do
@@ -122,7 +129,7 @@ class TextObject(object):
             return
         old_end = self._end
         self._end = _text_to_vim(
-                self._start, self._end, gtext or self._initial_text)
+            self._start, self._end, gtext or self._initial_text)
         if self._parent:
             self._parent._child_has_moved(
                 self._parent._children.index(self), min(old_end, self._end),
@@ -134,14 +141,16 @@ class TextObject(object):
 
         Return False if you need to be called again for this edit cycle.
         Otherwise return True.
+
         """
-        raise NotImplementedError("Must be implemented by subclasses.")
+        raise NotImplementedError('Must be implemented by subclasses.')
+
 
 class EditableTextObject(TextObject):
-    """
-    This base class represents any object in the text
-    that can be changed by the user
-    """
+
+    """This base class represents any object in the text that can be changed by
+    the user."""
+
     def __init__(self, *args, **kwargs):
         TextObject.__init__(self, *args, **kwargs)
         self._children = []
@@ -157,7 +166,7 @@ class EditableTextObject(TextObject):
 
     @property
     def _editable_children(self):
-        """List of all children that are EditableTextObjects"""
+        """List of all children that are EditableTextObjects."""
         return [child for child in self._children if
                 isinstance(child, EditableTextObject)]
 
@@ -177,13 +186,13 @@ class EditableTextObject(TextObject):
     def _do_edit(self, cmd):
         """Apply the edit 'cmd' to this object."""
         ctype, line, col, text = cmd
-        assert ('\n' not in text) or (text == "\n")
+        assert ('\n' not in text) or (text == '\n')
         pos = Position(line, col)
 
         to_kill = set()
         new_cmds = []
         for child in self._children:
-            if ctype == "I": # Insertion
+            if ctype == 'I':  # Insertion
                 if (child._start < pos <
                         Position(child._end.line, child._end.col) and
                         isinstance(child, NoneditableTextObject)):
@@ -194,9 +203,9 @@ class EditableTextObject(TextObject):
                         isinstance(child, EditableTextObject)):
                     child._do_edit(cmd)
                     return
-            else: # Deletion
-                delend = pos + Position(0, len(text)) if text != "\n" \
-                        else Position(line + 1, 0)
+            else:  # Deletion
+                delend = pos + Position(0, len(text)) if text != '\n' \
+                    else Position(line + 1, 0)
                 if ((child._start <= pos < child._end) and
                         (child._start < delend <= child._end)):
                     # this edit command is completely for the child
@@ -216,16 +225,16 @@ class EditableTextObject(TextObject):
                 elif (pos < child._start and
                         (child._start < delend <= child._end)):
                     # Case: partially for us, partially for the child
-                    my_text = text[:(child._start-pos).col]
-                    c_text = text[(child._start-pos).col:]
+                    my_text = text[:(child._start - pos).col]
+                    c_text = text[(child._start - pos).col:]
                     new_cmds.append((ctype, line, col, my_text))
                     new_cmds.append((ctype, line, col, c_text))
                     break
                 elif (delend >= child._end and (
                         child._start <= pos < child._end)):
                     # Case: partially for us, partially for the child
-                    c_text = text[(child._end-pos).col:]
-                    my_text = text[:(child._end-pos).col]
+                    c_text = text[(child._end - pos).col:]
+                    my_text = text[:(child._end - pos).col]
                     new_cmds.append((ctype, line, col, c_text))
                     new_cmds.append((ctype, line, col, my_text))
                     break
@@ -238,8 +247,8 @@ class EditableTextObject(TextObject):
             return
 
         # We have to handle this ourselves
-        delta = Position(1, 0) if text == "\n" else Position(0, len(text))
-        if ctype == "D":
+        delta = Position(1, 0) if text == '\n' else Position(0, len(text))
+        if ctype == 'D':
              # Makes no sense to delete in empty textobject
             if self._start == self._end:
                 return
@@ -263,7 +272,7 @@ class EditableTextObject(TextObject):
         'diff'."""
         self._end.move(pivot, diff)
 
-        for child in self._children[idx+1:]:
+        for child in self._children[idx + 1:]:
             child._move(pivot, diff)
 
         if self._parent:
@@ -295,7 +304,6 @@ class EditableTextObject(TextObject):
 
         return min(possible_sol)
 
-
     def _get_prev_tab(self, number):
         """Returns the previous tabstop before 'number'."""
         if not len(self._tabstops.keys()):
@@ -321,8 +329,11 @@ class EditableTextObject(TextObject):
         return max(possible_sol)
 
     def _get_tabstop(self, requester, number):
-        """Returns the tabstop 'number'. 'requester' is the class that is
-        interested in this."""
+        """Returns the tabstop 'number'.
+
+        'requester' is the class that is interested in this.
+
+        """
         if number in self._tabstops:
             return self._tabstops[number]
         for child in self._editable_children:
@@ -357,7 +368,10 @@ class EditableTextObject(TextObject):
         except (AttributeError, KeyError):
             pass
 
+
 class NoneditableTextObject(TextObject):
+
     """All passive text objects that the user can't edit by hand."""
+
     def _update(self, done):
         return True

@@ -7,14 +7,19 @@ from UltiSnips.position import Position
 from UltiSnips.snippet.parsing._lexer import tokenize, TabStopToken
 from UltiSnips.text_objects import TabStop
 
+
 def tokenize_snippet_text(snippet_instance, text, indent,
-        allowed_tokens_in_text, allowed_tokens_in_tabstops,
-        token_to_textobject):
+                          allowed_tokens_in_text, allowed_tokens_in_tabstops,
+                          token_to_textobject):
     """Turns 'text' into a stream of tokens and creates the text objects from
     those tokens that are mentioned in 'token_to_textobject' assuming the
-    current 'indent'. The 'allowed_tokens_in_text' define which tokens will be
-    recognized in 'text' while 'allowed_tokens_in_tabstops' are the tokens that
-    will be recognized in TabStop placeholder text."""
+    current 'indent'.
+
+    The 'allowed_tokens_in_text' define which tokens will be recognized
+    in 'text' while 'allowed_tokens_in_tabstops' are the tokens that
+    will be recognized in TabStop placeholder text.
+
+    """
     seen_ts = {}
     all_tokens = []
 
@@ -27,7 +32,7 @@ def tokenize_snippet_text(snippet_instance, text, indent,
                 ts = TabStop(parent, token)
                 seen_ts[token.number] = ts
                 _do_parse(ts, token.initial_text,
-                        allowed_tokens_in_tabstops)
+                          allowed_tokens_in_tabstops)
             else:
                 klass = token_to_textobject.get(token.__class__, None)
                 if klass is not None:
@@ -35,11 +40,12 @@ def tokenize_snippet_text(snippet_instance, text, indent,
     _do_parse(snippet_instance, text, allowed_tokens_in_text)
     return all_tokens, seen_ts
 
+
 def finalize(all_tokens, seen_ts, snippet_instance):
     """Adds a tabstop 0 if non is in 'seen_ts' and brings the text of the
     snippet instance into Vim."""
     if 0 not in seen_ts:
-        mark = all_tokens[-1][1].end # Last token is always EndOfText
+        mark = all_tokens[-1][1].end  # Last token is always EndOfText
         m1 = Position(mark.line, mark.col)
         TabStop(snippet_instance, 0, mark, m1)
     snippet_instance.replace_initial_text()
