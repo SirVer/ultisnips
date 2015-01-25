@@ -54,6 +54,7 @@ class SnippetUtil(object):
         self._cur = cur
         self._rv = ''
         self._changed = False
+        self._package = None
         self.reset_indent()
 
     def shift(self, amount=1):
@@ -113,6 +114,44 @@ class SnippetUtil(object):
     def basename(self):  # pylint:disable=no-self-use
         """The filename without extension."""
         return _vim.eval('expand("%:t:r")') or ''
+
+    @property
+    def dirname(self):  # pylint: disable=no-self-use
+        """The filename's directory."""
+        return _vim.eval('expand("%:p:h")') or ''
+
+    @property
+    def package(self):
+        """
+        Try our best to detect the python package name where this
+        snip is being used.
+        """
+        if self._package is None:
+            package = []
+            curdir = self.dirname
+            while True:
+                if os.path.isfile(os.path.join(curdir, '__init__.py')):
+                    package.append(os.path.basename(curdir))
+                    curdir = os.path.abspath(os.path.join(curdir, '..'))
+                    continue
+                break
+
+            if package:
+                package.reverse()
+                self._package = '.'.join(package)
+        return self._package
+
+    @property
+    def module(self):
+        """
+        Try our best to detect the python module name where this snippet
+        is being used.
+        """
+        if not self.package:
+            return ''
+        if self.basename == '__init__':
+            return self.package
+        return '{0}.{1}'.format(self.package, self.basename)
 
     @property
     def ft(self):  # pylint:disable=invalid-name
