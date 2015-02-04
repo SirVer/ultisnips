@@ -47,6 +47,16 @@ class RemoveTrailingWhitespace(_VimTest):
     wanted = """Hello\nGoodbye"""
     keys = 'test' + EX + BS + JF + 'Goodbye'
 
+class TrimSpacesAtEndOfLines(_VimTest):
+    snippets = ('test', """next line\n\nshould be empty""", '', 'm')
+    wanted = """\tnext line\n\n\tshould be empty"""
+    keys = '\ttest' + EX
+
+class DoNotTrimSpacesAtEndOfLinesByDefault(_VimTest):
+    snippets = ('test', """next line\n\nshould be empty""", '', '')
+    wanted = """\tnext line\n\t\n\tshould be empty"""
+    keys = '\ttest' + EX
+
 
 class LeaveTrailingWhitespace(_VimTest):
     snippets = ('test', """Hello \t ${1:default}\n$2""")
