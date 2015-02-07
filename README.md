@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/SirVer/ultisnips.png?label=ready&title=Ready)](https://waffle.io/SirVer/ultisnips)
 UltiSnips
 =========
 
