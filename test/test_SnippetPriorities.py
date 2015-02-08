@@ -81,7 +81,7 @@ class SnippetPriorities_FileHasHigherThanAdded(_VimTest):
     wanted = 'This is a test snippet'
 
 
-class SnippetPriorities_FileHasHigherThanAdded(_VimTest):
+class SnippetPriorities_FileHasHigherThanAdded_neg_prio(_VimTest):
     files = { 'us/all.snippets': r"""
         priority -3
         snippet test "Test Snippet" b
