@@ -43,9 +43,8 @@ import os
 import platform
 import subprocess
 import unittest
-
-from test.constant import *
-from test.vim_interface import *
+from test.vim_interface import (create_directory, tempfile, VimInterfaceScreen,
+                                VimInterfaceTmux)
 
 
 def plugin_cache_dir():

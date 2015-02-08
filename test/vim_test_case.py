@@ -10,8 +10,8 @@ import tempfile
 import textwrap
 import time
 import unittest
-
-from constant import *
+from test.constant import (ARR_D, ARR_L, ARR_R, ARR_U, BS, ESC, PYTHON3,
+                           SEQUENCES)
 
 
 def is_process_running(pid):

@@ -1,5 +1,5 @@
 from test.vim_test_case import VimTestCase as _VimTest
-from test.constant import *
+from test.constant import EX, ESC
 
 # Snippet Priority  {{{#
 

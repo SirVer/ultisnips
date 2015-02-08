@@ -1,6 +1,6 @@
 # encoding: utf-8
 from test.vim_test_case import VimTestCase as _VimTest
-from test.constant import *
+from test.constant import EX, JF, ESC
 from test.util import running_on_windows
 
 # ShellCode Interpolation  {{{#
