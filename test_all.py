@@ -77,6 +77,7 @@ def setup_other_plugins(all_plugins):
 
 if __name__ == '__main__':
     import optparse
+    import sys
 
     def parse_args():
         p = optparse.OptionParser('%prog [OPTIONS] <test case names to run>')
@@ -165,9 +166,9 @@ if __name__ == '__main__':
                 return
 
         v = 2 if options.verbose else 1
-        res = unittest.TextTestRunner(verbosity=v,
-                                      failfast=options.exitfirst).run(suite)
+        return unittest.TextTestRunner(verbosity=v,
+                                       failfast=options.exitfirst).run(suite)
 
-    main()
+    sys.exit(main())
 
 # vim:fileencoding=utf-8:foldmarker={{{#,#}}}:
