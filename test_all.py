@@ -3,8 +3,8 @@
 #
 # To execute this test requires two terminals, one for running Vim and one
 # for executing the test script. Both terminals should have their current
-# working directories set to this directory (the one containing this test.py
-# script).
+# working directories set to this directory (the one containing this
+# test_all.py script).
 #
 # In one terminal, launch a GNU ``screen`` session named ``vim``:
 #   $ screen -S vim
@@ -16,12 +16,12 @@
 # Now, from another terminal, launch the testsuite:
 #    $ ./test_all.py
 #
-# Note: if you want to Vim against the Python 3 bindings, you must launch the
+# Note: if you want to use Vim against the Python 3 bindings, you must launch the
 # test suite using Python 3.  For example:
 #    $ python3 ./test_all.py
 #
-# For each test, the test.py script will launch vim with a vimrc, run the test,
-# compare the output and exit vim again. The keys are send using screen.
+# For each test, the test_all.py script will launch vim with a vimrc, run the
+# test, compare the output and exit vim again. The keys are send using screen.
 #
 # To limit the tests that are executed, specify a pattern to be used to match
 # the beginning of the test name.  For instance, the following will execute all
