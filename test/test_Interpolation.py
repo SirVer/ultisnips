@@ -1,6 +1,8 @@
 # encoding: utf-8
+import os
+
 from test.vim_test_case import VimTestCase as _VimTest
-from test.constant import *
+from test.constant import EX, JF, ESC
 from test.util import running_on_windows
 
 # ShellCode Interpolation  {{{#
@@ -57,9 +59,9 @@ class TabStop_Shell_TestEscapedCharsAndShellVars_Overwrite(_VimTest):
 
 class TabStop_Shell_ShebangPython(_VimTest):
     skip_if = lambda self: running_on_windows()
-    snippets = ('test', """Hallo ${1:now `#!/usr/bin/env python
+    snippets = ('test', """Hallo ${1:now `#!/usr/bin/env %s
 print "Hallo Welt"
-`} end""")
+`} end""" % (os.environ.get('PYTHON', 'python2'),))
     keys = 'test' + EX + JF + 'and more'
     wanted = 'Hallo now Hallo Welt endand more'
 # End: ShellCode Interpolation  #}}}

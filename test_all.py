@@ -3,8 +3,8 @@
 #
 # To execute this test requires two terminals, one for running Vim and one
 # for executing the test script. Both terminals should have their current
-# working directories set to this directory (the one containing this test.py
-# script).
+# working directories set to this directory (the one containing this
+# test_all.py script).
 #
 # In one terminal, launch a GNU ``screen`` session named ``vim``:
 #   $ screen -S vim
@@ -16,12 +16,12 @@
 # Now, from another terminal, launch the testsuite:
 #    $ ./test_all.py
 #
-# Note: if you want to Vim against the Python 3 bindings, you must launch the
+# Note: if you want to use Vim against the Python 3 bindings, you must launch the
 # test suite using Python 3.  For example:
 #    $ python3 ./test_all.py
 #
-# For each test, the test.py script will launch vim with a vimrc, run the test,
-# compare the output and exit vim again. The keys are send using screen.
+# For each test, the test_all.py script will launch vim with a vimrc, run the
+# test, compare the output and exit vim again. The keys are send using screen.
 #
 # To limit the tests that are executed, specify a pattern to be used to match
 # the beginning of the test name.  For instance, the following will execute all
@@ -43,9 +43,8 @@ import os
 import platform
 import subprocess
 import unittest
-
-from test.constant import *
-from test.vim_interface import *
+from test.vim_interface import (create_directory, tempfile, VimInterfaceScreen,
+                                VimInterfaceTmux)
 
 
 def plugin_cache_dir():
@@ -78,6 +77,7 @@ def setup_other_plugins(all_plugins):
 
 if __name__ == '__main__':
     import optparse
+    import sys
 
     def parse_args():
         p = optparse.OptionParser('%prog [OPTIONS] <test case names to run>')
@@ -105,6 +105,8 @@ if __name__ == '__main__':
                      help='How often should each test be retried before it is '
                      'considered failed. Works around flakyness in the terminal '
                      'multiplexer and race conditions in writing to the file system.')
+        p.add_option("-x", "--exitfirst", dest="exitfirst", action="store_true",
+                     help="exit instantly on first error or failed test.")
 
         o, args = p.parse_args()
         if o.interface not in ('screen', 'tmux'):
@@ -164,8 +166,9 @@ if __name__ == '__main__':
                 return
 
         v = 2 if options.verbose else 1
-        res = unittest.TextTestRunner(verbosity=v).run(suite)
+        return unittest.TextTestRunner(verbosity=v,
+                                       failfast=options.exitfirst).run(suite)
 
-    main()
+    sys.exit(main())
 
 # vim:fileencoding=utf-8:foldmarker={{{#,#}}}:
