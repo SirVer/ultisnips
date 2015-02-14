@@ -5,6 +5,8 @@ python:
 env:
   - TMUX_VERSION=1.9
 before_script:
+  - sudo add-apt-repository ppa:pi-rho/tmux -y
+  - sudo add-apt-repository ppa:pi-rho/vim -y
   - sudo apt-get install -qq -y tmux vim
   - tmux new -d -s vim
 script: ./test_all.py -v --interface tmux --session vim Simple
