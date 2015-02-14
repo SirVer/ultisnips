@@ -281,7 +281,8 @@ class _RealLangMapTranslator(object):
 
 class _DummyLangMapTranslator(object):
 
-    """If vim hasn't got the langmap compiled in, we never have to do anything.
+    """If vim hasn't got the langmap compiled in, or is using langnoremap, we
+    never have to do anything.
 
     Then this class is used.
 
@@ -290,4 +291,6 @@ class _DummyLangMapTranslator(object):
 
 _LangMapTranslator = _RealLangMapTranslator
 if not int(eval('has("langmap")')):
+    _LangMapTranslator = _DummyLangMapTranslator
+elif int(eval('exists("+langnoremap") && &langnoremap')):
     _LangMapTranslator = _DummyLangMapTranslator
