@@ -10,9 +10,9 @@ before_script:
   - tmux new -d -s vim
   - vim --version
   # Display the python2 version in Vim.
-  - vim +'py import sys; open("/tmp/py_version", "w").write("%s" % sys.version)' +quit
-  - cat /tmp/py_version
+  # - vim +'py import sys; open("/tmp/py_version", "w").write("%s" % sys.version)' +quit
+  # - cat /tmp/py_version
   # Display the python3 version in Vim.
-  - vim +'py3 import sys; open("/tmp/py3_version", "w").write("%s" % sys.version)' +quit
-  - cat /tmp/py3_version
+  # - vim +'py3 import sys; open("/tmp/py3_version", "w").write("%s" % sys.version)' +quit
+  # - cat /tmp/py3_version
 script: ./test_all.py -v --interface tmux --session vim Simple
