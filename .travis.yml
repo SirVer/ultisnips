@@ -4,7 +4,8 @@ python:
   - 2.7
 before_script:
   - sudo add-apt-repository ppa:kalakris/tmux -y
-  - sudo add-apt-repository ppa:pi-rho/vim -y
+  # - sudo add-apt-repository ppa:pi-rho/vim -y
   - sudo apt-get install -qq -y tmux vim-gnome
   - tmux new -d -s vim
+  - vim --version
 script: ./test_all.py -v --interface tmux --session vim Simple
