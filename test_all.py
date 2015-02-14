@@ -105,8 +105,8 @@ if __name__ == '__main__':
                      help='How often should each test be retried before it is '
                      'considered failed. Works around flakyness in the terminal '
                      'multiplexer and race conditions in writing to the file system.')
-        p.add_option("-x", "--exitfirst", dest="exitfirst", action="store_true",
-                     help="exit instantly on first error or failed test.")
+        p.add_option('-x', '--exitfirst', dest='exitfirst', action='store_true',
+                     help='exit instantly on first error or failed test.')
 
         o, args = p.parse_args()
         if o.interface not in ('screen', 'tmux'):
@@ -166,9 +166,9 @@ if __name__ == '__main__':
                 return
 
         v = 2 if options.verbose else 1
-        return unittest.TextTestRunner(verbosity=v,
-                                       failfast=options.exitfirst).run(suite)
-
+        successfull = unittest.TextTestRunner(verbosity=v,
+                                          failfast=options.exitfirst).run(suite).wasSuccessful()
+        return 0 if successfull else 1
     sys.exit(main())
 
 # vim:fileencoding=utf-8:foldmarker={{{#,#}}}:
