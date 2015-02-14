@@ -228,7 +228,10 @@ class SnippetDefinition(object):
             if line_num != 0:
                 line_ind = indent + line_ind
 
-            initial_text.append(line_ind + line[tabs:])
+            result_line = line_ind + line[tabs:]
+            if 'm' in self._opts:
+                result_line = result_line.rstrip()
+            initial_text.append(result_line)
         initial_text = '\n'.join(initial_text)
 
         snippet_instance = SnippetInstance(
