@@ -1,18 +1,17 @@
 language: python
 
 python:
+  # TOOD: add support for one python3 version. The problem here is Vim: we need to install a version of vim that
+  # has py3, but not py2. I could not figure this out so far.
   - 2.7
-  - 3.4
 before_script:
+  # Clone the dependent plugins we want to use.
+  - ./test_all.py --clone-plugins
+  # Install tmux (> 1.8) and vim. 
   - sudo add-apt-repository ppa:kalakris/tmux -y
   - sudo apt-get update -qq
   - sudo apt-get install -qq -y tmux vim-gnome
+  # Start the testing session.
   - tmux new -d -s vim
   - vim --version
-  # Display the python2 version in Vim.
-  # - vim +'py import sys; open("/tmp/py_version", "w").write("%s" % sys.version)' +quit
-  # - cat /tmp/py_version
-  # Display the python3 version in Vim.
-  # - vim +'py3 import sys; open("/tmp/py3_version", "w").write("%s" % sys.version)' +quit
-  # - cat /tmp/py3_version
-script: ./test_all.py -v --interface tmux --session vim Simple
+script: ./test_all.py -v --plugins --interface tmux --session vim
