@@ -1,0 +1,10 @@
+language: python
+
+python:
+  - 2.7
+env:
+  - TMUX_VERSION=1.9
+before_script:
+  - sudo apt-get install -qq tmux vim
+  - tmux new -d -s vim
+script: /test_all.py -v --interface tmux --session vim Simple
