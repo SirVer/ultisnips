@@ -475,6 +475,7 @@ class SnippetManager(object):
         elif feedkey:
             _vim.command('return %s' % _vim.escape(feedkey))
 
+    @err_to_scratch_buffer
     def _snips(self, before, partial):
         """Returns all the snippets for the given text before the cursor.
 
@@ -572,6 +573,10 @@ class SnippetManager(object):
         if not before:
             return False
         snippets = self._snips(before, False)
+        # prefer snippets with context if any
+        snippets_with_context = [s for s in snippets if s.context]
+        if snippets_with_context:
+            snippets = snippets_with_context
         if not snippets:
             # No snippet found
             return False

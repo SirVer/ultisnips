@@ -21,7 +21,7 @@ class SnippetInstance(EditableTextObject):
     # pylint:disable=protected-access
 
     def __init__(self, snippet, parent, initial_text,
-                 start, end, visual_content, last_re, globals):
+                 start, end, visual_content, last_re, globals, context):
         if start is None:
             start = Position(0, 0)
         if end is None:
@@ -29,7 +29,7 @@ class SnippetInstance(EditableTextObject):
         self.snippet = snippet
         self._cts = 0
 
-        self.locals = {'match': last_re}
+        self.locals = {'match': last_re, 'context': context}
         self.globals = globals
         self.visual_content = visual_content
 

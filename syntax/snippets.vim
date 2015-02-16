@@ -78,7 +78,7 @@ syn match snipSnippetTrigger ,".\{-}"\ze\%(\s\+"\%(\s*\S\)\@=[^"]*\%("\s\+[^"[:s
 syn match snipSnippetTriggerInvalid ,\S\@=.\{-}\S\ze\%(\s\+"[^"]*\%("\s\+[^"[:space:]]\+\s*\|"\s*\)\=\|\s*\)$, contained nextgroup=snipSnippetDocString skipwhite
 syn match snipSnippetDocString ,"[^"]*\%("\ze\s*\%(\s[^"[:space:]]\+\s*\)\=\)\=$, contained nextgroup=snipSnippetOptions skipwhite
 syn match snipSnippetOptions ,\S\+, contained contains=snipSnippetOptionFlag
-syn match snipSnippetOptionFlag ,[biwrts], contained
+syn match snipSnippetOptionFlag ,[biwrtsmx], contained
 
 " Command substitution {{{4
 
