@@ -79,7 +79,6 @@ def _handle_snippet_or_global(filename, line, lines, python_globals, priority):
     else:
         context = None
 
-
     # Get and strip description if it exists
     remain = remain.strip()
     if len(remain.split()) > 1 and remain[-1] == '"':

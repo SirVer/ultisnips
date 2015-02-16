@@ -44,7 +44,7 @@ class SnippetDefinition(object):
     _TABS = re.compile(r"^\t*")
 
     def __init__(self, priority, trigger, value, description,
-                 options, globals, location, context):
+                 options, globals, location, context=None):
         self._priority = int(priority)
         self._trigger = as_unicode(trigger)
         self._value = as_unicode(value)

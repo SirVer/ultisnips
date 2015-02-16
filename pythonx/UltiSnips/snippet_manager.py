@@ -203,18 +203,19 @@ class SnippetManager(object):
 
     @err_to_scratch_buffer
     def add_snippet(self, trigger, value, description,
-                    options, ft='all', priority=0):
+                    options, ft='all', priority=0, context=None):
         """Add a snippet to the list of known snippets of the given 'ft'."""
         self._added_snippets_source.add_snippet(ft,
                                                 UltiSnipsSnippetDefinition(priority, trigger, value,
-                                                                           description, options, {}, 'added'))
+                                                                           description, options, {}, 'added',
+                                                                           context))
 
     @err_to_scratch_buffer
-    def expand_anon(self, value, trigger='', description='', options=''):
+    def expand_anon(self, value, trigger='', description='', options='', context=None):
         """Expand an anonymous snippet right here."""
         before = _vim.buf.line_till_cursor
         snip = UltiSnipsSnippetDefinition(0, trigger, value, description,
-                                          options, {}, '')
+                                          options, {}, '', context)
 
         if not trigger or snip.matches(before):
             self._do_snippet(snip, before)
@@ -573,10 +574,11 @@ class SnippetManager(object):
         if not before:
             return False
         snippets = self._snips(before, False)
-        # prefer snippets with context if any
-        snippets_with_context = [s for s in snippets if s.context]
-        if snippets_with_context:
-            snippets = snippets_with_context
+        if snippets:
+            # prefer snippets with context if any
+            snippets_with_context = [s for s in snippets if s.context]
+            if snippets_with_context:
+                snippets = snippets_with_context
         if not snippets:
             # No snippet found
             return False
