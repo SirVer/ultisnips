@@ -189,8 +189,8 @@ class SnippetDefinition(object):
 
         if match and self._context_code:
             self._context = self._context_match()
-            print(match, self._trigger, self._context)
-            match = self._context != None
+            if not self.context:
+                match = False
 
         return match
 
