@@ -2,12 +2,14 @@
 
 import os
 import re
+import shutil
 import subprocess
 import tempfile
 import textwrap
 import time
 
-from test.constant import *
+from test.constant import (ARR_D, ARR_L, ARR_R, ARR_U, BS, ESC, PYTHON3,
+        SEQUENCES)
 
 
 def wait_until_file_exists(file_path, times=None, interval=0.01):
