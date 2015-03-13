@@ -183,7 +183,7 @@ class EditableTextObject(TextObject):
     ###############################
     # Private/Protected functions #
     ###############################
-    def _do_edit(self, cmd):
+    def _do_edit(self, cmd, ctab=None):
         """Apply the edit 'cmd' to this object."""
         ctype, line, col, text = cmd
         assert ('\n' not in text) or (text == '\n')
@@ -201,7 +201,13 @@ class EditableTextObject(TextObject):
                     break
                 elif ((child._start <= pos <= child._end) and
                         isinstance(child, EditableTextObject)):
-                    child._do_edit(cmd)
+                    if pos == child.end and not child.children:
+                        try:
+                            if ctab.number != child.number:
+                                continue
+                        except AttributeError:
+                            pass
+                    child._do_edit(cmd, ctab)
                     return
             else:  # Deletion
                 delend = pos + Position(0, len(text)) if text != '\n' \
@@ -214,7 +220,7 @@ class EditableTextObject(TextObject):
                         new_cmds.append(cmd)
                         break
                     else:
-                        child._do_edit(cmd)
+                        child._do_edit(cmd, ctab)
                         return
                 elif ((pos < child._start and child._end <= delend) or
                         (pos <= child._start and child._end < delend)):

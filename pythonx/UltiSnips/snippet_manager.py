@@ -319,7 +319,7 @@ class SnippetManager(object):
                     lt = '\n'.join(lt)
                     ct = '\n'.join(ct)
                     es = diff(lt, ct, initial_line)
-                self._csnippets[0].replay_user_edits(es)
+                self._csnippets[0].replay_user_edits(es, self._ctab)
             except IndexError:
                 # Rather do nothing than throwing an error. It will be correct
                 # most of the time
