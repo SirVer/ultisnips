@@ -9,9 +9,6 @@ let s:source = {
    \ 'matchers' :
       \ (g:neocomplete#enable_fuzzy_completion ?
       \ ['matcher_fuzzy'] : ['matcher_head']),
-   \ 'min_pattern_length' : 1,
-   \ 'max_candidates' : 20,
-   \ 'is_volatile': 1,
    \ }
 
 function! s:source.gather_candidates(context)
