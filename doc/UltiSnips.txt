@@ -1444,6 +1444,7 @@ individuals have contributed to UltiSnips (in chronological order):
    Stanislav Seletskiy - seletskiy
    Pawel Palucki - ppalucki
    Dettorer - dettorer
+   Zhao Jiarong - kawing-chiu
 
 
 Thank you for your support.

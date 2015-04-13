@@ -364,3 +364,10 @@ class TabStop_CROnlyOnSelectedNear(_VimTest):
     snippets = ('test', 't$1t${2: }t{\n\t$0\n}')
     keys = 'test' + EX + JF + '\n' + JF + 't'
     wanted = 'tt\nt{\n\tt\n}'
+
+
+class TabStop_AdjacentTabStopAddText_ExpectCorrectResult(_VimTest):
+    snippets = ('test', '[ $1$2 ] $1')
+    keys = 'test' + EX + 'Hello' + JF + 'World' + JF
+    wanted = '[ HelloWorld ] Hello'
+

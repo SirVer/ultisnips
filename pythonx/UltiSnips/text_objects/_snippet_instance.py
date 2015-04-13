@@ -45,11 +45,11 @@ class SnippetInstance(EditableTextObject):
                     _place_initial_text(child)
         _place_initial_text(self)
 
-    def replay_user_edits(self, cmds):
+    def replay_user_edits(self, cmds, ctab=None):
         """Replay the edits the user has done to keep endings of our Text
         objects in sync with reality."""
         for cmd in cmds:
-            self._do_edit(cmd)
+            self._do_edit(cmd, ctab)
 
     def update_textobjects(self):
         """Update the text objects that should change automagically after the
