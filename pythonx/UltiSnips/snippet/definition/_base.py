@@ -102,6 +102,7 @@ class SnippetDefinition(object):
             'buffer': current.buffer,
             'line': current.window.cursor[0],
             'column': current.window.cursor[1],
+            'cursor': current.window.cursor,
         }
 
         exec(code, locals)

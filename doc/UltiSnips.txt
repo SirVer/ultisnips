@@ -36,6 +36,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       4.7.1 Replacement String                  |UltiSnips-replacement-string|
       4.7.2 Demos                               |UltiSnips-demos|
    4.8 Clearing snippets                        |UltiSnips-clearing-snippets|
+   4.9 Context snippets                         |UltiSnips-context-snippets|
 5. UltiSnips and Other Plugins                  |UltiSnips-other-plugins|
    5.1 Existing Integrations                    |UltiSnips-integrations|
    5.2 Extending UltiSnips                      |UltiSnips-extending|
@@ -1317,6 +1318,7 @@ Following python modules are automatically imported: 're', 'os', 'vim',
 Also, variables are declared in local scope for use in expression: >
     'window' - alias for 'vim.current.window'
     'buffer' - alias for 'vim.current.window.buffer'
+    'cursor' - alias for 'vim.current.cursor'
     'line' and 'column' - aliases for cursor position
 
 Keep in mind, that lines in vim numbered from 1, and lists in python starts
