@@ -1354,7 +1354,7 @@ That snippet will expand into 'if err != nil' if previous line will
 match 'err :=' prefix, otherwise default 'if' snippet will be expanded.
 
 It's good idea to move context conditions to separate library, so it can be
-used with other UltiSnips user. In that case, library should be imported
+used by other UltiSnips users. In that case, library should be imported
 using 'global' keyword, like this:
 
 ------------------- SNIP -------------------
