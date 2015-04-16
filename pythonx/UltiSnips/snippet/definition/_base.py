@@ -4,6 +4,7 @@
 """Snippet representation after parsing."""
 
 import re
+
 import vim
 
 from UltiSnips import _vim
@@ -44,7 +45,7 @@ class SnippetDefinition(object):
     _TABS = re.compile(r"^\t*")
 
     def __init__(self, priority, trigger, value, description,
-                 options, globals, location, context=None):
+                 options, globals, location, context):
         self._priority = int(priority)
         self._trigger = as_unicode(trigger)
         self._value = as_unicode(value)
@@ -90,17 +91,17 @@ class SnippetDefinition(object):
         code = "\n".join([
             'import re, os, vim, string, random',
             '\n'.join(self._globals.get('!p', [])).replace('\r\n', '\n'),
-            'ctx["match"] = ' + self._context_code,
+            'context["match"] = ' + self._context_code,
             ''
         ])
 
         context = {'match': False}
         locals = {
-            'ctx': context,
-            'w': current.window,
-            'b': current.buffer,
-            'l': current.window.cursor[0],
-            'c': current.window.cursor[1],
+            'context': context,
+            'window': current.window,
+            'buffer': current.buffer,
+            'line': current.window.cursor[0],
+            'column': current.window.cursor[1],
         }
 
         exec(code, locals)

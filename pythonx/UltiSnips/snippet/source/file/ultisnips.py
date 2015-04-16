@@ -72,12 +72,11 @@ def _handle_snippet_or_global(filename, line, lines, python_globals, priority):
             opts = words[-1]
             remain = remain[:-len(opts) - 1].rstrip()
 
-    if 'x' in opts:
+    context = None
+    if 'e' in opts:
         left = remain[:-1].rfind('"')
         if left != -1 and left != 0:
             context, remain = remain[left:].strip('"'), remain[:left]
-    else:
-        context = None
 
     # Get and strip description if it exists
     remain = remain.strip()
@@ -111,10 +110,12 @@ def _handle_snippet_or_global(filename, line, lines, python_globals, priority):
     if snip == 'global':
         python_globals[trig].append(content)
     elif snip == 'snippet':
-        return 'snippet', (UltiSnipsSnippetDefinition(priority, trig, content,
-                                                      descr, opts, python_globals,
-                                                      '%s:%i' % (filename, start_line_index),
-                                                      context),)
+        definition = UltiSnipsSnippetDefinition(
+            priority, trig, content,
+            descr, opts, python_globals,
+            '%s:%i' % (filename, start_line_index),
+            context)
+        return 'snippet', (definition,)
     else:
         return 'error', ("Invalid snippet type: '%s'" % snip, lines.line_index)
 
