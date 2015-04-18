@@ -44,7 +44,7 @@ class SnippetDefinition(object):
 
     def __init__(self, priority, trigger, value, description,
                  options, globals, location):
-        self._priority = priority
+        self._priority = int(priority)
         self._trigger = as_unicode(trigger)
         self._value = as_unicode(value)
         self._description = as_unicode(description)
