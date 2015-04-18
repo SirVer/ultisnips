@@ -6,7 +6,6 @@ python:
   - 2.7
 env:
   - VIM_VERSION=73
-  - VIM_VERSION=74
 before_script:
   - sudo ./travis_install.sh ${VIM_VERSION}
 script: ./test_all.py -v --plugins --interface tmux --session vim
