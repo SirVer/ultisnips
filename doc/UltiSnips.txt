@@ -975,7 +975,8 @@ until all the variable components are complete.
 The syntax for a tabstop is the dollar sign followed by a number, for example,
 '$1'. Tabstops start at number 1 and are followed in sequential order. The
 '$0' tabstop is a special tabstop. It is always the last tabstop in the
-snippet no matter how many tabstops are defined.
+snippet no matter how many tabstops are defined. If there is no '$0' defined,
+'$0' tabstop will be defined at the end of snippet.
 
 Here is a simple example.
 
