@@ -3,6 +3,8 @@
 # Installs dependencies on travis and prepares the test run.
 set -ex
 
+VIM_VERSION=$1; shift
+
 build_vim () {
    URL=$1; shift; 
    curl $URL -o /tmp/vim.tar.bz2
@@ -30,7 +32,7 @@ fi
 # Install tmux (> 1.8) and vim. 
 add-apt-repository ppa:kalakris/tmux -y
 apt-get update -qq
-apt-get install -qq -y tmux vim-gnome
+apt-get install -qq -y tmux 
 
 # Clone the dependent plugins we want to use.
 ./test_all.py --clone-plugins
