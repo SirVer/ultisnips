@@ -32,6 +32,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
     # Skip this test for the given reason or None for not skipping it.
     skip_if = lambda self: None
     version = None  # Will be set to vim --version output
+    maxDiff = None  # Show all diff output, always.
 
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)

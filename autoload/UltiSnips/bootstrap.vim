@@ -11,7 +11,7 @@ function! UltiSnips#bootstrap#Bootstrap()
        if !has("python3")
            if !has("python")
                if !exists("g:UltiSnipsNoPythonWarning")
-                   echo  "UltiSnips requires py >= 2.6 or any py3"
+                   echo  "UltiSnips requires py >= 2.7 or any py3"
                endif
                unlet g:_uspy
                return
