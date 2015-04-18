@@ -4,8 +4,10 @@ python:
   # TOOD: add support for one python3 version. The problem here is Vim: we need to install a version of vim that
   # has py3, but not py2. I could not figure this out so far.
   - 2.7
+global:
+   - PATH="$HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 env:
-  - VIM_VERSION=73
+  - VIM_VERSION="73"
 before_script:
   - sudo ./travis_install.sh ${VIM_VERSION}
 script: ./test_all.py -v --plugins --interface tmux --session vim
