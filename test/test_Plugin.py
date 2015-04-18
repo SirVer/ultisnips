@@ -57,20 +57,20 @@ def python3():
 # End: Plugin: Neocomplete  #}}}
 # Plugin: unite {{{#
 
+# TODO(sirver): Disable since it is flaky.
+# class Plugin_unite_BugTest(_VimTest):
+    # plugins = ['Shougo/unite.vim']
+    # snippets = ('t', 'Hello', '', 'w')
+    # keys = 'iab\\ t=UltiSnipsCallUnite()\n'
+    # wanted = 'iab\\ Hello '
 
-class Plugin_unite_BugTest(_VimTest):
-    plugins = ['Shougo/unite.vim']
-    snippets = ('t', 'Hello', '', 'w')
-    keys = 'iab\\ t=UltiSnipsCallUnite()\n'
-    wanted = 'iab\\ Hello '
-
-    def _extra_options_pre_init(self, vim_config):
-        vim_config.append(r'set iskeyword+=\\ ')
-        vim_config.append('function! UltiSnipsCallUnite()')
-        vim_config.append(
-            '  Unite -start-insert -winheight=100 -immediately -no-empty ultisnips')
-        vim_config.append('  return ""')
-        vim_config.append('endfunction')
+    # def _extra_options_pre_init(self, vim_config):
+        # vim_config.append(r'set iskeyword+=\\ ')
+        # vim_config.append('function! UltiSnipsCallUnite()')
+        # vim_config.append(
+            # '  Unite -start-insert -winheight=100 -immediately -no-empty ultisnips')
+        # vim_config.append('  return ""')
+        # vim_config.append('endfunction')
 # End: Plugin: unite  #}}}
 # Plugin: Supertab {{{#
 
