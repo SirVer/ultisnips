@@ -31,17 +31,18 @@ apt-get update -qq
 apt-get install -qq -y tmux 
 
 
-if [[ "$VIM_VERSION" = "73" ]]; then
+if [[ $VIM_VERSION == "73" ]]; then
    build_vim ftp://ftp.vim.org/pub/vim/unix/vim-7.3.tar.bz2
-elif [[ "$VIM_VERSION" = "74" ]]; then
+elif [[ $VIM_VERSION == "74" ]]; then
    build_vim ftp://ftp.vim.org/pub/vim/unix/vim-7.4.tar.bz2
 fi
 
-which vim
+# Dirty hack, since PATH seems to be ignored.
+sudo ln -sf /home/travis/bin/vim /usr/bin/vim
+vim --version
 
 # Clone the dependent plugins we want to use.
 ./test_all.py --clone-plugins
 
 # Start the testing session.
 tmux new -d -s vim
-vim --version
