@@ -12,4 +12,4 @@ install: sudo ./install_vim.sh "${VIM_VERSION}" "$(python --version 2>&1)"
 before_script:
   - tmux new -d -s vim
 
-script: ./test_all.py -v --plugins --interface tmux --session vim
+script: ./test_all.py -v --plugins --session vim
