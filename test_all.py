@@ -6,11 +6,7 @@
 # working directories set to this directory (the one containing this
 # test_all.py script).
 #
-# In one terminal, launch a GNU ``screen`` session named ``vim``:
-#   $ screen -S vim
-#
-#   Or the following if you use ``tmux``:
-#
+# In one terminal, launch a tmux session named ``vim``:
 #   $ tmux new -s vim
 #
 # Now, from another terminal, launch the testsuite:
@@ -21,7 +17,7 @@
 #    $ python3 ./test_all.py
 #
 # For each test, the test_all.py script will launch vim with a vimrc, run the
-# test, compare the output and exit vim again. The keys are send using screen.
+# test, compare the output and exit vim again. The keys are send using tmux send-keys.
 #
 # To limit the tests that are executed, specify a pattern to be used to match
 # the beginning of the test name.  For instance, the following will execute all
@@ -43,8 +39,7 @@ import os
 import platform
 import subprocess
 import unittest
-from test.vim_interface import (create_directory, tempfile, VimInterfaceScreen,
-                                VimInterfaceTmux)
+from test.vim_interface import (create_directory, tempfile, VimInterfaceTmux)
 
 
 def plugin_cache_dir():
@@ -83,7 +78,7 @@ if __name__ == '__main__':
         p = optparse.OptionParser('%prog [OPTIONS] <test case names to run>')
 
         p.set_defaults(session='vim', interrupt=False,
-                       verbose=False, interface='screen', retries=4, plugins=False)
+                       verbose=False, retries=4, plugins=False)
 
         p.add_option('-v', '--verbose', dest='verbose', action='store_true',
                      help='print name of tests as they are executed')
@@ -91,8 +86,6 @@ if __name__ == '__main__':
                      help='Only clones dependant plugins and exits the test runner.')
         p.add_option('--plugins', action='store_true',
                      help='Run integration tests with other Vim plugins.')
-        p.add_option('--interface', type=str,
-                     help='interface to vim to use on Mac and or Linux [screen|tmux].')
         p.add_option('-s', '--session', dest='session', metavar='SESSION',
                      help='session parameters for the terminal multiplexer SESSION [%default]')
         p.add_option('-i', '--interrupt', dest='interrupt',
@@ -109,9 +102,6 @@ if __name__ == '__main__':
                      help='exit instantly on first error or failed test.')
 
         o, args = p.parse_args()
-        if o.interface not in ('screen', 'tmux'):
-            p.error('--interface must be [screen|tmux].')
-
         return o, args
 
     def flatten_test_suite(suite):
@@ -128,18 +118,12 @@ if __name__ == '__main__':
 
         all_test_suites = unittest.defaultTestLoader.discover(start_dir='test')
 
-        vim = None
-        if not options.clone_plugins:
-            if platform.system() == 'Windows':
-                raise RuntimeError(
-                    'TODO: TestSuite is broken under windows. Volunteers wanted!.')
-                # vim = VimInterfaceWindows()
-                vim.focus()
-            else:
-                if options.interface == 'screen':
-                    vim = VimInterfaceScreen(options.session)
-                elif options.interface == 'tmux':
-                    vim = VimInterfaceTmux(options.session)
+        vim = VimInterfaceTmux(options.session)
+        if not options.clone_plugins and platform.system() == 'Windows':
+            raise RuntimeError(
+                'TODO: TestSuite is broken under windows. Volunteers wanted!.')
+            # vim = VimInterfaceWindows()
+            # vim.focus()
 
         all_other_plugins = set()
 
