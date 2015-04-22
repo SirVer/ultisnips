@@ -50,9 +50,6 @@ repeat_transiently_failing_command () {
    set -e
 }
 
-# Clone the dependent plugins we want to use.
-./test_all.py --clone-plugins
-
 # Install tmux (> 1.8) and vim. 
 repeat_transiently_failing_command "add-apt-repository ppa:kalakris/tmux -y"
 repeat_transiently_failing_command "apt-get update -qq"
@@ -69,3 +66,6 @@ fi
 ln -sf /home/travis/bin/vim /usr/bin/vim
 
 vim --version
+
+# Clone the dependent plugins we want to use.
+./test_all.py --clone-plugins
