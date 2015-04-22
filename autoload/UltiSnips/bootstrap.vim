@@ -11,7 +11,9 @@ function! UltiSnips#bootstrap#Bootstrap()
        if !has("python3")
            if !has("python")
                if !exists("g:UltiSnipsNoPythonWarning")
-                   echo  "UltiSnips requires py >= 2.7 or any py3"
+                   echohl WarningMsg
+                   echom  "UltiSnips requires py >= 2.7 or any py3"
+                   echohl None
                endif
                unlet g:_uspy
                return
@@ -20,10 +22,18 @@ function! UltiSnips#bootstrap#Bootstrap()
        endif
        let g:UltiSnipsUsePythonVersion = "<tab>"
    else
-       if g:UltiSnipsUsePythonVersion == 2
-           let g:_uspy=":py "
-       else
-           let g:_uspy=":py3 "
+       " Use user-provided value, but check if it's available.
+       " This uses `has()`, because e.g. `exists(":python3")` is always 2.
+       if g:UltiSnipsUsePythonVersion == 2 && has('python')
+           let g:_uspy=":python "
+       elseif g:UltiSnipsUsePythonVersion == 3 && has('python3')
+           let g:_uspy=":python3 "
+       endif
+       if !exists('g:_uspy')
+           echohl WarningMsg
+           echom  "UltiSnips: the Python version from g:UltiSnipsUsePythonVersion (".g:UltiSnipsUsePythonVersion.") is not available."
+           echohl None
+           return
        endif
    endif
 
