@@ -6,8 +6,8 @@ from test.constant import *
 
 class Undo_RemoveMultilineSnippet(_VimTest):
     snippets = ('test', 'Hello\naaa ${1} bbb\nWorld')
-    keys = 'test' + EX + ESC + 'u' + 'inothing'
-    wanted = 'nothing'
+    keys = 'test' + EX + ESC + 'u'
+    wanted = 'test'
 
 
 class Undo_RemoveEditInTabstop(_VimTest):
@@ -19,15 +19,43 @@ class Undo_RemoveEditInTabstop(_VimTest):
 class Undo_RemoveWholeSnippet(_VimTest):
     snippets = ('test', 'Hello\n${1:Hello}World')
     keys = 'first line\n\n\n\n\n\nthird line' + \
-        ESC + '3k0itest' + EX + ESC + 'uiupsy'
-    wanted = 'first line\n\n\nupsy\n\n\nthird line'
+        ESC + '3k0itest' + EX + ESC + 'u6j'
+    wanted = 'first line\n\n\ntest\n\n\nthird line'
+
+
+class Undo_RemoveOneSnippetByTime(_VimTest):
+    snippets = ('i', 'if:\n\t$1')
+    keys = 'i' + EX + 'i' + EX + ESC + 'u'
+    wanted = 'if:\n\ti'
+
+
+class Undo_RemoveOneSnippetByTime2(_VimTest):
+    snippets = ('i', 'if:\n\t$1')
+    keys = 'i' + EX + 'i' + EX + ESC + 'uu'
+    wanted = 'if:\n\t'
+
+
+class Undo_ChangesInPlaceholder(_VimTest):
+    snippets = ('i', 'if $1:\n\t$2')
+    keys = 'i' + EX + 'asd' + JF + ESC + 'u'
+    wanted = 'if :\n\t'
+
+
+class Undo_CompletelyUndoSnippet(_VimTest):
+    snippets = ('i', 'if $1:\n\t$2')
+    # undo 'feh'
+    # undo 'asd'
+    # undo snippet expansion
+    # undo entering of 'i'
+    keys = 'i' + EX + 'asd' + JF + 'feh' + ESC + 'uuuu'
+    wanted = ''
 
 
 class JumpForward_DefSnippet(_VimTest):
     snippets = (
         'test',
         "${1}\n`!p snip.rv = '\\n'.join(t[1].split())`\n\n${0:pass}")
-    keys = 'test' + EX + 'a b c' + JF + 'shallnot'
+    keys = 'test' + EX+ 'a b c' + JF + 'shallnot'
     wanted = 'a b c\na\nb\nc\n\nshallnot'
 
 
@@ -39,8 +67,8 @@ class DeleteSnippetInsertion0(_VimTest):
 
 class DeleteSnippetInsertion1(_VimTest):
     snippets = ('test', r"$1${1/(.*)/(?0::.)/}")
-    keys = 'test' + EX + ESC + 'u' + 'i' + JF + '\t'
-    wanted = '\t'
+    keys = 'test' + EX + ESC + 'u'
+    wanted = 'test'
 # End: Undo of Snippet insertion  #}}}
 
 # Normal mode editing  {{{#
