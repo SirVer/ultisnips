@@ -114,6 +114,7 @@ class SnippetManager(object):
         if not self._jump():
             _vim.command('let g:ulti_jump_forwards_res = 0')
             return self._handle_failure(self.forward_trigger)
+        _vim.command('let &undolevels = &undolevels')
 
     @err_to_scratch_buffer
     def jump_backwards(self):
@@ -122,6 +123,7 @@ class SnippetManager(object):
         if not self._jump(True):
             _vim.command('let g:ulti_jump_backwards_res = 0')
             return self._handle_failure(self.backward_trigger)
+        _vim.command('let &undolevels = &undolevels')
 
     @err_to_scratch_buffer
     def expand(self):
@@ -568,6 +570,7 @@ class SnippetManager(object):
 
     def _try_expand(self):
         """Try to expand a snippet in the current place."""
+        _vim.command('let &undolevels = &undolevels')
         before = _vim.buf.line_till_cursor
         if not before:
             return False
@@ -582,6 +585,7 @@ class SnippetManager(object):
             if not snippet:
                 return True
         self._do_snippet(snippet, before)
+        _vim.command('let &undolevels = &undolevels')
         return True
 
     @property
