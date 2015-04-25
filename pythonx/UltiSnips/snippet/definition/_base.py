@@ -104,9 +104,7 @@ class SnippetDefinition(object):
             'column': current.window.cursor[1],
             'cursor': current.window.cursor,
         }
-
         exec(code, locals)
-
         return context["match"]
 
     def has_option(self, opt):
@@ -142,7 +140,7 @@ class SnippetDefinition(object):
 
     @property
     def context(self):
-        """Returns matched context."""
+        """The matched context."""
         return self._context
 
     def matches(self, trigger):

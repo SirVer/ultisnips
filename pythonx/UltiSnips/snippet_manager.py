@@ -476,7 +476,6 @@ class SnippetManager(object):
         elif feedkey:
             _vim.command('return %s' % _vim.escape(feedkey))
 
-    @err_to_scratch_buffer
     def _snips(self, before, partial):
         """Returns all the snippets for the given text before the cursor.
 
