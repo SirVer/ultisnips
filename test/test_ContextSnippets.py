@@ -85,3 +85,19 @@ class ContextSnippets_SnippetPriority(_VimTest):
         if true {
             // pass
         }"""
+
+
+class ContextSnippets_PriorityKeyword(_VimTest):
+    files = { 'us/all.snippets': r"""
+        snippet i "desc" "True" e
+        a
+        endsnippet
+
+        priority 100
+        snippet i
+        b
+        endsnippet
+        """}
+
+    keys = "i" + EX
+    wanted = "b"

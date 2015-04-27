@@ -1333,10 +1333,8 @@ endsnippet
 That snippet will expand to 'return err' only if the previous line is starting
 from 'if err' prefix.
 
-Note: context snippets prioritized over non-context ones. So, if there are
-two snippets with the same trigger, and one of them is context snippet and
-it's expression evaluates to 'True', then context snippet will be used for
-expansion and first will be ignored.
+Note: context snippets prioritized over non-context ones. It makes possible to
+use non-context snippets as fallback, if no context matched:
 
 ------------------- SNIP -------------------
 snippet i "if ..." b
