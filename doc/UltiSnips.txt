@@ -1353,7 +1353,7 @@ endsnippet
 That snippet will expand into 'if err != nil' if previous line will
 match 'err :=' prefix, otherwise the default 'if' snippet will be expanded.
 
-It's good idea to move context conditions to a separate module, so it can be
+It's a good idea to move context conditions to a separate module, so it can be
 used by other UltiSnips users. In that case, module should be imported
 using 'global' keyword, like this:
 
