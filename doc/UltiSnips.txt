@@ -36,6 +36,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       4.7.1 Replacement String                  |UltiSnips-replacement-string|
       4.7.2 Demos                               |UltiSnips-demos|
    4.8 Clearing snippets                        |UltiSnips-clearing-snippets|
+   4.9 Context snippets                         |UltiSnips-context-snippets|
 5. UltiSnips and Other Plugins                  |UltiSnips-other-plugins|
    5.1 Existing Integrations                    |UltiSnips-integrations|
    5.2 Extending UltiSnips                      |UltiSnips-extending|
@@ -653,6 +654,11 @@ The options currently supported are: >
        Without this option empty lines in snippets definition will have
        indentation too.
 
+   e   Context snippets - With this option expansion of snippet can be
+       controlled not only by previous characters in line, but by any given
+       python expression. This option can be specified along with other
+       options, like 'b'. See |UltiSnips-context-snippets| for more info.
+
 The end line is the 'endsnippet' keyword on a line by itself. >
 
    endsnippet
@@ -813,11 +819,12 @@ output is ignored.
 
 The variables automatically defined in python code are: >
 
-   fn   - The current filename
-   path - The complete path to the current file
-   t    - The values of the placeholders, t[1] is the text of ${1}, and so on
-   snip - UltiSnips.TextObjects.SnippetUtil object instance. Has methods that
-          simplify indentation handling.
+   fn      - The current filename
+   path    - The complete path to the current file
+   t       - The values of the placeholders, t[1] is the text of ${1}, etc.
+   snip    - UltiSnips.TextObjects.SnippetUtil object instance. Has methods
+             that simplify indentation handling.
+   context - Result of context condition. See |UltiSnips-context-snippets|.
 
 The 'snip' object provides the following methods: >
 
@@ -1292,6 +1299,95 @@ snippets 'trigger1' and 'trigger2'.
 ------------------- SNIP -------------------
 clearsnippets trigger1 trigger2
 ------------------- SNAP -------------------
+
+
+4.9 Context snippets                            *UltiSnips-context-snippets*
+
+Context snippets can be enabled by using 'e' option in snippet definition.
+
+In that case snippet should be defined using this syntax: >
+
+    snippet tab_trigger "description" "expression" options
+
+The 'expression' can be any python expression. If 'expression' evaluates to
+'True', then this snippet will be chosen for expansion. The 'expression' must
+be wrapped with double-quotes.
+
+The following python modules are automatically imported into the scope before
+'expression' is evaluated: 're', 'os', 'vim', 'string', 'random'.
+
+Also, the following variables are defined:
+    'window' - alias for 'vim.current.window'
+    'buffer' - alias for 'vim.current.window.buffer'
+    'cursor' - alias for 'vim.current.cursor'
+    'line' and 'column' - aliases for cursor position
+
+Keep in mind, that lines in vim numbered from 1, and lists in python starts
+from 0, so to access the current line you need to use 'line-1'.
+
+------------------- SNIP -------------------
+snippet r "return" "re.match('^\s+if err ', buffer[line-2])" be
+return err
+endsnippet
+------------------- SNAP -------------------
+
+That snippet will expand to 'return err' only if the previous line is starting
+from 'if err' prefix.
+
+Note: context snippets prioritized over non-context ones. It makes possible to
+use non-context snippets as fallback, if no context matched:
+
+------------------- SNIP -------------------
+snippet i "if ..." b
+if $1 {
+    $2
+}
+endsnippet
+
+snippet i "if err != nil" "re.match('^\s+[^=]*err\s*:?=', buffer[line-2])" be
+if err != nil {
+    $1
+}
+endsnippet
+------------------- SNAP -------------------
+
+That snippet will expand into 'if err != nil' if previous line will
+match 'err :=' prefix, otherwise the default 'if' snippet will be expanded.
+
+It's a good idea to move context conditions to a separate module, so it can be
+used by other UltiSnips users. In that case, module should be imported
+using 'global' keyword, like this:
+
+------------------- SNIP -------------------
+global !p
+import my_utils
+endglobal
+
+snippet , "return ..., nil/err" "my_utils.is_return_argument(buffer, line, column)" ie
+, `!p if my_utils.is_in_err_condition():
+    snip.rv = "err"
+else:
+    snip.rv = "nil"`
+endsnippet
+------------------- SNAP -------------------
+
+That snippet will expand only if the cursor is located in the return statement,
+and then it will expand either to 'err' or to 'nil' depending on which 'if'
+statement it's located. 'is_return_argument' and 'is_in_err_condition' are
+part of custom python module which is called 'my_utils' in this example.
+
+Context condition can return any value which python can use as condition in
+it's 'if' statement, and if it's considered 'True', then snippet will be
+expanded. The evaluated value of 'condition' is available in the 'context'
+variable inside the snippet:
+
+------------------- SNIP -------------------
+snippet + "var +=" "re.match('\s*(.*?)\s*:?=', buffer[line-2])" ie
+`!p snip.rv = context.group(1)` += $1
+endsnippet
+------------------- SNAP -------------------
+
+That snippet will expand to 'var1 +=' after line, which begins from 'var1 :='.
 
 
 ==============================================================================

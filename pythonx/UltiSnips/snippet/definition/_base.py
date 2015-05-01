@@ -5,6 +5,8 @@
 
 import re
 
+import vim
+
 from UltiSnips import _vim
 from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
@@ -43,7 +45,7 @@ class SnippetDefinition(object):
     _TABS = re.compile(r"^\t*")
 
     def __init__(self, priority, trigger, value, description,
-                 options, globals, location):
+                 options, globals, location, context):
         self._priority = int(priority)
         self._trigger = as_unicode(trigger)
         self._value = as_unicode(value)
@@ -53,6 +55,8 @@ class SnippetDefinition(object):
         self._last_re = None
         self._globals = globals
         self._location = location
+        self._context_code = context
+        self._context = None
 
         # Make sure that we actually match our trigger in case we are
         # immediately expanded.
@@ -77,6 +81,31 @@ class SnippetDefinition(object):
             self._last_re = match
             return match
         return False
+
+    def _context_match(self):
+        current = vim.current
+        # skip on empty buffer
+        if len(current.buffer) == 1 and current.buffer[0] == "":
+            return
+
+        code = "\n".join([
+            'import re, os, vim, string, random',
+            '\n'.join(self._globals.get('!p', [])).replace('\r\n', '\n'),
+            'context["match"] = ' + self._context_code,
+            ''
+        ])
+
+        context = {'match': False}
+        locals = {
+            'context': context,
+            'window': current.window,
+            'buffer': current.buffer,
+            'line': current.window.cursor[0],
+            'column': current.window.cursor[1],
+            'cursor': current.window.cursor,
+        }
+        exec(code, locals)
+        return context["match"]
 
     def has_option(self, opt):
         """Check if the named option is set."""
@@ -108,6 +137,11 @@ class SnippetDefinition(object):
     def location(self):
         """Where this snippet was defined."""
         return self._location
+
+    @property
+    def context(self):
+        """The matched context."""
+        return self._context
 
     def matches(self, trigger):
         """Returns True if this snippet matches 'trigger'."""
@@ -152,6 +186,12 @@ class SnippetDefinition(object):
             if text_before.strip(' \t') != '':
                 self._matched = ''
                 return False
+
+        if match and self._context_code:
+            self._context = self._context_match()
+            if not self.context:
+                match = False
+
         return match
 
     def could_match(self, trigger):
@@ -236,7 +276,8 @@ class SnippetDefinition(object):
 
         snippet_instance = SnippetInstance(
             self, parent, initial_text, start, end, visual_content,
-            last_re=self._last_re, globals=self._globals)
+            last_re=self._last_re, globals=self._globals,
+            context=self._context)
         self.instantiate(snippet_instance, initial_text, indent)
 
         snippet_instance.update_textobjects()
