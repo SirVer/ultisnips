@@ -113,3 +113,15 @@ class ContextSnippets_ReportError(_VimTest):
     keys = "e" + EX
     wanted = "e" + EX
     expected_error = r"NameError: name 'Tru' is not defined"
+
+
+class ContextSnippets_ReportErrorOnIndexOutOfRange(_VimTest):
+    files = { 'us/all.snippets': r"""
+        snippet e "desc" "buffer[123]" e
+        error
+        endsnippet
+        """}
+
+    keys = "e" + EX
+    wanted = "e" + EX
+    expected_error = r"IndexError: line number out of range"
