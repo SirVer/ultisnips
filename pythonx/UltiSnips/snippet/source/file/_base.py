@@ -69,8 +69,12 @@ class SnippetFileSource(SnippetSource):
         if ft in self._snippets:
             del self._snippets[ft]
             del self._extends[ft]
-        for fn in self._files_for_ft[ft]:
-            self._parse_snippets(ft, fn)
+        try:
+            for fn in self._files_for_ft[ft]:
+                self._parse_snippets(ft, fn)
+        except:
+            del self._files_for_ft[ft]
+            raise
         # Now load for the parents
         for parent_ft in self.get_deep_extends([ft]):
             if parent_ft != ft and self._needs_update(parent_ft):

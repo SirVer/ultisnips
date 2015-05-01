@@ -101,3 +101,15 @@ class ContextSnippets_PriorityKeyword(_VimTest):
 
     keys = "i" + EX
     wanted = "b"
+
+
+class ContextSnippets_ReportError(_VimTest):
+    files = { 'us/all.snippets': r"""
+        snippet e "desc" "Tru" e
+        error
+        endsnippet
+        """}
+
+    keys = "e" + EX
+    wanted = "e" + EX
+    expected_error = r"NameError: name 'Tru' is not defined"
