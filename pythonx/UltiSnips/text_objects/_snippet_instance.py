@@ -30,6 +30,7 @@ class SnippetInstance(EditableTextObject):
         self.snippet = snippet
         self._cts = 0
 
+        self.context = context
         self.locals = {'match': last_re, 'context': context}
         self.globals = globals
         self.visual_content = visual_content
@@ -129,6 +130,9 @@ class SnippetInstance(EditableTextObject):
         rv = EditableTextObject._get_tabstop(self, requester, no)
         self._parent = cached_parent
         return rv
+
+    def get_tabstops(self):
+        return self._tabstops
 
 
 class _VimCursor(NoneditableTextObject):

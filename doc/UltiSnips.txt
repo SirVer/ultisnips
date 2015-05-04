@@ -38,6 +38,10 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       4.7.2 Demos                               |UltiSnips-demos|
    4.8 Clearing snippets                        |UltiSnips-clearing-snippets|
    4.9 Context snippets                         |UltiSnips-context-snippets|
+   4.10 Snippet actions                         |UltiSnips-snippet-actions|
+      4.10.1 Pre-expand actions                 |UltiSnips-pre-expand-actions|
+      4.10.2 Post-expand actions                |UltiSnips-post-expand-actions|
+      4.10.3 Post-jump actions                  |UltiSnips-post-jump-actions|
 5. UltiSnips and Other Plugins                  |UltiSnips-other-plugins|
    5.1 Existing Integrations                    |UltiSnips-integrations|
    5.2 Extending UltiSnips                      |UltiSnips-extending|
@@ -1416,6 +1420,179 @@ endsnippet
 
 That snippet will expand to 'var1 +=' after line, which begins from 'var1 :='.
 
+
+4.10 Snippets actions                             *UltiSnips-snippets-actions*
+---------------------
+
+Snippet actions is an arbitrary python code which can be executed at specific
+points in lifetime of the snippet.
+
+There are three types of actions:
+
+* Pre-expand - invoked just after trigger condition was matched, but before
+  snippet actually expanded;
+* Post-expand - invoked after snippet was expanded and interpolations
+  was applied for the first time, but before jump on the first placeholder.
+* Jump - invoked just after jump to the next/prev placeholder.
+
+Specified code will be evaluated at stages defined above and same global
+variables and modules will be available that are stated in
+the *UltiSnips-context-snippets* section.
+
+Note: special variable called 'buffer' should be used for all buffer
+modifications. Not 'vim.current.buffer' and not 'vim.command("...")', because
+of in that case UltiSnips will not be able to track changes buffer from
+actions.
+
+4.10.1 Pre-expand actions                       *UltiSnips-pre-expand-actions*
+
+Pre-expand actions can be used to match snippet in one location and then
+expand it in the different location. Some useful cases are: correcting
+indentation for snippet; expanding snippet for function declaration in another
+function body with moving expansion point beyond initial function; performing
+extract method refactoring via expanding snippet in different place.
+
+Pre-expand action declared as follows: >
+    pre_expand "python code here"
+    snippet ...
+    endsnippet
+
+Buffer can be modified in pre-expand action code through variable called
+'buffer', snippet expansion position will be automatically adjusted.
+
+If cursor line (where trigger was matched) need to be modified, then special
+variable named 'new_cursor' must be set to the desired cursor position. In
+that case UltiSnips will not remove any matched trigger text and it should
+be done manually in action code.
+
+To addition to the scope variables defined above 'visual_content' will be also
+declared and will contain text that was selected before snippet expansion
+(similar to $VISUAL placeholder).
+
+Following snippet will be expanded at 4 spaces indentation level no matter
+where it was triggered.
+
+------------------- SNIP -------------------
+pre_expand "buffer[line] = ' '*4; new_cursor = (line, 4)"
+snippet d
+def $1():
+    $0
+endsnippet
+------------------- SNAP -------------------
+
+Following snippet will move the selected code to the end of file and create
+new method definition for it:
+
+------------------- SNIP -------------------
+pre_expand "del buffer[line]; buffer.append(''); new_cursor = (len(buffer)-1, 0)"
+snippet x
+def $1():
+	${2:${VISUAL}}
+endsnippet
+------------------- SNAP -------------------
+
+4.10.2 Post-expand actions                     *UltiSnips-post-expand-actions*
+
+Post-expand actions can be used to perform some actions based on the expanded
+snippet text. Some cases are: code style formatting (e.g. inserting newlines
+before and after method declaration), apply actions depending on python
+interpolation result.
+
+Post-expand action declared as follows: >
+    post_expand "python code here"
+    snippet ...
+    endsnippet
+
+Buffer can be modified in post-expand action code through variable called
+'buffer', snippet expansion position will be automatically adjusted.
+
+Variables 'snippet_start' and 'snippet_end' will be defined at the action code
+scope and will point to positions of the start and end of expanded snippet
+accordingly in the form '(line, column)'.
+
+Note: 'snippet_start' and 'snippet_end' will automatically adjust to the
+correct positions if post-action will insert or delete lines before expansion.
+
+Following snippet will expand to method definition and automatically insert
+additional newline after end of the snippet. It's very useful to create a
+function that will insert as many newlines as required in specific context.
+
+------------------- SNIP -------------------
+post_expand "buffer[snippet_end[0]+1:snippet_end[0]+1] = ['']"
+snippet d "Description" b
+def $1():
+	$2
+endsnippet
+------------------- SNAP -------------------
+
+4.10.3 Post-jump actions                         *UltiSnips-post-jump-actions*
+
+Post-jump actions can be used to trigger some code based on user input into
+the placeholders. Notable use cases: expand another snippet after jump or
+anonymous snippet after last jump (e.g. perform move method refactoring and
+then insert new method invokation); insert heading into TOC after last jump.
+
+Jump-expand action declared as follows: >
+    post_jump "python code here"
+    snippet ...
+    endsnippet
+
+Buffer can be modified in post-expand action code through variable called
+'buffer', snippet expansion position will be automatically adjusted.
+
+Next variables will be also defined in the action code scope:
+* 'tabstop' - number of tabstop jumped onto;
+* 'jump_direction' - '1' if jumped forward and '-1' otherwise;
+* 'tabstops' - list with tabstop objects, see above;
+* 'snippet_start' - (line, column) of start of the expanded snippet;
+* 'snippet_end' - (line, column) of end of the expanded snippet;
+
+Tabstop object has several useful properties:
+* 'start' - (line, column) of the starting position of the tabstop (also
+  accessible as 'tabstop.line' and 'tabstop.col').
+* 'end' - (line, column) of the ending position;
+* 'current_text' - text inside the tabstop.
+
+Following snippet will insert section in the Table of Contents in the vim-help
+file:
+
+------------------- SNIP -------------------
+post_jump "if tabstop == 0: insert_toc_item(tabstops[1], buffer)"
+snippet s "section" b
+`!p insert_delimiter_0(snip, t)`$1`!p insert_section_title(snip, t)`
+`!p insert_delimiter_1(snip, t)`
+$0
+endsnippet
+------------------- SNAP -------------------
+
+'insert_toc_item' will be called after first jump and will add newly entered
+section into the TOC for current file.
+
+Note: It is also possible to trigger snippet expansion from the jump action.
+In that case 'new_cursor' should be set to special value named '"keep"', so
+UltiSnips will know that cursor is already at the required position.
+
+Following example will insert method call at the end of file after user jump
+out of method declaration snippet.
+
+------------------- SNIP -------------------
+global !p
+from UltiSnips import UltiSnips_Manager
+
+def insert_method_call(name):
+	global new_cursor
+
+	vim.command('normal G')
+	UltiSnips_Manager.expand_anon(name + '($1)\n')
+	new_cursor = 'keep'
+endglobal
+
+post_jump "if tabstop == 0: insert_method_call(tabstops[1].current_text)"
+snippet d "method declaration" b
+def $1():
+	$2
+endsnippet
+------------------- SNAP -------------------
 
 ==============================================================================
 5. UltiSnips and Other Plugins                      *UltiSnips-other-plugins*
