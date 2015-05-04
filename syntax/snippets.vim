@@ -47,10 +47,10 @@ syn match snipExtendsKeyword "^extends" contained display
 
 " snippet {{{3
 
-syn region snipSnippet start="^snippet\_s" end="^\zeendsnippet\s*$" contains=snipSnippetHeader nextgroup=snipSnippetFooter fold keepend
+syn region snipSnippet start="^snippet\_s" end="^endsnippet\s*$" contains=snipSnippetHeader fold keepend
 syn match snipSnippetHeader "^.*$" nextgroup=snipSnippetBody,snipSnippetFooter skipnl contained contains=snipSnippetHeaderKeyword
 syn match snipSnippetHeaderKeyword "^snippet" contained nextgroup=snipSnippetTrigger skipwhite
-syn region snipSnippetBody start="\_." end="^\zeendsnippet\s*$" contained contains=snipLeadingSpaces,@snipTokens
+syn region snipSnippetBody start="\_." end="^\zeendsnippet\s*$" contained nextgroup=snipSnippetFooter contains=snipLeadingSpaces,@snipTokens
 syn match snipSnippetFooter "^endsnippet.*" contained contains=snipSnippetFooterKeyword
 syn match snipSnippetFooterKeyword "^endsnippet" contained
 
