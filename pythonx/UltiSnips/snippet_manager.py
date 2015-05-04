@@ -205,19 +205,22 @@ class SnippetManager(object):
 
     @err_to_scratch_buffer
     def add_snippet(self, trigger, value, description,
-                    options, ft='all', priority=0, context=None):
+                    options, ft='all', priority=0, context=None, actions={}):
         """Add a snippet to the list of known snippets of the given 'ft'."""
         self._added_snippets_source.add_snippet(ft,
-                                                UltiSnipsSnippetDefinition(priority, trigger, value,
-                                                                           description, options, {}, 'added',
-                                                                           context))
+            UltiSnipsSnippetDefinition(priority, trigger, value,
+                                       description, options, {}, 'added',
+                                       context, actions))
 
     @err_to_scratch_buffer
-    def expand_anon(self, value, trigger='', description='', options='', context=None):
+    def expand_anon(
+        self, value, trigger='', description='', options='',
+        context=None, actions={}
+    ):
         """Expand an anonymous snippet right here."""
         before = _vim.buf.line_till_cursor
         snip = UltiSnipsSnippetDefinition(0, trigger, value, description,
-                                          options, {}, '', context)
+                                          options, {}, '', context, actions)
 
         if not trigger or snip.matches(before):
             self._do_snippet(snip, before)
@@ -274,6 +277,7 @@ class SnippetManager(object):
         self._vstate.remember_position()
         if _vim.eval('mode()') not in 'in':
             return
+
 
         if self._ignore_movements:
             self._ignore_movements = False
@@ -432,6 +436,18 @@ class SnippetManager(object):
     def _jump(self, backwards=False):
         """Helper method that does the actual jump."""
         jumped = False
+
+        # We need to remember current snippets stack here because of
+        # post-jump action on the last tabstop should be able to access
+        # snippet instance which is ended just now.
+        stack_for_post_jump = self._csnippets[:]
+
+        # we need to set 'onemore' there, because of limitations of the vim
+        # API regarding cursor movements; without that test
+        # 'CanExpandAnonSnippetInJumpActionWhileSelected' will fail
+        old_virtualedit = _vim.eval('&ve')
+        _vim.command('set ve=onemore')
+
         # If next tab has length 1 and the distance between itself and
         # self._ctab is 1 then there is 1 less CursorMove events.  We
         # cannot ignore next movement in such case.
@@ -450,18 +466,28 @@ class SnippetManager(object):
                     ntab_short_and_near = True
                 if ntab.number == 0:
                     self._current_snippet_is_done()
+                self._ctab = ntab
             else:
                 # This really shouldn't happen, because a snippet should
                 # have been popped when its final tabstop was used.
                 # Cleanup by removing current snippet and recursing.
                 self._current_snippet_is_done()
                 jumped = self._jump(backwards)
-            self._ctab = ntab
         if jumped:
             self._vstate.remember_position()
             self._vstate.remember_unnamed_register(self._ctab.current_text)
             if not ntab_short_and_near:
                 self._ignore_movements = True
+
+        if len(stack_for_post_jump) > 0 and ntab is not None:
+            stack_for_post_jump[0].snippet.do_post_jump(
+                ntab.number,
+                -1 if backwards else 1,
+                stack_for_post_jump
+            )
+
+        _vim.command('set ve=' + old_virtualedit)
+
         return jumped
 
     def _leaving_insert_mode(self):
@@ -562,6 +588,17 @@ class SnippetManager(object):
         if snippet.matched:
             text_before = before[:-len(snippet.matched)]
 
+        new_buffer, cursor_set_in_action = snippet.do_pre_expand(
+            self._visual_content.text,
+            self._csnippets
+        )
+
+        new_buffer.validate_buffer()
+
+        if cursor_set_in_action:
+            text_before = _vim.buf.line_till_cursor
+            before = _vim.buf.line_till_cursor
+
         if self._cs:
             start = Position(_vim.buf.cursor.line, len(text_before))
             end = Position(_vim.buf.cursor.line, len(before))
@@ -589,6 +626,12 @@ class SnippetManager(object):
         self._csnippets.append(si)
 
         si.update_textobjects()
+
+        new_buffer, _ = snippet.do_post_expand(
+            si._start, si._end, self._csnippets
+        )
+
+        new_buffer.validate_buffer()
 
         self._vstate.remember_buffer(self._csnippets[0])
 
