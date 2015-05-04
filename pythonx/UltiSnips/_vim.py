@@ -108,7 +108,18 @@ def feedkeys(keys, mode='n'):
     Mainly for convenience.
 
     """
-    command(as_unicode(r'call feedkeys("%s", "%s")') % (keys, mode))
+    if eval('mode()') == 'n':
+        if keys == 'a':
+            cursor_pos = get_cursor_pos()
+            cursor_pos[2] = int(cursor_pos[2]) + 1
+            set_cursor_from_pos(cursor_pos)
+        if keys in 'ai':
+            keys = 'startinsert'
+
+    if keys == 'startinsert':
+        command('startinsert')
+    else:
+        command(as_unicode(r'call feedkeys("%s", "%s")') % (keys, mode))
 
 
 def new_scratch_buffer(text):
@@ -137,13 +148,15 @@ def select(start, end):
     col = col2byte(start.line + 1, start.col)
     vim.current.window.cursor = start.line + 1, col
 
+    mode = eval('mode()')
+
     move_cmd = ''
-    if eval('mode()') != 'n':
+    if mode != 'n':
         move_cmd += r"\<Esc>"
 
     if start == end:
         # Zero Length Tabstops, use 'i' or 'a'.
-        if col == 0 or eval('mode()') not in 'i' and \
+        if col == 0 or mode not in 'i' and \
                 col < len(buf[start.line]):
             move_cmd += 'i'
         else:
@@ -164,6 +177,32 @@ def select(start, end):
             start.line + 1, start.col + 1)
     feedkeys(_LangMapTranslator().translate(move_cmd))
 
+def set_mark_from_pos(name, pos):
+    return _set_pos("'" + name, pos)
+
+def get_mark_pos(name):
+    return _get_pos("'" + name)
+
+def set_cursor_from_pos(pos):
+    return _set_pos('.', pos)
+
+def get_cursor_pos():
+    return _get_pos('.')
+
+def delete_mark(name):
+    try:
+        return command('delma ' + name)
+    except:
+        return False
+
+def _set_pos(name, pos):
+    return eval("setpos(\"{}\", {})".format(name, pos))
+
+def _get_pos(name):
+    return eval("getpos(\"{}\")".format(name))
+
+def _is_pos_zero(pos):
+    return ['0'] * 4 == pos or [0] == pos
 
 def _unmap_select_mode_mapping():
     """This function unmaps select mode mappings if so wished by the user.

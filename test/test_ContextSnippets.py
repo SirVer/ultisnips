@@ -50,7 +50,7 @@ class ContextSnippets_UseContext(_VimTest):
             return "< " + ins + " >"
         endglobal
 
-        snippet a "desc" "wrap(buffer[line-1])" e
+        snippet a "desc" "wrap(buffer[line])" e
         { `!p snip.rv = context` }
         endsnippet
         """}
@@ -60,7 +60,7 @@ class ContextSnippets_UseContext(_VimTest):
 
 class ContextSnippets_SnippetPriority(_VimTest):
     files = { 'us/all.snippets': r"""
-        snippet i "desc" "re.search('err :=', buffer[line-2])" e
+        snippet i "desc" "re.search('err :=', buffer[line-1])" e
         if err != nil {
             ${1:// pass}
         }
@@ -125,3 +125,14 @@ class ContextSnippets_ReportErrorOnIndexOutOfRange(_VimTest):
     keys = "e" + EX
     wanted = "e" + EX
     expected_error = r"IndexError: line number out of range"
+
+
+class ContextSnippets_CursorIsZeroBased(_VimTest):
+    files = { 'us/all.snippets': r"""
+        snippet e "desc" "cursor" e
+        `!p snip.rv = str(context)`
+        endsnippet
+        """}
+
+    keys = "e" + EX
+    wanted = "(2, 0)"

@@ -160,7 +160,7 @@ class MySnippetSource(SnippetSource):
       return [
           UltiSnipsSnippetDefinition(
               -100, "blumba", "this is a dynamic snippet", "", "", {}, "blub",
-              None)
+              None, {})
         ]
     return []
 """)

@@ -16,7 +16,7 @@ class SnipMateSnippetDefinition(SnippetDefinition):
     def __init__(self, trigger, value, description, location):
         SnippetDefinition.__init__(self, self.SNIPMATE_SNIPPET_PRIORITY,
                                    trigger, value, description, '', {}, location,
-                                   None)
+                                   None, {})
 
     def instantiate(self, snippet_instance, initial_text, indent):
         parse_and_instantiate(snippet_instance, initial_text, indent)
