@@ -1534,6 +1534,7 @@ individuals have contributed to UltiSnips (in chronological order):
    Pawel Palucki - ppalucki
    Dettorer - dettorer
    Zhao Jiarong - kawing-chiu
+   Ye Ding - dyng
 
 
 Thank you for your support.
