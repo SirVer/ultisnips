@@ -35,12 +35,13 @@ class VimBufferHelper:
                 lambda line: line.strip('\n'),
                 value
             )
-            map(self._apply_change, changes)
         else:
             changes = list(self._get_line_diff(key, self._buffer[key], value))
             self._buffer[key] = value
             self._buffer_copy[key] = value
-            map(self._apply_change, changes)
+
+        for change in changes:
+            self._apply_change(change)
 
     def __getitem__(self, key):
         if isinstance(key, slice):
