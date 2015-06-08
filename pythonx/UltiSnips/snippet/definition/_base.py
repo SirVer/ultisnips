@@ -12,6 +12,7 @@ from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text import escape
 from UltiSnips.text_objects import SnippetInstance
+from UltiSnips.text_objects._python_code import SnippetUtilForAction, SnippetUtilCursor
 from UltiSnips.position import Position
 from UltiSnips.buffer_helper import VimBufferHelper
 
@@ -90,7 +91,9 @@ class SnippetDefinition(object):
         if len(vim.current.buffer) == 1 and vim.current.buffer[0] == "":
             return
 
-        return self._eval_code('holder["result"] = ' + self._context_code)
+        return self._eval_code('snip.context = ' + self._context_code, {
+            'context': None
+        }).context
 
     def _eval_code(self, code, additional_locals={}):
         code = "\n".join([
@@ -104,19 +107,20 @@ class SnippetDefinition(object):
         holder = {'result': False}
 
         locals = {
-            'holder': holder,
             'window': current.window,
             'buffer': current.buffer,
             'line': current.window.cursor[0]-1,
             'column': current.window.cursor[1]-1,
-            'cursor': (current.window.cursor[0]-1, current.window.cursor[1]-1)
+            'cursor': SnippetUtilCursor(current.window.cursor)
         }
 
         locals.update(additional_locals)
 
-        exec(code, locals)
+        snip = SnippetUtilForAction(locals)
 
-        return holder["result"]
+        exec(code, {'snip': snip})
+
+        return snip
 
     def _execute_action(
         self,
@@ -132,22 +136,15 @@ class SnippetDefinition(object):
         cursor_line_before = _vim.buf.line_till_cursor
 
         locals = {
-            'new_cursor': None,
             'context': context,
         }
 
         locals.update(additional_locals)
 
-        new_cursor, new_context = self._eval_code(
-            action + "\nholder['result'] = (new_cursor, context)",
-            locals
-        )
+        snip = self._eval_code(action, locals)
 
-        cursor_set_in_action = False
-        if new_cursor:
-            if new_cursor != 'keep':
-                vim.current.window.cursor = (new_cursor[0]+1, new_cursor[1])
-            cursor_set_in_action = True
+        if snip.cursor.is_set():
+            vim.current.window.cursor = snip.cursor.to_vim_cursor()
         else:
             new_mark_pos = _vim.get_mark_pos(mark_to_use)
 
@@ -162,8 +159,8 @@ class SnippetDefinition(object):
 
             if cursor_invalid:
                 raise RuntimeError(
-                    'line under the cursor was modified, but "new_cursor" ' +
-                    'variable is not set; either set set "new_cursor" to ' +
+                    'line under the cursor was modified, but "snip.cursor" ' +
+                    'variable is not set; either set set "snip.cursor" to ' +
                     'new cursor position, or do not modify cursor line'
                 )
 
@@ -172,7 +169,8 @@ class SnippetDefinition(object):
                 _vim.delete_mark(mark_to_use)
             else:
                 _vim.set_mark_from_pos(mark_to_use, mark_pos)
-        return cursor_set_in_action, new_context
+
+        return snip
 
     def has_option(self, opt):
         """Check if the named option is set."""
@@ -318,13 +316,13 @@ class SnippetDefinition(object):
         if 'pre_expand' in self._actions:
             locals = {'buffer': buffer, 'visual_content': visual_content}
 
-            cursor_set_in_action, new_context = self._execute_action(
+            snip = self._execute_action(
                 self._actions['pre_expand'], self._context, locals
             )
 
-            self._context = new_context
+            self._context = snip.context
 
-            return buffer, cursor_set_in_action
+            return buffer, snip.cursor.is_set()
         else:
             return buffer, False
 
@@ -337,13 +335,13 @@ class SnippetDefinition(object):
                 'buffer': buffer
             }
 
-            cursor_set_in_action, new_context = self._execute_action(
+            snip = self._execute_action(
                 self._actions['post_expand'], snippets_stack[0].context, locals
             )
 
-            snippets_stack[0].context = new_context
+            snippets_stack[0].context = snip.context
 
-            return buffer, cursor_set_in_action
+            return buffer, snip.cursor.is_set()
         else:
             return buffer, False
 
@@ -354,6 +352,7 @@ class SnippetDefinition(object):
         if 'post_jump' in self._actions:
             start = snippets_stack[0].start
             end = snippets_stack[0].end
+
             locals = {
                 'tabstop': tabstop_number,
                 'jump_direction': jump_direction,
@@ -363,13 +362,13 @@ class SnippetDefinition(object):
                 'buffer': buffer
             }
 
-            cursor_set_in_action, new_context = self._execute_action(
+            snip = self._execute_action(
                 self._actions['post_jump'], snippets_stack[0].context, locals
             )
 
-            snippets_stack[0].context = new_context
+            snippets_stack[0].context = snip.context
 
-            return buffer, cursor_set_in_action
+            return buffer, snip.cursor.is_set()
         else:
             return buffer, (False, None)
 
