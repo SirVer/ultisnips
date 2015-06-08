@@ -8,17 +8,10 @@ class VimBufferHelper:
     def __init__(self, snippets_stack):
         self._snippets_stack = snippets_stack
         self._buffer = vim.current.buffer
-        self._buffer_copy = self._buffer[:]
+        self._change_tick = int(vim.eval("b:changedtick"))
 
     def is_buffer_changed_outside(self):
-        if len(self._buffer) != len(self._buffer_copy):
-            return True
-
-        for line_number in range(0, len(self._buffer_copy)):
-            if self._buffer[line_number] != self._buffer_copy[line_number]:
-                return True
-
-        return False
+        return self._change_tick != int(vim.eval("b:changedtick"))
 
     def validate_buffer(self):
         if self.is_buffer_changed_outside():
@@ -31,14 +24,11 @@ class VimBufferHelper:
         if isinstance(key, slice):
             changes = list(self._get_diff(key.start, key.stop, value))
             self._buffer[key.start:key.stop] = value
-            self._buffer_copy[key.start:key.stop] = map(
-                lambda line: line.strip('\n'),
-                value
-            )
         else:
             changes = list(self._get_line_diff(key, self._buffer[key], value))
             self._buffer[key] = value
-            self._buffer_copy[key] = value
+
+        self._change_tick += 1
 
         for change in changes:
             self._apply_change(change)
