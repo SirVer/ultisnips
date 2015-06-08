@@ -4,7 +4,7 @@ from test.constant import *
 
 class SnippetActions_PreActionModifiesBuffer(_VimTest):
     files = { 'us/all.snippets': r"""
-        pre_expand "buffer[line:line] = ['\n']"
+        pre_expand "snip.buffer[snip.line:snip.line] = ['\n']"
         snippet a "desc" "True" e
         abc
         endsnippet
@@ -15,7 +15,7 @@ class SnippetActions_PreActionModifiesBuffer(_VimTest):
 
 class SnippetActions_PostActionModifiesBuffer(_VimTest):
     files = { 'us/all.snippets': r"""
-        post_expand "buffer[line+1:line+1] = ['\n']"
+        post_expand "snip.buffer[snip.line+1:snip.line+1] = ['\n']"
         snippet a "desc" "True" e
         abc
         endsnippet
@@ -48,7 +48,7 @@ class SnippetActions_ErrorOnModificationSnippetLine(_VimTest):
 
 class SnippetActions_EnsureIndent(_VimTest):
     files = { 'us/all.snippets': r"""
-        pre_expand "buffer[line] = ' '*4; new_cursor = (cursor[0], 4)"
+        pre_expand "snip.buffer[snip.line] = ' '*4; snip.cursor[1] = 4"
         snippet i "desc" "True" e
         if:
             $1
@@ -65,11 +65,11 @@ class SnippetActions_PostActionCanUseSnippetRange(_VimTest):
     files = { 'us/all.snippets': r"""
         global !p
         def ensure_newlines(start, end):
-            buffer[start[0]:start[0]] = ['\n'] * 2
-            buffer[end[0]+1:end[0]+1] = ['\n'] * 1
+            snip.buffer[start[0]:start[0]] = ['\n'] * 2
+            snip.buffer[end[0]+1:end[0]+1] = ['\n'] * 1
         endglobal
 
-        post_expand "ensure_newlines(snippet_start, snippet_end)"
+        post_expand "ensure_newlines(snip.snippet_start, snip.snippet_end)"
         snippet i "desc"
         if
             $1
@@ -94,10 +94,10 @@ class SnippetActions_CanModifyParentBody(_VimTest):
     files = { 'us/all.snippets': r"""
         global !p
         def ensure_newlines(start, end):
-            buffer[start[0]:start[0]] = ['\n'] * 2
+            snip.buffer[start[0]:start[0]] = ['\n'] * 2
         endglobal
 
-        post_expand "ensure_newlines(snippet_start, snippet_end)"
+        post_expand "ensure_newlines(snip.snippet_start, snip.snippet_end)"
         snippet i "desc"
         if
             $1
@@ -127,7 +127,7 @@ class SnippetActions_MoveParentSnippetFromChildInPreAction(_VimTest):
     files = { 'us/all.snippets': r"""
         global !p
         def insert_import():
-            buffer[2:2] = ['import smthing', '']
+            snip.buffer[2:2] = ['import smthing', '']
         endglobal
 
         pre_expand "insert_import()"
@@ -156,13 +156,13 @@ end"""
 class SnippetActions_CanExpandSnippetInDifferentPlace(_VimTest):
     files = { 'us/all.snippets': r"""
         global !p
-        def expand_after_if():
-            global new_cursor
-            buffer[line] = buffer[line][:column] + buffer[line][column+1:]
-            new_cursor = (line, buffer[line].index('if ')+3)
+        def expand_after_if(snip):
+            snip.buffer[snip.line] = snip.buffer[snip.line][:snip.column] + \
+                snip.buffer[snip.line][snip.column+1:]
+            snip.cursor[1] = snip.buffer[snip.line].index('if ')+3
         endglobal
 
-        pre_expand "expand_after_if()"
+        pre_expand "expand_after_if(snip)"
         snippet n "append not to if" w
         not $0
         endsnippet
@@ -178,14 +178,13 @@ class SnippetActions_CanExpandSnippetInDifferentPlace(_VimTest):
 class SnippetActions_MoveVisual(_VimTest):
     files = { 'us/all.snippets': r"""
         global !p
-        def extract_method():
-            global new_cursor
-            del buffer[line]
-            buffer[len(buffer)-1:len(buffer)-1] = ['']
-            new_cursor = (len(buffer)-2, 0)
+        def extract_method(snip):
+            del snip.buffer[snip.line]
+            snip.buffer[len(snip.buffer)-1:len(snip.buffer)-1] = ['']
+            snip.cursor.set(len(snip.buffer)-2, 0)
         endglobal
 
-        pre_expand "extract_method()"
+        pre_expand "extract_method(snip)"
         snippet n "append not to if" w
         def $1:
             ${VISUAL}
@@ -210,7 +209,7 @@ def b:
 
 class SnippetActions_CanMirrorTabStopsOutsideOfSnippet(_VimTest):
     files = { 'us/all.snippets': r"""
-        post_jump "buffer[2] = 'debug({})'.format(tabstops[1].current_text)"
+        post_jump "snip.buffer[2] = 'debug({})'.format(snip.tabstops[1].current_text)"
         snippet i "desc"
         if $1:
             $2
@@ -228,14 +227,14 @@ if test(some(complex(cond(a)))):
 class SnippetActions_CanExpandAnonSnippetInJumpAction(_VimTest):
     files = { 'us/all.snippets': r"""
         global !p
-        def expand_anon():
-            if tabstop == 0:
+        def expand_anon(snip):
+            if snip.tabstop == 0:
                 from UltiSnips import UltiSnips_Manager
                 UltiSnips_Manager.expand_anon("a($2, $1)")
-                return 'keep'
+                snip.cursor.preserve()
         endglobal
 
-        post_jump "new_cursor = expand_anon()"
+        post_jump "expand_anon(snip)"
         snippet i "desc"
         if ${1:cond}:
             $0
@@ -249,14 +248,14 @@ class SnippetActions_CanExpandAnonSnippetInJumpAction(_VimTest):
 class SnippetActions_CanExpandAnonSnippetInJumpActionWhileSelected(_VimTest):
     files = { 'us/all.snippets': r"""
         global !p
-        def expand_anon():
-            if tabstop == 0:
+        def expand_anon(snip):
+            if snip.tabstop == 0:
                 from UltiSnips import UltiSnips_Manager
                 UltiSnips_Manager.expand_anon(" // a($2, $1)")
-                return 'keep'
+                snip.cursor.preserve()
         endglobal
 
-        post_jump "new_cursor = expand_anon()"
+        post_jump "expand_anon(snip)"
         snippet i "desc"
         if ${1:cond}:
             ${2:pass}
@@ -269,15 +268,7 @@ class SnippetActions_CanExpandAnonSnippetInJumpActionWhileSelected(_VimTest):
 
 class SnippetActions_CanUseContextFromContextMatch(_VimTest):
     files = { 'us/all.snippets': r"""
-        global !p
-        def expand_anon():
-            if tabstop == 0:
-                from UltiSnips import UltiSnips_Manager
-                UltiSnips_Manager.expand_anon(" // a($2, $1)")
-                return 'keep'
-        endglobal
-
-        pre_expand "buffer[line:line] = [context]"
+        pre_expand "snip.buffer[snip.line:snip.line] = [snip.context]"
         snippet i "desc" "'some context'" e
         body
         endsnippet

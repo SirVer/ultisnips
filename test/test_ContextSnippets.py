@@ -49,7 +49,7 @@ class ContextSnippets_UseContext(_VimTest):
             return "< " + ins + " >"
         endglobal
 
-        snippet a "desc" "wrap(buffer[line])" e
+        snippet a "desc" "wrap(snip.buffer[snip.line])" e
         { `!p snip.rv = context` }
         endsnippet
         """}
@@ -59,7 +59,7 @@ class ContextSnippets_UseContext(_VimTest):
 
 class ContextSnippets_SnippetPriority(_VimTest):
     files = { 'us/all.snippets': r"""
-        snippet i "desc" "re.search('err :=', buffer[line-1])" e
+        snippet i "desc" "re.search('err :=', snip.buffer[snip.line-1])" e
         if err != nil {
             ${1:// pass}
         }
@@ -119,7 +119,7 @@ class ContextSnippets_ReportErrorOnIndexOutOfRange(_VimTest):
     skip_if = lambda self: 'Bug in Neovim.' \
             if self.vim_flavor == 'neovim' else None
     files = { 'us/all.snippets': r"""
-        snippet e "desc" "buffer[123]" e
+        snippet e "desc" "snip.buffer[123]" e
         error
         endsnippet
         """}
@@ -131,10 +131,10 @@ class ContextSnippets_ReportErrorOnIndexOutOfRange(_VimTest):
 
 class ContextSnippets_CursorIsZeroBased(_VimTest):
     files = { 'us/all.snippets': r"""
-        snippet e "desc" "cursor" e
+        snippet e "desc" "snip.cursor" e
         `!p snip.rv = str(context)`
         endsnippet
         """}
 
     keys = "e" + EX
-    wanted = "(2, 0)"
+    wanted = "(2, 1)"
