@@ -132,7 +132,7 @@ class ContextSnippets_ReportErrorOnIndexOutOfRange(_VimTest):
 class ContextSnippets_CursorIsZeroBased(_VimTest):
     files = { 'us/all.snippets': r"""
         snippet e "desc" "snip.cursor" e
-        `!p snip.rv = str(context)`
+        `!p snip.rv = str(snip.context)`
         endsnippet
         """}
 
