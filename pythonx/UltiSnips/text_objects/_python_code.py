@@ -10,6 +10,7 @@ from UltiSnips import _vim
 from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text_objects._base import NoneditableTextObject
+import UltiSnips
 
 
 class _Tabs(object):
@@ -34,6 +35,10 @@ class SnippetUtilForAction(dict):
     def __init__(self, *args, **kwargs):
         super(SnippetUtilForAction, self).__init__(*args, **kwargs)
         self.__dict__ = self
+
+    def expand_anon(self, snippet):
+        UltiSnips.UltiSnips_Manager.expand_anon(snippet)
+        self.cursor.preserve()
 
 
 class SnippetUtilCursor(object):
@@ -80,11 +85,12 @@ class SnippetUtil(object):
 
     """
 
-    def __init__(self, initial_indent, vmode, vtext):
+    def __init__(self, initial_indent, vmode, vtext, context):
         self._ind = IndentUtil()
         self._visual = _VisualContent(vmode, vtext)
         self._initial_indent = self._ind.indent_to_spaces(initial_indent)
         self._reset('')
+        self._context = context
 
     def _reset(self, cur):
         """Gets the snippet ready for another update.
@@ -191,6 +197,10 @@ class SnippetUtil(object):
         """Content of visual expansions."""
         return self._visual
 
+    @property
+    def context(self):
+        return self._context
+
     def opt(self, option, default=None):  # pylint:disable=no-self-use
         """Gets a Vim variable."""
         if _vim.eval("exists('%s')" % option) == '1':
@@ -228,10 +238,11 @@ class PythonCode(NoneditableTextObject):
                 self._locals = snippet.locals
                 text = snippet.visual_content.text
                 mode = snippet.visual_content.mode
+                context = snippet.context
                 break
             except AttributeError:
                 snippet = snippet._parent  # pylint:disable=protected-access
-        self._snip = SnippetUtil(token.indent, mode, text)
+        self._snip = SnippetUtil(token.indent, mode, text, context)
 
         self._codes = ((
             'import re, os, vim, string, random',

@@ -14,7 +14,6 @@ from UltiSnips.text import escape
 from UltiSnips.text_objects import SnippetInstance
 from UltiSnips.text_objects._python_code import SnippetUtilForAction, SnippetUtilCursor
 from UltiSnips.position import Position
-from UltiSnips.buffer_helper import VimBufferHelper
 
 __WHITESPACE_SPLIT = re.compile(r"\s")
 def split_at_whitespace(string):
@@ -130,46 +129,40 @@ class SnippetDefinition(object):
         additional_locals={}
     ):
         mark_to_use = '`'
-        mark_pos = _vim.get_mark_pos(mark_to_use)
+        with _vim.save_mark(mark_to_use):
+            _vim.set_mark_from_pos(mark_to_use, _vim.get_cursor_pos())
 
-        _vim.set_mark_from_pos(mark_to_use, _vim.get_cursor_pos())
+            cursor_line_before = _vim.buf.line_till_cursor
 
-        cursor_line_before = _vim.buf.line_till_cursor
+            locals = {
+                'context': context,
+            }
 
-        locals = {
-            'context': context,
-        }
+            locals.update(additional_locals)
 
-        locals.update(additional_locals)
+            snip = self._eval_code(action, locals)
 
-        snip = self._eval_code(action, locals)
-
-        if snip.cursor.is_set():
-            vim.current.window.cursor = snip.cursor.to_vim_cursor()
-        else:
-            new_mark_pos = _vim.get_mark_pos(mark_to_use)
-
-            cursor_invalid = False
-
-            if _vim._is_pos_zero(new_mark_pos):
-                cursor_invalid = True
+            if snip.cursor.is_set():
+                vim.current.window.cursor = snip.cursor.to_vim_cursor()
             else:
-                _vim.set_cursor_from_pos(new_mark_pos)
-                if cursor_line_before != _vim.buf.line_till_cursor:
+                new_mark_pos = _vim.get_mark_pos(mark_to_use)
+
+                cursor_invalid = False
+
+                if _vim._is_pos_zero(new_mark_pos):
                     cursor_invalid = True
+                else:
+                    _vim.set_cursor_from_pos(new_mark_pos)
+                    if cursor_line_before != _vim.buf.line_till_cursor:
+                        cursor_invalid = True
 
-            if cursor_invalid:
-                raise RuntimeError(
-                    'line under the cursor was modified, but "snip.cursor" ' +
-                    'variable is not set; either set set "snip.cursor" to ' +
-                    'new cursor position, or do not modify cursor line'
-                )
-
-            # restore original mark position
-            if _vim._is_pos_zero(mark_pos):
-                _vim.delete_mark(mark_to_use)
-            else:
-                _vim.set_mark_from_pos(mark_to_use, mark_pos)
+                if cursor_invalid:
+                    raise RuntimeError(
+                        'line under the cursor was modified, but ' +
+                        '"snip.cursor" variable is not set; either set set ' +
+                        '"snip.cursor" to new cursor position, or do not ' +
+                        'modify cursor line'
+                    )
 
         return snip
 
@@ -309,9 +302,8 @@ class SnippetDefinition(object):
         raise NotImplementedError()
 
     def do_pre_expand(self, visual_content, snippets_stack):
-        buffer = VimBufferHelper(snippets_stack)
         if 'pre_expand' in self._actions:
-            locals = {'buffer': buffer, 'visual_content': visual_content}
+            locals = {'buffer': _vim.buf, 'visual_content': visual_content}
 
             snip = self._execute_action(
                 self._actions['pre_expand'], self._context, locals
@@ -319,55 +311,53 @@ class SnippetDefinition(object):
 
             self._context = snip.context
 
-            return buffer, snip.cursor.is_set()
+            return snip.cursor.is_set()
         else:
-            return buffer, False
+            return False
 
     def do_post_expand(self, start, end, snippets_stack):
-        buffer = VimBufferHelper(snippets_stack)
         if 'post_expand' in self._actions:
             locals = {
                 'snippet_start': start,
                 'snippet_end': end,
-                'buffer': buffer
+                'buffer': _vim.buf
             }
 
             snip = self._execute_action(
-                self._actions['post_expand'], snippets_stack[0].context, locals
+                self._actions['post_expand'], snippets_stack[-1].context, locals
             )
 
-            snippets_stack[0].context = snip.context
+            snippets_stack[-1].context = snip.context
 
-            return buffer, snip.cursor.is_set()
+            return snip.cursor.is_set()
         else:
-            return buffer, False
+            return False
 
     def do_post_jump(
         self, tabstop_number, jump_direction, snippets_stack
     ):
-        buffer = VimBufferHelper(snippets_stack)
         if 'post_jump' in self._actions:
-            start = snippets_stack[0].start
-            end = snippets_stack[0].end
+            start = snippets_stack[-1].start
+            end = snippets_stack[-1].end
 
             locals = {
                 'tabstop': tabstop_number,
                 'jump_direction': jump_direction,
-                'tabstops': snippets_stack[0].get_tabstops(),
+                'tabstops': snippets_stack[-1].get_tabstops(),
                 'snippet_start': start,
                 'snippet_end': end,
-                'buffer': buffer
+                'buffer': _vim.buf
             }
 
             snip = self._execute_action(
-                self._actions['post_jump'], snippets_stack[0].context, locals
+                self._actions['post_jump'], snippets_stack[-1].context, locals
             )
 
-            snippets_stack[0].context = snip.context
+            snippets_stack[-1].context = snip.context
 
-            return buffer, snip.cursor.is_set()
+            return snip.cursor.is_set()
         else:
-            return buffer, (False, None)
+            return False
 
 
     def launch(self, text_before, visual_content, parent, start, end):

@@ -229,9 +229,7 @@ class SnippetActions_CanExpandAnonSnippetInJumpAction(_VimTest):
         global !p
         def expand_anon(snip):
             if snip.tabstop == 0:
-                from UltiSnips import UltiSnips_Manager
-                UltiSnips_Manager.expand_anon("a($2, $1)")
-                snip.cursor.preserve()
+                snip.expand_anon("a($2, $1)")
         endglobal
 
         post_jump "expand_anon(snip)"
@@ -250,9 +248,7 @@ class SnippetActions_CanExpandAnonSnippetInJumpActionWhileSelected(_VimTest):
         global !p
         def expand_anon(snip):
             if snip.tabstop == 0:
-                from UltiSnips import UltiSnips_Manager
-                UltiSnips_Manager.expand_anon(" // a($2, $1)")
-                snip.cursor.preserve()
+                snip.expand_anon(" // a($2, $1)")
         endglobal
 
         post_jump "expand_anon(snip)"
@@ -276,3 +272,38 @@ class SnippetActions_CanUseContextFromContextMatch(_VimTest):
     keys = "i" + EX
     wanted = """some context
 body"""
+
+class SnippetActions_CanExpandAnonSnippetOnFirstJump(_VimTest):
+    files = { 'us/all.snippets': r"""
+        global !p
+        def expand_new_snippet_on_first_jump(snip):
+            if snip.tabstop == 1:
+                snip.expand_anon("some_check($1, $2, $3)")
+        endglobal
+
+        post_jump "expand_new_snippet_on_first_jump(snip)"
+        snippet "test" "test new features" "True" bwre
+        if $1: $2
+        endsnippet
+        """}
+    keys = "test" + EX + "1" + JF + "2" + JF + "3" + JF + " or 4" + JF + "5"
+    wanted = """if some_check(1, 2, 3) or 4: 5"""
+
+class SnippetActions_CanExpandAnonOnPreExpand(_VimTest):
+    files = { 'us/all.snippets': r"""
+        pre_expand "snip.buffer[snip.line] = ''; snip.expand_anon('totally_different($2, $1)')"
+        snippet test "test new features" wb
+        endsnippet
+        """}
+    keys = "test" + EX + "1" + JF + "2" + JF + "3"
+    wanted = """totally_different(2, 1)3"""
+
+class SnippetActions_CanEvenWrapSnippetInPreAction(_VimTest):
+    files = { 'us/all.snippets': r"""
+        pre_expand "snip.buffer[snip.line] = ''; snip.expand_anon('some_wrapper($1): $2')"
+        snippet test "test new features" wb
+        wrapme($2, $1)
+        endsnippet
+        """}
+    keys = "test" + EX + "1" + JF + "2" + JF + "3" + JF + "4"
+    wanted = """some_wrapper(wrapme(2, 1)3): 4"""
