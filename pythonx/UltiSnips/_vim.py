@@ -12,6 +12,8 @@ from UltiSnips.compatibility import col2byte, byte2col, \
     as_unicode, as_vimencoding
 from UltiSnips.position import Position
 
+from contextlib import contextmanager
+
 
 class VimBuffer(object):
 
@@ -71,6 +73,25 @@ class VimBuffer(object):
         vim.current.window.cursor = pos.line + 1, nbyte
 buf = VimBuffer()  # pylint:disable=invalid-name
 
+@contextmanager
+def toggle_opt(name, new_value):
+    old_value = eval('&' + name)
+    command('set {}={}'.format(name, new_value))
+    try:
+        yield
+    finally:
+        command('set {}={}'.format(name, old_value))
+
+@contextmanager
+def save_mark(name):
+    old_pos = get_mark_pos(name)
+    try:
+        yield
+    finally:
+        if _is_pos_zero(old_pos):
+            delete_mark(name)
+        else:
+            set_mark_from_pos(name, old_pos)
 
 def escape(inp):
     """Creates a vim-friendly string from a group of

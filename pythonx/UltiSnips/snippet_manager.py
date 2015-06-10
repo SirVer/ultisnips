@@ -18,6 +18,7 @@ from UltiSnips.snippet.source import UltiSnipsFileSource, SnipMateFileSource, \
     find_all_snippet_files, find_snippet_files, AddedSnippetsSource
 from UltiSnips.text import escape
 from UltiSnips.vim_state import VimState, VisualContentPreserver
+from UltiSnips.buffer_helper import use_proxy_buffer, suspend_proxy_edits
 
 
 def _ask_user(a, formatted):
@@ -409,59 +410,61 @@ class SnippetManager(object):
             self._unmap_inner_keys()
 
     def _jump(self, backwards=False):
-        """Helper method that does the actual jump."""
-        jumped = False
-
-        # We need to remember current snippets stack here because of
-        # post-jump action on the last tabstop should be able to access
-        # snippet instance which is ended just now.
-        stack_for_post_jump = self._csnippets[:]
-
         # we need to set 'onemore' there, because of limitations of the vim
         # API regarding cursor movements; without that test
         # 'CanExpandAnonSnippetInJumpActionWhileSelected' will fail
-        old_virtualedit = _vim.eval('&ve')
-        _vim.command('set ve=onemore')
+        with _vim.toggle_opt('ve', 'onemore'):
+            """Helper method that does the actual jump."""
+            jumped = False
 
-        # If next tab has length 1 and the distance between itself and
-        # self._ctab is 1 then there is 1 less CursorMove events.  We
-        # cannot ignore next movement in such case.
-        ntab_short_and_near = False
-        if self._cs:
-            ntab = self._cs.select_next_tab(backwards)
-            if ntab:
-                if self._cs.snippet.has_option('s'):
-                    lineno = _vim.buf.cursor.line
-                    _vim.buf[lineno] = _vim.buf[lineno].rstrip()
-                _vim.select(ntab.start, ntab.end)
-                jumped = True
-                if (self._ctab is not None
-                        and ntab.start - self._ctab.end == Position(0, 1)
-                        and ntab.end - ntab.start == Position(0, 1)):
-                    ntab_short_and_near = True
-                if ntab.number == 0:
+            # We need to remember current snippets stack here because of
+            # post-jump action on the last tabstop should be able to access
+            # snippet instance which is ended just now.
+            stack_for_post_jump = self._csnippets[:]
+
+            # If next tab has length 1 and the distance between itself and
+            # self._ctab is 1 then there is 1 less CursorMove events.  We
+            # cannot ignore next movement in such case.
+            ntab_short_and_near = False
+            if self._cs:
+                ntab = self._cs.select_next_tab(backwards)
+                if ntab:
+                    if self._cs.snippet.has_option('s'):
+                        lineno = _vim.buf.cursor.line
+                        _vim.buf[lineno] = _vim.buf[lineno].rstrip()
+                    _vim.select(ntab.start, ntab.end)
+                    jumped = True
+                    if (self._ctab is not None
+                            and ntab.start - self._ctab.end == Position(0, 1)
+                            and ntab.end - ntab.start == Position(0, 1)):
+                        ntab_short_and_near = True
+                    if ntab.number == 0:
+                        self._current_snippet_is_done()
+                    self._ctab = ntab
+                else:
+                    # This really shouldn't happen, because a snippet should
+                    # have been popped when its final tabstop was used.
+                    # Cleanup by removing current snippet and recursing.
                     self._current_snippet_is_done()
-                self._ctab = ntab
-            else:
-                # This really shouldn't happen, because a snippet should
-                # have been popped when its final tabstop was used.
-                # Cleanup by removing current snippet and recursing.
-                self._current_snippet_is_done()
-                jumped = self._jump(backwards)
-        if jumped:
-            self._vstate.remember_position()
-            self._vstate.remember_unnamed_register(self._ctab.current_text)
-            if not ntab_short_and_near:
-                self._ignore_movements = True
+                    jumped = self._jump(backwards)
+            if jumped:
+                self._vstate.remember_position()
+                self._vstate.remember_unnamed_register(self._ctab.current_text)
+                if not ntab_short_and_near:
+                    self._ignore_movements = True
 
-        if len(stack_for_post_jump) > 0 and ntab is not None:
-            stack_for_post_jump[0].snippet.do_post_jump(
-                ntab.number,
-                -1 if backwards else 1,
-                stack_for_post_jump
-            )
+            if len(stack_for_post_jump) > 0 and ntab is not None:
+                if self._cs:
+                    snippet_for_action = self._cs
+                else:
+                    snippet_for_action = stack_for_post_jump[-1]
 
-        _vim.command('set ve=' + old_virtualedit)
+                with use_proxy_buffer(stack_for_post_jump):
+                    snippet_for_action.snippet.do_post_jump(
+                        ntab.number,
+                        -1 if backwards else 1,
+                        stack_for_post_jump
+                    )
 
         return jumped
 
@@ -563,54 +566,59 @@ class SnippetManager(object):
         if snippet.matched:
             text_before = before[:-len(snippet.matched)]
 
-        new_buffer, cursor_set_in_action = snippet.do_pre_expand(
-            self._visual_content.text,
-            self._csnippets
-        )
-
-        new_buffer.validate_buffer()
+        with use_proxy_buffer(self._csnippets):
+            cursor_set_in_action = snippet.do_pre_expand(
+                self._visual_content.text,
+                self._csnippets
+            )
 
         if cursor_set_in_action:
             text_before = _vim.buf.line_till_cursor
             before = _vim.buf.line_till_cursor
 
-        if self._cs:
-            start = Position(_vim.buf.cursor.line, len(text_before))
-            end = Position(_vim.buf.cursor.line, len(before))
+        with suspend_proxy_edits():
+            if self._cs:
+                start = Position(_vim.buf.cursor.line, len(text_before))
+                end = Position(_vim.buf.cursor.line, len(before))
 
-            # It could be that our trigger contains the content of TextObjects
-            # in our containing snippet. If this is indeed the case, we have to
-            # make sure that those are properly killed. We do this by
-            # pretending that the user deleted and retyped the text that our
-            # trigger matched.
-            edit_actions = [
-                ('D', start.line, start.col, snippet.matched),
-                ('I', start.line, start.col, snippet.matched),
-            ]
-            self._csnippets[0].replay_user_edits(edit_actions)
+                # If cursor is set in pre-action, then action was modified
+                # cursor line, in that case we do not need to do any edits, it
+                # can break snippet
+                if not cursor_set_in_action:
+                    # It could be that our trigger contains the content of
+                    # TextObjects in our containing snippet. If this is indeed
+                    # the case, we have to make sure that those are properly
+                    # killed. We do this by pretending that the user deleted
+                    # and retyped the text that our trigger matched.
+                    edit_actions = [
+                        ('D', start.line, start.col, snippet.matched),
+                        ('I', start.line, start.col, snippet.matched),
+                    ]
+                    self._csnippets[0].replay_user_edits(edit_actions)
 
-            si = snippet.launch(text_before, self._visual_content,
-                                self._cs.find_parent_for_new_to(start), start, end)
-        else:
-            start = Position(_vim.buf.cursor.line, len(text_before))
-            end = Position(_vim.buf.cursor.line, len(before))
-            si = snippet.launch(text_before, self._visual_content,
-                                None, start, end)
+                si = snippet.launch(text_before, self._visual_content,
+                    self._cs.find_parent_for_new_to(start),
+                    start, end
+                )
+            else:
+                start = Position(_vim.buf.cursor.line, len(text_before))
+                end = Position(_vim.buf.cursor.line, len(before))
+                si = snippet.launch(text_before, self._visual_content,
+                                    None, start, end)
 
-        self._visual_content.reset()
-        self._csnippets.append(si)
+            self._visual_content.reset()
+            self._csnippets.append(si)
 
-        si.update_textobjects()
+            si.update_textobjects()
 
-        new_buffer, _ = snippet.do_post_expand(
-            si._start, si._end, self._csnippets
-        )
+            with use_proxy_buffer(self._csnippets):
+                snippet.do_post_expand(
+                    si._start, si._end, self._csnippets
+                )
 
-        new_buffer.validate_buffer()
+            self._vstate.remember_buffer(self._csnippets[0])
 
-        self._vstate.remember_buffer(self._csnippets[0])
-
-        self._jump()
+            self._jump()
 
     def _try_expand(self):
         """Try to expand a snippet in the current place."""

@@ -371,3 +371,28 @@ class TabStop_AdjacentTabStopAddText_ExpectCorrectResult(_VimTest):
     keys = 'test' + EX + 'Hello' + JF + 'World' + JF
     wanted = '[ HelloWorld ] Hello'
 
+
+class TabStop_KeepCorrectJumpListOnOverwriteOfPartOfSnippet(_VimTest):
+    files = { 'us/all.snippets': r"""
+        snippet i
+        ia$1: $2
+        endsnippet
+
+        snippet ia
+        ia($1, $2)
+        endsnippet"""}
+    keys = 'i' + EX + EX + '1' + JF + '2' + JF + ' after' + JF + '3'
+    wanted = 'ia(1, 2) after: 3'
+
+
+class TabStop_KeepCorrectJumpListOnOverwriteOfPartOfSnippetRE(_VimTest):
+    files = { 'us/all.snippets': r"""
+        snippet i
+        ia$1: $2
+        endsnippet
+
+        snippet "^ia" "regexp" r
+        ia($1, $2)
+        endsnippet"""}
+    keys = 'i' + EX + EX + '1' + JF + '2' + JF + ' after' + JF + '3'
+    wanted = 'ia(1, 2) after: 3'
