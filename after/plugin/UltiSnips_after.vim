@@ -4,7 +4,7 @@
 "              Supertab)
 " Last Modified: July 27, 2009
 
-if exists('did_UltiSnips_after') || &cp || version < 700
+if exists('did_UltiSnips_after') || &cp || version < 704
 	finish
 endif
 

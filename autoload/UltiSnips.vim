@@ -2,7 +2,7 @@
 " Author: Holger Rapp <SirVer@gmx.de>
 " Description: The Ultimate Snippets solution for Vim
 
-if exists('did_UltiSnips_autoload') || &cp || version < 700
+if exists('did_UltiSnips_autoload') || &cp || version < 704
     finish
 endif
 let did_UltiSnips_autoload=1
