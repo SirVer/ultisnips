@@ -61,8 +61,12 @@ augroup UltiSnips
     au!
     au CursorMovedI * call UltiSnips#CursorMoved()
     au CursorMoved * call UltiSnips#CursorMoved()
-    au BufLeave * call UltiSnips#LeavingBuffer()
+
     au InsertLeave * call UltiSnips#LeavingInsertMode()
+
+    au BufLeave * call UltiSnips#LeavingBuffer()
+    au CmdwinEnter * call UltiSnips#LeavingBuffer()
+    au CmdwinLeave * call UltiSnips#LeavingBuffer()
 augroup END
 
 call UltiSnips#map_keys#MapKeys()
