@@ -351,6 +351,7 @@ class SnippetManager(object):
         if not self._inner_mappings_in_place:
             return
         try:
+            _vim.command('silent doautocmd User UltiSnipsSnippetDone')
             if self.expand_trigger != self.forward_trigger:
                 _vim.command('iunmap <buffer> %s' % self.forward_trigger)
                 _vim.command('sunmap <buffer> %s' % self.forward_trigger)
@@ -531,6 +532,7 @@ class SnippetManager(object):
         """Expands the given snippet, and handles everything that needs to be
         done with it."""
         self._map_inner_keys()
+        _vim.command('silent doautocmd User UltiSnipsDoSnippet')
 
         # Adjust before, maybe the trigger is not the complete word
         text_before = before
