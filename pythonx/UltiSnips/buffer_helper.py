@@ -11,7 +11,7 @@ from contextlib import contextmanager
 
 @contextmanager
 def use_proxy_buffer(snippets_stack):
-    buffer_proxy = VimBufferHelper(snippets_stack)
+    buffer_proxy = VimBufferProxy(snippets_stack)
     old_buffer = _vim.buf
     try:
         _vim.buf = buffer_proxy
@@ -22,7 +22,7 @@ def use_proxy_buffer(snippets_stack):
 
 @contextmanager
 def suspend_proxy_edits():
-    if not isinstance(_vim.buf, VimBufferHelper):
+    if not isinstance(_vim.buf, VimBufferProxy):
         yield
     else:
         try:
@@ -31,7 +31,7 @@ def suspend_proxy_edits():
         finally:
             _vim.buf._enable_edits()
 
-class VimBufferHelper(_vim.VimBuffer):
+class VimBufferProxy(_vim.VimBuffer):
     def __init__(self, snippets_stack):
         self._snippets_stack = snippets_stack
         self._buffer = vim.current.buffer
