@@ -18,7 +18,7 @@ from UltiSnips.snippet.source import UltiSnipsFileSource, SnipMateFileSource, \
     find_all_snippet_files, find_snippet_files, AddedSnippetsSource
 from UltiSnips.text import escape
 from UltiSnips.vim_state import VimState, VisualContentPreserver
-from UltiSnips.buffer_helper import use_proxy_buffer, suspend_proxy_edits
+from UltiSnips.buffer_proxy import use_proxy_buffer, suspend_proxy_edits
 
 
 def _ask_user(a, formatted):
