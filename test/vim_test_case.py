@@ -121,7 +121,6 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         vim_config.append('set fileencoding=utf-8')
         vim_config.append('set buftype=nofile')
         vim_config.append('set shortmess=at')
-        vim_config.append('set cmdheight=10')
         vim_config.append('let @" = ""')
         vim_config.append('let g:UltiSnipsExpandTrigger="<tab>"')
         vim_config.append('let g:UltiSnipsJumpForwardTrigger="?"')

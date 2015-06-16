@@ -85,7 +85,8 @@ class VimBufferProxy(_vim.VimBuffer):
             raise RuntimeError('buffer was modified using vim.command or ' +
             'vim.current.buffer; that changes are untrackable and leads to ' +
             'errors in snippet expansion; use special variable `snip.buffer` '
-            'for buffer modifications')
+            'for buffer modifications.\n\n' +
+            'See :help UltiSnips-buffer-proxy for more info.')
 
     def __setitem__(self, key, value):
         """
