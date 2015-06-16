@@ -1441,10 +1441,14 @@ Specified code will be evaluated at stages defined above and same global
 variables and modules will be available that are stated in
 the *UltiSnips-context-snippets* section.
 
+                                                *UltiSnips-buffer-proxy*
+
 Note: special variable called 'snip.buffer' should be used for all buffer
 modifications. Not 'vim.current.buffer' and not 'vim.command("...")', because
 of in that case UltiSnips will not be able to track changes buffer from
 actions.
+
+'snip.buffer' has the same interface as 'vim.current.window.buffer'.
 
 4.10.1 Pre-expand actions                       *UltiSnips-pre-expand-actions*
 
