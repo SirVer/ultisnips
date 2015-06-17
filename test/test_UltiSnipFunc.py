@@ -154,7 +154,7 @@ from UltiSnips.snippet.source import SnippetSource
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
 
 class MySnippetSource(SnippetSource):
-  def get_snippets(self, filetypes, before, possible):
+  def get_snippets(self, filetypes, before, possible, autotrigger_only):
     if before.endswith('blumba'):
       return [
           UltiSnipsSnippetDefinition(
