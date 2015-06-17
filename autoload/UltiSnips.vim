@@ -99,7 +99,7 @@ function! UltiSnips#SnippetsInCurrentScope(...)
     return g:current_ulti_dict
 endfunction
 
-function! UltiSnips#SaveLastVisualSelection()
+function! UltiSnips#SaveLastVisualSelection() range
     exec g:_uspy "UltiSnips_Manager._save_last_visual_selection()"
     return ""
 endfunction
