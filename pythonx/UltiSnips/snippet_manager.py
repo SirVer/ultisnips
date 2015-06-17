@@ -100,6 +100,8 @@ class SnippetManager(object):
         self._snip_expanded_in_action = False
         self._inside_action = False
 
+        self._last_inserted_char = ''
+
         self._added_snippets_source = AddedSnippetsSource()
         self.register_snippet_source('ultisnips_files', UltiSnipsFileSource())
         self.register_snippet_source('added', self._added_snippets_source)
@@ -541,7 +543,7 @@ class SnippetManager(object):
         elif feedkey:
             _vim.command('return %s' % _vim.escape(feedkey))
 
-    def _snips(self, before, partial):
+    def _snips(self, before, partial, autotrigger_only=False):
         """Returns all the snippets for the given text before the cursor.
 
         If partial is True, then get also return partial matches.
@@ -552,7 +554,8 @@ class SnippetManager(object):
         clear_priority = None
         cleared = {}
         for _, source in self._snippet_sources:
-            source.ensure(filetypes)
+            if not autotrigger_only or not source.loaded(filetypes):
+                source.ensure(filetypes)
 
         # Collect cleared information from sources.
         for _, source in self._snippet_sources:
@@ -565,7 +568,14 @@ class SnippetManager(object):
                     cleared[key] = value
 
         for _, source in self._snippet_sources:
-            for snippet in source.get_snippets(filetypes, before, partial):
+            possible_snippets = source.get_snippets(
+                filetypes,
+                before,
+                partial,
+                autotrigger_only
+            )
+
+            for snippet in possible_snippets:
                 if ((clear_priority is None or snippet.priority > clear_priority)
                         and (snippet.trigger not in cleared or
                              snippet.priority > cleared[snippet.trigger])):
@@ -667,10 +677,10 @@ class SnippetManager(object):
                 self._snip_expanded_in_action = True
 
 
-    def _try_expand(self):
+    def _try_expand(self, autotrigger_only=False):
         """Try to expand a snippet in the current place."""
         before = _vim.buf.line_till_cursor
-        snippets = self._snips(before, False)
+        snippets = self._snips(before, False, autotrigger_only)
         if snippets:
             # prefer snippets with context if any
             snippets_with_context = [s for s in snippets if s.context]
@@ -764,6 +774,18 @@ class SnippetManager(object):
             yield
         finally:
             self._inside_action = old_flag
+
+    @err_to_scratch_buffer
+    def _track_change(self):
+        inserted_char = _vim.eval('v:char')
+        try:
+            if inserted_char == '':
+                before = _vim.buf.line_till_cursor
+                if before and before[-1] == self._last_inserted_char:
+                    self._try_expand(autotrigger_only=True)
+        finally:
+            self._last_inserted_char = inserted_char
+
 
 UltiSnips_Manager = SnippetManager(  # pylint:disable=invalid-name
     vim.eval('g:UltiSnipsExpandTrigger'),

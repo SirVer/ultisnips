@@ -151,3 +151,8 @@ endf
 function! UltiSnips#LeavingInsertMode()
     exec g:_uspy "UltiSnips_Manager._leaving_insert_mode()"
 endfunction
+
+function! UltiSnips#TrackChange()
+    exec g:_uspy "UltiSnips_Manager._track_change()"
+endfunction
+" }}}
