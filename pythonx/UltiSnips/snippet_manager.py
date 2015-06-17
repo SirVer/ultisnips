@@ -8,6 +8,7 @@ from functools import wraps
 import os
 import platform
 import traceback
+from contextlib import contextmanager
 
 from UltiSnips import _vim
 from UltiSnips._diff import diff, guess_edit
@@ -94,6 +95,9 @@ class SnippetManager(object):
         self._visual_content = VisualContentPreserver()
 
         self._snippet_sources = []
+
+        self._snip_expanded_in_action = False
+        self._inside_action = False
 
         self._added_snippets_source = AddedSnippetsSource()
         self.register_snippet_source('ultisnips_files', UltiSnipsFileSource())
@@ -561,16 +565,19 @@ class SnippetManager(object):
         done with it."""
         self._map_inner_keys()
 
+        self._snip_expanded_in_action = False
+
         # Adjust before, maybe the trigger is not the complete word
         text_before = before
         if snippet.matched:
             text_before = before[:-len(snippet.matched)]
 
         with use_proxy_buffer(self._csnippets):
-            cursor_set_in_action = snippet.do_pre_expand(
-                self._visual_content.text,
-                self._csnippets
-            )
+            with self._action_context():
+                cursor_set_in_action = snippet.do_pre_expand(
+                    self._visual_content.text,
+                    self._csnippets
+                )
 
         if cursor_set_in_action:
             text_before = _vim.buf.line_till_cursor
@@ -612,13 +619,23 @@ class SnippetManager(object):
             si.update_textobjects()
 
             with use_proxy_buffer(self._csnippets):
-                snippet.do_post_expand(
-                    si._start, si._end, self._csnippets
-                )
+                with self._action_context():
+                    snippet.do_post_expand(
+                        si._start, si._end, self._csnippets
+                    )
 
             self._vstate.remember_buffer(self._csnippets[0])
 
-            self._jump()
+            if not self._snip_expanded_in_action:
+                self._jump()
+            elif self._cs.current_text != '':
+                self._jump()
+            else:
+                self._current_snippet_is_done()
+
+            if self._inside_action:
+                self._snip_expanded_in_action = True
+
 
     def _try_expand(self):
         """Try to expand a snippet in the current place."""
@@ -710,3 +727,12 @@ class SnippetManager(object):
         if not os.path.exists(dirname):
             os.makedirs(dirname)
         return file_to_edit
+
+    @contextmanager
+    def _action_context(self):
+        try:
+            old_flag = self._inside_action
+            self._inside_action = True
+            yield
+        finally:
+            self._inside_action = old_flag
