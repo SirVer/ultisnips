@@ -307,3 +307,12 @@ class SnippetActions_CanEvenWrapSnippetInPreAction(_VimTest):
         """}
     keys = "test" + EX + "1" + JF + "2" + JF + "3" + JF + "4"
     wanted = """some_wrapper(wrapme(2, 1)3): 4"""
+
+class SnippetActions_CanVisuallySelectFirstPlaceholderInAnonSnippetInPre(_VimTest):
+    files = { 'us/all.snippets': r"""
+        pre_expand "snip.buffer[snip.line] = ''; snip.expand_anon('${1:asd}, ${2:blah}')"
+        snippet test "test new features" wb
+        endsnippet
+        """}
+    keys = "test" + EX + "1" + JF + "2"
+    wanted = """1, 2"""
