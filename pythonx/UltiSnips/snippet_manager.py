@@ -776,6 +776,7 @@ class SnippetManager(object):
         finally:
             self._inside_action = old_flag
 
+    @err_to_scratch_buffer
     def _track_change(self):
         inserted_char = _vim.eval('v:char')
         if inserted_char == '':
