@@ -430,6 +430,14 @@ class SnippetManager(object):
             # self._ctab is 1 then there is 1 less CursorMove events.  We
             # cannot ignore next movement in such case.
             ntab_short_and_near = False
+
+            if self._cs:
+                snippet_for_action = self._cs
+            elif stack_for_post_jump:
+                snippet_for_action = stack_for_post_jump[-1]
+            else:
+                snippet_for_action = None
+
             if self._cs:
                 ntab = self._cs.select_next_tab(backwards)
                 if ntab:
@@ -458,16 +466,12 @@ class SnippetManager(object):
                     self._ignore_movements = True
 
             if len(stack_for_post_jump) > 0 and ntab is not None:
-                if self._cs:
-                    snippet_for_action = self._cs
-                else:
-                    snippet_for_action = stack_for_post_jump[-1]
-
-                with use_proxy_buffer(stack_for_post_jump):
+                with use_proxy_buffer(stack_for_post_jump, self._vstate):
                     snippet_for_action.snippet.do_post_jump(
                         ntab.number,
                         -1 if backwards else 1,
-                        stack_for_post_jump
+                        stack_for_post_jump,
+                        snippet_for_action
                     )
 
         return jumped
@@ -572,7 +576,7 @@ class SnippetManager(object):
         if snippet.matched:
             text_before = before[:-len(snippet.matched)]
 
-        with use_proxy_buffer(self._csnippets):
+        with use_proxy_buffer(self._csnippets, self._vstate):
             with self._action_context():
                 cursor_set_in_action = snippet.do_pre_expand(
                     self._visual_content.text,
@@ -618,7 +622,7 @@ class SnippetManager(object):
 
             si.update_textobjects()
 
-            with use_proxy_buffer(self._csnippets):
+            with use_proxy_buffer(self._csnippets, self._vstate):
                 with self._action_context():
                     snippet.do_post_expand(
                         si._start, si._end, self._csnippets

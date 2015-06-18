@@ -11,12 +11,12 @@ from contextlib import contextmanager
 
 
 @contextmanager
-def use_proxy_buffer(snippets_stack):
+def use_proxy_buffer(snippets_stack, vstate):
     """
     Forward all changes made in the buffer to the current snippet stack while
     function call.
     """
-    buffer_proxy = VimBufferProxy(snippets_stack)
+    buffer_proxy = VimBufferProxy(snippets_stack, vstate)
     old_buffer = _vim.buf
     try:
         _vim.buf = buffer_proxy
@@ -59,7 +59,7 @@ class VimBufferProxy(_vim.VimBuffer):
     actual buffer contents.
     """
 
-    def __init__(self, snippets_stack):
+    def __init__(self, snippets_stack, vstate):
         """
         Instantiate new object.
 
@@ -69,6 +69,7 @@ class VimBufferProxy(_vim.VimBuffer):
         self._buffer = vim.current.buffer
         self._change_tick = int(vim.eval("b:changedtick"))
         self._forward_edits = True
+        self._vstate = vstate
 
     def is_buffer_changed_outside(self):
         """
@@ -107,6 +108,8 @@ class VimBufferProxy(_vim.VimBuffer):
         if self._forward_edits:
             for change in changes:
                 self._apply_change(change)
+            if self._snippets_stack:
+                self._vstate.remember_buffer(self._snippets_stack[0])
 
     def __setslice__(self, i, j, text):
         """
@@ -194,6 +197,10 @@ class VimBufferProxy(_vim.VimBuffer):
                 Position(direction, 0)
             )
         else:
+            if line_number > self._snippets_stack[0]._end.line:
+                return
+            if column_number > self._snippets_stack[0]._end.col:
+                return
             self._snippets_stack[0]._do_edit(change)
 
     def _disable_edits(self):

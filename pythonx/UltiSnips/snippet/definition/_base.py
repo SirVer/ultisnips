@@ -337,26 +337,26 @@ class SnippetDefinition(object):
             return False
 
     def do_post_jump(
-        self, tabstop_number, jump_direction, snippets_stack
+        self, tabstop_number, jump_direction, snippets_stack, current_snippet
     ):
         if 'post_jump' in self._actions:
-            start = snippets_stack[-1].start
-            end = snippets_stack[-1].end
+            start = current_snippet.start
+            end = current_snippet.end
 
             locals = {
                 'tabstop': tabstop_number,
                 'jump_direction': jump_direction,
-                'tabstops': snippets_stack[-1].get_tabstops(),
+                'tabstops': current_snippet.get_tabstops(),
                 'snippet_start': start,
                 'snippet_end': end,
                 'buffer': _vim.buf
             }
 
             snip = self._execute_action(
-                self._actions['post_jump'], snippets_stack[-1].context, locals
+                self._actions['post_jump'], current_snippet.context, locals
             )
 
-            snippets_stack[-1].context = snip.context
+            current_snippet.context = snip.context
 
             return snip.cursor.is_set()
         else:

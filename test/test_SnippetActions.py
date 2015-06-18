@@ -316,3 +316,33 @@ class SnippetActions_CanVisuallySelectFirstPlaceholderInAnonSnippetInPre(_VimTes
         """}
     keys = "test" + EX + "1" + JF + "2"
     wanted = """1, 2"""
+
+class SnippetActions_UseCorrectJumpActions(_VimTest):
+    files = { 'us/all.snippets': r"""
+        post_jump "snip.buffer[-2:-2]=['a' + str(snip.tabstop)]"
+        snippet a "a" wb
+        $1 {
+        $2
+        }
+        endsnippet
+
+        snippet b "b" wb
+        bbb
+        endsnippet
+
+        post_jump "snip.buffer[-2:-2]=['c' + str(snip.tabstop)]"
+        snippet c "c" w
+        $1 : $2 : $3
+        endsnippet
+        """}
+    keys = "a" + EX + "1" + JF + "b" + EX + " c" + EX + "2" + JF + "3" + JF + "4" + JF + JF
+    wanted = """1 {
+bbb 2 : 3 : 4
+}
+a1
+a2
+c1
+c2
+c3
+c0
+a0"""
