@@ -36,8 +36,8 @@ class SnippetUtilForAction(dict):
         super(SnippetUtilForAction, self).__init__(*args, **kwargs)
         self.__dict__ = self
 
-    def expand_anon(self, snippet):
-        UltiSnips.UltiSnips_Manager.expand_anon(snippet)
+    def expand_anon(self, *args, **kwargs):
+        UltiSnips.UltiSnips_Manager.expand_anon(*args, **kwargs)
         self.cursor.preserve()
 
 
