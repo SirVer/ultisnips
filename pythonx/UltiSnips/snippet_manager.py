@@ -8,6 +8,7 @@ from functools import wraps
 import os
 import platform
 import traceback
+import vim
 from contextlib import contextmanager
 
 from UltiSnips import _vim
@@ -763,3 +764,8 @@ class SnippetManager(object):
             yield
         finally:
             self._inside_action = old_flag
+
+UltiSnips_Manager = SnippetManager(  # pylint:disable=invalid-name
+    vim.eval('g:UltiSnipsExpandTrigger'),
+    vim.eval('g:UltiSnipsJumpForwardTrigger'),
+    vim.eval('g:UltiSnipsJumpBackwardTrigger'))

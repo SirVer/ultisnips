@@ -159,8 +159,12 @@ class VimBufferProxy(_vim.VimBuffer):
         Very fast diffing algorithm when changes are across many lines.
         """
         for line_number in range(start, end):
+            if line_number < 0:
+                line_number = len(self._buffer) + line_number
             yield ('D', line_number, 0, self._buffer[line_number])
 
+        if start < 0:
+            start = len(self._buffer) + start
         for line_number in range(0, len(new_value)):
             yield ('I', start+line_number, 0, new_value[line_number])
 

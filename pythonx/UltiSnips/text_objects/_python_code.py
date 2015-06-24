@@ -10,7 +10,7 @@ from UltiSnips import _vim
 from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text_objects._base import NoneditableTextObject
-import UltiSnips
+import UltiSnips.snippet_manager
 
 
 class _Tabs(object):
@@ -37,7 +37,9 @@ class SnippetUtilForAction(dict):
         self.__dict__ = self
 
     def expand_anon(self, *args, **kwargs):
-        UltiSnips.UltiSnips_Manager.expand_anon(*args, **kwargs)
+        UltiSnips.snippet_manager.UltiSnips_Manager.expand_anon(
+            *args, **kwargs
+        )
         self.cursor.preserve()
 
 
