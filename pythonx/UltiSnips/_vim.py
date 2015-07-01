@@ -49,8 +49,8 @@ class VimBuffer(object):
 
     @property
     def number(self):  # pylint:disable=no-self-use
-        """The bufnr() of this buffer."""
-        return int(eval("bufnr('%')"))
+        """The bufnr() of the current buffer."""
+        return vim.current.buffer.number
 
     @property
     def cursor(self):  # pylint:disable=no-self-use
