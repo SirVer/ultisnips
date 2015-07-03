@@ -2,14 +2,26 @@ language: python
 
 python:
   - 2.7
+  - 3.2
   - 3.3
   - 3.4
 env:
   - VIM_VERSION="74"
+  - VIM_VERSION="mercurial"
+  # - VIM_VERSION="NEOVIM"
 
-install: sudo ./install_vim.sh "${VIM_VERSION}" "$(python --version 2>&1)"
+matrix:
+  allow_failures:
+    # TODO(sirver): Neovim does not play well with our testing right now.
+    - env: VIM_VERSION="NEOVIM"
 
-before_script:
-  - tmux new -d -s vim
+install:
+   # Some of these commands fail transiently. We keep retrying them until they succeed.
+   - until sudo add-apt-repository ppa:kalakris/tmux -y; do sleep 10; done
+   - until sudo add-apt-repository ppa:neovim-ppa/unstable -y; do sleep 10; done
+   - until sudo apt-get update -qq; do sleep 10; done
+   - until sudo apt-get install -qq -y --force-yes tmux xclip gdb neovim mercurial; do sleep 10; done
+   - ./travis_install.sh
 
-script: ./test_all.py -v --plugins --session vim
+script:
+   - ./travis_test.sh

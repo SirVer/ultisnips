@@ -9,7 +9,7 @@ import textwrap
 import time
 
 from test.constant import (ARR_D, ARR_L, ARR_R, ARR_U, BS, ESC, PYTHON3,
-        SEQUENCES)
+                           SEQUENCES)
 
 
 def wait_until_file_exists(file_path, times=None, interval=0.01):
@@ -88,8 +88,9 @@ class TempFileManager(object):
 
 class VimInterface(TempFileManager):
 
-    def __init__(self, name=''):
+    def __init__(self, vim_executable, name):
         TempFileManager.__init__(self, name)
+        self._vim_executable = vim_executable
 
     def get_buffer_data(self):
         buffer_path = self.unique_name_temp(prefix='buffer_')
@@ -121,7 +122,7 @@ class VimInterface(TempFileManager):
                                       textwrap.dedent(os.linesep.join(config + post_config) + '\n'))
 
         # Note the space to exclude it from shell history.
-        self.send(""" vim -u %s\r\n""" % config_path)
+        self.send(""" %s -u %s\r\n""" % (self._vim_executable, config_path))
         wait_until_file_exists(done_file)
         self._vim_pid = int(open(pid_file, 'r').read())
 
@@ -133,8 +134,8 @@ class VimInterface(TempFileManager):
 
 class VimInterfaceTmux(VimInterface):
 
-    def __init__(self, session):
-        VimInterface.__init__(self, 'Tmux')
+    def __init__(self, vim_executable, session):
+        VimInterface.__init__(self, vim_executable, 'Tmux')
         self.session = session
         self._check_version()
 
@@ -181,7 +182,6 @@ class VimInterfaceWindows(VimInterface):
     ]
 
     def __init__(self):
-        self.seq_buf = []
         # import windows specific modules
         import win32com.client
         import win32gui
@@ -209,15 +209,7 @@ class VimInterfaceWindows(VimInterface):
         return keys
 
     def send(self, keys):
-        self.seq_buf.append(keys)
-        seq = ''.join(self.seq_buf)
-
-        for f in SEQUENCES:
-            if f.startswith(seq) and f != seq:
-                return
-        self.seq_buf = []
-
-        seq = self.convert_keys(seq)
+        keys = self.convert_keys(keys)
 
         if not self.is_focused():
             time.sleep(2)
@@ -226,4 +218,4 @@ class VimInterfaceWindows(VimInterface):
             # This is the only way I can find to stop test execution
             raise KeyboardInterrupt('Failed to focus GVIM')
 
-        self.shell.SendKeys(seq)
+        self.shell.SendKeys(keys)

@@ -100,6 +100,8 @@ if __name__ == '__main__':
                      'multiplexer and race conditions in writing to the file system.')
         p.add_option('-x', '--exitfirst', dest='exitfirst', action='store_true',
                      help='exit instantly on first error or failed test.')
+        p.add_option('--vim', dest='vim', type=str, default="vim",
+                     help='executable to run when launching vim.')
 
         o, args = p.parse_args()
         return o, args
@@ -118,7 +120,7 @@ if __name__ == '__main__':
 
         all_test_suites = unittest.defaultTestLoader.discover(start_dir='test')
 
-        vim = VimInterfaceTmux(options.session)
+        vim = VimInterfaceTmux(options.vim, options.session)
         if not options.clone_plugins and platform.system() == 'Windows':
             raise RuntimeError(
                 'TODO: TestSuite is broken under windows. Volunteers wanted!.')
