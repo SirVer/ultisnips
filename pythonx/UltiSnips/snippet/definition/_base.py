@@ -242,6 +242,7 @@ class SnippetDefinition(object):
                 self._matched = ''
                 return False
 
+        self._context = None
         if match and self._context_code:
             self._context = self._context_match()
             if not self.context:

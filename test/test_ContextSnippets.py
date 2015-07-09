@@ -138,3 +138,14 @@ class ContextSnippets_CursorIsZeroBased(_VimTest):
 
     keys = "e" + EX
     wanted = "(2, 1)"
+
+class ContextSnippets_ContextIsClearedBeforeExpand(_VimTest):
+    files = { 'us/all.snippets': r"""
+        pre_expand "snip.context = 1 if snip.context is None else 2"
+        snippet e "desc" w
+        `!p snip.rv = str(snip.context)`
+        endsnippet
+        """}
+
+    keys = "e" + EX + " " + "e" + EX
+    wanted = "1 1"
