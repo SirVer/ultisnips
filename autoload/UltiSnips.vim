@@ -1,28 +1,12 @@
-" File: UltiSnips.vim
-" Author: Holger Rapp <SirVer@gmx.de>
-" Description: The Ultimate Snippets solution for Vim
-
-if exists('did_UltiSnips_autoload') || &cp || version < 704
-    finish
+if exists("b:did_autoload_ultisnips") || !exists("g:_uspy")
+   finish
 endif
-let did_UltiSnips_autoload=1
+let b:did_autoload_ultisnips = 1
 
-" Define dummy version of function called by autocommand setup in
-" ftdetect/UltiSnips.vim and plugin/UltiSnips.vim.
-" If the function isn't defined (probably due to using a copy of vim
-" without python support) it would cause an error.
-function! UltiSnips#FileTypeChanged()
-endfunction
-function! UltiSnips#CursorMoved()
-endfunction
-function! UltiSnips#CursorMoved()
-endfunction
-function! UltiSnips#LeavingBuffer()
-endfunction
-function! UltiSnips#LeavingInsertMode()
-endfunction
+" Also import vim as we expect it to be imported in many places.
+exec g:_uspy "import vim"
+exec g:_uspy "from UltiSnips import UltiSnips_Manager"
 
-call UltiSnips#bootstrap#Bootstrap()
 if !exists("g:_uspy")
    " Delete the autocommands defined in plugin/UltiSnips.vim and
    " ftdetect/UltiSnips.vim.

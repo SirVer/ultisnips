@@ -98,7 +98,7 @@ class SnippetManager(object):
         self.register_snippet_source('ultisnips_files', UltiSnipsFileSource())
         self.register_snippet_source('added', self._added_snippets_source)
 
-        enable_snipmate = True
+        enable_snipmate = '1'
         if _vim.eval("exists('g:UltiSnipsEnableSnipMate')") == '1':
             enable_snipmate = _vim.eval('g:UltiSnipsEnableSnipMate')
         if enable_snipmate == '1':

@@ -13,6 +13,17 @@ snippet hello
     keys = 'hello' + EX
     wanted = 'This is a test snippet\n# With a comment'
 
+class snipMate_Disabled(_VimTest):
+    files = { 'snippets/_.snippets': """
+snippet hello
+\tThis is a test snippet
+\t# With a comment"""}
+    keys = 'hello' + EX
+    wanted = 'hello' + EX
+
+    def _extra_vim_config(self, vim_config):
+        vim_config.append("let g:UltiSnipsEnableSnipMate=0");
+
 
 class snipMate_OtherFiletype(_VimTest):
     files = { 'snippets/blubi.snippets': """

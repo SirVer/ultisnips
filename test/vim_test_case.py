@@ -52,10 +52,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
                 self.setUp()
         self.assertEqual(self.output, wanted)
 
-    def _extra_options_pre_init(self, vim_config):
-        """Adds extra lines to the vim_config list."""
-
-    def _extra_options_post_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         """Adds extra lines to the vim_config list."""
 
     def _before_test(self):
@@ -131,15 +128,11 @@ class VimTestCase(unittest.TestCase, TempFileManager):
             (3 if PYTHON3 else 2))
         vim_config.append('let g:UltiSnipsSnippetDirectories=["us"]')
 
-        self._extra_options_pre_init(vim_config)
-
-        # Now activate UltiSnips.
-        vim_config.append('call UltiSnips#bootstrap#Bootstrap()')
-
-        self._extra_options_post_init(vim_config)
+        self._extra_vim_config(vim_config)
 
         # Finally, add the snippets and some configuration for the test.
         vim_config.append('%s << EOF' % ('py3' if PYTHON3 else 'py'))
+        vim_config.append('from UltiSnips import UltiSnips_Manager\n')
 
         if len(self.snippets) and not isinstance(self.snippets[0], tuple):
             self.snippets = (self.snippets, )
@@ -159,6 +152,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
 
         # fill buffer with default text and place cursor in between.
         prefilled_text = (self.text_before + self.text_after).splitlines()
+        vim_config.append('import vim\n')
         vim_config.append('vim.current.buffer[:] = %r\n' % prefilled_text)
         vim_config.append(
             'vim.current.window.cursor = (max(len(vim.current.buffer)//2, 1), 0)')

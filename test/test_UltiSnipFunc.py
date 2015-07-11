@@ -9,9 +9,8 @@ from test.util import running_on_windows
 class _AddFuncBase(_VimTest):
     args = ''
 
-    def _extra_options_pre_init(self, vim_config):
-        vim_config.append(':call UltiSnips#AddSnippetWithPriority(%s)' %
-                          self.args)
+    def _before_test(self):
+        self.vim.send(':call UltiSnips#AddSnippetWithPriority(%s)\n' % self.args)
 
 
 class AddFunc_Simple(_AddFuncBase):
@@ -42,7 +41,7 @@ and a mirror: hi1
 hi2...hi3
 hi4"""
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set langmap=dj,rk,nl,ln,jd,kr,DJ,RK,NL,LN,JD,KR')
 
 # Test for https://bugs.launchpad.net/bugs/501727 #
@@ -149,7 +148,7 @@ class AddNewSnippetSource(_VimTest):
         'blumba' + EX
     )
 
-    def _extra_options_post_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         self._create_file('snippet_source.py', """
 from UltiSnips.snippet.source import SnippetSource
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition

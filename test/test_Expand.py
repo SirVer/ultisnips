@@ -22,7 +22,7 @@ class SimpleExpandNewLineAndBackspae_ExpectCorrectResult(_SimpleExpands):
     keys = 'hallo' + EX + '\nHallo Welt!\n\n\b\b\b\b\b'
     wanted = 'Hallo Welt!\nHallo We'
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set backspace=eol,start')
 
 

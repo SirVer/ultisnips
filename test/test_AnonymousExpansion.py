@@ -7,7 +7,7 @@ from test.constant import *
 class _AnonBase(_VimTest):
     args = ''
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('inoremap <silent> %s <C-R>=UltiSnips#Anon(%s)<cr>'
                           % (EA, self.args))
 

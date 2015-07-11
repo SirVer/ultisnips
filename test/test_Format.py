@@ -7,7 +7,7 @@ from test.util import running_on_windows
 
 class _ExpandTabs(_VimTest):
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set sw=3')
         vim_config.append('set expandtab')
 
@@ -33,8 +33,8 @@ class RecTabStopsWithExpandtab_SpecialIndentProblem_ECR(_ExpandTabs):
     keys = 'm' + EX + 'm1' + EX + '\nHallo'
     wanted = '   Something\n        Hallo'
 
-    def _extra_options_pre_init(self, vim_config):
-        _ExpandTabs._extra_options_pre_init(self, vim_config)
+    def _extra_vim_config(self, vim_config):
+        _ExpandTabs._extra_vim_config(self, vim_config)
         vim_config.append('set indentkeys=o,O,*<Return>,<>>,{,}')
         vim_config.append('set indentexpr=8')
 # End: ExpandTab  #}}}
@@ -59,7 +59,7 @@ class ProperIndenting_AutoIndentAndNewline_ECR(_VimTest):
     keys = '    test' + EX + '\n' + 'blah'
     wanted = '    hui\n    blah'
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set autoindent')
 # Test for bug 1073816
 
@@ -99,7 +99,7 @@ class ProperIndenting_FirstLineInFileComplete_ECR(
 
 class _FormatoptionsBase(_VimTest):
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set tw=20')
         vim_config.append('set fo=lrqntc')
 

@@ -283,7 +283,7 @@ i0
 
 class PythonCode_IndentEtSw(_VimTest):
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set sw=3')
         vim_config.append('set expandtab')
     snippets = ('test', r"""hi
@@ -307,7 +307,7 @@ i0
 
 class PythonCode_IndentEtSwOffset(_VimTest):
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set sw=3')
         vim_config.append('set expandtab')
     snippets = ('test', r"""hi
@@ -331,7 +331,7 @@ End""")
 
 class PythonCode_IndentNoetSwTs(_VimTest):
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set sw=3')
         vim_config.append('set ts=4')
     snippets = ('test', r"""hi
@@ -357,7 +357,7 @@ i0
 
 class PythonCode_OptExists(_VimTest):
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('let g:UStest="yes"')
     snippets = (
         'test',

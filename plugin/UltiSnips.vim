@@ -1,21 +1,43 @@
-" File: UltiSnips.vim
-" Author: Holger Rapp <SirVer@gmx.de>
-" Description: The Ultimate Snippets solution for Vim
-"
-" Testing Info:
-"   See directions at the top of the test.py script located one
-"   directory above this file.
-
-if exists('did_UltiSnips_plugin') || &cp
+if exists('did_plugin_ultisnips') || &cp
     finish
 endif
-let did_UltiSnips_plugin=1
+let did_plugin_ultisnips=1
 
 if version < 704
    echohl WarningMsg
    echom  "UltiSnips requires Vim >= 7.4"
    echohl None
    finish
+endif
+
+if !exists("g:UltiSnipsUsePythonVersion")
+   let g:_uspy=":py3 "
+   if !has("python3")
+       if !has("python")
+           if !exists("g:UltiSnipsNoPythonWarning")
+               echohl WarningMsg
+               echom  "UltiSnips requires py >= 2.7 or py3"
+               echohl None
+           endif
+           unlet g:_uspy
+           finish
+       endif
+       let g:_uspy=":py "
+   endif
+else
+   " Use user-provided value, but check if it's available.
+   " This uses `has()`, because e.g. `exists(":python3")` is always 2.
+   if g:UltiSnipsUsePythonVersion == 2 && has('python')
+       let g:_uspy=":python "
+   elseif g:UltiSnipsUsePythonVersion == 3 && has('python3')
+       let g:_uspy=":python3 "
+   endif
+   if !exists('g:_uspy')
+       echohl WarningMsg
+       echom  "UltiSnips: the Python version from g:UltiSnipsUsePythonVersion (".g:UltiSnipsUsePythonVersion.") is not available."
+       echohl None
+       finish
+   endif
 endif
 
 " The Commands we define.

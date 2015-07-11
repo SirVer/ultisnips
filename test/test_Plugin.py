@@ -24,7 +24,7 @@ def python3():
     # keys = "superlo\ty"
     # wanted = "Hello"
 
-    # def _extra_options_pre_init(self, vim_config):
+    # def _extra_vim_config(self, vim_config):
         # # Not sure why, but I need to make a new tab for this to work.
         # vim_config.append('let g:UltiSnipsExpandTrigger="y"')
         # vim_config.append('tabnew')
@@ -47,7 +47,7 @@ def python3():
     # keys = 'iab\\ t' + EX
     # wanted = 'iab\\ Hello'
 
-    # def _extra_options_pre_init(self, vim_config):
+    # def _extra_vim_config(self, vim_config):
         # vim_config.append(r'set iskeyword+=\\ ')
         # vim_config.append('let g:neocomplete#enable_at_startup = 1')
         # vim_config.append('let g:neocomplete#enable_smart_case = 1')
@@ -64,7 +64,7 @@ def python3():
     # keys = 'iab\\ t=UltiSnipsCallUnite()\n'
     # wanted = 'iab\\ Hello '
 
-    # def _extra_options_pre_init(self, vim_config):
+    # def _extra_vim_config(self, vim_config):
         # vim_config.append(r'set iskeyword+=\\ ')
         # vim_config.append('function! UltiSnipsCallUnite()')
         # vim_config.append(
@@ -87,7 +87,7 @@ class Plugin_SuperTab_SimpleTest(_VimTest):
         # Make sure that UltiSnips has the keymap
         self.vim.send(':call UltiSnips#map_keys#MapKeys()\n')
 
-    def _extra_options_post_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         assert EX == '\t'  # Otherwise this test needs changing.
         vim_config.append('let g:SuperTabDefaultCompletionType = "<c-p>"')
         vim_config.append('let g:SuperTabRetainCompletionDuration = "insert"')
