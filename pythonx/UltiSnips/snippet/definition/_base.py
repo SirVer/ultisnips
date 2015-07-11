@@ -13,6 +13,10 @@ from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text import escape
 from UltiSnips.text_objects import SnippetInstance
 
+__WHITESPACE_SPLIT = re.compile(r"\s")
+def split_at_whitespace(string):
+    """Like string.split(), but keeps empty words as empty words."""
+    return re.split(__WHITESPACE_SPLIT, string)
 
 def _words_for_line(trigger, before, num_words=None):
     """Gets the final 'num_words' words from 'before'.
@@ -20,13 +24,10 @@ def _words_for_line(trigger, before, num_words=None):
     If num_words is None, then use the number of words in 'trigger'.
 
     """
-    if not len(before):
-        return ''
-
     if num_words is None:
-        num_words = len(trigger.split())
+        num_words = len(split_at_whitespace(trigger))
 
-    word_list = before.split()
+    word_list = split_at_whitespace(before)
     if len(word_list) <= num_words:
         return before.strip()
     else:
@@ -143,22 +144,18 @@ class SnippetDefinition(object):
         """The matched context."""
         return self._context
 
-    def matches(self, trigger):
-        """Returns True if this snippet matches 'trigger'."""
+    def matches(self, before):
+        """Returns True if this snippet matches 'before'."""
         # If user supplies both "w" and "i", it should perhaps be an
         # error, but if permitted it seems that "w" should take precedence
         # (since matching at word boundary and within a word == matching at word
         # boundary).
         self._matched = ''
 
-        # Don't expand on whitespace
-        if trigger and trigger.rstrip() != trigger:
-            return False
-
-        words = _words_for_line(self._trigger, trigger)
+        words = _words_for_line(self._trigger, before)
 
         if 'r' in self._opts:
-            match = self._re_match(trigger)
+            match = self._re_match(before)
         elif 'w' in self._opts:
             words_len = len(self._trigger)
             words_prefix = words[:-words_len]
@@ -182,7 +179,7 @@ class SnippetDefinition(object):
 
         # Ensure the match was on a word boundry if needed
         if 'b' in self._opts and match:
-            text_before = trigger.rstrip()[:-len(self._matched)]
+            text_before = before.rstrip()[:-len(self._matched)]
             if text_before.strip(' \t') != '':
                 self._matched = ''
                 return False
@@ -194,21 +191,21 @@ class SnippetDefinition(object):
 
         return match
 
-    def could_match(self, trigger):
-        """Return True if this snippet could match the (partial) 'trigger'."""
+    def could_match(self, before):
+        """Return True if this snippet could match the (partial) 'before'."""
         self._matched = ''
 
         # List all on whitespace.
-        if trigger and trigger[-1] in (' ', '\t'):
-            trigger = ''
-        if trigger and trigger.rstrip() is not trigger:
+        if before and before[-1] in (' ', '\t'):
+            before = ''
+        if before and before.rstrip() is not before:
             return False
 
-        words = _words_for_line(self._trigger, trigger)
+        words = _words_for_line(self._trigger, before)
 
         if 'r' in self._opts:
             # Test for full match only
-            match = self._re_match(trigger)
+            match = self._re_match(before)
         elif 'w' in self._opts:
             # Trim non-empty prefix up to word boundary, if present.
             qwords = escape(words, r'\"')
@@ -234,7 +231,7 @@ class SnippetDefinition(object):
 
         # Ensure the match was on a word boundry if needed
         if 'b' in self._opts and match:
-            text_before = trigger.rstrip()[:-len(self._matched)]
+            text_before = before.rstrip()[:-len(self._matched)]
             if text_before.strip(' \t') != '':
                 self._matched = ''
                 return False

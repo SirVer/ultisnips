@@ -209,6 +209,12 @@ class SnippetOptions_Regex_Expand(_VimTest):
     wanted = 'Expand me!'
 
 
+class SnippetOptions_Regex_WithSpace(_VimTest):
+    snippets = ('test ', 'Expand me!', '', 'r')
+    keys = 'test ' + EX
+    wanted = 'Expand me!'
+
+
 class SnippetOptions_Regex_Multiple(_VimTest):
     snippets = ('(test *)+', 'Expand me!', '', 'r')
     keys = 'test test test' + EX

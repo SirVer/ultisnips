@@ -3,7 +3,6 @@
 
 """Implements a container for parsed snippets."""
 
-
 class SnippetDictionary(object):
 
     """See module docstring."""

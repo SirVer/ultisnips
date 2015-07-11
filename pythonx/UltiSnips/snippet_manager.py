@@ -592,8 +592,6 @@ class SnippetManager(object):
     def _try_expand(self):
         """Try to expand a snippet in the current place."""
         before = _vim.buf.line_till_cursor
-        if not before:
-            return False
         snippets = self._snips(before, False)
         if snippets:
             # prefer snippets with context if any
