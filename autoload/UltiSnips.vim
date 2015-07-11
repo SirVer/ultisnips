@@ -7,18 +7,6 @@ let b:did_autoload_ultisnips = 1
 exec g:_uspy "import vim"
 exec g:_uspy "from UltiSnips import UltiSnips_Manager"
 
-if !exists("g:_uspy")
-   " Delete the autocommands defined in plugin/UltiSnips.vim and
-   " ftdetect/UltiSnips.vim.
-   augroup UltiSnips
-       au!
-   augroup END
-   augroup UltiSnipsFileType
-       au!
-   augroup END
-   finish
-end
-
 " FUNCTIONS {{{
 function! s:compensate_for_pum()
     """ The CursorMovedI event is not triggered while the popup-menu is visible,
@@ -124,18 +112,6 @@ function! UltiSnips#FileTypeChanged()
     return ""
 endfunction
 
-
-function! UltiSnips#AddSnippet(trigger, value, description, options, ...)
-    " Takes the same arguments as SnippetManager.add_snippet.
-    echoerr "Deprecated UltiSnips#AddSnippet called. Please use UltiSnips#AddSnippetWithPriority." | sleep 1
-    exec g:_uspy "args = vim.eval(\"a:000\")"
-    exec g:_uspy "trigger = vim.eval(\"a:trigger\")"
-    exec g:_uspy "value = vim.eval(\"a:value\")"
-    exec g:_uspy "description = vim.eval(\"a:description\")"
-    exec g:_uspy "options = vim.eval(\"a:options\")"
-    exec g:_uspy "UltiSnips_Manager.add_snippet(trigger, value, description, options, *args)"
-    return ""
-endfunction
 
 function! UltiSnips#AddSnippetWithPriority(trigger, value, description, options, filetype, priority)
     exec g:_uspy "trigger = vim.eval(\"a:trigger\")"
