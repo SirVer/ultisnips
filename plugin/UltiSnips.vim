@@ -46,18 +46,6 @@ command! -bang -nargs=? -complete=customlist,UltiSnips#FileTypeComplete UltiSnip
 
 command! -nargs=1 UltiSnipsAddFiletypes :call UltiSnips#AddFiletypes(<q-args>)
 
-augroup UltiSnips
-    au!
-    au CursorMovedI * call UltiSnips#CursorMoved()
-    au CursorMoved * call UltiSnips#CursorMoved()
-
-    au InsertLeave * call UltiSnips#LeavingInsertMode()
-
-    au BufLeave * call UltiSnips#LeavingBuffer()
-    au CmdwinEnter * call UltiSnips#LeavingBuffer()
-    au CmdwinLeave * call UltiSnips#LeavingBuffer()
-augroup END
-
 call UltiSnips#map_keys#MapKeys()
 
 " vim: ts=8 sts=4 sw=4

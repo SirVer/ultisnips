@@ -83,7 +83,7 @@ class SnippetManager(object):
         self.expand_trigger = expand_trigger
         self.forward_trigger = forward_trigger
         self.backward_trigger = backward_trigger
-        self._inner_mappings_in_place = False
+        self._inner_state_up = False
         self._supertab_keys = None
 
         self._csnippets = []
@@ -269,8 +269,8 @@ class SnippetManager(object):
     @err_to_scratch_buffer
     def _cursor_moved(self):
         """Called whenever the cursor moved."""
-        if not self._csnippets and self._inner_mappings_in_place:
-            self._unmap_inner_keys()
+        if not self._csnippets and self._inner_state_up:
+            self._teardown_inner_state()
         self._vstate.remember_position()
         if _vim.eval('mode()') not in 'in':
             return
@@ -333,8 +333,9 @@ class SnippetManager(object):
             self._csnippets[0].update_textobjects()
             self._vstate.remember_buffer(self._csnippets[0])
 
-    def _map_inner_keys(self):
-        """Map keys that should only be defined when a snippet is active."""
+    def _setup_inner_state(self):
+        """Map keys and create autocommands that should only be defined when a
+        snippet is active."""
         if self.expand_trigger != self.forward_trigger:
             _vim.command('inoremap <buffer> <silent> ' + self.forward_trigger +
                          ' <C-R>=UltiSnips#JumpForwards()<cr>')
@@ -344,11 +345,27 @@ class SnippetManager(object):
                      ' <C-R>=UltiSnips#JumpBackwards()<cr>')
         _vim.command('snoremap <buffer> <silent> ' + self.backward_trigger +
                      ' <Esc>:call UltiSnips#JumpBackwards()<cr>')
-        self._inner_mappings_in_place = True
 
-    def _unmap_inner_keys(self):
-        """Unmap keys that should not be active when no snippet is active."""
-        if not self._inner_mappings_in_place:
+        # Setup the autogroups.
+        _vim.command('augroup UltiSnips')
+        _vim.command('autocmd!')
+        _vim.command('autocmd CursorMovedI * call UltiSnips#CursorMoved()')
+        _vim.command('autocmd CursorMoved * call UltiSnips#CursorMoved()')
+
+        _vim.command(
+            'autocmd InsertLeave * call UltiSnips#LeavingInsertMode()')
+
+        _vim.command('autocmd BufLeave * call UltiSnips#LeavingBuffer()')
+        _vim.command(
+            'autocmd CmdwinEnter * call UltiSnips#LeavingBuffer()')
+        _vim.command(
+            'autocmd CmdwinLeave * call UltiSnips#LeavingBuffer()')
+        _vim.command('augroup END')
+        self._inner_state_up = True
+
+    def _teardown_inner_state(self):
+        """Reverse _setup_inner_state."""
+        if not self._inner_state_up:
             return
         try:
             if self.expand_trigger != self.forward_trigger:
@@ -356,7 +373,10 @@ class SnippetManager(object):
                 _vim.command('sunmap <buffer> %s' % self.forward_trigger)
             _vim.command('iunmap <buffer> %s' % self.backward_trigger)
             _vim.command('sunmap <buffer> %s' % self.backward_trigger)
-            self._inner_mappings_in_place = False
+            _vim.command('augroup UltiSnips')
+            _vim.command('autocmd!')
+            _vim.command('augroup END')
+            self._inner_state_up = False
         except _vim.error:
             # This happens when a preview window was opened. This issues
             # CursorMoved, but not BufLeave. We have no way to unmap, until we
@@ -402,7 +422,7 @@ class SnippetManager(object):
         """The current snippet should be terminated."""
         self._csnippets.pop()
         if not self._csnippets:
-            self._unmap_inner_keys()
+            self._teardown_inner_state()
 
     def _jump(self, backwards=False):
         """Helper method that does the actual jump."""
@@ -530,7 +550,7 @@ class SnippetManager(object):
     def _do_snippet(self, snippet, before):
         """Expands the given snippet, and handles everything that needs to be
         done with it."""
-        self._map_inner_keys()
+        self._setup_inner_state()
 
         # Adjust before, maybe the trigger is not the complete word
         text_before = before

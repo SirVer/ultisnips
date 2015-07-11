@@ -7,7 +7,6 @@ let b:did_autoload_ultisnips = 1
 exec g:_uspy "import vim"
 exec g:_uspy "from UltiSnips import UltiSnips_Manager"
 
-" FUNCTIONS {{{
 function! s:compensate_for_pum()
     """ The CursorMovedI event is not triggered while the popup-menu is visible,
     """ and it's by this event that UltiSnips updates its vim-state. The fix is
@@ -145,4 +144,3 @@ endf
 function! UltiSnips#LeavingInsertMode()
     exec g:_uspy "UltiSnips_Manager._leaving_insert_mode()"
 endfunction
-" }}}

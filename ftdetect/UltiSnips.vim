@@ -8,7 +8,7 @@ endif
 
 if has("autocmd")
     augroup UltiSnipsFileType
-        au!
+        autocmd!
         autocmd FileType * call UltiSnips#FileTypeChanged()
     augroup END
 
