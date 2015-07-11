@@ -132,8 +132,7 @@ Using Pathogen:                                     *UltiSnips-using-pathogen*
 If you are a pathogen user, you can track the official mirror of UltiSnips on
 github: >
 
-   $ cd ~/.vim/
-   $ git submodule add git://github.com/SirVer/ultisnips.git bundle/ultisnips
+   $ cd ~/.vim/bundle && git clone git://github.com/SirVer/ultisnips.git
 
 If you also want the default snippets, also track >
 
