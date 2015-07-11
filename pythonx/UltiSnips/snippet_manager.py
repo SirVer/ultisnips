@@ -344,6 +344,7 @@ class SnippetManager(object):
                      ' <C-R>=UltiSnips#JumpBackwards()<cr>')
         _vim.command('snoremap <buffer> <silent> ' + self.backward_trigger +
                      ' <Esc>:call UltiSnips#JumpBackwards()<cr>')
+        _vim.command('silent doautocmd User UltiSnipsMapInnerKeys')
         self._inner_mappings_in_place = True
 
     def _unmap_inner_keys(self):
@@ -351,6 +352,7 @@ class SnippetManager(object):
         if not self._inner_mappings_in_place:
             return
         try:
+            _vim.command('silent doautocmd User UltiSnipsUnmapInnerKeys')
             if self.expand_trigger != self.forward_trigger:
                 _vim.command('iunmap <buffer> %s' % self.forward_trigger)
                 _vim.command('sunmap <buffer> %s' % self.forward_trigger)
