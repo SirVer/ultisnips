@@ -363,6 +363,8 @@ class SnippetManager(object):
         _vim.command(
             'autocmd CmdwinLeave * call UltiSnips#LeavingBuffer()')
         _vim.command('augroup END')
+
+        _vim.command('silent doautocmd User UltiSnipsEnterFirstSnippet')
         self._inner_state_up = True
 
     def _teardown_inner_state(self):
@@ -370,6 +372,7 @@ class SnippetManager(object):
         if not self._inner_state_up:
             return
         try:
+            _vim.command('silent doautocmd User UltiSnipsExitLastSnippet')
             if self.expand_trigger != self.forward_trigger:
                 _vim.command('iunmap <buffer> %s' % self.forward_trigger)
                 _vim.command('sunmap <buffer> %s' % self.forward_trigger)

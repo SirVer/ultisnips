@@ -12,7 +12,8 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    3.1 Commands                                 |UltiSnips-commands|
    3.2 Triggers                                 |UltiSnips-triggers|
       3.2.1 Using your own trigger functions    |UltiSnips-trigger-functions|
-      3.2.2 Path to Python Module               |UltiSnips-python-module-path|
+      3.2.2 Custom autocommands                 |UltiSnips-custom-autocommands|
+      3.2.3 Path to Python Module               |UltiSnips-python-module-path|
    3.3 Snippet Search Path                      |UltiSnips-snippet-search-path|
    3.4 Warning About Select Mode Mappings       |UltiSnips-warning-smappings|
    3.5 Functions                                |UltiSnips-functions|
@@ -301,7 +302,34 @@ then you define your mapping as >
 and if the you can't expand or jump from the current location then the
 alternative function IMAP_Jumpfunc('', 0) is called.
 
-3.2.2 Path to Python module                   *UltiSnips-python-module-path*
+3.2.2 Custom autocommands                       *UltiSnips-custom-autocommands*
+-------------------------
+
+                          *UltiSnipsEnterFirstSnippet* *UltiSnipsExitLastSnippet*
+For maximum compatibility with other plug-ins, UltiSnips sets up some special
+state, include mappings and autocommands, when a snippet starts being
+expanded, and tears them down once the last snippet has been exited. In order
+to make it possible to override these "inner" settings, it fires the following
+"User" autocommands:
+
+UltiSnipsEnterFirstSnippet
+UltiSnipsExitLastSnippet
+
+For example, to call a pair of custom functions in response to these events,
+you might do: >
+
+   autocmd! User UltiSnipsEnterFirstSnippet
+   autocmd User UltiSnipsEnterFirstSnippet call CustomInnerKeyMapper()
+   autocmd! User UltiSnipsExitLastSnippet
+   autocmd User UltiSnipsExitLastSnippet call CustomInnerKeyUnmapper()
+
+Note that snippet expansion may be nested, in which case
+|UltiSnipsEnterFirstSnippet| will fire only as the first (outermost) snippet
+is entered, and |UltiSnipsExitLastSnippet| will only fire once the last
+(outermost) snippet have been exited.
+
+
+3.2.3 Path to Python module                   *UltiSnips-python-module-path*
 ---------------------------
 
 For even more advanced usage, you can directly write python functions using
@@ -1534,6 +1562,7 @@ individuals have contributed to UltiSnips (in chronological order):
    Dettorer - dettorer
    Zhao Jiarong - kawing-chiu
    Ye Ding - dyng
+   Greg Hurrell - wincent
 
 
 Thank you for your support.
