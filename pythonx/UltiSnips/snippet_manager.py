@@ -336,6 +336,8 @@ class SnippetManager(object):
     def _setup_inner_state(self):
         """Map keys and create autocommands that should only be defined when a
         snippet is active."""
+        if self._inner_state_up:
+            return
         if self.expand_trigger != self.forward_trigger:
             _vim.command('inoremap <buffer> <silent> ' + self.forward_trigger +
                          ' <C-R>=UltiSnips#JumpForwards()<cr>')
