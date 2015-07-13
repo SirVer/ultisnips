@@ -305,6 +305,10 @@ alternative function IMAP_Jumpfunc('', 0) is called.
 3.2.2 Custom autocommands                       *UltiSnips-custom-autocommands*
 -------------------------
 
+Note Autocommands must *not* change the buffer in any way. If lines are added,
+deleted, or modified it will confuse UltiSnips which might scramble your
+snippets contents.
+
                           *UltiSnipsEnterFirstSnippet* *UltiSnipsExitLastSnippet*
 For maximum compatibility with other plug-ins, UltiSnips sets up some special
 state, include mappings and autocommands, when a snippet starts being
@@ -327,6 +331,7 @@ Note that snippet expansion may be nested, in which case
 |UltiSnipsEnterFirstSnippet| will fire only as the first (outermost) snippet
 is entered, and |UltiSnipsExitLastSnippet| will only fire once the last
 (outermost) snippet have been exited.
+
 
 
 3.2.3 Path to Python module                   *UltiSnips-python-module-path*
