@@ -1,5 +1,5 @@
-from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
+from test.vim_test_case import VimTestCase as _VimTest
 
 
 class ContextSnippets_SimpleSnippet(_VimTest):
@@ -40,7 +40,6 @@ class ContextSnippets_DoNotExpandOnFalse(_VimTest):
         """}
     keys = 'a' + EX
     wanted = keys
-
 
 
 class ContextSnippets_UseContext(_VimTest):
@@ -99,8 +98,8 @@ class ContextSnippets_PriorityKeyword(_VimTest):
         endsnippet
         """}
 
-    keys = "i" + EX
-    wanted = "b"
+    keys = 'i' + EX
+    wanted = 'b'
 
 
 class ContextSnippets_ReportError(_VimTest):
@@ -110,18 +109,21 @@ class ContextSnippets_ReportError(_VimTest):
         endsnippet
         """}
 
-    keys = "e" + EX
-    wanted = "e" + EX
+    keys = 'e' + EX
+    wanted = 'e' + EX
     expected_error = r"NameError: name 'Tru' is not defined"
 
 
 class ContextSnippets_ReportErrorOnIndexOutOfRange(_VimTest):
+    # Working around: https://github.com/neovim/python-client/issues/128.
+    skip_if = lambda self: 'Bug in Neovim.' \
+            if self.vim_flavor == 'neovim' else None
     files = { 'us/all.snippets': r"""
         snippet e "desc" "buffer[123]" e
         error
         endsnippet
         """}
 
-    keys = "e" + EX
-    wanted = "e" + EX
+    keys = 'e' + EX
+    wanted = 'e' + EX
     expected_error = r"IndexError: line number out of range"

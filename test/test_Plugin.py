@@ -85,7 +85,7 @@ class Plugin_SuperTab_SimpleTest(_VimTest):
 
     def _before_test(self):
         # Make sure that UltiSnips has the keymap
-        self.vim.send(':call UltiSnips#map_keys#MapKeys()\n')
+        self.vim.send_to_vim(':call UltiSnips#map_keys#MapKeys()\n')
 
     def _extra_vim_config(self, vim_config):
         assert EX == '\t'  # Otherwise this test needs changing.

@@ -9,7 +9,7 @@ import textwrap
 import time
 import unittest
 
-from test.constant import PYTHON3
+from test.constant import PYTHON3, SEQUENCES
 from test.vim_interface import create_directory, TempFileManager
 
 
@@ -33,6 +33,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
     skip_if = lambda self: None
     version = None  # Will be set to vim --version output
     maxDiff = None  # Show all diff output, always.
+    vim_flavor = None # will be 'vim' or 'neovim'.
 
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)
@@ -78,6 +79,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         os.symlink(source, os.path.join(absdir, os.path.basename(source)))
 
     def setUp(self):
+        # TODO(sirver): this uses 'vim', but must use --vim from the commandline.
         if not VimTestCase.version:
             VimTestCase.version, _ = subprocess.Popen(['vim', '--version'],
                                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
@@ -110,9 +112,13 @@ class VimTestCase(unittest.TestCase, TempFileManager):
                     'bundle')
             vim_config.append('execute pathogen#infect()')
 
-        # Vim parameters.
+        # Some configurations are unnecessary for vanilla Vim, but Neovim
+        # defines some defaults differently.
         vim_config.append('syntax on')
         vim_config.append('filetype plugin indent on')
+        vim_config.append('set nosmarttab')
+        vim_config.append('set noautoindent')
+        vim_config.append('set backspace=""')
         vim_config.append('set clipboard=""')
         vim_config.append('set encoding=utf-8')
         vim_config.append('set fileencoding=utf-8')
@@ -127,6 +133,10 @@ class VimTestCase(unittest.TestCase, TempFileManager):
             'let g:UltiSnipsUsePythonVersion="%i"' %
             (3 if PYTHON3 else 2))
         vim_config.append('let g:UltiSnipsSnippetDirectories=["us"]')
+        if self.python_host_prog:
+            vim_config.append('let g:python_host_prog="%s"' % self.python_host_prog)
+        if self.python3_host_prog:
+            vim_config.append('let g:python3_host_prog="%s"' % self.python3_host_prog)
 
         self._extra_vim_config(vim_config)
 
@@ -170,9 +180,17 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         if not self.interrupt:
             # Go into insert mode and type the keys but leave Vim some time to
             # react.
-            for c in 'i' + self.keys:
-                self.vim.send(c)
+            text = 'i' + self.keys
+            while text:
+                to_send = None
+                for seq in SEQUENCES:
+                    if text.startswith(seq):
+                        to_send = seq
+                        break
+                to_send = to_send or text[0]
+                self.vim.send_to_vim(to_send)
                 time.sleep(self.sleeptime)
+                text = text[len(to_send):]
             self.output = self.vim.get_buffer_data()
 
     def tearDown(self):

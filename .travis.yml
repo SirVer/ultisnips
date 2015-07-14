@@ -2,18 +2,12 @@ language: python
 
 python:
   - 2.7
-  - 3.2
   - 3.3
   - 3.4
 env:
   - VIM_VERSION="74"
   - VIM_VERSION="mercurial"
-  # - VIM_VERSION="NEOVIM"
-
-matrix:
-  allow_failures:
-    # TODO(sirver): Neovim does not play well with our testing right now.
-    - env: VIM_VERSION="NEOVIM"
+  - VIM_VERSION="NEOVIM"
 
 install:
    # Some of these commands fail transiently. We keep retrying them until they succeed.

@@ -56,7 +56,8 @@ build_vanilla_vim () {
 if [[ $VIM_VERSION = "74" || $VIM_VERSION = "mercurial" ]]; then
    build_vanilla_vim
 elif [[ $VIM_VERSION == "NEOVIM" ]]; then
-   pip install neovim
+   PIP=$(which pip)
+   $PIP install neovim
 else
    echo "Unknown VIM_VERSION: $VIM_VERSION"
    exit 1

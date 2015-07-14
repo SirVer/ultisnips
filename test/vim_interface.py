@@ -94,11 +94,16 @@ class VimInterface(TempFileManager):
 
     def get_buffer_data(self):
         buffer_path = self.unique_name_temp(prefix='buffer_')
-        self.send(ESC + ':w! %s\n' % buffer_path)
+        self.send_to_vim(ESC + ':w! %s\n' % buffer_path)
         if wait_until_file_exists(buffer_path, 50):
             return read_text_file(buffer_path)[:-1]
 
-    def send(self, s):
+    def send_to_terminal(self, s):
+        """Types 's' into the terminal."""
+        raise NotImplementedError()
+
+    def send_to_vim(self, s):
+        """Types 's' into the vim instance under test."""
         raise NotImplementedError()
 
     def launch(self, config=[]):
@@ -121,13 +126,16 @@ class VimInterface(TempFileManager):
         config_path = self.write_temp('vim_config.vim',
                                       textwrap.dedent(os.linesep.join(config + post_config) + '\n'))
 
-        # Note the space to exclude it from shell history.
-        self.send(""" %s -u %s\r\n""" % (self._vim_executable, config_path))
+        # Note the space to exclude it from shell history. Also we always set
+        # NVIM_LISTEN_ADDRESS, even when running vanilla vim, because it will
+        # just not care.
+        self.send_to_terminal(""" NVIM_LISTEN_ADDRESS=/tmp/nvim %s -u %s\r\n""" % (
+            self._vim_executable, config_path))
         wait_until_file_exists(done_file)
         self._vim_pid = int(open(pid_file, 'r').read())
 
     def leave_with_wait(self):
-        self.send(3 * ESC + ':qa!\n')
+        self.send_to_vim(3 * ESC + ':qa!\n')
         while is_process_running(self._vim_pid):
             time.sleep(.05)
 
@@ -139,7 +147,7 @@ class VimInterfaceTmux(VimInterface):
         self.session = session
         self._check_version()
 
-    def send(self, s):
+    def _send(self, s):
         # I did not find any documentation on what needs escaping when sending
         # to tmux, but it seems like this is all that is needed for now.
         s = s.replace(';', r'\;')
@@ -147,6 +155,12 @@ class VimInterfaceTmux(VimInterface):
         if PYTHON3:
             s = s.encode('utf-8')
         silent_call(['tmux', 'send-keys', '-t', self.session, '-l', s])
+
+    def send_to_terminal(self, s):
+        return self._send(s)
+
+    def send_to_vim(self, s):
+        return self._send(s)
 
     def _check_version(self):
         stdout, _ = subprocess.Popen(['tmux', '-V'],
@@ -159,6 +173,33 @@ class VimInterfaceTmux(VimInterface):
                 'Need at least tmux 1.8, you have %s.' %
                 stdout.strip())
 
+class VimInterfaceTmuxNeovim(VimInterfaceTmux):
+
+    def __init__(self, vim_executable, session):
+        VimInterfaceTmux.__init__(self, vim_executable, session)
+        self._nvim = None
+
+    def send_to_vim(self, s):
+        if s == ARR_L:
+            s = "<Left>"
+        elif s == ARR_R:
+            s = "<Right>"
+        elif s == ARR_U:
+            s = "<Up>"
+        elif s == ARR_D:
+            s = "<Down>"
+        elif s == BS:
+            s = "<bs>"
+        elif s == ESC:
+            s = "<esc>"
+        elif s == "<":
+            s = "<lt>"
+        self._nvim.input(s)
+
+    def launch(self, config=[]):
+        import neovim
+        VimInterfaceTmux.launch(self, config)
+        self._nvim = neovim.attach('socket', path='/tmp/nvim')
 
 class VimInterfaceWindows(VimInterface):
     BRACES = re.compile('([}{])')

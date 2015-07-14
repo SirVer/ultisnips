@@ -78,7 +78,7 @@ class NonUnicodeDataInUnnamedRegister(_VimTest):
         # The string below was the one a user had on their clipboard when
         # encountering the UnicodeDecodeError and could not be coerced into
         # unicode.
-        self.vim.send(
+        self.vim.send_to_vim(
             ':let @" = "\\x80kdI{\\x80@7 1},' +
             '\\x80kh\\x80kh\\x80kd\\x80kdq\\x80kb\\x1b"\n')
 # End: #171  #}}}
