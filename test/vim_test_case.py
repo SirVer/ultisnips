@@ -26,7 +26,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
     expected_error = ''
     wanted = ''
     keys = ''
-    sleeptime = 0.00
+    sleeptime = 0.02
     output = ''
     plugins = []
     # Skip this test for the given reason or None for not skipping it.
