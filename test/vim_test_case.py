@@ -48,7 +48,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         for i in range(self.retries):
             if self.output != wanted:
                 # Redo this, but slower
-                self.sleeptime += 0.02
+                self.sleeptime += 0.05
                 self.tearDown()
                 self.setUp()
         self.assertEqual(self.output, wanted)
