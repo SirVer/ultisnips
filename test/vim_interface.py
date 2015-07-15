@@ -137,7 +137,7 @@ class VimInterface(TempFileManager):
     def leave_with_wait(self):
         self.send_to_vim(3 * ESC + ':qa!\n')
         while is_process_running(self._vim_pid):
-            time.sleep(.05)
+            time.sleep(.2)
 
 
 class VimInterfaceTmux(VimInterface):
