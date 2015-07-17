@@ -1473,8 +1473,8 @@ variable method 'snip.cursor.set(line, column)' must be called with the
 desired cursor position. In that case UltiSnips will not remove any matched
 trigger text and it should be done manually in action code.
 
-To addition to the scope variables defined above 'snip.visual_content' will be also
-declared and will contain text that was selected before snippet expansion
+To addition to the scope variables defined above 'snip.visual_content' will be
+also declared and will contain text that was selected before snippet expansion
 (similar to $VISUAL placeholder).
 
 Following snippet will be expanded at 4 spaces indentation level no matter
@@ -1518,8 +1518,9 @@ Variables 'snip.snippet_start' and 'snip.snippet_end' will be defined at the
 action code scope and will point to positions of the start and end of expanded
 snippet accordingly in the form '(line, column)'.
 
-Note: 'snip.snippet_start' and 'snip.snippet_end' will automatically adjust to the
-correct positions if post-action will insert or delete lines before expansion.
+Note: 'snip.snippet_start' and 'snip.snippet_end' will automatically adjust to
+the correct positions if post-action will insert or delete lines before
+expansion.
 
 Following snippet will expand to method definition and automatically insert
 additional newline after end of the snippet. It's very useful to create a
