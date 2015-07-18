@@ -60,3 +60,10 @@ discussed in the videos.
 - [Episode 2: Creating Basic Snippets](http://www.sirver.net/blog/2012/01/08/second-episode-of-ultisnips-screencast/)
 - [Episode 3: What's new in version 2.0](http://www.sirver.net/blog/2012/02/05/third-episode-of-ultisnips-screencast/)
 - [Episode 4: Python Interpolation](http://www.sirver.net/blog/2012/03/31/fourth-episode-of-ultisnips-screencast/)
+
+Also the excellent [Vimcasts](http://vimcats.org) dedicated three episodes to
+UltiSnips:
+
+- [Meet UltiSnips](http://vimcasts.org/episodes/meet-ultisnips/)
+- [Using Python interpolation in UltiSnips snippets](http://vimcasts.org/episodes/ultisnips-python-interpolation/)
+- [Using selected text in UltiSnips snippets](http://vimcasts.org/episodes/ultisnips-visual-placeholder/)

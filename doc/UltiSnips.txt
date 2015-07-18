@@ -60,10 +60,6 @@ Snippets are common in structured text like source code but can also be used
 for general editing like, for example, inserting a signature in an email or
 inserting the current date in a text file.
 
-UltiSnips was developed using the TDD (Test-driven development) philosophy.
-This ensures that features do not disappear and bugs do not reappear after
-they have been fixed.
-
 On my blog, http://www.sirver.net, I posted several short screencasts, which
 make a great introduction to UltiSnips, illustrating its features and usage.
 
@@ -72,6 +68,12 @@ http://www.sirver.net/blog/2012/01/08/second-episode-of-ultisnips-screencast/
 http://www.sirver.net/blog/2012/02/05/third-episode-of-ultisnips-screencast/
 http://www.sirver.net/blog/2012/03/31/fourth-episode-of-ultisnips-screencast/
 
+Also the excellent [Vimcasts](http://vimcats.org) dedicated three episodes to
+UltiSnips:
+
+http://vimcasts.org/episodes/meet-ultisnips/
+http://vimcasts.org/episodes/ultisnips-python-interpolation/
+http://vimcasts.org/episodes/ultisnips-visual-placeholder/
 
 1.1 Requirements                                     *UltiSnips-requirements*
 ----------------
