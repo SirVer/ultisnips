@@ -9,7 +9,7 @@ import textwrap
 import time
 import unittest
 
-from test.constant import PYTHON3, SEQUENCES
+from test.constant import PYTHON3, SEQUENCES, EX
 from test.vim_interface import create_directory, TempFileManager
 
 
@@ -129,6 +129,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         vim_config.append('set buftype=nofile')
         vim_config.append('set shortmess=at')
         vim_config.append('let @" = ""')
+        assert EX == "\t"  # Otherwise you need to change the next line
         vim_config.append('let g:UltiSnipsExpandTrigger="<tab>"')
         vim_config.append('let g:UltiSnipsJumpForwardTrigger="?"')
         vim_config.append('let g:UltiSnipsJumpBackwardTrigger="+"')

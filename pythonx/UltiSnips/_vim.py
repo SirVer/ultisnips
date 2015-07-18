@@ -162,7 +162,7 @@ def select(start, end):
             move_cmd += '%iG%i|' % virtual_position(end.line + 1, end.col + 1)
         move_cmd += 'o%iG%i|o\\<c-g>' % virtual_position(
             start.line + 1, start.col + 1)
-    feedkeys(_LangMapTranslator().translate(move_cmd))
+    feedkeys(move_cmd)
 
 
 def _unmap_select_mode_mapping():
@@ -232,65 +232,3 @@ def _unmap_select_mode_mapping():
                     # This case should be rare enough to not bother us
                     # though.
                     pass
-
-
-class _RealLangMapTranslator(object):
-
-    """This cares for the Vim langmap option and basically reverses the
-    mappings. This was the only solution to get UltiSnips to work nicely with
-    langmap; other stuff I tried was using inoremap movement commands and
-    caching and restoring the langmap option.
-
-    Note that this will not work if the langmap overwrites a character
-    completely, for example if 'j' is remapped, but nothing is mapped
-    back to 'j', then moving one line down is no longer possible and
-    UltiSnips will fail.
-
-    """
-    _maps = {}
-    _SEMICOLONS = re.compile(r"(?<!\\);")
-    _COMMA = re.compile(r"(?<!\\),")
-
-    def _create_translation(self, langmap):
-        """Create the reverse mapping from 'langmap'."""
-        from_chars, to_chars = '', ''
-        for char in self._COMMA.split(langmap):
-            char = char.replace('\\,', ',')
-            res = self._SEMICOLONS.split(char)
-            if len(res) > 1:
-                from_char, to_char = [a.replace('\\;', ';') for a in res]
-                from_chars += from_char
-                to_chars += to_char
-            else:
-                from_chars += char[::2]
-                to_chars += char[1::2]
-        self._maps[langmap] = (from_chars, to_chars)
-
-    def translate(self, text):
-        """Inverse map 'text' through langmap."""
-        langmap = eval('&langmap').strip()
-        if langmap == '':
-            return text
-        text = as_unicode(text)
-        if langmap not in self._maps:
-            self._create_translation(langmap)
-        for before, after in zip(*self._maps[langmap]):
-            text = text.replace(before, after)
-        return text
-
-
-class _DummyLangMapTranslator(object):
-
-    """If vim hasn't got the langmap compiled in, or is using langnoremap, we
-    never have to do anything.
-
-    Then this class is used.
-
-    """
-    translate = lambda self, s: s
-
-_LangMapTranslator = _RealLangMapTranslator
-if not int(eval('has("langmap")')):
-    _LangMapTranslator = _DummyLangMapTranslator
-elif int(eval('exists("+langnoremap") && &langnoremap')):
-    _LangMapTranslator = _DummyLangMapTranslator
