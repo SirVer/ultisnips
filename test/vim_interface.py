@@ -107,6 +107,7 @@ class VimInterface(TempFileManager):
         raise NotImplementedError()
 
     def launch(self, config=[]):
+        """Returns the python version in Vim as a string, e.g. '2.7'"""
         pid_file = self.name_temp('vim.pid')
         done_file = self.name_temp('loading_done')
         if os.path.exists(done_file):
@@ -114,25 +115,25 @@ class VimInterface(TempFileManager):
 
         post_config = []
         post_config.append('%s << EOF' % ('py3' if PYTHON3 else 'py'))
-        post_config.append('import vim')
+        post_config.append('import vim, sys')
         post_config.append(
             "with open('%s', 'w') as pid_file: pid_file.write(vim.eval('getpid()'))" %
             pid_file)
-        post_config.append(
-            "with open('%s', 'w') as done_file: pass" %
-            done_file)
+        post_config.append("with open('%s', 'w') as done_file:" % done_file)
+        post_config.append("    done_file.write('%i.%i.%i' % sys.version_info[:3])")
         post_config.append('EOF')
 
         config_path = self.write_temp('vim_config.vim',
                                       textwrap.dedent(os.linesep.join(config + post_config) + '\n'))
 
         # Note the space to exclude it from shell history. Also we always set
-        # NVIM_LISTEN_ADDRESS, even when running vanilla vim, because it will
+        # NVIM_LISTEN_ADDRESS, even when running vanilla Vim, because it will
         # just not care.
         self.send_to_terminal(""" NVIM_LISTEN_ADDRESS=/tmp/nvim %s -u %s\r\n""" % (
             self._vim_executable, config_path))
         wait_until_file_exists(done_file)
-        self._vim_pid = int(open(pid_file, 'r').read())
+        self._vim_pid = int(read_text_file(pid_file))
+        return read_text_file(done_file).strip()
 
     def leave_with_wait(self):
         self.send_to_vim(3 * ESC + ':qa!\n')
@@ -198,8 +199,9 @@ class VimInterfaceTmuxNeovim(VimInterfaceTmux):
 
     def launch(self, config=[]):
         import neovim
-        VimInterfaceTmux.launch(self, config)
+        rv = VimInterfaceTmux.launch(self, config)
         self._nvim = neovim.attach('socket', path='/tmp/nvim')
+        return rv
 
 class VimInterfaceWindows(VimInterface):
     BRACES = re.compile('([}{])')

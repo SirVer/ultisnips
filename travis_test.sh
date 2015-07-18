@@ -32,9 +32,16 @@ else
    PY_IN_VIM="py3"
 fi
 
-echo "Using python from: $PYTHON_CMD Version: $($PYTHON_CMD --version 2>&1)"
+PYTHON_VERSION=$($PYTHON_CMD -c 'import sys;print(sys.version.split()[0])')
+echo "Using python from: $PYTHON_CMD Version: $PYTHON_VERSION"
 echo "Using vim from: $VIM. Version: $($VIMn)"
 
 tmux new -d -s vim
 
-$PYTHON_CMD ./test_all.py -v --plugins $INTERFACE --session vim --vim $VIM
+$PYTHON_CMD ./test_all.py \
+   -v \
+   --plugins \
+   --session vim \
+   --vim $VIM \
+   $INTERFACE \
+   --expected-python-version $PYTHON_VERSION

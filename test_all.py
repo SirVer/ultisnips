@@ -107,11 +107,14 @@ if __name__ == '__main__':
                      help="Interface to use. Use 'tmux' with vanilla Vim and 'tmux_nvim' "
                      'with Neovim.')
         p.add_option('--python-host-prog', dest='python_host_prog', type=str, default='',
-                # NOCOM(#sirver): what
-                     help="")
+                     help='Neovim needs a variable to tell it which python interpretor to use for '
+                     'py blocks. This needs to be set to point to the correct python interpretor. '
+                     'It is ignored for vanilla Vim.')
         p.add_option('--python3-host-prog', dest='python3_host_prog', type=str, default='',
-                # NOCOM(#sirver): what
-                     help="")
+                     help='See --python-host-prog.')
+        p.add_option('--expected-python-version', dest='expected_python_version', type=str, default='',
+                     help='If set, each test will check sys.version inside of vim to '
+                     'verify we are testing against the expected Python version.')
 
         o, args = p.parse_args()
         return o, args
@@ -156,6 +159,7 @@ if __name__ == '__main__':
             test.test_plugins = options.plugins
             test.python_host_prog = options.python_host_prog
             test.python3_host_prog = options.python3_host_prog
+            test.expected_python_version = options.expected_python_version
             test.vim = vim
             test.vim_flavor = vim_flavor
             all_other_plugins.update(test.plugins)
