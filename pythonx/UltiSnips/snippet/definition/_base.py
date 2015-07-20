@@ -10,10 +10,10 @@ import vim
 from UltiSnips import _vim
 from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
+from UltiSnips.position import Position
 from UltiSnips.text import escape
 from UltiSnips.text_objects import SnippetInstance
-from UltiSnips.text_objects._python_code import SnippetUtilForAction, SnippetUtilCursor
-from UltiSnips.position import Position
+from UltiSnips.text_objects._python_code import SnippetUtilCursor, SnippetUtilForAction
 
 __WHITESPACE_SPLIT = re.compile(r"\s")
 def split_at_whitespace(string):
@@ -103,8 +103,6 @@ class SnippetDefinition(object):
         ])
 
         current = vim.current
-
-        holder = {'result': False}
 
         locals = {
             'window': current.window,
