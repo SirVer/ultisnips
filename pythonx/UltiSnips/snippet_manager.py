@@ -365,8 +365,6 @@ class SnippetManager(object):
         _vim.command('autocmd!')
         _vim.command('autocmd CursorMovedI * call UltiSnips#CursorMoved()')
         _vim.command('autocmd CursorMoved * call UltiSnips#CursorMoved()')
-        _vim.command('autocmd InsertCharPre * call UltiSnips#TrackChange()')
-        _vim.command('autocmd TextChangedI * call UltiSnips#TrackChange()')
 
         _vim.command(
             'autocmd InsertLeave * call UltiSnips#LeavingInsertMode()')
@@ -779,11 +777,12 @@ class SnippetManager(object):
     @err_to_scratch_buffer
     def _track_change(self):
         inserted_char = _vim.eval('v:char')
-        if inserted_char == '':
-            before = _vim.buf.line_till_cursor
-            if before and before[-1] == self._last_inserted_char:
-                self._try_expand(autotrigger_only=True)
-        else:
+        try:
+            if inserted_char == '':
+                before = _vim.buf.line_till_cursor
+                if before and before[-1] == self._last_inserted_char:
+                    self._try_expand(autotrigger_only=True)
+        finally:
             self._last_inserted_char = inserted_char
 
 
