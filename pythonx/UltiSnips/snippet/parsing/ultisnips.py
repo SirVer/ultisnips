@@ -3,7 +3,7 @@
 
 """Parses a UltiSnips snippet definition and launches it into Vim."""
 
-from UltiSnips.snippet.parsing._base import tokenize_snippet_text, finalize
+from UltiSnips.snippet.parsing._base import tokenize_snippet_text, finalize, resolve_ambiguity
 from UltiSnips.snippet.parsing._lexer import EscapeCharToken, \
     VisualToken, TransformationToken, TabStopToken, MirrorToken, \
     PythonCodeToken, VimLCodeToken, ShellCodeToken
@@ -22,20 +22,6 @@ __ALLOWED_TOKENS = [
     EscapeCharToken, VisualToken, TransformationToken, TabStopToken,
     MirrorToken, PythonCodeToken, VimLCodeToken, ShellCodeToken
 ]
-
-
-def _resolve_ambiguity(all_tokens, seen_ts):
-    """$1 could be a Mirror or a TabStop.
-
-    This figures this out.
-
-    """
-    for parent, token in all_tokens:
-        if isinstance(token, MirrorToken):
-            if token.number not in seen_ts:
-                seen_ts[token.number] = TabStop(parent, token)
-            else:
-                Mirror(parent, seen_ts[token.number], token)
 
 
 def _create_transformations(all_tokens, seen_ts):
@@ -59,6 +45,6 @@ def parse_and_instantiate(parent_to, text, indent):
     """
     all_tokens, seen_ts = tokenize_snippet_text(parent_to, text, indent,
                                                 __ALLOWED_TOKENS, __ALLOWED_TOKENS, _TOKEN_TO_TEXTOBJECT)
-    _resolve_ambiguity(all_tokens, seen_ts)
+    resolve_ambiguity(all_tokens, seen_ts)
     _create_transformations(all_tokens, seen_ts)
     finalize(all_tokens, seen_ts, parent_to)

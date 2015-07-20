@@ -7,6 +7,23 @@ from UltiSnips.position import Position
 from UltiSnips.snippet.parsing._lexer import tokenize, TabStopToken
 from UltiSnips.text_objects import TabStop
 
+from UltiSnips.text_objects import  Mirror
+from UltiSnips.snippet.parsing._lexer import MirrorToken
+
+
+def resolve_ambiguity(all_tokens, seen_ts):
+    """$1 could be a Mirror or a TabStop.
+
+    This figures this out.
+
+    """
+    for parent, token in all_tokens:
+        if isinstance(token, MirrorToken):
+            if token.number not in seen_ts:
+                seen_ts[token.number] = TabStop(parent, token)
+            else:
+                Mirror(parent, seen_ts[token.number], token)
+
 
 def tokenize_snippet_text(snippet_instance, text, indent,
                           allowed_tokens_in_text, allowed_tokens_in_tabstops,

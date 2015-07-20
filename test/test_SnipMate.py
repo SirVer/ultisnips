@@ -87,6 +87,22 @@ snippet for
     wanted = 'for (j; j < blub; blub++) {\n\thi\n}'
 
 
+class snipMate_TestNoBraceTabstops(_VimTest):
+    files = { 'snippets/_.snippets': """
+snippet test
+\t$1 is $2"""}
+    keys = 'test' + EX + 'blub' + JF + 'blah'
+    wanted = 'blub is blah'
+
+
+class snipMate_TestNoBraceTabstopsAndMirrors(_VimTest):
+    files = { 'snippets/_.snippets': """
+snippet test
+\t$1 is $1, $2 is ${2}"""}
+    keys = 'test' + EX + 'blub' + JF + 'blah'
+    wanted = 'blub is blub, blah is blah'
+
+
 class snipMate_TestMirrorsInPlaceholders(_VimTest):
     files = { 'snippets/_.snippets': """
 snippet opt
