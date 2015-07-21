@@ -38,7 +38,7 @@ endif
 
 " UltiSnipsEdit will use this variable to decide if a new window
 " is opened when editing. default is "normal", allowed are also
-" "vertical", "horizontal"
+" "vertical", "horizontal", and "context".
 if !exists("g:UltiSnipsEditSplit")
     let g:UltiSnipsEditSplit = 'normal'
 endif

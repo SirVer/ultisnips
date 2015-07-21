@@ -1,3 +1,24 @@
+changes up to 3001566:
+	- New option `e`: Context aware snippets. This gives very precise and
+	  powerful control over when which snippet should be expanded.
+	  *UltiSnips-context-snippets*
+	- clearsnippets now clears all snippets below the current priority. This
+	  fits better with the priority system introduced in 3.0.
+	- Undo is more granular. Each jump and expand is now a separate undo step.
+	- UltiSnips now emits autocommands on certain events. *UltiSnips-custom-autocommands*
+	- New option `m`: Trim whitespace in all snippet lines.
+	- Improved syntax highlighting for snippets filetype.
+	- snipMate snippets support can be disabled. *UltiSnipsEnableSnipMate*
+	- UltiSnipsEditSplit got a new value 'context'. *UltiSnipsEditSplit*
+	- Mappings and autocommands are now only established when needed, i.e. when
+	  a snippet is active. This boosts performance outside of snippets.
+	- No longer supports Vim 7.3. Supported are Vim 7.4 and Neovim.
+	- Bug fixes, performance improvements, code cleanups and refactorings.
+	- Basic Unite integration.
+	- TagBar support.
+	- Ctags configuration file for snippet definitions.
+	- Now using waffle.io, gitter.im and travis-ci.com.
+
 version 3.0 (02-Mar-2014):
 	- Organisational changes: The project is now hosted on github. Snippets are
 	  now shipped separately - please track honza/vim-snippets.
@@ -7,16 +28,16 @@ version 3.0 (02-Mar-2014):
 	- UltiSnipsEdit now only edits private snippet files. Use UltiSnipsEdit! if
 	  you want to edit shipped files.
 	- New option 's' which strips trailing whitespace before jumping to next
-	  tabstop 
+	  tabstop
 	- New option 'a' which converts non-ascii characters into ascii characters
-	  in transformations. 
+	  in transformations.
 	- New keyword in snippet files: priority defines which snippets should
 	  overwrite others. This deprecates the '!' option.
 	  *UltiSnips-adding-snippets*
 	- Remove common whitespace of visual line selections before inserting in an
 	  indented tabstop.
 	- Support for overwriting the snippet directory name on a per buffer basis
-	  to support per project snippets. *UltiSnips-snippet-search-path* 
+	  to support per project snippets. *UltiSnips-snippet-search-path*
 	- The keymaps for jumping in snippets are now only mapped when a snippet is
 	  active, allowing them to be used for something else otherwise.
 	- Expanding and jumping no longer overwrites the unnamed register.
@@ -50,13 +71,13 @@ version 2.1 (14-Feb-2012):
 	- Python interpolation access to text from visual selection via snip.v.
 	- Support for transformations of ${VISUAL} texts.
 	- New or improved snippets: python, tex, texmath, ruby, rails, html, django
-	
+
 version 2.0 (05-Feb-2012):
 	- Backwards incompatible change: Support for normal mode editing. Snippets
 	  are no longer exited when leaving insert mode but only by leaving the
 	  text span of the snippets. This allows usage of normal mode commands and
 	  autoformatting. It also increases compatibility with other plugins.
-	- Backwards incompatible change: Changed glob patterns for snippets to 
+	- Backwards incompatible change: Changed glob patterns for snippets to
 	  behave more like Vim *UltiSnips-adding-snippets*
 	- Backwards incompatible change: Zero Tabstop is no longer removed in
 	  nested snippets
@@ -75,11 +96,11 @@ version 1.6 (30-Dec-2011):
 version 1.5 (24-Sep-2011):
 	- Some critical bug fixes for new vim versions.
 	- New or improved snippets: tex, texmath, python, jinja2, go, puppet, xhtml
-	- Configuration of search path for snippets *UltiSnips-snippet-search-path* 
+	- Configuration of search path for snippets *UltiSnips-snippet-search-path*
 	- New parser implementation: A little faster, more flexible and less bugged.
 
 version 1.4 (17-Jul-2011):
-	- New or improved snippets: php, html, djangohtml, mako, lua 
+	- New or improved snippets: php, html, djangohtml, mako, lua
 	- Snippets are now listed alphabetically by their trigger, no longer in
 	  order of appearance
 	- Snippet files are now automatically reloaded when they change.
@@ -114,14 +135,14 @@ version 1.2 (24-Aug-2010):
 	  more *UltiSnips-globals*
 	- added support for multi word and regular expression triggers. Very
 	  powerful in combination with python interpolation.
-	- Python interpolation became much more powerful *UltiSnips-python* 
+	- Python interpolation became much more powerful *UltiSnips-python*
 	- added support for clearsnippets command *UltiSnips-clearing-snippets*
 	- added support for option w which is a little more strict than i.
 	- added support for listing of valid triggers. Defaults to <c-tab>.
 	- added support for option i (inword expansion)
 	- extends keyword is now supported on the first line of snippet files. This makes it easy to
 	  define special cases, for example cpp extends c: a cpp trigger is useless
-	  in c, but a c trigger is valuable for cpp. 
+	  in c, but a c trigger is valuable for cpp.
 	- UltiSnips now adheres to expandtab and tabstop options of vim
 
 version 1.1 (21-Jul-2009):
@@ -135,4 +156,3 @@ version 1.1 (21-Jul-2009):
 	  with the same tab trigger ( *UltiSnips-adding-snippets* )
 	- Support for dotted filetype syntax. Now snippets for more than one filetype
 	  can be active ( *UltiSnips-adding-snippets* )
-
