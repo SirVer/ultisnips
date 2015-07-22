@@ -178,7 +178,7 @@ class EditableTextObject(TextObject):
         for children in self._editable_children:
             if children._start <= pos < children._end:
                 return children.find_parent_for_new_to(pos)
-            if children._start == pos == children._end:
+            if children._start == pos and pos == children._end:
                 return children.find_parent_for_new_to(pos)
         return self
 
