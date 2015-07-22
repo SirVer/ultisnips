@@ -95,9 +95,11 @@ class VimBufferProxy(_vim.VimBuffer):
         changes and applies them to the current snippet stack.
         """
         if isinstance(key, slice):
-            value = [as_vimencoding(l) for l in value]
+            value = [as_vimencoding(line) for line in value]
             changes = list(self._get_diff(key.start, key.stop, value))
-            self._buffer[key.start:key.stop] = value
+            self._buffer[key.start:key.stop] = [
+                line.strip('\n') for line in value
+            ]
         else:
             value = as_vimencoding(value)
             changes = list(self._get_line_diff(key, self._buffer[key], value))
