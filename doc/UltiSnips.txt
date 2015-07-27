@@ -139,7 +139,7 @@ github: >
 
 If you also want the default snippets, also track >
 
-   $ git submodule add https://github.com/honza/vim-snippets.git
+   $ cd ~/.vim/bundle && git clone git://github.com/honza/vim-snippets.git
 
 See the pathogen documentation for more details on how to update a bundle.
 
