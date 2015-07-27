@@ -48,18 +48,18 @@ class TextObject(object):
 
     """Represents any object in the text that has a span in any ways."""
 
-    def __init__(self, parent, token, end=None,
+    def __init__(self, parent, token_or_start, end=None,
                  initial_text='', tiebreaker=None):
         self._parent = parent
 
         if end is not None:  # Took 4 arguments
-            self._start = token
+            self._start = token_or_start
             self._end = end
             self._initial_text = initial_text
         else:  # Initialize from token
-            self._start = token.start
-            self._end = token.end
-            self._initial_text = token.initial_text
+            self._start = token_or_start.start
+            self._end = token_or_start.end
+            self._initial_text = token_or_start.initial_text
         self._tiebreaker = tiebreaker or Position(
             self._start.line, self._end.line)
         if parent is not None:

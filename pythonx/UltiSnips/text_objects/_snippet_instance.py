@@ -13,6 +13,7 @@ from UltiSnips import _vim
 from UltiSnips.position import Position
 from UltiSnips.text_objects._base import EditableTextObject, \
     NoneditableTextObject
+from UltiSnips.text_objects._tabstop import TabStop
 
 
 class SnippetInstance(EditableTextObject):
@@ -104,7 +105,16 @@ class SnippetInstance(EditableTextObject):
             res = self._get_next_tab(self._cts)
             if res is None:
                 self._cts = None
-                return self._tabstops.get(0, None)
+
+                ts = self._get_tabstop(self, 0)
+                if ts:
+                    return ts
+
+                # TabStop 0 was deleted. It was probably killed through some
+                # edit action. Recreate it at the end of us.
+                start = Position(self.end.line, self.end.col)
+                end = Position(self.end.line, self.end.col)
+                return TabStop(self, 0, start, end)
             else:
                 self._cts, ts = res
                 return ts

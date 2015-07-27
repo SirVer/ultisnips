@@ -26,7 +26,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
     expected_error = ''
     wanted = ''
     keys = ''
-    sleeptime = 0.02
+    sleeptime = 0.00
     output = ''
     plugins = []
     # Skip this test for the given reason or None for not skipping it.
@@ -52,7 +52,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         for i in range(self.retries):
             if self.output != wanted:
                 # Redo this, but slower
-                self.sleeptime += 0.05
+                self.sleeptime += 0.15
                 self.tearDown()
                 self.setUp()
         self.assertEqual(self.output, wanted)

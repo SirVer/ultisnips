@@ -227,6 +227,16 @@ class TabStop_TSInDefaultText_ZeroLengthNested_OverwriteSecond(_VimTest):
     wanted = """haupsblEnd"""
 
 
+class TabStop_TSInDefaultText_ZeroLengthZerothTabstop(_VimTest):
+    snippets = ('test', """Test: ${1:snippet start\nNested tabstop: $0\nsnippet end}\nTrailing text""")
+    keys = 'test' + EX + JF + 'hello'
+    wanted = "Test: snippet start\nNested tabstop: hello\nsnippet end\nTrailing text"
+
+class TabStop_TSInDefaultText_ZeroLengthZerothTabstop_Override(_VimTest):
+    snippets = ('test', """Test: ${1:snippet start\nNested tabstop: $0\nsnippet end}\nTrailing text""")
+    keys = 'test' + EX + 'blub' + JF + 'hello'
+    wanted = "Test: blub\nTrailing texthello"
+
 class TabStop_TSInDefaultText_ZeroLengthNested_OverwriteFirst(_VimTest):
     snippets = ('test', """h${1:a$2b}l""")
     keys = 'test' + EX + 'ups' + JF + 'End'
@@ -370,4 +380,3 @@ class TabStop_AdjacentTabStopAddText_ExpectCorrectResult(_VimTest):
     snippets = ('test', '[ $1$2 ] $1')
     keys = 'test' + EX + 'Hello' + JF + 'World' + JF
     wanted = '[ HelloWorld ] Hello'
-
