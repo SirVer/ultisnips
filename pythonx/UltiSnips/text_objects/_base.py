@@ -178,6 +178,8 @@ class EditableTextObject(TextObject):
         for children in self._editable_children:
             if children._start <= pos < children._end:
                 return children.find_parent_for_new_to(pos)
+            if children._start == pos and pos == children._end:
+                return children.find_parent_for_new_to(pos)
         return self
 
     ###############################
@@ -222,7 +224,8 @@ class EditableTextObject(TextObject):
                     else:
                         child._do_edit(cmd, ctab)
                         return
-                elif ((pos < child._start and child._end <= delend) or
+                elif ((pos < child._start and child._end <= delend and
+                            child.start < delend) or
                         (pos <= child._start and child._end < delend)):
                     # Case: this deletion removes the child
                     to_kill.add(child)

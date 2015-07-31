@@ -69,6 +69,11 @@ class DeleteSnippetInsertion1(_VimTest):
     snippets = ('test', r"$1${1/(.*)/(?0::.)/}")
     keys = 'test' + EX + ESC + 'u'
     wanted = 'test'
+
+class DoNotCrashOnUndoAndJumpInNestedSnippet(_VimTest):
+    snippets = ('test', r"if $1: $2")
+    keys = 'test' + EX + 'a' + JF + 'test' + EX + ESC + 'u' + JF
+    wanted = 'if a: test'
 # End: Undo of Snippet insertion  #}}}
 
 # Normal mode editing  {{{#

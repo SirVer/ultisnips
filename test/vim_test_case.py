@@ -46,16 +46,16 @@ class VimTestCase(unittest.TestCase, TempFileManager):
 
         # Only checks the output. All work is done in setUp().
         wanted = self.text_before + self.wanted + self.text_after
-        if self.expected_error:
-            self.assertRegexpMatches(self.output, self.expected_error)
-            return
         for i in range(self.retries):
-            if self.output != wanted:
+            if self.output and self.expected_error:
+                self.assertRegexpMatches(self.output, self.expected_error)
+                return
+            if self.output != wanted or self.output is None:
                 # Redo this, but slower
                 self.sleeptime += 0.15
                 self.tearDown()
                 self.setUp()
-        self.assertEqual(self.output, wanted)
+        self.assertMultiLineEqual(self.output, wanted)
 
     def _extra_vim_config(self, vim_config):
         """Adds extra lines to the vim_config list."""

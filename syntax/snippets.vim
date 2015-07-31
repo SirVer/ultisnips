@@ -151,6 +151,12 @@ syn match snipPriority "^priority\%(\s.*\|$\)" contains=snipPriorityKeyword disp
 syn match snipPriorityKeyword "^priority" contained nextgroup=snipPriorityValue skipwhite display
 syn match snipPriorityValue "-\?\d\+" contained display
 
+" Actions {{{3
+
+syn match snipAction "^\(pre_expand\|post_expand\|post_jump\)\%(\s.*\|$\)" contains=snipActionKeyword display
+syn match snipActionKeyword "^\(pre_expand\|post_expand\|post_jump\)" contained nextgroup=snipActionValue skipwhite display
+syn match snipActionValue '".*"' contained display
+
 " Snippt Clearing {{{2
 
 syn match snipClear "^clearsnippets\%(\s.*\|$\)" contains=snipClearKeyword display
@@ -200,6 +206,9 @@ hi def link snipTransformationOptions      Operator
 
 hi def link snipPriorityKeyword  Keyword
 hi def link snipPriorityValue    Number
+
+hi def link snipActionKeyword  Keyword
+hi def link snipActionValue    String
 
 hi def link snipClearKeyword     Keyword
 
