@@ -1441,7 +1441,7 @@ There are three types of actions:
 
 Specified code will be evaluated at stages defined above and same global
 variables and modules will be available that are stated in
-the *UltiSnips-context-snippets* section.
+the |UltiSnips-context-snippets| section.
 
                                                 *UltiSnips-buffer-proxy*
 
