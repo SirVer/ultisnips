@@ -6,7 +6,7 @@ if exists("vimpager")
     finish
 endif
 
-if has("autocmd")
+if has("autocmd") && &loadplugins
     augroup UltiSnipsFileType
         autocmd!
         autocmd FileType * call UltiSnips#FileTypeChanged()
