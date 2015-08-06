@@ -76,11 +76,11 @@ buf = VimBuffer()  # pylint:disable=invalid-name
 @contextmanager
 def toggle_opt(name, new_value):
     old_value = eval('&' + name)
-    command('set {}={}'.format(name, new_value))
+    command('set {0}={1}'.format(name, new_value))
     try:
         yield
     finally:
-        command('set {}={}'.format(name, old_value))
+        command('set {0}={1}'.format(name, old_value))
 
 @contextmanager
 def save_mark(name):
@@ -217,10 +217,10 @@ def delete_mark(name):
         return False
 
 def _set_pos(name, pos):
-    return eval("setpos(\"{}\", {})".format(name, pos))
+    return eval("setpos(\"{0}\", {1})".format(name, pos))
 
 def _get_pos(name):
-    return eval("getpos(\"{}\")".format(name))
+    return eval("getpos(\"{0}\")".format(name))
 
 def _is_pos_zero(pos):
     return ['0'] * 4 == pos or [0] == pos
