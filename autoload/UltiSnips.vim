@@ -1,5 +1,9 @@
 if exists("b:did_autoload_ultisnips") || !exists("g:_uspy")
-   finish
+    " Define no-op function, called via ftdetect/UltiSnips.vim.
+    function! UltiSnips#FileTypeChanged()
+    endfunction
+
+    finish
 endif
 let b:did_autoload_ultisnips = 1
 
