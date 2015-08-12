@@ -15,6 +15,8 @@ def has_patch(version, executable):
 
 
 def check_required_vim_version(test):
+    if test.vim_flavor == 'neovim':
+        return None
     if not has_patch(214, test.vim._vim_executable):
         return 'Vim newer than 7.4.214 is required'
     else:
