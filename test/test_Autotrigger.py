@@ -6,6 +6,7 @@ import subprocess
 
 def has_patch(version, executable):
     output = subprocess.check_output([executable, "--version"])
+    patch = 1
     for line in output.split("\n"):
         if line.startswith("Included patches:"):
             patch = line.split('-')[1]
