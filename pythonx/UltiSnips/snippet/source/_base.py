@@ -40,7 +40,8 @@ class SnippetSource(object):
         result = []
         for ft in self._get_existing_deep_extends(filetypes):
             snips = self._snippets[ft]
-            result.extend(snips.get_matching_snippets(before, possible, autotrigger_only))
+            result.extend(snips.get_matching_snippets(before, possible,
+                                                      autotrigger_only))
         return result
 
     def get_clear_priority(self, filetypes):

@@ -1606,7 +1606,7 @@ endsnippet
 4.11 Autotrigger                                       *UltiSnips-autotrigger*
 ----------------
 
-Many language constructions can occur only at specific places, so it's
+Many language constructs can occur only at specific places, so it's
 possible to use snippets without manually triggering them.
 
 Snippet can be marked as autotriggered by specifying 'A' option in the snippet
@@ -1615,6 +1615,9 @@ definition.
 After snippet is defined as being autotriggered, snippet condition will be
 checked on every typed character and if condition matches, then snippet will
 be triggered.
+
+*Warning:* using of this feature can lead to significant vim slowdown. If you
+discovered that, report an issue to the github.com/SirVer/UltiSnips.
 
 Consider following snippets, that can be usefull in Go programming:
 ------------------- SNIP -------------------
@@ -1630,7 +1633,8 @@ endsnippet
 ------------------- SNAP -------------------
 
 When "p" character will occur in the beginning of the line, it will be
-automatically expanded into "package main". Same with "m" character.
+automatically expanded into "package main". Same with "m" character. There is
+no need to press trigger key after "m".
 
 ==============================================================================
 5. UltiSnips and Other Plugins                      *UltiSnips-other-plugins*

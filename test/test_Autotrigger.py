@@ -13,10 +13,15 @@ def has_patch(version, executable):
     return int(patch) >= version
 
 
+def check_required_vim_version(test):
+    if not has_patch(214, test.vim._vim_executable):
+        return 'Vim newer than 7.4.214 is required'
+    else:
+        return None
+
+
 class Autotrigger_CanMatchSimpleTrigger(_VimTest):
-    skip_if = lambda self: 'Vim newer than 7.4.214 is required' if \
-        not has_patch(214, self.vim._vim_executable) \
-        else None
+    skip_if = check_required_vim_version
     files = { 'us/all.snippets': r"""
         snippet a "desc" A
         autotriggered
@@ -27,9 +32,7 @@ class Autotrigger_CanMatchSimpleTrigger(_VimTest):
 
 
 class Autotrigger_CanMatchContext(_VimTest):
-    skip_if = lambda self: 'Vim newer than 7.4.214 is required' if \
-        not has_patch(214, self.vim._vim_executable) \
-        else None
+    skip_if = check_required_vim_version
     files = { 'us/all.snippets': r"""
         snippet a "desc" "snip.line == 2" Ae
         autotriggered
@@ -37,3 +40,14 @@ class Autotrigger_CanMatchContext(_VimTest):
         """}
     keys = 'a\na'
     wanted = 'autotriggered\na'
+
+
+class Autotrigger_CanExpandOnTriggerWithLengthMoreThanOne(_VimTest):
+    skip_if = check_required_vim_version
+    files = { 'us/all.snippets': r"""
+        snippet abc "desc" A
+        autotriggered
+        endsnippet
+        """}
+    keys = 'abc'
+    wanted = 'autotriggered'
