@@ -21,6 +21,13 @@ class SnippetDictionary(object):
 
         If 'potentially' is true, returns all that could_match().
 
+        If 'autotrigger_only' is true, function will return only snippets which
+        are marked with flag 'A' (should be automatically expanded without
+        trigger key press).
+        It's handled specially to avoid walking down the list of all snippets,
+        which can be very slow, because function will be called on each change
+        made in insert mode.
+
         """
         all_snippets = self._snippets
         if autotrigger_only:
