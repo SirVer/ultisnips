@@ -54,3 +54,16 @@ class Autotrigger_CanExpandOnTriggerWithLengthMoreThanOne(_VimTest):
         """}
     keys = 'abc'
     wanted = 'autotriggered'
+
+
+class Autotrigger_WillProduceNoExceptionWithVimLowerThan214(_VimTest):
+    skip_if = lambda self: 'Vim older than 7.4.214 is required' \
+        if has_patch(214, self.vim._vim_executable) else None
+
+    files = { 'us/all.snippets': r"""
+        snippet abc "desc" A
+        autotriggered
+        endsnippet
+        """}
+    keys = 'abc'
+    wanted = 'abc'
