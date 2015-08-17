@@ -42,6 +42,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       4.10.1 Pre-expand actions                 |UltiSnips-pre-expand-actions|
       4.10.2 Post-expand actions                |UltiSnips-post-expand-actions|
       4.10.3 Post-jump actions                  |UltiSnips-post-jump-actions|
+   4.11 Autotrigger                             |UltiSnips-autotrigger|
 5. UltiSnips and Other Plugins                  |UltiSnips-other-plugins|
    5.1 Existing Integrations                    |UltiSnips-integrations|
    5.2 Extending UltiSnips                      |UltiSnips-extending|
@@ -689,6 +690,9 @@ The options currently supported are: >
        controlled not only by previous characters in line, but by any given
        python expression. This option can be specified along with other
        options, like 'b'. See |UltiSnips-context-snippets| for more info.
+
+   A   Snippet will be triggered automatically, when condition matches.
+       See |UltiSnips-autotrigger| for more info.
 
 The end line is the 'endsnippet' keyword on a line by itself. >
 
@@ -1598,6 +1602,41 @@ def $1():
 	$2
 endsnippet
 ------------------- SNAP -------------------
+
+4.11 Autotrigger                                       *UltiSnips-autotrigger*
+----------------
+
+Note: vim should be newer than 7.4.214 to support this feature.
+
+Many language constructs can occur only at specific places, so it's
+possible to use snippets without manually triggering them.
+
+Snippet can be marked as autotriggered by specifying 'A' option in the snippet
+definition.
+
+After snippet is defined as being autotriggered, snippet condition will be
+checked on every typed character and if condition matches, then snippet will
+be triggered.
+
+*Warning:* using of this feature can lead to significant vim slowdown. If you
+discovered that, report an issue to the github.com/SirVer/UltiSnips.
+
+Consider following snippets, that can be usefull in Go programming:
+------------------- SNIP -------------------
+snippet "^p" "package" rbA
+package ${1:main}
+endsnippet
+
+snippet "^m" "func main" rbA
+func main() {
+	$1
+}
+endsnippet
+------------------- SNAP -------------------
+
+When "p" character will occur in the beginning of the line, it will be
+automatically expanded into "package main". Same with "m" character. There is
+no need to press trigger key after "m""
 
 ==============================================================================
 5. UltiSnips and Other Plugins                      *UltiSnips-other-plugins*
