@@ -9,12 +9,6 @@ env:
   - VIM_VERSION="mercurial"
   - VIM_VERSION="NEOVIM"
 
-matrix:
-  allow_failures:
-    env:
-      - VIM_="NEOVIM"
-      
-
 install:
    # Some of these commands fail transiently. We keep retrying them until they succeed.
    - until sudo add-apt-repository ppa:kalakris/tmux -y; do sleep 10; done

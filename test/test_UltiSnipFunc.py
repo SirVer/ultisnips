@@ -154,8 +154,8 @@ from UltiSnips.snippet.source import SnippetSource
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
 
 class MySnippetSource(SnippetSource):
-  def get_snippets(self, filetypes, before, possible, autotrigger_only):
-    if before.endswith('blumba') and autotrigger_only == False:
+  def get_snippets(self, filetypes, before, possible):
+    if before.endswith('blumba'):
       return [
           UltiSnipsSnippetDefinition(
               -100, "blumba", "this is a dynamic snippet", "", "", {}, "blub",

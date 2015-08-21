@@ -46,12 +46,6 @@ command! -bang -nargs=? -complete=customlist,UltiSnips#FileTypeComplete UltiSnip
 
 command! -nargs=1 UltiSnipsAddFiletypes :call UltiSnips#AddFiletypes(<q-args>)
 
-augroup UltiSnips_AutoTrigger
-    au!
-    au InsertCharPre * call UltiSnips#TrackChange()
-    au TextChangedI * call UltiSnips#TrackChange()
-augroup END
-
 call UltiSnips#map_keys#MapKeys()
 
 " vim: ts=8 sts=4 sw=4
