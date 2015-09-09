@@ -72,7 +72,7 @@ http://www.sirver.net/blog/2012/01/08/second-episode-of-ultisnips-screencast/
 http://www.sirver.net/blog/2012/02/05/third-episode-of-ultisnips-screencast/
 http://www.sirver.net/blog/2012/03/31/fourth-episode-of-ultisnips-screencast/
 
-Also the excellent [Vimcasts](http://vimcats.org) dedicated three episodes to
+Also the excellent [Vimcasts](http://vimcasts.org) dedicated three episodes to
 UltiSnips:
 
 http://vimcasts.org/episodes/meet-ultisnips/
