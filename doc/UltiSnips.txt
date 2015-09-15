@@ -1000,7 +1000,7 @@ directly inside your snippets. For example to use
    endglobal
 
 
-4.4 Tabstops and Placeholders   *UltiSnips-tabstops* *UltiSnips-placeholders*
+4.5 Tabstops and Placeholders   *UltiSnips-tabstops* *UltiSnips-placeholders*
 -----------------------------
 
 Snippets are used to quickly insert reused text into a document. Often the
