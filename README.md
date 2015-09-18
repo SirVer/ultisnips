@@ -62,7 +62,7 @@ discussed in the videos.
 - [Episode 3: What's new in version 2.0](http://www.sirver.net/blog/2012/02/05/third-episode-of-ultisnips-screencast/)
 - [Episode 4: Python Interpolation](http://www.sirver.net/blog/2012/03/31/fourth-episode-of-ultisnips-screencast/)
 
-Also the excellent [Vimcasts](http://vimcats.org) dedicated three episodes to
+Also the excellent [Vimcasts](http://vimcasts.org) dedicated three episodes to
 UltiSnips:
 
 - [Meet UltiSnips](http://vimcasts.org/episodes/meet-ultisnips/)
