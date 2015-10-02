@@ -57,7 +57,7 @@ def err_to_scratch_buffer(func):
     def wrapper(self, *args, **kwds):
         try:
             return func(self, *args, **kwds)
-        except:  # pylint: disable=bare-except
+        except Exception as e:  # pylint: disable=bare-except
             msg = \
                 """An error occured. This is either a bug in UltiSnips or a bug in a
 snippet definition. If you think this is a bug, please report it to
@@ -65,7 +65,16 @@ https://github.com/SirVer/ultisnips/issues/new.
 
 Following is the full stack trace:
 """
+
             msg += traceback.format_exc()
+            if hasattr(e, 'code'):
+                msg += "\nFollowing is the full executed code:\n"
+                lines = e.code.split("\n")
+                number = 1
+                for line in lines:
+                    msg += str(number) + ": " + line + "\n"
+                    number += 1
+
             # Vim sends no WinLeave msg here.
             self._leaving_buffer()  # pylint:disable=protected-access
             _vim.new_scratch_buffer(msg)
