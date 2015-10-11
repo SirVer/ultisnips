@@ -7,12 +7,7 @@ python:
 env:
   - VIM_VERSION="74"
   - VIM_VERSION="mercurial"
-  - VIM_VERSION="NEOVIM"
-
-matrix:
-  allow_failures:
-    env:
-      - VIM_VERSION="NEOVIM"
+  # - VIM_VERSION="NEOVIM"
 
 install:
    # Some of these commands fail transiently. We keep retrying them until they succeed.
