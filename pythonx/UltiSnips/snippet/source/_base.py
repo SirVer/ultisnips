@@ -16,7 +16,7 @@ class SnippetSource(object):
         self._snippets = defaultdict(SnippetDictionary)
         self._extends = defaultdict(set)
 
-    def ensure(self, filetypes):
+    def ensure(self, filetypes, cached):
         """Update/reload the snippets in the source when needed.
 
         It makes sure that the snippets are not outdated.
