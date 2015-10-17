@@ -374,6 +374,10 @@ class SnippetManager(object):
             'autocmd CmdwinEnter * call UltiSnips#LeavingBuffer()')
         _vim.command(
             'autocmd CmdwinLeave * call UltiSnips#LeavingBuffer()')
+
+        # Also exit the snippet when we enter a unite complete buffer.
+        _vim.command('autocmd Filetype unite call UltiSnips#LeavingBuffer()')
+
         _vim.command('augroup END')
 
         _vim.command('silent doautocmd <nomodeline> User UltiSnipsEnterFirstSnippet')
