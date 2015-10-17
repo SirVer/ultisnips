@@ -554,8 +554,7 @@ class SnippetManager(object):
         clear_priority = None
         cleared = {}
         for _, source in self._snippet_sources:
-            if not autotrigger_only or not source.loaded(filetypes):
-                source.ensure(filetypes)
+            source.ensure(filetypes, cached=autotrigger_only)
 
         # Collect cleared information from sources.
         for _, source in self._snippet_sources:

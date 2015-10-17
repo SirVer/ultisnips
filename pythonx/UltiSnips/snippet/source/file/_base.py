@@ -36,11 +36,17 @@ class SnippetFileSource(SnippetSource):
         SnippetSource.__init__(self)
         self._files_for_ft = defaultdict(set)
         self._file_hashes = defaultdict(lambda: None)
+        self._ensure_cached = False
 
-    def ensure(self, filetypes):
+    def ensure(self, filetypes, cached):
+        if cached and self._ensure_cached:
+            return
+
         for ft in self.get_deep_extends(filetypes):
             if self._needs_update(ft):
                 self._load_snippets_for(ft)
+
+        self._ensure_cached = True
 
     def _get_all_snippet_files_for(self, ft):
         """Returns a set of all files that define snippets for 'ft'."""
