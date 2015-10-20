@@ -8,6 +8,7 @@ from functools import wraps
 import os
 import platform
 import traceback
+import sys
 import vim
 from contextlib import contextmanager
 
@@ -68,11 +69,19 @@ Following is the full stack trace:
 
             msg += traceback.format_exc()
             if hasattr(e, 'code'):
+                _, _, tb = sys.exc_info()
+                tb_top = traceback.extract_tb(tb)[-1]
                 msg += "\nFollowing is the full executed code:\n"
                 lines = e.code.split("\n")
                 number = 1
                 for line in lines:
-                    msg += str(number) + ": " + line + "\n"
+                    msg += str(number).rjust(3)
+                    prefix = ""
+                    if line != "":
+                        prefix = "   "
+                    if tb_top[1] == number:
+                        prefix = " > "
+                    msg += prefix + line + "\n"
                     number += 1
 
             # Vim sends no WinLeave msg here.
