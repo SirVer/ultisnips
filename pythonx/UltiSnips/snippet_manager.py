@@ -68,6 +68,9 @@ Following is the full stack trace:
 """
 
             msg += traceback.format_exc()
+            # snippet_code comes from _python_code.py, it's set manually for
+            # providing error message with stacktrace of failed python code
+            # inside of the snippet.
             if hasattr(e, 'snippet_code'):
                 _, _, tb = sys.exc_info()
                 tb_top = traceback.extract_tb(tb)[-1]
