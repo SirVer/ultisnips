@@ -239,3 +239,27 @@ endsnippet
         """}
     keys = 'ab' + EX
     wanted = 'x first a bob b y'
+
+
+class ParseSnippets_PrintPythonStacktrace(_VimTest):
+    files = { 'us/all.snippets': r"""
+        snippet test
+        `!p abc()`
+        endsnippet
+        """}
+    keys = 'test' + EX
+    wanted = keys
+    expected_error = " > abc"
+
+
+class ParseSnippets_PrintPythonStacktraceMultiline(_VimTest):
+    files = { 'us/all.snippets': r"""
+        snippet test
+        `!p if True:
+            qwe()`
+        endsnippet
+        """}
+    keys = 'test' + EX
+    wanted = keys
+    expected_error = " > \s+qwe"
+

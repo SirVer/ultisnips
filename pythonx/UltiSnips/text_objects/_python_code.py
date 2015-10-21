@@ -266,12 +266,11 @@ class PythonCode(NoneditableTextObject):
         })
         self._snip._reset(ct)  # pylint:disable=protected-access
 
-
         for code in self._codes:
             try:
                 exec(code, self._locals)  # pylint:disable=exec-used
             except Exception as e:
-                e.code = code
+                e.snippet_code = code
                 raise
 
         rv = as_unicode(

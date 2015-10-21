@@ -68,21 +68,17 @@ Following is the full stack trace:
 """
 
             msg += traceback.format_exc()
-            if hasattr(e, 'code'):
+            if hasattr(e, 'snippet_code'):
                 _, _, tb = sys.exc_info()
                 tb_top = traceback.extract_tb(tb)[-1]
-                msg += "\nFollowing is the full executed code:\n"
-                lines = e.code.split("\n")
-                number = 1
-                for line in lines:
+                msg += "\nExecuted snippet code:\n"
+                lines = e.snippet_code.split("\n")
+                for number, line in enumerate(lines, 1):
                     msg += str(number).rjust(3)
-                    prefix = ""
-                    if line != "":
-                        prefix = "   "
+                    prefix = "   " if line else ""
                     if tb_top[1] == number:
                         prefix = " > "
                     msg += prefix + line + "\n"
-                    number += 1
 
             # Vim sends no WinLeave msg here.
             self._leaving_buffer()  # pylint:disable=protected-access
