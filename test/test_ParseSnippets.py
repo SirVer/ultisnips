@@ -263,3 +263,44 @@ class ParseSnippets_PrintPythonStacktraceMultiline(_VimTest):
     wanted = keys
     expected_error = " > \s+qwe"
 
+
+class ParseSnippets_PrintErroneousSnippet(_VimTest):
+    files = { 'us/all.snippets': r"""
+        snippet test "asd()" e
+        endsnippet
+        """}
+    keys = 'test' + EX
+    wanted = keys
+    expected_error = "Trigger: test"
+
+
+class ParseSnippets_PrintErroneousSnippetContext(_VimTest):
+    files = { 'us/all.snippets': r"""
+        snippet test "asd()" e
+        endsnippet
+        """}
+    keys = 'test' + EX
+    wanted = keys
+    expected_error = "Context: asd"
+
+
+class ParseSnippets_PrintErroneousSnippetPreAction(_VimTest):
+    files = { 'us/all.snippets': r"""
+        pre_expand "asd()"
+        snippet test
+        endsnippet
+        """}
+    keys = 'test' + EX
+    wanted = keys
+    expected_error = "Pre-expand: asd"
+
+
+class ParseSnippets_PrintErroneousSnippetPostAction(_VimTest):
+    files = { 'us/all.snippets': r"""
+        post_expand "asd()"
+        snippet test
+        endsnippet
+        """}
+    keys = 'test' + EX
+    wanted = keys
+    expected_error = "Post-expand: asd"

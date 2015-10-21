@@ -10,6 +10,7 @@ import platform
 import traceback
 import sys
 import vim
+import re
 from contextlib import contextmanager
 
 from UltiSnips import _vim
@@ -68,6 +69,11 @@ Following is the full stack trace:
 """
 
             msg += traceback.format_exc()
+            if hasattr(e, 'snippet_info'):
+                msg += "\nSnippet, caused error:\n"
+                msg += re.sub(
+                    '^(?=\S)', '  ', e.snippet_info, flags=re.MULTILINE
+                )
             # snippet_code comes from _python_code.py, it's set manually for
             # providing error message with stacktrace of failed python code
             # inside of the snippet.
