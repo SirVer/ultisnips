@@ -121,12 +121,14 @@ class SnippetDefinition(object):
             exec(code, {'snip': snip})
         except Exception as e:
             e.snippet_info = textwrap.dedent("""
+                Defined in: {}
                 Trigger: {}
                 Description: {}
                 Context: {}
                 Pre-expand: {}
                 Post-expand: {}
             """).format(
+                self._location,
                 self._trigger,
                 self._description,
                 self._context_code if self._context_code else '<none>',

@@ -304,3 +304,13 @@ class ParseSnippets_PrintErroneousSnippetPostAction(_VimTest):
     keys = 'test' + EX
     wanted = keys
     expected_error = "Post-expand: asd"
+
+class ParseSnippets_PrintErroneousSnippetLocation(_VimTest):
+    files = { 'us/all.snippets': r"""
+        post_expand "asd()"
+        snippet test
+        endsnippet
+        """}
+    keys = 'test' + EX
+    wanted = keys
+    expected_error = "Defined in: .*/all.snippets"
