@@ -267,7 +267,11 @@ class PythonCode(NoneditableTextObject):
         self._snip._reset(ct)  # pylint:disable=protected-access
 
         for code in self._codes:
-            exec(code, self._locals)  # pylint:disable=exec-used
+            try:
+                exec(code, self._locals)  # pylint:disable=exec-used
+            except Exception as e:
+                e.snippet_code = code
+                raise
 
         rv = as_unicode(
             self._snip.rv if self._snip._rv_changed  # pylint:disable=protected-access

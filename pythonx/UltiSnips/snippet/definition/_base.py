@@ -6,6 +6,7 @@
 import re
 
 import vim
+import textwrap
 
 from UltiSnips import _vim
 from UltiSnips.compatibility import as_unicode
@@ -116,7 +117,31 @@ class SnippetDefinition(object):
 
         snip = SnippetUtilForAction(locals)
 
-        exec(code, {'snip': snip})
+        try:
+            exec(code, {'snip': snip})
+        except Exception as e:
+            e.snippet_info = textwrap.dedent("""
+                Defined in: {}
+                Trigger: {}
+                Description: {}
+                Context: {}
+                Pre-expand: {}
+                Post-expand: {}
+            """).format(
+                self._location,
+                self._trigger,
+                self._description,
+                self._context_code if self._context_code else '<none>',
+                self._actions['pre_expand'] if 'pre_expand' in self._actions
+                    else '<none>',
+                self._actions['post_expand'] if 'post_expand' in self._actions
+                    else '<none>',
+                code,
+            )
+
+            e.snippet_code = code
+
+            raise
 
         return snip
 
