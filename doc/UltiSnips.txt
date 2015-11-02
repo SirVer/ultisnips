@@ -704,9 +704,9 @@ from the 'endsnippet' end line.
 
  4.1.1 Character Escaping:                     *UltiSnips-character-escaping*
 
-In snippet definitions, the characters '`', '{', '$', '\' and "'" (single
-quote) have special meaning. If you want to insert one of these characters
-literally, escape them with a backslash, '\'.
+In snippet definitions, the characters '`', '{', '$' and '\' have special
+meaning. If you want to insert one of these characters literally, escape them
+with a backslash, '\'.
 
 
 4.2 Plaintext Snippets                         *UltiSnips-plaintext-snippets*
