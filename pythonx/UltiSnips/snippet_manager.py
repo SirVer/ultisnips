@@ -748,15 +748,14 @@ class SnippetManager(object):
         if _vim.eval("exists('g:UltiSnipsSnippetsDir')") == '1':
             snippet_dir = _vim.eval('g:UltiSnipsSnippetsDir')
         else:
+            home = _vim.eval('$HOME')
             if platform.system() == 'Windows':
-                snippet_dir = os.path.join(_vim.eval('$HOME'),
-                                           'vimfiles', 'UltiSnips')
+                snippet_dir = os.path.join(home, 'vimfiles', 'UltiSnips')
             elif _vim.eval("has('nvim')") == '1':
-                snippet_dir = os.path.join(_vim.eval('$HOME'),
-                                           '.nvim', 'UltiSnips')
+                xdg_home_config = _vim.eval('$XDG_CONFIG_HOME') or os.path.join(home, ".config")
+                snippet_dir = os.path.join(xdg_home_config, 'nvim', 'UltiSnips')
             else:
-                snippet_dir = os.path.join(_vim.eval('$HOME'),
-                                           '.vim', 'UltiSnips')
+                snippet_dir = os.path.join(home, '.vim', 'UltiSnips')
 
         filetypes = []
         if requested_ft:
