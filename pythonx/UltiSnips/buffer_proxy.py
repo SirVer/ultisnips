@@ -205,7 +205,7 @@ class VimBufferProxy(_vim.VimBuffer):
         else:
             if line_number > self._snippets_stack[0]._end.line:
                 return
-            if column_number > self._snippets_stack[0]._end.col:
+            if column_number >= self._snippets_stack[0]._end.col:
                 return
             self._snippets_stack[0]._do_edit(change)
 
