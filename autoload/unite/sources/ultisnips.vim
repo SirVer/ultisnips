@@ -31,15 +31,26 @@ function! s:unite_source.action_table.expand.func(candidate)
   return ''
 endfunction
 
+function! s:unite_source.get_longest_snippet_len(snippet_list)
+  let longest = 0
+  for snip in items(a:snippet_list)
+    if strlen(snip['word']) > longest
+      let longest = strlen(snip['word'])
+    endif
+  endfor
+  return longest
+endfunction
+
 function! s:unite_source.gather_candidates(args, context)
   let default_val = {'word': '', 'unite__abbr': '', 'is_dummy': 0, 'source':
         \  'ultisnips', 'unite__is_marked': 0, 'kind': 'command', 'is_matched': 1,
         \    'is_multiline': 0}
   let snippet_list = UltiSnips#SnippetsInCurrentScope()
+  let max_len = s:unite_source.get_longest_snippet_len(snippet_list)
   let canditates = []
   for snip in items(snippet_list)
     let curr_val = copy(default_val)
-    let curr_val['word'] = snip[0] . "     " . snip[1]
+    let curr_val['word'] = printf('%-*s', max_len, snip[0]) . "     " . snip[1]
     let curr_val['trigger'] = snip[0]
     call add(canditates, curr_val)
   endfor
