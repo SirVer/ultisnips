@@ -43,11 +43,8 @@ class VimBuffer(object):
     @property
     def line_till_cursor(self):  # pylint:disable=no-self-use
         """Returns the text before the cursor."""
-        # Note: we want byte position here
-        _, col = vim.current.window.cursor
-        line = vim.current.line
-        before = as_unicode(line[:col])
-        return before
+        _, col = self.cursor
+        return as_unicode(vim.current.line)[:col]
 
     @property
     def number(self):  # pylint:disable=no-self-use

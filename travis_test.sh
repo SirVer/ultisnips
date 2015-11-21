@@ -16,20 +16,12 @@ elif [[ $VIM_VERSION == "NEOVIM" ]]; then
    VIM="$(which nvim)"
    if [[ $TRAVIS_PYTHON_VERSION =~ ^2\. ]]; then
       INTERFACE="--interface tmux_nvim --python-host-prog=$PYTHON_CMD"
-      PY_IN_VIM="py"
    else
       INTERFACE="--interface tmux_nvim --python3-host-prog=$PYTHON_CMD"
-      PY_IN_VIM="py3"
    fi
 else
    echo "Unknown VIM_VERSION: $VIM_VERSION"
    exit 1
-fi
-
-if [[ $TRAVIS_PYTHON_VERSION =~ ^2\. ]]; then
-   PY_IN_VIM="py"
-else
-   PY_IN_VIM="py3"
 fi
 
 PYTHON_VERSION=$($PYTHON_CMD -c 'import sys;print(sys.version.split()[0])')
