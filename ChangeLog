@@ -1,23 +1,32 @@
-changes up to 3001566:
+version 3.1 (TODO: date):
+	- This is the last release done by @SirVer. The new maintainer of UltiSnips
+	  is @seletskiy. The repository remains https://github.com/SirVer/ultisnips,
+	  so this should not affect any users. This is also the last release to be
+	  published on vim.org. Please follow the master branch on GitHub for the
+	  latest stable version.
 	- New option `e`: Context aware snippets. This gives very precise and
-	  powerful control over when which snippet should be expanded.
-	  *UltiSnips-context-snippets*
-	- clearsnippets now clears all snippets below the current priority. This
-	  fits better with the priority system introduced in 3.0.
+	  powerful control over which snippet should be expanded depending on
+	  surrounding code. *UltiSnips-context-snippets*
+	- New option `m`: Trim whitespace in all snippet lines.
+	- Very powerful, freely configurable pre/post-expand and post-jump actions
+	  allow for transforming the buffer outside the snippet. *UltiSnips-snippet-actions*
+	- Automatic triggering of snippets without the need to press the expand
+	  trigger. *UltiSnips-autotrigger*
+	- Better error reporting for snippet errors including python stacktraces
+	  and listing of executed code.
 	- Undo is more granular. Each jump and expand is now a separate undo step.
 	- UltiSnips now emits autocommands on certain events. *UltiSnips-custom-autocommands*
-	- New option `m`: Trim whitespace in all snippet lines.
-	- Improved syntax highlighting for snippets filetype.
+	- clearsnippets now clears all snippets below the current priority. This
+	  fits better with the priority system introduced in 3.0.
 	- snipMate snippets support can be disabled. *UltiSnipsEnableSnipMate*
 	- UltiSnipsEditSplit got a new value 'context'. *UltiSnipsEditSplit*
+	- Improved syntax highlighting for snippets filetype.
 	- Mappings and autocommands are now only established when needed, i.e. when
 	  a snippet is active. This boosts performance outside of snippets.
-	- No longer supports Vim 7.3. Supported are Vim 7.4 and Neovim.
+	- New integration with Unite, TagBar, and deoplete.
+	- New Ctags configuration file for snippet definitions.
 	- Bug fixes, performance improvements, code cleanups and refactorings.
-	- Basic Unite integration.
-	- TagBar support.
-	- Ctags configuration file for snippet definitions.
-	- Now using waffle.io, gitter.im and travis-ci.com.
+	- No longer supports Vim < 7.4.
 
 version 3.0 (02-Mar-2014):
 	- Organisational changes: The project is now hosted on github. Snippets are
