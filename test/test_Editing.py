@@ -120,3 +120,21 @@ class Backspace_TabStop_NotZero(_VimTest):
     keys = 'test' + EX + 'A' + JF + BS + 'BBB'
     wanted = 'AA BBB'
 # End: Pressing BS in TabStop  #}}}
+
+class UpdateModifiedSnippetWithoutCursorMove(_VimTest):
+    snippets = ('test', '${1:one}(${2:xxx})${3:three}')
+    keys = 'test' + EX + 'aaaaa' + JF + BS + JF + '3333'
+    wanted = 'aaaaa()3333'
+
+class UpdateModifiedSnippetWithoutCursorMove2(_VimTest):
+    snippets = ('test', '''\
+private function ${1:functionName}(${2:arguments}):${3:Void}
+{
+    ${VISUAL}$0
+}''')
+    keys = 'test' + EX + 'a' + JF + BS + JF + 'Int' + JF + 'body'
+    wanted = '''\
+private function a():Int
+{
+    body
+}'''

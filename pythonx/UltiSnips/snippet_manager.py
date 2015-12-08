@@ -136,6 +136,8 @@ class SnippetManager(object):
             self.register_snippet_source('snipmate_files',
                                          SnipMateFileSource())
 
+        self._should_update_textobjects = False
+
         self._reinit()
 
     @err_to_scratch_buffer
@@ -303,6 +305,8 @@ class SnippetManager(object):
     @err_to_scratch_buffer
     def _cursor_moved(self):
         """Called whenever the cursor moved."""
+        self._should_update_textobjects = False
+
         if not self._csnippets and self._inner_state_up:
             self._teardown_inner_state()
         self._vstate.remember_position()
@@ -469,11 +473,14 @@ class SnippetManager(object):
             self._teardown_inner_state()
 
     def _jump(self, backwards=False):
+        """Helper method that does the actual jump."""
+        if self._should_update_textobjects:
+            self._cursor_moved()
+
         # we need to set 'onemore' there, because of limitations of the vim
         # API regarding cursor movements; without that test
         # 'CanExpandAnonSnippetInJumpActionWhileSelected' will fail
         with _vim.toggle_opt('ve', 'onemore'):
-            """Helper method that does the actual jump."""
             jumped = False
 
             # We need to remember current snippets stack here because of
@@ -632,6 +639,7 @@ class SnippetManager(object):
         self._setup_inner_state()
 
         self._snip_expanded_in_action = False
+        self._should_update_textobjects = False
 
         # Adjust before, maybe the trigger is not the complete word
         text_before = before
@@ -802,6 +810,8 @@ class SnippetManager(object):
 
     @err_to_scratch_buffer
     def _track_change(self):
+        self._should_update_textobjects = True
+
         inserted_char = _vim.eval('v:char')
         try:
             if inserted_char == '':
