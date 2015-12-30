@@ -112,7 +112,7 @@ syn region snipBalancedBraces start="{" end="}" contained transparent extend
 syn cluster snipTokens add=snipTabStop
 syn cluster snipTabStopTokens add=snipTabStop
 
-syn region snipVisual matchgroup=snipVisual start="\${VISUAL[:}/]\@=" end="}" contained contains=snipVisualDefault,snipTransformationPattern
+syn region snipVisual matchgroup=snipVisual start="\${VISUAL[:}/]\@=" end="}" contained contains=snipVisualDefault,snipTransformationPattern extend
 syn region snipVisualDefault matchgroup=snipVisual start=":" end="\ze[}/]" contained contains=snipTabStopEscape nextgroup=snipTransformationPattern
 syn cluster snipTokens add=snipVisual
 syn cluster snipTabStopTokens add=snipVisual
