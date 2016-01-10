@@ -128,7 +128,7 @@ class No_Tab_Expand_Leading_Tabs(_No_Tab_Expand):
 
 class No_Tab_Expand_No_TS(_No_Tab_Expand):
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set sw=3')
         vim_config.append('set sts=3')
     keys = 'test' + EX
@@ -137,7 +137,7 @@ class No_Tab_Expand_No_TS(_No_Tab_Expand):
 
 class No_Tab_Expand_ET(_No_Tab_Expand):
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set sw=3')
         vim_config.append('set expandtab')
     keys = 'test' + EX
@@ -146,7 +146,7 @@ class No_Tab_Expand_ET(_No_Tab_Expand):
 
 class No_Tab_Expand_ET_Leading_Spaces(_No_Tab_Expand):
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set sw=3')
         vim_config.append('set expandtab')
     keys = '  test' + EX
@@ -155,7 +155,7 @@ class No_Tab_Expand_ET_Leading_Spaces(_No_Tab_Expand):
 
 class No_Tab_Expand_ET_SW(_No_Tab_Expand):
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set sw=8')
         vim_config.append('set expandtab')
     keys = 'test' + EX
@@ -164,7 +164,7 @@ class No_Tab_Expand_ET_SW(_No_Tab_Expand):
 
 class No_Tab_Expand_ET_SW_TS(_No_Tab_Expand):
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set sw=3')
         vim_config.append('set sts=3')
         vim_config.append('set ts=3')
@@ -190,7 +190,7 @@ End""")
 
 class No_Tab_Expand_RealWorld(_TabExpand_RealWorld, _VimTest):
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set noexpandtab')
     keys = '\t\thi' + EX
     wanted = """\t\thi
@@ -206,6 +206,12 @@ class No_Tab_Expand_RealWorld(_TabExpand_RealWorld, _VimTest):
 class SnippetOptions_Regex_Expand(_VimTest):
     snippets = ('(test)', 'Expand me!', '', 'r')
     keys = 'test' + EX
+    wanted = 'Expand me!'
+
+
+class SnippetOptions_Regex_WithSpace(_VimTest):
+    snippets = ('test ', 'Expand me!', '', 'r')
+    keys = 'test ' + EX
     wanted = 'Expand me!'
 
 

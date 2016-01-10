@@ -6,9 +6,12 @@ if exists("vimpager")
     finish
 endif
 
-if has("autocmd")
-   augroup UltiSnipsFileType
-      au!
-      autocmd FileType * call UltiSnips#FileTypeChanged()
-   augroup END
+if has("autocmd") && &loadplugins
+    augroup UltiSnipsFileType
+        autocmd!
+        autocmd FileType * call UltiSnips#FileTypeChanged()
+    augroup END
+
+    " restore 'filetypedetect' group declaration
+    augroup filetypedetect
 endif

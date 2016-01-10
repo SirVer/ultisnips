@@ -240,4 +240,15 @@ class Snippet_With_Umlauts_Python(_UmlautsBase):
     snippets = ('ül', 'üü ${1:world} üü `!p snip.rv = len(t[1])*"a"`')
     keys = 'te ül' + EX + 'hüüll'
     wanted = 'te üü hüüll üü aaaaa'
+
+class UmlautsBeforeTriggerAndCharsAfter(_UmlautsBase):
+    snippets = ('trig', 'success')
+    keys = 'ööuu trig b' + 2 * ARR_L + EX
+    wanted = 'ööuu success b'
+
+class NoUmlautsBeforeTriggerAndCharsAfter(_UmlautsBase):
+    snippets = ('trig', 'success')
+    keys = 'oouu trig b' + 2 * ARR_L + EX
+    wanted = 'oouu success b'
+
 # End: Umlauts and Special Chars  #}}}

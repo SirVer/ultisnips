@@ -13,6 +13,17 @@ snippet hello
     keys = 'hello' + EX
     wanted = 'This is a test snippet\n# With a comment'
 
+class snipMate_Disabled(_VimTest):
+    files = { 'snippets/_.snippets': """
+snippet hello
+\tThis is a test snippet
+\t# With a comment"""}
+    keys = 'hello' + EX
+    wanted = 'hello' + EX
+
+    def _extra_vim_config(self, vim_config):
+        vim_config.append("let g:UltiSnipsEnableSnipMate=0");
+
 
 class snipMate_OtherFiletype(_VimTest):
     files = { 'snippets/blubi.snippets': """
@@ -74,6 +85,22 @@ snippet for
 \t}"""}
     keys = 'for' + EX + 'blub' + JF + 'j' + JF + 'hi'
     wanted = 'for (j; j < blub; blub++) {\n\thi\n}'
+
+
+class snipMate_TestNoBraceTabstops(_VimTest):
+    files = { 'snippets/_.snippets': """
+snippet test
+\t$1 is $2"""}
+    keys = 'test' + EX + 'blub' + JF + 'blah'
+    wanted = 'blub is blah'
+
+
+class snipMate_TestNoBraceTabstopsAndMirrors(_VimTest):
+    files = { 'snippets/_.snippets': """
+snippet test
+\t$1 is $1, $2 is ${2}"""}
+    keys = 'test' + EX + 'blub' + JF + 'blah'
+    wanted = 'blub is blub, blah is blah'
 
 
 class snipMate_TestMirrorsInPlaceholders(_VimTest):

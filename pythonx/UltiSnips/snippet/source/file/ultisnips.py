@@ -10,7 +10,8 @@ import os
 from UltiSnips import _vim
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
 from UltiSnips.snippet.source.file._base import SnippetFileSource
-from UltiSnips.snippet.source.file._common import handle_extends
+from UltiSnips.snippet.source.file._common import handle_extends, \
+    handle_action
 from UltiSnips.text import LineIterator, head_tail
 
 
@@ -53,7 +54,9 @@ def find_all_snippet_files(ft):
     return ret
 
 
-def _handle_snippet_or_global(filename, line, lines, python_globals, priority):
+def _handle_snippet_or_global(
+    filename, line, lines, python_globals, priority, pre_expand
+):
     """Parses the snippet that begins at the current line."""
     start_line_index = lines.line_index
     descr = ''
@@ -65,11 +68,18 @@ def _handle_snippet_or_global(filename, line, lines, python_globals, priority):
     # Get and strip options if they exist
     remain = line[len(snip):].strip()
     words = remain.split()
+
     if len(words) > 2:
         # second to last word ends with a quote
         if '"' not in words[-1] and words[-2][-1] == '"':
             opts = words[-1]
             remain = remain[:-len(opts) - 1].rstrip()
+
+    context = None
+    if 'e' in opts:
+        left = remain[:-1].rfind('"')
+        if left != -1 and left != 0:
+            context, remain = remain[left:].strip('"'), remain[:left]
 
     # Get and strip description if it exists
     remain = remain.strip()
@@ -103,9 +113,12 @@ def _handle_snippet_or_global(filename, line, lines, python_globals, priority):
     if snip == 'global':
         python_globals[trig].append(content)
     elif snip == 'snippet':
-        return 'snippet', (UltiSnipsSnippetDefinition(priority, trig, content,
-                                                      descr, opts, python_globals,
-                                                      '%s:%i' % (filename, start_line_index)),)
+        definition = UltiSnipsSnippetDefinition(
+            priority, trig, content,
+            descr, opts, python_globals,
+            '%s:%i' % (filename, start_line_index),
+            context, pre_expand)
+        return 'snippet', (definition,)
     else:
         return 'error', ("Invalid snippet type: '%s'" % snip, lines.line_index)
 
@@ -120,14 +133,21 @@ def _parse_snippets_file(data, filename):
     python_globals = defaultdict(list)
     lines = LineIterator(data)
     current_priority = 0
+    actions = {}
     for line in lines:
         if not line.strip():
             continue
 
         head, tail = head_tail(line)
         if head in ('snippet', 'global'):
-            snippet = _handle_snippet_or_global(filename, line, lines,
-                                                python_globals, current_priority)
+            snippet = _handle_snippet_or_global(
+                filename, line, lines,
+                python_globals,
+                current_priority,
+                actions
+            )
+
+            actions = {}
             if snippet is not None:
                 yield snippet
         elif head == 'extends':
@@ -139,6 +159,12 @@ def _parse_snippets_file(data, filename):
                 current_priority = int(tail.split()[0])
             except (ValueError, IndexError):
                 yield 'error', ('Invalid priority %r' % tail, lines.line_index)
+        elif head in ['pre_expand', 'post_expand', 'post_jump']:
+            head, tail = handle_action(head, tail, lines.line_index)
+            if head == 'error':
+                yield (head, tail)
+            else:
+                actions[head], = tail
         elif head and not head.startswith('#'):
             yield 'error', ('Invalid line %r' % line.rstrip(), lines.line_index)
 

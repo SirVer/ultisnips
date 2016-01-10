@@ -9,9 +9,8 @@ from test.util import running_on_windows
 class _AddFuncBase(_VimTest):
     args = ''
 
-    def _extra_options_pre_init(self, vim_config):
-        vim_config.append(':call UltiSnips#AddSnippetWithPriority(%s)' %
-                          self.args)
+    def _before_test(self):
+        self.vim.send_to_vim(':call UltiSnips#AddSnippetWithPriority(%s)\n' % self.args)
 
 
 class AddFunc_Simple(_AddFuncBase):
@@ -42,7 +41,7 @@ and a mirror: hi1
 hi2...hi3
 hi4"""
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set langmap=dj,rk,nl,ln,jd,kr,DJ,RK,NL,LN,JD,KR')
 
 # Test for https://bugs.launchpad.net/bugs/501727 #
@@ -62,7 +61,7 @@ hi2...hi3
 hi4Hello"""
 
     def _before_test(self):
-        self.vim.send(':set langmap=\\\\;;A\n')
+        self.vim.send_to_vim(':set langmap=\\\\;;A\n')
 
 # Test for bug 871357 #
 
@@ -82,7 +81,7 @@ hi2...hi3
 hi4"""
 
     def _before_test(self):
-        self.vim.send(
+        self.vim.send_to_vim(
             ":set langmap=йq,цw,уe,кr,еt,нy,гu,шi,щo,зp,х[,ъ],фa,ыs,вd,аf,пg,рh,оj,лk,дl,ж\\;,э',яz,чx,сc,мv,иb,тn,ьm,ю.,ё',ЙQ,ЦW,УE,КR,ЕT,НY,ГU,ШI,ЩO,ЗP,Х\{,Ъ\},ФA,ЫS,ВD,АF,ПG,РH,ОJ,ЛK,ДL,Ж\:,Э\",ЯZ,ЧX,СC,МV,ИB,ТN,ЬM,Б\<,Ю\>\n")
 
 # End: Langmap Handling  #}}}
@@ -149,17 +148,18 @@ class AddNewSnippetSource(_VimTest):
         'blumba' + EX
     )
 
-    def _extra_options_post_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         self._create_file('snippet_source.py', """
 from UltiSnips.snippet.source import SnippetSource
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
 
 class MySnippetSource(SnippetSource):
-  def get_snippets(self, filetypes, before, possible):
-    if before.endswith('blumba'):
+  def get_snippets(self, filetypes, before, possible, autotrigger_only):
+    if before.endswith('blumba') and autotrigger_only == False:
       return [
           UltiSnipsSnippetDefinition(
-              -100, "blumba", "this is a dynamic snippet", "", "", {}, "blub")
+              -100, "blumba", "this is a dynamic snippet", "", "", {}, "blub",
+              None, {})
         ]
     return []
 """)

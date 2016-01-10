@@ -65,3 +65,13 @@ class Position(object):
 
     def __repr__(self):
         return '(%i,%i)' % (self.line, self.col)
+
+    def __getitem__(self, index):
+        if index > 1:
+            raise IndexError(
+                'position can be indexed only 0 (line) and 1 (column)'
+            )
+        if index == 0:
+            return self.line
+        else:
+            return self.col

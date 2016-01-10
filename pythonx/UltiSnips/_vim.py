@@ -12,6 +12,8 @@ from UltiSnips.compatibility import col2byte, byte2col, \
     as_unicode, as_vimencoding
 from UltiSnips.position import Position
 
+from contextlib import contextmanager
+
 
 class VimBuffer(object):
 
@@ -41,16 +43,13 @@ class VimBuffer(object):
     @property
     def line_till_cursor(self):  # pylint:disable=no-self-use
         """Returns the text before the cursor."""
-        # Note: we want byte position here
-        _, col = vim.current.window.cursor
-        line = vim.current.line
-        before = as_unicode(line[:col])
-        return before
+        _, col = self.cursor
+        return as_unicode(vim.current.line)[:col]
 
     @property
     def number(self):  # pylint:disable=no-self-use
-        """The bufnr() of this buffer."""
-        return int(eval("bufnr('%')"))
+        """The bufnr() of the current buffer."""
+        return vim.current.buffer.number
 
     @property
     def cursor(self):  # pylint:disable=no-self-use
@@ -71,6 +70,25 @@ class VimBuffer(object):
         vim.current.window.cursor = pos.line + 1, nbyte
 buf = VimBuffer()  # pylint:disable=invalid-name
 
+@contextmanager
+def toggle_opt(name, new_value):
+    old_value = eval('&' + name)
+    command('set {0}={1}'.format(name, new_value))
+    try:
+        yield
+    finally:
+        command('set {0}={1}'.format(name, old_value))
+
+@contextmanager
+def save_mark(name):
+    old_pos = get_mark_pos(name)
+    try:
+        yield
+    finally:
+        if _is_pos_zero(old_pos):
+            delete_mark(name)
+        else:
+            set_mark_from_pos(name, old_pos)
 
 def escape(inp):
     """Creates a vim-friendly string from a group of
@@ -108,7 +126,18 @@ def feedkeys(keys, mode='n'):
     Mainly for convenience.
 
     """
-    command(as_unicode(r'call feedkeys("%s", "%s")') % (keys, mode))
+    if eval('mode()') == 'n':
+        if keys == 'a':
+            cursor_pos = get_cursor_pos()
+            cursor_pos[2] = int(cursor_pos[2]) + 1
+            set_cursor_from_pos(cursor_pos)
+        if keys in 'ai':
+            keys = 'startinsert'
+
+    if keys == 'startinsert':
+        command('startinsert')
+    else:
+        command(as_unicode(r'call feedkeys("%s", "%s")') % (keys, mode))
 
 
 def new_scratch_buffer(text):
@@ -137,13 +166,15 @@ def select(start, end):
     col = col2byte(start.line + 1, start.col)
     vim.current.window.cursor = start.line + 1, col
 
+    mode = eval('mode()')
+
     move_cmd = ''
-    if eval('mode()') != 'n':
+    if mode != 'n':
         move_cmd += r"\<Esc>"
 
     if start == end:
         # Zero Length Tabstops, use 'i' or 'a'.
-        if col == 0 or eval('mode()') not in 'i' and \
+        if col == 0 or mode not in 'i' and \
                 col < len(buf[start.line]):
             move_cmd += 'i'
         else:
@@ -162,8 +193,34 @@ def select(start, end):
             move_cmd += '%iG%i|' % virtual_position(end.line + 1, end.col + 1)
         move_cmd += 'o%iG%i|o\\<c-g>' % virtual_position(
             start.line + 1, start.col + 1)
-    feedkeys(_LangMapTranslator().translate(move_cmd))
+    feedkeys(move_cmd)
 
+def set_mark_from_pos(name, pos):
+    return _set_pos("'" + name, pos)
+
+def get_mark_pos(name):
+    return _get_pos("'" + name)
+
+def set_cursor_from_pos(pos):
+    return _set_pos('.', pos)
+
+def get_cursor_pos():
+    return _get_pos('.')
+
+def delete_mark(name):
+    try:
+        return command('delma ' + name)
+    except:
+        return False
+
+def _set_pos(name, pos):
+    return eval("setpos(\"{0}\", {1})".format(name, pos))
+
+def _get_pos(name):
+    return eval("getpos(\"{0}\")".format(name))
+
+def _is_pos_zero(pos):
+    return ['0'] * 4 == pos or [0] == pos
 
 def _unmap_select_mode_mapping():
     """This function unmaps select mode mappings if so wished by the user.
@@ -232,65 +289,3 @@ def _unmap_select_mode_mapping():
                     # This case should be rare enough to not bother us
                     # though.
                     pass
-
-
-class _RealLangMapTranslator(object):
-
-    """This cares for the Vim langmap option and basically reverses the
-    mappings. This was the only solution to get UltiSnips to work nicely with
-    langmap; other stuff I tried was using inoremap movement commands and
-    caching and restoring the langmap option.
-
-    Note that this will not work if the langmap overwrites a character
-    completely, for example if 'j' is remapped, but nothing is mapped
-    back to 'j', then moving one line down is no longer possible and
-    UltiSnips will fail.
-
-    """
-    _maps = {}
-    _SEMICOLONS = re.compile(r"(?<!\\);")
-    _COMMA = re.compile(r"(?<!\\),")
-
-    def _create_translation(self, langmap):
-        """Create the reverse mapping from 'langmap'."""
-        from_chars, to_chars = '', ''
-        for char in self._COMMA.split(langmap):
-            char = char.replace('\\,', ',')
-            res = self._SEMICOLONS.split(char)
-            if len(res) > 1:
-                from_char, to_char = [a.replace('\\;', ';') for a in res]
-                from_chars += from_char
-                to_chars += to_char
-            else:
-                from_chars += char[::2]
-                to_chars += char[1::2]
-        self._maps[langmap] = (from_chars, to_chars)
-
-    def translate(self, text):
-        """Inverse map 'text' through langmap."""
-        langmap = eval('&langmap').strip()
-        if langmap == '':
-            return text
-        text = as_unicode(text)
-        if langmap not in self._maps:
-            self._create_translation(langmap)
-        for before, after in zip(*self._maps[langmap]):
-            text = text.replace(before, after)
-        return text
-
-
-class _DummyLangMapTranslator(object):
-
-    """If vim hasn't got the langmap compiled in, or is using langnoremap, we
-    never have to do anything.
-
-    Then this class is used.
-
-    """
-    translate = lambda self, s: s
-
-_LangMapTranslator = _RealLangMapTranslator
-if not int(eval('has("langmap")')):
-    _LangMapTranslator = _DummyLangMapTranslator
-elif int(eval('exists("+langnoremap") && &langnoremap')):
-    _LangMapTranslator = _DummyLangMapTranslator

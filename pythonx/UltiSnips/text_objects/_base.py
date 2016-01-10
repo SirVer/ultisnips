@@ -48,18 +48,18 @@ class TextObject(object):
 
     """Represents any object in the text that has a span in any ways."""
 
-    def __init__(self, parent, token, end=None,
+    def __init__(self, parent, token_or_start, end=None,
                  initial_text='', tiebreaker=None):
         self._parent = parent
 
         if end is not None:  # Took 4 arguments
-            self._start = token
+            self._start = token_or_start
             self._end = end
             self._initial_text = initial_text
         else:  # Initialize from token
-            self._start = token.start
-            self._end = token.end
-            self._initial_text = token.initial_text
+            self._start = token_or_start.start
+            self._end = token_or_start.end
+            self._initial_text = token_or_start.initial_text
         self._tiebreaker = tiebreaker or Position(
             self._start.line, self._end.line)
         if parent is not None:
@@ -178,12 +178,14 @@ class EditableTextObject(TextObject):
         for children in self._editable_children:
             if children._start <= pos < children._end:
                 return children.find_parent_for_new_to(pos)
+            if children._start == pos and pos == children._end:
+                return children.find_parent_for_new_to(pos)
         return self
 
     ###############################
     # Private/Protected functions #
     ###############################
-    def _do_edit(self, cmd):
+    def _do_edit(self, cmd, ctab=None):
         """Apply the edit 'cmd' to this object."""
         ctype, line, col, text = cmd
         assert ('\n' not in text) or (text == '\n')
@@ -201,7 +203,13 @@ class EditableTextObject(TextObject):
                     break
                 elif ((child._start <= pos <= child._end) and
                         isinstance(child, EditableTextObject)):
-                    child._do_edit(cmd)
+                    if pos == child.end and not child.children:
+                        try:
+                            if ctab.number != child.number:
+                                continue
+                        except AttributeError:
+                            pass
+                    child._do_edit(cmd, ctab)
                     return
             else:  # Deletion
                 delend = pos + Position(0, len(text)) if text != '\n' \
@@ -214,9 +222,10 @@ class EditableTextObject(TextObject):
                         new_cmds.append(cmd)
                         break
                     else:
-                        child._do_edit(cmd)
+                        child._do_edit(cmd, ctab)
                         return
-                elif ((pos < child._start and child._end <= delend) or
+                elif ((pos < child._start and child._end <= delend and
+                            child.start < delend) or
                         (pos <= child._start and child._end < delend)):
                     # Case: this deletion removes the child
                     to_kill.add(child)

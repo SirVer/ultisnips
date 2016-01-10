@@ -47,10 +47,10 @@ syn match snipExtendsKeyword "^extends" contained display
 
 " snippet {{{3
 
-syn region snipSnippet start="^snippet\_s" end="^\zeendsnippet\s*$" contains=snipSnippetHeader nextgroup=snipSnippetFooter fold keepend
+syn region snipSnippet start="^snippet\_s" end="^endsnippet\s*$" contains=snipSnippetHeader fold keepend
 syn match snipSnippetHeader "^.*$" nextgroup=snipSnippetBody,snipSnippetFooter skipnl contained contains=snipSnippetHeaderKeyword
 syn match snipSnippetHeaderKeyword "^snippet" contained nextgroup=snipSnippetTrigger skipwhite
-syn region snipSnippetBody start="\_." end="^\zeendsnippet\s*$" contained contains=snipLeadingSpaces,@snipTokens
+syn region snipSnippetBody start="\_." end="^\zeendsnippet\s*$" contained nextgroup=snipSnippetFooter contains=snipLeadingSpaces,@snipTokens
 syn match snipSnippetFooter "^endsnippet.*" contained contains=snipSnippetFooterKeyword
 syn match snipSnippetFooterKeyword "^endsnippet" contained
 
@@ -78,7 +78,7 @@ syn match snipSnippetTrigger ,".\{-}"\ze\%(\s\+"\%(\s*\S\)\@=[^"]*\%("\s\+[^"[:s
 syn match snipSnippetTriggerInvalid ,\S\@=.\{-}\S\ze\%(\s\+"[^"]*\%("\s\+[^"[:space:]]\+\s*\|"\s*\)\=\|\s*\)$, contained nextgroup=snipSnippetDocString skipwhite
 syn match snipSnippetDocString ,"[^"]*\%("\ze\s*\%(\s[^"[:space:]]\+\s*\)\=\)\=$, contained nextgroup=snipSnippetOptions skipwhite
 syn match snipSnippetOptions ,\S\+, contained contains=snipSnippetOptionFlag
-syn match snipSnippetOptionFlag ,[biwrts], contained
+syn match snipSnippetOptionFlag ,[biwrtsmx], contained
 
 " Command substitution {{{4
 
@@ -151,6 +151,12 @@ syn match snipPriority "^priority\%(\s.*\|$\)" contains=snipPriorityKeyword disp
 syn match snipPriorityKeyword "^priority" contained nextgroup=snipPriorityValue skipwhite display
 syn match snipPriorityValue "-\?\d\+" contained display
 
+" Actions {{{3
+
+syn match snipAction "^\(pre_expand\|post_expand\|post_jump\)\%(\s.*\|$\)" contains=snipActionKeyword display
+syn match snipActionKeyword "^\(pre_expand\|post_expand\|post_jump\)" contained nextgroup=snipActionValue skipwhite display
+syn match snipActionValue '".*"' contained display
+
 " Snippt Clearing {{{2
 
 syn match snipClear "^clearsnippets\%(\s.*\|$\)" contains=snipClearKeyword display
@@ -200,6 +206,9 @@ hi def link snipTransformationOptions      Operator
 
 hi def link snipPriorityKeyword  Keyword
 hi def link snipPriorityValue    Number
+
+hi def link snipActionKeyword  Keyword
+hi def link snipActionValue    String
 
 hi def link snipClearKeyword     Keyword
 

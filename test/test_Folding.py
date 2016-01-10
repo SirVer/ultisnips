@@ -6,7 +6,7 @@ from test.constant import *
 
 class FoldingEnabled_SnippetWithFold_ExpectNoFolding(_VimTest):
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set foldlevel=0')
         vim_config.append('set foldmethod=marker')
     snippets = ('test', r"""Hello {{{
@@ -37,7 +37,7 @@ class Fold_DeleteMiddleLine_ECR(_VimTest):
 
 class PerlSyntaxFold(_VimTest):
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set foldlevel=0')
         vim_config.append('syntax enable')
         vim_config.append('set foldmethod=syntax')

@@ -13,6 +13,7 @@ from UltiSnips import _vim
 from UltiSnips.position import Position
 from UltiSnips.text_objects._base import EditableTextObject, \
     NoneditableTextObject
+from UltiSnips.text_objects._tabstop import TabStop
 
 
 class SnippetInstance(EditableTextObject):
@@ -21,7 +22,7 @@ class SnippetInstance(EditableTextObject):
     # pylint:disable=protected-access
 
     def __init__(self, snippet, parent, initial_text,
-                 start, end, visual_content, last_re, globals):
+                 start, end, visual_content, last_re, globals, context):
         if start is None:
             start = Position(0, 0)
         if end is None:
@@ -29,7 +30,8 @@ class SnippetInstance(EditableTextObject):
         self.snippet = snippet
         self._cts = 0
 
-        self.locals = {'match': last_re}
+        self.context = context
+        self.locals = {'match': last_re, 'context': context}
         self.globals = globals
         self.visual_content = visual_content
 
@@ -45,11 +47,11 @@ class SnippetInstance(EditableTextObject):
                     _place_initial_text(child)
         _place_initial_text(self)
 
-    def replay_user_edits(self, cmds):
+    def replay_user_edits(self, cmds, ctab=None):
         """Replay the edits the user has done to keep endings of our Text
         objects in sync with reality."""
         for cmd in cmds:
-            self._do_edit(cmd)
+            self._do_edit(cmd, ctab)
 
     def update_textobjects(self):
         """Update the text objects that should change automagically after the
@@ -104,7 +106,16 @@ class SnippetInstance(EditableTextObject):
             res = self._get_next_tab(self._cts)
             if res is None:
                 self._cts = None
-                return self._tabstops.get(0, None)
+
+                ts = self._get_tabstop(self, 0)
+                if ts:
+                    return ts
+
+                # TabStop 0 was deleted. It was probably killed through some
+                # edit action. Recreate it at the end of us.
+                start = Position(self.end.line, self.end.col)
+                end = Position(self.end.line, self.end.col)
+                return TabStop(self, 0, start, end)
             else:
                 self._cts, ts = res
                 return ts
@@ -119,6 +130,9 @@ class SnippetInstance(EditableTextObject):
         rv = EditableTextObject._get_tabstop(self, requester, no)
         self._parent = cached_parent
         return rv
+
+    def get_tabstops(self):
+        return self._tabstops
 
 
 class _VimCursor(NoneditableTextObject):

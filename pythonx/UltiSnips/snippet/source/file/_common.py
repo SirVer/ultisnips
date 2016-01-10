@@ -10,3 +10,12 @@ def handle_extends(tail, line_index):
         return 'extends', ([p.strip() for p in tail.split(',')],)
     else:
         return 'error', ("'extends' without file types", line_index)
+
+
+def handle_action(head, tail, line_index):
+    if tail:
+        action = tail.strip('"').replace(r'\"', '"').replace(r'\\\\', r'\\')
+        return head, (action,)
+    else:
+        return 'error', ("'{}' without specified action".format(head),
+            line_index)

@@ -1,41 +1,19 @@
-" File: UltiSnips.vim
-" Author: Holger Rapp <SirVer@gmx.de>
-" Description: The Ultimate Snippets solution for Vim
+if exists("b:did_autoload_ultisnips") || !exists("g:_uspy")
+    " Define no-op function, called via ftdetect/UltiSnips.vim.
+    " TODO(sirver): Add a test for that using a bad g:UltiSnipsPythonVersion
+    " setting. Without this fix moving the cursor will spam errors, with this
+    " it should not.
+    function! UltiSnips#FileTypeChanged()
+    endfunction
 
-if exists('did_UltiSnips_autoload') || &cp || version < 700
     finish
 endif
-let did_UltiSnips_autoload=1
+let b:did_autoload_ultisnips = 1
 
-" Define dummy version of function called by autocommand setup in
-" ftdetect/UltiSnips.vim and plugin/UltiSnips.vim.
-" If the function isn't defined (probably due to using a copy of vim
-" without python support) it would cause an error.
-function! UltiSnips#FileTypeChanged()
-endfunction
-function! UltiSnips#CursorMoved()
-endfunction
-function! UltiSnips#CursorMoved()
-endfunction
-function! UltiSnips#LeavingBuffer()
-endfunction
-function! UltiSnips#LeavingInsertMode()
-endfunction
+" Also import vim as we expect it to be imported in many places.
+exec g:_uspy "import vim"
+exec g:_uspy "from UltiSnips import UltiSnips_Manager"
 
-call UltiSnips#bootstrap#Bootstrap()
-if !exists("g:_uspy")
-   " Delete the autocommands defined in plugin/UltiSnips.vim and
-   " ftdetect/UltiSnips.vim.
-   augroup UltiSnips
-       au!
-   augroup END
-   augroup UltiSnipsFileType
-       au!
-   augroup END
-   finish
-end
-
-" FUNCTIONS {{{
 function! s:compensate_for_pum()
     """ The CursorMovedI event is not triggered while the popup-menu is visible,
     """ and it's by this event that UltiSnips updates its vim-state. The fix is
@@ -141,18 +119,6 @@ function! UltiSnips#FileTypeChanged()
 endfunction
 
 
-function! UltiSnips#AddSnippet(trigger, value, description, options, ...)
-    " Takes the same arguments as SnippetManager.add_snippet.
-    echoerr "Deprecated UltiSnips#AddSnippet called. Please use UltiSnips#AddSnippetWithPriority." | sleep 1
-    exec g:_uspy "args = vim.eval(\"a:000\")"
-    exec g:_uspy "trigger = vim.eval(\"a:trigger\")"
-    exec g:_uspy "value = vim.eval(\"a:value\")"
-    exec g:_uspy "description = vim.eval(\"a:description\")"
-    exec g:_uspy "options = vim.eval(\"a:options\")"
-    exec g:_uspy "UltiSnips_Manager.add_snippet(trigger, value, description, options, *args)"
-    return ""
-endfunction
-
 function! UltiSnips#AddSnippetWithPriority(trigger, value, description, options, filetype, priority)
     exec g:_uspy "trigger = vim.eval(\"a:trigger\")"
     exec g:_uspy "value = vim.eval(\"a:value\")"
@@ -184,5 +150,9 @@ endf
 
 function! UltiSnips#LeavingInsertMode()
     exec g:_uspy "UltiSnips_Manager._leaving_insert_mode()"
+endfunction
+
+function! UltiSnips#TrackChange()
+    exec g:_uspy "UltiSnips_Manager._track_change()"
 endfunction
 " }}}

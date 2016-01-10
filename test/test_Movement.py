@@ -13,7 +13,7 @@ class CursorMovement_Multiline_ECR(_VimTest):
 
 class CursorMovement_BS_InEditMode(_VimTest):
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set backspace=eol,indent,start')
     snippets = ('<trh', '<tr>\n\t<th>$1</th>\n\t$2\n</tr>\n$3')
     keys = '<trh' + EX + 'blah' + JF + BS + BS + JF + 'end'

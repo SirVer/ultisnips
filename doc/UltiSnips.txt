@@ -12,7 +12,8 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    3.1 Commands                                 |UltiSnips-commands|
    3.2 Triggers                                 |UltiSnips-triggers|
       3.2.1 Using your own trigger functions    |UltiSnips-trigger-functions|
-      3.2.2 Path to Python Module               |UltiSnips-python-module-path|
+      3.2.2 Custom autocommands                 |UltiSnips-custom-autocommands|
+      3.2.3 Path to Python Module               |UltiSnips-python-module-path|
    3.3 Snippet Search Path                      |UltiSnips-snippet-search-path|
    3.4 Warning About Select Mode Mappings       |UltiSnips-warning-smappings|
    3.5 Functions                                |UltiSnips-functions|
@@ -36,12 +37,17 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       4.7.1 Replacement String                  |UltiSnips-replacement-string|
       4.7.2 Demos                               |UltiSnips-demos|
    4.8 Clearing snippets                        |UltiSnips-clearing-snippets|
+   4.9 Context snippets                         |UltiSnips-context-snippets|
+   4.10 Snippet actions                         |UltiSnips-snippet-actions|
+      4.10.1 Pre-expand actions                 |UltiSnips-pre-expand-actions|
+      4.10.2 Post-expand actions                |UltiSnips-post-expand-actions|
+      4.10.3 Post-jump actions                  |UltiSnips-post-jump-actions|
+   4.11 Autotrigger                             |UltiSnips-autotrigger|
 5. UltiSnips and Other Plugins                  |UltiSnips-other-plugins|
    5.1 Existing Integrations                    |UltiSnips-integrations|
    5.2 Extending UltiSnips                      |UltiSnips-extending|
 6. Helping Out                                  |UltiSnips-helping|
-7. Contact                                      |UltiSnips-contact|
-8. Contributors                                 |UltiSnips-contributors|
+7. Contributors                                 |UltiSnips-contributors|
 
 This plugin only works if 'compatible' is not set.
 {Vi does not have any of these features}
@@ -58,28 +64,29 @@ Snippets are common in structured text like source code but can also be used
 for general editing like, for example, inserting a signature in an email or
 inserting the current date in a text file.
 
-UltiSnips was developed using the TDD (Test-driven development) philosophy.
-This ensures that features do not disappear and bugs do not reappear after
-they have been fixed.
-
-On my blog, http://www.sirver.net, I posted several short screencasts, which
-make a great introduction to UltiSnips, illustrating its features and usage.
+@SirVer posted several short screencasts which make a great introduction to
+UltiSnips, illustrating its features and usage.
 
 http://www.sirver.net/blog/2011/12/30/first-episode-of-ultisnips-screencast/
 http://www.sirver.net/blog/2012/01/08/second-episode-of-ultisnips-screencast/
 http://www.sirver.net/blog/2012/02/05/third-episode-of-ultisnips-screencast/
 http://www.sirver.net/blog/2012/03/31/fourth-episode-of-ultisnips-screencast/
 
+Also the excellent [Vimcasts](http://vimcasts.org) dedicated three episodes to
+UltiSnips:
+
+http://vimcasts.org/episodes/meet-ultisnips/
+http://vimcasts.org/episodes/ultisnips-python-interpolation/
+http://vimcasts.org/episodes/ultisnips-visual-placeholder/
 
 1.1 Requirements                                     *UltiSnips-requirements*
 ----------------
 
-This plugin works with Vim version 7.0 or later. It only works if the
+This plugin works with Vim version 7.4 or later. It only works if the
 'compatible' setting is not set.
 
-This plugin requires python >= 2.6. It has been specifically tested using
-python 2.7 and python 3.2 but should theoretically work on all versions of
-python >= 2.6.
+This plugin is tested against Python 2.7, 3.3 or 3.4. All other versions are
+unsupported, but might work.
 
 The Python 2.x or Python 3.x interface must be available. In other words, Vim
 must be compiled with either the |+python| feature or the |+python3| feature.
@@ -124,7 +131,7 @@ permission to use his snippets.
 =============================================================================
 2. Installation and Updating                       *UltiSnips-installnupdate*
 
-The recommended way of getting ultisnips is to track SirVer/ultisnips on
+The recommended way of getting UltiSnips is to track SirVer/ultisnips on
 github. The master branch is always stable.
 
 Using Pathogen:                                     *UltiSnips-using-pathogen*
@@ -132,12 +139,11 @@ Using Pathogen:                                     *UltiSnips-using-pathogen*
 If you are a pathogen user, you can track the official mirror of UltiSnips on
 github: >
 
-   $ cd ~/.vim/
-   $ git submodule add git://github.com/SirVer/ultisnips.git bundle/ultisnips
+   $ cd ~/.vim/bundle && git clone git://github.com/SirVer/ultisnips.git
 
 If you also want the default snippets, also track >
 
-   $ git submodule add https://github.com/honza/vim-snippets.git
+   $ cd ~/.vim/bundle && git clone git://github.com/honza/vim-snippets.git
 
 See the pathogen documentation for more details on how to update a bundle.
 
@@ -248,13 +254,6 @@ current expand context. Be advised, that some terminal emulators don't send
    g:UltiSnipsJumpForwardTrigger          <c-j>
    g:UltiSnipsJumpBackwardTrigger         <c-k>
 
-The g:UltiSnipsExpandTrigger and g:UltiSnipsJumpForwardTrigger can be set to
-the same value. To simulate TextMate behavior, add the following lines to your
-vimrc file. >
-   let g:UltiSnipsExpandTrigger="<tab>"
-   let g:UltiSnipsJumpForwardTrigger="<tab>"
-   let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
-
 UltiSnips will only map the jump triggers while a snippet is active to
 interfere as little as possible with other mappings.
 
@@ -309,7 +308,39 @@ then you define your mapping as >
 and if the you can't expand or jump from the current location then the
 alternative function IMAP_Jumpfunc('', 0) is called.
 
-3.2.2 Path to Python module                   *UltiSnips-python-module-path*
+3.2.2 Custom autocommands                       *UltiSnips-custom-autocommands*
+-------------------------
+
+Note Autocommands must *not* change the buffer in any way. If lines are added,
+deleted, or modified it will confuse UltiSnips which might scramble your
+snippets contents.
+
+                          *UltiSnipsEnterFirstSnippet* *UltiSnipsExitLastSnippet*
+For maximum compatibility with other plug-ins, UltiSnips sets up some special
+state, include mappings and autocommands, when a snippet starts being
+expanded, and tears them down once the last snippet has been exited. In order
+to make it possible to override these "inner" settings, it fires the following
+"User" autocommands:
+
+UltiSnipsEnterFirstSnippet
+UltiSnipsExitLastSnippet
+
+For example, to call a pair of custom functions in response to these events,
+you might do: >
+
+   autocmd! User UltiSnipsEnterFirstSnippet
+   autocmd User UltiSnipsEnterFirstSnippet call CustomInnerKeyMapper()
+   autocmd! User UltiSnipsExitLastSnippet
+   autocmd User UltiSnipsExitLastSnippet call CustomInnerKeyUnmapper()
+
+Note that snippet expansion may be nested, in which case
+|UltiSnipsEnterFirstSnippet| will fire only as the first (outermost) snippet
+is entered, and |UltiSnipsExitLastSnippet| will only fire once the last
+(outermost) snippet have been exited.
+
+
+
+3.2.3 Path to Python module                   *UltiSnips-python-module-path*
 ---------------------------
 
 For even more advanced usage, you can directly write python functions using
@@ -654,6 +685,14 @@ The options currently supported are: >
        Without this option empty lines in snippets definition will have
        indentation too.
 
+   e   Context snippets - With this option expansion of snippet can be
+       controlled not only by previous characters in line, but by any given
+       python expression. This option can be specified along with other
+       options, like 'b'. See |UltiSnips-context-snippets| for more info.
+
+   A   Snippet will be triggered automatically, when condition matches.
+       See |UltiSnips-autotrigger| for more info.
+
 The end line is the 'endsnippet' keyword on a line by itself. >
 
    endsnippet
@@ -664,9 +703,9 @@ from the 'endsnippet' end line.
 
  4.1.1 Character Escaping:                     *UltiSnips-character-escaping*
 
-In snippet definitions, the characters '`', '{', '$', '\' and "'" (single
-quote) have special meaning. If you want to insert one of these characters
-literally, escape them with a backslash, '\'.
+In snippet definitions, the characters '`', '{', '$' and '\' have special
+meaning. If you want to insert one of these characters literally, escape them
+with a backslash, '\'.
 
 
 4.2 Plaintext Snippets                         *UltiSnips-plaintext-snippets*
@@ -814,11 +853,12 @@ output is ignored.
 
 The variables automatically defined in python code are: >
 
-   fn   - The current filename
-   path - The complete path to the current file
-   t    - The values of the placeholders, t[1] is the text of ${1}, and so on
-   snip - UltiSnips.TextObjects.SnippetUtil object instance. Has methods that
-          simplify indentation handling.
+   fn      - The current filename
+   path    - The complete path to the current file
+   t       - The values of the placeholders, t[1] is the text of ${1}, etc.
+   snip    - UltiSnips.TextObjects.SnippetUtil object instance. Has methods
+             that simplify indentation handling.
+   context - Result of context condition. See |UltiSnips-context-snippets|.
 
 The 'snip' object provides the following methods: >
 
@@ -963,7 +1003,7 @@ directly inside your snippets. For example to use
    endglobal
 
 
-4.4 Tabstops and Placeholders   *UltiSnips-tabstops* *UltiSnips-placeholders*
+4.5 Tabstops and Placeholders   *UltiSnips-tabstops* *UltiSnips-placeholders*
 -----------------------------
 
 Snippets are used to quickly insert reused text into a document. Often the
@@ -976,7 +1016,8 @@ until all the variable components are complete.
 The syntax for a tabstop is the dollar sign followed by a number, for example,
 '$1'. Tabstops start at number 1 and are followed in sequential order. The
 '$0' tabstop is a special tabstop. It is always the last tabstop in the
-snippet no matter how many tabstops are defined.
+snippet no matter how many tabstops are defined. If there is no '$0' defined,
+'$0' tabstop will be defined at the end of snippet.
 
 Here is a simple example.
 
@@ -1294,6 +1335,308 @@ clearsnippets trigger1 trigger2
 ------------------- SNAP -------------------
 
 
+4.9 Context snippets                            *UltiSnips-context-snippets*
+
+Context snippets can be enabled by using 'e' option in snippet definition.
+
+In that case snippet should be defined using this syntax: >
+
+    snippet tab_trigger "description" "expression" options
+
+The 'expression' can be any python expression. If 'expression' evaluates to
+'True', then this snippet will be chosen for expansion. The 'expression' must
+be wrapped with double-quotes.
+
+The following python modules are automatically imported into the scope before
+'expression' is evaluated: 're', 'os', 'vim', 'string', 'random'.
+
+Global variable `snip` will be available with following properties:
+    'snip.window' - alias for 'vim.current.window'
+    'snip.buffer' - alias for 'vim.current.window.buffer'
+    'snip.cursor' - cursor object, which behaves like
+        'vim.current.window.cursor', but zero-indexed and with following
+        additional methods:
+        - 'preserve()' - special method for executing pre/post/jump actions;
+        - 'set(line, column)' - sets cursor to specified line and column;
+        - 'to_vim_cursor()' - returns 1-indexed cursor, suitable for assigning
+          to 'vim.current.window.cursor';
+    'snip.line' and 'snip.column' - aliases for cursor position (zero-indexed);
+
+
+------------------- SNIP -------------------
+snippet r "return" "re.match('^\s+if err ', snip.buffer[snip.line-1])" be
+return err
+endsnippet
+------------------- SNAP -------------------
+
+That snippet will expand to 'return err' only if the previous line is starting
+from 'if err' prefix.
+
+Note: context snippets prioritized over non-context ones. It makes possible to
+use non-context snippets as fallback, if no context matched:
+
+------------------- SNIP -------------------
+snippet i "if ..." b
+if $1 {
+    $2
+}
+endsnippet
+
+snippet i "if err != nil" "re.match('^\s+[^=]*err\s*:?=', snip.buffer[snip.line-1])" be
+if err != nil {
+    $1
+}
+endsnippet
+------------------- SNAP -------------------
+
+That snippet will expand into 'if err != nil' if previous line will
+match 'err :=' prefix, otherwise the default 'if' snippet will be expanded.
+
+It's a good idea to move context conditions to a separate module, so it can be
+used by other UltiSnips users. In that case, module should be imported
+using 'global' keyword, like this:
+
+------------------- SNIP -------------------
+global !p
+import my_utils
+endglobal
+
+snippet , "return ..., nil/err" "my_utils.is_return_argument(snip)" ie
+, `!p if my_utils.is_in_err_condition():
+    snip.rv = "err"
+else:
+    snip.rv = "nil"`
+endsnippet
+------------------- SNAP -------------------
+
+That snippet will expand only if the cursor is located in the return statement,
+and then it will expand either to 'err' or to 'nil' depending on which 'if'
+statement it's located. 'is_return_argument' and 'is_in_err_condition' are
+part of custom python module which is called 'my_utils' in this example.
+
+Context condition can return any value which python can use as condition in
+it's 'if' statement, and if it's considered 'True', then snippet will be
+expanded. The evaluated value of 'condition' is available in the 'snip.context'
+variable inside the snippet:
+
+------------------- SNIP -------------------
+snippet + "var +=" "re.match('\s*(.*?)\s*:?=', snip.buffer[snip.line-1])" ie
+`!p snip.rv = snip.context.group(1)` += $1
+endsnippet
+------------------- SNAP -------------------
+
+That snippet will expand to 'var1 +=' after line, which begins from 'var1 :='.
+
+
+4.10 Snippets actions                             *UltiSnips-snippet-actions*
+---------------------
+
+Snippet actions is an arbitrary python code which can be executed at specific
+points in lifetime of the snippet.
+
+There are three types of actions:
+
+* Pre-expand - invoked just after trigger condition was matched, but before
+  snippet actually expanded;
+* Post-expand - invoked after snippet was expanded and interpolations
+  was applied for the first time, but before jump on the first placeholder.
+* Jump - invoked just after jump to the next/prev placeholder.
+
+Specified code will be evaluated at stages defined above and same global
+variables and modules will be available that are stated in
+the |UltiSnips-context-snippets| section.
+
+                                                *UltiSnips-buffer-proxy*
+
+Note: special variable called 'snip.buffer' should be used for all buffer
+modifications. Not 'vim.current.buffer' and not 'vim.command("...")', because
+of in that case UltiSnips will not be able to track changes buffer from
+actions.
+
+'snip.buffer' has the same interface as 'vim.current.window.buffer'.
+
+4.10.1 Pre-expand actions                       *UltiSnips-pre-expand-actions*
+
+Pre-expand actions can be used to match snippet in one location and then
+expand it in the different location. Some useful cases are: correcting
+indentation for snippet; expanding snippet for function declaration in another
+function body with moving expansion point beyond initial function; performing
+extract method refactoring via expanding snippet in different place.
+
+Pre-expand action declared as follows: >
+    pre_expand "python code here"
+    snippet ...
+    endsnippet
+
+Buffer can be modified in pre-expand action code through variable called
+'snip.buffer', snippet expansion position will be automatically adjusted.
+
+If cursor line (where trigger was matched) need to be modified, then special
+variable method 'snip.cursor.set(line, column)' must be called with the
+desired cursor position. In that case UltiSnips will not remove any matched
+trigger text and it should be done manually in action code.
+
+To addition to the scope variables defined above 'snip.visual_content' will be
+also declared and will contain text that was selected before snippet expansion
+(similar to $VISUAL placeholder).
+
+Following snippet will be expanded at 4 spaces indentation level no matter
+where it was triggered.
+
+------------------- SNIP -------------------
+pre_expand "snip.buffer[snip.line] = ' '*4; snip.cursor.set(line, 4)"
+snippet d
+def $1():
+    $0
+endsnippet
+------------------- SNAP -------------------
+
+Following snippet will move the selected code to the end of file and create
+new method definition for it:
+
+------------------- SNIP -------------------
+pre_expand "del snip.buffer[snip.line]; snip.buffer.append(''); snip.cursor.set(len(snip.buffer)-1, 0)"
+snippet x
+def $1():
+	${2:${VISUAL}}
+endsnippet
+------------------- SNAP -------------------
+
+4.10.2 Post-expand actions                     *UltiSnips-post-expand-actions*
+
+Post-expand actions can be used to perform some actions based on the expanded
+snippet text. Some cases are: code style formatting (e.g. inserting newlines
+before and after method declaration), apply actions depending on python
+interpolation result.
+
+Post-expand action declared as follows: >
+    post_expand "python code here"
+    snippet ...
+    endsnippet
+
+Buffer can be modified in post-expand action code through variable called
+'snip.buffer', snippet expansion position will be automatically adjusted.
+
+Variables 'snip.snippet_start' and 'snip.snippet_end' will be defined at the
+action code scope and will point to positions of the start and end of expanded
+snippet accordingly in the form '(line, column)'.
+
+Note: 'snip.snippet_start' and 'snip.snippet_end' will automatically adjust to
+the correct positions if post-action will insert or delete lines before
+expansion.
+
+Following snippet will expand to method definition and automatically insert
+additional newline after end of the snippet. It's very useful to create a
+function that will insert as many newlines as required in specific context.
+
+------------------- SNIP -------------------
+post_expand "snip.buffer[snip.snippet_end[0]+1:snip.snippet_end[0]+1] = ['']"
+snippet d "Description" b
+def $1():
+	$2
+endsnippet
+------------------- SNAP -------------------
+
+4.10.3 Post-jump actions                         *UltiSnips-post-jump-actions*
+
+Post-jump actions can be used to trigger some code based on user input into
+the placeholders. Notable use cases: expand another snippet after jump or
+anonymous snippet after last jump (e.g. perform move method refactoring and
+then insert new method invokation); insert heading into TOC after last jump.
+
+Jump-expand action declared as follows: >
+    post_jump "python code here"
+    snippet ...
+    endsnippet
+
+Buffer can be modified in post-expand action code through variable called
+'snip.buffer', snippet expansion position will be automatically adjusted.
+
+Next variables and methods will be also defined in the action code scope:
+* 'snip.tabstop' - number of tabstop jumped onto;
+* 'snip.jump_direction' - '1' if jumped forward and '-1' otherwise;
+* 'snip.tabstops' - list with tabstop objects, see above;
+* 'snip.snippet_start' - (line, column) of start of the expanded snippet;
+* 'snip.snippet_end' - (line, column) of end of the expanded snippet;
+* 'snip.expand_anon()' - alias for 'UltiSnips_Manager.expand_anon()';
+
+Tabstop object has several useful properties:
+* 'start' - (line, column) of the starting position of the tabstop (also
+  accessible as 'tabstop.line' and 'tabstop.col').
+* 'end' - (line, column) of the ending position;
+* 'current_text' - text inside the tabstop.
+
+Following snippet will insert section in the Table of Contents in the vim-help
+file:
+
+------------------- SNIP -------------------
+post_jump "if snip.tabstop == 0: insert_toc_item(snip.tabstops[1], snip.buffer)"
+snippet s "section" b
+`!p insert_delimiter_0(snip, t)`$1`!p insert_section_title(snip, t)`
+`!p insert_delimiter_1(snip, t)`
+$0
+endsnippet
+------------------- SNAP -------------------
+
+'insert_toc_item' will be called after first jump and will add newly entered
+section into the TOC for current file.
+
+Note: It is also possible to trigger snippet expansion from the jump action.
+In that case method 'snip.cursor.preserve()' should be called, so UltiSnips
+will know that cursor is already at the required position.
+
+Following example will insert method call at the end of file after user jump
+out of method declaration snippet.
+
+------------------- SNIP -------------------
+global !p
+def insert_method_call(name):
+	vim.command('normal G')
+	snip.expand_anon(name + '($1)\n')
+endglobal
+
+post_jump "if snip.tabstop == 0: insert_method_call(snip.tabstops[1].current_text)"
+snippet d "method declaration" b
+def $1():
+	$2
+endsnippet
+------------------- SNAP -------------------
+
+4.11 Autotrigger                                       *UltiSnips-autotrigger*
+----------------
+
+Note: vim should be newer than 7.4.214 to support this feature.
+
+Many language constructs can occur only at specific places, so it's
+possible to use snippets without manually triggering them.
+
+Snippet can be marked as autotriggered by specifying 'A' option in the snippet
+definition.
+
+After snippet is defined as being autotriggered, snippet condition will be
+checked on every typed character and if condition matches, then snippet will
+be triggered.
+
+*Warning:* using of this feature can lead to significant vim slowdown. If you
+discovered that, report an issue to the github.com/SirVer/UltiSnips.
+
+Consider following snippets, that can be usefull in Go programming:
+------------------- SNIP -------------------
+snippet "^p" "package" rbA
+package ${1:main}
+endsnippet
+
+snippet "^m" "func main" rbA
+func main() {
+	$1
+}
+endsnippet
+------------------- SNAP -------------------
+
+When "p" character will occur in the beginning of the line, it will be
+automatically expanded into "package main". Same with "m" character. There is
+no need to press trigger key after "m""
+
 ==============================================================================
 5. UltiSnips and Other Plugins                      *UltiSnips-other-plugins*
 
@@ -1302,8 +1645,8 @@ clearsnippets trigger1 trigger2
 
 UltiSnips has built-in support for some common plugins and there are others
 that are aware of UltiSnips and use it to improve the user experience. This is
-an incomplete list - if you want to have your plugin listed here, just send me
-a pull request.
+an incomplete list - if you want to have your plugin listed here, just send a
+pull request.
 
                                                     *UltiSnips-snipMate*
 
@@ -1345,49 +1688,33 @@ to Supertab for expansion.
 UltiSnips allows other plugins to add new snippets on the fly. Since UltiSnips
 is written in python, the integration is also on a python basis. A small
 example can be found in `test.py`, search for AddNewSnippetSource. Please
-contact me on github if you integrate UltiSnips with your plugin so it can be
+contact us on github if you integrate UltiSnips with your plugin so it can be
 listed in the docs.
 
 =============================================================================
 6. Helping Out                                            *UltiSnips-helping*
 
 UltiSnips needs the help of the Vim community to keep improving. Please
-consider joining this effort by providing new snippets, new features or bug
-reports.
-
-You can contribute snippets or patches in various ways. The methods are listed
-below in order of convenience for me. Please be as convenient as you
-can be :)
+consider joining this effort by providing new features or bug reports.
 
 * Clone the repository on GitHub (git clone git@github.com:SirVer/ultisnips.git),
   make your changes and send a pull request on GitHub.
 * Make a patch, report a bug/feature request (see below) and attach the patch
   to it.
-* Send me an Email with a patch (see Contact section below).
-* Send me an Email with the changed files only.
 
 You can contribute by fixing or reporting bugs in our issue tracker:
 https://github.com/sirver/ultisnips/issues
 
-If you like this plugin, please vote for it on its Vim script page >
-    http://www.vim.org/scripts/script.php?script_id=2715
-It is life-changing for me. Maybe it is for you too.
-
-
 =============================================================================
-7. Contact                                                *UltiSnips-contact*
+7. Contributors                                      *UltiSnips-contributors*
 
-You can reach me at SirVer -AT- gmx -ADOT- de.
+UltiSnips has been started and maintained from Jun 2009 - Dec 2015 by Holger
+Rapp (@SirVer, SirVer@gmx.de). It is now maintained by Stanislav Seletskiy
+(@seletskiy).
 
-This project aims to be the one-for-all solution for Snippets for Vim. If you
-miss a feature or find a bug, please contact me or add an issues to our issues
-tracker.
-
-=============================================================================
-8. Contributors                                      *UltiSnips-contributors*
-
-The primary developer of UltiSnips is SirVer (Holger Rapp). The following
-individuals have contributed to UltiSnips (in chronological order):
+This is the list of contributors pre-git in chronological order. For a full
+list of contributors take the union of this set and the authors according to
+git log.
 
    JCEB - Jan Christoph Ebersbach
    Michael Henry
@@ -1444,8 +1771,8 @@ individuals have contributed to UltiSnips (in chronological order):
    Stanislav Seletskiy - seletskiy
    Pawel Palucki - ppalucki
    Dettorer - dettorer
-
-
-Thank you for your support.
+   Zhao Jiarong - kawing-chiu
+   Ye Ding - dyng
+   Greg Hurrell - wincent
 
 vim:tw=78:ts=8:ft=help:norl:

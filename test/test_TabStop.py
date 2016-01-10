@@ -227,6 +227,16 @@ class TabStop_TSInDefaultText_ZeroLengthNested_OverwriteSecond(_VimTest):
     wanted = """haupsblEnd"""
 
 
+class TabStop_TSInDefaultText_ZeroLengthZerothTabstop(_VimTest):
+    snippets = ('test', """Test: ${1:snippet start\nNested tabstop: $0\nsnippet end}\nTrailing text""")
+    keys = 'test' + EX + JF + 'hello'
+    wanted = "Test: snippet start\nNested tabstop: hello\nsnippet end\nTrailing text"
+
+class TabStop_TSInDefaultText_ZeroLengthZerothTabstop_Override(_VimTest):
+    snippets = ('test', """Test: ${1:snippet start\nNested tabstop: $0\nsnippet end}\nTrailing text""")
+    keys = 'test' + EX + 'blub' + JF + 'hello'
+    wanted = "Test: blub\nTrailing texthello"
+
 class TabStop_TSInDefaultText_ZeroLengthNested_OverwriteFirst(_VimTest):
     snippets = ('test', """h${1:a$2b}l""")
     keys = 'test' + EX + 'ups' + JF + 'End'
@@ -364,3 +374,35 @@ class TabStop_CROnlyOnSelectedNear(_VimTest):
     snippets = ('test', 't$1t${2: }t{\n\t$0\n}')
     keys = 'test' + EX + JF + '\n' + JF + 't'
     wanted = 'tt\nt{\n\tt\n}'
+
+
+class TabStop_AdjacentTabStopAddText_ExpectCorrectResult(_VimTest):
+    snippets = ('test', '[ $1$2 ] $1')
+    keys = 'test' + EX + 'Hello' + JF + 'World' + JF
+    wanted = '[ HelloWorld ] Hello'
+
+
+class TabStop_KeepCorrectJumpListOnOverwriteOfPartOfSnippet(_VimTest):
+    files = { 'us/all.snippets': r"""
+        snippet i
+        ia$1: $2
+        endsnippet
+
+        snippet ia
+        ia($1, $2)
+        endsnippet"""}
+    keys = 'i' + EX + EX + '1' + JF + '2' + JF + ' after' + JF + '3'
+    wanted = 'ia(1, 2) after: 3'
+
+
+class TabStop_KeepCorrectJumpListOnOverwriteOfPartOfSnippetRE(_VimTest):
+    files = { 'us/all.snippets': r"""
+        snippet i
+        ia$1: $2
+        endsnippet
+
+        snippet "^ia" "regexp" r
+        ia($1, $2)
+        endsnippet"""}
+    keys = 'i' + EX + EX + '1' + JF + '2' + JF + ' after' + JF + '3'
+    wanted = 'ia(1, 2) after: 3'

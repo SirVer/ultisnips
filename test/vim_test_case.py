@@ -3,295 +3,19 @@
 # pylint: skip-file
 
 import os
-import re
-import shutil
 import subprocess
 import tempfile
 import textwrap
 import time
 import unittest
-from test.constant import (ARR_D, ARR_L, ARR_R, ARR_U, BS, ESC, PYTHON3,
-                           SEQUENCES)
 
-
-def is_process_running(pid):
-    """Returns true if a process with pid is running, false otherwise."""
-    # from
-    # http://stackoverflow.com/questions/568271/how-to-check-if-there-exists-a-process-with-a-given-pid
-    try:
-        os.kill(pid, 0)
-    except OSError:
-        return False
-    else:
-        return True
-
-
-def silent_call(cmd):
-    """Calls 'cmd' and returns the exit value."""
-    return subprocess.call(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-
-
-def create_directory(dirname):
-    """Creates 'dirname' and its parents if it does not exist."""
-    try:
-        os.makedirs(dirname)
-    except OSError:
-        pass
+from test.constant import PYTHON3, SEQUENCES, EX
+from test.vim_interface import create_directory, TempFileManager
 
 
 def plugin_cache_dir():
     """The directory that we check out our bundles to."""
     return os.path.join(tempfile.gettempdir(), 'UltiSnips_test_vim_plugins')
-
-
-def read_text_file(filename):
-    """Reads the contens of a text file."""
-    if PYTHON3:
-        return open(filename, 'r', encoding='utf-8').read()
-    else:
-        return open(filename, 'r').read()
-
-
-def wait_until_file_exists(file_path, times=None, interval=0.01):
-    while times is None or times:
-        if os.path.exists(file_path):
-            return True
-        time.sleep(interval)
-        if times is not None:
-            times -= 1
-    return False
-
-
-class TempFileManager(object):
-
-    """A TempFileManager keeps a unique prefix path for temp files.
-
-    A temp file, or a name for a temp file generate by a TempFileManager
-    always belongs to the same directory.
-
-    """
-
-    def __init__(self, name=''):
-        """The unique prefix path is UltiSnipsTest_{name}XXXXXX."""
-        self._temp_dir = tempfile.mkdtemp(prefix='UltiSnipsTest_' + name)
-
-    def name_temp(self, file_path):
-        """Get the absolute path of a temp file by given file path."""
-        return os.path.join(self._temp_dir, file_path)
-
-    def write_temp(self, file_path, content):
-        """Write the content to a temp file by given file path inside the
-        _temp_dir, and return the absolute path of that file."""
-        abs_path = self.name_temp(file_path)
-        create_directory(os.path.dirname(abs_path))
-        if PYTHON3:
-            with open(abs_path, 'w', encoding='utf-8') as f:
-                f.write(content)
-        else:
-            with open(abs_path, 'w') as f:
-                f.write(content)
-        return abs_path
-
-    def unique_name_temp(self, suffix='', prefix=''):
-        """Generate a unique name for a temp file with given suffix and prefix,
-        and return full absolute path."""
-        file_handler, abspath = tempfile.mkstemp(
-            suffix, prefix, self._temp_dir)
-        os.close(file_handler)
-        os.remove(abspath)
-        return abspath
-
-    def clear_temp(self):
-        """Clear the temp file directory, but the directory itself is not
-        removed."""
-        shutil.rmtree(self._temp_dir)
-        create_directory(self._temp_dir)
-
-
-class VimInterface(TempFileManager):
-
-    def __init__(self, name=''):
-        TempFileManager.__init__(self, name)
-
-    def get_buffer_data(self):
-        buffer_path = self.unique_name_temp(prefix='buffer_')
-        self.send(ESC + ':w! %s\n' % buffer_path)
-        if wait_until_file_exists(buffer_path, 50):
-            return read_text_file(buffer_path)[:-1]
-
-    def send(self, s):
-        raise NotImplementedError()
-
-    def launch(self, config=[]):
-        pid_file = self.name_temp('vim.pid')
-        done_file = self.name_temp('loading_done')
-        if os.path.exists(done_file):
-            os.remove(done_file)
-
-        post_config = []
-        post_config.append('%s << EOF' % ('py3' if PYTHON3 else 'py'))
-        post_config.append('import vim')
-        post_config.append(
-            "with open('%s', 'w') as pid_file: pid_file.write(vim.eval('getpid()'))" %
-            pid_file)
-        post_config.append(
-            "with open('%s', 'w') as done_file: pass" %
-            done_file)
-        post_config.append('EOF')
-
-        config_path = self.write_temp('vim_config.vim',
-                                      textwrap.dedent(os.linesep.join(config + post_config) + '\n'))
-
-        # Note the space to exclude it from shell history.
-        self.send(""" vim -u %s\r\n""" % config_path)
-        wait_until_file_exists(done_file)
-        self._vim_pid = int(open(pid_file, 'r').read())
-
-    def leave_with_wait(self):
-        self.send(3 * ESC + ':qa!\n')
-        while is_process_running(self._vim_pid):
-            time.sleep(.05)
-
-
-class VimInterfaceScreen(VimInterface):
-
-    def __init__(self, session):
-        VimInterface.__init__(self, 'Screen')
-        self.session = session
-        self.need_screen_escapes = 0
-        self.detect_parsing()
-
-    def send(self, s):
-        if self.need_screen_escapes:
-            # escape characters that are special to some versions of screen
-            repl = lambda m: '\\' + m.group(0)
-            s = re.sub(r"[$^#\\']", repl, s)
-
-        if PYTHON3:
-            s = s.encode('utf-8')
-
-        while True:
-            rv = 0
-            if len(s) > 30:
-                rv |= silent_call(
-                    ['screen', '-x', self.session, '-X', 'register', 'S', s])
-                rv |= silent_call(
-                    ['screen', '-x', self.session, '-X', 'paste', 'S'])
-            else:
-                rv |= silent_call(
-                    ['screen', '-x', self.session, '-X', 'stuff', s])
-            if not rv:
-                break
-            time.sleep(.2)
-
-    def detect_parsing(self):
-        self.launch()
-        # Send a string where the interpretation will depend on version of
-        # screen
-        string = '$TERM'
-        self.send('i' + string + ESC)
-        output = self.get_buffer_data()
-        # If the output doesn't match the input, need to do additional escaping
-        if output != string:
-            self.need_screen_escapes = 1
-        self.leave_with_wait()
-
-
-class VimInterfaceTmux(VimInterface):
-
-    def __init__(self, session):
-        self.session = session
-        self._check_version()
-
-    def send(self, s):
-        # I did not find any documentation on what needs escaping when sending
-        # to tmux, but it seems like this is all that is needed for now.
-        s = s.replace(';', r'\;')
-
-        if PYTHON3:
-            s = s.encode('utf-8')
-        silent_call(['tmux', 'send-keys', '-t', self.session, '-l', s])
-
-    def _check_version(self):
-        stdout, _ = subprocess.Popen(['tmux', '-V'],
-                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-        if PYTHON3:
-            stdout = stdout.decode('utf-8')
-        m = re.match(r"tmux (\d+).(\d+)", stdout)
-        if not m or not (int(m.group(1)), int(m.group(2))) >= (1, 9):
-            raise RuntimeError(
-                'Need at least tmux 1.9, you have %s.' %
-                stdout.strip())
-
-
-class VimInterfaceWindows(VimInterface):
-    BRACES = re.compile('([}{])')
-    WIN_ESCAPES = ['+', '^', '%', '~', '[', ']', '<', '>', '(', ')']
-    WIN_REPLACES = [
-        (BS, '{BS}'),
-        (ARR_L, '{LEFT}'),
-        (ARR_R, '{RIGHT}'),
-        (ARR_U, '{UP}'),
-        (ARR_D, '{DOWN}'),
-        ('\t', '{TAB}'),
-        ('\n', '~'),
-        (ESC, '{ESC}'),
-
-        # On my system ` waits for a second keystroke, so `+SPACE = "`".  On
-        # most systems, `+Space = "` ". I work around this, by sending the host
-        # ` as `+_+BS. Awkward, but the only way I found to get this working.
-        ('`', '`_{BS}'),
-        ('´', '´_{BS}'),
-        ('{^}', '{^}_{BS}'),
-    ]
-
-    def __init__(self):
-        self.seq_buf = []
-        # import windows specific modules
-        import win32com.client
-        import win32gui
-        self.win32gui = win32gui
-        self.shell = win32com.client.Dispatch('WScript.Shell')
-
-    def is_focused(self, title=None):
-        cur_title = self.win32gui.GetWindowText(
-            self.win32gui.GetForegroundWindow())
-        if (title or '- GVIM') in cur_title:
-            return True
-        return False
-
-    def focus(self, title=None):
-        if not self.shell.AppActivate(title or '- GVIM'):
-            raise Exception('Failed to switch to GVim window')
-        time.sleep(1)
-
-    def convert_keys(self, keys):
-        keys = self.BRACES.sub(r"{\1}", keys)
-        for k in self.WIN_ESCAPES:
-            keys = keys.replace(k, '{%s}' % k)
-        for f, r in self.WIN_REPLACES:
-            keys = keys.replace(f, r)
-        return keys
-
-    def send(self, keys):
-        self.seq_buf.append(keys)
-        seq = ''.join(self.seq_buf)
-
-        for f in SEQUENCES:
-            if f.startswith(seq) and f != seq:
-                return
-        self.seq_buf = []
-
-        seq = self.convert_keys(seq)
-
-        if not self.is_focused():
-            time.sleep(2)
-            self.focus()
-        if not self.is_focused():
-            # This is the only way I can find to stop test execution
-            raise KeyboardInterrupt('Failed to focus GVIM')
-
-        self.shell.SendKeys(seq)
 
 
 class VimTestCase(unittest.TestCase, TempFileManager):
@@ -308,29 +32,32 @@ class VimTestCase(unittest.TestCase, TempFileManager):
     # Skip this test for the given reason or None for not skipping it.
     skip_if = lambda self: None
     version = None  # Will be set to vim --version output
+    maxDiff = None  # Show all diff output, always.
+    vim_flavor = None # will be 'vim' or 'neovim'.
+    expected_python_version = None # If set, we need to check that our Vim is running this python version.
 
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)
         TempFileManager.__init__(self, 'Case')
 
     def runTest(self):
+        if self.expected_python_version:
+            self.assertEqual(self.in_vim_python_version, self.expected_python_version)
+
         # Only checks the output. All work is done in setUp().
         wanted = self.text_before + self.wanted + self.text_after
-        if self.expected_error:
-            self.assertRegexpMatches(self.output, self.expected_error)
-            return
         for i in range(self.retries):
-            if self.output != wanted:
+            if self.output and self.expected_error:
+                self.assertRegexpMatches(self.output, self.expected_error)
+                return
+            if self.output != wanted or self.output is None:
                 # Redo this, but slower
-                self.sleeptime += 0.02
+                self.sleeptime += 0.15
                 self.tearDown()
                 self.setUp()
-        self.assertEqual(self.output, wanted)
+        self.assertMultiLineEqual(self.output, wanted)
 
-    def _extra_options_pre_init(self, vim_config):
-        """Adds extra lines to the vim_config list."""
-
-    def _extra_options_post_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         """Adds extra lines to the vim_config list."""
 
     def _before_test(self):
@@ -356,6 +83,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         os.symlink(source, os.path.join(absdir, os.path.basename(source)))
 
     def setUp(self):
+        # TODO(sirver): this uses 'vim', but must use --vim from the commandline.
         if not VimTestCase.version:
             VimTestCase.version, _ = subprocess.Popen(['vim', '--version'],
                                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
@@ -388,15 +116,20 @@ class VimTestCase(unittest.TestCase, TempFileManager):
                     'bundle')
             vim_config.append('execute pathogen#infect()')
 
-        # Vim parameters.
+        # Some configurations are unnecessary for vanilla Vim, but Neovim
+        # defines some defaults differently.
         vim_config.append('syntax on')
         vim_config.append('filetype plugin indent on')
+        vim_config.append('set nosmarttab')
+        vim_config.append('set noautoindent')
+        vim_config.append('set backspace=""')
         vim_config.append('set clipboard=""')
         vim_config.append('set encoding=utf-8')
         vim_config.append('set fileencoding=utf-8')
         vim_config.append('set buftype=nofile')
         vim_config.append('set shortmess=at')
         vim_config.append('let @" = ""')
+        assert EX == "\t"  # Otherwise you need to change the next line
         vim_config.append('let g:UltiSnipsExpandTrigger="<tab>"')
         vim_config.append('let g:UltiSnipsJumpForwardTrigger="?"')
         vim_config.append('let g:UltiSnipsJumpBackwardTrigger="+"')
@@ -405,16 +138,16 @@ class VimTestCase(unittest.TestCase, TempFileManager):
             'let g:UltiSnipsUsePythonVersion="%i"' %
             (3 if PYTHON3 else 2))
         vim_config.append('let g:UltiSnipsSnippetDirectories=["us"]')
+        if self.python_host_prog:
+            vim_config.append('let g:python_host_prog="%s"' % self.python_host_prog)
+        if self.python3_host_prog:
+            vim_config.append('let g:python3_host_prog="%s"' % self.python3_host_prog)
 
-        self._extra_options_pre_init(vim_config)
-
-        # Now activate UltiSnips.
-        vim_config.append('call UltiSnips#bootstrap#Bootstrap()')
-
-        self._extra_options_post_init(vim_config)
+        self._extra_vim_config(vim_config)
 
         # Finally, add the snippets and some configuration for the test.
         vim_config.append('%s << EOF' % ('py3' if PYTHON3 else 'py'))
+        vim_config.append('from UltiSnips import UltiSnips_Manager\n')
 
         if len(self.snippets) and not isinstance(self.snippets[0], tuple):
             self.snippets = (self.snippets, )
@@ -434,6 +167,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
 
         # fill buffer with default text and place cursor in between.
         prefilled_text = (self.text_before + self.text_after).splitlines()
+        vim_config.append('import vim\n')
         vim_config.append('vim.current.buffer[:] = %r\n' % prefilled_text)
         vim_config.append(
             'vim.current.window.cursor = (max(len(vim.current.buffer)//2, 1), 0)')
@@ -444,16 +178,24 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         for name, content in self.files.items():
             self._create_file(name, content)
 
-        self.vim.launch(vim_config)
+        self.in_vim_python_version = self.vim.launch(vim_config)
 
         self._before_test()
 
         if not self.interrupt:
             # Go into insert mode and type the keys but leave Vim some time to
             # react.
-            for c in 'i' + self.keys:
-                self.vim.send(c)
+            text = 'i' + self.keys
+            while text:
+                to_send = None
+                for seq in SEQUENCES:
+                    if text.startswith(seq):
+                        to_send = seq
+                        break
+                to_send = to_send or text[0]
+                self.vim.send_to_vim(to_send)
                 time.sleep(self.sleeptime)
+                text = text[len(to_send):]
             self.output = self.vim.get_buffer_data()
 
     def tearDown(self):

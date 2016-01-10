@@ -1,17 +1,29 @@
 language: python
 
 python:
-  # TOOD: add support for one python3 version. The problem here is Vim: we need to install a version of vim that
-  # has py3, but not py2. I could not figure this out so far.
   - 2.7
-before_script:
-  # Clone the dependent plugins we want to use.
-  - ./test_all.py --clone-plugins
-  # Install tmux (> 1.8) and vim. 
-  - sudo add-apt-repository ppa:kalakris/tmux -y
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq -y tmux vim-gnome
-  # Start the testing session.
-  - tmux new -d -s vim
-  - vim --version
-script: ./test_all.py -v --plugins --interface tmux --session vim
+  - 3.3
+  - 3.4
+env:
+  - VIM_VERSION="74"
+  - VIM_VERSION="mercurial"
+  # - VIM_VERSION="NEOVIM"
+
+install:
+   # Some of these commands fail transiently. We keep retrying them until they succeed.
+   - until sudo add-apt-repository ppa:kalakris/tmux -y; do sleep 10; done
+   - until sudo add-apt-repository ppa:neovim-ppa/unstable -y; do sleep 10; done
+   - until sudo apt-get update -qq; do sleep 10; done
+   - until sudo apt-get install -qq -y --force-yes tmux xclip gdb neovim mercurial; do sleep 10; done
+   - ./travis_install.sh
+
+script:
+   - ./travis_test.sh
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/558acac434012ba838cd
+    on_success: change  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: false     # default: false

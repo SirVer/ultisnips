@@ -14,7 +14,7 @@ class _SelectModeMappings(_VimTest):
     do_unmapping = True
     ignores = []
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append(
             ':let g:UltiSnipsRemoveSelectModeMappings=%i' % int(
                 self.do_unmapping))
@@ -77,7 +77,7 @@ class SelectModeMappings_BufferLocalMappings_ECR(_SelectModeMappings):
 
 class _ES_Base(_VimTest):
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set selection=exclusive')
 
 
@@ -103,7 +103,7 @@ class ExclusiveSelection_RealWorldCase_Test(_ES_Base):
 
 class _OS_Base(_VimTest):
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set selection=old')
 
 

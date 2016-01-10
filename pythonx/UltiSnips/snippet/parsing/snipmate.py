@@ -3,7 +3,7 @@
 
 """Parses a snipMate snippet definition and launches it into Vim."""
 
-from UltiSnips.snippet.parsing._base import tokenize_snippet_text, finalize
+from UltiSnips.snippet.parsing._base import tokenize_snippet_text, finalize, resolve_ambiguity
 from UltiSnips.snippet.parsing._lexer import EscapeCharToken, \
     VisualToken, TabStopToken, MirrorToken, ShellCodeToken
 from UltiSnips.text_objects import EscapedChar, Mirror, VimLCode, Visual
@@ -23,13 +23,6 @@ __ALLOWED_TOKENS_IN_TABSTOPS = [
 ]
 
 
-def _create_mirrors(all_tokens, seen_ts):
-    """Now that all tabstops are known, we can create mirrors."""
-    for parent, token in all_tokens:
-        if isinstance(token, MirrorToken):
-            Mirror(parent, seen_ts[token.number], token)
-
-
 def parse_and_instantiate(parent_to, text, indent):
     """Parses a snippet definition in snipMate format from 'text' assuming the
     current 'indent'.
@@ -41,5 +34,5 @@ def parse_and_instantiate(parent_to, text, indent):
     all_tokens, seen_ts = tokenize_snippet_text(parent_to, text, indent,
                                                 __ALLOWED_TOKENS, __ALLOWED_TOKENS_IN_TABSTOPS,
                                                 _TOKEN_TO_TEXTOBJECT)
-    _create_mirrors(all_tokens, seen_ts)
+    resolve_ambiguity(all_tokens, seen_ts)
     finalize(all_tokens, seen_ts, parent_to)

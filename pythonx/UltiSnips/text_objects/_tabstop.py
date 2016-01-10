@@ -37,5 +37,9 @@ class TabStop(EditableTextObject):
         return self._parent is None
 
     def __repr__(self):
+        try:
+            text = self.current_text
+        except IndexError:
+            text = '<err>'
         return 'TabStop(%s,%r->%r,%r)' % (self.number, self._start,
-                                          self._end, self.current_text)
+                                          self._end, text)

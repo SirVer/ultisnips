@@ -18,7 +18,7 @@ class VirtualEdit(_VimTest):
     keys = '\t\t\tpd' + EX + '2'
     wanted = '\t\t\tpadding: 2px'
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config.append('set virtualedit=all')
         vim_config.append('set noexpandtab')
 # End: 1251994  #}}}
@@ -46,7 +46,7 @@ class RetainsTheUnnamedRegister_ButOnlyOnce(_VimTest):
 
 class ShiftWidthZero(_VimTest):
 
-    def _extra_options_pre_init(self, vim_config):
+    def _extra_vim_config(self, vim_config):
         vim_config += [
             "if exists('*shiftwidth')",
             '  set shiftwidth=0',
@@ -78,7 +78,7 @@ class NonUnicodeDataInUnnamedRegister(_VimTest):
         # The string below was the one a user had on their clipboard when
         # encountering the UnicodeDecodeError and could not be coerced into
         # unicode.
-        self.vim.send(
+        self.vim.send_to_vim(
             ':let @" = "\\x80kdI{\\x80@7 1},' +
             '\\x80kh\\x80kh\\x80kd\\x80kdq\\x80kb\\x1b"\n')
 # End: #171  #}}}

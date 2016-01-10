@@ -12,7 +12,6 @@ class Mirror(NoneditableTextObject):
 
     def __init__(self, parent, tabstop, token):
         NoneditableTextObject.__init__(self, parent, token)
-
         self._ts = tabstop
 
     def _update(self, done):
