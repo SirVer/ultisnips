@@ -244,6 +244,7 @@ The priority will then be rails -> ruby -> programming -> all.
 
                            *g:UltiSnipsExpandTrigger* *g:UltiSnipsListSnippets*
                *g:UltiSnipsJumpForwardTrigger* *g:UltiSnipsJumpBackwardTrigger*
+                                                           *g:UltiSnipsNoMap*
 You can define the keys used to trigger UltiSnips actions by setting global
 variables. Variables define the keys used to expand a snippet, jump forward
 and jump backwards within a snippet, and list all available snippets in the
@@ -256,6 +257,9 @@ current expand context. Be advised, that some terminal emulators don't send
 
 UltiSnips will only map the jump triggers while a snippet is active to
 interfere as little as possible with other mappings.
+
+You can also disable completely the default mappings by defining: >
+   let g:UltiSnipsNoMap=1
 
 The default value for g:UltiSnipsJumpBackwardTrigger interferes with the
 built-in complete function: |i_CTRL-X_CTRL-K|. A workaround is to add the
