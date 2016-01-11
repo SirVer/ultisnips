@@ -93,7 +93,7 @@ function! UltiSnips#SnippetsInCurrentScope(...)
     let g:current_ulti_dict = {}
     let all = get(a:, 1, 0)
     if all
-      let g:current_ulti_dict_all = {}
+      let g:current_ulti_dict_info = {}
     endif
     exec g:_uspy "UltiSnips_Manager.snippets_in_current_scope(" . all . ")"
     return g:current_ulti_dict

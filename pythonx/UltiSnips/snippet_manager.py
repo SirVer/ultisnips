@@ -215,7 +215,7 @@ class SnippetManager(object):
 
             if searchAll:
                 _vim.command(as_unicode(
-                    ("let g:current_ulti_dict_all['{key}'] = {{"
+                    ("let g:current_ulti_dict_info['{key}'] = {{"
                      "'description': '{description}',"
                      "'location': '{location}',"
                      "}}")).format(
