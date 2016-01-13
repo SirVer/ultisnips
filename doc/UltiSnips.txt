@@ -452,8 +452,9 @@ snippets, so they cannot be expanded a second time unless the function is
 called again. The function takes three optional arguments, in order: trigger,
 description, options. Arguments coincide with the arguments of the
 |UltiSnips#AddSnippetWithPriority| function of the same name. The trigger and
-options arguments can change the way the snippet expands. The description is
-unused at this point.
+options arguments can change the way the snippet expands. Same options
+can be specified as in the snippet definition. See full list of options at
+|UltiSnips-snippet-options|. The description is unused at this point.
 
 An example use case might be this line from a reStructuredText plugin file:
 
@@ -634,6 +635,8 @@ documenting the snippet and for distinguishing it from other snippets with the
 same tab trigger. When a snippet is activated and more than one tab trigger
 match, UltiSnips displays a list of the matching snippets with their
 descriptions. The user then selects the snippet they want.
+
+                                                  *UltiSnips-snippet-options*
 
 The 'options' control the behavior of the snippet. Options are indicated by
 single characters. The 'options' characters for a snippet are combined into
