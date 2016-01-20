@@ -124,6 +124,8 @@ class TextObjectTransformation(object):
                 self._match_this_many = 0
             if 'i' in token.options:
                 flags |= re.IGNORECASE
+            if 'm' in token.options:
+                flags |= re.MULTILINE
             if 'a' in token.options:
                 self._convert_to_ascii = True
 
