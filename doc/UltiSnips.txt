@@ -470,8 +470,13 @@ typed so it can determine if the trigger matches or not.
 
 A third function is UltiSnips#SnippetsInCurrentScope which is the equivalent
 of snipmate GetSnipsInCurrentScope function.
+
 This function simply returns a vim dictionary with the snippets whose trigger
-matches the current word.
+matches the current word.  If you need all snippets information of current
+buffer, you can simply pass 1 (which means all) as first argument of this
+function, and use a global variable g:current_ulti_dict_info to get the
+result (see example below).
+
 This function does not add any new functionality to ultisnips directly but
 allows to use third party plugins to integrate the current available snippets.
 
@@ -511,6 +516,27 @@ If the trigger for your snippet is lorem, you type lor, and you have no other
 snippets whose trigger matches lor then hitting <C-L> will expand to whatever
 lorem expands to.
 
+A third example on how to use this function to extract all snippets of
+current buffer: >
+
+function! GetAllSnippets()
+  call UltiSnips#SnippetsInCurrentScope(1)
+  let list = []
+  for [key, info] in items(g:current_ulti_dict_info)
+    let parts = split(info.location, ':')
+    call add(list, {
+      \"key": key,
+      \"path": parts[0],
+      \"linenr": parts[1],
+      \"description": info.description,
+      \})
+  endfor
+  return list
+endfunction
+
+The new variable g:current_ulti_dict_info is made to avoid confilct with
+exists third party plugins.  The definition location contains file path and
+line number is also included in this variable.
 
 3.6 Warning about missing python support           *UltiSnips-python-warning*
 ----------------------------------------

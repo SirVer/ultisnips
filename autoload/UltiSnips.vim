@@ -89,9 +89,13 @@ function! UltiSnips#ListSnippets()
     return ""
 endfunction
 
-function! UltiSnips#SnippetsInCurrentScope()
+function! UltiSnips#SnippetsInCurrentScope(...)
     let g:current_ulti_dict = {}
-    exec g:_uspy "UltiSnips_Manager.snippets_in_current_scope()"
+    let all = get(a:, 1, 0)
+    if all
+      let g:current_ulti_dict_info = {}
+    endif
+    exec g:_uspy "UltiSnips_Manager.snippets_in_current_scope(" . all . ")"
     return g:current_ulti_dict
 endfunction
 

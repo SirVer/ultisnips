@@ -185,10 +185,10 @@ class SnippetManager(object):
             self._handle_failure(self.expand_trigger)
 
     @err_to_scratch_buffer
-    def snippets_in_current_scope(self):
+    def snippets_in_current_scope(self, searchAll):
         """Returns the snippets that could be expanded to Vim as a global
         variable."""
-        before = _vim.buf.line_till_cursor
+        before =  '' if searchAll else _vim.buf.line_till_cursor
         snippets = self._snips(before, True)
 
         # Sort snippets alphabetically
@@ -196,6 +196,8 @@ class SnippetManager(object):
         for snip in snippets:
             description = snip.description[snip.description.find(snip.trigger) +
                                            len(snip.trigger) + 2:]
+
+            location = snip.location if snip.location else ''
 
             key = as_unicode(snip.trigger)
             description = as_unicode(description)
@@ -210,6 +212,18 @@ class SnippetManager(object):
                 "let g:current_ulti_dict['{key}'] = '{val}'").format(
                     key=key.replace("'", "''"),
                     val=description.replace("'", "''")))
+
+            if searchAll:
+                _vim.command(as_unicode(
+                    ("let g:current_ulti_dict_info['{key}'] = {{"
+                     "'description': '{description}',"
+                     "'location': '{location}',"
+                     "}}")).format(
+                        key=key.replace("'", "''"),
+                        location=location.replace("'", "''"),
+                        description=description.replace("'", "''")))
+
+
 
     @err_to_scratch_buffer
     def list_snippets(self):
