@@ -15,6 +15,7 @@ class Source(Base):
         for trigger in snippets:
             suggestions.append({
                 'word': trigger,
-                'menu': self.mark + ' ' + snippets.get(trigger, '')
+                'menu': self.mark + ' ' + snippets.get(trigger, ''),
+                'dup': 1
             })
         return suggestions
