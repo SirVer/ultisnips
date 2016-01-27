@@ -1235,6 +1235,13 @@ The options can be any combination of >
    i    - case insensitive
           By default, regular expression matching is case sensitive. With this
           option, matching is done without regard to case.
+   m    - multiline
+          By default, the '^' and '$' special characters only apply to the
+          start and end of the entire string; so if you select multiple lines,
+          transformations are made on them entirely as a whole single line
+          string. With this option, '^' and '$' special characters match the
+          start or end of any line within a string ( separated by newline
+          character - '\n' ).
    a    - ascii conversion
           By default, transformation are made on the raw utf-8 string. With
           this option, matching is done on the corresponding ASCII string
