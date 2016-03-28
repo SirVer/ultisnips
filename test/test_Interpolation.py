@@ -429,6 +429,17 @@ class PythonCode_AccessKilledTabstop_OverwriteFirst(_VimTest):
     keys = 'test' + EX + 'aaa'
     wanted = 'aaa'
 
+class PythonCode_CanOverwriteTabstop(_VimTest):
+    snippets = (
+        'test',
+        """$1`!p if len(t[1]) > 3 and len(t[2]) == 0:
+            t[2] = t[1][2:];
+            t[1] = t[1][:2] + '-\\n\\t';
+            vim.command('call feedkeys("\<End>", "n")');
+            `$2""")
+    keys = 'test' + EX + 'blah' + ', bah'
+    wanted = "bl-\n\tah, bah"
+
 
 class PythonVisual_NoVisualSelection_Ignore(_VimTest):
     snippets = ('test', 'h`!p snip.rv = snip.v.mode + snip.v.text`b')

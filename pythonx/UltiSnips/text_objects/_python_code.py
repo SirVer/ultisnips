@@ -28,6 +28,14 @@ class _Tabs(object):
             return ''
         return ts.current_text
 
+    def __setitem__(self, no, value):
+        ts = self._to._get_tabstop(
+            self._to,
+            int(no))  # pylint:disable=protected-access
+        if ts is None:
+            return
+        ts.overwrite(value)
+
 _VisualContent = namedtuple('_VisualContent', ['mode', 'text'])
 
 
