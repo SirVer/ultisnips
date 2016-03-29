@@ -13,15 +13,20 @@ from UltiSnips.text_objects._mirror import Mirror
 def _find_closing_brace(string, start_pos):
     """Finds the corresponding closing brace after start_pos."""
     bracks_open = 1
+    escaped = False
     for idx, char in enumerate(string[start_pos:]):
         if char == '(':
-            if string[idx + start_pos - 1] != '\\':
+            if not escaped:
                 bracks_open += 1
         elif char == ')':
-            if string[idx + start_pos - 1] != '\\':
+            if not escaped:
                 bracks_open -= 1
             if not bracks_open:
                 return start_pos + idx + 1
+        if char == '\\':
+            escaped = not escaped
+        else:
+            escaped = False
 
 
 def _split_conditional(string):
@@ -29,18 +34,24 @@ def _split_conditional(string):
     bracks_open = 0
     args = []
     carg = ''
+    escaped = False
     for idx, char in enumerate(string):
         if char == '(':
-            if string[idx - 1] != '\\':
+            if not escaped:
                 bracks_open += 1
         elif char == ')':
-            if string[idx - 1] != '\\':
+            if not escaped:
                 bracks_open -= 1
-        elif char == ':' and not bracks_open and not string[idx - 1] == '\\':
+        elif char == ':' and not bracks_open and not escaped:
             args.append(carg)
             carg = ''
+            escaped = False
             continue
         carg += char
+        if char == '\\':
+            escaped = not escaped
+        else:
+            escaped = False
     args.append(carg)
     return args
 
