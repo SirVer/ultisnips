@@ -137,6 +137,7 @@ class SnippetManager(object):
                                          SnipMateFileSource())
 
         self._should_update_textobjects = False
+        self._should_reset_visual = False
 
         self._reinit()
 
@@ -269,7 +270,7 @@ class SnippetManager(object):
         snip = UltiSnipsSnippetDefinition(0, trigger, value, description,
                                           options, {}, '', context, actions)
 
-        if not trigger or snip.matches(before):
+        if not trigger or snip.matches(before, self._visual_content):
             self._do_snippet(snip, before)
             return True
         else:
@@ -489,6 +490,7 @@ class SnippetManager(object):
     def _jump(self, backwards=False):
         """Helper method that does the actual jump."""
         if self._should_update_textobjects:
+            self._should_reset_visual = False
             self._cursor_moved()
 
         # we need to set 'onemore' there, because of limitations of the vim
@@ -526,18 +528,31 @@ class SnippetManager(object):
                             and ntab.start - self._ctab.end == Position(0, 1)
                             and ntab.end - ntab.start == Position(0, 1)):
                         ntab_short_and_near = True
-                    if ntab.number == 0:
-                        self._current_snippet_is_done()
+
                     self._ctab = ntab
+
+                    # Run interpolations again to update new placeholder
+                    # values, binded to currently newly jumped placeholder.
+                    self._visual_content.conserve_placeholder(self._ctab)
+                    self._cs.current_placeholder = \
+                        self._visual_content.placeholder
+                    self._should_reset_visual = False
+                    self._csnippets[0].update_textobjects()
+                    self._vstate.remember_buffer(self._csnippets[0])
+
+                    if ntab.number == 0 and self._csnippets:
+                        self._current_snippet_is_done()
                 else:
                     # This really shouldn't happen, because a snippet should
                     # have been popped when its final tabstop was used.
                     # Cleanup by removing current snippet and recursing.
                     self._current_snippet_is_done()
                     jumped = self._jump(backwards)
+
             if jumped:
-                self._vstate.remember_position()
-                self._vstate.remember_unnamed_register(self._ctab.current_text)
+                if self._ctab:
+                    self._vstate.remember_position()
+                    self._vstate.remember_unnamed_register(self._ctab.current_text)
                 if not ntab_short_and_near:
                     self._ignore_movements = True
 
@@ -619,7 +634,8 @@ class SnippetManager(object):
                 filetypes,
                 before,
                 partial,
-                autotrigger_only
+                autotrigger_only,
+                self._visual_content
             )
 
             for snippet in possible_snippets:
@@ -834,6 +850,11 @@ class SnippetManager(object):
                     self._try_expand(autotrigger_only=True)
         finally:
             self._last_inserted_char = inserted_char
+
+        if self._should_reset_visual and self._visual_content.mode == '':
+            self._visual_content.reset()
+
+        self._should_reset_visual = True
 
 
 UltiSnips_Manager = SnippetManager(  # pylint:disable=invalid-name

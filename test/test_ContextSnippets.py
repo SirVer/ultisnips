@@ -149,3 +149,18 @@ class ContextSnippets_ContextIsClearedBeforeExpand(_VimTest):
 
     keys = "e" + EX + " " + "e" + EX
     wanted = "1 1"
+
+class ContextSnippets_ContextHasAccessToVisual(_VimTest):
+    files = { 'us/all.snippets': r"""
+        snippet test "desc" "snip.visual_text == '123'" we
+        Yes
+        endsnippet
+
+        snippet test "desc" w
+        No
+        endsnippet
+        """}
+
+    keys = "123" + ESC + "vhh" + EX + "test" + EX + " zzz" + ESC + \
+        "vhh" + EX + "test" + EX
+    wanted = "Yes No"

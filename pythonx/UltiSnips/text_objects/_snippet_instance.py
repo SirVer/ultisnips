@@ -34,6 +34,7 @@ class SnippetInstance(EditableTextObject):
         self.locals = {'match': last_re, 'context': context}
         self.globals = globals
         self.visual_content = visual_content
+        self.current_placeholder = None
 
         EditableTextObject.__init__(self, parent, start, end, initial_text)
 

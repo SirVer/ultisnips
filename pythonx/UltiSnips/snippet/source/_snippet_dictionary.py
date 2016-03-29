@@ -16,7 +16,8 @@ class SnippetDictionary(object):
         """Add 'snippet' to this dictionary."""
         self._snippets.append(snippet)
 
-    def get_matching_snippets(self, trigger, potentially, autotrigger_only):
+    def get_matching_snippets(self, trigger, potentially, autotrigger_only,
+                              visual_content):
         """Returns all snippets matching the given trigger.
 
         If 'potentially' is true, returns all that could_match().
@@ -34,7 +35,8 @@ class SnippetDictionary(object):
             all_snippets = [s for s in all_snippets if s.has_option('A')]
 
         if not potentially:
-            return [s for s in all_snippets if s.matches(trigger)]
+            return [s for s in all_snippets if s.matches(trigger,
+                                                         visual_content)]
         else:
             return [s for s in all_snippets if s.could_match(trigger)]
 

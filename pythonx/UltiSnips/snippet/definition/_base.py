@@ -87,14 +87,25 @@ class SnippetDefinition(object):
             return match
         return False
 
-    def _context_match(self):
+    def _context_match(self, visual_content):
         # skip on empty buffer
         if len(vim.current.buffer) == 1 and vim.current.buffer[0] == "":
             return
 
-        return self._eval_code('snip.context = ' + self._context_code, {
-            'context': None
-        }).context
+        locals = {
+            'context': None,
+            'visual_mode': '',
+            'visual_text': '',
+            'last_placeholder': None
+        }
+
+        if visual_content:
+            locals['visual_mode'] = visual_content.mode
+            locals['visual_text'] = visual_content.text
+            locals['last_placeholder'] = visual_content.placeholder
+
+        return self._eval_code('snip.context = ' + self._context_code,
+                               locals).context
 
     def _eval_code(self, code, additional_locals={}):
         code = "\n".join([
@@ -110,7 +121,7 @@ class SnippetDefinition(object):
             'buffer': current.buffer,
             'line': current.window.cursor[0]-1,
             'column': current.window.cursor[1]-1,
-            'cursor': SnippetUtilCursor(current.window.cursor)
+            'cursor': SnippetUtilCursor(current.window.cursor),
         }
 
         locals.update(additional_locals)
@@ -225,7 +236,7 @@ class SnippetDefinition(object):
         """The matched context."""
         return self._context
 
-    def matches(self, before):
+    def matches(self, before, visual_content=None):
         """Returns True if this snippet matches 'before'."""
         # If user supplies both "w" and "i", it should perhaps be an
         # error, but if permitted it seems that "w" should take precedence
@@ -267,7 +278,7 @@ class SnippetDefinition(object):
 
         self._context = None
         if match and self._context_code:
-            self._context = self._context_match()
+            self._context = self._context_match(visual_content)
             if not self.context:
                 match = False
 

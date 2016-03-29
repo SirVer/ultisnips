@@ -458,6 +458,26 @@ class PythonVisual_LineSelect_Simple(_VimTest):
     keys = 'hello\nnice\nworld' + ESC + 'Vkk' + EX + 'test' + EX
     wanted = 'hVhello\nnice\nworld\nb'
 
+class PythonVisual_HasAccessToSelectedPlaceholders(_VimTest):
+    snippets = (
+        'test',
+        """${1:first} ${2:second} (`!p
+snip.rv = "placeholder: " + snip.p.current_text`)"""
+    )
+    keys = 'test' + EX + ESC + "otest" + EX + JF + ESC
+    wanted = """first second (placeholder: first)
+first second (placeholder: second)"""
+
+class PythonVisual_HasAccessToZeroPlaceholders(_VimTest):
+    snippets = (
+        'test',
+        """${1:first} ${2:second} (`!p
+snip.rv = "placeholder: " + snip.p.current_text`)"""
+    )
+    keys = 'test' + EX + ESC + "otest" + EX + JF + JF + JF + JF
+    wanted = """first second (placeholder: first second (placeholder: ))
+first second (placeholder: )"""
+
 # Tests for https://bugs.launchpad.net/bugs/1259349
 
 

@@ -939,6 +939,14 @@ The 'snip' object provides some properties as well: >
     snip.ft:
         The current filetype.
 
+    snip.p:
+        Last selected placeholder. Will contain placeholder object with
+        following properties:
+
+        'current_text' - text in the placeholder on the moment of selection;
+        'start' - placeholder start on the moment of selection;
+        'end' - placeholder end on the moment of selection;
+
 For your convenience, the 'snip' object also provides the following
 operators: >
 
@@ -1397,6 +1405,15 @@ Global variable `snip` will be available with following properties:
         - 'to_vim_cursor()' - returns 1-indexed cursor, suitable for assigning
           to 'vim.current.window.cursor';
     'snip.line' and 'snip.column' - aliases for cursor position (zero-indexed);
+    'snip.visual_mode' - ('v', 'V', '^V', see |visual-mode|);
+    'snip.visual_text' - last visually-selected text;
+    'snip.last_placeholder' - last active placeholder from previous snippet
+        with following properties:
+
+        - 'current_text' - text in the placeholder on the moment of selection;
+        - 'start' - placeholder start on the moment of selection;
+        - 'end' - placeholder end on the moment of selection;
+
 
 
 ------------------- SNIP -------------------
@@ -1462,6 +1479,20 @@ endsnippet
 ------------------- SNAP -------------------
 
 That snippet will expand to 'var1 +=' after line, which begins from 'var1 :='.
+
+                                                  *UltiSnips-capture-placeholder*
+
+You can capture placeholder text from previous snippet by using following
+trick:
+------------------- SNIP -------------------
+snippet = "desc" "snip.last_placeholder" Ae
+`!p snip.rv = snip.context.current_text` == nil
+endsnippet
+------------------- SNAP -------------------
+
+That snippet will be expanded only if you will replace selected tabstop in
+other snippet (like, as in 'if ${1:var}') and will replace that tabstop by
+tabstop value following by ' == nil'.
 
 
 4.10 Snippets actions                             *UltiSnips-snippet-actions*
