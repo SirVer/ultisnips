@@ -195,6 +195,8 @@ hi def link snipShellCommand     snipCommand
 hi def link snipVimLCommand      snipCommand
 hi def link snipPythonCommandP   PreProc
 hi def link snipVimLCommandV     PreProc
+hi def link snipSnippetContext   String
+hi def link snipAction           String
 
 hi def link snipEscape                     Special
 hi def link snipMirror                     StorageClass
