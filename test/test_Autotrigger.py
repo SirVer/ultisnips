@@ -57,6 +57,8 @@ class Autotrigger_WillProduceNoExceptionWithVimLowerThan214(_VimTest):
 
 
 class Autotrigger_CanMatchPreviouslySelectedPlaceholder(_VimTest):
+    skip_if = check_required_vim_version
+
     files = { 'us/all.snippets': r"""
         snippet if "desc"
         if ${1:var}: pass
