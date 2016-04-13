@@ -157,9 +157,10 @@ syn match snipPriorityValue "-\?\d\+" contained display
 
 " context {{{3
 
-syn match snipContext "^\context\%(\s.*\|$\)" contains=snipContextKeyword display
-syn match snipContextKeyword "^context" contained nextgroup=snipContextValue skipwhite display
-syn match snipContextValue '".*"' contained display
+syn match snipContext "^\%context.*$" contains=snipContextKeyword display skipwhite
+syn match snipContextKeyword "\%context" contained nextgroup=snipContextValue skipwhite display
+syn match snipContextValue '"[^"]*"' contained contains=snipContextValueP
+syn region snipContextValueP start=,"\@<=., end=,\ze", contained contains=@Python skipwhite keepend
 
 " Actions {{{3
 
@@ -202,6 +203,7 @@ hi def link snipVimLCommand      snipCommand
 hi def link snipPythonCommandP   PreProc
 hi def link snipVimLCommandV     PreProc
 hi def link snipSnippetContext   String
+hi def link snipContext          String
 hi def link snipAction           String
 
 hi def link snipEscape                     Special
@@ -219,7 +221,6 @@ hi def link snipTransformationEscape       snipEscape
 hi def link snipTransformationOptions      Operator
 
 hi def link snipContextKeyword  Keyword
-hi def link snipContextValue    String
 
 hi def link snipPriorityKeyword  Keyword
 hi def link snipPriorityValue    Number
