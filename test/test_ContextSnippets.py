@@ -11,7 +11,6 @@ class ContextSnippets_SimpleSnippet(_VimTest):
     keys = 'a' + EX
     wanted = 'abc'
 
-
 class ContextSnippets_ExpandOnTrue(_VimTest):
     files = { 'us/all.snippets': r"""
         global !p
@@ -139,6 +138,7 @@ class ContextSnippets_CursorIsZeroBased(_VimTest):
     keys = "e" + EX
     wanted = "(2, 1)"
 
+
 class ContextSnippets_ContextIsClearedBeforeExpand(_VimTest):
     files = { 'us/all.snippets': r"""
         pre_expand "snip.context = 1 if snip.context is None else 2"
@@ -164,3 +164,35 @@ class ContextSnippets_ContextHasAccessToVisual(_VimTest):
     keys = "123" + ESC + "vhh" + EX + "test" + EX + " zzz" + ESC + \
         "vhh" + EX + "test" + EX
     wanted = "Yes No"
+
+
+class ContextSnippets_Header_ExpandOnTrue(_VimTest):
+    files = { 'us/all.snippets': r"""
+        global !p
+        def check_context():
+            return True
+        endglobal
+
+        context "check_context()"
+        snippet a "desc" e
+        abc
+        endsnippet
+        """}
+    keys = 'a' + EX
+    wanted = 'abc'
+
+
+class ContextSnippets_Header_DoNotExpandOnFalse(_VimTest):
+    files = { 'us/all.snippets': r"""
+        global !p
+        def check_context():
+            return False
+        endglobal
+
+        context "check_context()"
+        snippet a "desc" e
+        abc
+        endsnippet
+        """}
+    keys = 'a' + EX
+    wanted = keys

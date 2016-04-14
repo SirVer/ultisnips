@@ -1387,6 +1387,11 @@ In that case snippet should be defined using this syntax: >
 
     snippet tab_trigger "description" "expression" options
 
+Context can be defined using special header using this syntax: >
+
+    context "expression"
+    snippet tab_trigger "description" options
+
 The 'expression' can be any python expression. If 'expression' evaluates to
 'True', then this snippet will be chosen for expansion. The 'expression' must
 be wrapped with double-quotes.

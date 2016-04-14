@@ -19,3 +19,11 @@ def handle_action(head, tail, line_index):
     else:
         return 'error', ("'{}' without specified action".format(head),
             line_index)
+
+
+def handle_context(tail, line_index):
+    if tail:
+        return 'context', tail.strip('"').replace(r'\"', '"')\
+            .replace(r'\\\\', r'\\')
+    else:
+        return 'error', ("'context' without body", line_index)
