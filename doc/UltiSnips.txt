@@ -195,9 +195,14 @@ g:UltiSnipsSnippetsDir
                             files are stored in. For example, if the variable
                             is set to "~/.vim/mydir/UltiSnips" and the current
                             'filetype' is "cpp", then :UltiSnipsEdit will open
-                            "~/.vim/mydir/UltiSnips/cpp.snippets". Note that
-                            directories named "snippets" are reserved for
-                            snipMate snippets and cannot be used.
+                            "~/.vim/mydir/UltiSnips/cpp.snippets" if file is
+                            not empty, if it's empty :UltiSnipsEdit will see
+                            for non-empty files in directories
+                            g:UltiSnipsSnippetDirectories, if nothing found,
+                            :UltiSnipsEdit will open new file in
+                            g:UltiSnipsSnippetsDir.
+                            Note that directories named "snippets" are
+                            reserved for snipMate snippets and cannot be used.
 
                                                         *g:UltiSnipsSnippetDirectories*
 g:UltiSnipsSnippetDirectories
