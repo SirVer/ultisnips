@@ -771,7 +771,7 @@ class SnippetManager(object):
             return None
         return self._csnippets[-1]
 
-    def _file_to_edit(self, requested_ft, bang):  # pylint: disable=no-self-use
+    def _file_to_edit(self, requested_ft, bang):
         """Returns a file to be edited for the given requested_ft.
 
         If 'bang' is
@@ -779,22 +779,56 @@ class SnippetManager(object):
         otherwise all files are considered and the user gets to choose.
 
         """
-        # This method is not using self, but is called by UltiSnips.vim and is
-        # therefore in this class because it is the facade to Vim.
-        potentials = set()
 
+        snippet_dir = ''
         if _vim.eval("exists('g:UltiSnipsSnippetsDir')") == '1':
-            snippet_dir = _vim.eval('g:UltiSnipsSnippetsDir')
-        else:
-            home = _vim.eval('$HOME')
-            if platform.system() == 'Windows':
-                snippet_dir = os.path.join(home, 'vimfiles', 'UltiSnips')
-            elif _vim.eval("has('nvim')") == '1':
-                xdg_home_config = _vim.eval('$XDG_CONFIG_HOME') or os.path.join(home, ".config")
-                snippet_dir = os.path.join(xdg_home_config, 'nvim', 'UltiSnips')
-            else:
-                snippet_dir = os.path.join(home, '.vim', 'UltiSnips')
+            dir = _vim.eval('g:UltiSnipsSnippetsDir')
+            file = self._get_file_to_edit(dir, requested_ft, bang)
+            if file:
+                return file
+            snippet_dir = dir
 
+        if _vim.eval("exists('g:UltiSnipsSnippetDirectories')") == '1':
+            dirs = _vim.eval('g:UltiSnipsSnippetDirectories')
+            for dir in dirs:
+                file = self._get_file_to_edit(dir, requested_ft, bang)
+                if file:
+                    return file
+                if not snippet_dir:
+                    snippet_dir = dir
+
+        home = _vim.eval('$HOME')
+        if platform.system() == 'Windows':
+            dir = os.path.join(home, 'vimfiles', 'UltiSnips')
+            file = self._get_file_to_edit(dir, requested_ft, bang)
+            if file:
+                return file
+            if not snippet_dir:
+                snippet_dir = dir
+
+        if _vim.eval("has('nvim')") == '1':
+            xdg_home_config = _vim.eval('$XDG_CONFIG_HOME') or os.path.join(home, ".config")
+            dir = os.path.join(xdg_home_config, 'nvim', 'UltiSnips')
+            file = self._get_file_to_edit(dir, requested_ft, bang)
+            if file:
+                return file
+            if not snippet_dir:
+                snippet_dir = dir
+
+        dir = os.path.join(home, '.vim', 'UltiSnips')
+        file = self._get_file_to_edit(dir, requested_ft, bang)
+        if file:
+            return file
+        if not snippet_dir:
+            snippet_dir = dir
+
+        return self._get_file_to_edit(
+            snippet_dir, requested_ft, bang, True
+        )
+
+    def _get_file_to_edit(self, snippet_dir, requested_ft, bang,
+                          allow_empty=False): # pylint: disable=no-self-use
+        potentials = set()
         filetypes = []
         if requested_ft:
             filetypes.append(requested_ft)
@@ -824,9 +858,13 @@ class SnippetManager(object):
         else:
             file_to_edit = potentials.pop()
 
+        if not allow_empty and not os.path.exists(file_to_edit):
+            return ''
+
         dirname = os.path.dirname(file_to_edit)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
+
         return file_to_edit
 
     @contextmanager
