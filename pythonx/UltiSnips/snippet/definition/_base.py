@@ -11,15 +11,18 @@ import textwrap
 from UltiSnips import _vim
 from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
-from UltiSnips.position import Position
 from UltiSnips.text import escape
 from UltiSnips.text_objects import SnippetInstance
-from UltiSnips.text_objects._python_code import SnippetUtilCursor, SnippetUtilForAction
+from UltiSnips.text_objects._python_code import \
+    SnippetUtilCursor, SnippetUtilForAction
 
 __WHITESPACE_SPLIT = re.compile(r"\s")
+
+
 def split_at_whitespace(string):
     """Like string.split(), but keeps empty words as empty words."""
     return re.split(__WHITESPACE_SPLIT, string)
+
 
 def _words_for_line(trigger, before, num_words=None):
     """Gets the final 'num_words' words from 'before'.
@@ -131,27 +134,7 @@ class SnippetDefinition(object):
         try:
             exec(code, {'snip': snip})
         except Exception as e:
-            e.snippet_info = textwrap.dedent("""
-                Defined in: {}
-                Trigger: {}
-                Description: {}
-                Context: {}
-                Pre-expand: {}
-                Post-expand: {}
-            """).format(
-                self._location,
-                self._trigger,
-                self._description,
-                self._context_code if self._context_code else '<none>',
-                self._actions['pre_expand'] if 'pre_expand' in self._actions
-                    else '<none>',
-                self._actions['post_expand'] if 'post_expand' in self._actions
-                    else '<none>',
-                code,
-            )
-
-            e.snippet_code = code
-
+            self._make_debug_exception(e, code)
             raise
 
         return snip
@@ -200,6 +183,28 @@ class SnippetDefinition(object):
 
         return snip
 
+    def _make_debug_exception(self, e, code=''):
+        e.snippet_info = textwrap.dedent("""
+            Defined in: {}
+            Trigger: {}
+            Description: {}
+            Context: {}
+            Pre-expand: {}
+            Post-expand: {}
+        """).format(
+            self._location,
+            self._trigger,
+            self._description,
+            self._context_code if self._context_code else '<none>',
+            self._actions['pre_expand'] if 'pre_expand' in self._actions
+                else '<none>',
+            self._actions['post_expand'] if 'post_expand' in self._actions
+                else '<none>',
+            code,
+        )
+
+        e.snippet_code = code
+
     def has_option(self, opt):
         """Check if the named option is set."""
         return opt in self._opts
@@ -247,7 +252,12 @@ class SnippetDefinition(object):
         words = _words_for_line(self._trigger, before)
 
         if 'r' in self._opts:
-            match = self._re_match(before)
+            try:
+                match = self._re_match(before)
+            except Exception as e:
+                self._make_debug_exception(e)
+                raise
+
         elif 'w' in self._opts:
             words_len = len(self._trigger)
             words_prefix = words[:-words_len]
