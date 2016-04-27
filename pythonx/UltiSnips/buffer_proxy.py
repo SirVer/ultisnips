@@ -163,12 +163,12 @@ class VimBufferProxy(_vim.VimBuffer):
         for line_number in range(start, end):
             if line_number < 0:
                 line_number = len(self._buffer) + line_number
-            yield ('D', line_number, 0, self._buffer[line_number])
+            yield ('D', line_number, 0, self._buffer[line_number], True)
 
         if start < 0:
             start = len(self._buffer) + start
         for line_number in range(0, len(new_value)):
-            yield ('I', start+line_number, 0, new_value[line_number])
+            yield ('I', start+line_number, 0, new_value[line_number], True)
 
     def _get_line_diff(self, line_number, before, after):
         """
@@ -189,25 +189,30 @@ class VimBufferProxy(_vim.VimBuffer):
         if not self._snippets_stack:
             return
 
-        line_number = change[1]
-        column_number = change[2]
+        change_type, line_number, column_number, change_text = change[0:4]
+
         line_before = line_number <= self._snippets_stack[0]._start.line
         column_before = column_number <= self._snippets_stack[0]._start.col
         if line_before and column_before:
             direction = 1
-            if change[0] == 'D':
+            if change_type == 'D':
                 direction = -1
 
+            diff = Position(direction, 0)
+            if len(change) != 5:
+                diff = Position(0, direction * len(change_text))
+            print(change, diff)
+
             self._snippets_stack[0]._move(
-                Position(line_number, 0),
-                Position(direction, 0)
+                Position(line_number, column_number),
+                diff
             )
         else:
             if line_number > self._snippets_stack[0]._end.line:
                 return
             if column_number >= self._snippets_stack[0]._end.col:
                 return
-            self._snippets_stack[0]._do_edit(change)
+            self._snippets_stack[0]._do_edit(change[0:4])
 
     def _disable_edits(self):
         """

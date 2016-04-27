@@ -368,3 +368,14 @@ class SnippetActions_PostActionModifiesLineAfterSnippet(_VimTest):
         """}
     keys = '\n3' + ARR_U + 'a' + EX + '1' + JF + '2'
     wanted = '1: 1\n2'
+
+
+class SnippetActions_DoNotBreakCursorOnSingleLikeChange(_VimTest):
+    files = { 'us/all.snippets': r"""
+        post_expand "snip.buffer[snip.snippet_end[0]] = 'def'; snip.cursor.preserve()"
+        snippet a "desc"
+        asd
+        endsnippet
+        """}
+    keys = 'a' + EX + '123'
+    wanted = 'def123'
