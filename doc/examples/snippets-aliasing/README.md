@@ -1,6 +1,6 @@
 # Aliases for snippets
 
-![gif](https://github.com/seletskiy/repo/blob/branch/master/docs/examples/snippets-aliasing/demo.gif)
+![gif](https://raw.githubusercontent.com/SirVer/ultisnips/master/doc/examples/snippets-aliasing/demo.gif)
 
 Let's imagine we're editing shell file and we need to debug some vars.
 
