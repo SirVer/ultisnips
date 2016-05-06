@@ -4,7 +4,7 @@
 
 UltiSnips at the present day is more than snippet engine. It's more like
 constructor, where you can implement some complex features without prior
-feature implementation in the snippet byy itself.
+feature implementation in the snippet by itself.
 
 One of that features is dynamic tabstop generation.
 
