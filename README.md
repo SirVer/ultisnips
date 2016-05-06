@@ -27,7 +27,7 @@ The official home of UltiSnips is at <https://github.com/sirver/ultisnips>.
 Please add pull requests and issues there.
 
 UltiSnips was started in Jun 2009 by @SirVer. In Dec 2015, maintenance was
-handed over to @seletskiy.
+handed over to [@seletskiy](https://github.com/seletskiy).
 
 What can you do with UltiSnips?
 -------------------------------
@@ -35,6 +35,7 @@ What can you do with UltiSnips?
 1. Advanced snippets:
 
     * [Snippets Aliases](doc/examples/snippets-aliasing/README.md)
+    * [Dynamic Tabstops/Tabstop Generation](doc/examples/tabstop-generation/README.md)
 
 Quick Start
 -----------
