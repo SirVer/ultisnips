@@ -157,8 +157,8 @@ syn match snipPriorityValue "-\?\d\+" contained display
 
 " context {{{3
 
-syn match snipContext "^\%context.*$" contains=snipContextKeyword display skipwhite
-syn match snipContextKeyword "\%context" contained nextgroup=snipContextValue skipwhite display
+syn match snipContext "^context.*$" contains=snipContextKeyword display skipwhite
+syn match snipContextKeyword "context" contained nextgroup=snipContextValue skipwhite display
 syn match snipContextValue '"[^"]*"' contained contains=snipContextValueP
 syn region snipContextValueP start=,"\@<=., end=,\ze", contained contains=@Python skipwhite keepend
 
