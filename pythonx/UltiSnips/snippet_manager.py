@@ -71,7 +71,7 @@ class SnippetManager(object):
         self._supertab_keys = None
 
         self._csnippets = []
-        self._buffer_filetypes = defaultdict(lambda: ['all'])
+        self._added_buffer_filetypes = defaultdict(lambda: [])
 
         self._vstate = VimState()
         self._visual_content = VisualContentPreserver()
@@ -255,15 +255,12 @@ class SnippetManager(object):
                     self._snippet_sources[index + 1:]
                 break
 
-    def reset_buffer_filetypes(self):
-        """Reset the filetypes for the current buffer."""
-        if _vim.buf.number in self._buffer_filetypes:
-            del self._buffer_filetypes[_vim.buf.number]
+    def get_buffer_filetypes(self):
+        return (self._added_buffer_filetypes[_vim.buf.number] +
+                _vim.buf.filetypes + ['all'])
 
     def add_buffer_filetypes(self, ft):
-        """Checks for changes in the list of snippet files or the contents of
-        the snippet files and reloads them if necessary."""
-        buf_fts = self._buffer_filetypes[_vim.buf.number]
+        buf_fts = self._added_buffer_filetypes[_vim.buf.number]
         idx = -1
         for ft in ft.split('.'):
             ft = ft.strip()
@@ -272,7 +269,7 @@ class SnippetManager(object):
             try:
                 idx = buf_fts.index(ft)
             except ValueError:
-                self._buffer_filetypes[_vim.buf.number].insert(idx + 1, ft)
+                self._added_buffer_filetypes[_vim.buf.number].insert(idx + 1, ft)
                 idx += 1
 
     @err_to_scratch_buffer.wrap
@@ -570,7 +567,7 @@ class SnippetManager(object):
         If partial is True, then get also return partial matches.
 
         """
-        filetypes = self._buffer_filetypes[_vim.buf.number][::-1]
+        filetypes = self.get_buffer_filetypes()[::-1]
         matching_snippets = defaultdict(list)
         clear_priority = None
         cleared = {}
@@ -792,9 +789,9 @@ class SnippetManager(object):
             filetypes.append(requested_ft)
         else:
             if bang:
-                filetypes.extend(self._buffer_filetypes[_vim.buf.number])
+                filetypes.extend(self.get_buffer_filetypes())
             else:
-                filetypes.append(self._buffer_filetypes[_vim.buf.number][0])
+                filetypes.append(self.get_buffer_filetypes()[0])
 
         for ft in filetypes:
             potentials.update(find_snippet_files(ft, snippet_dir))
