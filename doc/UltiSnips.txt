@@ -1010,6 +1010,26 @@ expressions in this manner has some drawbacks:
    would end up with the above SNAP instead, not what you want.
 2. The snippet is harder to read.
 
+The biggest advantage, however, is that you can create snippets that take into
+account the text preceding a "trigger". This way, you can use it to create
+postfix snippets, which are popular in some IDEs.
+
+------------------- SNIP -------------------
+snippet "(\w+).par" "Parenthesis (postfix)" r
+(`!p snip.rv = match.group(1)`$1)$0
+endsnippet
+------------------- SNAP -------------------
+something.par<tab> ->
+(something)
+
+------------------- SNIP -------------------
+snippet "([^\s].*)\.return" "Return (postfix)" r
+return `!p snip.rv = match.group(1)`$0
+endsnippet
+------------------- SNAP -------------------
+value.return<tab> ->
+return value
+
 
  4.4.4 Global Snippets:                                   *UltiSnips-globals*
 
