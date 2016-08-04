@@ -3,7 +3,7 @@ if exists("b:did_autoload_ultisnips") || !exists("g:_uspy")
     " TODO(sirver): Add a test for that using a bad g:UltiSnipsPythonVersion
     " setting. Without this fix moving the cursor will spam errors, with this
     " it should not.
-    function! UltiSnips#FileTypeChanged()
+    function! UltiSnips#FileTypeChanged(...)
     endfunction
 
     finish
@@ -116,9 +116,9 @@ function! UltiSnips#JumpForwards()
     return ""
 endfunction
 
-function! UltiSnips#FileTypeChanged()
+function! UltiSnips#FileTypeChanged(...)
     exec g:_uspy "UltiSnips_Manager.reset_buffer_filetypes()"
-    exec g:_uspy "UltiSnips_Manager.add_buffer_filetypes('" . &ft . "')"
+    exec g:_uspy "UltiSnips_Manager.add_buffer_filetypes('" . (a:0 ? a:1 : &ft) . "')"
     return ""
 endfunction
 
