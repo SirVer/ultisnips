@@ -6,7 +6,7 @@ python:
   - 3.4
 env:
   - VIM_VERSION="74"
-  - VIM_VERSION="mercurial"
+  - VIM_VERSION="git"
   # - VIM_VERSION="NEOVIM"
 
 install:
@@ -14,7 +14,7 @@ install:
    - until sudo add-apt-repository ppa:kalakris/tmux -y; do sleep 10; done
    - until sudo add-apt-repository ppa:neovim-ppa/unstable -y; do sleep 10; done
    - until sudo apt-get update -qq; do sleep 10; done
-   - until sudo apt-get install -qq -y --force-yes tmux xclip gdb neovim mercurial; do sleep 10; done
+   - until sudo apt-get install -qq -y --force-yes tmux xclip gdb neovim git; do sleep 10; done
    - ./travis_install.sh
 
 script:

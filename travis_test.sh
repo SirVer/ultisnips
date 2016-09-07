@@ -5,7 +5,7 @@ set -ex
 PYTHON="python${TRAVIS_PYTHON_VERSION}"
 PYTHON_CMD="$(which ${PYTHON})"
 
-if [[ $VIM_VERSION = "74" || $VIM_VERSION = "mercurial" ]]; then
+if [[ $VIM_VERSION = "74" || $VIM_VERSION = "git" ]]; then
    INTERFACE="--interface tmux"
    VIM="${HOME}/bin/vim"
    # This is needed so that vim finds the shared libraries it was build against -

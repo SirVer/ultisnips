@@ -14,8 +14,8 @@ build_vanilla_vim () {
       until curl ftp://ftp.vim.org/pub/vim/unix/vim-7.4.tar.bz2 -o vim.tar.bz2; do sleep 10; done
       tar xjf vim.tar.bz2
       cd vim${VIM_VERSION}
-   elif [[ $VIM_VERSION == "mercurial" ]]; then
-      hg clone https://vim.googlecode.com/hg/ vim
+   elif [[ $VIM_VERSION == "git" ]]; then
+      git clone https://github.com/vim/vim
       cd vim
    fi
 
@@ -53,7 +53,7 @@ build_vanilla_vim () {
    rm -rf vim_build
 }
 
-if [[ $VIM_VERSION = "74" || $VIM_VERSION = "mercurial" ]]; then
+if [[ $VIM_VERSION = "74" || $VIM_VERSION = "git" ]]; then
    build_vanilla_vim
 elif [[ $VIM_VERSION == "NEOVIM" ]]; then
    PIP=$(which pip)
