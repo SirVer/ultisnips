@@ -1,11 +1,4 @@
 if exists("b:did_autoload_ultisnips") || !exists("g:_uspy")
-    " Define no-op function, called via ftdetect/UltiSnips.vim.
-    " TODO(sirver): Add a test for that using a bad g:UltiSnipsPythonVersion
-    " setting. Without this fix moving the cursor will spam errors, with this
-    " it should not.
-    function! UltiSnips#FileTypeChanged(...)
-    endfunction
-
     finish
 endif
 let b:did_autoload_ultisnips = 1
@@ -53,7 +46,7 @@ function! UltiSnips#Edit(bang, ...)
 endfunction
 
 function! UltiSnips#AddFiletypes(filetypes)
-    exec g:_uspy "UltiSnips_Manager.add_buffer_filetypes('" . a:filetypes . ".all')"
+    exec g:_uspy "UltiSnips_Manager.add_buffer_filetypes('" . a:filetypes . "')"
     return ""
 endfunction
 
@@ -115,13 +108,6 @@ function! UltiSnips#JumpForwards()
     exec g:_uspy "UltiSnips_Manager.jump_forwards()"
     return ""
 endfunction
-
-function! UltiSnips#FileTypeChanged(...)
-    exec g:_uspy "UltiSnips_Manager.reset_buffer_filetypes()"
-    exec g:_uspy "UltiSnips_Manager.add_buffer_filetypes('" . (a:0 ? a:1 : &ft) . "')"
-    return ""
-endfunction
-
 
 function! UltiSnips#AddSnippetWithPriority(trigger, value, description, options, filetype, priority)
     exec g:_uspy "trigger = vim.eval(\"a:trigger\")"

@@ -52,6 +52,10 @@ class VimBuffer(object):
         return vim.current.buffer.number
 
     @property
+    def filetypes(self):
+        return [ft for ft in vim.eval('&filetype').split('.') if ft]
+
+    @property
     def cursor(self):  # pylint:disable=no-self-use
         """The current windows cursor.
 
