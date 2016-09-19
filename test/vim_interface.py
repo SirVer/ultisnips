@@ -91,20 +91,25 @@ class VimInterface(TempFileManager):
     def __init__(self, vim_executable, name):
         TempFileManager.__init__(self, name)
         self._vim_executable = vim_executable
-        self._patch_version = None
+        self._version = None
 
-    def has_patch(self, version):
-        if self._patch_version is None:
+    def has_version(self, major, minor, patchlevel):
+        if self._version is None:
             output = subprocess.check_output([
                 self._vim_executable, "--version"
             ])
 
-            self._patch_version = 0
+            _major = 0
+            _minor = 0
+            _patch = 0
             for line in output.decode('utf-8').split("\n"):
+                if line.startswith("VIM - Vi IMproved"):
+                    _major, _minor = map(int, line.split()[4].split('.'))
                 if line.startswith("Included patches:"):
-                    self._patch_version = line.split('-')[1]
+                    _patch = int(line.split('-')[1])
+            self._version = (_major, _minor, _patch)
 
-        return int(self._patch_version) >= version
+        return self._version >= (major, minor, patchlevel)
 
     def get_buffer_data(self):
         buffer_path = self.unique_name_temp(prefix='buffer_')
