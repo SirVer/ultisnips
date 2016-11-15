@@ -81,7 +81,7 @@ class SnippetManager(object):
         self._snip_expanded_in_action = False
         self._inside_action = False
 
-        self._last_inserted_char = ''
+        self._last_change = ('', 0)
 
         self._added_snippets_source = AddedSnippetsSource()
         self.register_snippet_source('ultisnips_files', UltiSnipsFileSource())
@@ -839,10 +839,12 @@ class SnippetManager(object):
         try:
             if inserted_char == '':
                 before = _vim.buf.line_till_cursor
-                if before and before[-1] == self._last_inserted_char:
+                if before and before[-1] == self._last_change[0] or \
+                        self._last_change[1] != vim.current.line:
                     self._try_expand(autotrigger_only=True)
+
         finally:
-            self._last_inserted_char = inserted_char
+            self._last_change = (inserted_char, vim.current.window.cursor[0])
 
         if self._should_reset_visual and self._visual_content.mode == '':
             self._visual_content.reset()
