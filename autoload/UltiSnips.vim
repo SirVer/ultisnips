@@ -66,6 +66,11 @@ function! UltiSnips#FileTypeComplete(arglead, cmdline, cursorpos)
     return sort(keys(ret))
 endfunction
 
+function! UltiSnips#isExpandable()
+    exec g:_uspy "UltiSnips_Manager.is_expandable()"
+    return ""
+endfunction
+
 function! UltiSnips#ExpandSnippet()
     exec g:_uspy "UltiSnips_Manager.expand()"
     return ""

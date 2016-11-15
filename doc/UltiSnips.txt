@@ -282,12 +282,13 @@ If you have g:UltiSnipsExpandTrigger and g:UltiSnipsJumpForwardTrigger set
 to the same value then the function you are actually going to use is
 UltiSnips#ExpandSnippetOrJump.
 
-Each time any of the functions UltiSnips#ExpandSnippet,
+Each time any of the functions UltiSnips#isExpandable, UltiSnips#ExpandSnippet,
 UltiSnips#ExpandSnippetOrJump, UltiSnips#JumpForwards or
 UltiSnips#JumpBackwards is called a global variable is set that contains the
 return value of the corresponding function.
 
 The corresponding variables and functions are:
+UltiSnips#isExpandable        --> g:ulti_is_expandable (0: fail, 1: success)
 UltiSnips#ExpandSnippet       --> g:ulti_expand_res (0: fail, 1: success)
 UltiSnips#ExpandSnippetOrJump --> g:ulti_expand_or_jump_res (0: fail,
                                                     1: expand, 2: jump)

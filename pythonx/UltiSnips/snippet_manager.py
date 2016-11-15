@@ -118,6 +118,13 @@ class SnippetManager(object):
             return self._handle_failure(self.backward_trigger)
 
     @err_to_scratch_buffer.wrap
+    def is_expandable(self):
+        _vim.command('let g:ulti_is_expandable = 1')
+        if not self._is_expandable():
+            _vim.command('let g:ulti_is_expandable = 0')
+            # self._handle_failure(self.expand_trigger)
+
+    @err_to_scratch_buffer.wrap
     def expand(self):
         """Try to expand a snippet at the current position."""
         _vim.command('let g:ulti_expand_res = 1')
@@ -695,6 +702,14 @@ class SnippetManager(object):
             if self._inside_action:
                 self._snip_expanded_in_action = True
 
+
+    def _is_expandable(self):
+        before = _vim.buf.line_till_cursor
+        snippets = self._snips(before, False, False)
+        if snippets:
+            return True
+        else:
+            return False
 
     def _try_expand(self, autotrigger_only=False):
         """Try to expand a snippet in the current place."""
