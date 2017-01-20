@@ -836,8 +836,13 @@ class SnippetManager(object):
         self._should_update_textobjects = True
 
         inserted_char = _vim.as_unicode(_vim.eval('v:char'))
-        if not isinstance(inserted_char, unicode):
-            return
+
+        if sys.version_info >= (3, 0):
+            if isinstance(inserted_char, bytes):
+                return
+        else:
+            if not isinstance(inserted_char, unicode):
+                return
 
         try:
             if inserted_char == '':
