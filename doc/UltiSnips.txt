@@ -26,6 +26,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       4.1.1 Character Escaping                  |UltiSnips-character-escaping|
    4.2 Plaintext Snippets                       |UltiSnips-plaintext-snippets|
    4.3 Visual Placeholder                       |UltiSnips-visual-placeholder|
+      4.3.1 Visual modes and ${VISUAL}          |UltiSnips-visual-modes|
    4.4 Interpolation                            |UltiSnips-interpolation|
       4.4.1 Shellcode                           |UltiSnips-shellcode|
       4.4.2 VimScript                           |UltiSnips-vimscript|
@@ -815,6 +816,44 @@ again. The result is: >
 If you expand this snippet while not in Visual mode (e.g., in Insert mode type
 t<Tab>), you will get: >
    <tag>inside text</tag>
+
+ 4.3.1 Visual modes and ${VISUAL}:                   *UltiSnips-visual-modes*
+
+The Vim visual mode affects how ${VISUAL} will be indented by a snippet.
+Consider the following example, which uses a leading tab in the snippet body
+to cause the inserted text to be indented:
+
+------------------- SNIP -------------------
+snippet {{ "Insert a viml manual fold block" !b
+" ${1:Description} {
+	${2:${VISUAL}}
+" }
+$3
+endsnippet
+------------------- SNAP -------------------
+this is line one
+this is line two<ESC>vk0<tab>{{<tab> ->
+" Description {
+  this is line one
+this is line two
+" }
+
+In this example, the two lines are typed in *insert-mode* then selected in
+*characterwise-visual* mode.  Only the first line is indented due to the
+visual mode in use.  In visual and visual block modes the selected text will
+not be internally modified.
+
+Here is an example using the same snippet with a *linewise-visual* selection:
+
+------------------- SNAP -------------------
+this is line one
+this is line two<ESC>Vk<tab>{{<tab> ->
+" Description {
+  this is line one
+  this is line two
+" }
+
+Observe that all lines of the selection are indented.
 
 
 4.4 Interpolation                                   *UltiSnips-interpolation*
