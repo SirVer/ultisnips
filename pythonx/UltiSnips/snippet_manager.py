@@ -835,7 +835,10 @@ class SnippetManager(object):
     def _track_change(self):
         self._should_update_textobjects = True
 
-        inserted_char = _vim.as_unicode(_vim.eval('v:char'))
+        try:
+            inserted_char = _vim.as_unicode(_vim.eval('v:char'))
+        except UnicodeDecodeError:
+            return
 
         if sys.version_info >= (3, 0):
             if isinstance(inserted_char, bytes):
