@@ -835,15 +835,17 @@ class SnippetManager(object):
     def _track_change(self):
         self._should_update_textobjects = True
 
-        inserted_char = _vim.eval('v:char')
+        inserted_char = _vim.as_unicode(_vim.eval('v:char'))
+        if not isinstance(inserted_char, unicode):
+            return
+
         try:
             if inserted_char == '':
                 before = _vim.buf.line_till_cursor
-                if before and \
-                        before[-1].encode('ascii') == self._last_change[0] or \
+
+                if before and before[-1] == self._last_change[0] or \
                         self._last_change[1] != vim.current.window.cursor[0]:
                     self._try_expand(autotrigger_only=True)
-
         finally:
             self._last_change = (inserted_char, vim.current.window.cursor[0])
 
