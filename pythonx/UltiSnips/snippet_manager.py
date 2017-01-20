@@ -839,7 +839,8 @@ class SnippetManager(object):
         try:
             if inserted_char == '':
                 before = _vim.buf.line_till_cursor
-                if before and before[-1] == self._last_change[0] or \
+                if before and \
+                        before[-1].encode('ascii') == self._last_change[0] or \
                         self._last_change[1] != vim.current.window.cursor[0]:
                     self._try_expand(autotrigger_only=True)
 
