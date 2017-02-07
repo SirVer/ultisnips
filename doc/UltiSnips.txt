@@ -21,6 +21,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       3.5.2 UltiSnips#Anon                      |UltiSnips#Anon|
       3.5.3 UltiSnips#SnippetsInCurrentScope    |UltiSnips#SnippetsInCurrentScope|
    3.6 Missing python support                   |UltiSnips-python-warning|
+   3.7 Neocomplcache integration                |UltiSnips-neocomplcache|
 4. Syntax                                       |UltiSnips-syntax|
    4.1 Adding Snippets                          |UltiSnips-adding-snippets|
       4.1.1 Character Escaping                  |UltiSnips-character-escaping|
@@ -557,6 +558,18 @@ line to your vimrc file.
 
 This may be useful if your Vim configuration files are shared across several
 systems where some of them may not have Vim compiled with python support.
+
+3.7 Neocomplcache integration                       *UltiSnips_neocomplcache*
+-----------------------------
+
+If you are using Neocomplcache UltiSnips will provide integration with it.
+When completing something neocomplcache will show you available
+snippets with a description in completion list.
+
+Mappings for correct snippet expanding and completing are automatically set
+on g:UltiSnipsExpandTrigger key. For correct behavior snippet expanding and
+jumping is set to one key.
+
 
 =============================================================================
 4. Syntax                                                  *UltiSnips-syntax*
