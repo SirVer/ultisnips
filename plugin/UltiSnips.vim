@@ -54,4 +54,18 @@ augroup END
 
 call UltiSnips#map_keys#MapKeys()
 
+" Register ultisnips source for nvim-completion-manager
+" https://github.com/roxma/nvim-completion-manager
+"
+" Registering a source via this autocmd will avoid error when NCM has not been
+" installed yet. And it also avoid the loading of autoload/cm.vim on neovim
+" startup, so that NCM won't affect neovim's startup time
+au User CmSetup call cm#register_source({'name' : 'cm-ultisnips',
+		\ 'priority': 7, 
+		\ 'abbreviation': 'Snip',
+		\ 'default_word_pattern': '\S+',
+		\ 'cm_refresh_patterns':['(\S{3,})$'],
+		\ 'cm_refresh': 'cm#sources#ultisnips#cm_refresh',
+		\ })
+
 " vim: ts=8 sts=4 sw=4
