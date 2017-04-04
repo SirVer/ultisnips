@@ -378,6 +378,12 @@ class SnippetManager(object):
         _vim.command('augroup END')
 
         _vim.command('silent doautocmd <nomodeline> User UltiSnipsEnterFirstSnippet')
+
+        # If enabled, disable the preview window during completion
+        if _vim.eval("get(g:, 'UltiSnipsDisablePreview', 0)") == '1':
+            self._completeopt = _vim.eval('&completeopt')
+            _vim.command('set completeopt-=preview')
+
         self._inner_state_up = True
 
     def _teardown_inner_state(self):
@@ -394,6 +400,11 @@ class SnippetManager(object):
             _vim.command('augroup UltiSnips')
             _vim.command('autocmd!')
             _vim.command('augroup END')
+
+            # If completeopt was modified, reset it
+            if _vim.eval("get(g:, 'UltiSnipsDisablePreview', 0)") == '1':
+                _vim.command('set completeopt={}'.format(self._completeopt))
+
             self._inner_state_up = False
         except _vim.error:
             # This happens when a preview window was opened. This issues
