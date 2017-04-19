@@ -7,6 +7,7 @@ class Source(Base):
         self.name = 'ultisnips'
         self.mark = '[US]'
         self.rank = 8
+        self.is_volatile = True
 
     def gather_candidates(self, context):
         suggestions = []
