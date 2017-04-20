@@ -1,0 +1,149 @@
+snippet do
+do
+  ${1:body}
+end
+endsnippet
+
+snippet if "if .. do .. end"
+if ${1:condition} do
+  ${2:body}
+end
+endsnippet
+
+snippet if "if .. do: .."
+if ${1:condition}, do: ${2:expr}
+endsnippet
+
+snippet ife "if .. do .. else .. end"
+if ${1:condition} do
+  ${2:do_body}
+else
+  ${3:else_body}
+end
+endsnippet
+
+snippet ife "if .. do: .. else:"
+if ${1:condition}, do: ${2:do_expr}, else: ${3:else_expr}
+endsnippet
+
+snippet unless "unless .. do .. end"
+unless ${1:condition} do
+  ${2:body}
+end
+endsnippet
+
+snippet unless "unless .. do: .."
+unless ${1:condition}, do: ${2:expr}
+endsnippet
+
+snippet unlesse "unless .. do .. else .. end"
+unless ${1:condition} do
+  ${2:do_body}
+else
+  ${3:else_body}
+end
+endsnippet
+
+snippet unlesse "unless .. do: .. else:"
+unless ${1:condition}, do: ${2:do_expr}, else: ${3:else_expr}
+endsnippet
+
+snippet cond
+cond do
+${1:match} ->
+  ${2:body}
+end
+endsnippet
+
+snippet case
+case ${1:expression} do
+${2:match} ->
+  ${3:body}
+end
+endsnippet
+
+snippet def
+def ${1:name} do
+  ${2:body}
+end
+endsnippet
+
+snippet defim
+defimpl ${1:protocol_name}, for: ${2:data_type} do
+  ${3:function}
+end
+endsnippet
+
+snippet defma
+defmacro ${1:name} do
+  ${2:body}
+end
+endsnippet
+
+snippet defmo
+defmodule ${1:module_name} do
+  ${2:body}
+end
+endsnippet
+
+snippet defp
+defp ${1:name} do
+  ${2:body}
+end
+endsnippet
+
+snippet defpr
+defprotocol ${1:name}, [${2:function}]
+endsnippet
+
+snippet defr
+defrecord ${1:record_name}, ${2:fields}
+endsnippet
+
+snippet doc
+@doc """
+${1:text}
+"""
+endsnippet
+snippet fn
+fn(${1:args}) -> ${2:expr} end
+endsnippet
+
+snippet mdoc
+@moduledoc """
+${1:text}
+"""
+endsnippet
+
+snippet rec
+receive do
+${1:match} ->
+  ${2:body}
+end
+endsnippet
+
+snippet req
+require ${1:module_name}
+endsnippet
+
+snippet imp
+import ${1:module_name}
+endsnippet
+
+snippet ali
+alias ${1:module_name}
+endsnippet
+
+snippet test
+test "${1:test_name}" do
+  ${2:body}
+end
+endsnippet
+
+snippet try "try .. rescue .. end"
+try do
+  ${1:try_body}
+rescue
+  ${2:exception} -> ${3:expr}
+end
+endsnippet
