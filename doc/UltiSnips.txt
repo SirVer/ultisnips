@@ -316,7 +316,7 @@ alternative function IMAP_Jumpfunc('', 0) is called.
 3.2.2 Custom autocommands                       *UltiSnips-custom-autocommands*
 -------------------------
 
-Note Autocommands must *not* change the buffer in any way. If lines are added,
+Note Autocommands must not change the buffer in any way. If lines are added,
 deleted, or modified it will confuse UltiSnips which might scramble your
 snippets contents.
 
