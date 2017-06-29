@@ -23,7 +23,8 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    3.6 Missing python support                   |UltiSnips-python-warning|
 4. Syntax                                       |UltiSnips-syntax|
    4.1 Adding Snippets                          |UltiSnips-adding-snippets|
-      4.1.1 Character Escaping                  |UltiSnips-character-escaping|
+      4.1.1 Snippet Options                     |UltiSnips-snippet-options|
+      4.1.2 Character Escaping                  |UltiSnips-character-escaping|
    4.2 Plaintext Snippets                       |UltiSnips-plaintext-snippets|
    4.3 Visual Placeholder                       |UltiSnips-visual-placeholder|
    4.4 Interpolation                            |UltiSnips-interpolation|
@@ -667,7 +668,7 @@ same tab trigger. When a snippet is activated and more than one tab trigger
 match, UltiSnips displays a list of the matching snippets with their
 descriptions. The user then selects the snippet they want.
 
-                                                  *UltiSnips-snippet-options*
+ 4.1.1 Snippet Options:                           *UltiSnips-snippet-options*
 
 The 'options' control the behavior of the snippet. Options are indicated by
 single characters. The 'options' characters for a snippet are combined into
@@ -735,7 +736,7 @@ When parsing snippet files, UltiSnips chops the trailing newline character
 from the 'endsnippet' end line.
 
 
- 4.1.1 Character Escaping:                     *UltiSnips-character-escaping*
+ 4.1.2 Character Escaping:                     *UltiSnips-character-escaping*
 
 In snippet definitions, the characters '`', '{', '$' and '\' have special
 meaning. If you want to insert one of these characters literally, escape them
