@@ -15,6 +15,7 @@ from UltiSnips import _vim
 from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text_objects._transformation import TextObjectTransformation
 from UltiSnips.text_objects._base import NoneditableTextObject
+import platform
 
 _REPLACE_NON_WS = re.compile(r"[^ \t]")
 
@@ -42,7 +43,11 @@ class Visual(NoneditableTextObject, TextObjectTransformation):
 
     def _update(self, done):
         if self._mode == 'v':  # Normal selection.
-            text = self._text
+            if platform.system() == 'Windows':
+                # Remove last character for windows in normal selection.
+                text = self._text[:-1]
+            else:
+                text = self._text
         else:  # Block selection or line selection.
             text_before = _vim.buf[self.start.line][:self.start.col]
             indent = _REPLACE_NON_WS.sub(' ', text_before)
