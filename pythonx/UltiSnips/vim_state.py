@@ -8,7 +8,6 @@ from collections import deque, namedtuple
 from UltiSnips import _vim
 from UltiSnips.compatibility import as_unicode, byte2col
 from UltiSnips.position import Position
-import platform
 
 _Placeholder = namedtuple('_FrozenPlaceholder', ['current_text', 'start', 'end'])
 
@@ -129,19 +128,13 @@ class VisualContentPreserver(object):
 
         _vim_line_with_eol = lambda ln: _vim.buf[ln] + '\n'
 
-        # Remove last character for windows
-        if platform.system() == 'Windows':
-            add = 0
-        else:
-            add = 1
-
         if sl == el:
-            text = _vim_line_with_eol(sl - 1)[sc:ec + add]
+            text = _vim_line_with_eol(sl - 1)[sc:ec + 1]
         else:
             text = _vim_line_with_eol(sl - 1)[sc:]
             for cl in range(sl, el - 1):
                 text += _vim_line_with_eol(cl)
-            text += _vim_line_with_eol(el - 1)[:ec + add]
+            text += _vim_line_with_eol(el - 1)[:ec + 1]
         self._text = text
 
     def conserve_placeholder(self, placeholder):
