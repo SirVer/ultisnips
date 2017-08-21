@@ -126,6 +126,11 @@ class VisualContentPreserver(object):
         ec = byte2col(el, ebyte - 1)
         self._mode = _vim.eval('visualmode()')
 
+        # fix bug when vim option 'selection' is 'exclusive'.
+        if _vim.eval('&selection') == 'exclusive':
+            if sl != el and sbyte != ebyte:
+                ec -= 1
+
         _vim_line_with_eol = lambda ln: _vim.buf[ln] + '\n'
 
         if sl == el:
