@@ -53,7 +53,11 @@ class VimBuffer(object):
 
     @property
     def filetypes(self):
-        return [ft for ft in vim.eval('&filetype').split('.') if ft]
+        full_filetype = vim.eval('&filetype')
+        if full_filetype:
+            return [ft for ft in full_filetype.split('.') if ft] + [full_filetype]
+        else:
+            return []
 
     @property
     def cursor(self):  # pylint:disable=no-self-use

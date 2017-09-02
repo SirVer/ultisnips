@@ -597,7 +597,8 @@ example, would fit well in the all.snippets file.
 UltiSnips understands Vim's dotted filetype syntax. For example, if you define
 a dotted filetype for the CUDA C++ framework, e.g. ":set ft=cuda.cpp", then
 UltiSnips will search for and activate snippets for both the cuda and cpp
-filetypes.
+filetypes. You can also create a "cuda.cpp.snippets" file that would only
+activate for that combination of two filetypes.
 
 The snippets file syntax is simple. All lines starting with a # character are
 considered comments. Comments are ignored by UltiSnips. Use them to document
