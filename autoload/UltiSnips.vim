@@ -35,6 +35,8 @@ function! UltiSnips#Edit(bang, ...)
             let mode = 'vs'
         elseif g:UltiSnipsEditSplit == 'horizontal'
             let mode = 'sp'
+        elseif g:UltiSnipsEditSplit == 'tabdo'
+            let mode = 'tabedit'
         elseif g:UltiSnipsEditSplit == 'context'
             let mode = 'vs'
             if winwidth(0) <= 2 * (&tw ? &tw : 80)
