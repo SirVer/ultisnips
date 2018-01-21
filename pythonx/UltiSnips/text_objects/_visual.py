@@ -15,7 +15,6 @@ from UltiSnips import _vim
 from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text_objects._transformation import TextObjectTransformation
 from UltiSnips.text_objects._base import NoneditableTextObject
-import platform
 
 _REPLACE_NON_WS = re.compile(r"[^ \t]")
 
@@ -43,8 +42,8 @@ class Visual(NoneditableTextObject, TextObjectTransformation):
 
     def _update(self, done):
         if self._mode == 'v':  # Normal selection.
-            if platform.system() == 'Windows':
-                # Remove last character for windows in normal selection.
+            # Remove last character when selection mode is 'exclusive'
+            if _vim.eval('&selection') == 'exclusive':
                 text = self._text[:-1]
             else:
                 text = self._text
