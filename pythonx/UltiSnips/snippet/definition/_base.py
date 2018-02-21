@@ -281,7 +281,7 @@ class SnippetDefinition(object):
 
         # Ensure the match was on a word boundry if needed
         if 'b' in self._opts and match:
-            text_before = before.rstrip()[:-len(self._matched)]
+            text_before = before.rstrip()[:-len(self._matched) + 1]
             if text_before.strip(' \t') != '':
                 self._matched = ''
                 return False
