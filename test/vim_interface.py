@@ -172,9 +172,10 @@ class VimInterfaceTmux(VimInterface):
         # to tmux, but it seems like this is all that is needed for now.
         s = s.replace(';', r'\;')
 
-        if PYTHON3:
-            s = s.encode('utf-8')
-        silent_call(['tmux', 'send-keys', '-t', self.session, '-l', s])
+        if len(s) == 1:
+            silent_call(['tmux', 'send-keys', '-t', self.session, hex(ord(s))])
+        else:
+            silent_call(['tmux', 'send-keys', '-t', self.session, '-l', s])
 
     def send_to_terminal(self, s):
         return self._send(s)

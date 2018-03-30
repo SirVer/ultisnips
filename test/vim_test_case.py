@@ -185,7 +185,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         if not self.interrupt:
             # Go into insert mode and type the keys but leave Vim some time to
             # react.
-            text = 'i' + self.keys
+            text = u'i' + self.keys.decode("utf-8")
             while text:
                 to_send = None
                 for seq in SEQUENCES:
