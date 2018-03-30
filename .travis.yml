@@ -1,24 +1,21 @@
-language: python
+sudo: required
+services: docker
 
-python:
-  - 2.7
-  - 3.3
-  - 3.4
+# Cache intermediate Docker layers. For a description of how this works, see:
+# https://giorgos.sealabs.net/docker-cache-on-travis-and-docker-112.html
+cache:
+  directories:
+    - /home/travis/docker/
+
 env:
-  - VIM_VERSION="74"
-  - VIM_VERSION="git"
-  # - VIM_VERSION="NEOVIM"
+  - VIM_VERSION="7.4" PYTHON_IMAGE=2.7-stretch TAG=vim_74_py2 DOCKER_CACHE_FILE=/home/travis/docker/vim_74_py2.tar.gz
 
 install:
-   # Some of these commands fail transiently. We keep retrying them until they succeed.
-   - until sudo add-apt-repository ppa:kalakris/tmux -y; do sleep 10; done
-   - until sudo add-apt-repository ppa:neovim-ppa/unstable -y; do sleep 10; done
-   - until sudo apt-get update -qq; do sleep 10; done
-   - until sudo apt-get install -qq -y --force-yes tmux xclip gdb neovim git; do sleep 10; done
-   - ./travis_install.sh
+   - docker build -t ultisnips:${TAG} --build-arg PYTHON_IMAGE=${PYTHON_IMAGE} --build-arg VIM_VERSION=${VIM_VERSION} .
 
 script:
-   - ./travis_test.sh
+   - docker run -it ultisnips:${TAG} scripts/run_tests.sh
+   - scripts/save_docker_cache.sh
 
 notifications:
   webhooks:
