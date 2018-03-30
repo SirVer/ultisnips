@@ -8,10 +8,6 @@ let b:did_ftplugin = 1
 let s:save_cpo = &cpo
 set cpo&vim
 
-" Fold by syntax, but open all folds by default
-setlocal foldmethod=syntax
-setlocal foldlevel=99
-
 setlocal commentstring=#%s
 
 setlocal noexpandtab
