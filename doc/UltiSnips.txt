@@ -1582,7 +1582,7 @@ Following snippet will be expanded at 4 spaces indentation level no matter
 where it was triggered.
 
 ------------------- SNIP -------------------
-pre_expand "snip.buffer[snip.line] = ' '*4; snip.cursor.set(line, 4)"
+pre_expand "snip.buffer[snip.line] = ' '*4; snip.cursor.set(snip.line, 4)"
 snippet d
 def $1():
     $0
