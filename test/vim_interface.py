@@ -93,6 +93,10 @@ class VimInterface(TempFileManager):
         self._vim_executable = vim_executable
         self._version = None
 
+    @property
+    def vim_executable(self):
+        return self._vim_executable
+
     def has_version(self, major, minor, patchlevel):
         if self._version is None:
             output = subprocess.check_output([
