@@ -9,6 +9,8 @@ cache:
 
 env:
   - VIM_VERSION="7.4" PYTHON_IMAGE=2.7-stretch TAG=vim_74_py2 DOCKER_CACHE_FILE=/home/travis/docker/vim_74_py2.tar.gz
+  - VIM_VERSION="8.0" PYTHON_IMAGE=2.7-stretch TAG=vim_80_py2 DOCKER_CACHE_FILE=/home/travis/docker/vim_80_py2.tar.gz
+  - VIM_VERSION="git" PYTHON_IMAGE=2.7-stretch TAG=vim_git_py2 DOCKER_CACHE_FILE=/home/travis/docker/vim_git_py2.tar.gz
 
 install:
    - docker build -t ultisnips:${TAG} --build-arg PYTHON_IMAGE=${PYTHON_IMAGE} --build-arg VIM_VERSION=${VIM_VERSION} .
