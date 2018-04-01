@@ -13,7 +13,7 @@ and is very fast.
 In this demo I am editing a python file. I first expand the `#!` snippet, then
 the `class` snippet. The completion menu comes from
 [YouCompleteMe](https://github.com/Valloric/YouCompleteMe), UltiSnips also
-integrates with [deoplete](https://github.com/Shougo/deoplete.nvim). I can
+integrates with [Deoplete](https://github.com/Shougo/deoplete.nvim). I can
 jump through placeholders and add text while the snippet inserts text in other
 places automatically: when I add `Animal` as a base class, `__init__` gets
 updated to call the base class constructor. When I add arguments to the
@@ -28,6 +28,16 @@ Please add pull requests and issues there.
 
 UltiSnips was started in Jun 2009 by @SirVer. In Dec 2015, maintenance was
 handed over to [@seletskiy](https://github.com/seletskiy).
+
+Project Status
+--------------
+UltiSnips was started in Jun 2009 by **@SirVer**. In Dec 2015, maintenance was
+handed over to **[@seletskiy](https://github.com/seletskiy)**.
+
+Currently both **@SirVer** and **@seletskiy** are not able to actively maintain the project.
+So active development is stopped, and Ultisnips searching for new maintainers.
+If you want to help this project, by fixing existing bugs, developing new features
+and maintaining code base, please contact @SirVer [via email](SirVer@gmx.de).
 
 What can you do with UltiSnips?
 -------------------------------
