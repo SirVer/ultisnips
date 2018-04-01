@@ -14,7 +14,6 @@ fi
 export CFLAGS="$(python-config --cflags)"
 echo $CFLAGS
 ./configure \
-   --prefix=${HOME} \
    --disable-nls \
    --disable-sysmouse \
    --disable-gpm \

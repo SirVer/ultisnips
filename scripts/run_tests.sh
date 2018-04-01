@@ -3,11 +3,10 @@
 set -e
 
 PYTHON_CMD="$(which python)"
-INTERFACE="--interface tmux"
-VIM="$HOME/bin/vim"
+VIM="/usr/local/bin/vim"
 PYTHON_VERSION=$($PYTHON_CMD -c 'import sys;print(sys.version.split()[0])')
 echo "Using python from: $PYTHON_CMD Version: $PYTHON_VERSION"
-echo "Using vim from:"
+echo "Using vim from: $VIM"
 $VIM --version | head -n 3
 
 set -x
@@ -19,5 +18,5 @@ $PYTHON_CMD ./test_all.py \
    --plugins \
    --session vim \
    --vim $VIM \
-   $INTERFACE \
+   --interface tmux \
    --expected-python-version $PYTHON_VERSION
