@@ -25,6 +25,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    4.1 Adding Snippets                          |UltiSnips-adding-snippets|
       4.1.1 Snippet Options                     |UltiSnips-snippet-options|
       4.1.2 Character Escaping                  |UltiSnips-character-escaping|
+      4.1.3 How snippets are loaded             |UltiSnips-how-snippets-are-loaded|
    4.2 Plaintext Snippets                       |UltiSnips-plaintext-snippets|
    4.3 Visual Placeholder                       |UltiSnips-visual-placeholder|
    4.4 Interpolation                            |UltiSnips-interpolation|
@@ -570,60 +571,13 @@ syntax. Examples are used to help illustrate.
 4.1 Adding Snippets                               *UltiSnips-adding-snippets*
 -------------------
 
-See |UltiSnips-snippet-search-path| for an explanation of where directories
-with snippet definitions should be located.
-
-Using a strategy similar to how Vim detects |ftplugins|, UltiSnips iterates
-over the snippet definition directories looking for files with names of the
-following patterns: ft.snippets, ft_*.snippets, or ft/*, where "ft" is the
-'filetype' of the current document and "*" is a shell-like wildcard matching
-any string including the empty string. The following table shows some typical
-snippet filenames and their associated filetype.
-
-    snippet filename         filetype ~
-    ruby.snippets            ruby
-    perl.snippets            perl
-    c.snippets               c
-    c_my.snippets            c
-    c/a                      c
-    c/b.snippets             c
-    all.snippets             *all
-    all/a.snippets           *all
-
-* The 'all' filetype is unique. It represents snippets available for use when
-editing any document regardless of the filetype. A date insertion snippet, for
-example, would fit well in the all.snippets file.
-
-UltiSnips understands Vim's dotted filetype syntax. For example, if you define
-a dotted filetype for the CUDA C++ framework, e.g. ":set ft=cuda.cpp", then
-UltiSnips will search for and activate snippets for both the cuda and cpp
-filetypes.
-
-The snippets file syntax is simple. All lines starting with a # character are
-considered comments. Comments are ignored by UltiSnips. Use them to document
-snippets.
-
-A line beginning with the keyword 'extends' provides a way of combining
-snippet files. When the 'extends' directive is included in a snippet file, it
-instructs UltiSnips to include all snippets from the indicated filetypes.
-
-The syntax looks like this: >
-   extends ft1, ft2, ft3
-
-For example, the first line in cpp.snippets looks like this: >
-   extends c
-When UltiSnips activates snippets for a cpp file, it first looks for all c
-snippets and activates them as well. This is a convenient way to create
-specialized snippet files from more general ones. Multiple 'extends' lines are
-permitted in a snippet file, and they can be included anywhere in the file.
-
-
 A line beginning with the keyword 'priority' sets the priority for all
 snippets defined in the current file after this line. The default priority for
 a file is always 0. When a snippet should be expanded, UltiSnips will collect
-all snippet definitions from all sources that match the trigger and keep only
-the ones with the highest priority. For example, all shipped snippets have a
-priority < 0, so that user defined snippets always overwrite shipped snippets.
+all snippet definitions from all sources (see |UltiSnips-how-snippets-are-loaded|)
+that match the trigger and keep only the ones with the highest priority. For 
+example, all shipped snippets have a priority < 0, so that user defined snippets 
+always overwrite shipped snippets.
 
 
 A line beginning with the keyword 'snippet' marks the beginning of snippet
@@ -742,6 +696,56 @@ from the 'endsnippet' end line.
 In snippet definitions, the characters '`', '{', '$' and '\' have special
 meaning. If you want to insert one of these characters literally, escape them
 with a backslash, '\'.
+
+
+ 4.1.3 How UltiSnips loads snippets:           *UltiSnips-how-snippets-are-loaded*
+
+See |UltiSnips-snippet-search-path| for an explanation of where directories
+with snippet definitions should be located.
+
+Using a strategy similar to how Vim detects |ftplugins|, UltiSnips iterates
+over the snippet definition directories looking for files with names of the
+following patterns: ft.snippets, ft_*.snippets, or ft/*, where "ft" is the
+'filetype' of the current document and "*" is a shell-like wildcard matching
+any string including the empty string. The following table shows some typical
+snippet filenames and their associated filetype.
+
+    snippet filename         filetype ~
+    ruby.snippets            ruby
+    perl.snippets            perl
+    c.snippets               c
+    c_my.snippets            c
+    c/a                      c
+    c/b.snippets             c
+    all.snippets             *all
+    all/a.snippets           *all
+
+* The 'all' filetype is unique. It represents snippets available for use when
+editing any document regardless of the filetype. A date insertion snippet, for
+example, would fit well in the all.snippets file.
+
+UltiSnips understands Vim's dotted filetype syntax. For example, if you define
+a dotted filetype for the CUDA C++ framework, e.g. ":set ft=cuda.cpp", then
+UltiSnips will search for and activate snippets for both the cuda and cpp
+filetypes.
+
+The snippets file syntax is simple. All lines starting with a # character are
+considered comments. Comments are ignored by UltiSnips. Use them to document
+snippets.
+
+A line beginning with the keyword 'extends' provides a way of combining
+snippet files. When the 'extends' directive is included in a snippet file, it
+instructs UltiSnips to include all snippets from the indicated filetypes.
+
+The syntax looks like this: >
+   extends ft1, ft2, ft3
+
+For example, the first line in cpp.snippets looks like this: >
+   extends c
+When UltiSnips activates snippets for a cpp file, it first looks for all c
+snippets and activates them as well. This is a convenient way to create
+specialized snippet files from more general ones. Multiple 'extends' lines are
+permitted in a snippet file, and they can be included anywhere in the file.
 
 
 4.2 Plaintext Snippets                         *UltiSnips-plaintext-snippets*
