@@ -1,6 +1,6 @@
 call plug#begin('~/.vim/plugged')
 
-Plug 'SirVer/ultisnips'
+Plug '/src/UltiSnips'
 Plug 'honza/vim-snippets'
 
 let g:UltiSnipsExpandTrigger="<tab>"
