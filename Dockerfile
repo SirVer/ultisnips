@@ -4,11 +4,11 @@ FROM python:${PYTHON_IMAGE}
 
 ARG VIM_VERSION
 
-COPY scripts/install_packages.sh src/scripts/
+COPY docker/install_packages.sh src/scripts/
 RUN src/scripts/install_packages.sh
-COPY scripts/download_vim.sh src/scripts/
+COPY docker/download_vim.sh src/scripts/
 RUN src/scripts/download_vim.sh
-COPY scripts/build_vim.sh src/scripts/
+COPY docker/build_vim.sh src/scripts/
 RUN src/scripts/build_vim.sh
 
 # We clone the plugins we currently depend on manually here. Initially we check
