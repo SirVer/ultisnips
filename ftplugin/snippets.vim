@@ -17,6 +17,11 @@ setlocal commentstring=#%s
 setlocal noexpandtab
 setlocal autoindent nosmartindent nocindent
 
+augroup ultisnips_snippets.vim
+autocmd!
+autocmd BufWritePost <buffer> call UltiSnips#RefreshSnippets()
+augroup END
+
 " Define match words for use with matchit plugin
 " http://www.vim.org/scripts/script.php?script_id=39
 if exists("loaded_matchit") && !exists("b:match_words")
