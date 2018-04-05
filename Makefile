@@ -1,3 +1,5 @@
+MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+MAKEFILE_DIR := $(dir ${MAKEFILE_PATH})
 
 # Test images as run on CI.
 image_vim_74_py2:
@@ -21,4 +23,4 @@ image_repro: image_vim_80_py3
 # scripts/docker_vimrc.vim for the full vimrc. Need to run `make
 # image_repro` before this will work.
 repro:
-	docker run -it -v $(pwd):/src/UltiSnips ultisnips:repro /bin/bash
+	docker run -it -v ${MAKEFILE_DIR}:/src/UltiSnips ultisnips:repro /bin/bash
