@@ -1,7 +1,7 @@
-Please read this text and delete everything up to and including the line of slashes before
+Please read this text and delete everything up to the line of dashes before
 filing your issue. Please
 
-- fill out the table below the line of slashes and keep it at the end of your
+- fill out the table below the line of dashes and keep it at the end of your
   issue text. The provided answers below are examples, only keep one of them or
   replace them entirely with something else. But please provide an answer for
   every line.
@@ -9,8 +9,7 @@ filing your issue. Please
   https://github.com/SirVer/ultisnips/blob/master/CONTRIBUTING.md#reproducing-bugs.
 - If this is not possible, post a minimal, complete `.vimrc`, snippet
   definition, and set of key strokes that reproduces your problem.
-- remember to delete this boilerplate text up to and including the line of
-  slashes.
+- remember to delete this boilerplate text up to the line of dashes.
 
 ---------------------
 
