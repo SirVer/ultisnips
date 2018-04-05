@@ -1,28 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 #
-# To execute this test requires two terminals, one for running Vim and one
-# for executing the test script. Both terminals should have their current
-# working directories set to this directory (the one containing this
-# test_all.py script).
-#
-# In one terminal, launch a tmux session named ``vim``:
-#   $ tmux new -s vim
-#
-# Now, from another terminal, launch the testsuite:
-#    $ ./test_all.py
-#
-# Note: if you want to use Vim against the Python 3 bindings, you must launch the
-# test suite using Python 3.  For example:
-#    $ python3 ./test_all.py
-#
-# For each test, the test_all.py script will launch vim with a vimrc, run the
-# test, compare the output and exit vim again. The keys are send using tmux send-keys.
-#
-# To limit the tests that are executed, specify a pattern to be used to match
-# the beginning of the test name.  For instance, the following will execute all
-# tests that start with "SimpleExpand":
-#    $ ./test_all.py SimpleExpand
+# See CONTRIBUTING.md for an explanation of this file.
 #
 # NOTE: The test suite is not working under Windows right now as I have no
 # access to a windows system for fixing it. Volunteers welcome. Here are some

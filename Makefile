@@ -24,3 +24,8 @@ image_repro: image_vim_80_py3
 # image_repro` before this will work.
 repro:
 	docker run -it -v ${MAKEFILE_DIR}:/src/UltiSnips ultisnips:repro /bin/bash
+
+# This assumes, the repro image is already running and it opens an extra shell
+# inside the running container
+shell_in_repro:
+	docker exec -it $(shell docker ps -q) /bin/bash
