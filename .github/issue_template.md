@@ -12,7 +12,7 @@ filing your issue. Please
 - remember to delete this boilerplate text up to and including the line of
   slashes.
 
-///////////////////////////////////////
+---------------------
 
 - **OS**:  e.g. Windows XP / Ubuntu Linux / Mac OS 10.5
 - **Vim**: e.g. Vim 8.0, Vim 7.4, Neovim 0.3
