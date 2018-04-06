@@ -35,9 +35,9 @@ You are free to extend list if needed
 
 ## 
 <!-- Please fill theese fields -->
-- **Opirating Syestm**:  <!-- e.g. Windows XP / Ubuntu Linux / Mac OS 10.5 -->
+- **Operating System**:  <!-- e.g. Windows XP / Ubuntu Linux / Mac OS 10.5 -->
 - **Vim Version**: <!-- e.g. Vim 8.0, Vim 7.4, Neovim 0.3 -->
-- **UltiSnips version**: <!-- e.g. 3.1, commit 16c999e8c71134401a78d4d46435517b2271d6ac. Do
+- **UltiSnips Version**: <!-- e.g. 3.1, commit 16c999e8c71134401a78d4d46435517b2271d6ac. Do
   not write `latest master`, please look up the actual revision. You can do this by -->
 - **Python inside Vim**: <!-- e.g. 2.7.14 / 3.6.5. If unsure run 
   `:py import sys; print(sys.version)` and `:py3 import sys; print(sys.version)`
