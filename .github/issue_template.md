@@ -3,7 +3,7 @@ Thank you for opening issue. Please follow Issue Template contents,
 Please understand that without all essential info the issue
 may be closed as unreproducible.
 *** NOTE: Lines enclosed by arrows are comments, and will be deleted automatically. ***
-
+-->
 <!--                      ISSUE TEMPLATE:
 • Please provide clear explanations of the problem.
   - Provide short and understandable steps to reproduce the issue. (Optional)
@@ -13,7 +13,7 @@ may be closed as unreproducible.
   https://github.com/SirVer/ultisnips/blob/master/CONTRIBUTING.md#reproducing-bugs.
   If this is not possible, post a minimal, complete `.vimrc`, snippet
   definition, and set of keystrokes that reproduces your problem.
-
+-->
 <!-- Please post your explanations below -->
 
 
@@ -29,8 +29,10 @@ may be closed as unreproducible.
 2.
 3.
 
-<!-- Please fill theese fields. 
-NOTE: contents inside arrows will be ignored. -->
+<!--
+    Please fill theese fields. 
+    NOTE: contents inside arrows will be ignored.
+-->
 ## 
 - **Operating System**:  <!-- e.g. Windows XP / Ubuntu 16.04 / Mac OS 10.5 -->
 - **Vim Version**: <!-- e.g. Vim 8.0, Vim 7.4, Neovim 0.3 -->
