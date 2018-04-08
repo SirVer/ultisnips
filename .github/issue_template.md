@@ -2,11 +2,10 @@
 Thanks for reporting your issue. Please follow this template closely. Without
 all essential info the issue may be closed as unreproducible.
 
-Fill out the table below --- symbols and keep it at the end of your issue text.
-Please provide an answer for every line.
+Fill out the table below ----- symbols and keep it at the end of your issue
+text. Please provide an answer for every line.
 
 Please provide an explanation of the issue below this line. -->
-
 
 **Expected behavior:**
 
@@ -28,7 +27,7 @@ and set of keystrokes that reproduces your problem.
 2.
 3.
 
-------
+-----
 <!-- NOTE: contents inside arrows will be ignored. -->
 - **Operating System**: <!-- e.g. Windows XP / Ubuntu 16.04 / Mac OS 10.5 -->
 - **Vim Version**: <!-- first two lines of `:version` output -->
