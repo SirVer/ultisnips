@@ -17,7 +17,7 @@ Please provide an explanation of the issue below this line. -->
 
 <!--
 Provide a minimal viable repro case, ideally following
-https://github.com/SirVer/ultisnips/blob/master/CONTRIBUTING.md#reproducing-bugs.
+https://github.com/SirVer/ultisnips/blob/master/CONTRIBUTING.md#reproducing-bugs
 
 If this is not possible, post a minimal, complete `.vimrc`, snippet definition,
 and set of keystrokes that reproduces your problem.
