@@ -36,4 +36,5 @@ and set of keystrokes that reproduces your problem.
 - **Python inside Vim**: <!-- e.g. 2.7.14 / 3.6.5. If unsure run inside vim:
                               `:py import sys; print(sys.version)` and
                               `:py3 import sys; print(sys.version)' -->
-- **Docker repo/vimrc**: <!-- link to the repo, or uploaded minimal vimrc -->
+- **Docker repo/vimrc**: <!-- link to the branch containing the repro case, 
+                              or the uploaded minimal vimrc -->
