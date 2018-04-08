@@ -1,20 +1,11 @@
 <!--
-Thank you for opening issue. Please follow Issue Template contents.
-Please understand that without all essential info the issue may be closed as unreproducible.
-*** NOTE: Lines enclosed by arrows are comments, and will be deleted automatically. ***
--->
+Thanks for reporting your issue. Please follow this template, closely. Without
+all essential info the issue may be closed as unreproducible.
 
-<!--                      Issue Template:
-• Please provide clear explanations of the problem.
-  - Provide short and understandable steps to reproduce the issue. (Optional)
-• Fill out the table below ## symbols and keep it at the end of your
-  issue text. Please provide an answer for every line.
-• Provide a minimal viable repro case, ideally following
-  https://github.com/SirVer/ultisnips/blob/master/CONTRIBUTING.md#reproducing-bugs.
-  If this is not possible, post a minimal, complete `.vimrc`, snippet
-  definition, and set of keystrokes that reproduces your problem. -->
+Fill out the table below ## symbols and keep it at the end of your issue text.
+Please provide an answer for every line.
 
-<!-- Please post your explanations below -->
+Please provide an explanation of the issue below this line. -->
 
 
 **Expected behavior:**
@@ -23,7 +14,15 @@ Please understand that without all essential info the issue may be closed as unr
 **Actual behavior:**
 
 
-**Steps to reproduce** <!-- Optional -->
+**Steps to reproduce**
+
+<!--
+Provide a minimal viable repro case, ideally following
+https://github.com/SirVer/ultisnips/blob/master/CONTRIBUTING.md#reproducing-bugs.
+
+If this is not possible, post a minimal, complete `.vimrc`, snippet definition,
+and set of keystrokes that reproduces your problem.
+!-->
 
 1.
 2.
