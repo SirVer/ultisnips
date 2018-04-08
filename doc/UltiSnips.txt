@@ -22,7 +22,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       3.5.3 UltiSnips#SnippetsInCurrentScope    |UltiSnips#SnippetsInCurrentScope|
    3.6 Missing python support                   |UltiSnips-python-warning|
 4. Authoring snippets                           |UltiSnips-authoring-snippets|
-   4.1 Adding Snippets                          |UltiSnips-adding-snippets|
+   4.1 Basics                                   |UltiSnips-basics|
       4.1.1 Snippet Options                     |UltiSnips-snippet-options|
       4.1.2 Character Escaping                  |UltiSnips-character-escaping|
    4.2 Plaintext Snippets                       |UltiSnips-plaintext-snippets|
@@ -394,7 +394,7 @@ You can also redefine the search path on a buffer by buffer basis by setting
 the variable b:UltiSnipsSnippetDirectories. This variable takes precedence
 over the global variable.
 
-|UltiSnips-adding-snippets| explains which files are parsed for a given filetype.
+|UltiSnips-basics| explains which files are parsed for a given filetype.
 
 If only one directory is specified in this variable and this directory is
 specified by absolute path, UltiSnips will not look for snippets in
@@ -568,7 +568,7 @@ This chapter describes how to write your own snippets and snippet definition
 syntax. Examples are used to help illustrate.
 
 
-4.1 Adding Snippets                               *UltiSnips-adding-snippets*
+4.1 Basics                                        *UltiSnips-basics*
 -------------------
 
 See |UltiSnips-snippet-search-path| for an explanation of where directories
