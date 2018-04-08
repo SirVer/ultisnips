@@ -14,17 +14,17 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       3.2.1 Using your own trigger functions    |UltiSnips-trigger-functions|
       3.2.2 Custom autocommands                 |UltiSnips-custom-autocommands|
       3.2.3 Path to Python Module               |UltiSnips-python-module-path|
-   3.3 Snippet Search Path                      |UltiSnips-snippet-search-path|
-   3.4 Warning About Select Mode Mappings       |UltiSnips-warning-smappings|
-   3.5 Functions                                |UltiSnips-functions|
-      3.5.1 UltiSnips#AddSnippetWithPriority    |UltiSnips#AddSnippetWithPriority|
-      3.5.2 UltiSnips#Anon                      |UltiSnips#Anon|
-      3.5.3 UltiSnips#SnippetsInCurrentScope    |UltiSnips#SnippetsInCurrentScope|
-   3.6 Missing python support                   |UltiSnips-python-warning|
+   3.3 Warning About Select Mode Mappings       |UltiSnips-warning-smappings|
+   3.4 Functions                                |UltiSnips-functions|
+      3.4.1 UltiSnips#AddSnippetWithPriority    |UltiSnips#AddSnippetWithPriority|
+      3.4.2 UltiSnips#Anon                      |UltiSnips#Anon|
+      3.4.3 UltiSnips#SnippetsInCurrentScope    |UltiSnips#SnippetsInCurrentScope|
+   3.5 Missing python support                   |UltiSnips-python-warning|
 4. Authoring snippets                           |UltiSnips-authoring-snippets|
    4.1 Basics                                   |UltiSnips-basics|
-      4.1.1 Snippet Options                     |UltiSnips-snippet-options|
-      4.1.2 Character Escaping                  |UltiSnips-character-escaping|
+      4.1.1 How snippets are loaded             |UltiSnips-how-snippets-are-loaded|
+      4.1.2 Snippet Options                     |UltiSnips-snippet-options|
+      4.1.3 Character Escaping                  |UltiSnips-character-escaping|
    4.2 Plaintext Snippets                       |UltiSnips-plaintext-snippets|
    4.3 Visual Placeholder                       |UltiSnips-visual-placeholder|
    4.4 Interpolation                            |UltiSnips-interpolation|
@@ -212,7 +212,7 @@ g:UltiSnipsSnippetDirectories
                             Defines the directories for looking for snippets.
                             Do not mix up this variable with previous one.
                             More information about that variable can
-                            be found at section |UltiSnips-snippet-search-path|.
+                            be found at section |UltiSnips-how-snippets-are-loaded|.
 
                                                         *g:UltiSnipsEnableSnipMate*
 g:UltiSnipsEnableSnipMate
@@ -365,48 +365,8 @@ Here is a small example funtion that expands a snippet: >
    return ""
    endfunction
 
-3.3 Snippet Search Path                       *UltiSnips-snippet-search-path*
------------------------
 
-UltiSnips snippet definition files are stored in one or more directories.
-There are several variables used to indicate those directories and to define
-how UltiSnips loads snippets.
-
-Snippet definition files are stored in snippet directories. A snippet
-directory must be a subdirectory of a directory defined in the 'runtimepath'
-option. The variable g:UltiSnipsSnippetDirectories defines a list of names
-used for snippet directories. Note that "snippets" is reserved for snipMate
-snippets and cannot be used. The default is shown below. >
-
-   let g:UltiSnipsSnippetDirectories=["UltiSnips"]
-
-UltiSnips will search each 'runtimepath' directory for the subdirectory names
-defined in g:UltiSnipsSnippetDirectories in the order they are defined. For
-example, if you keep your snippets in a .vim subdirectory called
-"mycoolsnippets" and you want to make use of the default snippets that come
-with UltiSnips, add the following to your vimrc file. >
-   let g:UltiSnipsSnippetDirectories=["UltiSnips", "mycoolsnippets"]
-If you do not want to use the third party snippets that come with plugins,
-define the variable accordingly: >
-   let g:UltiSnipsSnippetDirectories=["mycoolsnippets"]
-
-You can also redefine the search path on a buffer by buffer basis by setting
-the variable b:UltiSnipsSnippetDirectories. This variable takes precedence
-over the global variable.
-
-|UltiSnips-basics| explains which files are parsed for a given filetype.
-
-If only one directory is specified in this variable and this directory is
-specified by absolute path, UltiSnips will not look for snippets in
-&runtimepath, which can lead to significant speedup. So, the common case is:
-
-    let g:UltiSnipsSnippetDirectories=[$HOME.'/.vim/UltiSnips']
-
-However, you will not able to use snippets that are shipped with third party
-plugins out of the box. You'll need to copy them into your chosen directory.
-
-
-3.4 Warning About Select Mode Mappings          *UltiSnips-warning-smappings*
+3.3 Warning About Select Mode Mappings          *UltiSnips-warning-smappings*
 --------------------------------------
 
 Vim's help document for |mapmode-s| states: >
@@ -435,13 +395,13 @@ complete definition as listed by the |:smap| command. >
    let g:UltiSnipsMappingsToIgnore = [ "somePlugin", "otherPlugin" ]
 
 
-3.5 Functions                                           *UltiSnips-functions*
+3.4 Functions                                           *UltiSnips-functions*
 -------------
 
 UltiSnips provides some functions for extending core functionality.
 
 
- 3.5.1 UltiSnips#AddSnippetWithPriority    *UltiSnips#AddSnippetWithPriority*
+ 3.4.1 UltiSnips#AddSnippetWithPriority    *UltiSnips#AddSnippetWithPriority*
 
 The first function is UltiSnips#AddSnippetWithPriority(trigger, value, description,
 options, filetyp, priority). It adds a new snippet with the provided trigger, value,
@@ -451,7 +411,7 @@ Priority is a number that defines which snippet should be preferred over
 others. See the priority keyword in|UltiSnips-add-snippets|.
 
 
- 3.5.2 UltiSnips#Anon                                        *UltiSnips#Anon*
+ 3.4.2 UltiSnips#Anon                                        *UltiSnips#Anon*
 
 The second function is UltiSnips#Anon(value, ...). It expands an anonymous
 snippet. Anonymous snippets are defined on the spot, expanded and immediately
@@ -474,7 +434,7 @@ the '$$' trigger and passes '$$' to the function as the trigger argument.
 This is required in order for UltiSnips to have access to the characters
 typed so it can determine if the trigger matches or not.
 
- 3.5.3 UltiSnips#SnippetsInCurrentScope    *UltiSnips#SnippetsInCurrentScope*
+ 3.4.3 UltiSnips#SnippetsInCurrentScope    *UltiSnips#SnippetsInCurrentScope*
 
 A third function is UltiSnips#SnippetsInCurrentScope which is the equivalent
 of snipmate GetSnipsInCurrentScope function.
@@ -546,7 +506,7 @@ The new variable g:current_ulti_dict_info is made to avoid confilct with
 exists third party plugins.  The definition location contains file path and
 line number is also included in this variable.
 
-3.6 Warning about missing python support           *UltiSnips-python-warning*
+3.5 Warning about missing python support           *UltiSnips-python-warning*
 ----------------------------------------
 
 When UltiSnips is loaded, it will check that the running Vim was compiled with
@@ -571,7 +531,7 @@ syntax. Examples are used to help illustrate.
 4.1 Basics                                        *UltiSnips-basics*
 -------------------
 
-See |UltiSnips-snippet-search-path| for an explanation of where directories
+See |UltiSnips-how-snippets-are-loaded| for an explanation of where directories
 with snippet definitions should be located.
 
 Using a strategy similar to how Vim detects |ftplugins|, UltiSnips iterates
@@ -670,7 +630,48 @@ same tab trigger. When a snippet is activated and more than one tab trigger
 match, UltiSnips displays a list of the matching snippets with their
 descriptions. The user then selects the snippet they want.
 
- 4.1.1 Snippet Options:                           *UltiSnips-snippet-options*
+
+ 4.1.1 How snippets are loaded                     *UltiSnips-how-snippets-are-loaded*
+
+UltiSnips snippet definition files are stored in one or more directories.
+There are several variables used to indicate those directories and to define
+how UltiSnips loads snippets.
+
+Snippet definition files are stored in snippet directories. A snippet
+directory must be a subdirectory of a directory defined in the 'runtimepath'
+option. The variable g:UltiSnipsSnippetDirectories defines a list of names
+used for snippet directories. Note that "snippets" is reserved for snipMate
+snippets and cannot be used. The default is shown below. >
+
+   let g:UltiSnipsSnippetDirectories=["UltiSnips"]
+
+UltiSnips will search each 'runtimepath' directory for the subdirectory names
+defined in g:UltiSnipsSnippetDirectories in the order they are defined. For
+example, if you keep your snippets in a .vim subdirectory called
+"mycoolsnippets" and you want to make use of the default snippets that come
+with UltiSnips, add the following to your vimrc file. >
+   let g:UltiSnipsSnippetDirectories=["UltiSnips", "mycoolsnippets"]
+If you do not want to use the third party snippets that come with plugins,
+define the variable accordingly: >
+   let g:UltiSnipsSnippetDirectories=["mycoolsnippets"]
+
+You can also redefine the search path on a buffer by buffer basis by setting
+the variable b:UltiSnipsSnippetDirectories. This variable takes precedence
+over the global variable.
+
+|UltiSnips-basics| explains which files are parsed for a given filetype.
+
+If only one directory is specified in this variable and this directory is
+specified by absolute path, UltiSnips will not look for snippets in
+&runtimepath, which can lead to significant speedup. So, the common case is:
+
+    let g:UltiSnipsSnippetDirectories=[$HOME.'/.vim/UltiSnips']
+
+However, you will not able to use snippets that are shipped with third party
+plugins out of the box. You'll need to copy them into your chosen directory.
+
+
+ 4.1.2 Snippet Options:                           *UltiSnips-snippet-options*
 
 The 'options' control the behavior of the snippet. Options are indicated by
 single characters. The 'options' characters for a snippet are combined into
@@ -738,7 +739,7 @@ When parsing snippet files, UltiSnips chops the trailing newline character
 from the 'endsnippet' end line.
 
 
- 4.1.2 Character Escaping:                     *UltiSnips-character-escaping*
+ 4.1.3 Character Escaping:                     *UltiSnips-character-escaping*
 
 In snippet definitions, the characters '`', '{', '$' and '\' have special
 meaning. If you want to insert one of these characters literally, escape them
