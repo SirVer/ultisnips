@@ -8,16 +8,18 @@ cache:
     - /home/travis/docker/
 
 env:
+  matrix:
   - VIM_VERSION="7.4" PYTHON_IMAGE=2.7-stretch TAG=vim_74_py2 DOCKER_CACHE_FILE=/home/travis/docker/vim_74_py2.tar.gz
   - VIM_VERSION="8.0" PYTHON_IMAGE=2.7-stretch TAG=vim_80_py2 DOCKER_CACHE_FILE=/home/travis/docker/vim_80_py2.tar.gz
   - VIM_VERSION="git" PYTHON_IMAGE=2.7-stretch TAG=vim_git_py2 DOCKER_CACHE_FILE=/home/travis/docker/vim_git_py2.tar.gz
   - VIM_VERSION="7.4" PYTHON_IMAGE=3.6-stretch TAG=vim_74_py3 DOCKER_CACHE_FILE=/home/travis/docker/vim_74_py3.tar.gz
   - VIM_VERSION="8.0" PYTHON_IMAGE=3.6-stretch TAG=vim_80_py3 DOCKER_CACHE_FILE=/home/travis/docker/vim_80_py3.tar.gz
   - VIM_VERSION="git" PYTHON_IMAGE=3.6-stretch TAG=vim_git_py3 DOCKER_CACHE_FILE=/home/travis/docker/vim_git_py3.tar.gz
-
+  global:
+    secure: PFU1Md8NuN6SQNjx6SsHX7icS9Tacb0xS0Ue9SHll1U7FNdI90F/gnokR6v+j7sdvoiLkwRSwUXeYUmrZS/d9qq8yiRxuqcj/Y0TfHVKqcLXXV/m9xWAN2UKRVF7Z1neerznk52Roo3IRqwgd9U+6d3bTthHKKYg4azBqTM7AFE=
 before_install: docker/load_docker_cache.sh
 install:
-   - docker build -t ultisnips:${TAG} --build-arg PYTHON_IMAGE=${PYTHON_IMAGE} --build-arg VIM_VERSION=${VIM_VERSION} .
+   - docker build -t ultisnips:${TAG} --build-arg PYTHON_IMAGE=${PYTHON_IMAGE} --build-arg VIM_VERSION=${VIM_VERSION} --build-arg GITHUB_ACCESS_TOKEN=${GITHUB_ACCESS_TOKEN} .
 
 script:
    - docker run -it ultisnips:${TAG} docker/run_tests.sh

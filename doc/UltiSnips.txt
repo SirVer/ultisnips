@@ -400,7 +400,7 @@ If only one directory is specified in this variable and this directory is
 specified by absolute path, UltiSnips will not look for snippets in
 &runtimepath, which can lead to significant speedup. So, the common case is:
 
-    let g:UltiSnipsSnippetDirectories=$HOME.'/.vim/UltiSnips'
+    let g:UltiSnipsSnippetDirectories=[$HOME.'/.vim/UltiSnips']
 
 However, you will not able to use snippets that are shipped with third party
 plugins out of the box. You'll need to copy them into your chosen directory.
@@ -1761,6 +1761,8 @@ offers a really nice completion dialogue for snippets.
 
 neocomplete - UltiSnips ships with a source for neocomplete and therefore
 offers out of the box completion dialogue support for it too.
+
+deoplete - The successor of neocomplete is also supported.
 
 unite - UltiSnips has a source for unite. As an example of how you can use
 it add the following function and mappings to your vimrc: >
