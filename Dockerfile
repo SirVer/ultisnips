@@ -3,6 +3,7 @@ ARG PYTHON_IMAGE
 FROM python:${PYTHON_IMAGE}
 
 ARG VIM_VERSION
+ARG GITHUB_ACCESS_TOKEN
 
 COPY docker/install_packages.sh src/scripts/
 RUN src/scripts/install_packages.sh
@@ -16,11 +17,11 @@ RUN src/scripts/build_vim.sh
 # the cache.
 RUN mkdir -p /tmp/UltiSnips_test_vim_plugins
 
-ADD https://api.github.com/repos/tpope/vim-pathogen/git/refs/heads/master \
+ADD https://api.github.com/repos/tpope/vim-pathogen/git/refs/heads/master?access_token=$GITHUB_ACCESS_TOKEN \
     /src/scripts/vim-pathogen_version.json
 RUN git clone --recursive --depth 1 https://github.com/tpope/vim-pathogen /tmp/UltiSnips_test_vim_plugins/vim-pathogen
 
-ADD https://api.github.com/repos/ervandew/supertab/git/refs/heads/master \
+ADD https://api.github.com/repos/ervandew/supertab/git/refs/heads/master?access_token=$GITHUB_ACCESS_TOKEN \
     /src/scripts/supertab_version.json
 RUN git clone --recursive --depth 1 https://github.com/ervandew/supertab /tmp/UltiSnips_test_vim_plugins/supertab
 
@@ -28,7 +29,7 @@ RUN git clone --recursive --depth 1 https://github.com/ervandew/supertab /tmp/Ul
 # install the latest version through pip. But we still use GitHub activity as a
 # marker to invalidate the installation step, just to make sure we occasionally
 # reinstall a new version.
-ADD https://api.github.com/repos/avian2/unidecode/git/refs/heads/master \
+ADD https://api.github.com/repos/avian2/unidecode/git/refs/heads/master?access_token=$GITHUB_ACCESS_TOKEN \
     /src/scripts/unidecode_version.json
 RUN pip install unidecode
 
