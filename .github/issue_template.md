@@ -21,7 +21,7 @@ https://github.com/SirVer/ultisnips/blob/master/CONTRIBUTING.md#reproducing-bugs
 
 If this is not possible, post a minimal, complete `.vimrc`, snippet definition,
 and set of keystrokes that reproduces your problem.
-!-->
+-->
 
 1.
 2.
