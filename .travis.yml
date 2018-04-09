@@ -10,7 +10,7 @@ env:
   - VIM_VERSION="git" PYTHON_IMAGE=3.6-stretch TAG=vim_git_py3
 
 install:
-   - docker build -t ultisnips:${TAG} --build-arg PYTHON_IMAGE=${PYTHON_IMAGE} --build-arg VIM_VERSION=${VIM_VERSION} --build-arg GITHUB_ACCESS_TOKEN=${GITHUB_ACCESS_TOKEN} .
+   - docker build -t ultisnips:${TAG} --build-arg PYTHON_IMAGE=${PYTHON_IMAGE} --build-arg VIM_VERSION=${VIM_VERSION} .
 
 script:
    - docker run -it ultisnips:${TAG} docker/run_tests.sh
