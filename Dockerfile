@@ -3,7 +3,6 @@ ARG PYTHON_IMAGE
 FROM python:${PYTHON_IMAGE}
 
 ARG VIM_VERSION
-ARG GITHUB_ACCESS_TOKEN
 
 COPY docker/install_packages.sh src/scripts/
 RUN src/scripts/install_packages.sh
