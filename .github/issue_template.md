@@ -1,11 +1,11 @@
 <!--
 Thanks for reporting your issue. Please follow this template closely. Without
 all essential info the issue may be closed as unreproducible.
-
+--
 Fill out the table below ----- symbols and keep it at the end of your issue
 text. Please provide an answer for every line.
-
-Please provide an explanation of the issue below this line. -->
+-->
+<!-- Please provide an explanation of the issue below this line. -->
 
 **Expected behavior:**
 
@@ -18,10 +18,10 @@ Please provide an explanation of the issue below this line. -->
 <!--
 Provide a minimal viable repro case, ideally following
 https://github.com/SirVer/ultisnips/blob/master/CONTRIBUTING.md#reproducing-bugs
-
+--
 If this is not possible, post a minimal, complete `.vimrc`, snippet definition,
 and set of keystrokes that reproduces your problem.
-!-->
+-->
 
 1.
 2.
