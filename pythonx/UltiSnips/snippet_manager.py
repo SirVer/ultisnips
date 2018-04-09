@@ -277,12 +277,9 @@ class SnippetManager(object):
         """Called whenever the cursor moved."""
         self._should_update_textobjects = False
 
-        if not self._csnippets and self._inner_state_up:
-            self._teardown_inner_state()
         self._vstate.remember_position()
         if _vim.eval('mode()') not in 'in':
             return
-
 
         if self._ignore_movements:
             self._ignore_movements = False
