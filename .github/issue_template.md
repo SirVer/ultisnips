@@ -1,22 +1,40 @@
-Please read this text and delete everything up to the line of dashes before
-filing your issue. Please
+<!--
+Thanks for reporting your issue. Please follow this template closely. Without
+all essential info the issue may be closed as unreproducible.
 
-- fill out the table below the line of dashes and keep it at the end of your
-  issue text. The provided answers below are examples, only keep one of them or
-  replace them entirely with something else. But please provide an answer for
-  every line.
-- provide a minimal viable repro case, ideally following
-  https://github.com/SirVer/ultisnips/blob/master/CONTRIBUTING.md#reproducing-bugs.
-- If this is not possible, post a minimal, complete `.vimrc`, snippet
-  definition, and set of key strokes that reproduces your problem.
-- remember to delete this boilerplate text up to the line of dashes.
+Fill out the table below ----- symbols and keep it at the end of your issue
+text. Please provide an answer for every line.
 
----------------------
+Please provide an explanation of the issue below this line. -->
 
-- **OS**:  e.g. Windows XP / Ubuntu Linux / Mac OS 10.5
-- **Vim**: e.g. Vim 8.0, Vim 7.4, Neovim 0.3
-- **UltiSnips**: e.g. 3.1, commit 16c999e8c71134401a78d4d46435517b2271d6ac. Do
-  not write `latest master`, please look up the actual revision.
-- **Python inside Vim**: e.g. 2.7.14 / 3.6.5. If unsure run 
-  `:py import sys; print(sys.version)` and `:py3 import sys; print(sys.version)`
-  inside Vim and copy and paste the result.
+**Expected behavior:**
+
+
+**Actual behavior:**
+
+
+**Steps to reproduce**
+
+<!--
+Provide a minimal viable repro case, ideally following
+https://github.com/SirVer/ultisnips/blob/master/CONTRIBUTING.md#reproducing-bugs
+
+If this is not possible, post a minimal, complete `.vimrc`, snippet definition,
+and set of keystrokes that reproduces your problem.
+-->
+
+1.
+2.
+3.
+
+-----
+<!-- NOTE: contents inside arrows will be ignored. -->
+- **Operating System**: <!-- e.g. Windows XP / Ubuntu 16.04 / Mac OS 10.5 -->
+- **Vim Version**: <!-- first two lines of `:version` output -->
+- **UltiSnips Version**: <!-- e.g. 3.1. If you're using version from git 
+                              run: `git rev-parse origin/master` -->
+- **Python inside Vim**: <!-- e.g. 2.7.14 / 3.6.5. If unsure run inside vim:
+                              `:py import sys; print(sys.version)` and
+                              `:py3 import sys; print(sys.version)' -->
+- **Docker repo/vimrc**: <!-- link to the branch containing the repro case, 
+                              or the uploaded minimal vimrc -->
