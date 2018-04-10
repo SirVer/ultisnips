@@ -131,7 +131,6 @@ function! UltiSnips#Anon(value, ...)
     return ""
 endfunction
 
-
 function! UltiSnips#CursorMoved()
     exec g:_uspy "UltiSnips_Manager._cursor_moved()"
 endf
@@ -146,5 +145,9 @@ endfunction
 
 function! UltiSnips#TrackChange()
     exec g:_uspy "UltiSnips_Manager._track_change()"
+endfunction
+
+function! UltiSnips#RefreshSnippets()
+    exec g:_uspy "UltiSnips_Manager._refresh_snippets()"
 endfunction
 " }}}
