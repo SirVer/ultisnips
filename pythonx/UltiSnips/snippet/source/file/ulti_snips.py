@@ -17,17 +17,16 @@ from UltiSnips.text import LineIterator, head_tail
 
 def find_snippet_files(ft, directory):
     """Returns all matching snippet files for 'ft' in 'directory'."""
-    directory = os.path.expanduser(directory)
     patterns = ['%s.snippets', '%s_*.snippets', os.path.join('%s', '*')]
     ret = set()
+    directory = os.path.expanduser(directory)
     for pattern in patterns:
         for fn in glob.glob(os.path.join(directory, pattern % ft)):
             ret.add(os.path.realpath(fn))
     return ret
 
-
 def _find_all_snippet_directories():
-    """Returns a list of the absolute path of all  snippet directories to
+    """Returns a list of the absolute path of all snippet directories to
     search."""
 
     if _vim.eval("exists('b:UltiSnipsSnippetDirectories')") == '1':
