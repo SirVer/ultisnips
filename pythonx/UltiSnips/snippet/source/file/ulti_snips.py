@@ -25,20 +25,19 @@ def find_snippet_files(ft, directory):
             ret.add(os.path.realpath(fn))
     return ret
 
+def _find_all_snippet_directories():
+    """Returns a list of the absolute path of all snippet directories to
+    search."""
 
-def find_all_snippet_files(ft):
-    """Returns all snippet files matching 'ft' in the given runtime path
-    directory."""
     if _vim.eval("exists('b:UltiSnipsSnippetDirectories')") == '1':
         snippet_dirs = _vim.eval('b:UltiSnipsSnippetDirectories')
     else:
         snippet_dirs = _vim.eval('g:UltiSnipsSnippetDirectories')
     if len(snippet_dirs) == 1 and os.path.isabs(snippet_dirs[0]):
-        check_dirs = ['']
-    else:
-        check_dirs = _vim.eval('&runtimepath').split(',')
-    patterns = ['%s.snippets', '%s_*.snippets', os.path.join('%s', '*')]
-    ret = set()
+        return snippet_dirs
+
+    all_dirs = []
+    check_dirs = _vim.eval('&runtimepath').split(',')
     for rtp in check_dirs:
         for snippet_dir in snippet_dirs:
             if snippet_dir == 'snippets':
@@ -48,9 +47,20 @@ def find_all_snippet_files(ft):
                     'directory for UltiSnips snippets.')
             pth = os.path.realpath(os.path.expanduser(
                 os.path.join(rtp, snippet_dir)))
-            for pattern in patterns:
-                for fn in glob.glob(os.path.join(pth, pattern % ft)):
-                    ret.add(fn)
+            if os.path.isdir(pth):
+                all_dirs.append(pth)
+    return all_dirs
+
+
+def find_all_snippet_files(ft):
+    """Returns all snippet files matching 'ft' in the given runtime path
+    directory."""
+    patterns = ['%s.snippets', '%s_*.snippets', os.path.join('%s', '*')]
+    ret = set()
+    for directory in _find_all_snippet_directories():
+        for pattern in patterns:
+            for fn in glob.glob(os.path.join(directory, pattern % ft)):
+                ret.add(fn)
     return ret
 
 
