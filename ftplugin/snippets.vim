@@ -17,6 +17,15 @@ setlocal commentstring=#%s
 setlocal noexpandtab
 setlocal autoindent nosmartindent nocindent
 
+" Whenever a snippets file is written, we ask UltiSnips to reload all snippet
+" files. This feels like auto-updating, but is of course just an
+" approximation: If files change outside of the current Vim instance, we will
+" not notice.
+augroup ultisnips_snippets.vim
+autocmd!
+autocmd BufWritePost <buffer> call UltiSnips#RefreshSnippets()
+augroup END
+
 " Define match words for use with matchit plugin
 " http://www.vim.org/scripts/script.php?script_id=39
 if exists("loaded_matchit") && !exists("b:match_words")
