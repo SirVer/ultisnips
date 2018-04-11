@@ -47,8 +47,9 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
 5. UltiSnips and Other Plugins                  |UltiSnips-other-plugins|
    5.1 Existing Integrations                    |UltiSnips-integrations|
    5.2 Extending UltiSnips                      |UltiSnips-extending|
-6. Helping Out                                  |UltiSnips-helping|
-7. Contributors                                 |UltiSnips-contributors|
+6. FAQ                                          |UltiSnips-FAQ|
+7. Helping Out                                  |UltiSnips-helping|
+8. Contributors                                 |UltiSnips-contributors|
 
 This plugin only works if 'compatible' is not set.
 {Vi does not have any of these features}
@@ -185,6 +186,7 @@ There are several variables associated with the UltiSnipsEdit command.
 g:UltiSnipsEditSplit        Defines how the edit window is opened. Possible
                             values:
                             |normal|         Default. Opens in the current window.
+                            |tabdo|          Opens the window in a new tab.
                             |horizontal|     Splits the window horizontally.
                             |vertical|       Splits the window vertically.
                             |context|        Splits the window vertically or
@@ -398,7 +400,7 @@ If only one directory is specified in this variable and this directory is
 specified by absolute path, UltiSnips will not look for snippets in
 &runtimepath, which can lead to significant speedup. So, the common case is:
 
-    let g:UltiSnipsSnippetDirectories=$HOME.'/.vim/UltiSnips'
+    let g:UltiSnipsSnippetDirectories=[$HOME.'/.vim/UltiSnips']
 
 However, you will not able to use snippets that are shipped with third party
 plugins out of the box. You'll need to copy them into your chosen directory.
@@ -1582,7 +1584,7 @@ Following snippet will be expanded at 4 spaces indentation level no matter
 where it was triggered.
 
 ------------------- SNIP -------------------
-pre_expand "snip.buffer[snip.line] = ' '*4; snip.cursor.set(line, 4)"
+pre_expand "snip.buffer[snip.line] = ' '*4; snip.cursor.set(snip.line, 4)"
 snippet d
 def $1():
     $0
@@ -1760,6 +1762,8 @@ offers a really nice completion dialogue for snippets.
 neocomplete - UltiSnips ships with a source for neocomplete and therefore
 offers out of the box completion dialogue support for it too.
 
+deoplete - The successor of neocomplete is also supported.
+
 unite - UltiSnips has a source for unite. As an example of how you can use
 it add the following function and mappings to your vimrc: >
 
@@ -1790,7 +1794,18 @@ contact us on github if you integrate UltiSnips with your plugin so it can be
 listed in the docs.
 
 =============================================================================
-6. Helping Out                                            *UltiSnips-helping*
+6. FAQ                                                        *UltiSnips-FAQ*
+
+Q: Do I have to call UltiSnips#ExpandSnippet() to check if a snippet is
+  expandable ? Is there instead an analog of neosnippet#expandable ?
+A: Yes there is, try
+
+  function UltiSnips#IsExpandable()
+    return !empty(UltiSnips#SnippetsInCurrentScope())
+  endfunction
+
+=============================================================================
+7. Helping Out                                            *UltiSnips-helping*
 
 UltiSnips needs the help of the Vim community to keep improving. Please
 consider joining this effort by providing new features or bug reports.
@@ -1804,7 +1819,7 @@ You can contribute by fixing or reporting bugs in our issue tracker:
 https://github.com/sirver/ultisnips/issues
 
 =============================================================================
-7. Contributors                                      *UltiSnips-contributors*
+8. Contributors                                      *UltiSnips-contributors*
 
 UltiSnips has been started and maintained from Jun 2009 - Dec 2015 by Holger
 Rapp (@SirVer, SirVer@gmx.de). It is now maintained by Stanislav Seletskiy

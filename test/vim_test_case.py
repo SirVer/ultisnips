@@ -83,9 +83,8 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         os.symlink(source, os.path.join(absdir, os.path.basename(source)))
 
     def setUp(self):
-        # TODO(sirver): this uses 'vim', but must use --vim from the commandline.
         if not VimTestCase.version:
-            VimTestCase.version, _ = subprocess.Popen(['vim', '--version'],
+            VimTestCase.version, _ = subprocess.Popen([self.vim.vim_executable, '--version'],
                                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
             if PYTHON3:
                 VimTestCase.version = VimTestCase.version.decode('utf-8')
@@ -185,7 +184,10 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         if not self.interrupt:
             # Go into insert mode and type the keys but leave Vim some time to
             # react.
-            text = 'i' + self.keys
+            if PYTHON3:
+                text = 'i' + self.keys
+            else:
+                text = u'i' + self.keys.decode("utf-8")
             while text:
                 to_send = None
                 for seq in SEQUENCES:

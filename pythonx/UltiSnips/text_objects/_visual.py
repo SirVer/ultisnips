@@ -42,7 +42,11 @@ class Visual(NoneditableTextObject, TextObjectTransformation):
 
     def _update(self, done):
         if self._mode == 'v':  # Normal selection.
-            text = self._text
+            # Remove last character when selection mode is 'exclusive'
+            if _vim.eval('&selection') == 'exclusive':
+                text = self._text[:-1]
+            else:
+                text = self._text
         else:  # Block selection or line selection.
             text_before = _vim.buf[self.start.line][:self.start.col]
             indent = _REPLACE_NON_WS.sub(' ', text_before)

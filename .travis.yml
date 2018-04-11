@@ -1,24 +1,19 @@
-language: python
+sudo: required
+services: docker
 
-python:
-  - 2.7
-  - 3.3
-  - 3.4
 env:
-  - VIM_VERSION="74"
-  - VIM_VERSION="git"
-  # - VIM_VERSION="NEOVIM"
+  - VIM_VERSION="7.4" PYTHON_IMAGE=2.7-stretch TAG=vim_74_py2
+  - VIM_VERSION="8.0" PYTHON_IMAGE=2.7-stretch TAG=vim_80_py2
+  - VIM_VERSION="git" PYTHON_IMAGE=2.7-stretch TAG=vim_git_py2
+  - VIM_VERSION="7.4" PYTHON_IMAGE=3.6-stretch TAG=vim_74_py3
+  - VIM_VERSION="8.0" PYTHON_IMAGE=3.6-stretch TAG=vim_80_py3
+  - VIM_VERSION="git" PYTHON_IMAGE=3.6-stretch TAG=vim_git_py3
 
 install:
-   # Some of these commands fail transiently. We keep retrying them until they succeed.
-   - until sudo add-apt-repository ppa:kalakris/tmux -y; do sleep 10; done
-   - until sudo add-apt-repository ppa:neovim-ppa/unstable -y; do sleep 10; done
-   - until sudo apt-get update -qq; do sleep 10; done
-   - until sudo apt-get install -qq -y --force-yes tmux xclip gdb neovim git; do sleep 10; done
-   - ./travis_install.sh
+   - docker build -t ultisnips:${TAG} --build-arg PYTHON_IMAGE=${PYTHON_IMAGE} --build-arg VIM_VERSION=${VIM_VERSION} .
 
 script:
-   - ./travis_test.sh
+   - docker run -it ultisnips:${TAG} docker/run_tests.sh
 
 notifications:
   webhooks:
