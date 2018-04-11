@@ -1,9 +1,6 @@
 from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
-# ${VISUAL}  {{{#
-
-
 class Visual_NoVisualSelection_Ignore(_VimTest):
     snippets = ('test', 'h${VISUAL}b')
     keys = 'test' + EX + 'abc'
@@ -15,6 +12,18 @@ class Visual_SelectOneWord(_VimTest):
     keys = 'blablub' + ESC + '0v6l' + EX + 'test' + EX
     wanted = 'hblablubb'
 
+class Visual_SelectOneWordInclusive(_VimTest):
+    snippets = ('test', 'h${VISUAL}b', '', 'i')
+    keys = 'xxxyyyyxxx' + ESC + '4|vlll' + EX + 'test' + EX
+    wanted = 'xxxhyyyybxxx'
+
+class Visual_SelectOneWordExclusive(_VimTest):
+    snippets = ('test', 'h${VISUAL}b', '', 'i')
+    keys = 'xxxyyyyxxx' + ESC + '4|vlll' + EX + 'test' + EX
+    wanted = 'xxxhyyybyxxx'
+
+    def _extra_vim_config(self, vim_config):
+        vim_config.append('set selection=exclusive')
 
 class Visual_SelectOneWord_ProblemAfterTab(_VimTest):
     snippets = ('test', 'h${VISUAL}b', '', 'i')
@@ -200,5 +209,3 @@ class VisualTransformation_InDefaultText_LineSelect_Overwrite(_VimTest):
     keys = 'hello\nnice\nworld' + ESC + 'Vkk' + \
         EX + 'test' + EX + 'jup' + JF + 'hi'
     wanted = 'hjupbhi'
-
-# End: ${VISUAL}  #}}}

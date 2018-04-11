@@ -126,6 +126,12 @@ class VisualContentPreserver(object):
         ec = byte2col(el, ebyte - 1)
         self._mode = _vim.eval('visualmode()')
 
+        # When 'selection' is 'exclusive', the > mark is one column behind the
+        # actual content being copied, but never before the < mark.
+        if _vim.eval('&selection') == 'exclusive':
+            if not (sl == el and sbyte == ebyte):
+                ec -= 1
+
         _vim_line_with_eol = lambda ln: _vim.buf[ln] + '\n'
 
         if sl == el:
