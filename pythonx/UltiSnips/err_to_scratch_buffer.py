@@ -18,7 +18,9 @@ def wrap(func):
             msg = \
                 """An error occured. This is either a bug in UltiSnips or a bug in a
 snippet definition. If you think this is a bug, please report it to
-https://github.com/SirVer/ultisnips/issues/new.
+https://github.com/SirVer/ultisnips/issues/new
+Please read and follow:
+https://github.com/SirVer/ultisnips/blob/master/CONTRIBUTING.md#reproducing-bugs
 
 Following is the full stack trace:
 """
