@@ -640,10 +640,10 @@ class SnippetManager(object):
             before = _vim.buf.line_till_cursor
 
         with suspend_proxy_edits():
+            start = Position(_vim.buf.cursor.line, len(text_before))
+            end = Position(_vim.buf.cursor.line, len(before))
+            parent = None
             if self._cs:
-                start = Position(_vim.buf.cursor.line, len(text_before))
-                end = Position(_vim.buf.cursor.line, len(before))
-
                 # If cursor is set in pre-action, then action was modified
                 # cursor line, in that case we do not need to do any edits, it
                 # can break snippet
@@ -658,26 +658,17 @@ class SnippetManager(object):
                         ('I', start.line, start.col, snippet.matched),
                     ]
                     self._csnippets[0].replay_user_edits(edit_actions)
-
-                si = snippet.launch(text_before, self._visual_content,
-                    self._cs.find_parent_for_new_to(start),
-                    start, end
-                )
-            else:
-                start = Position(_vim.buf.cursor.line, len(text_before))
-                end = Position(_vim.buf.cursor.line, len(before))
-                si = snippet.launch(text_before, self._visual_content,
-                                    None, start, end)
+                parent = self._cs.find_parent_for_new_to(start)
+            snippet_instance = snippet.launch(text_before,
+                    self._visual_content, parent, start, end)
 
             self._visual_content.reset()
-            self._csnippets.append(si)
-
-            si.update_textobjects()
+            self._csnippets.append(snippet_instance)
 
             with use_proxy_buffer(self._csnippets, self._vstate):
                 with self._action_context():
                     snippet.do_post_expand(
-                        si._start, si._end, self._csnippets
+                        snippet_instance._start, snippet_instance._end, self._csnippets
                     )
 
             self._vstate.remember_buffer(self._csnippets[0])

@@ -65,4 +65,3 @@ def finalize(all_tokens, seen_ts, snippet_instance):
         mark = all_tokens[-1][1].end  # Last token is always EndOfText
         m1 = Position(mark.line, mark.col)
         TabStop(snippet_instance, 0, mark, m1)
-    snippet_instance.replace_initial_text()
