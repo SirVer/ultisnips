@@ -16,6 +16,6 @@ class VimLCode(NoneditableTextObject):
 
         NoneditableTextObject.__init__(self, parent, token)
 
-    def _update(self, done):
-        self.overwrite(_vim.eval(self._code))
+    def _update(self, done, buf):
+        self.overwrite(buf, _vim.eval(self._code))
         return True
