@@ -1,9 +1,6 @@
 from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
-# Mirrors  {{{#
-
-
 class TextTabStopTextAfterTab_ExpectCorrectResult(_VimTest):
     snippets = ('test', '$1 Hinten\n$1')
     keys = 'test' + EX + 'hallo'
@@ -268,5 +265,3 @@ class Mirror_TestKillTabstop_Kill(_VimTest):
     snippets = 'test', 'welt${1:welt${2:welt}welt} $2'
     keys = 'hallo test' + EX + 'elt'
     wanted = 'hallo weltelt '
-
-# End: Mirrors  #}}}

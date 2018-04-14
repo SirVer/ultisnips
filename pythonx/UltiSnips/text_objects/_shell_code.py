@@ -65,12 +65,12 @@ class ShellCode(NoneditableTextObject):
         self._code = token.code.replace('\\`', '`')
         self._tmpdir = _get_tmp()
 
-    def _update(self, done):
+    def _update(self, done, buf):
         if not self._tmpdir:
             output = \
                 'Unable to find executable tmp directory, check noexec on /tmp'
         else:
             output = _run_shell_command(self._code, self._tmpdir)
-        self.overwrite(output)
+        self.overwrite(buf, output)
         self._parent._del_child(self)  # pylint:disable=protected-access
         return True
