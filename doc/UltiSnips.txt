@@ -201,15 +201,14 @@ g:UltiSnipsEditSplit        Defines how the edit window is opened. Possible
                                                         *g:UltiSnipsSnippetsDir*
 g:UltiSnipsSnippetsDir
                             Defines the directory private snippet definition
-                            files are stored in. For example, if the variable
-                            is set to "~/.vim/mydir/UltiSnips" and the current
-                            'filetype' is "cpp", then :UltiSnipsEdit will open
-                            "~/.vim/mydir/UltiSnips/cpp.snippets" if the file
-                            exists. If it does not :UltiSnipsEdit will search
-                            for files in the directories mentioned in
-                            g:UltiSnipsSnippetDirectories. If none are found,
-                            :UltiSnipsEdit will open new file in
-                            g:UltiSnipsSnippetsDir.
+                            new snippets files are placed in in.
+
+                            When the current 'filetype' is "cpp" the :UltiSnipsEdit
+                            command looks for a file to edit in this order:
+                            1. An existing g:UltiSnipsSnippetsDir."/cpp.snippets" file
+                            2. Find a matching "cpp" snippets file in g:UltiSnipsSnippetDirectories
+                            3. Create a new g:UltiSnipsSnippetsDir."/cpp.snippets" file
+
                             Note that directories named "snippets" are
                             reserved for snipMate snippets and cannot be used.
                             Also, this setting does not affect where snippets
@@ -1447,7 +1446,7 @@ endsnippet
 That snippet will expand to 'return err' only if the previous line is starting
 from 'if err' prefix.
 
-Note: custom context snippets are prioritized over other snippets. It makes possible 
+Note: custom context snippets are prioritized over other snippets. It makes possible
 to use other snippets as a fallback if no context can be matched:
 
 ------------------- SNIP -------------------
