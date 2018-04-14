@@ -7,7 +7,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
 1. Description                                  |UltiSnips-description|
    1.1 Requirements                             |UltiSnips-requirements|
    1.2 Acknowledgments                          |UltiSnips-acknowledgments|
-2. Installation and Updating                    |UltiSnips-installnupdate|
+2. Installation and Updating                    |UltiSnips-install-and-update|
 3. Settings & Commands                          |UltiSnips-settings|
    3.1 Commands                                 |UltiSnips-commands|
       3.1.1 UltiSnipsEdit                       |UltiSnipsEdit|
@@ -135,7 +135,7 @@ permission to use his snippets.
 
 
 =============================================================================
-2. Installation and Updating                       *UltiSnips-installnupdate*
+2. Installation and Updating                       *UltiSnips-install-and-update*
 
 The recommended way of getting UltiSnips is to track SirVer/ultisnips on
 github. The master branch is always stable.
@@ -160,7 +160,7 @@ Download the packet and unpack into a directory of your choice. Then add this
 directory to your Vim runtime path by adding this line to your vimrc file. >
    set runtimepath+=~/.vim/ultisnips_rep
 
-UltiSnips also needs Vim sources files from the ftdetect/ directory.
+UltiSnips also needs Vim source files from the ftdetect/ directory.
 Unfortunately, Vim only allows this directory in the .vim directory. You
 therefore have to symlink/copy the files: >
    mkdir -p ~/.vim/ftdetect/
@@ -262,7 +262,6 @@ The priority will then be rails -> ruby -> programming -> all.
 ------------
 
  3.2.1 Trigger key mappings                   *UltiSnips-trigger-key-mappings*
-
 
                            *g:UltiSnipsExpandTrigger* *g:UltiSnipsListSnippets*
                *g:UltiSnipsJumpForwardTrigger* *g:UltiSnipsJumpBackwardTrigger*
@@ -420,7 +419,7 @@ The first function is UltiSnips#AddSnippetWithPriority(trigger, value, descripti
 options, filetyp, priority). It adds a new snippet to the current list of
 snippets. See |UltiSnips-authoring-snippets| for details most of the function
 arguments. The priority is a number that defines which snippet should be
-preferred over others. See the priority keyword in|UltiSnips-add-snippets|.
+preferred over others. See the priority keyword in |UltiSnips-add-snippets|.
 
 
  3.4.2 UltiSnips#Anon                                        *UltiSnips#Anon*
@@ -542,7 +541,7 @@ define the variable accordingly: >
 
    let g:UltiSnipsSnippetDirectories=["mycoolsnippets"]
 
-If the list has only one entry this is an absolute path, UltiSnips will not
+If the list has only one entry that is an absolute path, UltiSnips will not
 iterate through &runtimepath but only look in this one directory for snippets.
 This can lead to significant speedup. This means you will miss out on snippets
 that are shipped with third party plugins. You'll need to copy them into this
@@ -880,7 +879,7 @@ The variables automatically defined in python code are: >
    path    - The complete path to the current file
    t       - The values of the placeholders, t[1] is the text of ${1}, etc.
    snip    - UltiSnips.TextObjects.SnippetUtil object instance. Has methods
-             that simplify indentation handling and ownes the string that
+             that simplify indentation handling and owns the string that
              should be inserted for the snippet.
    context - Result of context condition. See |UltiSnips-context-snippets|.
    match   - Only in regular expression triggered snippets. This is the return
@@ -1407,7 +1406,7 @@ In that case snippet should be defined using this syntax: >
 
 The context can be defined using a special header: >
 
-    context "expression"
+    context "python_expression"
     snippet trigger_word "description" options
 
 The 'expression' can be any python expression. If 'expression' evaluates to
@@ -1812,7 +1811,7 @@ https://github.com/sirver/ultisnips/issues
 UltiSnips has been started and maintained from Jun 2009 - Dec 2015 by Holger
 Rapp (@SirVer, SirVer@gmx.de). Up to April 2018 it was maintained by Stanislav
 Seletskiy (@seletskiy). Now, it is maintained by a growing set of
-contributors including those two.
+contributors.
 
 This is the list of contributors pre-git in chronological order. For a full
 list of contributors take the union of this set and the authors according to
