@@ -86,7 +86,6 @@ class SnippetInstance(EditableTextObject):
                 'dependencies or random strings in your snippet. You can use '
                 "'if not snip.c' to make sure to only expand random output "
                 'once.')
-
         vc.to_vim()
         self._del_child(vc)
 

@@ -13,8 +13,7 @@ from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text import escape
 from UltiSnips.text_objects import SnippetInstance
-from UltiSnips.text_objects._python_code import \
-    SnippetUtilForAction
+from UltiSnips.text_objects._python_code import SnippetUtilForAction
 
 __WHITESPACE_SPLIT = re.compile(r"\s")
 
