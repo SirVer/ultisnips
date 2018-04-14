@@ -336,7 +336,7 @@ class SnippetManager(object):
 
         self._check_if_still_inside_snippet()
         if self._csnippets:
-            self._csnippets[0].update_textobjects()
+            self._csnippets[0].update_textobjects(_vim.buf)
             self._vstate.remember_buffer(self._csnippets[0])
 
     def _setup_inner_state(self):
@@ -448,7 +448,7 @@ class SnippetManager(object):
         # we need to set 'onemore' there, because of limitations of the vim
         # API regarding cursor movements; without that test
         # 'CanExpandAnonSnippetInJumpActionWhileSelected' will fail
-        with _vim.toggle_opt('ve', 'onemore'):
+        with _vim.option_set_to('ve', 'onemore'):
             jumped = False
 
             # We need to remember current snippets stack here because of
@@ -489,7 +489,7 @@ class SnippetManager(object):
                     self._cs.current_placeholder = \
                         self._visual_content.placeholder
                     self._should_reset_visual = False
-                    self._csnippets[0].update_textobjects()
+                    self._csnippets[0].update_textobjects(_vim.buf)
                     self._vstate.remember_buffer(self._csnippets[0])
 
                     if ntab.number == 0 and self._csnippets:

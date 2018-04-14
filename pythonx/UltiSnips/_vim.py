@@ -75,8 +75,8 @@ class VimBuffer(object):
 buf = VimBuffer()  # pylint:disable=invalid-name
 
 @contextmanager
-def toggle_opt(name, new_value):
-    old_value = eval('&' + name)
+def option_set_to(name, new_value):
+    old_value = vim.eval('&' + name)
     command('set {0}={1}'.format(name, new_value))
     try:
         yield
