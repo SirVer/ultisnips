@@ -42,7 +42,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       4.7.1 Replacement String                  |UltiSnips-replacement-string|
       4.7.2 Demos                               |UltiSnips-demos|
    4.8 Clearing snippets                        |UltiSnips-clearing-snippets|
-   4.9 Context snippets                         |UltiSnips-context-snippets|
+   4.9 Custom context snippets                  |UltiSnips-custom-context-snippets|
    4.10 Snippet actions                         |UltiSnips-snippet-actions|
       4.10.1 Pre-expand actions                 |UltiSnips-pre-expand-actions|
       4.10.2 Post-expand actions                |UltiSnips-post-expand-actions|
@@ -708,10 +708,10 @@ The options currently supported are: >
        Without this option empty lines in snippets definition will have
        indentation too.
 
-   e   Context snippets - With this option expansion of snippet can be
+   e   Custom context snippet - With this option expansion of snippet can be
        controlled not only by previous characters in line, but by any given
        python expression. This option can be specified along with other
-       options, like 'b'. See |UltiSnips-context-snippets| for more info.
+       options, like 'b'. See |UltiSnips-custom-context-snippets| for more info.
 
    A   Snippet will be triggered automatically, when condition matches.
        See |UltiSnips-autotrigger| for more info.
@@ -881,7 +881,7 @@ The variables automatically defined in python code are: >
    snip    - UltiSnips.TextObjects.SnippetUtil object instance. Has methods
              that simplify indentation handling and owns the string that
              should be inserted for the snippet.
-   context - Result of context condition. See |UltiSnips-context-snippets|.
+   context - Result of context condition. See |UltiSnips-custom-context-snippets|.
    match   - Only in regular expression triggered snippets. This is the return
              value of the match of the regular expression. See
              http://docs.python.org/library/re.html#match-objects
@@ -1395,9 +1395,9 @@ clearsnippets trigger1 trigger2
 ------------------- SNAP -------------------
 
 
-4.9 Context snippets                            *UltiSnips-context-snippets*
+4.9 Custom context snippets                      *UltiSnips-custom-context-snippets*
 
-Context snippets can be enabled by using the 'e' option in the snippet
+Custom context snippets can be enabled by using the 'e' option in the snippet
 definition.
 
 In that case snippet should be defined using this syntax: >
@@ -1447,8 +1447,8 @@ endsnippet
 That snippet will expand to 'return err' only if the previous line is starting
 from 'if err' prefix.
 
-Note: context snippets prioritized over non-context ones. It makes possible to
-use non-context snippets as fallback, if no context matched:
+Note: custom context snippets are prioritized over other snippets. It makes possible 
+to use other snippets as a fallback if no context can be matched:
 
 ------------------- SNIP -------------------
 snippet i "if ..." b
@@ -1533,7 +1533,7 @@ There are three types of actions:
 
 Specified code will be evaluated at stages defined above and same global
 variables and modules will be available that are stated in
-the |UltiSnips-context-snippets| section.
+the |UltiSnips-custom-context-snippets| section.
 
                                                 *UltiSnips-buffer-proxy*
 
