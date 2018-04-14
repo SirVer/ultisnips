@@ -438,6 +438,6 @@ class SnippetDefinition(object):
             last_re=self._last_re, globals=self._globals,
             context=self._context)
         self.instantiate(snippet_instance, initial_text, indent)
-
+        snippet_instance.replace_initial_text()
         snippet_instance.update_textobjects()
         return snippet_instance

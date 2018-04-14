@@ -42,7 +42,7 @@ class SnippetInstance(EditableTextObject):
         """Puts the initial text of all text elements into Vim."""
         def _place_initial_text(obj):
             """recurses on the children to do the work."""
-            obj.overwrite()
+            obj.overwrite_with_initial_text()
             if isinstance(obj, EditableTextObject):
                 for child in obj._children:
                     _place_initial_text(child)

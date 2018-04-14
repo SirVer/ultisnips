@@ -115,7 +115,10 @@ class TextObject(object):
         """The end position."""
         return self._end
 
-    def overwrite(self, gtext=None):
+    def overwrite_with_initial_text(self):
+        self.overwrite(self._initial_text)
+
+    def overwrite(self, gtext):
         """Overwrite the text of this object in the Vim Buffer and update its
         length information.
 
@@ -129,7 +132,7 @@ class TextObject(object):
             return
         old_end = self._end
         self._end = _text_to_vim(
-            self._start, self._end, gtext or self._initial_text)
+            self._start, self._end, gtext)
         if self._parent:
             self._parent._child_has_moved(
                 self._parent._children.index(self), min(old_end, self._end),
