@@ -485,7 +485,6 @@ class SnippetManager(object):
 
                     # Run interpolations again to update new placeholder
                     # values, binded to currently newly jumped placeholder.
-                    # # NOCOM(#sirver): WHy should jump update the buffer?
                     self._visual_content.conserve_placeholder(self._ctab)
                     self._cs.current_placeholder = \
                         self._visual_content.placeholder
