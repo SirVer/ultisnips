@@ -32,12 +32,6 @@ def _replace_text(buf, start, end, text):
         new_lines[-1] += after
     buf[start.line:end.line + 1] = new_lines
 
-    # Open any folds this might have created
-    # TODO(sirver): This leaks that we are still inside Vim, while this code should
-    # only care that it is modifying 'buf'.
-    _vim.buf.cursor = start
-    _vim.command('normal! zv')
-
     return new_end
 
 # These classes use their subclasses a lot and we really do not want to expose
