@@ -490,6 +490,8 @@ class SnippetManager(object):
                         self._visual_content.placeholder
                     self._should_reset_visual = False
                     self._csnippets[0].update_textobjects(_vim.buf)
+                    # Open any folds this might have created
+                    _vim.command('normal! zv')
                     self._vstate.remember_buffer(self._csnippets[0])
 
                     if ntab.number == 0 and self._csnippets:
@@ -661,6 +663,8 @@ class SnippetManager(object):
                 parent = self._cs.find_parent_for_new_to(start)
             snippet_instance = snippet.launch(text_before,
                     self._visual_content, parent, start, end)
+            # Open any folds this might have created
+            _vim.command('normal! zv')
 
             self._visual_content.reset()
             self._csnippets.append(snippet_instance)
