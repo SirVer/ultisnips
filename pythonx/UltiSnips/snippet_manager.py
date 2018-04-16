@@ -663,6 +663,8 @@ class SnippetManager(object):
                 parent = self._current_snippet.find_parent_for_new_to(start)
             snippet_instance = snippet.launch(text_before,
                     self._visual_content, parent, start, end)
+            # Open any folds this might have created
+            _vim.command('normal! zv')
 
             self._visual_content.reset()
             self._active_snippets.append(snippet_instance)
