@@ -32,7 +32,7 @@ def _splitall(path):
     return allparts
 
 
-def snipmate_files_for(ft):
+def _snipmate_files_for(ft):
     """Returns all snipMate files we need to look at for 'ft'."""
     if ft == 'all':
         ft = '_'
@@ -116,7 +116,7 @@ class SnipMateFileSource(SnippetFileSource):
     """Manages all snipMate snippet definitions found in rtp."""
 
     def _get_all_snippet_files_for(self, ft):
-        return snipmate_files_for(ft)
+        return _snipmate_files_for(ft)
 
     def _parse_snippet_file(self, filedata, filename):
         if filename.lower().endswith('snippet'):

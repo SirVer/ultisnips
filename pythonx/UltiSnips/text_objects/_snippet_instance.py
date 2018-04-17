@@ -38,11 +38,11 @@ class SnippetInstance(EditableTextObject):
 
         EditableTextObject.__init__(self, parent, start, end, initial_text)
 
-    def replace_initial_text(self):
+    def replace_initial_text(self, buf):
         """Puts the initial text of all text elements into Vim."""
         def _place_initial_text(obj):
             """recurses on the children to do the work."""
-            obj.overwrite()
+            obj.overwrite_with_initial_text(buf)
             if isinstance(obj, EditableTextObject):
                 for child in obj._children:
                     _place_initial_text(child)
@@ -54,7 +54,7 @@ class SnippetInstance(EditableTextObject):
         for cmd in cmds:
             self._do_edit(cmd, ctab)
 
-    def update_textobjects(self):
+    def update_textobjects(self, buf):
         """Update the text objects that should change automagically after the
         users edits have been replayed.
 
@@ -77,7 +77,7 @@ class SnippetInstance(EditableTextObject):
         while (done != not_done) and counter:
             # Order matters for python locals!
             for obj in sorted(not_done - done):
-                if obj._update(done):
+                if obj._update(done, buf):
                     done.add(obj)
             counter -= 1
         if not counter:

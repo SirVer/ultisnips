@@ -740,8 +740,9 @@ with a backslash, '\'.
 To illustrate plaintext snippets, let's begin with a simple example. You can
 try the examples yourself. Simply edit a new file with Vim. Example snippets
 will be added to the 'all.snippets' file, so you'll want to open it in Vim for
-editing as well. >
-   ~/.vim/UltiSnips/all.snippets
+editing as well in the same Vim instance. You can use |UltiSnipsEdit| for this,
+but you can also just run >
+   :tabedit ~/.vim/UltiSnips/all.snippets
 
 Add this snippet to 'all.snippets' and save the file.
 
@@ -1753,6 +1754,8 @@ offers a really nice completion dialogue for snippets.
 
 neocomplete - UltiSnips ships with a source for neocomplete and therefore
 offers out of the box completion dialogue support for it too.
+
+deoplete - The successor of neocomplete is also supported.
 
 unite - UltiSnips has a source for unite. As an example of how you can use
 it add the following function and mappings to your vimrc: >

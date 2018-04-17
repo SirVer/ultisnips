@@ -15,27 +15,22 @@ def _calc_end(text, start):
         new_end = Position(start.line + len(text) - 1, len(text[-1]))
     return new_end
 
-
-def _text_to_vim(start, end, text):
+def _replace_text(buf, start, end, text):
     """Copy the given text to the current buffer, overwriting the span 'start'
     to 'end'."""
     lines = text.split('\n')
 
     new_end = _calc_end(lines, start)
 
-    before = _vim.buf[start.line][:start.col]
-    after = _vim.buf[end.line][end.col:]
+    before = buf[start.line][:start.col]
+    after = buf[end.line][end.col:]
 
     new_lines = []
     if len(lines):
         new_lines.append(before + lines[0])
         new_lines.extend(lines[1:])
         new_lines[-1] += after
-    _vim.buf[start.line:end.line + 1] = new_lines
-
-    # Open any folds this might have created
-    _vim.buf.cursor = start
-    _vim.command('normal! zv')
+    buf[start.line:end.line + 1] = new_lines
 
     return new_end
 
@@ -115,7 +110,10 @@ class TextObject(object):
         """The end position."""
         return self._end
 
-    def overwrite(self, gtext=None):
+    def overwrite_with_initial_text(self, buf):
+        self.overwrite(buf, self._initial_text)
+
+    def overwrite(self, buf, gtext):
         """Overwrite the text of this object in the Vim Buffer and update its
         length information.
 
@@ -128,16 +126,16 @@ class TextObject(object):
         if self.current_text == gtext:
             return
         old_end = self._end
-        self._end = _text_to_vim(
-            self._start, self._end, gtext or self._initial_text)
+        self._end = _replace_text(
+            buf, self._start, self._end, gtext)
         if self._parent:
             self._parent._child_has_moved(
                 self._parent._children.index(self), min(old_end, self._end),
                 self._end.delta(old_end)
             )
 
-    def _update(self, done):
-        """Update this object inside the Vim Buffer.
+    def _update(self, done, buf):
+        """Update this object inside 'buf' which is a list of lines.
 
         Return False if you need to be called again for this edit cycle.
         Otherwise return True.
@@ -354,7 +352,7 @@ class EditableTextObject(TextObject):
         if self._parent and requester is not self._parent:
             return self._parent._get_tabstop(self, number)
 
-    def _update(self, done):
+    def _update(self, done, buf):
         if all((child in done) for child in self._children):
             assert self not in done
             done.add(self)
@@ -382,5 +380,5 @@ class NoneditableTextObject(TextObject):
 
     """All passive text objects that the user can't edit by hand."""
 
-    def _update(self, done):
+    def _update(self, done, buf):
         return True

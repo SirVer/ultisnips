@@ -35,7 +35,8 @@ class _Tabs(object):
             int(no))  # pylint:disable=protected-access
         if ts is None:
             return
-        ts.overwrite(value)
+        # TODO(sirver): The buffer should be passed into the object on construction.
+        ts.overwrite(_vim.buf, value)
 
 _VisualContent = namedtuple('_VisualContent', ['mode', 'text'])
 
@@ -50,42 +51,6 @@ class SnippetUtilForAction(dict):
             *args, **kwargs
         )
         self.cursor.preserve()
-
-
-class SnippetUtilCursor(object):
-    def __init__(self, cursor):
-        self._cursor = [cursor[0] - 1, cursor[1]]
-        self._set = False
-
-    def preserve(self):
-        self._set = True
-        self._cursor = [
-            _vim.buf.cursor[0],
-            _vim.buf.cursor[1],
-        ]
-
-    def is_set(self):
-        return self._set
-
-    def set(self, line, column):
-        self.__setitem__(0, line)
-        self.__setitem__(1, column)
-
-    def to_vim_cursor(self):
-        return (self._cursor[0] + 1, self._cursor[1])
-
-    def __getitem__(self, index):
-        return self._cursor[index]
-
-    def __setitem__(self, index, value):
-        self._set = True
-        self._cursor[index] = value
-
-    def __len__(self):
-        return 2
-
-    def __str__(self):
-        return str((self._cursor[0], self._cursor[1]))
 
 
 class SnippetUtil(object):
@@ -290,7 +255,7 @@ class PythonCode(NoneditableTextObject):
         ))
         NoneditableTextObject.__init__(self, parent, token)
 
-    def _update(self, done):
+    def _update(self, done, buf):
         path = _vim.eval('expand("%")') or ''
         ct = self.current_text
         self._locals.update({
@@ -316,6 +281,6 @@ class PythonCode(NoneditableTextObject):
         )
 
         if ct != rv:
-            self.overwrite(rv)
+            self.overwrite(buf, rv)
             return False
         return True

@@ -13,10 +13,45 @@ from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text import escape
 from UltiSnips.text_objects import SnippetInstance
-from UltiSnips.text_objects._python_code import \
-    SnippetUtilCursor, SnippetUtilForAction
+from UltiSnips.text_objects._python_code import SnippetUtilForAction
 
 __WHITESPACE_SPLIT = re.compile(r"\s")
+
+
+class _SnippetUtilCursor(object):
+    def __init__(self, cursor):
+        self._cursor = [cursor[0] - 1, cursor[1]]
+        self._set = False
+
+    def preserve(self):
+        self._set = True
+        self._cursor = [
+            _vim.buf.cursor[0],
+            _vim.buf.cursor[1],
+        ]
+
+    def is_set(self):
+        return self._set
+
+    def set(self, line, column):
+        self.__setitem__(0, line)
+        self.__setitem__(1, column)
+
+    def to_vim_cursor(self):
+        return (self._cursor[0] + 1, self._cursor[1])
+
+    def __getitem__(self, index):
+        return self._cursor[index]
+
+    def __setitem__(self, index, value):
+        self._set = True
+        self._cursor[index] = value
+
+    def __len__(self):
+        return 2
+
+    def __str__(self):
+        return str((self._cursor[0], self._cursor[1]))
 
 
 def split_at_whitespace(string):
@@ -124,7 +159,7 @@ class SnippetDefinition(object):
             'buffer': current.buffer,
             'line': current.window.cursor[0]-1,
             'column': current.window.cursor[1]-1,
-            'cursor': SnippetUtilCursor(current.window.cursor),
+            'cursor': _SnippetUtilCursor(current.window.cursor),
         }
 
         locals.update(additional_locals)
@@ -438,6 +473,6 @@ class SnippetDefinition(object):
             last_re=self._last_re, globals=self._globals,
             context=self._context)
         self.instantiate(snippet_instance, initial_text, indent)
-
-        snippet_instance.update_textobjects()
+        snippet_instance.replace_initial_text(_vim.buf)
+        snippet_instance.update_textobjects(_vim.buf)
         return snippet_instance

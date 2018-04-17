@@ -1,27 +1,19 @@
 sudo: required
 services: docker
 
-# Cache intermediate Docker layers. For a description of how this works, see:
-# https://giorgos.sealabs.net/docker-cache-on-travis-and-docker-112.html
-cache:
-  directories:
-    - /home/travis/docker/
-
 env:
-  - VIM_VERSION="7.4" PYTHON_IMAGE=2.7-stretch TAG=vim_74_py2 DOCKER_CACHE_FILE=/home/travis/docker/vim_74_py2.tar.gz
-  - VIM_VERSION="8.0" PYTHON_IMAGE=2.7-stretch TAG=vim_80_py2 DOCKER_CACHE_FILE=/home/travis/docker/vim_80_py2.tar.gz
-  - VIM_VERSION="git" PYTHON_IMAGE=2.7-stretch TAG=vim_git_py2 DOCKER_CACHE_FILE=/home/travis/docker/vim_git_py2.tar.gz
-  - VIM_VERSION="7.4" PYTHON_IMAGE=3.6-stretch TAG=vim_74_py3 DOCKER_CACHE_FILE=/home/travis/docker/vim_74_py3.tar.gz
-  - VIM_VERSION="8.0" PYTHON_IMAGE=3.6-stretch TAG=vim_80_py3 DOCKER_CACHE_FILE=/home/travis/docker/vim_80_py3.tar.gz
-  - VIM_VERSION="git" PYTHON_IMAGE=3.6-stretch TAG=vim_git_py3 DOCKER_CACHE_FILE=/home/travis/docker/vim_git_py3.tar.gz
+  - VIM_VERSION="7.4" PYTHON_IMAGE=2.7-stretch TAG=vim_74_py2
+  - VIM_VERSION="8.0" PYTHON_IMAGE=2.7-stretch TAG=vim_80_py2
+  - VIM_VERSION="git" PYTHON_IMAGE=2.7-stretch TAG=vim_git_py2
+  - VIM_VERSION="7.4" PYTHON_IMAGE=3.6-stretch TAG=vim_74_py3
+  - VIM_VERSION="8.0" PYTHON_IMAGE=3.6-stretch TAG=vim_80_py3
+  - VIM_VERSION="git" PYTHON_IMAGE=3.6-stretch TAG=vim_git_py3
 
-before_install: docker/load_docker_cache.sh
 install:
    - docker build -t ultisnips:${TAG} --build-arg PYTHON_IMAGE=${PYTHON_IMAGE} --build-arg VIM_VERSION=${VIM_VERSION} .
 
 script:
    - docker run -it ultisnips:${TAG} docker/run_tests.sh
-   - docker/save_docker_cache.sh
 
 notifications:
   webhooks:
