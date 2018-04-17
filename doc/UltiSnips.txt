@@ -160,9 +160,9 @@ Download the packet and unpack into a directory of your choice. Then add this
 directory to your Vim runtime path by adding this line to your vimrc file. >
    set runtimepath+=~/.vim/ultisnips_rep
 
-UltiSnips also needs Vim source files from the ftdetect/ directory.
-Unfortunately, Vim only allows this directory in the .vim directory. You
-therefore have to symlink/copy the files: >
+UltiSnips also needs Vim files from the ftdetect/ directory. Unfortunately,
+Vim only allows this directory in the .vim directory. You therefore have to
+symlink/copy the files: >
    mkdir -p ~/.vim/ftdetect/
    ln -s ~/.vim/ultisnips_rep/ftdetect/* ~/.vim/ftdetect/
 
@@ -200,14 +200,18 @@ g:UltiSnipsEditSplit        Defines how the edit window is opened. Possible
 
                                                         *g:UltiSnipsSnippetsDir*
 g:UltiSnipsSnippetsDir
-                            Defines the directory private snippet definition
-                            new snippets files are placed in in.
+                            Defines the directory where private snippet
+                            definition files are placed in in.
 
-                            When the current 'filetype' is "cpp" the :UltiSnipsEdit
-                            command looks for a file to edit in this order:
-                            1. An existing g:UltiSnipsSnippetsDir."/cpp.snippets" file
-                            2. Find a matching "cpp" snippets file in g:UltiSnipsSnippetDirectories
-                            3. Create a new g:UltiSnipsSnippetsDir."/cpp.snippets" file
+                            As example, if the current 'filetype' is "cpp" the
+                            :UltiSnipsEdit command looks for a file to edit in
+                            this order:
+                            1. An existing
+                               g:UltiSnipsSnippetsDir."/cpp.snippets" file
+                            2. Find a matching "cpp" snippets file in
+                               g:UltiSnipsSnippetDirectories
+                            3. Create a new
+                               g:UltiSnipsSnippetsDir."/cpp.snippets" file
 
                             Note that directories named "snippets" are
                             reserved for snipMate snippets and cannot be used.
