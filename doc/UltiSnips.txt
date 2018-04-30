@@ -1790,11 +1790,24 @@ with your plugin so it can be listed in the docs.
 6. FAQ                                                        *UltiSnips-FAQ*
 
 Q: Do I have to call UltiSnips#ExpandSnippet() to check if a snippet is
-   expandable ? Is there instead an analog of neosnippet#expandable ?
+   expandable? Is there instead an analog of neosnippet#expandable?
 A: Yes there is, try
 
   function UltiSnips#IsExpandable()
     return !empty(UltiSnips#SnippetsInCurrentScope())
+  endfunction
+
+  Consider that UltiSnips#SnippetsInCurrentScope() will return all the
+  snippets you have if you call it after a space character. If you want
+  UltiSnips#IsExpandable() to return false when you call it after a space
+  character use this a bit more complicated implementation:
+
+  function UltiSnips#IsExpandable()
+    return !(
+      \ col('.') <= 1
+      \ || !empty(matchstr(getline('.'), '\%' . (col('.') - 1) . 'c\s'))
+      \ || empty(UltiSnips#SnippetsInCurrentScope())
+      \ )
   endfunction
 
 =============================================================================
