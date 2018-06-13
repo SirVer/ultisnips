@@ -1773,6 +1773,11 @@ interface with matching snippets. Pressing enter will expand the corresponding
 snippet. If only one snippet matches the text in front of the cursor will be
 expanded when you press the <F12> key.
 
+To use the same mapping as |g:UltiSnipsListSnippets|, you need to disable after
+cleanup: >
+  let b:did_after_plugin_ultisnips_after = 0
+<
+
 Supertab - UltiSnips has built-in support for Supertab. Just use a recent
 enough version of both plugins and <tab> will either expand a snippet or defer
 to Supertab for expansion.
