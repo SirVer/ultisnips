@@ -294,9 +294,13 @@ class EditableTextObject(TextObject):
         tno_max = max(self._tabstops.keys())
 
         possible_sol = []
+        if number == tno_max:
+            # by convention the tabstop with index 0 should be the last tabstop.
+            possible_sol.append((0, self._tabstops[0]))
+
         i = number + 1
         while i <= tno_max:
-            if i in self._tabstops:
+            if i in self._tabstops and self._tabstops[i]._start >= _vim.buf.cursor:
                 possible_sol.append((i, self._tabstops[i]))
                 break
             i += 1

@@ -33,6 +33,8 @@ class SnippetDictionary(object):
         all_snippets = self._snippets
         if autotrigger_only:
             all_snippets = [s for s in all_snippets if s.has_option('A')]
+        else:
+            all_snippets = [s for s in all_snippets if not s.has_option('A')]
 
         if not potentially:
             return [s for s in all_snippets if s.matches(trigger,
