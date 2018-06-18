@@ -105,33 +105,13 @@ class SnippetInstance(EditableTextObject):
             return ts
         else:
             res = self._get_next_tab(self._cts)
-            # FIXME:
-            with open('/tmp/u', 'a') as f:
-                f.write('_tabstops' + str(self._tabstops) + '\n')
-                f.write('res:' + str(res) + '\n')
-                f.write('_cts:' + str(self._cts) + '\n')
-                f.write('\n')
             if res is None:
                 return
-                raise RuntimeError('res is None')
-                self._cts = None
-
-                ts = self._get_tabstop(self, 0)
-                if ts:
-                    return ts
-
-                # TabStop 0 was deleted. It was probably killed through some
-                # edit action. Recreate it at the end of us.
-                start = Position(self.end.line, self.end.col)
-                end = Position(self.end.line, self.end.col)
-                return TabStop(self, 0, start, end)
             else:
                 self._cts, ts = res
                 if self._cts == 0:
                     self._cts = None
                 return ts
-
-        return self._tabstops[self._cts]
 
     def _get_tabstop(self, requester, no):
         # SnippetInstances are completely self contained, therefore, we do not

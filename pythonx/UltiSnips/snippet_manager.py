@@ -470,11 +470,6 @@ class SnippetManager(object):
 
             if self._current_snippet:
                 ntab = self._current_snippet.select_next_tab(backwards)
-
-                # FIXME:
-                with open('/tmp/u', 'a') as f:
-                    f.write('outer _cts:' + str(self._current_snippet._cts) + '\n')
-
                 if ntab:
                     if self._current_snippet.snippet.has_option('s'):
                         lineno = _vim.buf.cursor.line
