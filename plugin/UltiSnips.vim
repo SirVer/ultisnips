@@ -40,6 +40,10 @@ else
    endif
 endif
 
+if !exists("g:UltiSnipsAutoApplyForSingleCandidate")
+   let g:UltiSnipsAutoApplyForSingleCandidate=0
+endif
+
 " The Commands we define.
 command! -bang -nargs=? -complete=customlist,UltiSnips#FileTypeComplete UltiSnipsEdit
     \ :call UltiSnips#Edit(<q-bang>, <q-args>)

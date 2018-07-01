@@ -195,6 +195,10 @@ class SnippetManager(object):
             self._handle_failure(self.backward_trigger)
             return True
 
+        if len(snippets) == 1 and _vim.eval('g:UltiSnipsAutoApplyForSingleCandidate') == '1':
+            self._do_snippet(snippets[0], before)
+            return True
+
         # Sort snippets alphabetically
         snippets.sort(key=lambda x: x.trigger)
 

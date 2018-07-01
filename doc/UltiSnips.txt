@@ -283,6 +283,10 @@ their default values are: >
 UltiSnips will only map the jump triggers while a snippet is active to
 interfere as little as possible with other mappings.
 
+You can also `let g:UltiSnipsAutoApplyForSingleCandidate=1` to apply snippets
+automatically if there is only one candiate when list snippets, otherwise,
+a prompt would be shown to let you choose snippets to expand.
+
 The default value for g:UltiSnipsJumpBackwardTrigger interferes with the
 built-in complete function: |i_CTRL-X_CTRL-K|. A workaround is to add the
 following to your vimrc file or switching to a plugin like Supertab or
