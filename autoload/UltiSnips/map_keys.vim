@@ -10,7 +10,7 @@ if !exists("g:UltiSnipsExpandTrigger")
 endif
 
 " The trigger used to display all triggers that could possible
-" match in the current position.
+" match in the current position. Use empty to disable.
 if !exists("g:UltiSnipsListSnippets")
     let g:UltiSnipsListSnippets = "<c-tab>"
 endif
@@ -62,8 +62,10 @@ function! UltiSnips#map_keys#MapKeys()
         exec "snoremap <silent> " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips#ExpandSnippet()<cr>"
     endif
     exec "xnoremap <silent> " . g:UltiSnipsExpandTrigger. " :call UltiSnips#SaveLastVisualSelection()<cr>gvs"
-    exec "inoremap <silent> " . g:UltiSnipsListSnippets . " <C-R>=UltiSnips#ListSnippets()<cr>"
-    exec "snoremap <silent> " . g:UltiSnipsListSnippets . " <Esc>:call UltiSnips#ListSnippets()<cr>"
+    if len(g:UltiSnipsListSnippets) > 0
+       exec "inoremap <silent> " . g:UltiSnipsListSnippets . " <C-R>=UltiSnips#ListSnippets()<cr>"
+       exec "snoremap <silent> " . g:UltiSnipsListSnippets . " <Esc>:call UltiSnips#ListSnippets()<cr>"
+    endif
 
     snoremap <silent> <BS> <c-g>c
     snoremap <silent> <DEL> <c-g>c
