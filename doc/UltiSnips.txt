@@ -218,8 +218,8 @@ g:UltiSnipsSnippetsDir
                             Also, this setting does not affect where snippets
                             are searched for, so it is possible to change this
                             to opening files that are then not found by
-                            UltiSnips. See |UltiSnips-snippet-search-path| for
-                            details.
+                            UltiSnips. See |UltiSnips-how-snippets-are-loaded|
+                            for details.
 
                                                         *g:UltiSnipsSnippetDirectories*
 g:UltiSnipsSnippetDirectories
