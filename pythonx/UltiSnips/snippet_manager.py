@@ -345,13 +345,13 @@ class SnippetManager(object):
         if self._inner_state_up:
             return
         if self.expand_trigger != self.forward_trigger:
-            _vim.command('inoremap <buffer> <silent> ' + self.forward_trigger +
+            _vim.command('inoremap <buffer><nowait><silent> ' + self.forward_trigger +
                          ' <C-R>=UltiSnips#JumpForwards()<cr>')
-            _vim.command('snoremap <buffer> <silent> ' + self.forward_trigger +
+            _vim.command('snoremap <buffer><nowait><silent> ' + self.forward_trigger +
                          ' <Esc>:call UltiSnips#JumpForwards()<cr>')
-        _vim.command('inoremap <buffer> <silent> ' + self.backward_trigger +
+        _vim.command('inoremap <buffer><nowait><silent> ' + self.backward_trigger +
                      ' <C-R>=UltiSnips#JumpBackwards()<cr>')
-        _vim.command('snoremap <buffer> <silent> ' + self.backward_trigger +
+        _vim.command('snoremap <buffer><nowait><silent> ' + self.backward_trigger +
                      ' <Esc>:call UltiSnips#JumpBackwards()<cr>')
 
         # Setup the autogroups.
