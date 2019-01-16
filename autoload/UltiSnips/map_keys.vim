@@ -65,8 +65,8 @@ function! UltiSnips#map_keys#MapKeys()
     exec "inoremap <silent> " . g:UltiSnipsListSnippets . " <C-R>=UltiSnips#ListSnippets()<cr>"
     exec "snoremap <silent> " . g:UltiSnipsListSnippets . " <Esc>:call UltiSnips#ListSnippets()<cr>"
 
-    snoremap <silent> <BS> <c-g>c
-    snoremap <silent> <DEL> <c-g>c
-    snoremap <silent> <c-h> <c-g>c
+    snoremap <silent> <BS> <c-g>"_c
+    snoremap <silent> <DEL> <c-g>"_c
+    snoremap <silent> <c-h> <c-g>"_c
     snoremap <c-r> <c-g>"_c<c-r>
 endf
