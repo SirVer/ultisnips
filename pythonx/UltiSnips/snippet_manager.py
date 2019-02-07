@@ -363,7 +363,7 @@ class SnippetManager(object):
         _vim.command(
             'autocmd InsertLeave * call UltiSnips#LeavingInsertMode()')
 
-        _vim.command('autocmd BufLeave * call UltiSnips#LeavingBuffer()')
+        _vim.command('autocmd BufEnter * call UltiSnips#LeavingBuffer()')
         _vim.command(
             'autocmd CmdwinEnter * call UltiSnips#LeavingBuffer()')
         _vim.command(
