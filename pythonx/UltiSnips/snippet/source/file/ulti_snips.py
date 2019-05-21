@@ -33,6 +33,11 @@ def _find_all_snippet_directories():
         snippet_dirs = _vim.eval('b:UltiSnipsSnippetDirectories')
     else:
         snippet_dirs = _vim.eval('g:UltiSnipsSnippetDirectories')
+
+    # We need to call expanduser() on these incase we hit the early return condition. If we don't, then this method won't work with paths that contain "~".
+    for i in range(0, len(snippet_dirs)):
+        snippet_dirs[i] = os.path.expanduser(snippet_dirs[1])
+
     if len(snippet_dirs) == 1 and os.path.isabs(snippet_dirs[0]):
         return snippet_dirs
 
