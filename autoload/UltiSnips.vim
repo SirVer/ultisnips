@@ -6,6 +6,7 @@ let b:did_autoload_ultisnips = 1
 " Also import vim as we expect it to be imported in many places.
 exec g:_uspy "import vim"
 exec g:_uspy "from UltiSnips import UltiSnips_Manager"
+source './MyUltiSnips.vim'
 
 function! s:compensate_for_pum()
     """ The CursorMovedI event is not triggered while the popup-menu is visible,
