@@ -12,6 +12,8 @@ let g:UltiSnipsExpandTrigger = "<tab>"
 let g:UltiSnipsJumpForwardTrigger = "<tab>"
 let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
 
+let g:UltiSnipsSnippetDirectories= [ UltiSnipsSnippetsDir ]
+
 if !isdirectory(UltiSnipsSnippetsDir)
 	exec "!git clone https://github.com/countoren/ultisnips-snippets.git ".expand(UltiSnipsSnippetsDir)
 endif
