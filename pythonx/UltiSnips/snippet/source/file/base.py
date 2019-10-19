@@ -6,9 +6,9 @@
 from collections import defaultdict
 import os
 
-from UltiSnips import _vim
+from UltiSnips import vim_helper
 from UltiSnips import compatibility
-from UltiSnips.snippet.source._base import SnippetSource
+from UltiSnips.snippet.source.base import SnippetSource
 
 
 class SnippetSyntaxError(RuntimeError):
@@ -64,8 +64,8 @@ class SnippetFileSource(SnippetSource):
         for event, data in self._parse_snippet_file(file_data, filename):
             if event == 'error':
                 msg, line_index = data
-                filename = _vim.eval("""fnamemodify(%s, ":~:.")""" %
-                                     _vim.escape(filename))
+                filename = vim_helper.eval("""fnamemodify(%s, ":~:.")""" %
+                                     vim_helper.escape(filename))
                 raise SnippetSyntaxError(filename, line_index, msg)
             elif event == 'clearsnippets':
                 priority, triggers = data

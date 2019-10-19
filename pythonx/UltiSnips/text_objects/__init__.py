@@ -3,12 +3,12 @@
 
 """Public facing classes for TextObjects."""
 
-from UltiSnips.text_objects._escaped_char import EscapedChar
-from UltiSnips.text_objects._mirror import Mirror
-from UltiSnips.text_objects._python_code import PythonCode
-from UltiSnips.text_objects._shell_code import ShellCode
-from UltiSnips.text_objects._snippet_instance import SnippetInstance
-from UltiSnips.text_objects._tabstop import TabStop
-from UltiSnips.text_objects._transformation import Transformation
-from UltiSnips.text_objects._viml_code import VimLCode
-from UltiSnips.text_objects._visual import Visual
+from UltiSnips.text_objects.escaped_char import EscapedChar
+from UltiSnips.text_objects.mirror import Mirror
+from UltiSnips.text_objects.python_code import PythonCode
+from UltiSnips.text_objects.shell_code import ShellCode
+from UltiSnips.text_objects.snippet_instance import SnippetInstance
+from UltiSnips.text_objects.tabstop import TabStop
+from UltiSnips.text_objects.transformation import Transformation
+from UltiSnips.text_objects.viml_code import VimLCode
+from UltiSnips.text_objects.visual import Visual

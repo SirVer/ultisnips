@@ -3,7 +3,7 @@
 
 """See module comment."""
 
-from UltiSnips.text_objects._base import NoneditableTextObject
+from UltiSnips.text_objects.base import NoneditableTextObject
 
 
 class EscapedChar(NoneditableTextObject):

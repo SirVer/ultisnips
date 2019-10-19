@@ -5,7 +5,7 @@ import traceback
 import re
 import sys
 
-from UltiSnips import _vim
+from UltiSnips import vim_helper
 
 def wrap(func):
     """Decorator that will catch any Exception that 'func' throws and displays
@@ -49,5 +49,5 @@ Following is the full stack trace:
             # Vim sends no WinLeave msg here.
             if hasattr(self, '_leaving_buffer'):
                 self._leaving_buffer()  # pylint:disable=protected-access
-            _vim.new_scratch_buffer(msg)
+            vim_helper.new_scratch_buffer(msg)
     return wrapper

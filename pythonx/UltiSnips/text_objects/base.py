@@ -3,7 +3,7 @@
 
 """Base classes for all text objects."""
 
-from UltiSnips import _vim
+from UltiSnips import vim_helper
 from UltiSnips.position import Position
 
 
@@ -93,11 +93,11 @@ class TextObject(object):
     def current_text(self):
         """The current text of this object."""
         if self._start.line == self._end.line:
-            return _vim.buf[self._start.line][self._start.col:self._end.col]
+            return vim_helper.buf[self._start.line][self._start.col:self._end.col]
         else:
-            lines = [_vim.buf[self._start.line][self._start.col:]]
-            lines.extend(_vim.buf[self._start.line + 1:self._end.line])
-            lines.append(_vim.buf[self._end.line][:self._end.col])
+            lines = [vim_helper.buf[self._start.line][self._start.col:]]
+            lines.extend(vim_helper.buf[self._start.line + 1:self._end.line])
+            lines.append(vim_helper.buf[self._end.line][:self._end.col])
             return '\n'.join(lines)
 
     @property
