@@ -8,12 +8,12 @@ import re
 import vim
 import textwrap
 
-from UltiSnips import _vim
+from UltiSnips import vim_helper
 from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text import escape
 from UltiSnips.text_objects import SnippetInstance
-from UltiSnips.text_objects._python_code import SnippetUtilForAction
+from UltiSnips.text_objects.python_code import SnippetUtilForAction
 
 __WHITESPACE_SPLIT = re.compile(r"\s")
 
@@ -26,8 +26,8 @@ class _SnippetUtilCursor(object):
     def preserve(self):
         self._set = True
         self._cursor = [
-            _vim.buf.cursor[0],
-            _vim.buf.cursor[1],
+            vim_helper.buf.cursor[0],
+            vim_helper.buf.cursor[1],
         ]
 
     def is_set(self):
@@ -181,10 +181,10 @@ class SnippetDefinition(object):
         additional_locals={}
     ):
         mark_to_use = '`'
-        with _vim.save_mark(mark_to_use):
-            _vim.set_mark_from_pos(mark_to_use, _vim.get_cursor_pos())
+        with vim_helper.save_mark(mark_to_use):
+            vim_helper.set_mark_from_pos(mark_to_use, vim_helper.get_cursor_pos())
 
-            cursor_line_before = _vim.buf.line_till_cursor
+            cursor_line_before = vim_helper.buf.line_till_cursor
 
             locals = {
                 'context': context,
@@ -197,15 +197,15 @@ class SnippetDefinition(object):
             if snip.cursor.is_set():
                 vim.current.window.cursor = snip.cursor.to_vim_cursor()
             else:
-                new_mark_pos = _vim.get_mark_pos(mark_to_use)
+                new_mark_pos = vim_helper.get_mark_pos(mark_to_use)
 
                 cursor_invalid = False
 
-                if _vim._is_pos_zero(new_mark_pos):
+                if vim_helper._is_pos_zero(new_mark_pos):
                     cursor_invalid = True
                 else:
-                    _vim.set_cursor_from_pos(new_mark_pos)
-                    if cursor_line_before != _vim.buf.line_till_cursor:
+                    vim_helper.set_cursor_from_pos(new_mark_pos)
+                    if cursor_line_before != vim_helper.buf.line_till_cursor:
                         cursor_invalid = True
 
                 if cursor_invalid:
@@ -302,7 +302,7 @@ class SnippetDefinition(object):
                 # Require a word boundary between prefix and suffix.
                 boundary_chars = escape(words_prefix[-1:] +
                                         words_suffix[:1], r'\"')
-                match = _vim.eval(
+                match = vim_helper.eval(
                     '"%s" =~# "\\\\v.<."' %
                     boundary_chars) != '0'
         elif 'i' in self._opts:
@@ -347,7 +347,7 @@ class SnippetDefinition(object):
         elif 'w' in self._opts:
             # Trim non-empty prefix up to word boundary, if present.
             qwords = escape(words, r'\"')
-            words_suffix = _vim.eval(
+            words_suffix = vim_helper.eval(
                 'substitute("%s", "\\\\v^.+<(.+)", "\\\\1", "")' % qwords)
             match = self._trigger.startswith(words_suffix)
             self._matched = words_suffix
@@ -383,7 +383,7 @@ class SnippetDefinition(object):
 
     def do_pre_expand(self, visual_content, snippets_stack):
         if 'pre_expand' in self._actions:
-            locals = {'buffer': _vim.buf, 'visual_content': visual_content}
+            locals = {'buffer': vim_helper.buf, 'visual_content': visual_content}
 
             snip = self._execute_action(
                 self._actions['pre_expand'], self._context, locals
@@ -400,7 +400,7 @@ class SnippetDefinition(object):
             locals = {
                 'snippet_start': start,
                 'snippet_end': end,
-                'buffer': _vim.buf
+                'buffer': vim_helper.buf
             }
 
             snip = self._execute_action(
@@ -426,7 +426,7 @@ class SnippetDefinition(object):
                 'tabstops': current_snippet.get_tabstops(),
                 'snippet_start': start,
                 'snippet_end': end,
-                'buffer': _vim.buf
+                'buffer': vim_helper.buf
             }
 
             snip = self._execute_action(
@@ -473,6 +473,6 @@ class SnippetDefinition(object):
             last_re=self._last_re, globals=self._globals,
             context=self._context)
         self.instantiate(snippet_instance, initial_text, indent)
-        snippet_instance.replace_initial_text(_vim.buf)
-        snippet_instance.update_textobjects(_vim.buf)
+        snippet_instance.replace_initial_text(vim_helper.buf)
+        snippet_instance.update_textobjects(vim_helper.buf)
         return snippet_instance
