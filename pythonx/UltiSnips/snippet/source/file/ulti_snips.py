@@ -7,10 +7,10 @@ from collections import defaultdict
 import glob
 import os
 
-from UltiSnips import _vim
+from UltiSnips import vim_helper
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
-from UltiSnips.snippet.source.file._base import SnippetFileSource
-from UltiSnips.snippet.source.file._common import handle_extends, \
+from UltiSnips.snippet.source.file.base import SnippetFileSource
+from UltiSnips.snippet.source.file.common import handle_extends, \
     handle_action, handle_context
 from UltiSnips.text import LineIterator, head_tail
 
@@ -29,10 +29,10 @@ def _find_all_snippet_directories():
     """Returns a list of the absolute path of all snippet directories to
     search."""
 
-    if _vim.eval("exists('b:UltiSnipsSnippetDirectories')") == '1':
-        snippet_dirs = _vim.eval('b:UltiSnipsSnippetDirectories')
+    if vim_helper.eval("exists('b:UltiSnipsSnippetDirectories')") == '1':
+        snippet_dirs = vim_helper.eval('b:UltiSnipsSnippetDirectories')
     else:
-        snippet_dirs = _vim.eval('g:UltiSnipsSnippetDirectories')
+        snippet_dirs = vim_helper.eval('g:UltiSnipsSnippetDirectories')
 
     # We need to call expanduser() on these incase we hit the early return condition. If we don't, then this method won't work with paths that contain "~".
     for i in range(0, len(snippet_dirs)):
@@ -42,7 +42,7 @@ def _find_all_snippet_directories():
         return snippet_dirs
 
     all_dirs = []
-    check_dirs = _vim.eval('&runtimepath').split(',')
+    check_dirs = vim_helper.eval('&runtimepath').split(',')
     for rtp in check_dirs:
         for snippet_dir in snippet_dirs:
             if snippet_dir == 'snippets':

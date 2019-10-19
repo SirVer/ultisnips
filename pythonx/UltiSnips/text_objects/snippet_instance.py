@@ -9,11 +9,11 @@ also a TextObject.
 
 """
 
-from UltiSnips import _vim
+from UltiSnips import vim_helper
 from UltiSnips.position import Position
-from UltiSnips.text_objects._base import EditableTextObject, \
+from UltiSnips.text_objects.base import EditableTextObject, \
     NoneditableTextObject
-from UltiSnips.text_objects._tabstop import TabStop
+from UltiSnips.text_objects.tabstop import TabStop
 
 
 class SnippetInstance(EditableTextObject):
@@ -143,10 +143,10 @@ class _VimCursor(NoneditableTextObject):
 
     def __init__(self, parent):
         NoneditableTextObject.__init__(
-            self, parent, _vim.buf.cursor, _vim.buf.cursor,
+            self, parent, vim_helper.buf.cursor, vim_helper.buf.cursor,
             tiebreaker=Position(-1, -1))
 
     def to_vim(self):
         """Moves the cursor in the Vim to our position."""
         assert self._start == self._end
-        _vim.buf.cursor = self._start
+        vim_helper.buf.cursor = self._start
