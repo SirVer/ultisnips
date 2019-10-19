@@ -11,7 +11,7 @@ let s:source = {
       \ ['matcher_fuzzy'] : ['matcher_head']),
    \ }
 
-function! s:source.gather_candidates(context)
+function! s:source.gather_candidates(context) abort
    let suggestions = []
    let snippets = UltiSnips#SnippetsInCurrentScope()
    for trigger in keys(snippets)
@@ -24,7 +24,7 @@ function! s:source.gather_candidates(context)
    return suggestions
 endfunction
 
-function! neocomplete#sources#ultisnips#define()
+function! neocomplete#sources#ultisnips#define() abort
    return s:source
 endfunction
 

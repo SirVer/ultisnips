@@ -1,11 +1,10 @@
 # coding=utf8
 
 import vim
-import UltiSnips._vim
+from UltiSnips import vim_helper
 from UltiSnips.compatibility import as_unicode, as_vimencoding
 from UltiSnips.position import Position
-from UltiSnips._diff import diff
-from UltiSnips import _vim
+from UltiSnips.diff import diff
 
 from contextlib import contextmanager
 
@@ -17,12 +16,12 @@ def use_proxy_buffer(snippets_stack, vstate):
     function call.
     """
     buffer_proxy = VimBufferProxy(snippets_stack, vstate)
-    old_buffer = _vim.buf
+    old_buffer = vim_helper.buf
     try:
-        _vim.buf = buffer_proxy
+        vim_helper.buf = buffer_proxy
         yield
     finally:
-        _vim.buf = old_buffer
+        vim_helper.buf = old_buffer
     buffer_proxy.validate_buffer()
 
 
@@ -31,17 +30,17 @@ def suspend_proxy_edits():
     """
     Prevents changes being applied to the snippet stack while function call.
     """
-    if not isinstance(_vim.buf, VimBufferProxy):
+    if not isinstance(vim_helper.buf, VimBufferProxy):
         yield
     else:
         try:
-            _vim.buf._disable_edits()
+            vim_helper.buf._disable_edits()
             yield
         finally:
-            _vim.buf._enable_edits()
+            vim_helper.buf._enable_edits()
 
 
-class VimBufferProxy(_vim.VimBuffer):
+class VimBufferProxy(vim_helper.VimBuffer):
     """
     Proxy object used for tracking changes that made from snippet actions.
 

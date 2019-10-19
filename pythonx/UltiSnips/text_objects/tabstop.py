@@ -8,7 +8,7 @@ the Snippet.
 
 """
 
-from UltiSnips.text_objects._base import EditableTextObject
+from UltiSnips.text_objects.base import EditableTextObject
 
 
 class TabStop(EditableTextObject):

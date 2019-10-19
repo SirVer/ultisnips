@@ -12,8 +12,8 @@ import re
 import textwrap
 
 from UltiSnips.indent_util import IndentUtil
-from UltiSnips.text_objects._transformation import TextObjectTransformation
-from UltiSnips.text_objects._base import NoneditableTextObject
+from UltiSnips.text_objects.transformation import TextObjectTransformation
+from UltiSnips.text_objects.base import NoneditableTextObject
 
 _REPLACE_NON_WS = re.compile(r"[^ \t]")
 
