@@ -724,9 +724,7 @@ class SnippetManager(object):
         If 'bang' is
         empty only private files in g:UltiSnipsSnippetsDir are considered,
         otherwise all files are considered and the user gets to choose.
-
         """
-
         snippet_dir = ''
         if vim_helper.eval("exists('g:UltiSnipsSnippetsDir')") == '1':
             dir = vim_helper.eval('g:UltiSnipsSnippetsDir')
