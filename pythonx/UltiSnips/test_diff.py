@@ -5,7 +5,7 @@
 
 import unittest
 
-from _diff import diff, guess_edit
+from diff import diff, guess_edit
 from position import Position
 
 
