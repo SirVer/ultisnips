@@ -4,11 +4,11 @@
 """Common functionality of the snippet parsing codes."""
 
 from UltiSnips.position import Position
-from UltiSnips.snippet.parsing._lexer import tokenize, TabStopToken
+from UltiSnips.snippet.parsing.lexer import tokenize, TabStopToken
 from UltiSnips.text_objects import TabStop
 
 from UltiSnips.text_objects import  Mirror
-from UltiSnips.snippet.parsing._lexer import MirrorToken
+from UltiSnips.snippet.parsing.lexer import MirrorToken
 
 
 def resolve_ambiguity(all_tokens, seen_ts):
@@ -65,4 +65,3 @@ def finalize(all_tokens, seen_ts, snippet_instance):
         mark = all_tokens[-1][1].end  # Last token is always EndOfText
         m1 = Position(mark.line, mark.col)
         TabStop(snippet_instance, 0, mark, m1)
-    snippet_instance.replace_initial_text()

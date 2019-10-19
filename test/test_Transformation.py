@@ -113,14 +113,14 @@ class Transformation_SimpleCaseAsciiResult(_VimTest):
     skip_if = lambda self: no_unidecode_available()
     snippets = ('ascii', '$1 ${1/(.*)/$1/a}')
     keys = 'ascii' + EX + 'éèàçôïÉÈÀÇÔÏ€'
-    wanted = 'éèàçôïÉÈÀÇÔÏ€ eeacoiEEACOIEU'
+    wanted = 'éèàçôïÉÈÀÇÔÏ€ eeacoiEEACOIEUR'
 
 
 class Transformation_LowerCaseAsciiResult(_VimTest):
     skip_if = lambda self: no_unidecode_available()
     snippets = ('ascii', '$1 ${1/(.*)/\L$1\E/a}')
     keys = 'ascii' + EX + 'éèàçôïÉÈÀÇÔÏ€'
-    wanted = 'éèàçôïÉÈÀÇÔÏ€ eeacoieeacoieu'
+    wanted = 'éèàçôïÉÈÀÇÔÏ€ eeacoieeacoieur'
 
 
 class Transformation_ConditionalInsertionSimple_ExpectCorrectResult(_VimTest):

@@ -75,8 +75,8 @@ class VimBuffer(object):
 buf = VimBuffer()  # pylint:disable=invalid-name
 
 @contextmanager
-def toggle_opt(name, new_value):
-    old_value = eval('&' + name)
+def option_set_to(name, new_value):
+    old_value = vim.eval('&' + name)
     command('set {0}={1}'.format(name, new_value))
     try:
         yield
@@ -161,6 +161,14 @@ def new_scratch_buffer(text):
     vim.current.buffer[:] = text.splitlines()
 
     feedkeys(r"\<Esc>")
+
+    # Older versions of Vim always jumped the cursor to a new window, no matter
+    # how it was generated. Newer versions of Vim seem to not jump if the
+    # window is generated while in insert mode. Our tests rely that the cursor
+    # jumps when an error is thrown. Instead of doing the right thing of fixing
+    # how our test get the information about an error, we do the quick thing
+    # and make sure we always end up with the cursor in the scratch buffer.
+    feedkeys(r"\<c-w>\<down>")
 
 
 def virtual_position(line, col):

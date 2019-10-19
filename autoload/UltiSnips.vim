@@ -7,7 +7,7 @@ let b:did_autoload_ultisnips = 1
 exec g:_uspy "import vim"
 exec g:_uspy "from UltiSnips import UltiSnips_Manager"
 
-function! s:compensate_for_pum()
+function! s:compensate_for_pum() abort
     """ The CursorMovedI event is not triggered while the popup-menu is visible,
     """ and it's by this event that UltiSnips updates its vim-state. The fix is
     """ to explicitly check for the presence of the popup menu, and update
@@ -17,7 +17,7 @@ function! s:compensate_for_pum()
     endif
 endfunction
 
-function! UltiSnips#Edit(bang, ...)
+function! UltiSnips#Edit(bang, ...) abort
     if a:0 == 1 && a:1 != ''
         let type = a:1
     else
@@ -35,6 +35,8 @@ function! UltiSnips#Edit(bang, ...)
             let mode = 'vs'
         elseif g:UltiSnipsEditSplit == 'horizontal'
             let mode = 'sp'
+        elseif g:UltiSnipsEditSplit == 'tabdo'
+            let mode = 'tabedit'
         elseif g:UltiSnipsEditSplit == 'context'
             let mode = 'vs'
             if winwidth(0) <= 2 * (&tw ? &tw : 80)
@@ -45,12 +47,12 @@ function! UltiSnips#Edit(bang, ...)
     exe ':'.mode.' '.escape(file, ' ')
 endfunction
 
-function! UltiSnips#AddFiletypes(filetypes)
+function! UltiSnips#AddFiletypes(filetypes) abort
     exec g:_uspy "UltiSnips_Manager.add_buffer_filetypes('" . a:filetypes . "')"
     return ""
 endfunction
 
-function! UltiSnips#FileTypeComplete(arglead, cmdline, cursorpos)
+function! UltiSnips#FileTypeComplete(arglead, cmdline, cursorpos) abort
     let ret = {}
     let items = map(
     \   split(globpath(&runtimepath, 'syntax/*.vim'), '\n'),
@@ -66,23 +68,23 @@ function! UltiSnips#FileTypeComplete(arglead, cmdline, cursorpos)
     return sort(keys(ret))
 endfunction
 
-function! UltiSnips#ExpandSnippet()
+function! UltiSnips#ExpandSnippet() abort
     exec g:_uspy "UltiSnips_Manager.expand()"
     return ""
 endfunction
 
-function! UltiSnips#ExpandSnippetOrJump()
+function! UltiSnips#ExpandSnippetOrJump() abort
     call s:compensate_for_pum()
     exec g:_uspy "UltiSnips_Manager.expand_or_jump()"
     return ""
 endfunction
 
-function! UltiSnips#ListSnippets()
+function! UltiSnips#ListSnippets() abort
     exec g:_uspy "UltiSnips_Manager.list_snippets()"
     return ""
 endfunction
 
-function! UltiSnips#SnippetsInCurrentScope(...)
+function! UltiSnips#SnippetsInCurrentScope(...) abort
     let g:current_ulti_dict = {}
     let all = get(a:, 1, 0)
     if all
@@ -92,24 +94,24 @@ function! UltiSnips#SnippetsInCurrentScope(...)
     return g:current_ulti_dict
 endfunction
 
-function! UltiSnips#SaveLastVisualSelection() range
+function! UltiSnips#SaveLastVisualSelection() range abort
     exec g:_uspy "UltiSnips_Manager._save_last_visual_selection()"
     return ""
 endfunction
 
-function! UltiSnips#JumpBackwards()
+function! UltiSnips#JumpBackwards() abort
     call s:compensate_for_pum()
     exec g:_uspy "UltiSnips_Manager.jump_backwards()"
     return ""
 endfunction
 
-function! UltiSnips#JumpForwards()
+function! UltiSnips#JumpForwards() abort
     call s:compensate_for_pum()
     exec g:_uspy "UltiSnips_Manager.jump_forwards()"
     return ""
 endfunction
 
-function! UltiSnips#AddSnippetWithPriority(trigger, value, description, options, filetype, priority)
+function! UltiSnips#AddSnippetWithPriority(trigger, value, description, options, filetype, priority) abort
     exec g:_uspy "trigger = vim.eval(\"a:trigger\")"
     exec g:_uspy "value = vim.eval(\"a:value\")"
     exec g:_uspy "description = vim.eval(\"a:description\")"
@@ -120,7 +122,7 @@ function! UltiSnips#AddSnippetWithPriority(trigger, value, description, options,
     return ""
 endfunction
 
-function! UltiSnips#Anon(value, ...)
+function! UltiSnips#Anon(value, ...) abort
     " Takes the same arguments as SnippetManager.expand_anon:
     " (value, trigger="", description="", options="")
     exec g:_uspy "args = vim.eval(\"a:000\")"
@@ -129,20 +131,23 @@ function! UltiSnips#Anon(value, ...)
     return ""
 endfunction
 
-
-function! UltiSnips#CursorMoved()
+function! UltiSnips#CursorMoved() abort
     exec g:_uspy "UltiSnips_Manager._cursor_moved()"
 endf
 
-function! UltiSnips#LeavingBuffer()
+function! UltiSnips#LeavingBuffer() abort
     exec g:_uspy "UltiSnips_Manager._leaving_buffer()"
 endf
 
-function! UltiSnips#LeavingInsertMode()
+function! UltiSnips#LeavingInsertMode() abort
     exec g:_uspy "UltiSnips_Manager._leaving_insert_mode()"
 endfunction
 
-function! UltiSnips#TrackChange()
+function! UltiSnips#TrackChange() abort
     exec g:_uspy "UltiSnips_Manager._track_change()"
+endfunction
+
+function! UltiSnips#RefreshSnippets() abort
+    exec g:_uspy "UltiSnips_Manager._refresh_snippets()"
 endfunction
 " }}}

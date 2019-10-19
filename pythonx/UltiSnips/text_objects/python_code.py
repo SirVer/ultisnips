@@ -6,10 +6,10 @@
 import os
 from collections import namedtuple
 
-from UltiSnips import _vim
+from UltiSnips import vim_helper
 from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
-from UltiSnips.text_objects._base import NoneditableTextObject
+from UltiSnips.text_objects.base import NoneditableTextObject
 from UltiSnips.vim_state import _Placeholder
 import UltiSnips.snippet_manager
 
@@ -35,7 +35,8 @@ class _Tabs(object):
             int(no))  # pylint:disable=protected-access
         if ts is None:
             return
-        ts.overwrite(value)
+        # TODO(sirver): The buffer should be passed into the object on construction.
+        ts.overwrite(vim_helper.buf, value)
 
 _VisualContent = namedtuple('_VisualContent', ['mode', 'text'])
 
@@ -50,42 +51,6 @@ class SnippetUtilForAction(dict):
             *args, **kwargs
         )
         self.cursor.preserve()
-
-
-class SnippetUtilCursor(object):
-    def __init__(self, cursor):
-        self._cursor = [cursor[0] - 1, cursor[1]]
-        self._set = False
-
-    def preserve(self):
-        self._set = True
-        self._cursor = [
-            _vim.buf.cursor[0],
-            _vim.buf.cursor[1],
-        ]
-
-    def is_set(self):
-        return self._set
-
-    def set(self, line, column):
-        self.__setitem__(0, line)
-        self.__setitem__(1, column)
-
-    def to_vim_cursor(self):
-        return (self._cursor[0] + 1, self._cursor[1])
-
-    def __getitem__(self, index):
-        return self._cursor[index]
-
-    def __setitem__(self, index, value):
-        self._set = True
-        self._cursor[index] = value
-
-    def __len__(self):
-        return 2
-
-    def __str__(self):
-        return str((self._cursor[0], self._cursor[1]))
 
 
 class SnippetUtil(object):
@@ -169,12 +134,12 @@ class SnippetUtil(object):
     @property
     def fn(self):  # pylint:disable=no-self-use,invalid-name
         """The filename."""
-        return _vim.eval('expand("%:t")') or ''
+        return vim_helper.eval('expand("%:t")') or ''
 
     @property
     def basename(self):  # pylint:disable=no-self-use
         """The filename without extension."""
-        return _vim.eval('expand("%:t:r")') or ''
+        return vim_helper.eval('expand("%:t:r")') or ''
 
     @property
     def ft(self):  # pylint:disable=invalid-name
@@ -224,10 +189,10 @@ class SnippetUtil(object):
 
     def opt(self, option, default=None):  # pylint:disable=no-self-use
         """Gets a Vim variable."""
-        if _vim.eval("exists('%s')" % option) == '1':
+        if vim_helper.eval("exists('%s')" % option) == '1':
             try:
-                return _vim.eval(option)
-            except _vim.error:
+                return vim_helper.eval(option)
+            except vim_helper.error:
                 pass
         return default
 
@@ -261,7 +226,7 @@ class SnippetUtil(object):
 
     @property
     def buffer(self):
-        return _vim.buf
+        return vim_helper.buf
 
 
 class PythonCode(NoneditableTextObject):
@@ -290,8 +255,8 @@ class PythonCode(NoneditableTextObject):
         ))
         NoneditableTextObject.__init__(self, parent, token)
 
-    def _update(self, done):
-        path = _vim.eval('expand("%")') or ''
+    def _update(self, done, buf):
+        path = vim_helper.eval('expand("%")') or ''
         ct = self.current_text
         self._locals.update({
             't': _Tabs(self._parent),
@@ -316,6 +281,6 @@ class PythonCode(NoneditableTextObject):
         )
 
         if ct != rv:
-            self.overwrite(rv)
+            self.overwrite(buf, rv)
             return False
         return True

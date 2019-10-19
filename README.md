@@ -1,5 +1,4 @@
 [![Build Status](https://travis-ci.org/SirVer/ultisnips.svg?branch=master)](https://travis-ci.org/SirVer/ultisnips)
-[![Stories in Ready](https://badge.waffle.io/SirVer/ultisnips.png?label=ready&title=Ready)](https://waffle.io/SirVer/ultisnips)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/SirVer/ultisnips?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 UltiSnips
@@ -13,7 +12,7 @@ and is very fast.
 In this demo I am editing a python file. I first expand the `#!` snippet, then
 the `class` snippet. The completion menu comes from
 [YouCompleteMe](https://github.com/Valloric/YouCompleteMe), UltiSnips also
-integrates with [neocomplete](https://github.com/Shougo/neocomplete.vim). I can
+integrates with [deoplete](https://github.com/Shougo/deoplete.nvim). I can
 jump through placeholders and add text while the snippet inserts text in other
 places automatically: when I add `Animal` as a base class, `__init__` gets
 updated to call the base class constructor. When I add arguments to the

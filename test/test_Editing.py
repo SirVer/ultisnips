@@ -131,7 +131,7 @@ class Backspace_TabStop_NotZero(_VimTest):
     wanted = 'AA BBB'
 # End: Pressing BS in TabStop  #}}}
 
-class UpdateModifiedSnippetWithoutCursorMove(_VimTest):
+class UpdateModifiedSnippetWithoutCursorMove1(_VimTest):
     skip_if = check_required_vim_version
     snippets = ('test', '${1:one}(${2:xxx})${3:three}')
     keys = 'test' + EX + 'aaaaa' + JF + BS + JF + '3333'

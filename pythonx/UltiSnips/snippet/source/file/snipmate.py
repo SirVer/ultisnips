@@ -6,10 +6,10 @@
 import os
 import glob
 
-from UltiSnips import _vim
+from UltiSnips import vim_helper
 from UltiSnips.snippet.definition import SnipMateSnippetDefinition
-from UltiSnips.snippet.source.file._base import SnippetFileSource
-from UltiSnips.snippet.source.file._common import handle_extends
+from UltiSnips.snippet.source.file.base import SnippetFileSource
+from UltiSnips.snippet.source.file.common import handle_extends
 from UltiSnips.text import LineIterator, head_tail
 
 
@@ -32,7 +32,7 @@ def _splitall(path):
     return allparts
 
 
-def snipmate_files_for(ft):
+def _snipmate_files_for(ft):
     """Returns all snipMate files we need to look at for 'ft'."""
     if ft == 'all':
         ft = '_'
@@ -43,7 +43,7 @@ def snipmate_files_for(ft):
         os.path.join(ft, '*/*.snippet'),
     ]
     ret = set()
-    for rtp in _vim.eval('&runtimepath').split(','):
+    for rtp in vim_helper.eval('&runtimepath').split(','):
         path = os.path.realpath(os.path.expanduser(
             os.path.join(rtp, 'snippets')))
         for pattern in patterns:
@@ -116,7 +116,7 @@ class SnipMateFileSource(SnippetFileSource):
     """Manages all snipMate snippet definitions found in rtp."""
 
     def _get_all_snippet_files_for(self, ft):
-        return snipmate_files_for(ft)
+        return _snipmate_files_for(ft)
 
     def _parse_snippet_file(self, filedata, filename):
         if filename.lower().endswith('snippet'):

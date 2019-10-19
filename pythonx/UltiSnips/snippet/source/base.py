@@ -5,7 +5,7 @@
 
 from collections import defaultdict
 
-from UltiSnips.snippet.source._snippet_dictionary import SnippetDictionary
+from UltiSnips.snippet.source.snippet_dictionary import SnippetDictionary
 
 
 class SnippetSource(object):
@@ -16,15 +16,13 @@ class SnippetSource(object):
         self._snippets = defaultdict(SnippetDictionary)
         self._extends = defaultdict(set)
 
-    def ensure(self, filetypes, cached):
-        """Update/reload the snippets in the source when needed.
+    def ensure(self, filetypes):
+        """Ensures that snippets are loaded."""
 
-        It makes sure that the snippets are not outdated.
-
+    def refresh(self):
+        """Resets all snippets, so that they are reloaded on the next call to
+        ensure.
         """
-
-    def loaded(self, filetypes):
-        return len(self._snippets) > 0
 
     def _get_existing_deep_extends(self, base_filetypes):
         """Helper for get all existing filetypes extended by base filetypes."""

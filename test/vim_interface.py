@@ -93,6 +93,10 @@ class VimInterface(TempFileManager):
         self._vim_executable = vim_executable
         self._version = None
 
+    @property
+    def vim_executable(self):
+        return self._vim_executable
+
     def has_version(self, major, minor, patchlevel):
         if self._version is None:
             output = subprocess.check_output([
@@ -106,7 +110,7 @@ class VimInterface(TempFileManager):
                 if line.startswith("VIM - Vi IMproved"):
                     _major, _minor = map(int, line.split()[4].split('.'))
                 if line.startswith("Included patches:"):
-                    _patch = int(line.split('-')[1])
+                    _patch = int(line.split(':')[-1].strip().split('-')[-1])
             self._version = (_major, _minor, _patch)
 
         return self._version >= (major, minor, patchlevel)
@@ -172,9 +176,10 @@ class VimInterfaceTmux(VimInterface):
         # to tmux, but it seems like this is all that is needed for now.
         s = s.replace(';', r'\;')
 
-        if PYTHON3:
-            s = s.encode('utf-8')
-        silent_call(['tmux', 'send-keys', '-t', self.session, '-l', s])
+        if len(s) == 1:
+            silent_call(['tmux', 'send-keys', '-t', self.session, hex(ord(s))])
+        else:
+            silent_call(['tmux', 'send-keys', '-t', self.session, '-l', s])
 
     def send_to_terminal(self, s):
         return self._send(s)

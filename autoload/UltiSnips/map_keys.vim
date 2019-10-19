@@ -38,7 +38,7 @@ endif
 
 " UltiSnipsEdit will use this variable to decide if a new window
 " is opened when editing. default is "normal", allowed are also
-" "vertical", "horizontal", and "context".
+" "tabdo", "vertical", "horizontal", and "context".
 if !exists("g:UltiSnipsEditSplit")
     let g:UltiSnipsEditSplit = 'normal'
 endif
@@ -53,7 +53,7 @@ if !exists("g:UltiSnipsEnableSnipMate")
     let g:UltiSnipsEnableSnipMate = 1
 endif
 
-function! UltiSnips#map_keys#MapKeys()
+function! UltiSnips#map_keys#MapKeys() abort
     if g:UltiSnipsExpandTrigger == g:UltiSnipsJumpForwardTrigger
         exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=UltiSnips#ExpandSnippetOrJump()<cr>"
         exec "snoremap <silent> " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips#ExpandSnippetOrJump()<cr>"

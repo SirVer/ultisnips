@@ -9,11 +9,11 @@ also a TextObject.
 
 """
 
-from UltiSnips import _vim
+from UltiSnips import vim_helper
 from UltiSnips.position import Position
-from UltiSnips.text_objects._base import EditableTextObject, \
+from UltiSnips.text_objects.base import EditableTextObject, \
     NoneditableTextObject
-from UltiSnips.text_objects._tabstop import TabStop
+from UltiSnips.text_objects.tabstop import TabStop
 
 
 class SnippetInstance(EditableTextObject):
@@ -38,11 +38,11 @@ class SnippetInstance(EditableTextObject):
 
         EditableTextObject.__init__(self, parent, start, end, initial_text)
 
-    def replace_initial_text(self):
+    def replace_initial_text(self, buf):
         """Puts the initial text of all text elements into Vim."""
         def _place_initial_text(obj):
             """recurses on the children to do the work."""
-            obj.overwrite()
+            obj.overwrite_with_initial_text(buf)
             if isinstance(obj, EditableTextObject):
                 for child in obj._children:
                     _place_initial_text(child)
@@ -54,7 +54,7 @@ class SnippetInstance(EditableTextObject):
         for cmd in cmds:
             self._do_edit(cmd, ctab)
 
-    def update_textobjects(self):
+    def update_textobjects(self, buf):
         """Update the text objects that should change automagically after the
         users edits have been replayed.
 
@@ -77,7 +77,7 @@ class SnippetInstance(EditableTextObject):
         while (done != not_done) and counter:
             # Order matters for python locals!
             for obj in sorted(not_done - done):
-                if obj._update(done):
+                if obj._update(done, buf):
                     done.add(obj)
             counter -= 1
         if not counter:
@@ -143,10 +143,10 @@ class _VimCursor(NoneditableTextObject):
 
     def __init__(self, parent):
         NoneditableTextObject.__init__(
-            self, parent, _vim.buf.cursor, _vim.buf.cursor,
+            self, parent, vim_helper.buf.cursor, vim_helper.buf.cursor,
             tiebreaker=Position(-1, -1))
 
     def to_vim(self):
         """Moves the cursor in the Vim to our position."""
         assert self._start == self._end
-        _vim.buf.cursor = self._start
+        vim_helper.buf.cursor = self._start

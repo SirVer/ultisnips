@@ -3,8 +3,8 @@
 
 """A UltiSnips snippet after parsing."""
 
-from UltiSnips.snippet.definition._base import SnippetDefinition
-from UltiSnips.snippet.parsing.ultisnips import parse_and_instantiate
+from UltiSnips.snippet.definition.base import SnippetDefinition
+from UltiSnips.snippet.parsing.ulti_snips import parse_and_instantiate
 
 
 class UltiSnipsSnippetDefinition(SnippetDefinition):

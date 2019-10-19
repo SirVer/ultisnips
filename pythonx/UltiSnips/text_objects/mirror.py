@@ -3,7 +3,7 @@
 
 """A Mirror object contains the same text as its related tabstop."""
 
-from UltiSnips.text_objects._base import NoneditableTextObject
+from UltiSnips.text_objects.base import NoneditableTextObject
 
 
 class Mirror(NoneditableTextObject):
@@ -14,16 +14,16 @@ class Mirror(NoneditableTextObject):
         NoneditableTextObject.__init__(self, parent, token)
         self._ts = tabstop
 
-    def _update(self, done):
+    def _update(self, done, buf):
         if self._ts.is_killed:
-            self.overwrite('')
+            self.overwrite(buf, '')
             self._parent._del_child(self)   # pylint:disable=protected-access
             return True
 
         if self._ts not in done:
             return False
 
-        self.overwrite(self._get_text())
+        self.overwrite(buf, self._get_text())
         return True
 
     def _get_text(self):

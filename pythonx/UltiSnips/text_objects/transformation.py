@@ -7,7 +7,7 @@ import re
 import sys
 
 from UltiSnips.text import unescape, fill_in_whitespace
-from UltiSnips.text_objects._mirror import Mirror
+from UltiSnips.text_objects.mirror import Mirror
 
 
 def _find_closing_brace(string, start_pos):
