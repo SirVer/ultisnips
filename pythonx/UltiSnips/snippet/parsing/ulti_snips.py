@@ -3,8 +3,8 @@
 
 """Parses a UltiSnips snippet definition and launches it into Vim."""
 
-from UltiSnips.snippet.parsing._base import tokenize_snippet_text, finalize, resolve_ambiguity
-from UltiSnips.snippet.parsing._lexer import EscapeCharToken, \
+from UltiSnips.snippet.parsing.base import tokenize_snippet_text, finalize, resolve_ambiguity
+from UltiSnips.snippet.parsing.lexer import EscapeCharToken, \
     VisualToken, TransformationToken, TabStopToken, MirrorToken, \
     PythonCodeToken, VimLCodeToken, ShellCodeToken
 from UltiSnips.text_objects import EscapedChar, Mirror, PythonCode, \

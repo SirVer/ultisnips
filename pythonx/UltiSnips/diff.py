@@ -7,7 +7,7 @@ another."""
 from collections import defaultdict
 import sys
 
-from UltiSnips import _vim
+from UltiSnips import vim_helper
 from UltiSnips.position import Position
 
 
@@ -70,11 +70,11 @@ def guess_edit(initial_line, last_text, current_text, vim_state):
         if is_complete_edit(initial_line, last_text, current_text, es):
             return True, es
     if ppos.mode == 'v':  # Maybe selectmode?
-        sv = list(map(int, _vim.eval("""getpos("'<")""")))
+        sv = list(map(int, vim_helper.eval("""getpos("'<")""")))
         sv = Position(sv[1] - 1, sv[2] - 1)
-        ev = list(map(int, _vim.eval("""getpos("'>")""")))
+        ev = list(map(int, vim_helper.eval("""getpos("'>")""")))
         ev = Position(ev[1] - 1, ev[2] - 1)
-        if 'exclusive' in _vim.eval('&selection'):
+        if 'exclusive' in vim_helper.eval('&selection'):
             ppos.col -= 1  # We want to be inclusive, sorry.
             ev.col -= 1
         es = []
