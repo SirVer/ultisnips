@@ -735,13 +735,12 @@ meaning. If you want to insert one of these characters literally, escape them
 with a backslash, '\'.
 
 
-4.1.5 Snippets text-objects                   *UltiSnips-snippet-text-objects*
+ 4.1.5 Snippets text-objects                   *UltiSnips-snippet-text-objects*
 
 Inside a snippets buffer, the following text objects are available:
 >
    iS   inside snippet
    aS   around snippet (including empty lines that follow)
-<
 
 
 4.2 Plaintext Snippets                         *UltiSnips-plaintext-snippets*
