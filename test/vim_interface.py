@@ -110,7 +110,7 @@ class VimInterface(TempFileManager):
                 if line.startswith("VIM - Vi IMproved"):
                     _major, _minor = map(int, line.split()[4].split('.'))
                 if line.startswith("Included patches:"):
-                    _patch = int(line.split('-')[1])
+                    _patch = int(line.split(':')[-1].strip().split('-')[-1])
             self._version = (_major, _minor, _patch)
 
         return self._version >= (major, minor, patchlevel)

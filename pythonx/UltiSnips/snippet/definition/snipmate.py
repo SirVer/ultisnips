@@ -3,7 +3,7 @@
 
 """A snipMate snippet after parsing."""
 
-from UltiSnips.snippet.definition._base import SnippetDefinition
+from UltiSnips.snippet.definition.base import SnippetDefinition
 from UltiSnips.snippet.parsing.snipmate import parse_and_instantiate
 
 

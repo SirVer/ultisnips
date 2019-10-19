@@ -6,12 +6,16 @@ image_vim_74_py2:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=2.7-stretch --build-arg VIM_VERSION=7.4 .
 image_vim_80_py2:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=2.7-stretch --build-arg VIM_VERSION=8.0 .
+image_vim_81_py2:
+	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=2.7-stretch --build-arg VIM_VERSION=8.1 .
 image_vim_git_py2:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=2.7-stretch --build-arg VIM_VERSION=git .
 image_vim_74_py3:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.6-stretch --build-arg VIM_VERSION=7.4 .
 image_vim_80_py3:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.6-stretch --build-arg VIM_VERSION=8.0 .
+image_vim_81_py3:
+	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.6-stretch --build-arg VIM_VERSION=8.1 .
 image_vim_git_py3:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.6-stretch --build-arg VIM_VERSION=git .
 
