@@ -3,7 +3,7 @@
 
 """See module doc."""
 
-from UltiSnips import _vim
+from UltiSnips import vim_helper
 
 
 class IndentUtil(object):
@@ -16,9 +16,9 @@ class IndentUtil(object):
     def reset(self):
         """Gets the spacing properties from Vim."""
         self.shiftwidth = int(
-            _vim.eval("exists('*shiftwidth') ? shiftwidth() : &shiftwidth"))
-        self._expandtab = (_vim.eval('&expandtab') == '1')
-        self._tabstop = int(_vim.eval('&tabstop'))
+            vim_helper.eval("exists('*shiftwidth') ? shiftwidth() : &shiftwidth"))
+        self._expandtab = (vim_helper.eval('&expandtab') == '1')
+        self._tabstop = int(vim_helper.eval('&tabstop'))
 
     def ntabs_to_proper_indent(self, ntabs):
         """Convert 'ntabs' number of tabs to the proper indent prefix."""

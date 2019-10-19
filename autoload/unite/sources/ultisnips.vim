@@ -28,7 +28,7 @@ function! s:unite_source.hooks.on_syntax(args, context) abort
   highlight default link uniteSource__UltisnipsDescription Statement
 endfunction
 
-function! s:unite_source.action_table.preview.func(candidate)
+function! s:unite_source.action_table.preview.func(candidate) abort
   " no nice preview at this point, cannot get snippet text
   let snippet_preview = a:candidate['word']
   echo snippet_preview
@@ -39,14 +39,14 @@ let s:unite_source.action_table.expand = {
       \ 'is_quit': 1
       \}
 
-function! s:unite_source.action_table.expand.func(candidate)
+function! s:unite_source.action_table.expand.func(candidate) abort
   let delCurrWord = (getline(".")[col(".")-1] == " ") ? "" : "diw"
   exe "normal " . delCurrWord . "a" . a:candidate['trigger'] . " "
   call UltiSnips#ExpandSnippet()
   return ''
 endfunction
 
-function! s:unite_source.get_longest_snippet_len(snippet_list)
+function! s:unite_source.get_longest_snippet_len(snippet_list) abort
   let longest = 0
   for snip in items(a:snippet_list)
     if strlen(snip['word']) > longest
@@ -56,7 +56,7 @@ function! s:unite_source.get_longest_snippet_len(snippet_list)
   return longest
 endfunction
 
-function! s:unite_source.gather_candidates(args, context)
+function! s:unite_source.gather_candidates(args, context) abort
   let default_val = {'word': '', 'unite__abbr': '', 'is_dummy': 0, 'source':
         \  'ultisnips', 'unite__is_marked': 0, 'kind': 'command', 'is_matched': 1,
         \    'is_multiline': 0}
@@ -72,7 +72,7 @@ function! s:unite_source.gather_candidates(args, context)
   return canditates
 endfunction
 
-function! unite#sources#ultisnips#define()
+function! unite#sources#ultisnips#define() abort
   return s:unite_source
 endfunction
 

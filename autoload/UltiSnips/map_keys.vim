@@ -53,7 +53,7 @@ if !exists("g:UltiSnipsEnableSnipMate")
     let g:UltiSnipsEnableSnipMate = 1
 endif
 
-function! UltiSnips#map_keys#MapKeys()
+function! UltiSnips#map_keys#MapKeys() abort
     if g:UltiSnipsExpandTrigger == g:UltiSnipsJumpForwardTrigger
         exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=UltiSnips#ExpandSnippetOrJump()<cr>"
         exec "snoremap <silent> " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips#ExpandSnippetOrJump()<cr>"

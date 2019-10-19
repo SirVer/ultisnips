@@ -10,7 +10,7 @@ import stat
 import tempfile
 
 from UltiSnips.compatibility import as_unicode
-from UltiSnips.text_objects._base import NoneditableTextObject
+from UltiSnips.text_objects.base import NoneditableTextObject
 
 
 def _chomp(string):
