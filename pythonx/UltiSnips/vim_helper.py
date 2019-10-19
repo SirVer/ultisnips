@@ -162,6 +162,14 @@ def new_scratch_buffer(text):
 
     feedkeys(r"\<Esc>")
 
+    # Older versions of Vim always jumped the cursor to a new window, no matter
+    # how it was generated. Newer versions of Vim seem to not jump if the
+    # window is generated while in insert mode. Our tests rely that the cursor
+    # jumps when an error is thrown. Instead of doing the right thing of fixing
+    # how our test get the information about an error, we do the quick thing
+    # and make sure we always end up with the cursor in the scratch buffer.
+    feedkeys(r"\<c-w>\<down>")
+
 
 def virtual_position(line, col):
     """Runs the position through virtcol() and returns the result."""
