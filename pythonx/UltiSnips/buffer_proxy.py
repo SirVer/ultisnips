@@ -82,11 +82,13 @@ class VimBufferProxy(vim_helper.VimBuffer):
         Raises exception if buffer is changes beyound proxy object.
         """
         if self.is_buffer_changed_outside():
-            raise RuntimeError('buffer was modified using vim.command or ' +
-            'vim.current.buffer; that changes are untrackable and leads to ' +
-            'errors in snippet expansion; use special variable `snip.buffer` '
-            'for buffer modifications.\n\n' +
-            'See :help UltiSnips-buffer-proxy for more info.')
+            raise RuntimeError(
+                "buffer was modified using vim.command or "
+                + "vim.current.buffer; that changes are untrackable and leads to "
+                + "errors in snippet expansion; use special variable `snip.buffer` "
+                "for buffer modifications.\n\n"
+                + "See :help UltiSnips-buffer-proxy for more info."
+            )
 
     def __setitem__(self, key, value):
         """
@@ -96,9 +98,7 @@ class VimBufferProxy(vim_helper.VimBuffer):
         if isinstance(key, slice):
             value = [as_vimencoding(line) for line in value]
             changes = list(self._get_diff(key.start, key.stop, value))
-            self._buffer[key.start:key.stop] = [
-                line.strip('\n') for line in value
-            ]
+            self._buffer[key.start : key.stop] = [line.strip("\n") for line in value]
         else:
             value = as_vimencoding(value)
             changes = list(self._get_line_diff(key, self._buffer[key], value))
@@ -123,7 +123,7 @@ class VimBufferProxy(vim_helper.VimBuffer):
         Just passing call to the vim.current.window.buffer.__getitem__.
         """
         if isinstance(key, slice):
-            return [as_unicode(l) for l in self._buffer[key.start:key.stop]]
+            return [as_unicode(l) for l in self._buffer[key.start : key.stop]]
         else:
             return as_unicode(self._buffer[key])
 
@@ -153,7 +153,7 @@ class VimBufferProxy(vim_helper.VimBuffer):
         if isinstance(key, slice):
             self.__setitem__(key, [])
         else:
-            self.__setitem__(slice(key, key+1), [])
+            self.__setitem__(slice(key, key + 1), [])
 
     def _get_diff(self, start, end, new_value):
         """
@@ -162,19 +162,19 @@ class VimBufferProxy(vim_helper.VimBuffer):
         for line_number in range(start, end):
             if line_number < 0:
                 line_number = len(self._buffer) + line_number
-            yield ('D', line_number, 0, self._buffer[line_number], True)
+            yield ("D", line_number, 0, self._buffer[line_number], True)
 
         if start < 0:
             start = len(self._buffer) + start
         for line_number in range(0, len(new_value)):
-            yield ('I', start+line_number, 0, new_value[line_number], True)
+            yield ("I", start + line_number, 0, new_value[line_number], True)
 
     def _get_line_diff(self, line_number, before, after):
         """
         Use precise diffing for tracking changes in single line.
         """
-        if before == '':
-            for change in self._get_diff(line_number, line_number+1, [after]):
+        if before == "":
+            for change in self._get_diff(line_number, line_number + 1, [after]):
                 yield change
         else:
             for change in diff(before, after):
@@ -194,7 +194,7 @@ class VimBufferProxy(vim_helper.VimBuffer):
         column_before = column_number <= self._snippets_stack[0]._start.col
         if line_before and column_before:
             direction = 1
-            if change_type == 'D':
+            if change_type == "D":
                 direction = -1
 
             diff = Position(direction, 0)
@@ -202,10 +202,7 @@ class VimBufferProxy(vim_helper.VimBuffer):
                 diff = Position(0, direction * len(change_text))
             print(change, diff)
 
-            self._snippets_stack[0]._move(
-                Position(line_number, column_number),
-                diff
-            )
+            self._snippets_stack[0]._move(Position(line_number, column_number), diff)
         else:
             if line_number > self._snippets_stack[0]._end.line:
                 return

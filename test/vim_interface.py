@@ -8,8 +8,7 @@ import tempfile
 import textwrap
 import time
 
-from test.constant import (ARR_D, ARR_L, ARR_R, ARR_U, BS, ESC, PYTHON3,
-                           SEQUENCES)
+from test.constant import ARR_D, ARR_L, ARR_R, ARR_U, BS, ESC, PYTHON3, SEQUENCES
 
 
 def wait_until_file_exists(file_path, times=None, interval=0.01):
@@ -25,9 +24,9 @@ def wait_until_file_exists(file_path, times=None, interval=0.01):
 def read_text_file(filename):
     """Reads the contens of a text file."""
     if PYTHON3:
-        return open(filename, 'r', encoding='utf-8').read()
+        return open(filename, "r", encoding="utf-8").read()
     else:
-        return open(filename, 'r').read()
+        return open(filename, "r").read()
 
 
 def is_process_running(pid):
@@ -56,9 +55,8 @@ def create_directory(dirname):
 
 
 class TempFileManager(object):
-
-    def __init__(self, name=''):
-        self._temp_dir = tempfile.mkdtemp(prefix='UltiSnipsTest_' + name)
+    def __init__(self, name=""):
+        self._temp_dir = tempfile.mkdtemp(prefix="UltiSnipsTest_" + name)
 
     def name_temp(self, file_path):
         return os.path.join(self._temp_dir, file_path)
@@ -67,16 +65,15 @@ class TempFileManager(object):
         abs_path = self.name_temp(file_path)
         create_directory(os.path.dirname(abs_path))
         if PYTHON3:
-            with open(abs_path, 'w', encoding='utf-8') as f:
+            with open(abs_path, "w", encoding="utf-8") as f:
                 f.write(content)
         else:
-            with open(abs_path, 'w') as f:
+            with open(abs_path, "w") as f:
                 f.write(content)
         return abs_path
 
-    def unique_name_temp(self, suffix='', prefix=''):
-        file_handler, abspath = tempfile.mkstemp(
-            suffix, prefix, self._temp_dir)
+    def unique_name_temp(self, suffix="", prefix=""):
+        file_handler, abspath = tempfile.mkstemp(suffix, prefix, self._temp_dir)
         os.close(file_handler)
         os.remove(abspath)
         return abspath
@@ -87,7 +84,6 @@ class TempFileManager(object):
 
 
 class VimInterface(TempFileManager):
-
     def __init__(self, vim_executable, name):
         TempFileManager.__init__(self, name)
         self._vim_executable = vim_executable
@@ -99,25 +95,23 @@ class VimInterface(TempFileManager):
 
     def has_version(self, major, minor, patchlevel):
         if self._version is None:
-            output = subprocess.check_output([
-                self._vim_executable, "--version"
-            ])
+            output = subprocess.check_output([self._vim_executable, "--version"])
 
             _major = 0
             _minor = 0
             _patch = 0
-            for line in output.decode('utf-8').split("\n"):
+            for line in output.decode("utf-8").split("\n"):
                 if line.startswith("VIM - Vi IMproved"):
-                    _major, _minor = map(int, line.split()[4].split('.'))
+                    _major, _minor = map(int, line.split()[4].split("."))
                 if line.startswith("Included patches:"):
-                    _patch = int(line.split(':')[-1].strip().split('-')[-1])
+                    _patch = int(line.split(":")[-1].strip().split("-")[-1])
             self._version = (_major, _minor, _patch)
 
         return self._version >= (major, minor, patchlevel)
 
     def get_buffer_data(self):
-        buffer_path = self.unique_name_temp(prefix='buffer_')
-        self.send_to_vim(ESC + ':w! %s\n' % buffer_path)
+        buffer_path = self.unique_name_temp(prefix="buffer_")
+        self.send_to_vim(ESC + ":w! %s\n" % buffer_path)
         if wait_until_file_exists(buffer_path, 50):
             return read_text_file(buffer_path)[:-1]
 
@@ -131,55 +125,59 @@ class VimInterface(TempFileManager):
 
     def launch(self, config=[]):
         """Returns the python version in Vim as a string, e.g. '2.7'"""
-        pid_file = self.name_temp('vim.pid')
-        done_file = self.name_temp('loading_done')
+        pid_file = self.name_temp("vim.pid")
+        done_file = self.name_temp("loading_done")
         if os.path.exists(done_file):
             os.remove(done_file)
 
         post_config = []
-        post_config.append('%s << EOF' % ('py3' if PYTHON3 else 'py'))
-        post_config.append('import vim, sys')
+        post_config.append("%s << EOF" % ("py3" if PYTHON3 else "py"))
+        post_config.append("import vim, sys")
         post_config.append(
-            "with open('%s', 'w') as pid_file: pid_file.write(vim.eval('getpid()'))" %
-            pid_file)
+            "with open('%s', 'w') as pid_file: pid_file.write(vim.eval('getpid()'))"
+            % pid_file
+        )
         post_config.append("with open('%s', 'w') as done_file:" % done_file)
         post_config.append("    done_file.write('%i.%i.%i' % sys.version_info[:3])")
-        post_config.append('EOF')
+        post_config.append("EOF")
 
-        config_path = self.write_temp('vim_config.vim',
-                                      textwrap.dedent(os.linesep.join(config + post_config) + '\n'))
+        config_path = self.write_temp(
+            "vim_config.vim",
+            textwrap.dedent(os.linesep.join(config + post_config) + "\n"),
+        )
 
         # Note the space to exclude it from shell history. Also we always set
         # NVIM_LISTEN_ADDRESS, even when running vanilla Vim, because it will
         # just not care.
-        self.send_to_terminal(""" NVIM_LISTEN_ADDRESS=/tmp/nvim %s -u %s\r\n""" % (
-            self._vim_executable, config_path))
+        self.send_to_terminal(
+            """ NVIM_LISTEN_ADDRESS=/tmp/nvim %s -u %s\r\n"""
+            % (self._vim_executable, config_path)
+        )
         wait_until_file_exists(done_file)
         self._vim_pid = int(read_text_file(pid_file))
         return read_text_file(done_file).strip()
 
     def leave_with_wait(self):
-        self.send_to_vim(3 * ESC + ':qa!\n')
+        self.send_to_vim(3 * ESC + ":qa!\n")
         while is_process_running(self._vim_pid):
-            time.sleep(.2)
+            time.sleep(0.2)
 
 
 class VimInterfaceTmux(VimInterface):
-
     def __init__(self, vim_executable, session):
-        VimInterface.__init__(self, vim_executable, 'Tmux')
+        VimInterface.__init__(self, vim_executable, "Tmux")
         self.session = session
         self._check_version()
 
     def _send(self, s):
         # I did not find any documentation on what needs escaping when sending
         # to tmux, but it seems like this is all that is needed for now.
-        s = s.replace(';', r'\;')
+        s = s.replace(";", r"\;")
 
         if len(s) == 1:
-            silent_call(['tmux', 'send-keys', '-t', self.session, hex(ord(s))])
+            silent_call(["tmux", "send-keys", "-t", self.session, hex(ord(s))])
         else:
-            silent_call(['tmux', 'send-keys', '-t', self.session, '-l', s])
+            silent_call(["tmux", "send-keys", "-t", self.session, "-l", s])
 
     def send_to_terminal(self, s):
         return self._send(s)
@@ -188,18 +186,17 @@ class VimInterfaceTmux(VimInterface):
         return self._send(s)
 
     def _check_version(self):
-        stdout, _ = subprocess.Popen(['tmux', '-V'],
-                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        stdout, _ = subprocess.Popen(
+            ["tmux", "-V"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        ).communicate()
         if PYTHON3:
-            stdout = stdout.decode('utf-8')
+            stdout = stdout.decode("utf-8")
         m = re.match(r"tmux (\d+).(\d+)", stdout)
         if not m or not (int(m.group(1)), int(m.group(2))) >= (1, 8):
-            raise RuntimeError(
-                'Need at least tmux 1.8, you have %s.' %
-                stdout.strip())
+            raise RuntimeError("Need at least tmux 1.8, you have %s." % stdout.strip())
+
 
 class VimInterfaceTmuxNeovim(VimInterfaceTmux):
-
     def __init__(self, vim_executable, session):
         VimInterfaceTmux.__init__(self, vim_executable, session)
         self._nvim = None
@@ -223,54 +220,55 @@ class VimInterfaceTmuxNeovim(VimInterfaceTmux):
 
     def launch(self, config=[]):
         import neovim
+
         rv = VimInterfaceTmux.launch(self, config)
-        self._nvim = neovim.attach('socket', path='/tmp/nvim')
+        self._nvim = neovim.attach("socket", path="/tmp/nvim")
         return rv
 
-class VimInterfaceWindows(VimInterface):
-    BRACES = re.compile('([}{])')
-    WIN_ESCAPES = ['+', '^', '%', '~', '[', ']', '<', '>', '(', ')']
-    WIN_REPLACES = [
-        (BS, '{BS}'),
-        (ARR_L, '{LEFT}'),
-        (ARR_R, '{RIGHT}'),
-        (ARR_U, '{UP}'),
-        (ARR_D, '{DOWN}'),
-        ('\t', '{TAB}'),
-        ('\n', '~'),
-        (ESC, '{ESC}'),
 
+class VimInterfaceWindows(VimInterface):
+    BRACES = re.compile("([}{])")
+    WIN_ESCAPES = ["+", "^", "%", "~", "[", "]", "<", ">", "(", ")"]
+    WIN_REPLACES = [
+        (BS, "{BS}"),
+        (ARR_L, "{LEFT}"),
+        (ARR_R, "{RIGHT}"),
+        (ARR_U, "{UP}"),
+        (ARR_D, "{DOWN}"),
+        ("\t", "{TAB}"),
+        ("\n", "~"),
+        (ESC, "{ESC}"),
         # On my system ` waits for a second keystroke, so `+SPACE = "`".  On
         # most systems, `+Space = "` ". I work around this, by sending the host
         # ` as `+_+BS. Awkward, but the only way I found to get this working.
-        ('`', '`_{BS}'),
-        ('´', '´_{BS}'),
-        ('{^}', '{^}_{BS}'),
+        ("`", "`_{BS}"),
+        ("´", "´_{BS}"),
+        ("{^}", "{^}_{BS}"),
     ]
 
     def __init__(self):
         # import windows specific modules
         import win32com.client
         import win32gui
+
         self.win32gui = win32gui
-        self.shell = win32com.client.Dispatch('WScript.Shell')
+        self.shell = win32com.client.Dispatch("WScript.Shell")
 
     def is_focused(self, title=None):
-        cur_title = self.win32gui.GetWindowText(
-            self.win32gui.GetForegroundWindow())
-        if (title or '- GVIM') in cur_title:
+        cur_title = self.win32gui.GetWindowText(self.win32gui.GetForegroundWindow())
+        if (title or "- GVIM") in cur_title:
             return True
         return False
 
     def focus(self, title=None):
-        if not self.shell.AppActivate(title or '- GVIM'):
-            raise Exception('Failed to switch to GVim window')
+        if not self.shell.AppActivate(title or "- GVIM"):
+            raise Exception("Failed to switch to GVim window")
         time.sleep(1)
 
     def convert_keys(self, keys):
         keys = self.BRACES.sub(r"{\1}", keys)
         for k in self.WIN_ESCAPES:
-            keys = keys.replace(k, '{%s}' % k)
+            keys = keys.replace(k, "{%s}" % k)
         for f, r in self.WIN_REPLACES:
             keys = keys.replace(f, r)
         return keys
@@ -283,6 +281,6 @@ class VimInterfaceWindows(VimInterface):
             self.focus()
         if not self.is_focused():
             # This is the only way I can find to stop test execution
-            raise KeyboardInterrupt('Failed to focus GVIM')
+            raise KeyboardInterrupt("Failed to focus GVIM")
 
         self.shell.SendKeys(keys)

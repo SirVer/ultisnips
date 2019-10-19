@@ -34,23 +34,22 @@ class Visual(NoneditableTextObject, TextObjectTransformation):
                 snippet = snippet._parent  # pylint:disable=protected-access
         if not self._text:
             self._text = token.alternative_text
-            self._mode = 'v'
+            self._mode = "v"
 
         NoneditableTextObject.__init__(self, parent, token)
         TextObjectTransformation.__init__(self, token)
 
     def _update(self, done, buf):
-        if self._mode == 'v':  # Normal selection.
+        if self._mode == "v":  # Normal selection.
             text = self._text
         else:  # Block selection or line selection.
-            text_before = buf[self.start.line][:self.start.col]
-            indent = _REPLACE_NON_WS.sub(' ', text_before)
+            text_before = buf[self.start.line][: self.start.col]
+            indent = _REPLACE_NON_WS.sub(" ", text_before)
             iu = IndentUtil()
             indent = iu.indent_to_spaces(indent)
             indent = iu.spaces_to_indent(indent)
-            text = ''
-            for idx, line in enumerate(textwrap.dedent(
-                    self._text).splitlines(True)):
+            text = ""
+            for idx, line in enumerate(textwrap.dedent(self._text).splitlines(True)):
                 if idx != 0:
                     text += indent
                 text += line

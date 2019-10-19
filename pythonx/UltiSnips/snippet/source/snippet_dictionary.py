@@ -3,6 +3,7 @@
 
 """Implements a container for parsed snippets."""
 
+
 class SnippetDictionary(object):
 
     """See module docstring."""
@@ -16,8 +17,9 @@ class SnippetDictionary(object):
         """Add 'snippet' to this dictionary."""
         self._snippets.append(snippet)
 
-    def get_matching_snippets(self, trigger, potentially, autotrigger_only,
-                              visual_content):
+    def get_matching_snippets(
+        self, trigger, potentially, autotrigger_only, visual_content
+    ):
         """Returns all snippets matching the given trigger.
 
         If 'potentially' is true, returns all that could_match().
@@ -32,11 +34,10 @@ class SnippetDictionary(object):
         """
         all_snippets = self._snippets
         if autotrigger_only:
-            all_snippets = [s for s in all_snippets if s.has_option('A')]
+            all_snippets = [s for s in all_snippets if s.has_option("A")]
 
         if not potentially:
-            return [s for s in all_snippets if s.matches(trigger,
-                                                         visual_content)]
+            return [s for s in all_snippets if s.matches(trigger, visual_content)]
         else:
             return [s for s in all_snippets if s.could_match(trigger)]
 
@@ -52,8 +53,7 @@ class SnippetDictionary(object):
                 self._clear_priority = priority
         else:
             for trigger in triggers:
-                if (trigger not in self._cleared or
-                        priority > self._cleared[trigger]):
+                if trigger not in self._cleared or priority > self._cleared[trigger]:
                     self._cleared[trigger] = priority
 
     def __len__(self):
