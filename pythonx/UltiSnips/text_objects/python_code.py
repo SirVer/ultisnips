@@ -6,10 +6,10 @@
 import os
 from collections import namedtuple
 
-from UltiSnips import _vim
+from UltiSnips import vim_helper
 from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
-from UltiSnips.text_objects._base import NoneditableTextObject
+from UltiSnips.text_objects.base import NoneditableTextObject
 from UltiSnips.vim_state import _Placeholder
 import UltiSnips.snippet_manager
 
@@ -36,7 +36,7 @@ class _Tabs(object):
         if ts is None:
             return
         # TODO(sirver): The buffer should be passed into the object on construction.
-        ts.overwrite(_vim.buf, value)
+        ts.overwrite(vim_helper.buf, value)
 
 _VisualContent = namedtuple('_VisualContent', ['mode', 'text'])
 
@@ -134,12 +134,12 @@ class SnippetUtil(object):
     @property
     def fn(self):  # pylint:disable=no-self-use,invalid-name
         """The filename."""
-        return _vim.eval('expand("%:t")') or ''
+        return vim_helper.eval('expand("%:t")') or ''
 
     @property
     def basename(self):  # pylint:disable=no-self-use
         """The filename without extension."""
-        return _vim.eval('expand("%:t:r")') or ''
+        return vim_helper.eval('expand("%:t:r")') or ''
 
     @property
     def ft(self):  # pylint:disable=invalid-name
@@ -189,10 +189,10 @@ class SnippetUtil(object):
 
     def opt(self, option, default=None):  # pylint:disable=no-self-use
         """Gets a Vim variable."""
-        if _vim.eval("exists('%s')" % option) == '1':
+        if vim_helper.eval("exists('%s')" % option) == '1':
             try:
-                return _vim.eval(option)
-            except _vim.error:
+                return vim_helper.eval(option)
+            except vim_helper.error:
                 pass
         return default
 
@@ -226,7 +226,7 @@ class SnippetUtil(object):
 
     @property
     def buffer(self):
-        return _vim.buf
+        return vim_helper.buf
 
 
 class PythonCode(NoneditableTextObject):
@@ -256,7 +256,7 @@ class PythonCode(NoneditableTextObject):
         NoneditableTextObject.__init__(self, parent, token)
 
     def _update(self, done, buf):
-        path = _vim.eval('expand("%")') or ''
+        path = vim_helper.eval('expand("%")') or ''
         ct = self.current_text
         self._locals.update({
             't': _Tabs(self._parent),

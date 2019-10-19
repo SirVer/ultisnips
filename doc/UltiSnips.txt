@@ -218,8 +218,8 @@ g:UltiSnipsSnippetsDir
                             Also, this setting does not affect where snippets
                             are searched for, so it is possible to change this
                             to opening files that are then not found by
-                            UltiSnips. See |UltiSnips-snippet-search-path| for
-                            details.
+                            UltiSnips. See |UltiSnips-how-snippets-are-loaded|
+                            for details.
 
                                                         *g:UltiSnipsSnippetDirectories*
 g:UltiSnipsSnippetDirectories
@@ -533,7 +533,7 @@ this list.
 
 UltiSnips will search each 'runtimepath' directory for the subdirectory names
 defined in g:UltiSnipsSnippetDirectories in the order they are defined. For
-example, if you keep your snippets in `~/.vim/mycoolsnippets`and you want to
+example, if you keep your snippets in `~/.vim/mycoolsnippets` and you want to
 make use of the UltiSnips snippets that come with other plugins, add the
 following to your vimrc file. >
 
