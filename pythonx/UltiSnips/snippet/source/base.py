@@ -29,8 +29,9 @@ class SnippetSource(object):
         deep_extends = self.get_deep_extends(base_filetypes)
         return [ft for ft in deep_extends if ft in self._snippets]
 
-    def get_snippets(self, filetypes, before, possible, autotrigger_only,
-            visual_content):
+    def get_snippets(
+        self, filetypes, before, possible, autotrigger_only, visual_content
+    ):
         """Returns the snippets for all 'filetypes' (in order) and their
         parents matching the text 'before'. If 'possible' is true, a partial
         match is enough. Base classes can override this method to provide means
@@ -42,9 +43,11 @@ class SnippetSource(object):
         result = []
         for ft in self._get_existing_deep_extends(filetypes):
             snips = self._snippets[ft]
-            result.extend(snips.get_matching_snippets(before, possible,
-                                                      autotrigger_only,
-                                                      visual_content))
+            result.extend(
+                snips.get_matching_snippets(
+                    before, possible, autotrigger_only, visual_content
+                )
+            )
         return result
 
     def get_clear_priority(self, filetypes):
@@ -88,8 +91,7 @@ class SnippetSource(object):
         todo_fts = list(set(base_filetypes))
         while todo_fts:
             todo_ft = todo_fts.pop()
-            unseen_extends = set(
-                ft for ft in self._extends[todo_ft] if ft not in seen)
+            unseen_extends = set(ft for ft in self._extends[todo_ft] if ft not in seen)
             seen.update(unseen_extends)
             todo_fts.extend(unseen_extends)
         return seen

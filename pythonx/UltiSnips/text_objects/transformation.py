@@ -15,15 +15,15 @@ def _find_closing_brace(string, start_pos):
     bracks_open = 1
     escaped = False
     for idx, char in enumerate(string[start_pos:]):
-        if char == '(':
+        if char == "(":
             if not escaped:
                 bracks_open += 1
-        elif char == ')':
+        elif char == ")":
             if not escaped:
                 bracks_open -= 1
             if not bracks_open:
                 return start_pos + idx + 1
-        if char == '\\':
+        if char == "\\":
             escaped = not escaped
         else:
             escaped = False
@@ -33,22 +33,22 @@ def _split_conditional(string):
     """Split the given conditional 'string' into its arguments."""
     bracks_open = 0
     args = []
-    carg = ''
+    carg = ""
     escaped = False
     for idx, char in enumerate(string):
-        if char == '(':
+        if char == "(":
             if not escaped:
                 bracks_open += 1
-        elif char == ')':
+        elif char == ")":
             if not escaped:
                 bracks_open -= 1
-        elif char == ':' and not bracks_open and not escaped:
+        elif char == ":" and not bracks_open and not escaped:
             args.append(carg)
-            carg = ''
+            carg = ""
             escaped = False
             continue
         carg += char
-        if char == '\\':
+        if char == "\\":
             escaped = not escaped
         else:
             escaped = False
@@ -62,8 +62,8 @@ def _replace_conditional(match, string):
     while conditional_match:
         start = conditional_match.start()
         end = _find_closing_brace(string, start + 4)
-        args = _split_conditional(string[start + 4:end - 1])
-        rv = ''
+        args = _split_conditional(string[start + 4 : end - 1])
+        rv = ""
         if match.group(int(conditional_match.group(1))):
             rv = unescape(_replace_conditional(match, args[0]))
         elif len(args) > 1:
@@ -71,6 +71,7 @@ def _replace_conditional(match, string):
         string = string[:start] + rv + string[end:]
         conditional_match = _CONDITIONAL.search(string)
     return string
+
 
 _ONE_CHAR_CASE_SWITCH = re.compile(r"\\([ul].)", re.DOTALL)
 _LONG_CASEFOLDINGS = re.compile(r"\\([UL].*?)\\E", re.DOTALL)
@@ -89,29 +90,31 @@ class _CleverReplace(object):
         """Replaces 'match' through the correct replacement string."""
         transformed = self._expression
         # Replace all $? with capture groups
-        transformed = _DOLLAR.subn(
-            lambda m: match.group(int(m.group(1))), transformed)[0]
+        transformed = _DOLLAR.subn(lambda m: match.group(int(m.group(1))), transformed)[
+            0
+        ]
 
         # Replace Case switches
         def _one_char_case_change(match):
             """Replaces one character case changes."""
-            if match.group(1)[0] == 'u':
+            if match.group(1)[0] == "u":
                 return match.group(1)[-1].upper()
             else:
                 return match.group(1)[-1].lower()
-        transformed = _ONE_CHAR_CASE_SWITCH.subn(
-            _one_char_case_change, transformed)[0]
+
+        transformed = _ONE_CHAR_CASE_SWITCH.subn(_one_char_case_change, transformed)[0]
 
         def _multi_char_case_change(match):
             """Replaces multi character case changes."""
-            if match.group(1)[0] == 'U':
+            if match.group(1)[0] == "U":
                 return match.group(1)[1:].upper()
             else:
                 return match.group(1)[1:].lower()
-        transformed = _LONG_CASEFOLDINGS.subn(
-            _multi_char_case_change, transformed)[0]
+
+        transformed = _LONG_CASEFOLDINGS.subn(_multi_char_case_change, transformed)[0]
         transformed = _replace_conditional(match, transformed)
         return unescape(fill_in_whitespace(transformed))
+
 
 # flag used to display only one time the lack of unidecode
 UNIDECODE_ALERT_RAISED = False
@@ -131,13 +134,13 @@ class TextObjectTransformation(object):
         flags = 0
         self._match_this_many = 1
         if token.options:
-            if 'g' in token.options:
+            if "g" in token.options:
                 self._match_this_many = 0
-            if 'i' in token.options:
+            if "i" in token.options:
                 flags |= re.IGNORECASE
-            if 'm' in token.options:
+            if "m" in token.options:
                 flags |= re.MULTILINE
-            if 'a' in token.options:
+            if "a" in token.options:
                 self._convert_to_ascii = True
 
         self._find = re.compile(token.search, flags | re.DOTALL)
@@ -149,17 +152,18 @@ class TextObjectTransformation(object):
         if self._convert_to_ascii:
             try:
                 import unidecode
+
                 text = unidecode.unidecode(text)
             except Exception:  # pylint:disable=broad-except
                 if UNIDECODE_ALERT_RAISED == False:
                     UNIDECODE_ALERT_RAISED = True
                     sys.stderr.write(
-                        'Please install unidecode python package in order to '
-                        'be able to make ascii conversions.\n')
+                        "Please install unidecode python package in order to "
+                        "be able to make ascii conversions.\n"
+                    )
         if self._find is None:
             return text
-        return self._find.subn(
-            self._replace.replace, text, self._match_this_many)[0]
+        return self._find.subn(self._replace.replace, text, self._match_this_many)[0]
 
 
 class Transformation(Mirror, TextObjectTransformation):
