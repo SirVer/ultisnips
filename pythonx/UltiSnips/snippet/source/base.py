@@ -5,7 +5,7 @@
 
 from collections import defaultdict
 
-from UltiSnips.snippet.source._snippet_dictionary import SnippetDictionary
+from UltiSnips.snippet.source.snippet_dictionary import SnippetDictionary
 
 
 class SnippetSource(object):
