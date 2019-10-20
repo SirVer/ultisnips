@@ -70,7 +70,7 @@ class SimpleExpandEndingWithNewline_ExpectCorrectResult(_VimTest):
     wanted = "Hallo Welt\n\nAnd more"
 
 
-class SimpleExpand_DoNotClobberRegister(_VimTest):
+class SimpleExpand_DoNotClobberDefaultRegister(_VimTest):
     snippets = ("hallo", "Hallo ${1:Welt}")
     keys = "hallo" + EX + BS + ESC + "o" + ESC + "P"
     wanted = "Hallo \n"
