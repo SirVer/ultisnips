@@ -53,18 +53,26 @@ if !exists("g:UltiSnipsEnableSnipMate")
     let g:UltiSnipsEnableSnipMate = 1
 endif
 
+inoremap <Plug>(UltiSnips#ExpandSnippetOrJump) <C-R>=UltiSnips#ExpandSnippetOrJump()<cr>
+snoremap <Plug>(UltiSnips#ExpandSnippetOrJump) <Esc>:call UltiSnips#ExpandSnippetOrJump()<cr>
+inoremap <Plug>(UltiSnips#ExpandSnippet) <C-R>=UltiSnips#ExpandSnippet()<cr>
+snoremap <Plug>(UltiSnips#ExpandSnippet) <Esc>:call UltiSnips#ExpandSnippet()<cr>
+xnoremap <Plug>(UltiSnips#SaveLastVisualSelection) :call UltiSnips#SaveLastVisualSelection()<cr>gvs
+inoremap <Plug>(UltiSnips#ListSnippets) <C-R>=UltiSnips#ListSnippets()<cr>
+snoremap <Plug>(UltiSnips#ListSnippets) <Esc>:call UltiSnips#ListSnippets()<cr>
+
 function! UltiSnips#map_keys#MapKeys() abort
     if g:UltiSnipsExpandTrigger == g:UltiSnipsJumpForwardTrigger
-        exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=UltiSnips#ExpandSnippetOrJump()<cr>"
-        exec "snoremap <silent> " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips#ExpandSnippetOrJump()<cr>"
+        exec "imap <silent> " . g:UltiSnipsExpandTrigger . " <Plug>(UltiSnips#ExpandSnippetOrJump)"
+        exec "smap <silent> " . g:UltiSnipsExpandTrigger . " <Plug>(UltiSnips#ExpandSnippetOrJump)"
     else
-        exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=UltiSnips#ExpandSnippet()<cr>"
-        exec "snoremap <silent> " . g:UltiSnipsExpandTrigger . " <Esc>:call UltiSnips#ExpandSnippet()<cr>"
+        exec "imap <silent> " . g:UltiSnipsExpandTrigger . " <Plug>(UltiSnips#ExpandSnippet)"
+        exec "smap <silent> " . g:UltiSnipsExpandTrigger . " <Plug>(UltiSnips#ExpandSnippet)"
     endif
-    exec "xnoremap <silent> " . g:UltiSnipsExpandTrigger. " :call UltiSnips#SaveLastVisualSelection()<cr>gvs"
+    exec "xmap <silent> " . g:UltiSnipsExpandTrigger. " <Plug>(UltiSnips#SaveLastVisualSelection)"
     if len(g:UltiSnipsListSnippets) > 0
-       exec "inoremap <silent> " . g:UltiSnipsListSnippets . " <C-R>=UltiSnips#ListSnippets()<cr>"
-       exec "snoremap <silent> " . g:UltiSnipsListSnippets . " <Esc>:call UltiSnips#ListSnippets()<cr>"
+       exec "imap <silent> " . g:UltiSnipsListSnippets . " <Plug>(UltiSnips#ListSnippets)"
+       exec "smap <silent> " . g:UltiSnipsListSnippets . " <Plug>(UltiSnips#ListSnippets)"
     endif
 
     snoremap <silent> <BS> <c-g>"_c
