@@ -19,6 +19,7 @@ class Source(Base):
                     "word": trigger,
                     "menu": self.mark + " " + snippets.get(trigger, ""),
                     "dup": 1,
+                    "kind": "snippet",
                 }
             )
         return suggestions

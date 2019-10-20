@@ -18,7 +18,8 @@ function! s:source.gather_candidates(context) abort
       let description = get(snippets, trigger)
       call add(suggestions, {
          \ 'word' : trigger,
-         \ 'menu' : self.mark . ' '. description
+         \ 'menu' : self.mark . ' '. description,
+         \ 'kind' : 'snippet'
          \ })
    endfor
    return suggestions
