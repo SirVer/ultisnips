@@ -28,7 +28,7 @@ class Position(object):
         else:
             self.line += delta.line
             if self.line == pivot.line:
-                self.col += - delta.col + pivot.col
+                self.col += -delta.col + pivot.col
 
     def delta(self, pos):
         """Returns the difference that the cursor must move to come from 'pos'
@@ -64,13 +64,11 @@ class Position(object):
         return (self.line, self.col) <= (other.line, other.col)
 
     def __repr__(self):
-        return '(%i,%i)' % (self.line, self.col)
+        return "(%i,%i)" % (self.line, self.col)
 
     def __getitem__(self, index):
         if index > 1:
-            raise IndexError(
-                'position can be indexed only 0 (line) and 1 (column)'
-            )
+            raise IndexError("position can be indexed only 0 (line) and 1 (column)")
         if index == 0:
             return self.line
         else:

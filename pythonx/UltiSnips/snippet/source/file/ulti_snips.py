@@ -10,14 +10,17 @@ import os
 from UltiSnips import vim_helper
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
 from UltiSnips.snippet.source.file.base import SnippetFileSource
-from UltiSnips.snippet.source.file.common import handle_extends, \
-    handle_action, handle_context
+from UltiSnips.snippet.source.file.common import (
+    handle_extends,
+    handle_action,
+    handle_context,
+)
 from UltiSnips.text import LineIterator, head_tail
 
 
 def find_snippet_files(ft, directory):
     """Returns all matching snippet files for 'ft' in 'directory'."""
-    patterns = ['%s.snippets', '%s_*.snippets', os.path.join('%s', '*')]
+    patterns = ["%s.snippets", "%s_*.snippets", os.path.join("%s", "*")]
     ret = set()
     directory = os.path.expanduser(directory)
     for pattern in patterns:
@@ -25,28 +28,34 @@ def find_snippet_files(ft, directory):
             ret.add(os.path.realpath(fn))
     return ret
 
+
 def _find_all_snippet_directories():
     """Returns a list of the absolute path of all snippet directories to
     search."""
 
-    if vim_helper.eval("exists('b:UltiSnipsSnippetDirectories')") == '1':
-        snippet_dirs = vim_helper.eval('b:UltiSnipsSnippetDirectories')
+    if vim_helper.eval("exists('b:UltiSnipsSnippetDirectories')") == "1":
+        snippet_dirs = vim_helper.eval("b:UltiSnipsSnippetDirectories")
     else:
-        snippet_dirs = vim_helper.eval('g:UltiSnipsSnippetDirectories')
-    if len(snippet_dirs) == 1 and os.path.isabs(snippet_dirs[0]):
-        return snippet_dirs
+        snippet_dirs = vim_helper.eval("g:UltiSnipsSnippetDirectories")
+
+    if len(snippet_dirs) == 1:
+        # To reduce confusion and increase consistency with
+        # `UltiSnipsSnippetsDir`, we expand ~ here too.
+        full_path = os.path.expanduser(snippet_dirs[0])
+        if os.path.isabs(full_path):
+            return [full_path]
 
     all_dirs = []
-    check_dirs = vim_helper.eval('&runtimepath').split(',')
+    check_dirs = vim_helper.eval("&runtimepath").split(",")
     for rtp in check_dirs:
         for snippet_dir in snippet_dirs:
-            if snippet_dir == 'snippets':
+            if snippet_dir == "snippets":
                 raise RuntimeError(
                     "You have 'snippets' in UltiSnipsSnippetDirectories. This "
-                    'directory is reserved for snipMate snippets. Use another '
-                    'directory for UltiSnips snippets.')
-            pth = os.path.realpath(os.path.expanduser(
-                os.path.join(rtp, snippet_dir)))
+                    "directory is reserved for snipMate snippets. Use another "
+                    "directory for UltiSnips snippets."
+                )
+            pth = os.path.realpath(os.path.expanduser(os.path.join(rtp, snippet_dir)))
             if os.path.isdir(pth):
                 all_dirs.append(pth)
     return all_dirs
@@ -55,7 +64,7 @@ def _find_all_snippet_directories():
 def find_all_snippet_files(ft):
     """Returns all snippet files matching 'ft' in the given runtime path
     directory."""
-    patterns = ['%s.snippets', '%s_*.snippets', os.path.join('%s', '*')]
+    patterns = ["%s.snippets", "%s_*.snippets", os.path.join("%s", "*")]
     ret = set()
     for directory in _find_all_snippet_directories():
         for pattern in patterns:
@@ -69,23 +78,23 @@ def _handle_snippet_or_global(
 ):
     """Parses the snippet that begins at the current line."""
     start_line_index = lines.line_index
-    descr = ''
-    opts = ''
+    descr = ""
+    opts = ""
 
     # Ensure this is a snippet
     snip = line.split()[0]
 
     # Get and strip options if they exist
-    remain = line[len(snip):].strip()
+    remain = line[len(snip) :].strip()
     words = remain.split()
 
     if len(words) > 2:
         # second to last word ends with a quote
         if '"' not in words[-1] and words[-2][-1] == '"':
             opts = words[-1]
-            remain = remain[:-len(opts) - 1].rstrip()
+            remain = remain[: -len(opts) - 1].rstrip()
 
-    if 'e' in opts and not context:
+    if "e" in opts and not context:
         left = remain[:-1].rfind('"')
         if left != -1 and left != 0:
             context, remain = remain[left:].strip('"'), remain[:left]
@@ -99,13 +108,12 @@ def _handle_snippet_or_global(
 
     # The rest is the trigger
     trig = remain.strip()
-    if len(trig.split()) > 1 or 'r' in opts:
+    if len(trig.split()) > 1 or "r" in opts:
         if trig[0] != trig[-1]:
-            return 'error', ("Invalid multiword trigger: '%s'" % trig,
-                             lines.line_index)
+            return "error", ("Invalid multiword trigger: '%s'" % trig, lines.line_index)
         trig = trig[1:-1]
-    end = 'end' + snip
-    content = ''
+    end = "end" + snip
+    content = ""
 
     found_end = False
     for line in lines:
@@ -116,20 +124,25 @@ def _handle_snippet_or_global(
         content += line
 
     if not found_end:
-        return 'error', ("Missing 'endsnippet' for %r" %
-                         trig, lines.line_index)
+        return "error", ("Missing 'endsnippet' for %r" % trig, lines.line_index)
 
-    if snip == 'global':
+    if snip == "global":
         python_globals[trig].append(content)
-    elif snip == 'snippet':
+    elif snip == "snippet":
         definition = UltiSnipsSnippetDefinition(
-            priority, trig, content,
-            descr, opts, python_globals,
-            '%s:%i' % (filename, start_line_index),
-            context, pre_expand)
-        return 'snippet', (definition,)
+            priority,
+            trig,
+            content,
+            descr,
+            opts,
+            python_globals,
+            "%s:%i" % (filename, start_line_index),
+            context,
+            pre_expand,
+        )
+        return "snippet", (definition,)
     else:
-        return 'error', ("Invalid snippet type: '%s'" % snip, lines.line_index)
+        return "error", ("Invalid snippet type: '%s'" % snip, lines.line_index)
 
 
 def _parse_snippets_file(data, filename):
@@ -149,40 +162,42 @@ def _parse_snippets_file(data, filename):
             continue
 
         head, tail = head_tail(line)
-        if head in ('snippet', 'global'):
+        if head in ("snippet", "global"):
             snippet = _handle_snippet_or_global(
-                filename, line, lines,
+                filename,
+                line,
+                lines,
                 python_globals,
                 current_priority,
                 actions,
-                context
+                context,
             )
 
             actions = {}
             context = None
             if snippet is not None:
                 yield snippet
-        elif head == 'extends':
+        elif head == "extends":
             yield handle_extends(tail, lines.line_index)
-        elif head == 'clearsnippets':
-            yield 'clearsnippets', (current_priority, tail.split())
-        elif head == 'context':
+        elif head == "clearsnippets":
+            yield "clearsnippets", (current_priority, tail.split())
+        elif head == "context":
             head, context, = handle_context(tail, lines.line_index)
-            if head == 'error':
+            if head == "error":
                 yield (head, tail)
-        elif head == 'priority':
+        elif head == "priority":
             try:
                 current_priority = int(tail.split()[0])
             except (ValueError, IndexError):
-                yield 'error', ('Invalid priority %r' % tail, lines.line_index)
-        elif head in ['pre_expand', 'post_expand', 'post_jump']:
+                yield "error", ("Invalid priority %r" % tail, lines.line_index)
+        elif head in ["pre_expand", "post_expand", "post_jump"]:
             head, tail = handle_action(head, tail, lines.line_index)
-            if head == 'error':
+            if head == "error":
                 yield (head, tail)
             else:
                 actions[head], = tail
-        elif head and not head.startswith('#'):
-            yield 'error', ('Invalid line %r' % line.rstrip(), lines.line_index)
+        elif head and not head.startswith("#"):
+            yield "error", ("Invalid line %r" % line.rstrip(), lines.line_index)
 
 
 class UltiSnipsFileSource(SnippetFileSource):
