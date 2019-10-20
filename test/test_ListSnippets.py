@@ -42,4 +42,12 @@ class ListAllAvailable_NonDefined_NoExpectionShouldBeRaised(_ListAllSnippets):
     wanted = "hallo qualleHi"
 
 
+class ListAllAvailable_Disabled_ExpectCorrectResult(_ListAllSnippets):
+    keys = "hallo test" + LS + "2\n"
+    wanted = "hallo test" + LS + "2\n"
+
+    def _extra_vim_config(self, vim_config):
+        vim_config.append('let g:UltiSnipsListSnippets=""')
+
+
 # End: List Snippets  #}}}
