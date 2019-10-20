@@ -50,6 +50,9 @@ augroup UltiSnips_AutoTrigger
     au!
     au InsertCharPre * call UltiSnips#TrackChange()
     au TextChangedI * call UltiSnips#TrackChange()
+    if exists('##TextChangedP')
+        au TextChangedP * call UltiSnips#TrackChange()
+    endif
 augroup END
 
 call UltiSnips#map_keys#MapKeys()
