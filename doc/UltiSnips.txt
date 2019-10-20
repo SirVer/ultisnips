@@ -29,6 +29,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       4.1.2 Basic syntax                        |UltiSnips-basic-syntax|
       4.1.3 Snippet Options                     |UltiSnips-snippet-options|
       4.1.4 Character Escaping                  |UltiSnips-character-escaping|
+      4.1.5 Snippets text-objects               |UltiSnips-snippet-text-objects|
    4.2 Plaintext Snippets                       |UltiSnips-plaintext-snippets|
    4.3 Visual Placeholder                       |UltiSnips-visual-placeholder|
    4.4 Interpolation                            |UltiSnips-interpolation|
@@ -732,6 +733,14 @@ from the 'endsnippet' end line.
 In snippet definitions, the characters '`', '{', '$' and '\' have special
 meaning. If you want to insert one of these characters literally, escape them
 with a backslash, '\'.
+
+
+ 4.1.5 Snippets text-objects                   *UltiSnips-snippet-text-objects*
+
+Inside a snippets buffer, the following text objects are available:
+>
+   iS   inside snippet
+   aS   around snippet (including empty lines that follow)
 
 
 4.2 Plaintext Snippets                         *UltiSnips-plaintext-snippets*
