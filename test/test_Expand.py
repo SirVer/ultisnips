@@ -70,4 +70,13 @@ class SimpleExpandEndingWithNewline_ExpectCorrectResult(_VimTest):
     wanted = "Hallo Welt\n\nAnd more"
 
 
+class SimpleExpand_DoNotClobberDefaultRegister(_VimTest):
+    snippets = ("hallo", "Hallo ${1:Welt}")
+    keys = "hallo" + EX + BS + ESC + "o" + ESC + "P"
+    wanted = "Hallo \n"
+
+    def _extra_vim_config(self, vim_config):
+        vim_config.append('let @"=""')
+
+
 # End: Simple Expands  #}}}
