@@ -136,7 +136,12 @@ function! UltiSnips#CursorMoved() abort
 endf
 
 function! UltiSnips#LeavingBuffer() abort
-    exec g:_uspy "UltiSnips_Manager._leaving_buffer()"
+    let from_preview = getwinvar(winnr('#'), '&previewwindow')
+    let to_preview = getwinvar(winnr(), '&previewwindow')
+
+    if !(from_preview || to_preview)
+        exec g:_uspy "UltiSnips_Manager._leaving_buffer()"
+    endif
 endf
 
 function! UltiSnips#LeavingInsertMode() abort
