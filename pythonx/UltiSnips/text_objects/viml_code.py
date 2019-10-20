@@ -12,7 +12,7 @@ class VimLCode(NoneditableTextObject):
     """See module docstring."""
 
     def __init__(self, parent, token):
-        self._code = token.code.replace('\\`', '`').strip()
+        self._code = token.code.replace("\\`", "`").strip()
 
         NoneditableTextObject.__init__(self, parent, token)
 

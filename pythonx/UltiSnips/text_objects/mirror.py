@@ -16,8 +16,8 @@ class Mirror(NoneditableTextObject):
 
     def _update(self, done, buf):
         if self._ts.is_killed:
-            self.overwrite(buf, '')
-            self._parent._del_child(self)   # pylint:disable=protected-access
+            self.overwrite(buf, "")
+            self._parent._del_child(self)  # pylint:disable=protected-access
             return True
 
         if self._ts not in done:
