@@ -58,8 +58,8 @@ As there are more options and tons of features I suggest you at least skim it.
 
 There are example uses for some power user features here:
 
-    * [Snippets Aliases](doc/examples/snippets-aliasing/README.md)
-    * [Dynamic Tabstops/Tabstop Generation](doc/examples/tabstop-generation/README.md)
+  * [Snippets Aliases](doc/examples/snippets-aliasing/README.md)
+  * [Dynamic Tabstops/Tabstop Generation](doc/examples/tabstop-generation/README.md)
 
 Screencasts
 -----------
