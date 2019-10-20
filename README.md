@@ -4,8 +4,8 @@
 UltiSnips
 =========
 
-UltiSnips is the ultimate solution for snippets in Vim. It has tons of features
-and is very fast.
+UltiSnips is the ultimate solution for snippets in Vim. It has many features,
+speed being one of them.
 
 ![GIF Demo](https://raw.github.com/SirVer/ultisnips/master/doc/demo.gif)
 
@@ -26,15 +26,11 @@ The official home of UltiSnips is at <https://github.com/sirver/ultisnips>.
 Please add pull requests and issues there.
 
 UltiSnips was started in Jun 2009 by @SirVer. In Dec 2015, maintenance was
-handed over to [@seletskiy](https://github.com/seletskiy).
+handed over to [@seletskiy](https://github.com/seletskiy) who ran out of time
+in early 2017. Since Jun 2019, @SirVer is maintaining UltiSnips again on a
+very constraint time budget. If you can help triaging issues it would be
+greatly appreciated.
 
-What can you do with UltiSnips?
--------------------------------
-
-1. Advanced snippets:
-
-    * [Snippets Aliases](doc/examples/snippets-aliasing/README.md)
-    * [Dynamic Tabstops/Tabstop Generation](doc/examples/tabstop-generation/README.md)
 
 Quick Start
 -----------
@@ -59,6 +55,11 @@ for your plugin manager of choice. Put this into your `.vimrc`.
 UltiSnips comes with comprehensive
 [documentation](https://github.com/SirVer/ultisnips/blob/master/doc/UltiSnips.txt).
 As there are more options and tons of features I suggest you at least skim it.
+
+There are example uses for some power user features here:
+
+  * [Snippets Aliases](doc/examples/snippets-aliasing/README.md)
+  * [Dynamic Tabstops/Tabstop Generation](doc/examples/tabstop-generation/README.md)
 
 Screencasts
 -----------
