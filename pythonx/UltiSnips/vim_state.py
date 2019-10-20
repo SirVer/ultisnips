@@ -9,7 +9,8 @@ from UltiSnips import vim_helper
 from UltiSnips.compatibility import as_unicode, byte2col
 from UltiSnips.position import Position
 
-_Placeholder = namedtuple('_FrozenPlaceholder', ['current_text', 'start', 'end'])
+_Placeholder = namedtuple("_FrozenPlaceholder", ["current_text", "start", "end"])
+
 
 class VimPosition(Position):
 
@@ -18,7 +19,7 @@ class VimPosition(Position):
 
     def __init__(self):
         pos = vim_helper.buf.cursor
-        self._mode = vim_helper.eval('mode()')
+        self._mode = vim_helper.eval("mode()")
         Position.__init__(self, pos.line, pos.col)
 
     @property
@@ -36,7 +37,7 @@ class VimState(object):
         self._poss = deque(maxlen=5)
         self._lvb = None
 
-        self._text_to_expect = ''
+        self._text_to_expect = ""
         self._unnamed_reg_cached = False
 
         # We store the cached value of the unnamed register in Vim directly to
@@ -76,7 +77,7 @@ class VimState(object):
 
     def remember_buffer(self, to):
         """Remember the content of the buffer and the position."""
-        self._lvb = vim_helper.buf[to.start.line:to.end.line + 1]
+        self._lvb = vim_helper.buf[to.start.line : to.end.line + 1]
         self._lvb_len = len(vim_helper.buf)
         self.remember_position()
 
@@ -112,43 +113,43 @@ class VisualContentPreserver(object):
 
     def reset(self):
         """Forget the preserved state."""
-        self._mode = ''
-        self._text = as_unicode('')
+        self._mode = ""
+        self._text = as_unicode("")
         self._placeholder = None
 
     def conserve(self):
         """Save the last visual selection and the mode it was made in."""
-        sl, sbyte = map(int,
-                        (vim_helper.eval("""line("'<")"""), vim_helper.eval("""col("'<")""")))
-        el, ebyte = map(int,
-                        (vim_helper.eval("""line("'>")"""), vim_helper.eval("""col("'>")""")))
+        sl, sbyte = map(
+            int, (vim_helper.eval("""line("'<")"""), vim_helper.eval("""col("'<")"""))
+        )
+        el, ebyte = map(
+            int, (vim_helper.eval("""line("'>")"""), vim_helper.eval("""col("'>")"""))
+        )
         sc = byte2col(sl, sbyte - 1)
         ec = byte2col(el, ebyte - 1)
-        self._mode = vim_helper.eval('visualmode()')
+        self._mode = vim_helper.eval("visualmode()")
 
         # When 'selection' is 'exclusive', the > mark is one column behind the
         # actual content being copied, but never before the < mark.
-        if vim_helper.eval('&selection') == 'exclusive':
+        if vim_helper.eval("&selection") == "exclusive":
             if not (sl == el and sbyte == ebyte):
                 ec -= 1
 
-        _vim_line_with_eol = lambda ln: vim_helper.buf[ln] + '\n'
+        _vim_line_with_eol = lambda ln: vim_helper.buf[ln] + "\n"
 
         if sl == el:
-            text = _vim_line_with_eol(sl - 1)[sc:ec + 1]
+            text = _vim_line_with_eol(sl - 1)[sc : ec + 1]
         else:
             text = _vim_line_with_eol(sl - 1)[sc:]
             for cl in range(sl, el - 1):
                 text += _vim_line_with_eol(cl)
-            text += _vim_line_with_eol(el - 1)[:ec + 1]
+            text += _vim_line_with_eol(el - 1)[: ec + 1]
         self._text = text
 
     def conserve_placeholder(self, placeholder):
         if placeholder:
             self._placeholder = _Placeholder(
-                placeholder.current_text,
-                placeholder.start,
-                placeholder.end
+                placeholder.current_text, placeholder.start, placeholder.end
             )
         else:
             self._placeholder = None

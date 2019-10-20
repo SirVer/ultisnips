@@ -22,23 +22,20 @@ class _Tabs(object):
         self._to = to
 
     def __getitem__(self, no):
-        ts = self._to._get_tabstop(
-            self._to,
-            int(no))  # pylint:disable=protected-access
+        ts = self._to._get_tabstop(self._to, int(no))  # pylint:disable=protected-access
         if ts is None:
-            return ''
+            return ""
         return ts.current_text
 
     def __setitem__(self, no, value):
-        ts = self._to._get_tabstop(
-            self._to,
-            int(no))  # pylint:disable=protected-access
+        ts = self._to._get_tabstop(self._to, int(no))  # pylint:disable=protected-access
         if ts is None:
             return
         # TODO(sirver): The buffer should be passed into the object on construction.
         ts.overwrite(vim_helper.buf, value)
 
-_VisualContent = namedtuple('_VisualContent', ['mode', 'text'])
+
+_VisualContent = namedtuple("_VisualContent", ["mode", "text"])
 
 
 class SnippetUtilForAction(dict):
@@ -47,9 +44,7 @@ class SnippetUtilForAction(dict):
         self.__dict__ = self
 
     def expand_anon(self, *args, **kwargs):
-        UltiSnips.snippet_manager.UltiSnips_Manager.expand_anon(
-            *args, **kwargs
-        )
+        UltiSnips.snippet_manager.UltiSnips_Manager.expand_anon(*args, **kwargs)
         self.cursor.preserve()
 
 
@@ -65,7 +60,7 @@ class SnippetUtil(object):
         self._ind = IndentUtil()
         self._visual = _VisualContent(vmode, vtext)
         self._initial_indent = self._ind.indent_to_spaces(initial_indent)
-        self._reset('')
+        self._reset("")
         self._context = context
         self._start = parent.start
         self._end = parent.end
@@ -79,7 +74,7 @@ class SnippetUtil(object):
         """
         self._ind.reset()
         self._cur = cur
-        self._rv = ''
+        self._rv = ""
         self._changed = False
         self.reset_indent()
 
@@ -90,7 +85,7 @@ class SnippetUtil(object):
         :amount: the amount by which to shift.
 
         """
-        self.indent += ' ' * self._ind.shiftwidth * amount
+        self.indent += " " * self._ind.shiftwidth * amount
 
     def unshift(self, amount=1):
         """Unshift the indentation level. Note that this uses the shiftwidth
@@ -103,9 +98,9 @@ class SnippetUtil(object):
         try:
             self.indent = self.indent[:by]
         except IndexError:
-            self.indent = ''
+            self.indent = ""
 
-    def mkline(self, line='', indent=None):
+    def mkline(self, line="", indent=None):
         """Creates a properly set up line.
 
         :line: the text to add
@@ -117,11 +112,11 @@ class SnippetUtil(object):
             indent = self.indent
             # this deals with the fact that the first line is
             # already properly indented
-            if '\n' not in self._rv:
+            if "\n" not in self._rv:
                 try:
-                    indent = indent[len(self._initial_indent):]
+                    indent = indent[len(self._initial_indent) :]
                 except IndexError:
-                    indent = ''
+                    indent = ""
             indent = self._ind.spaces_to_indent(indent)
 
         return indent + line
@@ -134,17 +129,17 @@ class SnippetUtil(object):
     @property
     def fn(self):  # pylint:disable=no-self-use,invalid-name
         """The filename."""
-        return vim_helper.eval('expand("%:t")') or ''
+        return vim_helper.eval('expand("%:t")') or ""
 
     @property
     def basename(self):  # pylint:disable=no-self-use
         """The filename without extension."""
-        return vim_helper.eval('expand("%:t:r")') or ''
+        return vim_helper.eval('expand("%:t:r")') or ""
 
     @property
     def ft(self):  # pylint:disable=invalid-name
         """The filetype."""
-        return self.opt('&filetype', '')
+        return self.opt("&filetype", "")
 
     @property
     def rv(self):  # pylint:disable=invalid-name
@@ -181,7 +176,7 @@ class SnippetUtil(object):
         if self._parent.current_placeholder:
             return self._parent.current_placeholder
         else:
-            return _Placeholder('', 0, 0)
+            return _Placeholder("", 0, 0)
 
     @property
     def context(self):
@@ -189,7 +184,7 @@ class SnippetUtil(object):
 
     def opt(self, option, default=None):  # pylint:disable=no-self-use
         """Gets a Vim variable."""
-        if vim_helper.eval("exists('%s')" % option) == '1':
+        if vim_helper.eval("exists('%s')" % option) == "1":
             try:
                 return vim_helper.eval(option)
             except vim_helper.error:
@@ -198,7 +193,7 @@ class SnippetUtil(object):
 
     def __add__(self, value):
         """Appends the given line to rv using mkline."""
-        self.rv += '\n'  # pylint:disable=invalid-name
+        self.rv += "\n"  # pylint:disable=invalid-name
         self.rv += self.mkline(value)
         return self
 
@@ -248,24 +243,26 @@ class PythonCode(NoneditableTextObject):
                 snippet = snippet._parent  # pylint:disable=protected-access
         self._snip = SnippetUtil(token.indent, mode, text, context, snippet)
 
-        self._codes = ((
-            'import re, os, vim, string, random',
-            '\n'.join(snippet.globals.get('!p', [])).replace('\r\n', '\n'),
-            token.code.replace('\\`', '`')
-        ))
+        self._codes = (
+            "import re, os, vim, string, random",
+            "\n".join(snippet.globals.get("!p", [])).replace("\r\n", "\n"),
+            token.code.replace("\\`", "`"),
+        )
         NoneditableTextObject.__init__(self, parent, token)
 
     def _update(self, done, buf):
-        path = vim_helper.eval('expand("%")') or ''
+        path = vim_helper.eval('expand("%")') or ""
         ct = self.current_text
-        self._locals.update({
-            't': _Tabs(self._parent),
-            'fn': os.path.basename(path),
-            'path': path,
-            'cur': ct,
-            'res': ct,
-            'snip': self._snip,
-        })
+        self._locals.update(
+            {
+                "t": _Tabs(self._parent),
+                "fn": os.path.basename(path),
+                "path": path,
+                "cur": ct,
+                "res": ct,
+                "snip": self._snip,
+            }
+        )
         self._snip._reset(ct)  # pylint:disable=protected-access
 
         for code in self._codes:
@@ -276,8 +273,9 @@ class PythonCode(NoneditableTextObject):
                 raise
 
         rv = as_unicode(
-            self._snip.rv if self._snip._rv_changed  # pylint:disable=protected-access
-            else as_unicode(self._locals['res'])
+            self._snip.rv
+            if self._snip._rv_changed  # pylint:disable=protected-access
+            else as_unicode(self._locals["res"])
         )
 
         if ct != rv:
