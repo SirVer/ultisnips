@@ -15,30 +15,32 @@ from test.vim_interface import create_directory, TempFileManager
 
 def plugin_cache_dir():
     """The directory that we check out our bundles to."""
-    return os.path.join(tempfile.gettempdir(), 'UltiSnips_test_vim_plugins')
+    return os.path.join(tempfile.gettempdir(), "UltiSnips_test_vim_plugins")
 
 
 class VimTestCase(unittest.TestCase, TempFileManager):
     snippets = ()
     files = {}
-    text_before = ' --- some text before --- \n\n'
-    text_after = '\n\n --- some text after --- '
-    expected_error = ''
-    wanted = ''
-    keys = ''
+    text_before = " --- some text before --- \n\n"
+    text_after = "\n\n --- some text after --- "
+    expected_error = ""
+    wanted = ""
+    keys = ""
     sleeptime = 0.00
-    output = ''
+    output = ""
     plugins = []
     # Skip this test for the given reason or None for not skipping it.
     skip_if = lambda self: None
     version = None  # Will be set to vim --version output
     maxDiff = None  # Show all diff output, always.
-    vim_flavor = None # will be 'vim' or 'neovim'.
-    expected_python_version = None # If set, we need to check that our Vim is running this python version.
+    vim_flavor = None  # will be 'vim' or 'neovim'.
+    expected_python_version = (
+        None
+    )  # If set, we need to check that our Vim is running this python version.
 
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)
-        TempFileManager.__init__(self, 'Case')
+        TempFileManager.__init__(self, "Case")
 
     def runTest(self):
         if self.expected_python_version:
@@ -73,7 +75,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         Returns the absolute path to the file.
 
         """
-        return self.write_temp(file_path, textwrap.dedent(content + '\n'))
+        return self.write_temp(file_path, textwrap.dedent(content + "\n"))
 
     def _link_file(self, source, relative_destination):
         """Creates a link from 'source' to the 'relative_destination' in our
@@ -84,49 +86,49 @@ class VimTestCase(unittest.TestCase, TempFileManager):
 
     def setUp(self):
         if not VimTestCase.version:
-            VimTestCase.version, _ = subprocess.Popen([self.vim.vim_executable, '--version'],
-                                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+            VimTestCase.version, _ = subprocess.Popen(
+                [self.vim.vim_executable, "--version"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            ).communicate()
             if PYTHON3:
-                VimTestCase.version = VimTestCase.version.decode('utf-8')
+                VimTestCase.version = VimTestCase.version.decode("utf-8")
 
         if self.plugins and not self.test_plugins:
-            return self.skipTest('Not testing integration with other plugins.')
+            return self.skipTest("Not testing integration with other plugins.")
         reason_for_skipping = self.skip_if()
         if reason_for_skipping is not None:
             return self.skipTest(reason_for_skipping)
 
         vim_config = []
-        vim_config.append('set nocompatible')
-        vim_config.append('set runtimepath=$VIMRUNTIME,%s,%s' % (
-            os.path.dirname(os.path.dirname(__file__)), self._temp_dir))
+        vim_config.append("set nocompatible")
+        vim_config.append(
+            "set runtimepath=$VIMRUNTIME,%s,%s"
+            % (os.path.dirname(os.path.dirname(__file__)), self._temp_dir)
+        )
 
         if self.plugins:
             self._link_file(
-                os.path.join(
-                    plugin_cache_dir(),
-                    'vim-pathogen',
-                    'autoload'),
-                '.')
+                os.path.join(plugin_cache_dir(), "vim-pathogen", "autoload"), "."
+            )
             for plugin in self.plugins:
                 self._link_file(
-                    os.path.join(
-                        plugin_cache_dir(),
-                        os.path.basename(plugin)),
-                    'bundle')
-            vim_config.append('execute pathogen#infect()')
+                    os.path.join(plugin_cache_dir(), os.path.basename(plugin)), "bundle"
+                )
+            vim_config.append("execute pathogen#infect()")
 
         # Some configurations are unnecessary for vanilla Vim, but Neovim
         # defines some defaults differently.
-        vim_config.append('syntax on')
-        vim_config.append('filetype plugin indent on')
-        vim_config.append('set nosmarttab')
-        vim_config.append('set noautoindent')
+        vim_config.append("syntax on")
+        vim_config.append("filetype plugin indent on")
+        vim_config.append("set nosmarttab")
+        vim_config.append("set noautoindent")
         vim_config.append('set backspace=""')
         vim_config.append('set clipboard=""')
-        vim_config.append('set encoding=utf-8')
-        vim_config.append('set fileencoding=utf-8')
-        vim_config.append('set buftype=nofile')
-        vim_config.append('set shortmess=at')
+        vim_config.append("set encoding=utf-8")
+        vim_config.append("set fileencoding=utf-8")
+        vim_config.append("set buftype=nofile")
+        vim_config.append("set shortmess=at")
         vim_config.append('let @" = ""')
         assert EX == "\t"  # Otherwise you need to change the next line
         vim_config.append('let g:UltiSnipsExpandTrigger="<tab>"')
@@ -134,8 +136,8 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         vim_config.append('let g:UltiSnipsJumpBackwardTrigger="+"')
         vim_config.append('let g:UltiSnipsListSnippets="@"')
         vim_config.append(
-            'let g:UltiSnipsUsePythonVersion="%i"' %
-            (3 if PYTHON3 else 2))
+            'let g:UltiSnipsUsePythonVersion="%i"' % (3 if PYTHON3 else 2)
+        )
         vim_config.append('let g:UltiSnipsSnippetDirectories=["us"]')
         if self.python_host_prog:
             vim_config.append('let g:python_host_prog="%s"' % self.python_host_prog)
@@ -145,15 +147,15 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         self._extra_vim_config(vim_config)
 
         # Finally, add the snippets and some configuration for the test.
-        vim_config.append('%s << EOF' % ('py3' if PYTHON3 else 'py'))
-        vim_config.append('from UltiSnips import UltiSnips_Manager\n')
+        vim_config.append("%s << EOF" % ("py3" if PYTHON3 else "py"))
+        vim_config.append("from UltiSnips import UltiSnips_Manager\n")
 
         if len(self.snippets) and not isinstance(self.snippets[0], tuple):
-            self.snippets = (self.snippets, )
+            self.snippets = (self.snippets,)
         for s in self.snippets:
             sv, content = s[:2]
-            description = ''
-            options = ''
+            description = ""
+            options = ""
             priority = 0
             if len(s) > 2:
                 description = s[2]
@@ -161,18 +163,21 @@ class VimTestCase(unittest.TestCase, TempFileManager):
                 options = s[3]
             if len(s) > 4:
                 priority = s[4]
-            vim_config.append('UltiSnips_Manager.add_snippet(%r, %r, %r, %r, priority=%i)' % (
-                sv, content, description, options, priority))
+            vim_config.append(
+                "UltiSnips_Manager.add_snippet(%r, %r, %r, %r, priority=%i)"
+                % (sv, content, description, options, priority)
+            )
 
         # fill buffer with default text and place cursor in between.
         prefilled_text = (self.text_before + self.text_after).splitlines()
-        vim_config.append('import vim\n')
-        vim_config.append('vim.current.buffer[:] = %r\n' % prefilled_text)
+        vim_config.append("import vim\n")
+        vim_config.append("vim.current.buffer[:] = %r\n" % prefilled_text)
         vim_config.append(
-            'vim.current.window.cursor = (max(len(vim.current.buffer)//2, 1), 0)')
+            "vim.current.window.cursor = (max(len(vim.current.buffer)//2, 1), 0)"
+        )
 
         # End of python stuff.
-        vim_config.append('EOF')
+        vim_config.append("EOF")
 
         for name, content in self.files.items():
             self._create_file(name, content)
@@ -185,9 +190,9 @@ class VimTestCase(unittest.TestCase, TempFileManager):
             # Go into insert mode and type the keys but leave Vim some time to
             # react.
             if PYTHON3:
-                text = 'i' + self.keys
+                text = "i" + self.keys
             else:
-                text = u'i' + self.keys.decode("utf-8")
+                text = u"i" + self.keys.decode("utf-8")
             while text:
                 to_send = None
                 for seq in SEQUENCES:
@@ -197,14 +202,15 @@ class VimTestCase(unittest.TestCase, TempFileManager):
                 to_send = to_send or text[0]
                 self.vim.send_to_vim(to_send)
                 time.sleep(self.sleeptime)
-                text = text[len(to_send):]
+                text = text[len(to_send) :]
             self.output = self.vim.get_buffer_data()
 
     def tearDown(self):
         if self.interrupt:
-            print('Working directory: %s' % (self._temp_dir))
+            print("Working directory: %s" % (self._temp_dir))
             return
         self.vim.leave_with_wait()
         self.clear_temp()
+
 
 # vim:fileencoding=utf-8:foldmarker={{{#,#}}}:

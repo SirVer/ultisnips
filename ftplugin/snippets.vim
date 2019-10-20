@@ -52,5 +52,43 @@ let b:undo_ftplugin = "
             \|endif
             \"
 
+" snippet text object:
+" iS: inside snippet
+" aS: around snippet (including empty lines that follow)
+fun! s:UltiSnippetTextObj(inner) abort
+  normal! 0
+  let start = search('^snippet', 'nbcW')
+  let end   = search('^endsnippet', 'ncW')
+  let prev  = search('^endsnippet', 'nbW')
+
+  if !start || !end || prev > start
+    return feedkeys("\<Esc>", 'n')
+  endif
+
+  exe end
+
+  if a:inner
+    let start += 1
+    let end   -= 1
+
+  else
+    if search('^\S') <= (end + 1)
+      exe end
+    else
+      let end = line('.') - 1
+    endif
+  endif
+
+  exe start
+  k<
+  exe end
+  normal! $m>gv
+endfun
+
+onoremap <silent><buffer> iS :<C-U>call <SID>UltiSnippetTextObj(1)<CR>
+xnoremap <silent><buffer> iS :<C-U>call <SID>UltiSnippetTextObj(1)<CR>
+onoremap <silent><buffer> aS :<C-U>call <SID>UltiSnippetTextObj(0)<CR>
+xnoremap <silent><buffer> aS :<C-U>call <SID>UltiSnippetTextObj(0)<CR>
+
 let &cpo = s:save_cpo
 unlet s:save_cpo
