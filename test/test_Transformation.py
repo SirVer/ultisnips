@@ -140,6 +140,16 @@ class Transformation_CIBothDefinedPositive_ExpectCorrectResult(_VimTest):
     wanted = "a some yes"
 
 
+class Transformation_ConditionalInsertGithub1057_TypeSomething(_VimTest):
+    snippets = ("test", r"result $1" + "\n" + r"optional: '${1/(.+)|(.*)/(?1:A:B)/g}' full: '$1'")
+    keys = "test" + EX + "hi"
+    wanted = "result hi\noptional: 'A' full: 'hi'"
+
+class Transformation_ConditionalInsertGithub1057_TypeNothing(_VimTest):
+    snippets = ("test", r"result $1" + "\n" + r"optional: '${1/(.+)|(.*)/(?1:A:B)/g}' full: '$1'")
+    keys = "test" + EX + "hi" + BS + BS
+    wanted = "result \noptional: 'B' full: ''"
+
 class Transformation_ConditionalInsertRWEllipsis_ECR(_VimTest):
     snippets = ("test", r"$1 ${1/(\w+(?:\W+\w+){,7})\W*(.+)?/$1(?2:...)/}")
     keys = "test" + EX + "a b  c d e f ghhh h oha"
