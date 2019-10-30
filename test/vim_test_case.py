@@ -138,6 +138,13 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         vim_config.append(
             'let g:UltiSnipsUsePythonVersion="%i"' % (3 if PYTHON3 else 2)
         )
+
+        # Work around https://github.com/vim/vim/issues/3117 for testing >
+        # py3.7 on Vim 8.1. Actually also reported against UltiSnips
+        # https://github.com/SirVer/ultisnips/issues/996
+        if PYTHON3 and "Vi IMproved 8.1" in self.version:
+            vim_config.append("silent! python3 1")
+
         vim_config.append('let g:UltiSnipsSnippetDirectories=["us"]')
         if self.python_host_prog:
             vim_config.append('let g:python_host_prog="%s"' % self.python_host_prog)

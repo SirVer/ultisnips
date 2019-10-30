@@ -18,18 +18,11 @@ image_vim_81_py36:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.6-stretch --build-arg VIM_VERSION=8.1 .
 image_vim_git_py36:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.6-stretch --build-arg VIM_VERSION=git .
-image_vim_74_py37:
-	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.7-stretch --build-arg VIM_VERSION=7.4 .
-image_vim_80_py37:
-	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.7-stretch --build-arg VIM_VERSION=8.0 .
+# 74 and 80 do not build with py37 and py38. The build errors out with "Require native threads".
 image_vim_81_py37:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.7-stretch --build-arg VIM_VERSION=8.1 .
 image_vim_git_py37:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.7-stretch --build-arg VIM_VERSION=git .
-image_vim_74_py38:
-	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.8-buster --build-arg VIM_VERSION=7.4 .
-image_vim_80_py38:
-	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.8-buster --build-arg VIM_VERSION=8.0 .
 image_vim_81_py38:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.8-buster --build-arg VIM_VERSION=8.1 .
 image_vim_git_py38:
