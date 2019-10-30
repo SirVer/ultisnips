@@ -12,6 +12,7 @@ import sys
 import vim
 import re
 from contextlib import contextmanager
+from UltiSnips.debug import *  # NOCOM(#sirver):
 
 from UltiSnips import vim_helper
 from UltiSnips import err_to_scratch_buffer
@@ -129,6 +130,7 @@ class SnippetManager(object):
         """Try to expand a snippet at the current position."""
         vim_helper.command("let g:ulti_expand_res = 1")
         if not self._try_expand():
+            debug("self.expand_trigger: %r" % (self.expand_trigger))
             vim_helper.command("let g:ulti_expand_res = 0")
             self._handle_failure(self.expand_trigger)
 
@@ -143,9 +145,11 @@ class SnippetManager(object):
         """
         vim_helper.command("let g:ulti_expand_or_jump_res = 1")
         rv = self._try_expand()
+        debug("rv: %r" % (rv))
         if not rv:
             vim_helper.command("let g:ulti_expand_or_jump_res = 2")
             rv = self._jump()
+            debug("rv: %r" % (rv))
         if not rv:
             vim_helper.command("let g:ulti_expand_or_jump_res = 0")
             self._handle_failure(self.expand_trigger)
@@ -585,6 +589,7 @@ class SnippetManager(object):
 
     def _handle_failure(self, trigger):
         """Mainly make sure that we play well with SuperTab."""
+        debug("trigger: %r" % (trigger))
         if trigger.lower() == "<tab>":
             feedkey = "\\" + trigger
         elif trigger.lower() == "<s-tab>":
@@ -750,6 +755,8 @@ class SnippetManager(object):
 
     def _try_expand(self, autotrigger_only=False):
         """Try to expand a snippet in the current place."""
+        if autotrigger_only:
+            return
         before = vim_helper.buf.line_till_cursor
         snippets = self._snips(before, False, autotrigger_only)
         if snippets:
@@ -757,6 +764,7 @@ class SnippetManager(object):
             snippets_with_context = [s for s in snippets if s.context]
             if snippets_with_context:
                 snippets = snippets_with_context
+        debug("snippets: %r" % (snippets))
         if not snippets:
             # No snippet found
             return False
@@ -767,6 +775,7 @@ class SnippetManager(object):
             snippet = _ask_snippets(snippets)
             if not snippet:
                 return True
+        debug("snippet: %r, before: %r" % (snippet, before))
         self._do_snippet(snippet, before)
         vim_helper.command("let &undolevels = &undolevels")
         return True

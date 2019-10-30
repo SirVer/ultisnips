@@ -47,6 +47,7 @@ hi4"""
 
     def _extra_vim_config(self, vim_config):
         vim_config.append("set langmap=dj,rk,nl,ln,jd,kr,DJ,RK,NL,LN,JD,KR")
+        vim_config.append("set nolangremap")
 
 
 # Test for https://bugs.launchpad.net/bugs/501727 #

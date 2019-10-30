@@ -63,16 +63,17 @@ snoremap <Plug>(UltiSnips#ListSnippets) <Esc>:call UltiSnips#ListSnippets()<cr>
 
 function! UltiSnips#map_keys#MapKeys() abort
     if g:UltiSnipsExpandTrigger == g:UltiSnipsJumpForwardTrigger
-        exec "imap <silent> " . g:UltiSnipsExpandTrigger . " <Plug>(UltiSnips#ExpandSnippetOrJump)"
-        exec "smap <silent> " . g:UltiSnipsExpandTrigger . " <Plug>(UltiSnips#ExpandSnippetOrJump)"
+        imap <silent> <tab> <Plug>(UltiSnips#ExpandSnippetOrJump)
+        exec "imap <special><silent> " . g:UltiSnipsExpandTrigger . " <Plug>(UltiSnips#ExpandSnippetOrJump)"
+        exec "smap <special><silent> " . g:UltiSnipsExpandTrigger . " <Plug>(UltiSnips#ExpandSnippetOrJump)"
     else
-        exec "imap <silent> " . g:UltiSnipsExpandTrigger . " <Plug>(UltiSnips#ExpandSnippet)"
-        exec "smap <silent> " . g:UltiSnipsExpandTrigger . " <Plug>(UltiSnips#ExpandSnippet)"
+        exec "imap <special><silent> " . g:UltiSnipsExpandTrigger . " <Plug>(UltiSnips#ExpandSnippet)"
+        exec "smap <special><silent> " . g:UltiSnipsExpandTrigger . " <Plug>(UltiSnips#ExpandSnippet)"
     endif
-    exec "xmap <silent> " . g:UltiSnipsExpandTrigger. " <Plug>(UltiSnips#SaveLastVisualSelection)"
+    exec "xmap <special><silent> " . g:UltiSnipsExpandTrigger. " <Plug>(UltiSnips#SaveLastVisualSelection)"
     if len(g:UltiSnipsListSnippets) > 0
-       exec "imap <silent> " . g:UltiSnipsListSnippets . " <Plug>(UltiSnips#ListSnippets)"
-       exec "smap <silent> " . g:UltiSnipsListSnippets . " <Plug>(UltiSnips#ListSnippets)"
+       exec "imap <special><silent> " . g:UltiSnipsListSnippets . " <Plug>(UltiSnips#ListSnippets)"
+       exec "smap <special><silent> " . g:UltiSnipsListSnippets . " <Plug>(UltiSnips#ListSnippets)"
     endif
 
     snoremap <silent> <BS> <c-g>"_c
