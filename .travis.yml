@@ -6,10 +6,14 @@ env:
   - VIM_VERSION="8.0" PYTHON_IMAGE=2.7-stretch TAG=vim_80_py2
   - VIM_VERSION="8.1" PYTHON_IMAGE=2.7-stretch TAG=vim_81_py2
   - VIM_VERSION="git" PYTHON_IMAGE=2.7-stretch TAG=vim_git_py2
-  - VIM_VERSION="7.4" PYTHON_IMAGE=3.6-stretch TAG=vim_74_py3
-  - VIM_VERSION="8.0" PYTHON_IMAGE=3.6-stretch TAG=vim_80_py3
-  - VIM_VERSION="8.1" PYTHON_IMAGE=3.6-stretch TAG=vim_81_py3
-  - VIM_VERSION="git" PYTHON_IMAGE=3.6-stretch TAG=vim_git_py3
+  - VIM_VERSION="7.4" PYTHON_IMAGE=3.6-stretch TAG=vim_74_py36
+  - VIM_VERSION="8.0" PYTHON_IMAGE=3.6-stretch TAG=vim_80_py36
+  - VIM_VERSION="8.1" PYTHON_IMAGE=3.6-stretch TAG=vim_81_py36
+  - VIM_VERSION="git" PYTHON_IMAGE=3.6-stretch TAG=vim_git_py36
+  - VIM_VERSION="8.1" PYTHON_IMAGE=3.7-stretch TAG=vim_81_py37
+  - VIM_VERSION="git" PYTHON_IMAGE=3.7-stretch TAG=vim_git_py37
+  - VIM_VERSION="8.1" PYTHON_IMAGE=3.8-buster TAG=vim_81_py38
+  - VIM_VERSION="git" PYTHON_IMAGE=3.8-buster TAG=vim_git_py38
 
 install:
    - docker build -t ultisnips:${TAG} --build-arg PYTHON_IMAGE=${PYTHON_IMAGE} --build-arg VIM_VERSION=${VIM_VERSION} .
