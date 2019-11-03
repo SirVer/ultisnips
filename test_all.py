@@ -235,4 +235,4 @@ if __name__ == "__main__":
 
     sys.exit(main())
 
-# vim:fileencoding=utf-8:foldmarker={{{#,#}}}:
+# vim:fileencoding=utf-8:

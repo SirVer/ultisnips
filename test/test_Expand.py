@@ -1,8 +1,6 @@
 from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
-# Simple Expands  {{{#
-
 
 class _SimpleExpands(_VimTest):
     snippets = ("hallo", "Hallo Welt!")
@@ -77,6 +75,3 @@ class SimpleExpand_DoNotClobberDefaultRegister(_VimTest):
 
     def _extra_vim_config(self, vim_config):
         vim_config.append('let @"=""')
-
-
-# End: Simple Expands  #}}}

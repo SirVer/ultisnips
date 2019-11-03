@@ -2,8 +2,6 @@
 from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
-# Autocommands  {{{#
-
 
 class Autocommands(_VimTest):
     snippets = ("test", "[ ${1:foo} ]")
@@ -40,6 +38,3 @@ class Autocommands(_VimTest):
         vim_config.append("autocmd User UltiSnipsEnterFirstSnippet call CustomMapper()")
         vim_config.append("autocmd! User UltiSnipsExitLastSnippet")
         vim_config.append("autocmd User UltiSnipsExitLastSnippet call CustomUnmapper()")
-
-
-# end: Autocommands  #}}}
