@@ -5,6 +5,7 @@ if exists("b:current_syntax")
     finish
 endif
 
+" Embedded syntaxes {{{1
 
 " Re-include the original file so we can share some of its definitions
 let b:ultisnips_override_snipmate = 1
@@ -15,6 +16,7 @@ unlet b:ultisnips_override_snipmate
 syn cluster snipTokens contains=snipEscape,snipVisual,snipTabStop,snipMirror,snipmateCommand
 syn cluster snipTabStopTokens contains=snipVisual,snipMirror,snipEscape,snipmateCommand
 
+" Syntax definitions {{{1
 
 syn match snipmateComment "^#.*"
 
@@ -29,6 +31,7 @@ syn region snipmateSnippetBody start="^\t" end="^\ze[^[:tab:]]" contained contai
 
 syn region snipmateCommand keepend matchgroup=snipCommandDelim start="`" skip="\\[{}\\$`]" end="`" contained contains=snipCommandSyntaxOverride,@Viml
 
+" Highlight groups {{{1
 
 hi def link snipmateComment snipComment
 
@@ -38,5 +41,7 @@ hi def link snipmateTrigger snipSnippetTrigger
 hi def link snipmateDescription snipSnippetDocString
 
 hi def link snipmateCommand snipCommand
+
+" }}}1
 
 let b:current_syntax = "snippets"
