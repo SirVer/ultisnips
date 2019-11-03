@@ -15,6 +15,7 @@ from contextlib import contextmanager
 
 from UltiSnips import vim_helper
 from UltiSnips import err_to_scratch_buffer
+from UltiSnips.debug import *  # NOCOM(#sirver):
 from UltiSnips.diff import diff, guess_edit
 from UltiSnips.compatibility import as_unicode
 from UltiSnips.position import Position
@@ -91,6 +92,8 @@ class SnippetManager(object):
 
         self._last_change = ("", 0)
 
+        self._last_changed_ticks = defaultdict(int)
+
         self._added_snippets_source = AddedSnippetsSource()
         self.register_snippet_source("ultisnips_files", UltiSnipsFileSource())
         self.register_snippet_source("added", self._added_snippets_source)
@@ -101,7 +104,6 @@ class SnippetManager(object):
         if enable_snipmate == "1":
             self.register_snippet_source("snipmate_files", SnipMateFileSource())
 
-        self._should_update_textobjects = False
         self._should_reset_visual = False
 
         self._reinit()
@@ -310,8 +312,6 @@ class SnippetManager(object):
     @err_to_scratch_buffer.wrap
     def _cursor_moved(self):
         """Called whenever the cursor moved."""
-        self._should_update_textobjects = False
-
         self._vstate.remember_position()
         if vim_helper.eval("mode()") not in "in":
             return
@@ -320,7 +320,13 @@ class SnippetManager(object):
             self._ignore_movements = False
             return
 
-        if self._active_snippets:
+        tick = vim_helper.buf.changed_tick
+        changed = False
+        if tick != self._last_changed_ticks[vim_helper.buf.number]:
+            changed = True
+            self._last_changed_ticks[vim_helper.buf.number] = tick
+        if self._active_snippets and changed:
+            echo_to_hierarchy(self._active_snippets[0])
             cstart = self._active_snippets[0].start.line
             cend = (
                 self._active_snippets[0].end.line + self._vstate.diff_in_buffer_length
@@ -377,6 +383,7 @@ class SnippetManager(object):
         self._check_if_still_inside_snippet()
         if self._active_snippets:
             self._active_snippets[0].update_textobjects(vim_helper.buf)
+            self._last_changed_ticks[vim_helper.buf.number] = vim_helper.buf.changed_tick
             self._vstate.remember_buffer(self._active_snippets[0])
 
     def _setup_inner_state(self):
@@ -496,9 +503,8 @@ class SnippetManager(object):
 
     def _jump(self, backwards=False):
         """Helper method that does the actual jump."""
-        if self._should_update_textobjects:
-            self._should_reset_visual = False
-            self._cursor_moved()
+        self._should_reset_visual = False
+        self._cursor_moved()
 
         # we need to set 'onemore' there, because of limitations of the vim
         # API regarding cursor movements; without that test
@@ -548,6 +554,7 @@ class SnippetManager(object):
                     )
                     self._should_reset_visual = False
                     self._active_snippets[0].update_textobjects(vim_helper.buf)
+                    self._last_changed_ticks[vim_helper.buf.number] = vim_helper.buf.changed_tick
                     # Open any folds this might have created
                     vim_helper.command("normal! zv")
                     self._vstate.remember_buffer(self._active_snippets[0])
@@ -682,7 +689,6 @@ class SnippetManager(object):
         self._setup_inner_state()
 
         self._snip_expanded_in_action = False
-        self._should_update_textobjects = False
 
         # Adjust before, maybe the trigger is not the complete word
         text_before = before
@@ -884,8 +890,6 @@ class SnippetManager(object):
 
     @err_to_scratch_buffer.wrap
     def _track_change(self):
-        self._should_update_textobjects = True
-
         try:
             inserted_char = vim_helper.as_unicode(vim_helper.eval("v:char"))
         except UnicodeDecodeError:

@@ -51,6 +51,10 @@ class VimBuffer(object):
         return vim.current.buffer.number
 
     @property
+    def changed_tick(self): # pylint:disable=no-self-use
+        return int(vim.eval("b:changedtick"))
+
+    @property
     def filetypes(self):
         return [ft for ft in vim.eval("&filetype").split(".") if ft]
 
