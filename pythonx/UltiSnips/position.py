@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-"""Represents a Position in a text file: (0 based line index, 0 based column
-index) and provides methods for moving them around."""
+from enum import Enum
+
+class JumpDirection(Enum):
+    forward = 1
+    backward = 2
 
 
 class Position(object):
-
-    """See module docstring."""
+    """Represents a Position in a text file: (0 based line index, 0 based column
+    index) and provides methods for moving them around."""
 
     def __init__(self, line, col):
         self.line = line
