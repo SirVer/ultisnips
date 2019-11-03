@@ -81,7 +81,6 @@ class DoNotCrashOnUndoAndJumpInNestedSnippet(_VimTest):
     wanted = "if a: test"
 
 
-
 # Test for bug #927844
 class DeleteLastTwoLinesInSnippet(_VimTest):
     snippets = ("test", "$1hello\nnice\nworld")

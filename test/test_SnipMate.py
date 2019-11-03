@@ -207,7 +207,6 @@ endsnippet
     wanted = "ultisnips"
 
 
-
 class snipMate_Issue658(_VimTest):
     files = {
         "snippets/_.snippets": """
@@ -223,4 +222,3 @@ snippet /*
  * 2
  */
 """
-

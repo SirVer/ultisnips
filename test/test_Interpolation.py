@@ -68,12 +68,10 @@ print "Hallo Welt"
     wanted = "Hallo now Hallo Welt endand more"
 
 
-
 class TabStop_VimScriptInterpolation_SimpleExample(_VimTest):
     snippets = ("test", """hi `!v indent(".")` End""")
     keys = "    test" + EX
     wanted = "    hi 4 End"
-
 
 
 class PythonCodeOld_SimpleExample(_VimTest):
@@ -553,5 +551,3 @@ class Python_WeirdScoping_Error(_VimTest):
     )
     keys = "test" + EX
     wanted = "h5b"
-
-

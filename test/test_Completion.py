@@ -2,7 +2,6 @@ from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
 
-
 class Completion_SimpleExample_ECR(_VimTest):
     snippets = ("test", "$1 ${1:blah}")
     keys = (
@@ -38,5 +37,3 @@ class Completion_BackwardsJumpWithoutCOMPL_ACCEPT(_VimTest):
     snippets = ("test", "$1 $2")
     keys = COMPLETION_OPTIONS + "test" + EX + "foo" + JF + "com" + COMPL_KW + JB + "foo"
     wanted = COMPLETION_OPTIONS + "foo completion1"
-
-

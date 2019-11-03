@@ -1,6 +1,7 @@
 from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
+
 class _MultipleMatches(_VimTest):
     snippets = (
         ("test", "Case1", "This is Case 1"),
@@ -67,5 +68,3 @@ class Multiple_ManySnippetsOneTrigger_ECR(_VimTest):
     )
     keys = "test" + EX + " " + ESC + ESC + "ahi"
     wanted = "testhi"
-
-

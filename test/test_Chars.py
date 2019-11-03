@@ -37,7 +37,6 @@ class Snippet_With_DoubleQuote_List(_VimTest):
     wanted = 'Expand me"!'
 
 
-
 class RemoveTrailingWhitespace(_VimTest):
     snippets = ("test", """Hello\t ${1:default}\n$2""", "", "s")
     wanted = """Hello\nGoodbye"""
@@ -206,8 +205,6 @@ x
 y"""
 
 
-
-
 class _UmlautsBase(_VimTest):
     # SendKeys can't send UTF characters
     skip_if = lambda self: running_on_windows()
@@ -271,5 +268,3 @@ class NoUmlautsBeforeTriggerAndCharsAfter(_UmlautsBase):
     snippets = ("trig", "success")
     keys = "oouu trig b" + 2 * ARR_L + EX
     wanted = "oouu success b"
-
-

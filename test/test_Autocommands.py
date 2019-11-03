@@ -38,5 +38,3 @@ class Autocommands(_VimTest):
         vim_config.append("autocmd User UltiSnipsEnterFirstSnippet call CustomMapper()")
         vim_config.append("autocmd! User UltiSnipsExitLastSnippet")
         vim_config.append("autocmd User UltiSnipsExitLastSnippet call CustomUnmapper()")
-
-

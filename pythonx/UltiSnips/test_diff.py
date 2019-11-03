@@ -73,7 +73,6 @@ class TestGuessing_DeleteOneChar(_BaseGuessing, unittest.TestCase):
     wanted = (("D", 0, 5, " "),)
 
 
-
 class _Base(object):
     def runTest(self):
         es = diff(self.a, self.b)

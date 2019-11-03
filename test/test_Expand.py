@@ -75,4 +75,3 @@ class SimpleExpand_DoNotClobberDefaultRegister(_VimTest):
 
     def _extra_vim_config(self, vim_config):
         vim_config.append('let @"=""')
-

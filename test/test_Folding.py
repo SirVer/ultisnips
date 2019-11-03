@@ -2,7 +2,6 @@ from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
 
-
 class FoldingEnabled_SnippetWithFold_ExpectNoFolding(_VimTest):
     def _extra_vim_config(self, vim_config):
         vim_config.append("set foldlevel=0")
@@ -57,5 +56,3 @@ ${0}
     )
     keys = "test" + EX + JF + "sub junk {}"
     wanted = "package c03;\nsub junk {}\n1;"
-
-

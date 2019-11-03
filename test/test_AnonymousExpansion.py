@@ -63,5 +63,3 @@ class Anon_Trigger_Opts(_AnonBase):
     args = '"simple expand", ".*abc", "desc", "r"'
     keys = "blah blah abc" + EA
     wanted = "simple expand"
-
-

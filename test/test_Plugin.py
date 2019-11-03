@@ -29,4 +29,3 @@ class Plugin_SuperTab_SimpleTest(_VimTest):
         vim_config.append('let g:SuperTabRetainCompletionDuration = "insert"')
         vim_config.append("let g:SuperTabLongestHighlight = 1")
         vim_config.append("let g:SuperTabCrMapping = 0")
-

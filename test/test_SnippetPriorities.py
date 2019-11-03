@@ -163,4 +163,3 @@ class SnippetPriorities_ClearedByChild(_VimTest):
         + ":set ft=p"
     )
     wanted = "Should only expand in p.\ntest" + EX
-

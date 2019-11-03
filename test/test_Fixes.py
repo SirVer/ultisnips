@@ -2,12 +2,10 @@ from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
 
-
 class Bug1251994(_VimTest):
     snippets = ("test", "${2:#2} ${1:#1};$0")
     keys = "  test" + EX + "hello" + JF + "world" + JF + "blub"
     wanted = "  world hello;blub"
-
 
 
 # Test for https://github.com/SirVer/ultisnips/issues/157 (virtualedit)
@@ -106,4 +104,4 @@ class NonUnicodeDataInUnnamedRegister(_VimTest):
         )
 
 
-# End: #171 
+# End: #171

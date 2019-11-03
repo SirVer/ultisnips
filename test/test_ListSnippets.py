@@ -46,5 +46,3 @@ class ListAllAvailable_Disabled_ExpectCorrectResult(_ListAllSnippets):
 
     def _extra_vim_config(self, vim_config):
         vim_config.append('let g:UltiSnipsListSnippets=""')
-
-

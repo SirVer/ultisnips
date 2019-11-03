@@ -360,5 +360,3 @@ class MultiWord_SnippetOptions_ExpandWordSnippets_ExpandSuffix(
 ):
     keys = "a-test it" + EX
     wanted = "a-Expand me!"
-
-

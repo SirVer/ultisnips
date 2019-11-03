@@ -4,7 +4,6 @@ from test.constant import *
 from test.util import no_unidecode_available
 
 
-
 class Transformation_SimpleCase_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 ${1/foo/batzl/}")
     keys = "test" + EX + "hallo foo boy"
@@ -277,5 +276,3 @@ class Transformation_ConditionalWithBackslashBeforeDelimiter1(_VimTest):
     snippets = "test", r"$1 ${1/(aa)|.*/(?1:yes:no\\)/}"
     keys = "test" + EX + "ab"
     wanted = "ab no\\"
-
-

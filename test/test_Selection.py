@@ -68,9 +68,6 @@ class SelectModeMappings_BufferLocalMappings_ECR(_SelectModeMappings):
     wanted = "Hello"
 
 
-
-
-
 class _ES_Base(_VimTest):
     def _extra_vim_config(self, vim_config):
         vim_config.append("set selection=exclusive")
@@ -95,9 +92,6 @@ class ExclusiveSelection_RealWorldCase_Test(_ES_Base):
 }"""
 
 
-
-
-
 class _OS_Base(_VimTest):
     def _extra_vim_config(self, vim_config):
         vim_config.append("set selection=old")
@@ -120,5 +114,3 @@ class OldSelection_RealWorldCase_Test(_OS_Base):
     wanted = """for ($k = 0; $k < count; $k++) {
 	// code
 }"""
-
-

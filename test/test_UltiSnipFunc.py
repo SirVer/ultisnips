@@ -4,7 +4,6 @@ from test.constant import *
 from test.util import running_on_windows
 
 
-
 class _AddFuncBase(_VimTest):
     args = ""
 
@@ -22,7 +21,6 @@ class AddFunc_Opt(_AddFuncBase):
     args = '".*test", "simple expand", "desc", "r", "all", 0'
     keys = "abc test" + EX
     wanted = "simple expand"
-
 
 
 # Test for bug 501727 #
@@ -136,8 +134,6 @@ class VerifyVimDict3(_VimTest):
     wanted = "te'123êabc"
 
 
-
-
 class AddNewSnippetSource(_VimTest):
     keys = (
         "blumba"
@@ -175,5 +171,3 @@ class MySnippetSource(SnippetSource):
         )
         pyfile = "py3file" if PYTHON3 else "pyfile"
         vim_config.append("%s %s" % (pyfile, self.name_temp("snippet_source.py")))
-
-
