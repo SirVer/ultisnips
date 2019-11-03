@@ -220,4 +220,4 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         self.clear_temp()
 
 
-# vim:fileencoding=utf-8:foldmarker={{{#,#}}}:
+# vim:fileencoding=utf-8:

@@ -11,9 +11,6 @@ def check_required_vim_version(test):
         return None
 
 
-# Undo of Snippet insertion  {{{#
-
-
 class Undo_RemoveMultilineSnippet(_VimTest):
     snippets = ("test", "Hello\naaa ${1} bbb\nWorld")
     keys = "test" + EX + ESC + "u"
@@ -84,12 +81,7 @@ class DoNotCrashOnUndoAndJumpInNestedSnippet(_VimTest):
     wanted = "if a: test"
 
 
-# End: Undo of Snippet insertion  #}}}
-
-# Normal mode editing  {{{#
 # Test for bug #927844
-
-
 class DeleteLastTwoLinesInSnippet(_VimTest):
     snippets = ("test", "$1hello\nnice\nworld")
     keys = "test" + EX + ESC + "j2dd"
@@ -114,9 +106,6 @@ class DeleteCurrentTabStop3_JumpAround(_VimTest):
     wanted = "hello\nendworld"
 
 
-# End: Normal mode editing  #}}}
-
-# Pressing BS in TabStop  {{{#
 # Test for Bug #774917
 
 
@@ -130,9 +119,6 @@ class Backspace_TabStop_NotZero(_VimTest):
     snippets = ("test", "A${1:C} ${2:DDD}", "This is Case 1")
     keys = "test" + EX + "A" + JF + BS + "BBB"
     wanted = "AA BBB"
-
-
-# End: Pressing BS in TabStop  #}}}
 
 
 class UpdateModifiedSnippetWithoutCursorMove1(_VimTest):

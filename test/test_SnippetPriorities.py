@@ -1,8 +1,6 @@
 from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import EX, ESC
 
-# Snippet Priority  {{{#
-
 
 class SnippetPriorities_MultiWordTriggerOverwriteExisting(_VimTest):
     snippets = (
@@ -165,6 +163,3 @@ class SnippetPriorities_ClearedByChild(_VimTest):
         + ":set ft=p"
     )
     wanted = "Should only expand in p.\ntest" + EX
-
-
-# End: Snippet Priority  #}}}

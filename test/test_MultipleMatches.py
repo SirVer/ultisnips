@@ -1,8 +1,6 @@
 from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
-# Selecting Between Same Triggers  {{{#
-
 
 class _MultipleMatches(_VimTest):
     snippets = (
@@ -37,7 +35,6 @@ class Multiple_SimpleCaseEscapeOut_ECR(_MultipleMatches):
 
 
 class Multiple_ManySnippetsOneTrigger_ECR(_VimTest):
-    # Snippet definition {{{#
     snippets = (
         ("test", "Case1", "This is Case 1"),
         ("test", "Case2", "This is Case 2"),
@@ -68,9 +65,6 @@ class Multiple_ManySnippetsOneTrigger_ECR(_VimTest):
         ("test", "Case27", "This is Case 27"),
         ("test", "Case28", "This is Case 28"),
         ("test", "Case29", "This is Case 29"),
-    )  # }}}
+    )
     keys = "test" + EX + " " + ESC + ESC + "ahi"
     wanted = "testhi"
-
-
-# End: Selecting Between Same Triggers  #}}}

@@ -5,8 +5,6 @@ from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import EX, JF, ESC
 from test.util import running_on_windows
 
-# ShellCode Interpolation  {{{#
-
 
 class TabStop_Shell_SimpleExample(_VimTest):
     skip_if = lambda self: running_on_windows()
@@ -70,19 +68,10 @@ print "Hallo Welt"
     wanted = "Hallo now Hallo Welt endand more"
 
 
-# End: ShellCode Interpolation  #}}}
-# VimScript Interpolation  {{{#
-
-
 class TabStop_VimScriptInterpolation_SimpleExample(_VimTest):
     snippets = ("test", """hi `!v indent(".")` End""")
     keys = "    test" + EX
     wanted = "    hi 4 End"
-
-
-# End: VimScript Interpolation  #}}}
-# PythonCode Interpolation  {{{#
-# Deprecated Implementation  {{{#
 
 
 class PythonCodeOld_SimpleExample(_VimTest):
@@ -125,10 +114,6 @@ else:
     )
     keys = "    test" + EX
     wanted = "    start b isbigger a end"
-
-
-# End: Deprecated Implementation  #}}}
-# New Implementation  {{{#
 
 
 class PythonCode_UseNewOverOld(_VimTest):
@@ -566,7 +551,3 @@ class Python_WeirdScoping_Error(_VimTest):
     )
     keys = "test" + EX
     wanted = "h5b"
-
-
-# End: New Implementation  #}}}
-# End: PythonCode Interpolation  #}}}
