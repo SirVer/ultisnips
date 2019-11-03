@@ -1,7 +1,6 @@
 from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
-# Folding Interaction  {{{#
 
 
 class FoldingEnabled_SnippetWithFold_ExpectNoFolding(_VimTest):
@@ -60,4 +59,3 @@ ${0}
     wanted = "package c03;\nsub junk {}\n1;"
 
 
-# End: Folding Interaction  #}}}

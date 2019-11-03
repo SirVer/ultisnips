@@ -3,7 +3,6 @@ from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 from test.util import running_on_windows
 
-# AddSnippet Function  {{{#
 
 
 class _AddFuncBase(_VimTest):
@@ -25,9 +24,7 @@ class AddFunc_Opt(_AddFuncBase):
     wanted = "simple expand"
 
 
-# End: AddSnippet Function  #}}}
 
-# Langmap Handling  {{{#
 # Test for bug 501727 #
 
 
@@ -95,11 +92,6 @@ hi4"""
         )
 
 
-# End: Langmap Handling  #}}}
-
-# SnippetsInCurrentScope  {{{#
-
-
 class VerifyVimDict1(_VimTest):
 
     """check:
@@ -144,9 +136,6 @@ class VerifyVimDict3(_VimTest):
     wanted = "te'123êabc"
 
 
-# End: SnippetsInCurrentScope  #}}}
-
-# Snippet Source  {{{#
 
 
 class AddNewSnippetSource(_VimTest):
@@ -188,4 +177,3 @@ class MySnippetSource(SnippetSource):
         vim_config.append("%s %s" % (pyfile, self.name_temp("snippet_source.py")))
 
 
-# End: Snippet Source  #}}}

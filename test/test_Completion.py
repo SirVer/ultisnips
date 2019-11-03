@@ -1,7 +1,6 @@
 from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
-# Tab Completion of Words  {{{#
 
 
 class Completion_SimpleExample_ECR(_VimTest):
@@ -41,4 +40,3 @@ class Completion_BackwardsJumpWithoutCOMPL_ACCEPT(_VimTest):
     wanted = COMPLETION_OPTIONS + "foo completion1"
 
 
-# End: Tab Completion of Words  #}}}

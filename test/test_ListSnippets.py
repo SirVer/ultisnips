@@ -1,8 +1,6 @@
 from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
-# List Snippets  {{{#
-
 
 class _ListAllSnippets(_VimTest):
     snippets = (
@@ -50,4 +48,3 @@ class ListAllAvailable_Disabled_ExpectCorrectResult(_ListAllSnippets):
         vim_config.append('let g:UltiSnipsListSnippets=""')
 
 
-# End: List Snippets  #}}}

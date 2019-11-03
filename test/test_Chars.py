@@ -3,7 +3,6 @@ from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 from test.util import running_on_windows
 
-# Quotes in Snippets  {{{#
 # Test for Bug #774917
 
 
@@ -38,10 +37,6 @@ class Snippet_With_DoubleQuote_List(_VimTest):
     wanted = 'Expand me"!'
 
 
-# End: Quotes in Snippets  #}}}
-
-# Trailing whitespace {{{#
-
 
 class RemoveTrailingWhitespace(_VimTest):
     snippets = ("test", """Hello\t ${1:default}\n$2""", "", "s")
@@ -67,9 +62,6 @@ class LeaveTrailingWhitespace(_VimTest):
     keys = "test" + EX + BS + JF + "Goodbye"
 
 
-# End: Trailing whitespace #}}}
-
-# Newline in default text {{{#
 # Tests for bug 616315 #
 
 
@@ -214,9 +206,6 @@ x
 y"""
 
 
-# End: Newline in default text  #}}}
-
-# Umlauts and Special Chars  {{{#
 
 
 class _UmlautsBase(_VimTest):
@@ -284,4 +273,3 @@ class NoUmlautsBeforeTriggerAndCharsAfter(_UmlautsBase):
     wanted = "oouu success b"
 
 
-# End: Umlauts and Special Chars  #}}}

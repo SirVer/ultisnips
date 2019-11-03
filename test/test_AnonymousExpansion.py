@@ -1,8 +1,6 @@
 from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
-# Anonymous Expansion  {{{#
-
 
 class _AnonBase(_VimTest):
     args = ""
@@ -67,4 +65,3 @@ class Anon_Trigger_Opts(_AnonBase):
     wanted = "simple expand"
 
 
-# End: Anonymous Expansion  #}}}

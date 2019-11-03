@@ -1,7 +1,6 @@
 from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
-# Unmap SelectMode Mappings  {{{#
 # Test for bug 427298 #
 
 
@@ -69,9 +68,7 @@ class SelectModeMappings_BufferLocalMappings_ECR(_SelectModeMappings):
     wanted = "Hello"
 
 
-# End: Unmap SelectMode Mappings  #}}}
 
-# Exclusive Selection  {{{#
 
 
 class _ES_Base(_VimTest):
@@ -98,9 +95,7 @@ class ExclusiveSelection_RealWorldCase_Test(_ES_Base):
 }"""
 
 
-# End: Exclusive Selection  #}}}
 
-# Old Selection {{{#
 
 
 class _OS_Base(_VimTest):
@@ -127,4 +122,3 @@ class OldSelection_RealWorldCase_Test(_OS_Base):
 }"""
 
 
-# End: Old Selection #}}}

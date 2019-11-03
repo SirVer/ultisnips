@@ -1,7 +1,6 @@
 from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
-# Cursor Movement  {{{#
 
 
 class CursorMovement_Multiline_ECR(_VimTest):
@@ -22,8 +21,6 @@ class CursorMovement_BS_InEditMode(_VimTest):
     wanted = "<tr>\n\t<th>blah</th>\n</tr>\nend"
 
 
-# End: Cursor Movement  #}}}
-# Insert Mode Moving  {{{#
 
 
 class IMMoving_CursorsKeys_ECR(_VimTest):
@@ -84,4 +81,3 @@ class IMMoving_ExitWhenOutsideBelow_ECR(_VimTest):
     wanted = "hello tab\nblub this\n" + JF + "testhallo"
 
 
-# End: Insert Mode Moving  #}}}

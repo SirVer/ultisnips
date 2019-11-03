@@ -2,7 +2,6 @@ from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 from test.util import running_on_windows
 
-# ExpandTab  {{{#
 
 
 class _ExpandTabs(_VimTest):
@@ -35,9 +34,7 @@ class RecTabStopsWithExpandtab_SpecialIndentProblem_ECR(_ExpandTabs):
         vim_config.append("set indentexpr=8")
 
 
-# End: ExpandTab  #}}}
 
-# Proper Indenting  {{{#
 
 
 class ProperIndenting_SimpleCase_ECR(_VimTest):
@@ -95,9 +92,7 @@ class ProperIndenting_FirstLineInFileComplete_ECR(ProperIndenting_FirstLineInFil
     wanted = "#include <cstdlib>"
 
 
-# End: Proper Indenting  #}}}
 
-# Format options tests  {{{#
 
 
 class _FormatoptionsBase(_VimTest):
@@ -163,4 +158,3 @@ longersnippet that
 should wrap properlyend"""
 
 
-# End: Format options tests  #}}}

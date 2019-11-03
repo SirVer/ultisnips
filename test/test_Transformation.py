@@ -3,7 +3,6 @@ from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 from test.util import no_unidecode_available
 
-# Transformations  {{{#
 
 
 class Transformation_SimpleCase_ExpectCorrectResult(_VimTest):
@@ -280,4 +279,3 @@ class Transformation_ConditionalWithBackslashBeforeDelimiter1(_VimTest):
     wanted = "ab no\\"
 
 
-# End: Transformations  #}}}
