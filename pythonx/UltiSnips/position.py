@@ -1,13 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from enum import Enum
-
-
-class JumpDirection(Enum):
-    forward = 1
-    backward = 2
-
 
 class Position(object):
     """Represents a Position in a text file: (0 based line index, 0 based column
