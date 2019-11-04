@@ -119,7 +119,7 @@ class SnippetManager(object):
         """Jumps to the previous tabstop."""
         vim_helper.command("let g:ulti_jump_backwards_res = 1")
         vim_helper.command("let &undolevels = &undolevels")
-        if not self._jump("backward", update_text_objects=True):
+        if not self._jump(backwards=True, update_text_objects=True):
             vim_helper.command("let g:ulti_jump_backwards_res = 0")
             return self._handle_failure(self.backward_trigger)
 
