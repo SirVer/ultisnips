@@ -905,11 +905,11 @@ class SnippetManager(object):
                 if (
                     before
                     and before[-1] == self._last_change[0]
-                    or self._last_change[1] != vim.current.window.cursor[0]
+                    or self._last_change[1] != vim_helper.buf.cursor
                 ):
                     self._try_expand(autotrigger_only=True)
         finally:
-            self._last_change = (inserted_char, vim.current.window.cursor[0])
+            self._last_change = (inserted_char, vim_helper.buf.cursor)
 
         if self._should_reset_visual and self._visual_content.mode == "":
             self._visual_content.reset()

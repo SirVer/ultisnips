@@ -200,7 +200,7 @@ class SnippetDefinition(object):
             snip = self._eval_code(action, locals)
 
             if snip.cursor.is_set():
-                vim.current.window.cursor = snip.cursor.to_vim_cursor()
+                vim_helper.buf.cursor = snip.cursor._cursor
             else:
                 new_mark_pos = vim_helper.get_mark_pos(mark_to_use)
 
