@@ -89,7 +89,7 @@ class SnippetManager(object):
         self._snip_expanded_in_action = False
         self._inside_action = False
 
-        self._last_change = ("", 0)
+        self._last_change = ("", Position(-1, -1))
 
         self._added_snippets_source = AddedSnippetsSource()
         self.register_snippet_source("ultisnips_files", UltiSnipsFileSource())
