@@ -7,6 +7,7 @@ import unittest
 
 from diff import diff, guess_edit
 from position import Position
+from typing import List
 
 
 def transform(a, cmds):
@@ -26,9 +27,6 @@ def transform(a, cmds):
     return "\n".join(buf)
 
 
-import unittest
-
-
 class _BaseGuessing:
     def runTest(self):
         rv, es = guess_edit(
@@ -39,7 +37,8 @@ class _BaseGuessing:
 
 
 class TestGuessing_Noop0(_BaseGuessing, unittest.TestCase):
-    a, b = [], []
+    a: List[str] = []
+    b: List[str] = []
     initial_line = 0
     ppos, pos = (0, 6), (0, 7)
     wanted = ()
