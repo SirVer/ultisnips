@@ -107,7 +107,7 @@ class SnippetDefinition(object):
         self._location = location
         self._context_code = context
         self._context = None
-        self._actions = actions
+        self._actions = actions or {}
 
         # Make sure that we actually match our trigger in case we are
         # immediately expanded.
