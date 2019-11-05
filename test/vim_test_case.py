@@ -48,13 +48,14 @@ class VimTestCase(unittest.TestCase, TempFileManager):
 
         # Only checks the output. All work is done in setUp().
         wanted = self.text_before + self.wanted + self.text_after
+        SLEEPTIMES = [0.01, 0.15, 0.3, 0.4, 0.5, 1]
         for i in range(self.retries):
             if self.output and self.expected_error:
                 self.assertRegexpMatches(self.output, self.expected_error)
                 return
             if self.output != wanted or self.output is None:
                 # Redo this, but slower
-                self.sleeptime += 0.01
+                self.sleeptime = SLEEPTIMES[min(i, len(SLEEPTIMES) - 1)]
                 self.tearDown()
                 self.setUp()
         self.assertMultiLineEqual(self.output, wanted)
