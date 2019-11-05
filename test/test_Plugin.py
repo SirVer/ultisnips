@@ -3,13 +3,6 @@ import sys
 from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
-PYTHON3 = sys.version_info >= (3, 0)
-
-
-def python3():
-    if PYTHON3:
-        return "Test does not work on python3."
-
 
 class Plugin_SuperTab_SimpleTest(_VimTest):
     plugins = ["ervandew/supertab"]

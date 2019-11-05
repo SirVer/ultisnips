@@ -48,8 +48,7 @@ disable=
    too-many-locals,
    too-many-public-methods, 
    too-many-return-statements,
-   too-many-statements,
-   useless-object-inheritance,
+   too-many-statements
 
 
 

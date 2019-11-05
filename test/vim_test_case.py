@@ -9,7 +9,7 @@ import textwrap
 import time
 import unittest
 
-from test.constant import PYTHON3, SEQUENCES, EX
+from test.constant import SEQUENCES, EX
 from test.vim_interface import create_directory, TempFileManager
 
 
@@ -91,8 +91,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             ).communicate()
-            if PYTHON3:
-                VimTestCase.version = VimTestCase.version.decode("utf-8")
+            VimTestCase.version = VimTestCase.version.decode("utf-8")
 
         if self.plugins and not self.test_plugins:
             return self.skipTest("Not testing integration with other plugins.")
@@ -135,26 +134,21 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         vim_config.append('let g:UltiSnipsJumpForwardTrigger="?"')
         vim_config.append('let g:UltiSnipsJumpBackwardTrigger="+"')
         vim_config.append('let g:UltiSnipsListSnippets="@"')
-        vim_config.append(
-            'let g:UltiSnipsUsePythonVersion="%i"' % (3 if PYTHON3 else 2)
-        )
 
         # Work around https://github.com/vim/vim/issues/3117 for testing >
         # py3.7 on Vim 8.1. Actually also reported against UltiSnips
         # https://github.com/SirVer/ultisnips/issues/996
-        if PYTHON3 and "Vi IMproved 8.1" in self.version:
+        if "Vi IMproved 8.1" in self.version:
             vim_config.append("silent! python3 1")
 
         vim_config.append('let g:UltiSnipsSnippetDirectories=["us"]')
         if self.python_host_prog:
-            vim_config.append('let g:python_host_prog="%s"' % self.python_host_prog)
-        if self.python3_host_prog:
-            vim_config.append('let g:python3_host_prog="%s"' % self.python3_host_prog)
+            vim_config.append('let g:python3_host_prog="%s"' % self.python_host_prog)
 
         self._extra_vim_config(vim_config)
 
         # Finally, add the snippets and some configuration for the test.
-        vim_config.append("%s << EOF" % ("py3" if PYTHON3 else "py"))
+        vim_config.append("py3 << EOF")
         vim_config.append("from UltiSnips import UltiSnips_Manager\n")
 
         if len(self.snippets) and not isinstance(self.snippets[0], tuple):
@@ -196,10 +190,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         if not self.interrupt:
             # Go into insert mode and type the keys but leave Vim some time to
             # react.
-            if PYTHON3:
-                text = "i" + self.keys
-            else:
-                text = u"i" + self.keys.decode("utf-8")
+            text = "i" + self.keys
             while text:
                 to_send = None
                 for seq in SEQUENCES:

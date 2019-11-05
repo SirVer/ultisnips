@@ -5,22 +5,19 @@ set -o verbose
 
 cd /src/vim
 
-if [[ $PYTHON_VERSION =~ ^2\. ]]; then
-   PYTHON_BUILD_CONFIG="--enable-pythoninterp"
-else
-   PYTHON_BUILD_CONFIG="--enable-python3interp"
-fi
+PYTHON_BUILD_CONFIG="--enable-python3interp"
 
 export CFLAGS="$(python-config --cflags)"
 echo $CFLAGS
 ./configure \
+   --disable-gpm \
    --disable-nls \
    --disable-sysmouse \
-   --disable-gpm \
    --enable-gui=no \
    --enable-multibyte \
+   --enable-python3interp \
    --with-features=huge \
    --with-tlib=ncurses \
    --without-x \
-   $PYTHON_BUILD_CONFIG || cat $(find . -name 'config.log')
+   || cat $(find . -name 'config.log')
 make install

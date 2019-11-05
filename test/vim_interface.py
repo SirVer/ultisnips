@@ -8,7 +8,7 @@ import tempfile
 import textwrap
 import time
 
-from test.constant import ARR_D, ARR_L, ARR_R, ARR_U, BS, ESC, PYTHON3, SEQUENCES
+from test.constant import ARR_D, ARR_L, ARR_R, ARR_U, BS, ESC, SEQUENCES
 
 
 def wait_until_file_exists(file_path, times=None, interval=0.01):
@@ -21,12 +21,10 @@ def wait_until_file_exists(file_path, times=None, interval=0.01):
     return False
 
 
+# NOCOM(#sirver): inline function?
 def read_text_file(filename):
     """Reads the contens of a text file."""
-    if PYTHON3:
-        return open(filename, "r", encoding="utf-8").read()
-    else:
-        return open(filename, "r").read()
+    return open(filename, "r", encoding="utf-8").read()
 
 
 def is_process_running(pid):
@@ -64,12 +62,8 @@ class TempFileManager(object):
     def write_temp(self, file_path, content):
         abs_path = self.name_temp(file_path)
         create_directory(os.path.dirname(abs_path))
-        if PYTHON3:
-            with open(abs_path, "w", encoding="utf-8") as f:
-                f.write(content)
-        else:
-            with open(abs_path, "w") as f:
-                f.write(content)
+        with open(abs_path, "w", encoding="utf-8") as f:
+            f.write(content)
         return abs_path
 
     def unique_name_temp(self, suffix="", prefix=""):
@@ -131,7 +125,7 @@ class VimInterface(TempFileManager):
             os.remove(done_file)
 
         post_config = []
-        post_config.append("%s << EOF" % ("py3" if PYTHON3 else "py"))
+        post_config.append("py3 << EOF")
         post_config.append("import vim, sys")
         post_config.append(
             "with open('%s', 'w') as pid_file: pid_file.write(vim.eval('getpid()'))"
@@ -189,8 +183,7 @@ class VimInterfaceTmux(VimInterface):
         stdout, _ = subprocess.Popen(
             ["tmux", "-V"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
         ).communicate()
-        if PYTHON3:
-            stdout = stdout.decode("utf-8")
+        stdout = stdout.decode("utf-8")
         m = re.match(r"tmux (\d+).(\d+)", stdout)
         if not m or not (int(m.group(1)), int(m.group(2))) >= (1, 8):
             raise RuntimeError("Need at least tmux 1.8, you have %s." % stdout.strip())
