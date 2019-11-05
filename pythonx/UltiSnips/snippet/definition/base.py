@@ -9,7 +9,6 @@ import vim
 import textwrap
 
 from UltiSnips import vim_helper
-from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text import escape
 from UltiSnips.text_objects import SnippetInstance
@@ -97,9 +96,9 @@ class SnippetDefinition:
         actions,
     ):
         self._priority = int(priority)
-        self._trigger = as_unicode(trigger)
-        self._value = as_unicode(value)
-        self._description = as_unicode(description)
+        self._trigger = trigger
+        self._value = value
+        self._description = description
         self._opts = options
         self._matched = ""
         self._last_re = None

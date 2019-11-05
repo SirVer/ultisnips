@@ -12,7 +12,6 @@ import vim
 from UltiSnips import vim_helper
 from UltiSnips import err_to_scratch_buffer
 from UltiSnips.diff import diff, guess_edit
-from UltiSnips.compatibility import as_unicode
 from UltiSnips.position import Position
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
 from UltiSnips.snippet.source import (
@@ -50,8 +49,7 @@ def _ask_snippets(snippets):
     """Given a list of snippets, ask the user which one they want to use, and
     return it."""
     display = [
-        as_unicode("%i: %s (%s)")
-        % (i + 1, escape(s.description, "\\"), escape(s.location, "\\"))
+        "%i: %s (%s)" % (i + 1, escape(s.description, "\\"), escape(s.location, "\\"))
         for i, s in enumerate(snippets)
     ]
     return _ask_user(snippets, display)
@@ -164,8 +162,7 @@ class SnippetManager:
 
             location = snip.location if snip.location else ""
 
-            key = as_unicode(snip.trigger)
-            description = as_unicode(description)
+            key = snip.trigger
 
             # remove surrounding "" or '' in snippet description if it exists
             if len(description) > 2:
@@ -173,20 +170,18 @@ class SnippetManager:
                     description = description[1:-1]
 
             vim_helper.command(
-                as_unicode("let g:current_ulti_dict['{key}'] = '{val}'").format(
+                "let g:current_ulti_dict['{key}'] = '{val}'".format(
                     key=key.replace("'", "''"), val=description.replace("'", "''")
                 )
             )
 
             if search_all:
                 vim_helper.command(
-                    as_unicode(
-                        (
-                            "let g:current_ulti_dict_info['{key}'] = {{"
-                            "'description': '{description}',"
-                            "'location': '{location}',"
-                            "}}"
-                        )
+                    (
+                        "let g:current_ulti_dict_info['{key}'] = {{"
+                        "'description': '{description}',"
+                        "'location': '{location}',"
+                        "}}"
                     ).format(
                         key=key.replace("'", "''"),
                         location=location.replace("'", "''"),
@@ -849,8 +844,7 @@ class SnippetManager:
         if len(potentials) > 1:
             files = sorted(potentials)
             formatted = [
-                as_unicode("%i: %s") % (i, escape(fn, "\\"))
-                for i, fn in enumerate(files, 1)
+                "%i: %s" % (i, escape(fn, "\\")) for i, fn in enumerate(files, 1)
             ]
             file_to_edit = _ask_user(files, formatted)
             if file_to_edit is None:
@@ -881,7 +875,7 @@ class SnippetManager:
         self._should_update_textobjects = True
 
         try:
-            inserted_char = vim_helper.as_unicode(vim_helper.eval("v:char"))
+            inserted_char = vim_helper.eval("v:char")
         except UnicodeDecodeError:
             return
 

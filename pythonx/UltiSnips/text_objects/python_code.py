@@ -7,7 +7,6 @@ import os
 from collections import namedtuple
 
 from UltiSnips import vim_helper
-from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text_objects.base import NoneditableTextObject
 from UltiSnips.vim_state import _Placeholder
@@ -272,11 +271,9 @@ class PythonCode(NoneditableTextObject):
                 e.snippet_code = code
                 raise
 
-        rv = as_unicode(
-            self._snip.rv
-            if self._snip._rv_changed  # pylint:disable=protected-access
-            else as_unicode(self._locals["res"])
-        )
+        rv = (
+            self._snip.rv if self._snip._rv_changed else self._locals["res"]
+        )  # pylint:disable=protected-access
 
         if ct != rv:
             self.overwrite(buf, rv)

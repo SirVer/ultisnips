@@ -2,7 +2,6 @@
 
 import vim
 from UltiSnips import vim_helper
-from UltiSnips.compatibility import as_unicode
 from UltiSnips.position import Position
 from UltiSnips.diff import diff
 
@@ -122,10 +121,7 @@ class VimBufferProxy(vim_helper.VimBuffer):
         """
         Just passing call to the vim.current.window.buffer.__getitem__.
         """
-        if isinstance(key, slice):
-            return [as_unicode(l) for l in self._buffer[key.start : key.stop]]
-        else:
-            return as_unicode(self._buffer[key])
+        return self._buffer[key]
 
     def __getslice__(self, i, j):
         """

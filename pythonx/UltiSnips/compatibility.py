@@ -37,10 +37,3 @@ def byte2col(line, nbyte):
     line = vim.current.buffer[line - 1]
     raw_bytes = _vim_enc(line)[:nbyte]
     return len(_vim_dec(raw_bytes))
-
-
-def as_unicode(string):
-    """Return 'string' as unicode instance."""
-    if isinstance(string, bytes):
-        return _vim_dec(string)
-    return str(string)

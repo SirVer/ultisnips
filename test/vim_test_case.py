@@ -54,7 +54,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
                 return
             if self.output != wanted or self.output is None:
                 # Redo this, but slower
-                self.sleeptime += 0.15
+                self.sleeptime += 0.01
                 self.tearDown()
                 self.setUp()
         self.assertMultiLineEqual(self.output, wanted)

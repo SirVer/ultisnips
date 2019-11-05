@@ -6,7 +6,7 @@
 from collections import deque, namedtuple
 
 from UltiSnips import vim_helper
-from UltiSnips.compatibility import as_unicode, byte2col
+from UltiSnips.compatibility import byte2col
 from UltiSnips.position import Position
 
 _Placeholder = namedtuple("_FrozenPlaceholder", ["current_text", "start", "end"])
@@ -114,7 +114,7 @@ class VisualContentPreserver:
     def reset(self):
         """Forget the preserved state."""
         self._mode = ""
-        self._text = as_unicode("")
+        self._text = ""
         self._placeholder = None
 
     def conserve(self):
