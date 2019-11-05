@@ -175,7 +175,7 @@ ignore-mixin-members=yes
 # List of classes names for which member attributes should not be checked
 # (useful for classes with attributes dynamically set).
 ignored-classes=SQLObject
-ignoret-modules=vim
+ignored-modules=vim
 
 # When zope mode is activated, add a predefined set of Zope acquired attributes
 # to generated-members.
