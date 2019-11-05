@@ -12,7 +12,7 @@ from UltiSnips.position import Position
 from UltiSnips.text import unescape
 
 
-class _TextIterator(object):
+class _TextIterator:
 
     """Helper class to make iterating over text easier."""
 
@@ -40,8 +40,6 @@ class _TextIterator(object):
             self._col += 1
         self._idx += 1
         return rv
-
-    next = __next__  # for python2
 
     def peek(self, count=1):
         """Returns the next 'count' characters without advancing the stream."""
@@ -114,7 +112,7 @@ def _parse_till_unescaped_char(stream, chars):
     return rv, char
 
 
-class Token(object):
+class Token:
 
     """Represents a Token as parsed from a snippet definition."""
 

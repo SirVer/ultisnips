@@ -28,7 +28,7 @@ class VimPosition(Position):
         return self._mode
 
 
-class VimState(object):
+class VimState:
 
     """Caches some state information from Vim to better guess what editing
     tasks the user might have done in the last step."""
@@ -103,7 +103,7 @@ class VimState(object):
         return self._lvb[:]
 
 
-class VisualContentPreserver(object):
+class VisualContentPreserver:
 
     """Saves the current visual selection and the selection mode it was done in
     (e.g. line selection, block selection or regular selection.)"""

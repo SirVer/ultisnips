@@ -41,7 +41,7 @@ def _replace_text(buf, start, end, text):
 # pylint: disable=protected-access
 
 
-class TextObject(object):
+class TextObject:
 
     """Represents any object in the text that has a span in any ways."""
 

@@ -5,7 +5,7 @@
 index) and provides methods for moving them around."""
 
 
-class Position(object):
+class Position:
 
     """See module docstring."""
 

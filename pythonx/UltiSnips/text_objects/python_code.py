@@ -14,7 +14,7 @@ from UltiSnips.vim_state import _Placeholder
 import UltiSnips.snippet_manager
 
 
-class _Tabs(object):
+class _Tabs:
 
     """Allows access to tabstop content via t[] inside of python code."""
 
@@ -48,7 +48,7 @@ class SnippetUtilForAction(dict):
         self.cursor.preserve()
 
 
-class SnippetUtil(object):
+class SnippetUtil:
 
     """Provides easy access to indentation, etc.
 

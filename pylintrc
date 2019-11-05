@@ -144,12 +144,6 @@ max-module-lines=1000
 indent-string='    '
 
 
-[MISCELLANEOUS]
-
-# List of note tags to take in consideration, separated by a comma.
-notes=TODO
-
-
 [SIMILARITIES]
 
 # Minimum lines number of a similarity.

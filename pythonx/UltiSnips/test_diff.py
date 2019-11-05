@@ -29,7 +29,7 @@ def transform(a, cmds):
 import unittest
 
 
-class _BaseGuessing(object):
+class _BaseGuessing:
     def runTest(self):
         rv, es = guess_edit(
             self.initial_line, self.a, self.b, Position(*self.ppos), Position(*self.pos)
@@ -73,7 +73,7 @@ class TestGuessing_DeleteOneChar(_BaseGuessing, unittest.TestCase):
     wanted = (("D", 0, 5, " "),)
 
 
-class _Base(object):
+class _Base:
     def runTest(self):
         es = diff(self.a, self.b)
         tr = transform(self.a, es)

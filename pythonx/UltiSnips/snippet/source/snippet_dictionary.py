@@ -4,7 +4,7 @@
 """Implements a container for parsed snippets."""
 
 
-class SnippetDictionary(object):
+class SnippetDictionary:
 
     """See module docstring."""
 

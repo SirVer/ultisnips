@@ -2,7 +2,7 @@
 
 import vim
 from UltiSnips import vim_helper
-from UltiSnips.compatibility import as_unicode, as_vimencoding
+from UltiSnips.compatibility import as_unicode
 from UltiSnips.position import Position
 from UltiSnips.diff import diff
 
@@ -96,11 +96,11 @@ class VimBufferProxy(vim_helper.VimBuffer):
         changes and applies them to the current snippet stack.
         """
         if isinstance(key, slice):
-            value = [as_vimencoding(line) for line in value]
+            value = [line for line in value]
             changes = list(self._get_diff(key.start, key.stop, value))
             self._buffer[key.start : key.stop] = [line.strip("\n") for line in value]
         else:
-            value = as_vimencoding(value)
+            value = value
             changes = list(self._get_line_diff(key, self._buffer[key], value))
             self._buffer[key] = value
 
@@ -147,7 +147,7 @@ class VimBufferProxy(vim_helper.VimBuffer):
             line_number = len(self)
         if not isinstance(line, list):
             line = [line]
-        self[line_number:line_number] = [as_vimencoding(l) for l in line]
+        self[line_number:line_number] = [l for l in line]
 
     def __delitem__(self, key):
         if isinstance(key, slice):

@@ -168,7 +168,7 @@ class No_Tab_Expand_ET_SW_TS(_No_Tab_Expand):
     wanted = "\t\tExpand\tme!\t"
 
 
-class _TabExpand_RealWorld(object):
+class _TabExpand_RealWorld:
     snippets = (
         "hi",
         r"""hi

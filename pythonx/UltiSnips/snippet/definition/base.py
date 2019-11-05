@@ -19,7 +19,7 @@ from UltiSnips.text_objects.python_code import SnippetUtilForAction
 __WHITESPACE_SPLIT = re.compile(r"\s")
 
 
-class _SnippetUtilCursor(object):
+class _SnippetUtilCursor:
     def __init__(self, cursor):
         self._cursor = [cursor[0] - 1, cursor[1]]
         self._set = False
@@ -77,7 +77,7 @@ def _words_for_line(trigger, before, num_words=None):
         return before[len(before_words) :].strip()
 
 
-class SnippetDefinition(object):
+class SnippetDefinition:
 
     """Represents a snippet as parsed from a file."""
 
@@ -396,9 +396,7 @@ class SnippetDefinition(object):
             snip = self._execute_action(
                 self._actions["pre_expand"], self._context, locals
             )
-
             self._context = snip.context
-
             return snip.cursor.is_set()
         else:
             return False

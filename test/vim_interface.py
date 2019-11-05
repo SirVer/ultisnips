@@ -21,10 +21,10 @@ def wait_until_file_exists(file_path, times=None, interval=0.01):
     return False
 
 
-# NOCOM(#sirver): inline function?
-def read_text_file(filename):
+def _read_text_file(filename):
     """Reads the contens of a text file."""
-    return open(filename, "r", encoding="utf-8").read()
+    with open(filename, "r", encoding="utf-8") as to_read:
+        return to_read.read()
 
 
 def is_process_running(pid):
@@ -52,7 +52,7 @@ def create_directory(dirname):
         pass
 
 
-class TempFileManager(object):
+class TempFileManager:
     def __init__(self, name=""):
         self._temp_dir = tempfile.mkdtemp(prefix="UltiSnipsTest_" + name)
 
@@ -107,7 +107,7 @@ class VimInterface(TempFileManager):
         buffer_path = self.unique_name_temp(prefix="buffer_")
         self.send_to_vim(ESC + ":w! %s\n" % buffer_path)
         if wait_until_file_exists(buffer_path, 50):
-            return read_text_file(buffer_path)[:-1]
+            return _read_text_file(buffer_path)[:-1]
 
     def send_to_terminal(self, s):
         """Types 's' into the terminal."""
@@ -118,7 +118,7 @@ class VimInterface(TempFileManager):
         raise NotImplementedError()
 
     def launch(self, config=[]):
-        """Returns the python version in Vim as a string, e.g. '2.7'"""
+        """Returns the python version in Vim as a string, e.g. '3.7'"""
         pid_file = self.name_temp("vim.pid")
         done_file = self.name_temp("loading_done")
         if os.path.exists(done_file):
@@ -148,8 +148,8 @@ class VimInterface(TempFileManager):
             % (self._vim_executable, config_path)
         )
         wait_until_file_exists(done_file)
-        self._vim_pid = int(read_text_file(pid_file))
-        return read_text_file(done_file).strip()
+        self._vim_pid = int(_read_text_file(pid_file))
+        return _read_text_file(done_file).strip()
 
     def leave_with_wait(self):
         self.send_to_vim(3 * ESC + ":qa!\n")

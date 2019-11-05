@@ -7,7 +7,6 @@ from collections import defaultdict
 from contextlib import contextmanager
 import os
 import platform
-import sys
 import vim
 
 from UltiSnips import vim_helper
@@ -60,7 +59,7 @@ def _ask_snippets(snippets):
 
 # TODO(sirver): This class is still too long. It should only contain public
 # facing methods, most of the private methods should be moved outside of it.
-class SnippetManager(object):
+class SnippetManager:
 
     """The main entry point for all UltiSnips functionality.
 
@@ -726,8 +725,8 @@ class SnippetManager(object):
             with use_proxy_buffer(self._active_snippets, self._vstate):
                 with self._action_context():
                     snippet.do_post_expand(
-                        snippet_instance._start,
-                        snippet_instance._end,
+                        snippet_instance.start,
+                        snippet_instance.end,
                         self._active_snippets,
                     )
 
@@ -886,12 +885,8 @@ class SnippetManager(object):
         except UnicodeDecodeError:
             return
 
-        if sys.version_info >= (3, 0):
-            if isinstance(inserted_char, bytes):
-                return
-        else:
-            if not isinstance(inserted_char, unicode):
-                return
+        if isinstance(inserted_char, bytes):
+            return
 
         try:
             if inserted_char == "":

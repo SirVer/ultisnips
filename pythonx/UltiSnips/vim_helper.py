@@ -8,13 +8,13 @@ import re
 import vim  # pylint:disable=import-error
 from vim import error  # pylint:disable=import-error,unused-import
 
-from UltiSnips.compatibility import col2byte, byte2col, as_unicode, as_vimencoding
+from UltiSnips.compatibility import col2byte, byte2col, as_unicode
 from UltiSnips.position import Position
 
 from contextlib import contextmanager
 
 
-class VimBuffer(object):
+class VimBuffer:
 
     """Wrapper around the current Vim buffer."""
 
@@ -31,10 +31,10 @@ class VimBuffer(object):
     def __setitem__(self, idx, text):
         if isinstance(idx, slice):  # Py3
             return self.__setslice__(idx.start, idx.stop, text)
-        vim.current.buffer[idx] = as_vimencoding(text)
+        vim.current.buffer[idx] = text
 
     def __setslice__(self, i, j, text):  # pylint:disable=no-self-use
-        vim.current.buffer[i:j] = [as_vimencoding(l) for l in text]
+        vim.current.buffer[i:j] = [l for l in text]
 
     def __len__(self):
         return len(vim.current.buffer)
@@ -126,12 +126,12 @@ def escape(inp):
 
 def command(cmd):
     """Wraps vim.command."""
-    return as_unicode(vim.command(as_vimencoding(cmd)))
+    return as_unicode(vim.command(cmd))
 
 
 def eval(text):
     """Wraps vim.eval."""
-    rv = vim.eval(as_vimencoding(text))
+    rv = vim.eval(text)
     if not isinstance(rv, (dict, list)):
         return as_unicode(rv)
     return rv
@@ -139,7 +139,7 @@ def eval(text):
 
 def bindeval(text):
     """Wraps vim.bindeval."""
-    rv = vim.bindeval(as_vimencoding(text))
+    rv = vim.bindeval(text)
     if not isinstance(rv, (dict, list)):
         return as_unicode(rv)
     return rv
