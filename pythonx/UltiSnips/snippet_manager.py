@@ -7,13 +7,11 @@ from collections import defaultdict
 from contextlib import contextmanager
 import os
 import platform
-import sys
 import vim
 
 from UltiSnips import vim_helper
 from UltiSnips import err_to_scratch_buffer
 from UltiSnips.diff import diff, guess_edit
-from UltiSnips.compatibility import as_unicode
 from UltiSnips.position import Position
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
 from UltiSnips.snippet.source import (
@@ -51,8 +49,7 @@ def _ask_snippets(snippets):
     """Given a list of snippets, ask the user which one they want to use, and
     return it."""
     display = [
-        as_unicode("%i: %s (%s)")
-        % (i + 1, escape(s.description, "\\"), escape(s.location, "\\"))
+        "%i: %s (%s)" % (i + 1, escape(s.description, "\\"), escape(s.location, "\\"))
         for i, s in enumerate(snippets)
     ]
     return _ask_user(snippets, display)
@@ -60,7 +57,7 @@ def _ask_snippets(snippets):
 
 # TODO(sirver): This class is still too long. It should only contain public
 # facing methods, most of the private methods should be moved outside of it.
-class SnippetManager(object):
+class SnippetManager:
 
     """The main entry point for all UltiSnips functionality.
 
@@ -165,8 +162,7 @@ class SnippetManager(object):
 
             location = snip.location if snip.location else ""
 
-            key = as_unicode(snip.trigger)
-            description = as_unicode(description)
+            key = snip.trigger
 
             # remove surrounding "" or '' in snippet description if it exists
             if len(description) > 2:
@@ -174,20 +170,18 @@ class SnippetManager(object):
                     description = description[1:-1]
 
             vim_helper.command(
-                as_unicode("let g:current_ulti_dict['{key}'] = '{val}'").format(
+                "let g:current_ulti_dict['{key}'] = '{val}'".format(
                     key=key.replace("'", "''"), val=description.replace("'", "''")
                 )
             )
 
             if search_all:
                 vim_helper.command(
-                    as_unicode(
-                        (
-                            "let g:current_ulti_dict_info['{key}'] = {{"
-                            "'description': '{description}',"
-                            "'location': '{location}',"
-                            "}}"
-                        )
+                    (
+                        "let g:current_ulti_dict_info['{key}'] = {{"
+                        "'description': '{description}',"
+                        "'location': '{location}',"
+                        "}}"
                     ).format(
                         key=key.replace("'", "''"),
                         location=location.replace("'", "''"),
@@ -726,8 +720,8 @@ class SnippetManager(object):
             with use_proxy_buffer(self._active_snippets, self._vstate):
                 with self._action_context():
                     snippet.do_post_expand(
-                        snippet_instance._start,
-                        snippet_instance._end,
+                        snippet_instance.start,
+                        snippet_instance.end,
                         self._active_snippets,
                     )
 
@@ -850,8 +844,7 @@ class SnippetManager(object):
         if len(potentials) > 1:
             files = sorted(potentials)
             formatted = [
-                as_unicode("%i: %s") % (i, escape(fn, "\\"))
-                for i, fn in enumerate(files, 1)
+                "%i: %s" % (i, escape(fn, "\\")) for i, fn in enumerate(files, 1)
             ]
             file_to_edit = _ask_user(files, formatted)
             if file_to_edit is None:
@@ -882,16 +875,12 @@ class SnippetManager(object):
         self._should_update_textobjects = True
 
         try:
-            inserted_char = vim_helper.as_unicode(vim_helper.eval("v:char"))
+            inserted_char = vim_helper.eval("v:char")
         except UnicodeDecodeError:
             return
 
-        if sys.version_info >= (3, 0):
-            if isinstance(inserted_char, bytes):
-                return
-        else:
-            if not isinstance(inserted_char, unicode):
-                return
+        if isinstance(inserted_char, bytes):
+            return
 
         try:
             if inserted_char == "":

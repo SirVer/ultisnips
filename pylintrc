@@ -48,8 +48,7 @@ disable=
    too-many-locals,
    too-many-public-methods, 
    too-many-return-statements,
-   too-many-statements,
-   useless-object-inheritance,
+   too-many-statements
 
 
 
@@ -143,12 +142,6 @@ max-module-lines=1000
 # String used as indentation unit. This is usually " " (4 spaces) or "\t" (1
 # tab).
 indent-string='    '
-
-
-[MISCELLANEOUS]
-
-# List of note tags to take in consideration, separated by a comma.
-notes=TODO
 
 
 [SIMILARITIES]

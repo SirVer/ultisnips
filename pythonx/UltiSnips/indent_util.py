@@ -6,7 +6,7 @@
 from UltiSnips import vim_helper
 
 
-class IndentUtil(object):
+class IndentUtil:
 
     """Utility class for dealing properly with indentation."""
 

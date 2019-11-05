@@ -3,38 +3,23 @@
 
 """Wrapper functionality around the functions we need from Vim."""
 
-import re
-
-import vim  # pylint:disable=import-error
-from vim import error  # pylint:disable=import-error,unused-import
-
-from UltiSnips.compatibility import col2byte, byte2col, as_unicode, as_vimencoding
-from UltiSnips.position import Position
-
 from contextlib import contextmanager
 
+from UltiSnips.compatibility import col2byte, byte2col
+from UltiSnips.position import Position
+from vim import error  # pylint:disable=import-error,unused-import
+import vim  # pylint:disable=import-error
 
-class VimBuffer(object):
+
+class VimBuffer:
 
     """Wrapper around the current Vim buffer."""
 
     def __getitem__(self, idx):
-        if isinstance(idx, slice):  # Py3
-            return self.__getslice__(idx.start, idx.stop)
-        rv = vim.current.buffer[idx]
-        return as_unicode(rv)
-
-    def __getslice__(self, i, j):  # pylint:disable=no-self-use
-        rv = vim.current.buffer[i:j]
-        return [as_unicode(l) for l in rv]
+        return vim.current.buffer[idx]
 
     def __setitem__(self, idx, text):
-        if isinstance(idx, slice):  # Py3
-            return self.__setslice__(idx.start, idx.stop, text)
-        vim.current.buffer[idx] = as_vimencoding(text)
-
-    def __setslice__(self, i, j, text):  # pylint:disable=no-self-use
-        vim.current.buffer[i:j] = [as_vimencoding(l) for l in text]
+        vim.current.buffer[idx] = text
 
     def __len__(self):
         return len(vim.current.buffer)
@@ -43,7 +28,7 @@ class VimBuffer(object):
     def line_till_cursor(self):  # pylint:disable=no-self-use
         """Returns the text before the cursor."""
         _, col = self.cursor
-        return as_unicode(vim.current.line)[:col]
+        return vim.current.line[:col]
 
     @property
     def number(self):  # pylint:disable=no-self-use
@@ -105,9 +90,9 @@ def escape(inp):
     def conv(obj):
         """Convert obj."""
         if isinstance(obj, list):
-            rv = as_unicode("[" + ",".join(conv(o) for o in obj) + "]")
+            rv = "[" + ",".join(conv(o) for o in obj) + "]"
         elif isinstance(obj, dict):
-            rv = as_unicode(
+            rv = (
                 "{"
                 + ",".join(
                     [
@@ -118,7 +103,7 @@ def escape(inp):
                 + "}"
             )
         else:
-            rv = as_unicode('"%s"') % as_unicode(obj).replace('"', '\\"')
+            rv = '"%s"' % obj.replace('"', '\\"')
         return rv
 
     return conv(inp)
@@ -126,22 +111,19 @@ def escape(inp):
 
 def command(cmd):
     """Wraps vim.command."""
-    return as_unicode(vim.command(as_vimencoding(cmd)))
+    return vim.command(cmd)
 
 
 def eval(text):
     """Wraps vim.eval."""
-    rv = vim.eval(as_vimencoding(text))
-    if not isinstance(rv, (dict, list)):
-        return as_unicode(rv)
-    return rv
+    return vim.eval(text)
 
 
 def bindeval(text):
     """Wraps vim.bindeval."""
-    rv = vim.bindeval(as_vimencoding(text))
+    rv = vim.bindeval(text)
     if not isinstance(rv, (dict, list)):
-        return as_unicode(rv)
+        return rv.decode(vim.eval("&encoding"), "replace")
     return rv
 
 
@@ -162,7 +144,7 @@ def feedkeys(keys, mode="n"):
     if keys == "startinsert":
         command("startinsert")
     else:
-        command(as_unicode(r'call feedkeys("%s", "%s")') % (keys, mode))
+        command(r'call feedkeys("%s", "%s")' % (keys, mode))
 
 
 def new_scratch_buffer(text):

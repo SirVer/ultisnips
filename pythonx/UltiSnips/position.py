@@ -5,7 +5,7 @@
 index) and provides methods for moving them around."""
 
 
-class Position(object):
+class Position:
 
     """See module docstring."""
 
@@ -36,12 +36,9 @@ class Position(object):
         assert isinstance(pos, Position)
         if self.line == pos.line:
             return Position(0, self.col - pos.col)
-        else:
-            if self > pos:
-                return Position(self.line - pos.line, self.col)
-            else:
-                return Position(self.line - pos.line, pos.col)
-        return Position(self.line - pos.line, self.col - pos.col)
+        if self > pos:
+            return Position(self.line - pos.line, self.col)
+        return Position(self.line - pos.line, pos.col)
 
     def __add__(self, pos):
         assert isinstance(pos, Position)

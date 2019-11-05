@@ -9,7 +9,6 @@ from subprocess import Popen, PIPE
 import stat
 import tempfile
 
-from UltiSnips.compatibility import as_unicode
 from UltiSnips.text_objects.base import NoneditableTextObject
 
 
@@ -41,7 +40,7 @@ def _run_shell_command(cmd, tmpdir):
     proc.wait()
     stdout, _ = proc.communicate()
     os.unlink(path)
-    return _chomp(as_unicode(stdout))
+    return _chomp(stdout.decode("utf-8"))
 
 
 def _get_tmp():

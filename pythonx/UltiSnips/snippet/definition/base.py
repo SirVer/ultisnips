@@ -9,7 +9,6 @@ import vim
 import textwrap
 
 from UltiSnips import vim_helper
-from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text import escape
 from UltiSnips.text_objects import SnippetInstance
@@ -19,7 +18,7 @@ from UltiSnips.text_objects.python_code import SnippetUtilForAction
 __WHITESPACE_SPLIT = re.compile(r"\s")
 
 
-class _SnippetUtilCursor(object):
+class _SnippetUtilCursor:
     def __init__(self, cursor):
         self._cursor = [cursor[0] - 1, cursor[1]]
         self._set = False
@@ -77,7 +76,7 @@ def _words_for_line(trigger, before, num_words=None):
         return before[len(before_words) :].strip()
 
 
-class SnippetDefinition(object):
+class SnippetDefinition:
 
     """Represents a snippet as parsed from a file."""
 
@@ -97,9 +96,9 @@ class SnippetDefinition(object):
         actions,
     ):
         self._priority = int(priority)
-        self._trigger = as_unicode(trigger)
-        self._value = as_unicode(value)
-        self._description = as_unicode(description)
+        self._trigger = trigger
+        self._value = value
+        self._description = description
         self._opts = options
         self._matched = ""
         self._last_re = None
@@ -396,9 +395,7 @@ class SnippetDefinition(object):
             snip = self._execute_action(
                 self._actions["pre_expand"], self._context, locals
             )
-
             self._context = snip.context
-
             return snip.cursor.is_set()
         else:
             return False

@@ -58,7 +58,8 @@ class SnippetFileSource(SnippetSource):
 
     def _parse_snippets(self, ft, filename):
         """Parse the 'filename' for the given 'ft'."""
-        file_data = compatibility.open_ascii_file(filename, "r").read()
+        with open(filename, "r", encoding="utf-8") as to_read:
+            file_data = to_read.read()
         self._snippets[ft]  # Make sure the dictionary exists
         for event, data in self._parse_snippet_file(file_data, filename):
             if event == "error":
