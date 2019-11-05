@@ -197,7 +197,7 @@ def select(start, end):
     selection = eval("&selection")
 
     col = col2byte(start.line + 1, start.col)
-    vim.current.window.cursor = start.line + 1, col
+    buf.cursor = start
 
     mode = eval("mode()")
 

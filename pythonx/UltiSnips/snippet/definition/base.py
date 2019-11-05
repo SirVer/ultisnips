@@ -13,6 +13,7 @@ from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text import escape
 from UltiSnips.text_objects import SnippetInstance
+from UltiSnips.position import Position
 from UltiSnips.text_objects.python_code import SnippetUtilForAction
 
 __WHITESPACE_SPLIT = re.compile(r"\s")
@@ -200,7 +201,9 @@ class SnippetDefinition(object):
             snip = self._eval_code(action, locals)
 
             if snip.cursor.is_set():
-                vim.current.window.cursor = snip.cursor.to_vim_cursor()
+                vim_helper.buf.cursor = Position(
+                    snip.cursor._cursor[0], snip.cursor._cursor[1]
+                )
             else:
                 new_mark_pos = vim_helper.get_mark_pos(mark_to_use)
 
