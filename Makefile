@@ -20,7 +20,7 @@ image_vim_81_py38:
 image_vim_git_py38:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.8-buster --build-arg VIM_VERSION=git .
 
-image_repro: image_vim_80_py3
+image_repro: image_vim_80_py36
 	docker build -t ultisnips:repro --build-arg BASE_IMAGE=$< -f Dockerfile.repro .
 
 # A reproduction image that drops you into a naked environment,
