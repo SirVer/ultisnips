@@ -22,8 +22,11 @@ from UltiSnips.snippet.source import (
     AddedSnippetsSource,
 )
 from UltiSnips.text import escape
+from UltiSnips.debug import *  # NOCOM(#sirver):
+from typing import Tuple, Set
 from UltiSnips.vim_state import VimState, VisualContentPreserver
 from UltiSnips.buffer_proxy import use_proxy_buffer, suspend_proxy_edits
+from enum import Enum
 
 
 def _ask_user(a, formatted):
@@ -53,6 +56,44 @@ def _ask_snippets(snippets):
         for i, s in enumerate(snippets)
     ]
     return _ask_user(snippets, display)
+
+
+class GetFileToEditResult(Enum):
+    EXISTS = 1
+    NOT_EXISTING = 2
+    USER_ABORT = 3
+
+
+def _get_file_to_edit(
+    snippet_dir, filetypes, bang, allow_empty
+) -> Tuple[GetFileToEditResult, str]:
+    potentials: Set[str] = set()
+
+    for ft in filetypes:
+        potentials.update(find_snippet_files(ft, snippet_dir))
+        potentials.add(os.path.join(snippet_dir, ft + ".snippets"))
+        if bang:
+            potentials.update(find_all_snippet_files(ft))
+
+    potentials = set(os.path.realpath(os.path.expanduser(p)) for p in potentials)
+
+    if len(potentials) > 1:
+        files = sorted(potentials)
+        formatted = ["%i: %s" % (i, escape(fn, "\\")) for i, fn in enumerate(files, 1)]
+        file_to_edit = _ask_user(files, formatted)
+        if file_to_edit is None:
+            return GetFileToEditResult.USER_ABORT, ""
+    else:
+        file_to_edit = potentials.pop()
+
+    if not allow_empty and not os.path.exists(file_to_edit):
+        return GetFileToEditResult.NOT_EXISTING, ""
+
+    dirname = os.path.dirname(file_to_edit)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
+    return GetFileToEditResult.EXISTS, file_to_edit
 
 
 # TODO(sirver): This class is still too long. It should only contain public
@@ -774,27 +815,45 @@ class SnippetManager:
         empty only private files in g:UltiSnipsSnippetsDir are considered,
         otherwise all files are considered and the user gets to choose.
         """
+        filetypes = []
+        if requested_ft:
+            filetypes.append(requested_ft)
+        else:
+            if bang:
+                filetypes.extend(self.get_buffer_filetypes())
+            else:
+                filetypes.append(self.get_buffer_filetypes()[0])
+        debug("filetypes: %r" % (filetypes))
+
         snippet_dir = ""
         if vim_helper.eval("exists('g:UltiSnipsSnippetsDir')") == "1":
             dir = vim_helper.eval("g:UltiSnipsSnippetsDir")
-            file = self._get_file_to_edit(dir, requested_ft, bang)
+            result, file = _get_file_to_edit(dir, filetypes, bang, False)
+            debug("1 file: %r" % (file))
+            if result == GetFileToEditResult.USER_ABORT:
+                return ""
             if file:
                 return file
             snippet_dir = dir
 
-        if vim_helper.eval("exists('g:UltiSnipsSnippetDirectories')") == "1":
-            dirs = vim_helper.eval("g:UltiSnipsSnippetDirectories")
-            for dir in dirs:
-                file = self._get_file_to_edit(dir, requested_ft, bang)
-                if file:
-                    return file
-                if not snippet_dir:
-                    snippet_dir = dir
+        dirs = vim_helper.eval("g:UltiSnipsSnippetDirectories")
+        for dir in dirs:
+            result, file = _get_file_to_edit(dir, filetypes, bang, True)
+            debug("2 file: %r" % (file))
+            if result == GetFileToEditResult.USER_ABORT:
+                return ""
+            if file:
+                return file
+            if not snippet_dir:
+                snippet_dir = dir
 
         home = vim_helper.eval("$HOME")
         if platform.system() == "Windows":
             dir = os.path.join(home, "vimfiles", "UltiSnips")
-            file = self._get_file_to_edit(dir, requested_ft, bang)
+            result, file = _get_file_to_edit(dir, filetypes, bang, False)
+            debug("3 file: %r" % (file))
+            if result == GetFileToEditResult.USER_ABORT:
+                return ""
             if file:
                 return file
             if not snippet_dir:
@@ -805,61 +864,25 @@ class SnippetManager:
                 home, ".config"
             )
             dir = os.path.join(xdg_home_config, "nvim", "UltiSnips")
-            file = self._get_file_to_edit(dir, requested_ft, bang)
+            result, file = _get_file_to_edit(dir, filetypes, bang, False)
+            debug("4 file: %r" % (file))
+            if result == GetFileToEditResult.USER_ABORT:
+                return ""
             if file:
                 return file
             if not snippet_dir:
                 snippet_dir = dir
 
         dir = os.path.join(home, ".vim", "UltiSnips")
-        file = self._get_file_to_edit(dir, requested_ft, bang)
+        result, file = _get_file_to_edit(dir, filetypes, bang, False)
+        debug("5 file: %r" % (file))
+        if result == GetFileToEditResult.USER_ABORT:
+            return ""
         if file:
             return file
         if not snippet_dir:
             snippet_dir = dir
-
-        return self._get_file_to_edit(snippet_dir, requested_ft, bang, True)
-
-    def _get_file_to_edit(
-        self, snippet_dir, requested_ft, bang, allow_empty=False
-    ):  # pylint: disable=no-self-use
-        potentials = set()
-        filetypes = []
-        if requested_ft:
-            filetypes.append(requested_ft)
-        else:
-            if bang:
-                filetypes.extend(self.get_buffer_filetypes())
-            else:
-                filetypes.append(self.get_buffer_filetypes()[0])
-
-        for ft in filetypes:
-            potentials.update(find_snippet_files(ft, snippet_dir))
-            potentials.add(os.path.join(snippet_dir, ft + ".snippets"))
-            if bang:
-                potentials.update(find_all_snippet_files(ft))
-
-        potentials = set(os.path.realpath(os.path.expanduser(p)) for p in potentials)
-
-        if len(potentials) > 1:
-            files = sorted(potentials)
-            formatted = [
-                "%i: %s" % (i, escape(fn, "\\")) for i, fn in enumerate(files, 1)
-            ]
-            file_to_edit = _ask_user(files, formatted)
-            if file_to_edit is None:
-                return ""
-        else:
-            file_to_edit = potentials.pop()
-
-        if not allow_empty and not os.path.exists(file_to_edit):
-            return ""
-
-        dirname = os.path.dirname(file_to_edit)
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
-
-        return file_to_edit
+        return _get_file_to_edit(snippet_dir, filetypes, bang, True)[1]
 
     @contextmanager
     def _action_context(self):
