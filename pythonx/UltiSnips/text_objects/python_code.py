@@ -174,8 +174,7 @@ class SnippetUtil:
     def p(self):
         if self._parent.current_placeholder:
             return self._parent.current_placeholder
-        else:
-            return _Placeholder("", 0, 0)
+        return _Placeholder("", 0, 0)
 
     @property
     def context(self):
@@ -238,7 +237,7 @@ class PythonCode(NoneditableTextObject):
                 mode = snippet.visual_content.mode
                 context = snippet.context
                 break
-            except AttributeError as e:
+            except AttributeError:
                 snippet = snippet._parent  # pylint:disable=protected-access
         self._snip = SnippetUtil(token.indent, mode, text, context, snippet)
 
@@ -267,11 +266,11 @@ class PythonCode(NoneditableTextObject):
         for code in self._codes:
             try:
                 exec(code, self._locals)  # pylint:disable=exec-used
-            except Exception as e:
-                e.snippet_code = code
+            except Exception as exception:
+                exception.snippet_code = code
                 raise
 
-        rv = (
+        rv = str(
             self._snip.rv if self._snip._rv_changed else self._locals["res"]
         )  # pylint:disable=protected-access
 
