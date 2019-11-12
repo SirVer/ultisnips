@@ -1,4 +1,4 @@
-call plug#begin('~/.vim/plugged')
+call plug#begin('~/.vim_plugged')
 
 Plug '/src/UltiSnips'
 Plug 'honza/vim-snippets'

@@ -4,6 +4,8 @@
 """Wrapper functionality around the functions we need from Vim."""
 
 from contextlib import contextmanager
+import os
+import platform
 
 from UltiSnips.compatibility import col2byte, byte2col
 from UltiSnips.position import Position
@@ -207,6 +209,24 @@ def select(start, end):
             move_cmd += "%iG%i|" % virtual_position(end.line + 1, end.col + 1)
         move_cmd += "o%iG%i|o\\<c-g>" % virtual_position(start.line + 1, start.col + 1)
     feedkeys(move_cmd)
+
+
+def get_dot_vim():
+    """Returns the likely place for ~/.vim for the current setup."""
+    home = vim.eval("$HOME")
+    candidates = []
+    if platform.system() == "Windows":
+        candidates.append(os.path.join(home, "vimfiles"))
+    if vim.eval("has('nvim')") == "1":
+        xdg_home_config = vim.eval("$XDG_CONFIG_HOME") or os.path.join(home, ".config")
+        candidates.append(os.path.join(xdg_home_config, "nvim"))
+    candidates.append(os.path.join(home, ".vim"))
+    for candidate in candidates:
+        if os.path.isdir(candidate):
+            return os.path.realpath(candidate)
+    raise RuntimeError(
+        "Unable to find user configuration directory. I tried '%s'." % candidates
+    )
 
 
 def set_mark_from_pos(name, pos):

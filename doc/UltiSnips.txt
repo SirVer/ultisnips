@@ -165,7 +165,7 @@ found here: https://github.com/honza/vim-snippets
 
 The UltiSnipsEdit command opens a private snippet definition file for the
 current filetype. If no snippet file exists, a new file is created. If used as
-UltiSnipsEdit! all public snippet files are taken into account too. If
+UltiSnipsEdit! all public snippet files that exist are taken into account too. If
 multiple files match the search, the user gets to choose the file.
 
 There are several variables associated with the UltiSnipsEdit command.
@@ -180,34 +180,13 @@ g:UltiSnipsEditSplit        Defines how the edit window is opened. Possible
                             |context|        Splits the window vertically or
                                            horizontally depending on context.
 
-                                                        *g:UltiSnipsSnippetsDir*
-g:UltiSnipsSnippetsDir
-                            Defines the directory where private snippet
-                            definition files are placed in in.
-
-                            As example, if the current 'filetype' is "cpp" the
-                            :UltiSnipsEdit command looks for a file to edit in
-                            this order:
-                            1. An existing
-                               g:UltiSnipsSnippetsDir."/cpp.snippets" file
-                            2. Find a matching "cpp" snippets file in
-                               g:UltiSnipsSnippetDirectories
-                            3. Create a new
-                               g:UltiSnipsSnippetsDir."/cpp.snippets" file
-
-                            Note that directories named "snippets" are
-                            reserved for snipMate snippets and cannot be used.
-                            Also, this setting does not affect where snippets
-                            are searched for, so it is possible to change this
-                            to opening files that are then not found by
-                            UltiSnips. See |UltiSnips-how-snippets-are-loaded|
-                            for details.
-
                                                         *g:UltiSnipsSnippetDirectories*
 g:UltiSnipsSnippetDirectories
-                            Configures the directories that are searched for
-                            snippets. Do not mix up this variable with the
-                            previous one. See |UltiSnips-how-snippets-are-loaded|.
+                            An array of relative directory names OR an array
+                            with a single absolute path. Defaults to [
+                            "UltiSnips" ]. No entry in this list must be
+                            "snippets". Please read
+                            |UltiSnips-how-snippets-are-loaded| for details.
 
                                                         *g:UltiSnipsEnableSnipMate*
 g:UltiSnipsEnableSnipMate
