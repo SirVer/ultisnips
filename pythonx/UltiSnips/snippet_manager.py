@@ -321,7 +321,8 @@ class SnippetManager:
             + ["all"]
         )
 
-    def add_buffer_filetypes(self, filetypes):
+    def add_buffer_filetypes(self, filetypes: str):
+        """'filetypes' is a dotted filetype list, for example 'cuda.cpp'"""
         buf_fts = self._added_buffer_filetypes[vim_helper.buf.number]
         idx = -1
         for ft in filetypes.split("."):
