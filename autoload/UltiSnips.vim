@@ -48,7 +48,7 @@ function! UltiSnips#Edit(bang, ...) abort
 endfunction
 
 function! UltiSnips#AddFiletypes(filetypes) abort
-    py3 UltiSnips_Manager.add_buffer_filetypes('" . a:filetypes . "')
+    py3 UltiSnips_Manager.add_buffer_filetypes(vim.eval("a:filetypes"))
     return ""
 endfunction
 
