@@ -220,7 +220,11 @@ def get_dot_vim():
     if vim.eval("has('nvim')") == "1":
         xdg_home_config = vim.eval("$XDG_CONFIG_HOME") or os.path.join(home, ".config")
         candidates.append(os.path.join(xdg_home_config, "nvim"))
+
     candidates.append(os.path.join(home, ".vim"))
+
+    my_vimrc = os.environ["MYVIMRC"]
+    candidates.append(os.path.realpath(os.path.dirname(my_vimrc)))
     for candidate in candidates:
         if os.path.isdir(candidate):
             return os.path.realpath(candidate)
