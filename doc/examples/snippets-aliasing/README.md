@@ -10,6 +10,10 @@ insert location of the debug statement and variable name.
 Example of that snippet is shown below:
 
 ```
+global !p
+import px.snippets
+endglobal
+
 snippet pr "print debug" bw
 `!p
 prefix = t[1] + ": %q\\n' "
