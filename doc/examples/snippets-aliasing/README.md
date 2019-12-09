@@ -2,7 +2,7 @@
 
 ![gif](https://raw.githubusercontent.com/SirVer/ultisnips/master/doc/examples/snippets-aliasing/demo.gif)
 
-These examples use [vim-pythonx library](https://github.com/reconquest/vim-pythonx/blob/master/pythonx/px/snippets.py) which provides set of functions to make coding little bit easier.
+These examples use thes [vim-pythonx library](https://github.com/reconquest/vim-pythonx/blob/master/pythonx/px/snippets.py) which provides set of functions to make coding little bit easier.
 
 Let's imagine we're editing a shell file and we need to debug some state.
 

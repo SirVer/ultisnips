@@ -25,7 +25,7 @@ However, with UltiSnips, it can be done via only one keypress:
 
 ## Implementation
 
-This example uses [vim-pythonx library](https://github.com/reconquest/vim-pythonx/blob/master/pythonx/px/snippets.py) which provides set of functions to make coding little bit easier.
+This example uses the [vim-pythonx library](https://github.com/reconquest/vim-pythonx/blob/master/pythonx/px/snippets.py) which provides set of functions to make coding little bit easier.
 
 ```
 global !p
