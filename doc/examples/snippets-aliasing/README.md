@@ -2,14 +2,17 @@
 
 ![gif](https://raw.githubusercontent.com/SirVer/ultisnips/master/doc/examples/snippets-aliasing/demo.gif)
 
-Let's imagine we're editing shell file and we need to debug some vars.
+These examples use thes [vim-pythonx library](https://github.com/reconquest/vim-pythonx/blob/master/pythonx/px/snippets.py) which provides set of functions to make coding little bit easier.
 
-Essentially, we will end up with snippet like that, that will automatically
-insert location of the debug statement and variable name.
+Let's imagine we're editing a shell file and we need to debug some state.
 
-Example of that snippet is shown below:
+We will probably end up with a snippet that will automatically insert the location of the debug statement, the variable name and its content:
 
 ```
+global !p
+import px.snippets
+endglobal
+
 snippet pr "print debug" bw
 `!p
 prefix = t[1] + ": %q\\n' "
@@ -22,7 +25,7 @@ prefix = "{}:{}: {}".format(
 endsnippet
 ```
 
-Now, we want to use same debug snippet, but dump variable to the file.
+Now, we want to use same debug snippet, but dump output to a file.
 How can we do it?
 
 Simple, declare new snippet in that way:
@@ -34,7 +37,7 @@ pr$1 >${2:/tmp/debug}
 endsnippet
 ```
 
-This snippet will expand `pr` snippet automatically (note `pr$1` part) after
+This snippet will expand the `pr` snippet automatically (note `pr$1` part) after
 jumping to the first placeholder (jump will be done automatically by UltiSnips
 engine).
 
@@ -48,5 +51,4 @@ def expand(snip, jump_pos=1):
     vim.eval('feedkeys("\<C-R>=UltiSnips#ExpandSnippet()\<CR>")')
 ```
 
-`px.buffer.get()` and `px.cursor.get()` are simple helpers for the
-`vim.current.window.buffer` and `vim.current.window.cursor`.
+`px.buffer.get()` and `px.cursor.get()` are simple helpers for the `vim.current.window.buffer` and `vim.current.window.cursor`.
