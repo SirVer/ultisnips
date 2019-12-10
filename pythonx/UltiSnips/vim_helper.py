@@ -224,10 +224,10 @@ def get_dot_vim():
     candidates.append(os.path.join(home, ".vim"))
 
     my_vimrc = os.environ["MYVIMRC"]
-    candidates.append(os.path.realpath(os.path.dirname(my_vimrc)))
+    candidates.append(os.path.dirname(my_vimrc))
     for candidate in candidates:
         if os.path.isdir(candidate):
-            return os.path.realpath(candidate)
+            return candidate
     raise RuntimeError(
         "Unable to find user configuration directory. I tried '%s'." % candidates
     )

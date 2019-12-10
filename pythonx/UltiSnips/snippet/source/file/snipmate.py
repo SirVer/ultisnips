@@ -44,7 +44,7 @@ def _snipmate_files_for(ft):
     ]
     ret = set()
     for rtp in vim_helper.eval("&runtimepath").split(","):
-        path = os.path.realpath(os.path.expanduser(os.path.join(rtp, "snippets")))
+        path = os.path.expanduser(os.path.join(rtp, "snippets"))
         for pattern in patterns:
             for fn in glob.glob(os.path.join(path, pattern)):
                 ret.add(fn)
