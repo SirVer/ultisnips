@@ -22,3 +22,26 @@ class Plugin_SuperTab_SimpleTest(_VimTest):
         vim_config.append('let g:SuperTabRetainCompletionDuration = "insert"')
         vim_config.append("let g:SuperTabLongestHighlight = 1")
         vim_config.append("let g:SuperTabCrMapping = 0")
+
+
+class Plugin_VimTemplate_SimpleTest(_VimTest):
+    test_plugins = False
+    plugins = ["srydell/vim-template"]
+    snippets = ("_skel", "Hello", "", "b")
+    keys = ()
+    # NOTE: Trailing 'i' since the test suite
+    #       expects to have to start insert mode
+    wanted = "Helloi"
+
+
+class Plugin_VimTemplate_JumpsTest(_VimTest):
+    test_plugins = False
+    plugins = ["srydell/vim-template"]
+    snippets = ("_skel", "[ ${1:foo} ] ${2:bar}")
+    keys = (
+        "HelloWorld" + JF + JF
+    )  # Should replace 'foo' with 'HelloWorld' but keep 'bar'
+
+    # NOTE: Leading 'i' since the test suite
+    #       expects to have to start insert mode
+    wanted = "[ iHelloWorld ] bar"
