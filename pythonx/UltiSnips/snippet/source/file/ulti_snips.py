@@ -25,7 +25,7 @@ def find_snippet_files(ft, directory):
     directory = os.path.expanduser(directory)
     for pattern in patterns:
         for fn in glob.glob(os.path.join(directory, pattern % ft)):
-            ret.add(os.path.realpath(fn))
+            ret.add(fn)
     return ret
 
 
@@ -55,7 +55,7 @@ def find_all_snippet_directories():
                     "directory is reserved for snipMate snippets. Use another "
                     "directory for UltiSnips snippets."
                 )
-            pth = os.path.realpath(os.path.expanduser(os.path.join(rtp, snippet_dir)))
+            pth = os.path.expanduser(os.path.join(rtp, snippet_dir))
             all_dirs.append(pth)
     return all_dirs
 
