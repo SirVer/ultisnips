@@ -10,6 +10,7 @@ pylint = "*"
 
 [packages]
 mypy = "*"
+black = "*"
 
 [requires]
 python_version = "3.7"
