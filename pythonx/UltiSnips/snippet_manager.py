@@ -47,6 +47,13 @@ def _ask_user(a, formatted):
         return None
 
 
+def _show_user_warning(msg):
+    """Shows a Vim warning message to the user."""
+    vim_helper.command("echohl WarningMsg")
+    vim_helper.command('echom "%s"' % msg.replace('"', '\\"'))
+    vim_helper.command("echohl None")
+
+
 def _ask_snippets(snippets):
     """Given a list of snippets, ask the user which one they want to use, and
     return it."""
@@ -58,6 +65,8 @@ def _ask_snippets(snippets):
 
 
 def _select_and_create_file_to_edit(potentials: Set[str]) -> str:
+    assert len(potentials) >= 1
+
     file_to_edit = ""
     if len(potentials) > 1:
         files = sorted(potentials)
@@ -845,6 +854,13 @@ class SnippetManager:
         if bang:
             for ft in filetypes:
                 potentials.update(find_all_snippet_files(ft))
+        else:
+            if not potentials:
+                _show_user_warning(
+                    "UltiSnips was not able to find a default directory for snippets. "
+                    "Do you have a .vim directory? Try :UltiSnipsEdit! instead of :UltiSnipsEdit."
+                )
+                return ""
         return _select_and_create_file_to_edit(potentials)
 
     @contextmanager
