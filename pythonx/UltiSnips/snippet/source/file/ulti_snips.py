@@ -11,9 +11,10 @@ from UltiSnips import vim_helper
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
 from UltiSnips.snippet.source.file.base import SnippetFileSource
 from UltiSnips.snippet.source.file.common import (
-    handle_extends,
     handle_action,
     handle_context,
+    handle_extends,
+    normalize_file_path,
 )
 from UltiSnips.text import LineIterator, head_tail
 
@@ -25,7 +26,7 @@ def find_snippet_files(ft, directory):
     directory = os.path.expanduser(directory)
     for pattern in patterns:
         for fn in glob.glob(os.path.join(directory, pattern % ft)):
-            ret.add(fn)
+            ret.add(normalize_file_path(fn))
     return ret
 
 
@@ -55,7 +56,9 @@ def find_all_snippet_directories():
                     "directory is reserved for snipMate snippets. Use another "
                     "directory for UltiSnips snippets."
                 )
-            pth = os.path.expanduser(os.path.join(rtp, snippet_dir))
+            pth = normalize_file_path(
+                os.path.expanduser(os.path.join(rtp, snippet_dir))
+            )
             all_dirs.append(pth)
     return all_dirs
 
@@ -196,7 +199,7 @@ def _parse_snippets_file(data, filename):
             if head == "error":
                 yield (head, tail)
             else:
-                actions[head], = tail
+                (actions[head],) = tail
         elif head and not head.startswith("#"):
             yield "error", ("Invalid line %r" % line.rstrip(), lines.line_index)
 
