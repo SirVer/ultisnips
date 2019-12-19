@@ -3,6 +3,13 @@
 
 """Common code for snipMate and UltiSnips snippet files."""
 
+import os.path
+
+
+def normalize_file_path(path: str) -> str:
+    """Calls normpath and normcase on path"""
+    return os.path.normcase(os.path.normpath(path))
+
 
 def handle_extends(tail, line_index):
     """Handles an extends line in a snippet."""
