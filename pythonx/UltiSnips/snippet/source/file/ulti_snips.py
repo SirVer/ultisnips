@@ -195,7 +195,7 @@ def _parse_snippets_file(data, filename):
             if head == "error":
                 yield (head, tail)
             else:
-                actions[head], = tail
+                (actions[head],) = tail
         elif head and not head.startswith("#"):
             yield "error", ("Invalid line %r" % line.rstrip(), lines.line_index)
 
