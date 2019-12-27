@@ -7,17 +7,16 @@ definitions into logical units called Tokens."""
 import string
 import re
 
-from UltiSnips.compatibility import as_unicode
 from UltiSnips.position import Position
 from UltiSnips.text import unescape
 
 
-class _TextIterator(object):
+class _TextIterator:
 
     """Helper class to make iterating over text easier."""
 
     def __init__(self, text, offset):
-        self._text = as_unicode(text)
+        self._text = text
         self._line = offset.line
         self._col = offset.col
 
@@ -40,8 +39,6 @@ class _TextIterator(object):
             self._col += 1
         self._idx += 1
         return rv
-
-    next = __next__  # for python2
 
     def peek(self, count=1):
         """Returns the next 'count' characters without advancing the stream."""
@@ -114,12 +111,12 @@ def _parse_till_unescaped_char(stream, chars):
     return rv, char
 
 
-class Token(object):
+class Token:
 
     """Represents a Token as parsed from a snippet definition."""
 
     def __init__(self, gen, indent):
-        self.initial_text = as_unicode("")
+        self.initial_text = ""
         self.start = gen.pos
         self._parse(gen, indent)
         self.end = gen.pos

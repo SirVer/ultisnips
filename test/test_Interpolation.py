@@ -541,13 +541,8 @@ snip.rv = "placeholder: " + snip.p.current_text`)""",
 first second (placeholder: )"""
 
 
-# Tests for https://bugs.launchpad.net/bugs/1259349
-
-
-class Python_WeirdScoping_Error(_VimTest):
-    snippets = (
-        "test",
-        "h`!p import re; snip.rv = '%i' % len([re.search for i in 'aiiia'])`b",
-    )
+class Python_SnipRvCanBeNonText(_VimTest):
+    # Test for https://github.com/SirVer/ultisnips/issues/1132
+    snippets = ("test", "`!p snip.rv = 5`")
     keys = "test" + EX
-    wanted = "h5b"
+    wanted = "5"

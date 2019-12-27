@@ -1,5 +1,3 @@
-import sys
-
 # Some constants for better reading
 BS = "\x7f"
 ESC = "\x1b"
@@ -20,5 +18,3 @@ EA = "#"  # Expand anonymous
 
 COMPL_KW = chr(24) + chr(14)
 COMPL_ACCEPT = chr(25)
-
-PYTHON3 = sys.version_info >= (3, 0)

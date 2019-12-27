@@ -102,12 +102,12 @@ class SnippetInstance(EditableTextObject):
         vc.to_vim()
         self._del_child(vc)
 
-    def select_next_tab(self, jump_direction):
+    def select_next_tab(self, jump_direction: JumpDirection):
         """Selects the next tabstop in the direction of 'jump_direction'."""
         if self._cts is None:
             return
 
-        if jump_direction == JumpDirection.backward:
+        if jump_direction == JumpDirection.BACKWARD:
             cts_bf = self._cts
 
             res = self._get_prev_tab(self._cts)
@@ -116,7 +116,7 @@ class SnippetInstance(EditableTextObject):
                 return self._tabstops.get(self._cts, None)
             self._cts, ts = res
             return ts
-        elif jump_direction == JumpDirection.forward:
+        elif jump_direction == JumpDirection.FORWARD:
             res = self._get_next_tab(self._cts)
             if res is None:
                 self._cts = None

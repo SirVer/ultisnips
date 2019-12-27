@@ -149,13 +149,6 @@ if __name__ == "__main__":
             "It is ignored for vanilla Vim.",
         )
         p.add_option(
-            "--python3-host-prog",
-            dest="python3_host_prog",
-            type=str,
-            default="",
-            help="See --python-host-prog.",
-        )
-        p.add_option(
             "--expected-python-version",
             dest="expected_python_version",
             type=str,
@@ -207,7 +200,6 @@ if __name__ == "__main__":
             test.retries = options.retries
             test.test_plugins = options.plugins
             test.python_host_prog = options.python_host_prog
-            test.python3_host_prog = options.python3_host_prog
             test.expected_python_version = options.expected_python_version
             test.vim = vim
             test.vim_flavor = vim_flavor

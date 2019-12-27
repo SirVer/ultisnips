@@ -8,7 +8,7 @@ from collections import defaultdict
 from UltiSnips.snippet.source.snippet_dictionary import SnippetDictionary
 
 
-class SnippetSource(object):
+class SnippetSource:
 
     """See module docstring."""
 

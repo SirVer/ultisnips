@@ -11,9 +11,10 @@ from UltiSnips import vim_helper
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
 from UltiSnips.snippet.source.file.base import SnippetFileSource
 from UltiSnips.snippet.source.file.common import (
-    handle_extends,
     handle_action,
     handle_context,
+    handle_extends,
+    normalize_file_path,
 )
 from UltiSnips.text import LineIterator, head_tail
 
@@ -25,13 +26,13 @@ def find_snippet_files(ft, directory):
     directory = os.path.expanduser(directory)
     for pattern in patterns:
         for fn in glob.glob(os.path.join(directory, pattern % ft)):
-            ret.add(os.path.realpath(fn))
+            ret.add(normalize_file_path(fn))
     return ret
 
 
-def _find_all_snippet_directories():
-    """Returns a list of the absolute path of all snippet directories to
-    search."""
+def find_all_snippet_directories():
+    """Returns a list of the absolute path of all potential snippet
+    directories, no matter if they exist or not."""
 
     if vim_helper.eval("exists('b:UltiSnipsSnippetDirectories')") == "1":
         snippet_dirs = vim_helper.eval("b:UltiSnipsSnippetDirectories")
@@ -55,9 +56,10 @@ def _find_all_snippet_directories():
                     "directory is reserved for snipMate snippets. Use another "
                     "directory for UltiSnips snippets."
                 )
-            pth = os.path.realpath(os.path.expanduser(os.path.join(rtp, snippet_dir)))
-            if os.path.isdir(pth):
-                all_dirs.append(pth)
+            pth = normalize_file_path(
+                os.path.expanduser(os.path.join(rtp, snippet_dir))
+            )
+            all_dirs.append(pth)
     return all_dirs
 
 
@@ -66,7 +68,9 @@ def find_all_snippet_files(ft):
     directory."""
     patterns = ["%s.snippets", "%s_*.snippets", os.path.join("%s", "*")]
     ret = set()
-    for directory in _find_all_snippet_directories():
+    for directory in find_all_snippet_directories():
+        if not os.path.isdir(directory):
+            continue
         for pattern in patterns:
             for fn in glob.glob(os.path.join(directory, pattern % ft)):
                 ret.add(fn)
@@ -195,7 +199,7 @@ def _parse_snippets_file(data, filename):
             if head == "error":
                 yield (head, tail)
             else:
-                actions[head], = tail
+                (actions[head],) = tail
         elif head and not head.startswith("#"):
             yield "error", ("Invalid line %r" % line.rstrip(), lines.line_index)
 

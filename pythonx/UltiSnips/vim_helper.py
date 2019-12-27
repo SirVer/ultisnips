@@ -3,38 +3,26 @@
 
 """Wrapper functionality around the functions we need from Vim."""
 
-import re
-
-import vim  # pylint:disable=import-error
-from vim import error  # pylint:disable=import-error,unused-import
-
-from UltiSnips.compatibility import col2byte, byte2col, as_unicode, as_vimencoding
-from UltiSnips.position import Position
-
 from contextlib import contextmanager
+import os
+import platform
+
+from UltiSnips.snippet.source.file.common import normalize_file_path
+from UltiSnips.compatibility import col2byte, byte2col
+from UltiSnips.position import Position
+from vim import error  # pylint:disable=import-error,unused-import
+import vim  # pylint:disable=import-error
 
 
-class VimBuffer(object):
+class VimBuffer:
 
     """Wrapper around the current Vim buffer."""
 
     def __getitem__(self, idx):
-        if isinstance(idx, slice):  # Py3
-            return self.__getslice__(idx.start, idx.stop)
-        rv = vim.current.buffer[idx]
-        return as_unicode(rv)
-
-    def __getslice__(self, i, j):  # pylint:disable=no-self-use
-        rv = vim.current.buffer[i:j]
-        return [as_unicode(l) for l in rv]
+        return vim.current.buffer[idx]
 
     def __setitem__(self, idx, text):
-        if isinstance(idx, slice):  # Py3
-            return self.__setslice__(idx.start, idx.stop, text)
-        vim.current.buffer[idx] = as_vimencoding(text)
-
-    def __setslice__(self, i, j, text):  # pylint:disable=no-self-use
-        vim.current.buffer[i:j] = [as_vimencoding(l) for l in text]
+        vim.current.buffer[idx] = text
 
     def __len__(self):
         return len(vim.current.buffer)
@@ -43,7 +31,7 @@ class VimBuffer(object):
     def line_till_cursor(self):  # pylint:disable=no-self-use
         """Returns the text before the cursor."""
         _, col = self.cursor
-        return as_unicode(vim.current.line)[:col]
+        return vim.current.line[:col]
 
     @property
     def number(self):  # pylint:disable=no-self-use
@@ -109,9 +97,9 @@ def escape(inp):
     def conv(obj):
         """Convert obj."""
         if isinstance(obj, list):
-            rv = as_unicode("[" + ",".join(conv(o) for o in obj) + "]")
+            rv = "[" + ",".join(conv(o) for o in obj) + "]"
         elif isinstance(obj, dict):
-            rv = as_unicode(
+            rv = (
                 "{"
                 + ",".join(
                     [
@@ -122,7 +110,7 @@ def escape(inp):
                 + "}"
             )
         else:
-            rv = as_unicode('"%s"') % as_unicode(obj).replace('"', '\\"')
+            rv = '"%s"' % obj.replace('"', '\\"')
         return rv
 
     return conv(inp)
@@ -130,22 +118,19 @@ def escape(inp):
 
 def command(cmd):
     """Wraps vim.command."""
-    return as_unicode(vim.command(as_vimencoding(cmd)))
+    return vim.command(cmd)
 
 
 def eval(text):
     """Wraps vim.eval."""
-    rv = vim.eval(as_vimencoding(text))
-    if not isinstance(rv, (dict, list)):
-        return as_unicode(rv)
-    return rv
+    return vim.eval(text)
 
 
 def bindeval(text):
     """Wraps vim.bindeval."""
-    rv = vim.bindeval(as_vimencoding(text))
+    rv = vim.bindeval(text)
     if not isinstance(rv, (dict, list)):
-        return as_unicode(rv)
+        return rv.decode(vim.eval("&encoding"), "replace")
     return rv
 
 
@@ -166,7 +151,7 @@ def feedkeys(keys, mode="n"):
     if keys == "startinsert":
         command("startinsert")
     else:
-        command(as_unicode(r'call feedkeys("%s", "%s")') % (keys, mode))
+        command(r'call feedkeys("%s", "%s")' % (keys, mode))
 
 
 def new_scratch_buffer(text):
@@ -201,7 +186,7 @@ def select(start, end):
     selection = eval("&selection")
 
     col = col2byte(start.line + 1, start.col)
-    vim.current.window.cursor = start.line + 1, col
+    buf.cursor = start
 
     mode = eval("mode()")
 
@@ -229,6 +214,28 @@ def select(start, end):
             move_cmd += "%iG%i|" % virtual_position(end.line + 1, end.col + 1)
         move_cmd += "o%iG%i|o\\<c-g>" % virtual_position(start.line + 1, start.col + 1)
     feedkeys(move_cmd)
+
+
+def get_dot_vim():
+    """Returns the likely place for ~/.vim for the current setup."""
+    home = vim.eval("$HOME")
+    candidates = []
+    if platform.system() == "Windows":
+        candidates.append(os.path.join(home, "vimfiles"))
+    if vim.eval("has('nvim')") == "1":
+        xdg_home_config = vim.eval("$XDG_CONFIG_HOME") or os.path.join(home, ".config")
+        candidates.append(os.path.join(xdg_home_config, "nvim"))
+
+    candidates.append(os.path.join(home, ".vim"))
+
+    my_vimrc = os.environ["MYVIMRC"]
+    candidates.append(normalize_file_path(os.path.dirname(my_vimrc)))
+    for candidate in candidates:
+        if os.path.isdir(candidate):
+            return normalize_file_path(candidate)
+    raise RuntimeError(
+        "Unable to find user configuration directory. I tried '%s'." % candidates
+    )
 
 
 def set_mark_from_pos(name, pos):

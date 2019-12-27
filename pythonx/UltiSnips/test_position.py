@@ -8,7 +8,7 @@ import unittest
 from position import Position
 
 
-class _MPBase(object):
+class _MPBase:
     def runTest(self):
         obj = Position(*self.obj)
         for pivot, delta, wanted in self.steps:
