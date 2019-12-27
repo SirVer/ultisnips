@@ -5,8 +5,8 @@ from enum import Enum
 
 
 class JumpDirection(Enum):
-    forward = 1
-    backward = 2
+    FORWARD = 1
+    BACKWARD = 2
 
 
 class Position(object):

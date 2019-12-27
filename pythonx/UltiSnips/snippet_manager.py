@@ -10,7 +10,6 @@ import platform
 import traceback
 import sys
 import vim
-from enum import Enum
 import re
 from contextlib import contextmanager
 
@@ -30,11 +29,6 @@ from UltiSnips.snippet.source import (
 from UltiSnips.text import escape
 from UltiSnips.vim_state import VimState, VisualContentPreserver
 from UltiSnips.buffer_proxy import use_proxy_buffer, suspend_proxy_edits
-
-
-class IgnoreMovements(Enum):
-    yes = 1
-    no = 2
 
 
 def _ask_user(a, formatted):
@@ -107,6 +101,7 @@ class SnippetManager(object):
         if enable_snipmate == "1":
             self.register_snippet_source("snipmate_files", SnipMateFileSource())
 
+        self._should_update_textobjects = False
         self._should_reset_visual = False
 
         self._reinit()
@@ -116,7 +111,7 @@ class SnippetManager(object):
         """Jumps to the next tabstop."""
         vim_helper.command("let g:ulti_jump_forwards_res = 1")
         vim_helper.command("let &undolevels = &undolevels")
-        if not self._jump(JumpDirection.forward, IgnoreMovements.no):
+        if not self._jump(JumpDirection.FORWARD):
             vim_helper.command("let g:ulti_jump_forwards_res = 0")
             return self._handle_failure(self.forward_trigger)
 
@@ -125,7 +120,7 @@ class SnippetManager(object):
         """Jumps to the previous tabstop."""
         vim_helper.command("let g:ulti_jump_backwards_res = 1")
         vim_helper.command("let &undolevels = &undolevels")
-        if not self._jump(JumpDirection.backward, IgnoreMovements.no):
+        if not self._jump(JumpDirection.BACKWARD):
             vim_helper.command("let g:ulti_jump_backwards_res = 0")
             return self._handle_failure(self.backward_trigger)
 
@@ -150,7 +145,7 @@ class SnippetManager(object):
         rv = self._try_expand()
         if not rv:
             vim_helper.command("let g:ulti_expand_or_jump_res = 2")
-            rv = self._jump(JumpDirection.forward, IgnoreMovements.no)
+            rv = self._jump(JumpDirection.FORWARD)
         if not rv:
             vim_helper.command("let g:ulti_expand_or_jump_res = 0")
             self._handle_failure(self.expand_trigger)
@@ -315,6 +310,8 @@ class SnippetManager(object):
     @err_to_scratch_buffer.wrap
     def _cursor_moved(self):
         """Called whenever the cursor moved."""
+        self._should_update_textobjects = False
+
         self._vstate.remember_position()
         if vim_helper.eval("mode()") not in "in":
             return
@@ -497,9 +494,9 @@ class SnippetManager(object):
         if not self._active_snippets:
             self._teardown_inner_state()
 
-    def _jump(self, jump_direction: JumpDirection, ignore_movements: IgnoreMovements):
+    def _jump(self, jump_direction: JumpDirection):
         """Helper method that does the actual jump."""
-        if ignore_movements == IgnoreMovements.no:
+        if self._should_update_textobjects:
             self._should_reset_visual = False
             self._cursor_moved()
 
@@ -562,7 +559,7 @@ class SnippetManager(object):
                     # have been popped when its final tabstop was used.
                     # Cleanup by removing current snippet and recursing.
                     self._current_snippet_is_done()
-                    jumped = self._jump(jump_direction, IgnoreMovements.no)
+                    jumped = self._jump(jump_direction)
 
             if jumped:
                 if self._ctab:
@@ -575,7 +572,7 @@ class SnippetManager(object):
                 with use_proxy_buffer(stack_for_post_jump, self._vstate):
                     snippet_for_action.snippet.do_post_jump(
                         ntab.number,
-                        -1 if jump_direction == JumpDirection.backward else 1,
+                        -1 if jump_direction == JumpDirection.BACKWARD else 1,
                         stack_for_post_jump,
                         snippet_for_action,
                     )
@@ -685,6 +682,7 @@ class SnippetManager(object):
         self._setup_inner_state()
 
         self._snip_expanded_in_action = False
+        self._should_update_textobjects = False
 
         # Adjust before, maybe the trigger is not the complete word
         text_before = before
@@ -741,9 +739,9 @@ class SnippetManager(object):
             self._vstate.remember_buffer(self._active_snippets[0])
 
             if not self._snip_expanded_in_action:
-                self._jump(JumpDirection.forward, IgnoreMovements.yes)
+                self._jump(JumpDirection.FORWARD)
             elif self._current_snippet.current_text != "":
-                self._jump(JumpDirection.forward, IgnoreMovements.yes)
+                self._jump(JumpDirection.FORWARD)
             else:
                 self._current_snippet_is_done()
 
@@ -886,6 +884,8 @@ class SnippetManager(object):
 
     @err_to_scratch_buffer.wrap
     def _track_change(self):
+        self._should_update_textobjects = True
+
         try:
             inserted_char = vim_helper.as_unicode(vim_helper.eval("v:char"))
         except UnicodeDecodeError:
