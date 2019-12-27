@@ -2,14 +2,6 @@ MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MAKEFILE_DIR := $(dir ${MAKEFILE_PATH})
 
 # Test images as run on CI.
-image_vim_74_py2:
-	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=2.7-stretch --build-arg VIM_VERSION=7.4 .
-image_vim_80_py2:
-	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=2.7-stretch --build-arg VIM_VERSION=8.0 .
-image_vim_81_py2:
-	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=2.7-stretch --build-arg VIM_VERSION=8.1 .
-image_vim_git_py2:
-	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=2.7-stretch --build-arg VIM_VERSION=git .
 image_vim_74_py36:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.6-stretch --build-arg VIM_VERSION=7.4 .
 image_vim_80_py36:
@@ -28,7 +20,7 @@ image_vim_81_py38:
 image_vim_git_py38:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.8-buster --build-arg VIM_VERSION=git .
 
-image_repro: image_vim_80_py3
+image_repro: image_vim_80_py36
 	docker build -t ultisnips:repro --build-arg BASE_IMAGE=$< -f Dockerfile.repro .
 
 # A reproduction image that drops you into a naked environment,

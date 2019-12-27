@@ -2,10 +2,6 @@ sudo: required
 services: docker
 
 env:
-  - VIM_VERSION="7.4" PYTHON_IMAGE=2.7-stretch TAG=vim_74_py2
-  - VIM_VERSION="8.0" PYTHON_IMAGE=2.7-stretch TAG=vim_80_py2
-  - VIM_VERSION="8.1" PYTHON_IMAGE=2.7-stretch TAG=vim_81_py2
-  - VIM_VERSION="git" PYTHON_IMAGE=2.7-stretch TAG=vim_git_py2
   - VIM_VERSION="7.4" PYTHON_IMAGE=3.6-stretch TAG=vim_74_py36
   - VIM_VERSION="8.0" PYTHON_IMAGE=3.6-stretch TAG=vim_80_py36
   - VIM_VERSION="8.1" PYTHON_IMAGE=3.6-stretch TAG=vim_81_py36

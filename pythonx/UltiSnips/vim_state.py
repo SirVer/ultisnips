@@ -6,7 +6,7 @@
 from collections import deque, namedtuple
 
 from UltiSnips import vim_helper
-from UltiSnips.compatibility import as_unicode, byte2col
+from UltiSnips.compatibility import byte2col
 from UltiSnips.position import Position
 
 _Placeholder = namedtuple("_FrozenPlaceholder", ["current_text", "start", "end"])
@@ -28,7 +28,7 @@ class VimPosition(Position):
         return self._mode
 
 
-class VimState(object):
+class VimState:
 
     """Caches some state information from Vim to better guess what editing
     tasks the user might have done in the last step."""
@@ -103,7 +103,7 @@ class VimState(object):
         return self._lvb[:]
 
 
-class VisualContentPreserver(object):
+class VisualContentPreserver:
 
     """Saves the current visual selection and the selection mode it was done in
     (e.g. line selection, block selection or regular selection.)"""
@@ -114,7 +114,7 @@ class VisualContentPreserver(object):
     def reset(self):
         """Forget the preserved state."""
         self._mode = ""
-        self._text = as_unicode("")
+        self._text = ""
         self._placeholder = None
 
     def conserve(self):

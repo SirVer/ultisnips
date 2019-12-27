@@ -9,7 +9,7 @@ import glob
 from UltiSnips import vim_helper
 from UltiSnips.snippet.definition import SnipMateSnippetDefinition
 from UltiSnips.snippet.source.file.base import SnippetFileSource
-from UltiSnips.snippet.source.file.common import handle_extends
+from UltiSnips.snippet.source.file.common import handle_extends, normalize_file_path
 from UltiSnips.text import LineIterator, head_tail
 
 
@@ -44,7 +44,7 @@ def _snipmate_files_for(ft):
     ]
     ret = set()
     for rtp in vim_helper.eval("&runtimepath").split(","):
-        path = os.path.realpath(os.path.expanduser(os.path.join(rtp, "snippets")))
+        path = normalize_file_path(os.path.expanduser(os.path.join(rtp, "snippets")))
         for pattern in patterns:
             for fn in glob.glob(os.path.join(path, pattern)):
                 ret.add(fn)

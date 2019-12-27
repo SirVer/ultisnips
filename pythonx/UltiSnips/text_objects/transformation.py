@@ -79,7 +79,7 @@ _DOLLAR = re.compile(r"\$(\d+)", re.DOTALL)
 _CONDITIONAL = re.compile(r"\(\?(\d+):", re.DOTALL)
 
 
-class _CleverReplace(object):
+class _CleverReplace:
 
     """Mimics TextMates replace syntax."""
 
@@ -120,7 +120,7 @@ class _CleverReplace(object):
 UNIDECODE_ALERT_RAISED = False
 
 
-class TextObjectTransformation(object):
+class TextObjectTransformation:
 
     """Base class for Transformations and ${VISUAL}."""
 

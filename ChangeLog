@@ -1,3 +1,19 @@
+version 3.2 (05-Nov-2019):
+	- This is the first release done again by @SirVer. And this is also posted
+	  on vim.org again. `¯\_(ツ)_/¯`
+	- This is the last version to support Python 2.
+	- Syntax highlighting improvements: a new one for unite & tweaks to others.
+	- Support for transformations on multiple lines.
+	- Python interpolation got more powerful, for example tabstops can now be
+	  modified in python interpolation, you can access the last changed
+	  placeholder text and more.
+	- Support for deoplete.
+	- Snippet files are no longer watched for changes. This increases
+	  performance, but also means that if you change your snippet files outside
+	  of Vim, UltiSnips will not know about it. You need to run `:call
+	  UltiSnips#RefreshSnippets()` or restart Vim.
+	- Text objects for selecting snippets in visual mode: iS, aS
+
 version 3.1 (07-Dec-2015):
 	- This is the last release done by @SirVer. The new maintainer of UltiSnips
 	  is @seletskiy. The repository remains https://github.com/SirVer/ultisnips,

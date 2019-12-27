@@ -7,14 +7,13 @@ import os
 from collections import namedtuple
 
 from UltiSnips import vim_helper
-from UltiSnips.compatibility import as_unicode
 from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text_objects.base import NoneditableTextObject
 from UltiSnips.vim_state import _Placeholder
 import UltiSnips.snippet_manager
 
 
-class _Tabs(object):
+class _Tabs:
 
     """Allows access to tabstop content via t[] inside of python code."""
 
@@ -48,7 +47,7 @@ class SnippetUtilForAction(dict):
         self.cursor.preserve()
 
 
-class SnippetUtil(object):
+class SnippetUtil:
 
     """Provides easy access to indentation, etc.
 
@@ -175,8 +174,7 @@ class SnippetUtil(object):
     def p(self):
         if self._parent.current_placeholder:
             return self._parent.current_placeholder
-        else:
-            return _Placeholder("", 0, 0)
+        return _Placeholder("", 0, 0)
 
     @property
     def context(self):
@@ -239,7 +237,7 @@ class PythonCode(NoneditableTextObject):
                 mode = snippet.visual_content.mode
                 context = snippet.context
                 break
-            except AttributeError as e:
+            except AttributeError:
                 snippet = snippet._parent  # pylint:disable=protected-access
         self._snip = SnippetUtil(token.indent, mode, text, context, snippet)
 
@@ -268,15 +266,13 @@ class PythonCode(NoneditableTextObject):
         for code in self._codes:
             try:
                 exec(code, self._locals)  # pylint:disable=exec-used
-            except Exception as e:
-                e.snippet_code = code
+            except Exception as exception:
+                exception.snippet_code = code
                 raise
 
-        rv = as_unicode(
-            self._snip.rv
-            if self._snip._rv_changed  # pylint:disable=protected-access
-            else as_unicode(self._locals["res"])
-        )
+        rv = str(
+            self._snip.rv if self._snip._rv_changed else self._locals["res"]
+        )  # pylint:disable=protected-access
 
         if ct != rv:
             self.overwrite(buf, rv)

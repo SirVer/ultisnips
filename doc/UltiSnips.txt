@@ -58,7 +58,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
 
 This plugin only works if 'compatible' is not set.
 {Vi does not have any of these features}
-{only available when |+python| or |+python3| have been enabled at compile time}
+{only available when |+python3| has been enabled at compile time}
 
 
 ==============================================================================
@@ -89,21 +89,13 @@ http://vimcasts.org/episodes/ultisnips-visual-placeholder/
 1.1 Requirements                                     *UltiSnips-requirements*
 ----------------
 
-This plugin works with Vim version 7.4 or later. It only works if the
-'compatible' setting is not set.
+This plugin works with Vim version 7.4 or later with Python 3 support enabled.
+It only works if the 'compatible' setting is not set.
 
-This plugin is tested against Python 2.7 and 3.6 in Vim 7.4 and 8. All other
-combinations are unsupported, but might work.
-
-The Python 2.x or Python 3.x interface must be available. In other words, Vim
-must be compiled with either the |+python| feature or the |+python3| feature.
+The Python 3.x interface must be available. In other words, Vim
+must be compiled with the |+python3| feature.
 The following commands show how to test if you have python compiled in Vim.
 They print '1' if the python version is compiled in, '0' if not.
-
-Test if Vim is compiled with python version 2.x: >
-    :echo has("python")
-The python version Vim is linked against can be found with: >
-    :py import sys; print(sys.version)
 
 Test if Vim is compiled with python version 3.x: >
     :echo has("python3")
@@ -112,17 +104,6 @@ The python version Vim is linked against can be found with: >
 
 Note that Vim is maybe not using your system-wide installed python version, so
 make sure to check the Python version inside of Vim.
-
-UltiSnips attempts to auto-detect which python version is compiled into Vim.
-Unfortunately, in some versions of Vim this detection does not work.
-In that case you have to explicitly tell UltiSnips which version to use using
-the 'UltiSnipsUsePythonVersion' global variable.
-
-To use python version 2.x: >
-   let g:UltiSnipsUsePythonVersion = 2
-
-To use python version 3.x: >
-   let g:UltiSnipsUsePythonVersion = 3
 
 
 1.2 Acknowledgments                               *UltiSnips-acknowledgments*
@@ -184,7 +165,7 @@ found here: https://github.com/honza/vim-snippets
 
 The UltiSnipsEdit command opens a private snippet definition file for the
 current filetype. If no snippet file exists, a new file is created. If used as
-UltiSnipsEdit! all public snippet files are taken into account too. If
+UltiSnipsEdit! all public snippet files that exist are taken into account too. If
 multiple files match the search, the user gets to choose the file.
 
 There are several variables associated with the UltiSnipsEdit command.
@@ -199,34 +180,13 @@ g:UltiSnipsEditSplit        Defines how the edit window is opened. Possible
                             |context|        Splits the window vertically or
                                            horizontally depending on context.
 
-                                                        *g:UltiSnipsSnippetsDir*
-g:UltiSnipsSnippetsDir
-                            Defines the directory where private snippet
-                            definition files are placed in in.
-
-                            As example, if the current 'filetype' is "cpp" the
-                            :UltiSnipsEdit command looks for a file to edit in
-                            this order:
-                            1. An existing
-                               g:UltiSnipsSnippetsDir."/cpp.snippets" file
-                            2. Find a matching "cpp" snippets file in
-                               g:UltiSnipsSnippetDirectories
-                            3. Create a new
-                               g:UltiSnipsSnippetsDir."/cpp.snippets" file
-
-                            Note that directories named "snippets" are
-                            reserved for snipMate snippets and cannot be used.
-                            Also, this setting does not affect where snippets
-                            are searched for, so it is possible to change this
-                            to opening files that are then not found by
-                            UltiSnips. See |UltiSnips-how-snippets-are-loaded|
-                            for details.
-
                                                         *g:UltiSnipsSnippetDirectories*
 g:UltiSnipsSnippetDirectories
-                            Configures the directories that are searched for
-                            snippets. Do not mix up this variable with the
-                            previous one. See |UltiSnips-how-snippets-are-loaded|.
+                            An array of relative directory names OR an array
+                            with a single absolute path. Defaults to [
+                            "UltiSnips" ]. No entry in this list must be
+                            "snippets". Please read
+                            |UltiSnips-how-snippets-are-loaded| for details.
 
                                                         *g:UltiSnipsEnableSnipMate*
 g:UltiSnipsEnableSnipMate

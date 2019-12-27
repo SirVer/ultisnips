@@ -1,4 +1,4 @@
-if exists("b:did_autoload_ultisnips_map_keys") || !exists("g:_uspy")
+if exists("b:did_autoload_ultisnips_map_keys")
    finish
 endif
 let b:did_autoload_ultisnips_map_keys = 1

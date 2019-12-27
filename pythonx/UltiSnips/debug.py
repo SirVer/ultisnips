@@ -9,8 +9,6 @@ They should never be used in production code.
 
 import sys
 
-from UltiSnips.compatibility import as_unicode
-
 DUMP_FILENAME = (
     "/tmp/file.txt"
     if not sys.platform.lower().startswith("win")
@@ -29,7 +27,7 @@ def echo_to_hierarchy(text_object):
 
     def _do_print(text_object, indent=""):
         """prints recursively."""
-        debug(indent + as_unicode(text_object))
+        debug(indent + text_object)
         try:
             for child in text_object._children:
                 _do_print(child, indent=indent + "  ")
@@ -41,7 +39,6 @@ def echo_to_hierarchy(text_object):
 
 def debug(msg):
     """Dumb 'msg' into the debug file."""
-    msg = as_unicode(msg)
     with open(DUMP_FILENAME, "ab") as dump_file:
         dump_file.write((msg + "\n").encode("utf-8"))
 
