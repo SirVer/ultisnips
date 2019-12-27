@@ -74,10 +74,10 @@ class SnippetFileSource(SnippetSource):
             elif event == "extends":
                 # TODO(sirver): extends information is more global
                 # than one snippet source.
-                filetypes, = data
+                (filetypes,) = data
                 self.update_extends(ft, filetypes)
             elif event == "snippet":
-                snippet, = data
+                (snippet,) = data
                 self._snippets[ft].add_snippet(snippet)
             else:
                 assert False, "Unhandled %s: %r" % (event, data)
