@@ -13,7 +13,7 @@ import vim
 from UltiSnips import vim_helper
 from UltiSnips import err_to_scratch_buffer
 from UltiSnips.diff import diff, guess_edit
-from UltiSnips.position import Position
+from UltiSnips.position import Position, JumpDirection
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
 from UltiSnips.snippet.source import (
     AddedSnippetsSource,
@@ -149,7 +149,7 @@ class SnippetManager:
         """Jumps to the next tabstop."""
         vim_helper.command("let g:ulti_jump_forwards_res = 1")
         vim_helper.command("let &undolevels = &undolevels")
-        if not self._jump():
+        if not self._jump(JumpDirection.FORWARD):
             vim_helper.command("let g:ulti_jump_forwards_res = 0")
             return self._handle_failure(self.forward_trigger)
         return None
@@ -159,7 +159,7 @@ class SnippetManager:
         """Jumps to the previous tabstop."""
         vim_helper.command("let g:ulti_jump_backwards_res = 1")
         vim_helper.command("let &undolevels = &undolevels")
-        if not self._jump(True):
+        if not self._jump(JumpDirection.BACKWARD):
             vim_helper.command("let g:ulti_jump_backwards_res = 0")
             return self._handle_failure(self.backward_trigger)
         return None
@@ -185,7 +185,7 @@ class SnippetManager:
         rv = self._try_expand()
         if not rv:
             vim_helper.command("let g:ulti_expand_or_jump_res = 2")
-            rv = self._jump()
+            rv = self._jump(JumpDirection.FORWARD)
         if not rv:
             vim_helper.command("let g:ulti_expand_or_jump_res = 0")
             self._handle_failure(self.expand_trigger)
@@ -531,7 +531,7 @@ class SnippetManager:
         if not self._active_snippets:
             self._teardown_inner_state()
 
-    def _jump(self, backwards=False):
+    def _jump(self, jump_direction: JumpDirection):
         """Helper method that does the actual jump."""
         if self._should_update_textobjects:
             self._should_reset_visual = False
@@ -561,7 +561,7 @@ class SnippetManager:
                 snippet_for_action = None
 
             if self._current_snippet:
-                ntab = self._current_snippet.select_next_tab(backwards)
+                ntab = self._current_snippet.select_next_tab(jump_direction)
                 if ntab:
                     if self._current_snippet.snippet.has_option("s"):
                         lineno = vim_helper.buf.cursor.line
@@ -596,7 +596,7 @@ class SnippetManager:
                     # have been popped when its final tabstop was used.
                     # Cleanup by removing current snippet and recursing.
                     self._current_snippet_is_done()
-                    jumped = self._jump(backwards)
+                    jumped = self._jump(jump_direction)
 
             if jumped:
                 if self._ctab:
@@ -609,7 +609,7 @@ class SnippetManager:
                 with use_proxy_buffer(stack_for_post_jump, self._vstate):
                     snippet_for_action.snippet.do_post_jump(
                         ntab.number,
-                        -1 if backwards else 1,
+                        -1 if jump_direction == JumpDirection.BACKWARD else 1,
                         stack_for_post_jump,
                         snippet_for_action,
                     )
@@ -773,9 +773,9 @@ class SnippetManager:
             self._vstate.remember_buffer(self._active_snippets[0])
 
             if not self._snip_expanded_in_action:
-                self._jump()
+                self._jump(JumpDirection.FORWARD)
             elif self._current_snippet.current_text != "":
-                self._jump()
+                self._jump(JumpDirection.FORWARD)
             else:
                 self._current_snippet_is_done()
 

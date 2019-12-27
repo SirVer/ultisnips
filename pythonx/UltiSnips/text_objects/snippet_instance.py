@@ -10,7 +10,7 @@ also a TextObject.
 """
 
 from UltiSnips import vim_helper
-from UltiSnips.position import Position
+from UltiSnips.position import Position, JumpDirection
 from UltiSnips.text_objects.base import EditableTextObject, NoneditableTextObject
 from UltiSnips.text_objects.tabstop import TabStop
 
@@ -103,12 +103,12 @@ class SnippetInstance(EditableTextObject):
         vc.to_vim()
         self._del_child(vc)
 
-    def select_next_tab(self, backwards=False):
-        """Selects the next tabstop or the previous if 'backwards' is True."""
+    def select_next_tab(self, jump_direction: JumpDirection):
+        """Selects the next tabstop in the direction of 'jump_direction'."""
         if self._cts is None:
             return
 
-        if backwards:
+        if jump_direction == JumpDirection.BACKWARD:
             cts_bf = self._cts
 
             res = self._get_prev_tab(self._cts)
@@ -117,7 +117,7 @@ class SnippetInstance(EditableTextObject):
                 return self._tabstops.get(self._cts, None)
             self._cts, ts = res
             return ts
-        else:
+        elif jump_direction == JumpDirection.FORWARD:
             res = self._get_next_tab(self._cts)
             if res is None:
                 self._cts = None
@@ -134,6 +134,8 @@ class SnippetInstance(EditableTextObject):
             else:
                 self._cts, ts = res
                 return ts
+        else:
+            assert False, "Unknown JumpDirection: %r" % jump_direction
 
         return self._tabstops[self._cts]
 
