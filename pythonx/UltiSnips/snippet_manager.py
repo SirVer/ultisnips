@@ -28,6 +28,7 @@ from UltiSnips.text import escape
 from UltiSnips.vim_state import VimState, VisualContentPreserver
 from UltiSnips.buffer_proxy import use_proxy_buffer, suspend_proxy_edits
 
+
 def _ask_user(a, formatted):
     """Asks the user using inputlist() and returns the selected element or
     None."""
@@ -422,7 +423,9 @@ class SnippetManager:
         self._check_if_still_inside_snippet()
         if self._active_snippets:
             self._active_snippets[0].update_textobjects(vim_helper.buf)
-            self._last_changed_ticks[vim_helper.buf.number] = vim_helper.buf.changed_tick
+            self._last_changed_ticks[
+                vim_helper.buf.number
+            ] = vim_helper.buf.changed_tick
             self._vstate.remember_buffer(self._active_snippets[0])
 
     def _setup_inner_state(self):
@@ -530,7 +533,14 @@ class SnippetManager:
             <= vim_helper.buf.cursor
             <= self._current_snippet.end
         ):
-            debug("SNIPPET done: %r, %r, %r" % (self._current_snippet.start, vim_helper.buf.cursor, self._current_snippet.end))
+            debug(
+                "SNIPPET done: %r, %r, %r"
+                % (
+                    self._current_snippet.start,
+                    vim_helper.buf.cursor,
+                    self._current_snippet.end,
+                )
+            )
             self._current_snippet_is_done()
             self._reinit()
             self._check_if_still_inside_snippet()
@@ -595,7 +605,9 @@ class SnippetManager:
                     )
                     self._should_reset_visual = False
                     self._active_snippets[0].update_textobjects(vim_helper.buf)
-                    self._last_changed_ticks[vim_helper.buf.number] = vim_helper.buf.changed_tick
+                    self._last_changed_ticks[
+                        vim_helper.buf.number
+                    ] = vim_helper.buf.changed_tick
                     # Open any folds this might have created
                     vim_helper.command("normal! zv")
                     self._vstate.remember_buffer(self._active_snippets[0])

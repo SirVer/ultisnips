@@ -39,7 +39,7 @@ class VimBuffer:
         return vim.current.buffer.number
 
     @property
-    def changed_tick(self): # pylint:disable=no-self-use
+    def changed_tick(self):  # pylint:disable=no-self-use
         return int(vim.eval("b:changedtick"))
 
     @property

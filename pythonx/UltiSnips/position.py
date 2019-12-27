@@ -3,6 +3,7 @@
 
 from enum import Enum
 
+
 class JumpDirection(Enum):
     FORWARD = 1
     BACKWARD = 2

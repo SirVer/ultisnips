@@ -14,6 +14,7 @@ from UltiSnips.position import Position, JumpDirection
 from UltiSnips.text_objects.base import EditableTextObject, NoneditableTextObject
 from UltiSnips.text_objects.tabstop import TabStop
 
+
 class SnippetInstance(EditableTextObject):
 
     """See module docstring."""
