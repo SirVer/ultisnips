@@ -5,8 +5,9 @@ Plug 'honza/vim-snippets'
 
 let g:UltiSnipsExpandTrigger="<tab>"
 
-" Weird choices for jump triggers, but I wanted something that is rarely typed
-" and never eaten by the shell.
+" Weird choices for triggers, but I wanted something that is rarely typed and
+" never eaten by the shell.
+let g:UltiSnipsListSnippets="9"
 let g:UltiSnipsJumpForwardTrigger="2"
 let g:UltiSnipsJumpBackwardTrigger="1"
 
