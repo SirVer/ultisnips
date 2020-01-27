@@ -250,6 +250,41 @@ class MirrorToken(Token):
         return "MirrorToken(%r,%r,%r)" % (self.start, self.end, self.number)
 
 
+class ChoicesToken(Token):
+
+    """${1|o1,o2,o3|}"""
+
+    CHECK = re.compile(r"^\${\d+\|")
+
+    @classmethod
+    def starts_here(cls, stream):
+        """Returns true if this token starts at the current position in
+        'stream'."""
+        return cls.CHECK.match(stream.peek(10)) is not None
+
+    def _parse(self, stream, indent):
+        next(stream)  # $
+        next(stream)  # {
+
+        self.number = _parse_number(stream)
+
+        next(stream)  # |
+
+        choices_text = _parse_till_unescaped_char(stream, "|")[0]
+        self.choice_list = choices_text.split(",")
+        self.initial_text = choices_text
+
+        _parse_till_closing_brace(stream)
+
+    def __repr__(self):
+        return "ChoicesToken(%r,%r,%r,|%r|)" % (
+            self.start,
+            self.end,
+            self.number,
+            self.initial_text,
+        )
+
+
 class EscapeCharToken(Token):
 
     """\\n."""
