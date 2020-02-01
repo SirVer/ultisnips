@@ -272,7 +272,7 @@ class ChoicesToken(Token):
 
         choices_text = _parse_till_unescaped_char(stream, "|")[0]
         self.choice_list = choices_text.split(",")
-        self.initial_text = choices_text
+        self.initial_text = "|{0}|".format(choices_text)
 
         _parse_till_closing_brace(stream)
 

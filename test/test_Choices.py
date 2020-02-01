@@ -35,7 +35,14 @@ class Choices_MoreThan9Candidates_ShouldWaitForInputs(_VimTest):
     wanted = "1 is a char"
 
 
-class Choices_MoreThan9Candidates_FinishWithInputs(_VimTest):
-    snippets = ("test", "${1|a,b,c,d,e,f,g,h,i,j,k,l,m,n|} is ${2:a char}")
-    keys = "test" + EX + "12"
-    wanted = "l is a char"
+class Choices_EmptyChoiceWillBeDiscarded(_VimTest):
+    snippets = ("test", "${1|a,,c|}")
+    keys = "test" + EX
+    wanted = "1.a|2.c"
+
+
+class Choices_WillNotExpand_If_ChoiceListIsEmpty(_VimTest):
+    snippets = ("test", "${1||}")
+    keys = "test" + EX
+    wanted = "||"
+

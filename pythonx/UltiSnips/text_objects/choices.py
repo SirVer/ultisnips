@@ -17,14 +17,15 @@ class Choices(TabStop):
         self._number = token.number  # for TabStop property 'number'
         self._initial_text = token.initial_text
 
-        self._choice_list = token.choice_list[:]
+        # empty choice will be discarded
+        self._choice_list = [s for s in token.choice_list if len(s) > 0]
         self._done = False
         self._input_chars = list(self._initial_text)
         self._has_been_updated = False
 
         TabStop.__init__(self, parent, token)
 
-    def _get_choices_placeholder(self):
+    def _get_choices_placeholder(self) -> str:
         # prefix choices with index number
         # e.g. 'a,b,c' -> '1.a|2.b|3.c'
         text_segs = []
@@ -38,8 +39,13 @@ class Choices(TabStop):
     def _update(self, done, buf):
         # expand initial text with select prefix number, only once
         if not self._has_been_updated:
-            text = self._get_choices_placeholder()
-            self.overwrite(buf, text)
+            # '${1:||}' is not valid choice, should be downgraded to plain tabstop
+            are_choices_valid = len(self._choice_list) > 0
+            if are_choices_valid:
+                text = self._get_choices_placeholder()
+                self.overwrite(buf, text)
+            else:
+                self._done = True
             self._has_been_updated = True
         return True
 
