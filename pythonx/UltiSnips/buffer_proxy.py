@@ -196,7 +196,6 @@ class VimBufferProxy(vim_helper.VimBuffer):
             diff = Position(direction, 0)
             if len(change) != 5:
                 diff = Position(0, direction * len(change_text))
-            print(change, diff)
 
             self._snippets_stack[0]._move(Position(line_number, column_number), diff)
         else:
