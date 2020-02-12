@@ -224,8 +224,9 @@ def get_dot_vim():
 
     candidates.append(os.path.join(home, ".vim"))
 
-    my_vimrc = os.path.expandvars(os.environ["MYVIMRC"])
-    candidates.append(normalize_file_path(os.path.dirname(my_vimrc)))
+    if "MYVIMRC" in os.environ:
+        my_vimrc = os.path.expandvars(os.environ["MYVIMRC"])
+        candidates.append(normalize_file_path(os.path.dirname(my_vimrc)))
     for candidate in candidates:
         if os.path.isdir(candidate):
             return normalize_file_path(candidate)
