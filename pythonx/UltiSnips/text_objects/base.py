@@ -143,7 +143,6 @@ class TextObject:
         if self.current_text == gtext:
             return
         old_end = self._end
-
         self._end = _replace_text(buf, self._start, self._end, gtext)
         if self._parent:
             self._parent._child_has_moved(
@@ -299,7 +298,6 @@ class EditableTextObject(TextObject):
     def _child_has_moved(self, idx, pivot, diff):
         """Called when a the child with 'idx' has moved behind 'pivot' by
         'diff'."""
-
         self._end.move(pivot, diff)
 
         for child in self._children[idx + 1 :]:

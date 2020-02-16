@@ -59,6 +59,7 @@ def tokenize_snippet_text(
                 if klass is not None:
                     text_object = klass(parent, token)
 
+                    # TabStop has some subclasses (e.g. Choices)
                     if isinstance(text_object, TabStop):
                         seen_ts[text_object.number] = text_object
 

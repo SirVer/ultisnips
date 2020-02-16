@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-"""Choices are enumeration values you can choose, by selecting index number,
-it is also a special TabStop
+"""Choices are enumeration values you can choose, by selecting index number.
+It is a special TabStop, its contents are taken literally, thus said, they will not be parsed recursively.
 """
+
 from UltiSnips import vim_helper
 from UltiSnips.position import Position
 from UltiSnips.text_objects.tabstop import TabStop
-
 from UltiSnips.snippet.parsing.lexer import ChoicesToken
 
 
@@ -66,7 +66,7 @@ class Choices(TabStop):
 
         inputted_text = "".join(self._input_chars)
 
-        if not len(self._input_chars):
+        if not self._input_chars:
             return
 
         # if there are more than 9 selection candidates,
@@ -93,7 +93,6 @@ class Choices(TabStop):
 
         if should_continue_input:
             # will wait for further input
-            # maybe we can inform user about this?
             return
 
         buf = vim_helper.buf
