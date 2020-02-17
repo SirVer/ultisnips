@@ -1,6 +1,7 @@
 from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
+
 class Choices_WillBeExpandedToInlineSelection(_VimTest):
     snippets = ("test", "${1|red,gray|}")
     keys = "test" + EX
@@ -46,3 +47,44 @@ class Choices_WillNotExpand_If_ChoiceListIsEmpty(_VimTest):
     keys = "test" + EX
     wanted = "||"
 
+
+class Choices_CanTakeNonAsciiCharacters(_VimTest):
+    snippets = ("test", "${1|Русский язык,中文,한국어,öääö|}")
+    keys = "test" + EX
+    wanted = "1.Русский язык|2.中文|3.한국어|4.öääö"
+
+
+class Choices_AsNestedElement_ShouldOverwriteDefaultText(_VimTest):
+    snippets = ("test", "${1:outer ${2|foo,blah|}}")
+    keys = "test" + EX
+    wanted = "outer 1.foo|2.blah"
+
+
+class Choices_AsNestedElement_ShallNotTakeActionIfParentInput(_VimTest):
+    snippets = ("test", "${1:outer ${2|foo,blah|}}")
+    keys = "test" + EX + "input"
+    wanted = "input"
+
+
+class Choices_AsNestedElement_CanBeTabbedInto(_VimTest):
+    snippets = ("test", "${1:outer ${2|foo,blah|}}")
+    keys = "test" + EX + JF + "1"
+    wanted = "outer foo"
+
+
+class Choices_AsNestedElement_CanBeTabbedThrough(_VimTest):
+    snippets = ("test", "${1:outer ${2|foo,blah|}} ${3}")
+    keys = "test" + EX + JF + JF + "input"
+    wanted = "outer 1.foo|2.blah input"
+
+
+class Choices_With_Mirror(_VimTest):
+    snippets = ("test", "${1|cyan,magenta|}, mirror: $1")
+    keys = "test" + EX + "1"
+    wanted = "cyan, mirror: cyan"
+
+
+class Choices_With_Mirror_ContinueMirroring_EvenAfterSelectionDone(_VimTest):
+    snippets = ("test", "${1|cyan,magenta|}, mirror: $1")
+    keys = "test" + EX + "1 is a color"
+    wanted = "cyan is a color, mirror: cyan is a color"

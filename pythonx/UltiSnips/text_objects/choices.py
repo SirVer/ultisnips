@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 """Choices are enumeration values you can choose, by selecting index number.
-It is a special TabStop, its contents are taken literally, thus said, they will not be parsed recursively.
+It is a special TabStop, its content are taken literally, thus said, they will not be parsed recursively.
 """
 
 from UltiSnips import vim_helper
@@ -37,6 +37,9 @@ class Choices(TabStop):
         return text
 
     def _update(self, done, buf):
+        if self._done:
+            return True
+
         # expand initial text with select prefix number, only once
         if not self._has_been_updated:
             # '${1:||}' is not valid choice, should be downgraded to plain tabstop
@@ -51,7 +54,10 @@ class Choices(TabStop):
 
     def _do_edit(self, cmd, ctab=None):
         if self._done:
+            # do as what parent class do
+            TabStop._do_edit(self, cmd, ctab)
             return
+
         ctype, line, col, cmd_text = cmd
 
         cursor = vim_helper.get_cursor_pos()
@@ -114,7 +120,7 @@ class Choices(TabStop):
             self._end.col = displayed_text_end_col
             self.overwrite(buf, overwrite_text)
 
-            # notify all tabstops in the same line and the after this to adjust their positions
+            # notify all tabstops those in the same line and after this to adjust their positions
             pivot = Position(line, old_end_col)
             diff_col = displayed_text_end_col - old_end_col
             self._parent._child_has_moved(
@@ -124,9 +130,6 @@ class Choices(TabStop):
             )
 
             vim_helper.set_cursor_from_pos([buf_num, cursor_line, self._end.col + 1])
-
-        if self._done:
-            self._parent._del_child(self)  # pylint:disable=protected-access
 
     def __repr__(self):
         return "Choices(%s,%r->%r,%r)" % (self._number, self._start, self._end, self._initial_text)

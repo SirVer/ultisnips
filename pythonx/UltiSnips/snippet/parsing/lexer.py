@@ -252,7 +252,10 @@ class MirrorToken(Token):
 
 class ChoicesToken(Token):
 
-    """${1|o1,o2,o3|}"""
+    """${1|o1,o2,o3|}
+    P.S. This is not a subclass of TabStop,
+         so its content will not be parsed recursively.
+    """
 
     CHECK = re.compile(r"^\${\d+\|")
 
