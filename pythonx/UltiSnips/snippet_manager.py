@@ -241,7 +241,7 @@ class SnippetManager:
         snippets = self._snips(before, True)
 
         if len(snippets) == 0:
-            self._handle_failure(self.backward_trigger)
+            self._handle_failure(vim.eval("g:UltiSnipsListSnippets"))
             return True
 
         # Sort snippets alphabetically
