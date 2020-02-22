@@ -88,3 +88,9 @@ class Choices_With_Mirror_ContinueMirroring_EvenAfterSelectionDone(_VimTest):
     snippets = ("test", "${1|cyan,magenta|}, mirror: $1")
     keys = "test" + EX + "1 is a color"
     wanted = "cyan is a color, mirror: cyan is a color"
+
+
+class Choices_ShouldThrowErrorWithZeroTabstop(_VimTest):
+    snippets = ("test", "${0|red,blue|}")
+    keys = "test" + EX
+    expected_error = "Choices selection is not supported on \$0"

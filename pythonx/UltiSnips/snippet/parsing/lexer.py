@@ -271,6 +271,11 @@ class ChoicesToken(Token):
 
         self.number = _parse_number(stream)
 
+        if self.number is 0:
+            raise RuntimeError(
+                "Choices selection is not supported on $0"
+            )
+
         next(stream)  # |
 
         choices_text = _parse_till_unescaped_char(stream, "|")[0]
