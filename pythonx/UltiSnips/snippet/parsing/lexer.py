@@ -271,7 +271,7 @@ class ChoicesToken(Token):
 
         self.number = _parse_number(stream)
 
-        if self.number is 0:
+        if self.number == 0:
             raise RuntimeError(
                 "Choices selection is not supported on $0"
             )
