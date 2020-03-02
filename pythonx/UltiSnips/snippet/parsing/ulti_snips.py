@@ -12,6 +12,7 @@ from UltiSnips.snippet.parsing.lexer import (
     EscapeCharToken,
     VisualToken,
     TransformationToken,
+    ChoicesToken,
     TabStopToken,
     MirrorToken,
     PythonCodeToken,
@@ -27,6 +28,7 @@ from UltiSnips.text_objects import (
     Transformation,
     VimLCode,
     Visual,
+    Choices,
 )
 
 _TOKEN_TO_TEXTOBJECT = {
@@ -35,12 +37,14 @@ _TOKEN_TO_TEXTOBJECT = {
     ShellCodeToken: ShellCode,
     PythonCodeToken: PythonCode,
     VimLCodeToken: VimLCode,
+    ChoicesToken: Choices,
 }
 
 __ALLOWED_TOKENS = [
     EscapeCharToken,
     VisualToken,
     TransformationToken,
+    ChoicesToken,
     TabStopToken,
     MirrorToken,
     PythonCodeToken,
@@ -80,3 +84,4 @@ def parse_and_instantiate(parent_to, text, indent):
     resolve_ambiguity(all_tokens, seen_ts)
     _create_transformations(all_tokens, seen_ts)
     finalize(all_tokens, seen_ts, parent_to)
+
