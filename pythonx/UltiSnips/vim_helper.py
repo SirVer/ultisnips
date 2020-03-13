@@ -218,9 +218,14 @@ def get_dot_vim():
     candidates = []
     if platform.system() == "Windows":
         candidates.append(os.path.join(home, "vimfiles"))
+
     if vim.eval("has('nvim')") == "1":
         xdg_home_config = vim.eval("$XDG_CONFIG_HOME") or os.path.join(home, ".config")
         candidates.append(os.path.join(xdg_home_config, "nvim"))
+
+    if vim.eval("$XDG_CONFIG_HOME"):
+        xdg_home_config = vim.eval("$XDG_CONFIG_HOME") or os.path.join(home, ".config")
+        candidates.append(os.path.join(xdg_home_config, "vim"))
 
     candidates.append(os.path.join(home, ".vim"))
 
