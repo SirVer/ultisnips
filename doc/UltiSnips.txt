@@ -1094,7 +1094,7 @@ example illustrating an HTML anchor snippet.
 
 ------------------- SNIP -------------------
 snippet a
-<a href="${1:http://www.${2:example.com}}"</a>
+<a href="${1:http://www.${2:example.com}}"
     $0
 </a>
 endsnippet
