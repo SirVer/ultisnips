@@ -23,7 +23,7 @@ def find_snippet_files(ft, directory):
     """Returns all matching snippet files for 'ft' in 'directory'."""
     patterns = ["%s.snippets", "%s_*.snippets", os.path.join("%s", "*")]
     ret = set()
-    directory = os.path.expanduser(directory)
+    directory = os.path.expanduser(str(directory))
     for pattern in patterns:
         for fn in glob.glob(os.path.join(directory, pattern % ft)):
             ret.add(normalize_file_path(fn))
@@ -42,7 +42,7 @@ def find_all_snippet_directories():
     if len(snippet_dirs) == 1:
         # To reduce confusion and increase consistency with
         # `UltiSnipsSnippetsDir`, we expand ~ here too.
-        full_path = os.path.expanduser(snippet_dirs[0])
+        full_path = os.path.expanduser(str(snippet_dirs[0]))
         if os.path.isabs(full_path):
             return [full_path]
 
@@ -57,7 +57,7 @@ def find_all_snippet_directories():
                     "directory for UltiSnips snippets."
                 )
             pth = normalize_file_path(
-                os.path.expanduser(os.path.join(rtp, snippet_dir))
+                os.path.expanduser(str(os.path.join(rtp, snippet_dir)))
             )
             all_dirs.append(pth)
     return all_dirs
