@@ -2,6 +2,14 @@ MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MAKEFILE_DIR := $(dir ${MAKEFILE_PATH})
 
 # Test images as run on CI.
+image_vim_74_py35:
+	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.5-stretch --build-arg VIM_VERSION=7.4 .
+image_vim_80_py35:
+	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.5-stretch --build-arg VIM_VERSION=8.0 .
+image_vim_81_py35:
+	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.5-stretch --build-arg VIM_VERSION=8.1 .
+image_vim_git_py35:
+	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.5-stretch --build-arg VIM_VERSION=git .
 image_vim_74_py36:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.6-stretch --build-arg VIM_VERSION=7.4 .
 image_vim_80_py36:
