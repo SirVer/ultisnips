@@ -1154,6 +1154,22 @@ a<tab>http://www.google.com<c-j><BS><c-j>Google ->
     Google
 </a>
 
+Another special type of tabstop is choice tabstop. It let's you to choose
+from a predefined list of items. The syntax of a choice tabstop is
+'${1|item1,item2,item3,...|}'. Here is an example to illustrate this
+feature.
+
+------------------- SNIP -------------------
+snippet q
+Your age: ${1|<18,18~60,>60|}
+Your height: ${2|<120cm,120cm~180cm,>180cm|}
+endsnippet
+------------------- SNAP -------------------
+
+q<tab>2<c-j>2
+Your age: 18~60
+Your height: 120cm~180cm
+
 The default text of tabstops can also contain mirrors, transformations or
 interpolation.
 
