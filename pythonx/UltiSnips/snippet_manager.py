@@ -481,12 +481,13 @@ class SnippetManager:
             vim_helper.command("augroup UltiSnips")
             vim_helper.command("autocmd!")
             vim_helper.command("augroup END")
-            self._inner_state_up = False
         except vim_helper.error:
             # This happens when a preview window was opened. This issues
             # CursorMoved, but not BufLeave. We have no way to unmap, until we
             # are back in our buffer
             pass
+        finally:
+            self._inner_state_up = False
 
     @err_to_scratch_buffer.wrap
     def _save_last_visual_selection(self):
