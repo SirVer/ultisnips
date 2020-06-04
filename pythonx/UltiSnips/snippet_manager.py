@@ -843,10 +843,9 @@ class SnippetManager:
             # Likely the array contains things like ["UltiSnips",
             # "mycoolsnippets"] There is no more obvious way to edit than in
             # the users vim config directory.
-            dot_vim_dir = Path(vim_helper.get_dot_vim())
+            dot_vim_dir = vim_helper.get_dot_vim()
             for snippet_dir in all_snippet_directories:
-                snippet_dir = Path(snippet_dir)
-                if dot_vim_dir != snippet_dir.parent:
+                if Path(dot_vim_dir) != Path(snippet_dir).parent:
                     continue
                 potentials.update(
                     _get_potential_snippet_filenames_to_edit(snippet_dir, filetypes)
