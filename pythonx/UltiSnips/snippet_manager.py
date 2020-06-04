@@ -88,7 +88,7 @@ def _select_and_create_file_to_edit(potentials: Set[str]) -> str:
     return file_to_edit
 
 
-def _get_potential_snippet_filenames_to_edit(snippet_dir, filetypes):
+def _get_potential_snippet_filenames_to_edit(snippet_dir: str, filetypes: str) -> Set[str]:
     potentials = set()
     for ft in filetypes:
         ft_snippets_files = find_snippet_files(ft, snippet_dir)

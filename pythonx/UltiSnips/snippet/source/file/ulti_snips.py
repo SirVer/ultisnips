@@ -6,6 +6,7 @@
 from collections import defaultdict
 import glob
 import os
+from typing import Set, List
 
 from UltiSnips import vim_helper
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
@@ -19,7 +20,7 @@ from UltiSnips.snippet.source.file.common import (
 from UltiSnips.text import LineIterator, head_tail
 
 
-def find_snippet_files(ft, directory):
+def find_snippet_files(ft, directory: str) -> Set[str]:
     """Returns all matching snippet files for 'ft' in 'directory'."""
     patterns = ["%s.snippets", "%s_*.snippets", os.path.join("%s", "*")]
     ret = set()
@@ -30,7 +31,7 @@ def find_snippet_files(ft, directory):
     return ret
 
 
-def find_all_snippet_directories():
+def find_all_snippet_directories() -> List[str]:
     """Returns a list of the absolute path of all potential snippet
     directories, no matter if they exist or not."""
 
@@ -63,7 +64,7 @@ def find_all_snippet_directories():
     return all_dirs
 
 
-def find_all_snippet_files(ft):
+def find_all_snippet_files(ft) -> Set[str]:
     """Returns all snippet files matching 'ft' in the given runtime path
     directory."""
     patterns = ["%s.snippets", "%s_*.snippets", os.path.join("%s", "*")]
