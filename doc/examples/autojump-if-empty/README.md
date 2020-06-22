@@ -44,7 +44,7 @@ def clean_first_placeholder(snip):
     # Jumper is a helper for performing jumps in UltiSnips.
     px.snippets.make_jumper(snip)
 
-    if snip.tabstop == 2 and not get_jumper_text(snip):
+    if snip.tabstop == 2 and not px.snippets.get_jumper_text(snip):
         line = snip.buffer[snip.cursor[0]]
         snip.buffer[snip.cursor[0]] = \
             line[:snip.tabstops[1].start[1]-2] + \
