@@ -330,7 +330,7 @@ For even more advanced usage, you can directly write python functions using
 UltiSnip's python modules. This is an internal and therefore unstable API and
 not recommended though.
 
-Here is a small example funtion that expands a snippet: >
+Here is a small example function that expands a snippet: >
 
    function! s:Ulti_ExpandSnip()
    Python << EOF
