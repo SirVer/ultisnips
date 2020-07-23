@@ -78,19 +78,30 @@ class Choices(TabStop):
         # if there are more than 9 selection candidates,
         # may need to wait for 2 inputs to determine selection number
         is_all_digits = True
+        has_selection_terminator = False
 
-        for s in self._input_chars:
-            if not s.isdigit():
+        # input string sub string of pure digits
+        inputted_text_for_num = inputted_text
+        for [i, s] in enumerate(self._input_chars):
+            if s is " ":  # treat space as a terminator for selection
+                has_selection_terminator = True
+                inputted_text_for_num = inputted_text[0:i]
+            elif not s.isdigit():
                 is_all_digits = False
 
         should_continue_input = False
-        index_strs = [str(index) for index in list(range(1, len(self._choice_list) + 1))]
-        if is_all_digits:
-            matched_index_strs = list(filter(lambda s: s.startswith(inputted_text), index_strs))
+        if is_all_digits or has_selection_terminator:
+            index_strs = [str(index) for index in list(range(1, len(self._choice_list) + 1))]
+            matched_index_strs = list(filter(lambda s: s.startswith(inputted_text_for_num), index_strs))
+            remained_choice_list = []
             if len(matched_index_strs) == 0:
                 remained_choice_list = []
+            elif has_selection_terminator:
+                if inputted_text_for_num:
+                    num = int(inputted_text_for_num)
+                    remained_choice_list = list(self._choice_list)[num - 1: num]
             elif len(matched_index_strs) == 1:
-                num = int(inputted_text)
+                num = int(inputted_text_for_num)
                 remained_choice_list = list(self._choice_list)[num - 1: num]
             else:
                 should_continue_input = True
@@ -104,7 +115,7 @@ class Choices(TabStop):
         buf = vim_helper.buf
         if len(remained_choice_list) == 0:
             # no matched choice, should quit selection and go on with inputted text
-            overwrite_text = inputted_text
+            overwrite_text = inputted_text_for_num
             self._done = True
         elif len(remained_choice_list) == 1:
             # only one match
