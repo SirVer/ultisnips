@@ -87,11 +87,16 @@ endfunction
 function! UltiSnips#SnippetsInCurrentScope(...) abort
     let g:current_ulti_dict = {}
     let all = get(a:, 1, 0)
+    let exact = get(a:, 2, 1)
     if all
       let g:current_ulti_dict_info = {}
     endif
-    py3 UltiSnips_Manager.snippets_in_current_scope(int(vim.eval("all")))
+    py3 UltiSnips_Manager.snippets_in_current_scope(int(vim.eval("all")), int(vim.eval("exact")))
     return g:current_ulti_dict
+endfunction
+
+function! UltiSnips#ExpandableExact() abort
+    return !!len(UltiSnips#SnippetsInCurrentScope(0, 0))
 endfunction
 
 function! UltiSnips#SaveLastVisualSelection() range abort

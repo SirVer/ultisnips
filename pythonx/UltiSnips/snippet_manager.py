@@ -191,11 +191,11 @@ class SnippetManager:
             self._handle_failure(self.expand_trigger)
 
     @err_to_scratch_buffer.wrap
-    def snippets_in_current_scope(self, search_all):
+    def snippets_in_current_scope(self, search_all, exact=1):
         """Returns the snippets that could be expanded to Vim as a global
         variable."""
         before = "" if search_all else vim_helper.buf.line_till_cursor
-        snippets = self._snips(before, True)
+        snippets = self._snips(before, bool(exact))
 
         # Sort snippets alphabetically
         snippets.sort(key=lambda x: x.trigger)
