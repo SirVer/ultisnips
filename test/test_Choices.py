@@ -24,6 +24,7 @@ class Choices_WillAbandonSelection_If_InputIsGreaterThanMaxSelectionIndex(_VimTe
     keys = "test" + EX + "3"
     wanted = "3"
 
+
 class Choices_WilNotMessWithTabstopsAfterIt(_VimTest):
     snippets = ("test", "${1|red,gray|} is ${2:color}\nline 2")
     keys = "test" + EX + "2"
@@ -100,3 +101,9 @@ class Choices_ShouldThrowErrorWithZeroTabstop(_VimTest):
     snippets = ("test", "${0|red,blue|}")
     keys = "test" + EX
     expected_error = "Choices selection is not supported on \$0"
+
+
+class Choices_CanEscapeCommaInsideChoiceItem(_VimTest):
+    snippets = ("test", r"${1|fun1(,fun2(param1\, ,fun3(param1\, param2\, |}param_end) result: $1")
+    keys = "test" + EX + "2"
+    wanted = "fun2(param1, param_end) result: fun2(param1, "
