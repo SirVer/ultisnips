@@ -279,10 +279,31 @@ class ChoicesToken(Token):
         next(stream)  # |
 
         choices_text = _parse_till_unescaped_char(stream, "|")[0]
-        self.choice_list = choices_text.split(",")
-        self.initial_text = "|{0}|".format(choices_text)
+
+        choice_list = []
+        # inside choice item, comma can be escaped by "\,"
+        # we need to do a little bit smarter parsing than simply splitting
+        choice_stream = _TextIterator(choices_text, Position(0, 0))
+        while True:
+            cur_col = choice_stream.pos.col
+            try:
+                result = _parse_till_unescaped_char(choice_stream, ",")[0]
+                if not result:
+                    continue
+                choice_list.append(self._get_unescaped_choice_item(result))
+            except:
+                last_choice_item = self._get_unescaped_choice_item(choices_text[cur_col:])
+                if last_choice_item:
+                    choice_list.append(last_choice_item)
+                break
+        self.choice_list = choice_list
+        self.initial_text = "|{0}|".format(",".join(choice_list))
 
         _parse_till_closing_brace(stream)
+
+    def _get_unescaped_choice_item(self, escaped_choice_item):
+        """unescape common inside choice item"""
+        return escaped_choice_item.replace(r"\,", ",")
 
     def __repr__(self):
         return "ChoicesToken(%r,%r,%r,|%r|)" % (
