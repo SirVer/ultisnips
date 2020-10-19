@@ -890,8 +890,8 @@ class SnippetManager:
 
                 if (
                     before
+                    and self._last_change[0] != ''
                     and before[-1] == self._last_change[0]
-                    or self._last_change[1] != vim_helper.buf.cursor
                 ):
                     self._try_expand(autotrigger_only=True)
         finally:
