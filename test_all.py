@@ -226,5 +226,3 @@ if __name__ == "__main__":
         return 0 if successfull else 1
 
     sys.exit(main())
-
-# vim:fileencoding=utf-8:
