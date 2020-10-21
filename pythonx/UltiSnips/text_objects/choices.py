@@ -83,7 +83,7 @@ class Choices(TabStop):
         # input string sub string of pure digits
         inputted_text_for_num = inputted_text
         for [i, s] in enumerate(self._input_chars):
-            if s is " ":  # treat space as a terminator for selection
+            if s == " ":  # treat space as a terminator for selection
                 has_selection_terminator = True
                 inputted_text_for_num = inputted_text[0:i]
             elif not s.isdigit():
