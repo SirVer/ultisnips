@@ -30,7 +30,11 @@ augroup END
 " http://www.vim.org/scripts/script.php?script_id=39
 if exists("loaded_matchit") && !exists("b:match_words")
   let b:match_ignorecase = 0
-  let b:match_words = '^snippet\>:^endsnippet\>,^global\>:^endglobal\>,\${:}'
+  function! s:set_match_words() abort
+    let b:match_words = '^snippet\>:^endsnippet\>,^global\>:^endglobal\>,\${:}'
+  endfunction
+  call s:set_match_words()
+  delfunction s:set_match_words
   let s:set_match_words = 1
 endif
 
