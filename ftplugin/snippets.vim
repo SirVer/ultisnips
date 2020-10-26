@@ -31,7 +31,13 @@ augroup END
 if exists("loaded_matchit") && !exists("b:match_words")
   let b:match_ignorecase = 0
   function! s:set_match_words() abort
-    let b:match_words = '^snippet\>:^endsnippet\>,^global\>:^endglobal\>,\${:}'
+    let pairs = [
+                \ ['^snippet\>', '^endsnippet\>'],
+                \ ['^global\>', '^endglobal\>'],
+                \ ['\${', '}'],
+                \ ]
+    let pats = map(pairs, 'join(v:val, ":")')
+    let b:match_words = join(pats, ',')
   endfunction
   call s:set_match_words()
   delfunction s:set_match_words
