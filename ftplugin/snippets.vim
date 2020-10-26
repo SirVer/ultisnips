@@ -43,6 +43,7 @@ if exists("loaded_matchit") && !exists("b:match_words")
     " set to '}'.
     call add(pairs, ['\${\%(\%(\d\|VISUAL\)\:\ze\|\ze\%(\d\|VISUAL\)\).*\\\@<!}', '\\\@<!}']) " ${1:foo}, ${VISUAL:bar}, ... or ${1}, ${VISUAL}, ...
     call add(pairs, ['\${\%(\d\|VISUAL\)|\ze.*\\\@<!|}', '\\\@<!|}']) " ${1|baz,qux|}
+    call add(pairs, ['\\\@<!`\%(![pv]\|#!\/\f\+\)\%( \|$\)', '\\\@<!`']) " `!p quux`, `!v corge`, `#!/usr/bin/bash grault`, ... (indicators includes a whitespace or end-of-line)
 
     let pats = map(deepcopy(pairs), 'join(v:val, ":")')
     let b:match_words = join(pats, ',')
