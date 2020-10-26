@@ -34,9 +34,17 @@ if exists("loaded_matchit") && !exists("b:match_words")
     let pairs = [
                 \ ['^snippet\>', '^endsnippet\>'],
                 \ ['^global\>', '^endglobal\>'],
-                \ ['\${', '}'],
                 \ ]
-    let pats = map(pairs, 'join(v:val, ":")')
+
+    " Note: Keep the related patterns into a pattern
+    " Because tabstop-patterns such as ${1}, ${1:foo}, ${VISUAL}, ..., end with
+    " the same pattern, '}', matchit could fail to get corresponding '}' in
+    " nested patterns like ${1:${VISUAL:bar}} when the end-pattern is simply
+    " set to '}'.
+    call add(pairs, ['\${\%(\%(\d\|VISUAL\)\:\ze\|\ze\%(\d\|VISUAL\)\).*\\\@<!}', '\\\@<!}']) " ${1:foo}, ${VISUAL:bar}, ... or ${1}, ${VISUAL}, ...
+    call add(pairs, ['\${\%(\d\|VISUAL\)|\ze.*\\\@<!|}', '\\\@<!|}']) " ${1|baz,qux|}
+
+    let pats = map(deepcopy(pairs), 'join(v:val, ":")')
     let b:match_words = join(pats, ',')
   endfunction
   call s:set_match_words()
