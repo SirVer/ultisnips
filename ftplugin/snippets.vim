@@ -46,9 +46,10 @@ if exists("loaded_matchit") && !exists("b:match_words")
     call add(pairs, ['\\\@<!`\%(![pv]\|#!\/\f\+\)\%( \|$\)', '\\\@<!`']) " `!p quux`, `!v corge`, `#!/usr/bin/bash grault`, ... (indicators includes a whitespace or end-of-line)
 
     let pats = map(deepcopy(pairs), 'join(v:val, ":")')
-    let b:match_words = join(pats, ',')
+    let match_words = join(pats, ',')
+    return match_words
   endfunction
-  call s:set_match_words()
+  let b:match_words = s:set_match_words()
   delfunction s:set_match_words
   let s:set_match_words = 1
 endif
