@@ -41,9 +41,9 @@ if exists("loaded_matchit") && !exists("b:match_words")
     " the same pattern, '}', matchit could fail to get corresponding '}' in
     " nested patterns like ${1:${VISUAL:bar}} when the end-pattern is simply
     " set to '}'.
-    call add(pairs, ['\${\%(\%(\d\|VISUAL\)\:\ze\|\ze\%(\d\|VISUAL\)\).*\\\@<!}', '\\\@<!}']) " ${1:foo}, ${VISUAL:bar}, ... or ${1}, ${VISUAL}, ...
     call add(pairs, ['\${\%(\d\|VISUAL\)|\ze.*\\\@<!|}', '\\\@<!|}']) " ${1|baz,qux|}
     call add(pairs, ['\${\%(\d\|VISUAL\)\/\ze.*\\\@<!\/[gima]*}', '\\\@<!\/[gima]*}']) " ${1/garply/waldo/g}
+    call add(pairs, ['\${\%(\%(\d\|VISUAL\)\:\ze\|\ze\%(\d\|VISUAL\)\).*\\\@<!}', '\\\@<!}']) " ${1:foo}, ${VISUAL:bar}, ... or ${1}, ${VISUAL}, ...
     call add(pairs, ['\\\@<!`\%(![pv]\|#!\/\f\+\)\%( \|$\)', '\\\@<!`']) " `!p quux`, `!v corge`, `#!/usr/bin/bash grault`, ... (indicators includes a whitespace or end-of-line)
 
     let pats = map(deepcopy(pairs), 'join(v:val, ":")')
