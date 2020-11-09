@@ -30,7 +30,28 @@ augroup END
 " http://www.vim.org/scripts/script.php?script_id=39
 if exists("loaded_matchit") && !exists("b:match_words")
   let b:match_ignorecase = 0
-  let b:match_words = '^snippet\>:^endsnippet\>,^global\>:^endglobal\>,\${:}'
+  function! s:set_match_words() abort
+    let pairs = [
+                \ ['^snippet\>', '^endsnippet\>'],
+                \ ['^global\>', '^endglobal\>'],
+                \ ]
+
+    " Note: Keep the related patterns into a pattern
+    " Because tabstop-patterns such as ${1}, ${1:foo}, ${VISUAL}, ..., end with
+    " the same pattern, '}', matchit could fail to get corresponding '}' in
+    " nested patterns like ${1:${VISUAL:bar}} when the end-pattern is simply
+    " set to '}'.
+    call add(pairs, ['\${\%(\d\|VISUAL\)|\ze.*\\\@<!|}', '\\\@<!|}']) " ${1|baz,qux|}
+    call add(pairs, ['\${\%(\d\|VISUAL\)\/\ze.*\\\@<!\/[gima]*}', '\\\@<!\/[gima]*}']) " ${1/garply/waldo/g}
+    call add(pairs, ['\${\%(\%(\d\|VISUAL\)\:\ze\|\ze\%(\d\|VISUAL\)\).*\\\@<!}', '\\\@<!}']) " ${1:foo}, ${VISUAL:bar}, ... or ${1}, ${VISUAL}, ...
+    call add(pairs, ['\\\@<!`\%(![pv]\|#!\/\f\+\)\%( \|$\)', '\\\@<!`']) " `!p quux`, `!v corge`, `#!/usr/bin/bash grault`, ... (indicators includes a whitespace or end-of-line)
+
+    let pats = map(deepcopy(pairs), 'join(v:val, ":")')
+    let match_words = join(pats, ',')
+    return match_words
+  endfunction
+  let b:match_words = s:set_match_words()
+  delfunction s:set_match_words
   let s:set_match_words = 1
 endif
 
