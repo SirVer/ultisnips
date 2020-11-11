@@ -165,8 +165,8 @@ found here: https://github.com/honza/vim-snippets
 
 The UltiSnipsEdit command opens a private snippet definition file for the
 current filetype. If no snippet file exists, a new file is created. If used as
-UltiSnipsEdit! all public snippet files that exist are taken into account too. If
-multiple files match the search, the user gets to choose the file.
+UltiSnipsEdit! all public snippet files that exist are taken into account too.
+If multiple files match the search, the user gets to choose the file.
 
 There are several variables associated with the UltiSnipsEdit command.
 
@@ -597,13 +597,13 @@ The start line takes the following form: >
 The trigger_word is required, but the description and options are optional.
 
 The 'trigger_word' is the word or string sequence used to trigger the snippet.
-Generally a single word is used but the trigger_word can include spaces. If you
-wish to include spaces, you must wrap the tab trigger in quotes. >
+Generally a single word is used but the trigger_word can include spaces. If
+you wish to include spaces, you must wrap the tab trigger in quotes. >
 
     snippet "tab trigger" [ "description" [ options ] ]
 
-The quotes are not part of the trigger. To activate the snippet type: tab trigger
-followed by the snippet expand character.
+The quotes are not part of the trigger. To activate the snippet type: tab
+trigger followed by the snippet expand character.
 
 It is not technically necessary to use quotes to wrap a trigger with spaces.
 Any matching characters will do. For example, this is a valid snippet starting
@@ -680,7 +680,8 @@ The options currently supported are: >
    e   Custom context snippet - With this option expansion of snippet can be
        controlled not only by previous characters in line, but by any given
        python expression. This option can be specified along with other
-       options, like 'b'. See |UltiSnips-custom-context-snippets| for more info.
+       options, like 'b'. See |UltiSnips-custom-context-snippets| for more
+       info.
 
    A   Snippet will be triggered automatically, when condition matches.
        See |UltiSnips-autotrigger| for more info.
@@ -714,8 +715,8 @@ Inside a snippets buffer, the following text objects are available:
 To illustrate plaintext snippets, let's begin with a simple example. You can
 try the examples yourself. Simply edit a new file with Vim. Example snippets
 will be added to the 'all.snippets' file, so you'll want to open it in Vim for
-editing as well in the same Vim instance. You can use |UltiSnipsEdit| for this,
-but you can also just run >
+editing as well in the same Vim instance. You can use |UltiSnipsEdit| for
+this, but you can also just run >
    :tabedit ~/.vim/UltiSnips/all.snippets
 
 Add this snippet to 'all.snippets' and save the file.
@@ -1441,8 +1442,8 @@ endsnippet
 That snippet will expand to 'return err' only if the previous line is starting
 from 'if err' prefix.
 
-Note: custom context snippets are prioritized over other snippets. It makes possible
-to use other snippets as a fallback if no context can be matched:
+Note: custom context snippets are prioritized over other snippets. It makes
+possible to use other snippets as a fallback if no context can be matched:
 
 ------------------- SNIP -------------------
 snippet i "if ..." b
@@ -1478,15 +1479,16 @@ else:
 endsnippet
 ------------------- SNAP -------------------
 
-That snippet will expand only if the cursor is located in the return statement,
-and then it will expand either to 'err' or to 'nil' depending on which 'if'
-statement it's located. 'is_return_argument' and 'is_in_err_condition' are
-part of custom python module which is called 'my_utils' in this example.
+That snippet will expand only if the cursor is located in the return
+statement, and then it will expand either to 'err' or to 'nil' depending on
+which 'if' statement it's located. 'is_return_argument' and
+'is_in_err_condition' are part of custom python module which is called
+'my_utils' in this example.
 
 Context condition can return any value which python can use as condition in
 it's 'if' statement, and if it's considered 'True', then snippet will be
-expanded. The evaluated value of 'condition' is available in the 'snip.context'
-variable inside the snippet:
+expanded. The evaluated value of 'condition' is available in the
+'snip.context' variable inside the snippet:
 
 ------------------- SNIP -------------------
 snippet + "var +=" "re.match('\s*(.*?)\s*:?=', snip.buffer[snip.line-1])" ie
