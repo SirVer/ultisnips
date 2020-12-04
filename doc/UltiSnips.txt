@@ -180,6 +180,12 @@ g:UltiSnipsEditSplit        Defines how the edit window is opened. Possible
                             |context|        Splits the window vertically or
                                            horizontally depending on context.
 
+                                                        *g:UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit*
+g:UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit
+                            A single directory or absolute path name the
+                            location for `UltiSnipsEdit`. This changes the
+                            default behaviour.
+
                                                         *g:UltiSnipsSnippetDirectories*
 g:UltiSnipsSnippetDirectories
                             An array of relative directory names OR an array
