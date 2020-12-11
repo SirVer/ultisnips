@@ -849,8 +849,7 @@ class SnippetManager:
             )
         if len(all_snippet_directories) == 1:
             # Most likely the user has set g:UltiSnipsSnippetDirectories to a
-            # single absolute path or uses
-            # g:UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit
+            # single absolute path.
             potentials.update(
                 _get_potential_snippet_filenames_to_edit(
                     all_snippet_directories[0], filetypes
