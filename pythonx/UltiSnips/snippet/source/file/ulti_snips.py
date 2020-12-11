@@ -47,12 +47,13 @@ def find_all_snippet_directories() -> List[str]:
         if os.path.isabs(full_path):
             return [full_path]
 
-    snippet_storage_dir = \
-        vim_helper.eval("g:UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit")
-    if snippet_storage_dir != "":
-        full_path = os.path.expanduser(snippet_storage_dir)
-        if os.path.isabs(full_path):
-            return [full_path]
+    if vim_helper.eval("exists('g:UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit')") == "1":
+        snippet_storage_dir = \
+            vim_helper.eval("g:UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit")
+        if snippet_storage_dir != "":
+            full_path = os.path.expanduser(snippet_storage_dir)
+            if os.path.isabs(full_path):
+                return [full_path]
 
     all_dirs = []
     check_dirs = vim_helper.eval("&runtimepath").split(",")
