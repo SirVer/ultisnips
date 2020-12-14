@@ -180,6 +180,19 @@ g:UltiSnipsEditSplit        Defines how the edit window is opened. Possible
                             |context|        Splits the window vertically or
                                            horizontally depending on context.
 
+                                                        *g:UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit*
+g:UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit
+                            A single absolute path to a directory which will
+                            be used as the storage for location for
+                            `UltiSnipsEdit`. This means that UltiSnipsEdit no
+                            longer searches all paths in
+                            `g:UltiSnipsSnippetDirectories` for snippets to
+                            edit, but only this one. Note that this does not
+                            imply that the snippet expansion engine also
+                            searches this directory. Please read
+                            |UltiSnips-how-snippets-are-loaded| for details.
+
+
                                                         *g:UltiSnipsSnippetDirectories*
 g:UltiSnipsSnippetDirectories
                             An array of relative directory names OR an array
@@ -518,6 +531,13 @@ An example configuration could be: >
 You can also redefine the search path on a buffer by buffer basis by setting
 the variable b:UltiSnipsSnippetDirectories. This variable takes precedence
 over the global variable.
+
+There is an additional variable which does not control the search path for
+snippets at expansion time, but controls where `:UltiSnipsEdit` is looking for
+snippets. If this variable is set to a single absolute path it will only
+affect where the edit command is looking for and writing snippets too. This is
+useful if you want to use third party snippets, but have all your self created
+snippets in a single place without being asked where to put the file on edit.
 
 Using a strategy similar to how Vim detects |ftplugins|, UltiSnips iterates
 over the snippet definition directories looking for files with names of the

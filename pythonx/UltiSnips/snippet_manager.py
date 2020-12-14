@@ -88,7 +88,9 @@ def _select_and_create_file_to_edit(potentials: Set[str]) -> str:
     return file_to_edit
 
 
-def _get_potential_snippet_filenames_to_edit(snippet_dir: str, filetypes: str) -> Set[str]:
+def _get_potential_snippet_filenames_to_edit(
+    snippet_dir: str, filetypes: str
+) -> Set[str]:
     potentials = set()
     for ft in filetypes:
         ft_snippets_files = find_snippet_files(ft, snippet_dir)
@@ -831,6 +833,20 @@ class SnippetManager:
         potentials = set()
 
         all_snippet_directories = find_all_snippet_directories()
+        has_storage_dir = (
+            vim_helper.eval(
+                "exists('g:UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit')"
+            )
+            == "1"
+        )
+        if has_storage_dir:
+            snippet_storage_dir = vim_helper.eval(
+                "g:UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit"
+            )
+            full_path = os.path.expanduser(snippet_storage_dir)
+            potentials.update(
+                _get_potential_snippet_filenames_to_edit(full_path, filetypes)
+            )
         if len(all_snippet_directories) == 1:
             # Most likely the user has set g:UltiSnipsSnippetDirectories to a
             # single absolute path.
@@ -839,7 +855,10 @@ class SnippetManager:
                     all_snippet_directories[0], filetypes
                 )
             )
-        else:
+
+        if (len(all_snippet_directories) != 1 and not has_storage_dir) or (
+            has_storage_dir and bang
+        ):
             # Likely the array contains things like ["UltiSnips",
             # "mycoolsnippets"] There is no more obvious way to edit than in
             # the users vim config directory.
@@ -890,7 +909,7 @@ class SnippetManager:
 
                 if (
                     before
-                    and self._last_change[0] != ''
+                    and self._last_change[0] != ""
                     and before[-1] == self._last_change[0]
                 ):
                     self._try_expand(autotrigger_only=True)
