@@ -1,22 +1,22 @@
 # Autojump from tabstop when it's empty
 
 UltiSnips offers enough API to support automatic jump from one tabstop to
-another when some condition is encountered.
+another, when some condition is met.
 
-One example of applying that behaviour is jump on the next placeholder when
-current becomes empty when user types `<BS>` or another erase sequence when
+One example of applying this behaviour is to jump to the next placeholder when the
+current one becomes empty, when the user types <kbd>BackSpace</kbd> or another erase sequence while the
 tabstop is active.
 
-Let's imagine, that we have following snippet:
+Let's imagine, that we have the following snippet:
 
 ![snippet](https://raw.githubusercontent.com/SirVer/ultisnips/master/doc/examples/autojump-if-empty/snippet.gif)
 
-First placeholder, surrounded by braces, can be erased by user, but then 
-surrounding quotes will left untouched, and user should remove quotes and
-one space, and only then jump to next placeholder, that equals to **5** total
+The first placeholder, surrounded by parentheses, can be erased by the user, but then the 
+surrounding parentheses will be left untouched and the user has to remove the parentheses and
+one space and only then jump to the next placeholder. That equates to **5** total
 keypresses: <kbd>BackSpace</kbd> (erase placeholder), <kbd>BackSpace</kbd> and
-<kbd>Delete</kbd> (erase braces), <kbd>Delete</kbd> (erase space),
-<kbd>Ctrl+J</kbd> (jump to next placeholder).
+<kbd>Delete</kbd> (erase parentheses), <kbd>Delete</kbd> (erase space),
+<kbd>Tab</kbd> (jump to next placeholder).
 
 However, with UltiSnips, it can be done via only one keypress:
 <kbd>BackSpace</kbd>:
@@ -25,7 +25,7 @@ However, with UltiSnips, it can be done via only one keypress:
 
 ## Implementation
 
-This example uses the [vim-pythonx library](https://github.com/reconquest/vim-pythonx/blob/master/pythonx/px/snippets.py) which provides set of functions to make coding little bit easier.
+This example uses the [vim-pythonx library](https://github.com/reconquest/vim-pythonx/blob/master/pythonx/px/snippets.py), which provides a set of functions to make coding a little bit easier.
 
 ```
 global !p
