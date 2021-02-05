@@ -139,6 +139,14 @@ class SnippetInstance(EditableTextObject):
 
         return self._tabstops[self._cts]
 
+    def has_next_tab(self, jump_direction: JumpDirection):
+        # This is kind of a hack but it'll keep me from editing code I don't
+        # fully understand
+        cts_bf = self._cts
+        res = self.select_next_tab(jump_direction)
+        self._cts = cts_bf
+        return res != None
+
     def _get_tabstop(self, requester, no):
         # SnippetInstances are completely self contained, therefore, we do not
         # need to ask our parent for Tabstops

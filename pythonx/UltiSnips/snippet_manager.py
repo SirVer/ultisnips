@@ -808,6 +808,26 @@ class SnippetManager:
         vim_helper.command("let &undolevels = &undolevels")
         return True
 
+    def can_expand(self, autotrigger_only=False):
+        """Check if _try_expand would successfully find a snippet."""
+        before = vim_helper.buf.line_till_cursor
+        snippets = self._snips(before, False, autotrigger_only)
+        if snippets:
+            return True
+        else:
+            return False
+
+    def can_jump_direction(self, direction):
+        if self._current_snippet == None:
+            return False
+        return self._current_snippet.has_next_tab(direction)
+
+    def can_jump_forwards(self):
+        return self.can_jump_direction(JumpDirection.FORWARD)
+
+    def can_jump_backwards(self):
+        return self.can_jump_direction(JumpDirection.BACKWARD)
+
     @property
     def _current_snippet(self):
         """The current snippet or None."""
