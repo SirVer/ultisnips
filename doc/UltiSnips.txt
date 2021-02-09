@@ -22,6 +22,9 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       3.4.1 UltiSnips#AddSnippetWithPriority    |UltiSnips#AddSnippetWithPriority|
       3.4.2 UltiSnips#Anon                      |UltiSnips#Anon|
       3.4.3 UltiSnips#SnippetsInCurrentScope    |UltiSnips#SnippetsInCurrentScope|
+      3.4.4 UltiSnips#CanExpandSnippet          |UltiSnips#CanExpandSnippet|
+      3.4.5 UltiSnips#CanJumpForwards           |UltiSnips#CanJumpForwards|
+      3.4.6 UltiSnips#CanJumpBackwards          |UltiSnips#CanJumpBackwards|
    3.5 Missing python support                   |UltiSnips-python-warning|
 4. Authoring snippets                           |UltiSnips-authoring-snippets|
    4.1 Basics                                   |UltiSnips-basics|
@@ -472,6 +475,21 @@ function! GetAllSnippets()
   endfor
   return list
 endfunction
+
+ 3.4.4 UltiSnips#CanExpandSnippet    *UltiSnips#CanExpandSnippet*
+
+This function returns 1 if UltiSnips can actually do a meaningful expansion in
+the current situation. This is useful in conditional mappings.
+
+ 3.4.5 UltiSnips#CanJumpForwards    *UltiSnips#CanJumpForwards*
+
+This function returns 1 if UltiSnips can jump forward in the current
+situation. This is useful in conditional mappings.
+
+ 3.4.6 UltiSnips#CanJumpBackwards    *UltiSnips#CanJumpBackwards*
+
+This function returns 1 if UltiSnips can jump backwards in the current
+situation. This is useful in conditional mappings.
 
 3.5 Warning about missing python support           *UltiSnips-python-warning*
 ----------------------------------------
