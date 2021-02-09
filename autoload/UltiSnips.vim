@@ -94,6 +94,21 @@ function! UltiSnips#SnippetsInCurrentScope(...) abort
     return g:current_ulti_dict
 endfunction
 
+function! UltiSnips#CanExpandSnippet() abort
+	py3 vim.command("let can_expand = %d" % UltiSnips_Manager.can_expand())
+	return can_expand
+endfunction
+
+function! UltiSnips#CanJumpForwards() abort
+	py3 vim.command("let can_jump_forwards = %d" % UltiSnips_Manager.can_jump_forwards())
+	return can_jump_forwards
+endfunction
+
+function! UltiSnips#CanJumpBackwards() abort
+	py3 vim.command("let can_jump_backwards = %d" % UltiSnips_Manager.can_jump_backwards())
+	return can_jump_backwards
+endfunction
+
 function! UltiSnips#SaveLastVisualSelection() range abort
     py3 UltiSnips_Manager._save_last_visual_selection()
     return ""

@@ -785,10 +785,13 @@ class SnippetManager:
             if self._inside_action:
                 self._snip_expanded_in_action = True
 
+    def _can_expand(self, autotrigger_only=False):
+        before = vim_helper.buf.line_till_cursor
+        return before, self._snips(before, False, autotrigger_only)
+
     def _try_expand(self, autotrigger_only=False):
         """Try to expand a snippet in the current place."""
-        before = vim_helper.buf.line_till_cursor
-        snippets = self._snips(before, False, autotrigger_only)
+        before, snippets = self._can_expand(autotrigger_only)
         if snippets:
             # prefer snippets with context if any
             snippets_with_context = [s for s in snippets if s.context]
@@ -807,6 +810,21 @@ class SnippetManager:
         self._do_snippet(snippet, before)
         vim_helper.command("let &undolevels = &undolevels")
         return True
+
+    def can_expand(self, autotrigger_only=False):
+        """Check if we would be able to successfully find a snippet in the current position."""
+        return bool(self._can_expand(autotrigger_only)[1])
+
+    def can_jump(self, direction):
+        if self._current_snippet == None:
+            return False
+        return self._current_snippet.has_next_tab(direction)
+
+    def can_jump_forwards(self):
+        return self.can_jump(JumpDirection.FORWARD)
+
+    def can_jump_backwards(self):
+        return self.can_jump(JumpDirection.BACKWARD)
 
     @property
     def _current_snippet(self):

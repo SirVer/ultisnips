@@ -109,11 +109,11 @@ class SnippetInstance(EditableTextObject):
             return
 
         if jump_direction == JumpDirection.BACKWARD:
-            cts_bf = self._cts
+            current_tabstop_backup = self._cts
 
             res = self._get_prev_tab(self._cts)
             if res is None:
-                self._cts = cts_bf
+                self._cts = current_tabstop_backup
                 return self._tabstops.get(self._cts, None)
             self._cts, ts = res
             return ts
@@ -137,7 +137,12 @@ class SnippetInstance(EditableTextObject):
         else:
             assert False, "Unknown JumpDirection: %r" % jump_direction
 
-        return self._tabstops[self._cts]
+    def has_next_tab(self, jump_direction: JumpDirection):
+        if jump_direction == JumpDirection.BACKWARD:
+            return self._get_prev_tab(self._cts) is not None
+        # There is always a next tabstop if we jump forward, since the snippet
+        # instance is deleted once we reach tabstop 0.
+        return True
 
     def _get_tabstop(self, requester, no):
         # SnippetInstances are completely self contained, therefore, we do not
