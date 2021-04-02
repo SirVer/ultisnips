@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/SirVer/ultisnips.svg?branch=master)](https://travis-ci.org/SirVer/ultisnips)
+![Build Status](https://github.com/SirVer/ultisnips/actions/workflows/main.yml/badge.svg)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/SirVer/ultisnips?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 UltiSnips
