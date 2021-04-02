@@ -26,7 +26,7 @@ class SimpleExpandNewLineAndBackspae_ExpectCorrectResult(_SimpleExpands):
 
 class SimpleExpandTypeAfterExpand_ExpectCorrectResult(_SimpleExpands):
     keys = "hallo" + EX + "and again"
-    wanted = "Hallo Wlt!and again"
+    wanted = "Hallo Welt!and again"
 
 
 class SimpleExpandTypeAndDelete_ExpectCorrectResult(_SimpleExpands):
