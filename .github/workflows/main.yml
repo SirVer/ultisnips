@@ -6,9 +6,8 @@ jobs:
     strategy:
      matrix:
       include:
-        - vim_version: "8.2"
-          python_image: "3.9-buster"
-          tag: "vim_82_py39"
+        - { vim_version: "8.1", python_image: "3.9-buster", tag: "vim_81_py39" }
+        - { vim_version: "8.2", python_image: "3.9-buster", tag: "vim_82_py39" }
     name: Build & Test using Docker
     steps:
       - name: Checkout
@@ -16,5 +15,5 @@ jobs:
       - name: Build the tagged Docker image
         run: docker build -t ultisnips:${{ matrix.tag }} --build-arg PYTHON_IMAGE=${{ matrix.python_image }} --build-arg VIM_VERSION=${{ matrix.vim_version }} .
       - name: Run the tests
-        run: docker run -it ultisnips:${{ matrix.tag }} docker/run_tests.sh
+        run: docker run --rm -t ultisnips:${{ matrix.tag }} docker/run_tests.sh
 
