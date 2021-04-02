@@ -137,7 +137,7 @@ class VimInterface(TempFileManager):
         post_config.append("with open('%s', 'w') as version_file:" % version_file)
         post_config.append("    version_file.write('%i.%i.%i' % sys.version_info[:3])")
         post_config.append("with open('%s', 'w') as done_file:" % done_file)
-        post_config.append("    done_file.write('all_done!'")
+        post_config.append("    done_file.write('all_done!')")
         post_config.append("EOF")
 
         config_path = self.write_temp(
