@@ -6,7 +6,7 @@ jobs:
     strategy:
      matrix:
       include:
-        - { vim_version: "8.1", python_image: "3.9-buster", tag: "vim_81_py39" }
+        # - { vim_version: "8.1", python_image: "3.9-buster", tag: "vim_81_py39" }
         - { vim_version: "8.2", python_image: "3.9-buster", tag: "vim_82_py39" }
     name: Build & Test using Docker
     steps:
