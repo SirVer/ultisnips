@@ -1,19 +1,20 @@
 on: [push]
 
 jobs:
-  hello_world_job:
+  test:
     runs-on: ubuntu-latest
-    name: A job to say hello
+    strategy:
+     matrix:
+      include:
+        - vim_version: "8.2"
+          python_image: "3.9-buster"
+          tag: "vim_82_py39"
+    name: Build & Test using Docker
     steps:
-      # To use this repository's private action,
-      # you must check out the repository
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Hello world action step
-        uses: ./.github/actions
-        id: hello
-        with:
-          who-to-greet: 'Mona the Octocat'
-      # Use the output from the `hello` step
-      - name: Get the output time
-        run: echo "The time was ${{ steps.hello.outputs.time }}"
+      - name: Build the tagged Docker image
+        run: docker build -t ultisnips:${{ matrix.tag }} --build-arg PYTHON_IMAGE=${{ matrix.python_image }} --build-arg VIM_VERSION=${{ matrix.vim_version }} .
+      - name: Run the tests
+        run: docker run -it ultisnips:${{ matrix.tag }} docker/run_tests.sh
+
