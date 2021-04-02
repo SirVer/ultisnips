@@ -1,4 +1,10 @@
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   test:
@@ -31,9 +37,6 @@ jobs:
     name: Build & Test using Docker
     steps:
       - uses: actions/checkout@v2
-      # We only cache non-git versions of the build, otherwise we will never reclone.
-      - uses: satackey/action-docker-layer-caching@v0.0.11
-        if: ${{ matrix.vim_version != 'git' }}
       - name: Build the image
         run: docker build -t ultisnips:${{ matrix.tag }} --build-arg PYTHON_IMAGE=${{ matrix.python_image }} --build-arg VIM_VERSION=${{ matrix.vim_version }} .
       - name: Run the tests
