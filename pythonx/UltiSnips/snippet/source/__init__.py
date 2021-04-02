@@ -12,3 +12,5 @@ from UltiSnips.snippet.source.file.ulti_snips import (
     find_all_snippet_files,
     find_snippet_files,
 )
+from UltiSnips.snippet.source.file.common import expand_path
+

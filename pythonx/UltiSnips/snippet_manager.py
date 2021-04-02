@@ -22,6 +22,7 @@ from UltiSnips.snippet.source import (
     find_all_snippet_directories,
     find_all_snippet_files,
     find_snippet_files,
+    expand_path,
 )
 from UltiSnips.text import escape
 from UltiSnips.vim_state import VimState, VisualContentPreserver
@@ -861,7 +862,7 @@ class SnippetManager:
             snippet_storage_dir = vim_helper.eval(
                 "g:UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit"
             )
-            full_path = os.path.expanduser(snippet_storage_dir)
+            full_path = expand_path(snippet_storage_dir)
             potentials.update(
                 _get_potential_snippet_filenames_to_edit(full_path, filetypes)
             )
@@ -882,8 +883,6 @@ class SnippetManager:
             # the users vim config directory.
             dot_vim_dir = vim_helper.get_dot_vim()
             for snippet_dir in all_snippet_directories:
-                if Path(dot_vim_dir) != Path(snippet_dir).parent:
-                    continue
                 potentials.update(
                     _get_potential_snippet_filenames_to_edit(snippet_dir, filetypes)
                 )

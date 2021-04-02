@@ -5,6 +5,8 @@
 
 import os.path
 
+def expand_path(path: str):
+    return os.path.expandvars(os.path.expanduser(path))
 
 def normalize_file_path(path: str) -> str:
     """Calls normpath and normcase on path"""
