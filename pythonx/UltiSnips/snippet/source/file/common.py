@@ -11,11 +11,6 @@ def expand_path(path: str) -> Path:
     return Path(os.path.expandvars(os.path.expanduser(path))).resolve()
 
 
-def normalize_file_path(path: str) -> str:
-    """Calls normpath and normcase on path"""
-    return os.path.normcase(os.path.normpath(path))
-
-
 def handle_extends(tail, line_index):
     """Handles an extends line in a snippet."""
     if tail:

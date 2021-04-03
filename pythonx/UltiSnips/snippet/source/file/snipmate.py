@@ -5,12 +5,11 @@
 
 import os
 from pathlib import Path
-import glob
 
 from UltiSnips import vim_helper
 from UltiSnips.snippet.definition import SnipMateSnippetDefinition
 from UltiSnips.snippet.source.file.base import SnippetFileSource
-from UltiSnips.snippet.source.file.common import handle_extends, normalize_file_path, expand_path
+from UltiSnips.snippet.source.file.common import handle_extends, expand_path
 from UltiSnips.text import LineIterator, head_tail
 
 
@@ -39,16 +38,16 @@ def _snipmate_files_for(ft):
         ft = "_"
     patterns = [
         "%s.snippets" % ft,
-        os.path.join(ft, "*.snippets"),
-        os.path.join(ft, "*.snippet"),
-        os.path.join(ft, "*/*.snippet"),
+        Path(ft, "*.snippets"),
+        Path(ft, "*.snippet"),
+        Path(ft, "*/*.snippet"),
     ]
     ret = set()
     for rtp in vim_helper.eval("&runtimepath").split(","):
-        path = normalize_file_path(expand_path(os.path.join(rtp, "snippets")))
+        path = expand_path(Path(rtp, "snippets"))
         for pattern in patterns:
-            for fn in glob.glob(os.path.join(path, pattern)):
-                ret.add(fn)
+            for filename in path.glob(patter):
+                ret.add(filename)
     return ret
 
 

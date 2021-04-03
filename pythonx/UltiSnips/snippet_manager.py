@@ -65,13 +65,13 @@ def _ask_snippets(snippets):
     return _ask_user(snippets, display)
 
 
-def _select_and_create_file_to_edit(potentials: Set[str]) -> str:
+def _select_and_create_file_to_edit(potentials: Set[Path]) -> Path:
     assert len(potentials) >= 1
 
     file_to_edit = ""
     if len(potentials) > 1:
         files = sorted(potentials)
-        exists = [os.path.exists(f) for f in files]
+        exists = [f.exists() for f in files]
         formatted = [
             "%s %i: %s" % ("*" if exists else " ", i, escape(fn, "\\"))
             for i, (fn, exists) in enumerate(zip(files, exists), 1)
@@ -82,8 +82,8 @@ def _select_and_create_file_to_edit(potentials: Set[str]) -> str:
     else:
         file_to_edit = potentials.pop()
 
-    dirname = os.path.dirname(file_to_edit)
-    if not os.path.exists(dirname):
+    dirname = file_to_edit.parent
+    if not dirname.exists():
         os.makedirs(dirname)
 
     return file_to_edit
@@ -91,14 +91,14 @@ def _select_and_create_file_to_edit(potentials: Set[str]) -> str:
 
 def _get_potential_snippet_filenames_to_edit(
     snippet_dir: str, filetypes: str
-) -> Set[str]:
+) -> Set[Path]:
     potentials = set()
     for ft in filetypes:
         ft_snippets_files = find_snippet_files(ft, snippet_dir)
         potentials.update(ft_snippets_files)
         if not ft_snippets_files:
             # If there is no snippet file yet, we just default to `ft.snippets`.
-            potentials.add(os.path.join(snippet_dir, ft + ".snippets"))
+            potentials.add(Path(snippet_dir, ft + ".snippets"))
     return potentials
 
 
