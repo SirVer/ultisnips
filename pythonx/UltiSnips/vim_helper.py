@@ -4,10 +4,10 @@
 """Wrapper functionality around the functions we need from Vim."""
 
 from contextlib import contextmanager
+from pathlib import Path
 import os
 import platform
 
-from UltiSnips.snippet.source.file.common import normalize_file_path
 from UltiSnips.compatibility import col2byte, byte2col
 from UltiSnips.position import Position
 from vim import error  # pylint:disable=import-error,unused-import
@@ -212,24 +212,30 @@ def select(start, end):
     feedkeys(move_cmd)
 
 
-def get_dot_vim():
+def get_dot_vim() -> Path:
     """Returns the likely place for ~/.vim for the current setup."""
     home = vim.eval("$HOME")
     candidates = []
-    if platform.system() == "Windows":
-        candidates.append(os.path.join(home, "vimfiles"))
-    if vim.eval("has('nvim')") == "1":
-        xdg_home_config = vim.eval("$XDG_CONFIG_HOME") or os.path.join(home, ".config")
-        candidates.append(os.path.join(xdg_home_config, "nvim"))
-
-    candidates.append(os.path.join(home, ".vim"))
-
+    
+    # Prioritise MYVIMRC, then nvim config variables, then generic file paths. 
     if "MYVIMRC" in os.environ:
-        my_vimrc = os.path.expandvars(os.environ["MYVIMRC"])
-        candidates.append(normalize_file_path(os.path.dirname(my_vimrc)))
+        my_vimrc = Path(os.path.expandvars(os.environ["MYVIMRC"]))
+        candidates.append(my_vimrc.parent)
+    
+    if vim.eval("has('nvim')") == "1":
+        candidates.append(Path(vim.eval("sdtpath('config')")))
+        xdg_home_config = vim.eval("$XDG_CONFIG_HOME") or Path(home, ".config")
+        candidates.append(Path(xdg_home_config, "nvim"))
+
+    candidates.append(Path(home, ".vim"))
+
+    if platform.system() == "Windows":
+        candidates.append(Path(home, "vimfiles"))
+        candidates.append(Path("~/.vim").expanduser())
+
     for candidate in candidates:
-        if os.path.isdir(candidate):
-            return normalize_file_path(candidate)
+        if candidate.is_dir():
+            return candidate.resolve()
     raise RuntimeError(
         "Unable to find user configuration directory. I tried '%s'." % candidates
     )

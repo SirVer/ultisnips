@@ -19,7 +19,7 @@ def unescape(text):
 
 
 def escape(text, chars):
-    """Escapes all characters in 'chars' in text using backspaces."""
+    """Escapes all characters in 'chars' in text using backslashes."""
     rv = ""
     for char in text:
         if char in chars:
@@ -29,7 +29,7 @@ def escape(text, chars):
 
 
 def fill_in_whitespace(text):
-    """Returns 'text' with escaped whitespace replaced through whitespaces."""
+    """Returns 'text' with escaped whitespace replaced with literal whitespace."""
     text = text.replace(r"\n", "\n")
     text = text.replace(r"\t", "\t")
     text = text.replace(r"\r", "\r")
@@ -39,16 +39,12 @@ def fill_in_whitespace(text):
 
 
 def head_tail(line):
-    """Returns the first word in 'line' and the rest of 'line' or None if the
+    """Returns the first word in 'line' and the rest of 'line' or '' if the
     line is too short."""
-    generator = (t.strip() for t in line.split(None, 1))
-    head = next(generator).strip()
-    tail = ""
-    try:
-        tail = next(generator).strip()
-    except StopIteration:
-        pass
-    return head, tail
+    
+    line = line.strip().split(None, 1)
+    line.append('')
+    return line[0], line[1]
 
 
 class LineIterator:

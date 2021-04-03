@@ -4,6 +4,7 @@
 """Parses snipMate files."""
 
 import os
+from pathlib import Path
 import glob
 
 from UltiSnips import vim_helper

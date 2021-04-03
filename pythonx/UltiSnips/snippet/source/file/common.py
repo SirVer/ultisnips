@@ -5,8 +5,11 @@
 
 import os.path
 
-def expand_path(path: str):
-    return os.path.expandvars(os.path.expanduser(path))
+
+def expand_path(path: str) -> Path:
+    # For Python <3.6 this will raise an error if the file does not exist.
+    return Path(os.path.expandvars(os.path.expanduser(path))).resolve()
+
 
 def normalize_file_path(path: str) -> str:
     """Calls normpath and normcase on path"""
