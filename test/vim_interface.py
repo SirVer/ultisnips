@@ -120,6 +120,9 @@ class VimInterface(TempFileManager):
     def launch(self, config=[]):
         """Returns the python version in Vim as a string, e.g. '3.7'"""
         pid_file = self.name_temp("vim.pid")
+        version_file = self.name_temp("vim_version")
+        if os.path.exists(version_file):
+            os.remove(version_file)
         done_file = self.name_temp("loading_done")
         if os.path.exists(done_file):
             os.remove(done_file)
@@ -131,8 +134,10 @@ class VimInterface(TempFileManager):
             "with open('%s', 'w') as pid_file: pid_file.write(vim.eval('getpid()'))"
             % pid_file
         )
+        post_config.append("with open('%s', 'w') as version_file:" % version_file)
+        post_config.append("    version_file.write('%i.%i.%i' % sys.version_info[:3])")
         post_config.append("with open('%s', 'w') as done_file:" % done_file)
-        post_config.append("    done_file.write('%i.%i.%i' % sys.version_info[:3])")
+        post_config.append("    done_file.write('all_done!')")
         post_config.append("EOF")
 
         config_path = self.write_temp(
@@ -149,7 +154,7 @@ class VimInterface(TempFileManager):
         )
         wait_until_file_exists(done_file)
         self._vim_pid = int(_read_text_file(pid_file))
-        return _read_text_file(done_file).strip()
+        return _read_text_file(version_file).strip()
 
     def leave_with_wait(self):
         self.send_to_vim(3 * ESC + ":qa!\n")

@@ -6,6 +6,7 @@
 from contextlib import contextmanager
 from pathlib import Path
 import os
+from pathlib import Path
 import platform
 
 from UltiSnips.compatibility import col2byte, byte2col

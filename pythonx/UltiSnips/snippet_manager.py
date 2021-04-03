@@ -878,14 +878,16 @@ class SnippetManager:
         if (len(all_snippet_directories) != 1 and not has_storage_dir) or (
             has_storage_dir and bang
         ):
-            # Likely the array contains things like ["UltiSnips",
-            # "mycoolsnippets"] There is no more obvious way to edit than in
-            # the users vim config directory.
+            # Look in the vim config directory first.
             dot_vim_dir = vim_helper.get_dot_vim()
-            for snippet_dir in all_snippet_directories:
-                potentials.update(
-                    _get_potential_snippet_filenames_to_edit(snippet_dir, filetypes)
-                )
+            potentials.update(find_snippet_files(dot_vim_dir, filetypes))
+            
+            # If it doesn't exist, check runtimepath.
+            if not potentials:
+                for snippet_dir in all_snippet_directories:
+                    potentials.update(
+                        _get_potential_snippet_filenames_to_edit(snippet_dir, filetypes)
+                    )
 
         if bang:
             for ft in filetypes:
