@@ -8,6 +8,8 @@ image_vim_80_py35:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.5-stretch --build-arg VIM_VERSION=8.0 .
 image_vim_81_py35:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.5-stretch --build-arg VIM_VERSION=8.1 .
+image_vim_82_py35:
+	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.5-stretch --build-arg VIM_VERSION=8.2 .
 image_vim_git_py35:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.5-stretch --build-arg VIM_VERSION=git .
 image_vim_74_py36:
@@ -16,19 +18,31 @@ image_vim_80_py36:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.6-stretch --build-arg VIM_VERSION=8.0 .
 image_vim_81_py36:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.6-stretch --build-arg VIM_VERSION=8.1 .
+image_vim_82_py36:
+	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.6-stretch --build-arg VIM_VERSION=8.2 .
 image_vim_git_py36:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.6-stretch --build-arg VIM_VERSION=git .
 # 74 and 80 do not build with py37 and py38. The build errors out with "Require native threads".
 image_vim_81_py37:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.7-stretch --build-arg VIM_VERSION=8.1 .
+image_vim_82_py37:
+	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.7-stretch --build-arg VIM_VERSION=8.2 .
 image_vim_git_py37:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.7-stretch --build-arg VIM_VERSION=git .
 image_vim_81_py38:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.8-buster --build-arg VIM_VERSION=8.1 .
+image_vim_82_py38:
+	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.8-buster --build-arg VIM_VERSION=8.2 .
 image_vim_git_py38:
 	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.8-buster --build-arg VIM_VERSION=git .
+image_vim_81_py39:
+	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.9-buster --build-arg VIM_VERSION=8.1 .
+image_vim_82_py39:
+	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.9-buster --build-arg VIM_VERSION=8.2 .
+image_vim_git_py39:
+	docker build -t ultisnips:$@ --build-arg PYTHON_IMAGE=3.9-buster --build-arg VIM_VERSION=git .
 
-image_repro: image_vim_80_py36
+image_repro: image_vim_82_py39
 	docker build -t ultisnips:repro --build-arg BASE_IMAGE=$< -f Dockerfile.repro .
 
 # A reproduction image that drops you into a naked environment,
