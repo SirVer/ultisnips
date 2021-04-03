@@ -5,6 +5,7 @@
 
 from contextlib import contextmanager
 import os
+from pathlib import Path
 import platform
 
 from UltiSnips.snippet.source.file.common import normalize_file_path
@@ -212,21 +213,27 @@ def select(start, end):
     feedkeys(move_cmd)
 
 
-def get_dot_vim():
+def get_dot_vim() -> str:
     """Returns the likely place for ~/.vim for the current setup."""
     home = vim.eval("$HOME")
     candidates = []
-    if platform.system() == "Windows":
-        candidates.append(os.path.join(home, "vimfiles"))
+    
+    # Prioritise MYVIMRC, then nvim config variables, then generic file paths.
+    if "MYVIMRC" in os.environ:
+        my_vimrc = os.path.expandvars(os.environ["MYVIMRC"])
+        candidates.append(normalize_file_path(os.path.dirname(my_vimrc)))
+
     if vim.eval("has('nvim')") == "1":
+        candidates.append(vim.eval("stdpath('config')"))
         xdg_home_config = vim.eval("$XDG_CONFIG_HOME") or os.path.join(home, ".config")
         candidates.append(os.path.join(xdg_home_config, "nvim"))
 
     candidates.append(os.path.join(home, ".vim"))
 
-    if "MYVIMRC" in os.environ:
-        my_vimrc = os.path.expandvars(os.environ["MYVIMRC"])
-        candidates.append(normalize_file_path(os.path.dirname(my_vimrc)))
+    if platform.system() == "Windows":
+        candidates.append(os.path.join(home, "vimfiles"))
+        candidates.append(os.path.expanduser("~/.vim")])
+
     for candidate in candidates:
         if os.path.isdir(candidate):
             return normalize_file_path(candidate)
