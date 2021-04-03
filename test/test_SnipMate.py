@@ -222,3 +222,14 @@ snippet /*
  * 2
  */
 """
+
+class snipMate_Issue1325(_VimTest):
+    # https://github.com/SirVer/ultisnips/issues/1325
+    files = {
+        "snippets/_.snippets": """
+snippet frac \\frac{}{}
+\t\\\\frac{${1:num}}{${2:denom}} ${0}
+""".rstrip()
+    }
+    keys = "$frac" + EX + JF + JF + "blub"
+    wanted = r"$\frac{num}{denom} blub"
