@@ -242,6 +242,6 @@ snippet .
 \tself.
 """.rstrip()
     }
-    keys = "os." + EX + "foo"
-    wanted = "os.\tfoo"
+    keys = "os." + EX + "foo\n." + EX
+    wanted = "os.\tfoo\nself."
 
