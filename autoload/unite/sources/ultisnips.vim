@@ -67,7 +67,7 @@ function! s:unite_source.gather_candidates(args, context) abort
     let curr_val = copy(default_val)
     let curr_val['word'] = printf('%-*s', max_len, snip[0]) . "     " . snip[1]
     let curr_val['trigger'] = snip[0]
-    let curr_val['kind'] = 'snippet'
+    let curr_val['kind'] = 'common'
     call add(canditates, curr_val)
   endfor
   return canditates
