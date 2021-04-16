@@ -20,7 +20,7 @@ class SnipMateSnippetDefinition(SnippetDefinition):
             trigger,
             value,
             description,
-            "i",
+            "w",
             {},
             location,
             None,

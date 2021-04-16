@@ -233,3 +233,15 @@ snippet frac \\frac{}{}
     }
     keys = "$frac" + EX + JF + JF + "blub"
     wanted = r"$\frac{num}{denom} blub"
+
+class snipMate_Issue1344(_VimTest):
+    # https://github.com/SirVer/ultisnips/issues/144
+    files = {
+        "snippets/_.snippets": """
+snippet .
+\tself.
+""".rstrip()
+    }
+    keys = "os." + EX + "foo\n." + EX
+    wanted = "os.\tfoo\nself."
+
