@@ -21,13 +21,14 @@ with open(DUMP_FILENAME, "w"):
 def echo_to_hierarchy(text_object):
     """Outputs the given 'text_object' and its children hierarchically."""
     # pylint:disable=protected-access
+    orig = text_object
     parent = text_object
     while parent._parent:
         parent = parent._parent
 
     def _do_print(text_object, indent=""):
         """prints recursively."""
-        debug(indent + text_object)
+        debug(indent + ("MAIN: " if text_object == orig else "") + str(text_object))
         try:
             for child in text_object._children:
                 _do_print(child, indent=indent + "  ")
@@ -47,5 +48,5 @@ def print_stack():
     """Dump a stack trace into the debug file."""
     import traceback
 
-    with open(DUMP_FILENAME, "ab") as dump_file:
+    with open(DUMP_FILENAME, "a") as dump_file:
         traceback.print_stack(file=dump_file)

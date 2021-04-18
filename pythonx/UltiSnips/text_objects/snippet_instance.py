@@ -73,19 +73,22 @@ class SnippetInstance(EditableTextObject):
         This might also move the Cursor
 
         """
-        vc = _VimCursor(self)
         done = set()
         not_done = set()
 
         def _find_recursive(obj):
             """Finds all text objects and puts them into 'not_done'."""
+            cursorInsideLowest = None
             if isinstance(obj, EditableTextObject):
+                if obj.start <= vim_helper.buf.cursor <= obj.end and not (isinstance(obj, TabStop) and obj.number == 0):
+                    cursorInsideLowest = obj
                 for child in obj._children:
-                    _find_recursive(child)
+                    cursorInsideLowest = _find_recursive(child) or cursorInsideLowest
             not_done.add(obj)
-
-        _find_recursive(self)
-
+            return cursorInsideLowest
+        cursorInsideLowest = _find_recursive(self)
+        if cursorInsideLowest is not None:
+            vc = _VimCursor(cursorInsideLowest)
         counter = 10
         while (done != not_done) and counter:
             # Order matters for python locals!
@@ -100,8 +103,9 @@ class SnippetInstance(EditableTextObject):
                 "'if not snip.c' to make sure to only expand random output "
                 "once."
             )
-        vc.to_vim()
-        self._del_child(vc)
+        if cursorInsideLowest is not None:
+            vc.to_vim()
+            cursorInsideLowest._del_child(vc)
 
     def select_next_tab(self, jump_direction: JumpDirection):
         """Selects the next tabstop in the direction of 'jump_direction'."""

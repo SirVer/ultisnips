@@ -139,7 +139,7 @@ def guess_edit(initial_line, last_text, current_text, vim_state):
                     if is_complete_edit(initial_line, last_text, current_text, es):
                         return True, es
         elif len(current_text) < len(last_text):
-            # where some lines deleted? (dd or so)
+            # were some lines deleted? (dd or so)
             es = []
             for i in range(len(last_text) - len(current_text)):
                 es.append(("D", pos.line, 0, last_text[pos.line - initial_line + i]))
