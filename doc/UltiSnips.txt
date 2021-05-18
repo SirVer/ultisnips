@@ -1778,7 +1778,8 @@ offers a really nice completion dialogue for snippets.
 neocomplete - UltiSnips ships with a source for neocomplete and therefore
 offers out of the box completion dialogue support for it too.
 
-deoplete - The successor of neocomplete is also supported.
+deoplete - The successor of neocomplete is also supported. The completion 
+source is called 'ultisnips'.
 
 unite - UltiSnips has a source for unite. As an example of how you can use
 it add the following function and mappings to your vimrc: >
