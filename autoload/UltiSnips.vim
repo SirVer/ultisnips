@@ -154,6 +154,15 @@ function! UltiSnips#LeavingBuffer() abort
     let from_preview = getwinvar(winnr('#'), '&previewwindow')
     let to_preview = getwinvar(winnr(), '&previewwindow')
 
+    if "ic" == mode()
+        return
+    endif
+    if "i" == mode()
+        return
+    endif
+    if "ix" == mode()
+        return
+    endif
     if !(from_preview || to_preview)
         py3 UltiSnips_Manager._leaving_buffer()
     endif
