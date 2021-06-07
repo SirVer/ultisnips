@@ -1751,7 +1751,7 @@ endsnippet
 
 When "p" character will occur in the beginning of the line, it will be
 automatically expanded into "package main". Same with "m" character. There is
-no need to press trigger key after "m""
+no need to press the trigger key after "m"
 
 ==============================================================================
 5. UltiSnips and Other Plugins                      *UltiSnips-other-plugins*
