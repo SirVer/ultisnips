@@ -399,7 +399,7 @@ The first function is UltiSnips#AddSnippetWithPriority(trigger, value, descripti
 options, filetyp, priority). It adds a new snippet to the current list of
 snippets. See |UltiSnips-authoring-snippets| for details most of the function
 arguments. The priority is a number that defines which snippet should be
-preferred over others. See the priority keyword in |UltiSnips-add-snippets|.
+preferred over others. See the priority keyword in |UltiSnips-basic-syntax|.
 
 
  3.4.2 UltiSnips#Anon                                        *UltiSnips#Anon*
