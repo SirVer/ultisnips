@@ -76,8 +76,8 @@ class SimpleExpand_DoNotClobberDefaultRegister(_VimTest):
     def _extra_vim_config(self, vim_config):
         vim_config.append('let @"=""')
 
+
 class SimpleExpand_Issue1343(_VimTest):
     snippets = ("test", r"${1:\Safe\\}")
     keys = "test" + EX + JF + "foo"
     wanted = r"\Safe\foo"
-

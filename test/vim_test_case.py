@@ -35,8 +35,8 @@ class VimTestCase(unittest.TestCase, TempFileManager):
     maxDiff = None  # Show all diff output, always.
     vim_flavor = None  # will be 'vim' or 'neovim'.
     expected_python_version = (
-        None
-    )  # If set, we need to check that our Vim is running this python version.
+        None  # If set, we need to check that our Vim is running this python version.
+    )
 
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)

@@ -187,7 +187,10 @@ def _parse_snippets_file(data, filename):
         elif head == "clearsnippets":
             yield "clearsnippets", (current_priority, tail.split())
         elif head == "context":
-            head, context, = handle_context(tail, lines.line_index)
+            (
+                head,
+                context,
+            ) = handle_context(tail, lines.line_index)
             if head == "error":
                 yield (head, tail)
         elif head == "priority":

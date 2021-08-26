@@ -84,4 +84,3 @@ def parse_and_instantiate(parent_to, text, indent):
     resolve_ambiguity(all_tokens, seen_ts)
     _create_transformations(all_tokens, seen_ts)
     finalize(all_tokens, seen_ts, parent_to)
-

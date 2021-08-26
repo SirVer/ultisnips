@@ -56,3 +56,6 @@ repro:
 # inside the running container
 shell_in_repro:
 	docker exec -it $(shell docker ps -q) /bin/bash
+
+format:
+	find . -name '*.py' -print0 | xargs -0 black

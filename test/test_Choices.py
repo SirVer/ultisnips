@@ -7,6 +7,7 @@ class Choices_WillBeExpandedToInlineSelection(_VimTest):
     keys = "test" + EX
     wanted = "1.red|2.gray"
 
+
 class Choices_ExpectCorrectResult(_VimTest):
     snippets = ("test", "${1|red,gray|}")
     keys = "test" + EX + "2"
@@ -104,6 +105,9 @@ class Choices_ShouldThrowErrorWithZeroTabstop(_VimTest):
 
 
 class Choices_CanEscapeCommaInsideChoiceItem(_VimTest):
-    snippets = ("test", r"${1|fun1(,fun2(param1\, ,fun3(param1\, param2\, |}param_end) result: $1")
+    snippets = (
+        "test",
+        r"${1|fun1(,fun2(param1\, ,fun3(param1\, param2\, |}param_end) result: $1",
+    )
     keys = "test" + EX + "2"
     wanted = "fun2(param1, param_end) result: fun2(param1, "

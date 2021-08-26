@@ -103,31 +103,30 @@ class SimpleMirrorSameLine_ExpectCorrectResult(_VimTest):
     keys = "test" + EX + "hallo"
     wanted = "hallo hallo"
 
+
 class SimpleMirrorSameLineNoSpace_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1$1")
     keys = "test" + EX + "hallo"
     wanted = "hallohallo"
 
+
 class SimpleMirrorSameLineNoSpaceInsideOther_ExpectCorrectResult(_VimTest):
-    snippets = (
-        ("test", "$1$1"),
-        ("outer", "$1")
-    )
+    snippets = (("test", "$1$1"), ("outer", "$1"))
     keys = "outer" + EX + "test" + EX + "hallo"
     wanted = "hallohallo"
+
 
 class SimpleMirrorSameLineNoSpaceSpaceAfter_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1$1 ")
     keys = "test" + EX + "hallo"
     wanted = "hallohallo "
 
+
 class SimpleMirrorSameLineNoSpaceInsideOtherSpaceAfter_ExpectCorrectResult(_VimTest):
-    snippets = (
-        ("test", "$1$1 "),
-        ("outer", "$1")
-    )
+    snippets = (("test", "$1$1 "), ("outer", "$1"))
     keys = "outer" + EX + "test" + EX + "hallo"
     wanted = "hallohallo "
+
 
 class SimpleMirrorSameLine_InText_ExpectCorrectResult(_VimTest):
     snippets = ("test", "$1 $1")

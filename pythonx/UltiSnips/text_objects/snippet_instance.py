@@ -80,12 +80,15 @@ class SnippetInstance(EditableTextObject):
             """Finds all text objects and puts them into 'not_done'."""
             cursorInsideLowest = None
             if isinstance(obj, EditableTextObject):
-                if obj.start <= vim_helper.buf.cursor <= obj.end and not (isinstance(obj, TabStop) and obj.number == 0):
+                if obj.start <= vim_helper.buf.cursor <= obj.end and not (
+                    isinstance(obj, TabStop) and obj.number == 0
+                ):
                     cursorInsideLowest = obj
                 for child in obj._children:
                     cursorInsideLowest = _find_recursive(child) or cursorInsideLowest
             not_done.add(obj)
             return cursorInsideLowest
+
         cursorInsideLowest = _find_recursive(self)
         if cursorInsideLowest is not None:
             vc = _VimCursor(cursorInsideLowest)

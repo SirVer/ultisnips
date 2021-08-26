@@ -13,6 +13,7 @@ from UltiSnips.snippet.parsing.lexer import ChoicesToken
 
 class Choices(TabStop):
     """See module docstring."""
+
     def __init__(self, parent, token: ChoicesToken):
         self._number = token.number  # for TabStop property 'number'
         self._initial_text = token.initial_text
@@ -68,7 +69,7 @@ class Choices(TabStop):
             self._input_chars.append(cmd_text)
         elif ctype == "D":
             line_text = vim_helper.buf[cursor_line - 1]
-            self._input_chars = list(line_text[self._start.col: col])
+            self._input_chars = list(line_text[self._start.col : col])
 
         inputted_text = "".join(self._input_chars)
 
@@ -91,18 +92,22 @@ class Choices(TabStop):
 
         should_continue_input = False
         if is_all_digits or has_selection_terminator:
-            index_strs = [str(index) for index in list(range(1, len(self._choice_list) + 1))]
-            matched_index_strs = list(filter(lambda s: s.startswith(inputted_text_for_num), index_strs))
+            index_strs = [
+                str(index) for index in list(range(1, len(self._choice_list) + 1))
+            ]
+            matched_index_strs = list(
+                filter(lambda s: s.startswith(inputted_text_for_num), index_strs)
+            )
             remained_choice_list = []
             if len(matched_index_strs) == 0:
                 remained_choice_list = []
             elif has_selection_terminator:
                 if inputted_text_for_num:
                     num = int(inputted_text_for_num)
-                    remained_choice_list = list(self._choice_list)[num - 1: num]
+                    remained_choice_list = list(self._choice_list)[num - 1 : num]
             elif len(matched_index_strs) == 1:
                 num = int(inputted_text_for_num)
-                remained_choice_list = list(self._choice_list)[num - 1: num]
+                remained_choice_list = list(self._choice_list)[num - 1 : num]
             else:
                 should_continue_input = True
         else:
@@ -135,12 +140,15 @@ class Choices(TabStop):
             pivot = Position(line, old_end_col)
             diff_col = displayed_text_end_col - old_end_col
             self._parent._child_has_moved(
-                self._parent.children.index(self),
-                pivot,
-                Position(0, diff_col)
+                self._parent.children.index(self), pivot, Position(0, diff_col)
             )
 
             vim_helper.set_cursor_from_pos([buf_num, cursor_line, self._end.col + 1])
 
     def __repr__(self):
-        return "Choices(%s,%r->%r,%r)" % (self._number, self._start, self._end, self._initial_text)
+        return "Choices(%s,%r->%r,%r)" % (
+            self._number,
+            self._start,
+            self._end,
+            self._initial_text,
+        )

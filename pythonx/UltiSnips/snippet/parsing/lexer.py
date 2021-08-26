@@ -272,9 +272,7 @@ class ChoicesToken(Token):
         self.number = _parse_number(stream)
 
         if self.number == 0:
-            raise RuntimeError(
-                "Choices selection is not supported on $0"
-            )
+            raise RuntimeError("Choices selection is not supported on $0")
 
         next(stream)  # |
 
@@ -292,7 +290,9 @@ class ChoicesToken(Token):
                     continue
                 choice_list.append(self._get_unescaped_choice_item(result))
             except:
-                last_choice_item = self._get_unescaped_choice_item(choices_text[cur_col:])
+                last_choice_item = self._get_unescaped_choice_item(
+                    choices_text[cur_col:]
+                )
                 if last_choice_item:
                     choice_list.append(last_choice_item)
                 break
