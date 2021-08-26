@@ -30,6 +30,7 @@ from UltiSnips.text_objects import (
     Visual,
     Choices,
 )
+from UltiSnips.error import PebkacError
 
 _TOKEN_TO_TEXTOBJECT = {
     EscapeCharToken: EscapedChar,
@@ -58,7 +59,7 @@ def _create_transformations(all_tokens, seen_ts):
     for parent, token in all_tokens:
         if isinstance(token, TransformationToken):
             if token.number not in seen_ts:
-                raise RuntimeError(
+                raise PebkacError(
                     "Tabstop %i is not known but is used by a Transformation"
                     % token.number
                 )

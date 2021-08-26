@@ -7,6 +7,7 @@ definitions into logical units called Tokens."""
 import string
 import re
 
+from UltiSnips.error import PebkacError
 from UltiSnips.position import Position
 from UltiSnips.text import unescape
 
@@ -184,7 +185,7 @@ class VisualToken(Token):
                 self.replace = _parse_till_unescaped_char(stream, "/")[0]
                 self.options = _parse_till_closing_brace(stream)
             except StopIteration:
-                raise RuntimeError(
+                raise PebkacError(
                     "Invalid ${VISUAL} transformation! Forgot to escape a '/'?"
                 )
         else:
@@ -272,7 +273,7 @@ class ChoicesToken(Token):
         self.number = _parse_number(stream)
 
         if self.number == 0:
-            raise RuntimeError("Choices selection is not supported on $0")
+            raise PebkacError("Choices selection is not supported on $0")
 
         next(stream)  # |
 

@@ -10,6 +10,7 @@ also a TextObject.
 """
 
 from UltiSnips import vim_helper
+from UltiSnips.error import PebkacError
 from UltiSnips.position import Position, JumpDirection
 from UltiSnips.text_objects.base import EditableTextObject, NoneditableTextObject
 from UltiSnips.text_objects.tabstop import TabStop
@@ -100,7 +101,7 @@ class SnippetInstance(EditableTextObject):
                     done.add(obj)
             counter -= 1
         if not counter:
-            raise RuntimeError(
+            raise PebkacError(
                 "The snippets content did not converge: Check for Cyclic "
                 "dependencies or random strings in your snippet. You can use "
                 "'if not snip.c' to make sure to only expand random output "
