@@ -9,10 +9,11 @@ import vim
 import textwrap
 
 from UltiSnips import vim_helper
+from UltiSnips.error import PebkacError
 from UltiSnips.indent_util import IndentUtil
+from UltiSnips.position import Position
 from UltiSnips.text import escape
 from UltiSnips.text_objects import SnippetInstance
-from UltiSnips.position import Position
 from UltiSnips.text_objects.python_code import SnippetUtilForAction
 
 __WHITESPACE_SPLIT = re.compile(r"\s")
@@ -216,7 +217,7 @@ class SnippetDefinition:
                         cursor_invalid = True
 
                 if cursor_invalid:
-                    raise RuntimeError(
+                    raise PebkacError(
                         "line under the cursor was modified, but "
                         + '"snip.cursor" variable is not set; either set set '
                         + '"snip.cursor" to new cursor position, or do not '

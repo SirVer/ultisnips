@@ -6,12 +6,13 @@
 from collections import defaultdict
 import os
 
-from UltiSnips import vim_helper
 from UltiSnips import compatibility
+from UltiSnips import vim_helper
+from UltiSnips.error import PebkacError
 from UltiSnips.snippet.source.base import SnippetSource
 
 
-class SnippetSyntaxError(RuntimeError):
+class SnippetSyntaxError(PebkacError):
 
     """Thrown when a syntax error is found in a file."""
 

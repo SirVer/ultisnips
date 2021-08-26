@@ -7,9 +7,10 @@ from contextlib import contextmanager
 import os
 import platform
 
-from UltiSnips.snippet.source.file.common import normalize_file_path
 from UltiSnips.compatibility import col2byte, byte2col
+from UltiSnips.error import PebkacError
 from UltiSnips.position import Position
+from UltiSnips.snippet.source.file.common import normalize_file_path
 from vim import error  # pylint:disable=import-error,unused-import
 import vim  # pylint:disable=import-error
 
@@ -230,7 +231,7 @@ def get_dot_vim():
     for candidate in candidates:
         if os.path.isdir(candidate):
             return normalize_file_path(candidate)
-    raise RuntimeError(
+    raise PebkacError(
         "Unable to find user configuration directory. I tried '%s'." % candidates
     )
 
