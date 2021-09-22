@@ -491,7 +491,17 @@ situation. This is useful in conditional mappings.
 This function returns 1 if UltiSnips can jump backwards in the current
 situation. This is useful in conditional mappings.
 
-3.5 Warning about missing python support           *UltiSnips-python-warning*
+
+3.5 Store persistence directory                         *g:UltiSnipsStoreDir*
+-------------------------------
+
+Some interpolation data stores need persistence ('file' and 'common' sotres).
+The g:UltiSnipsStoreDir should to be set to an existing directory to provide
+this functionnality. if not set, or set to v:null, these stores will behave
+like 'buffer' and 'session'.
+
+
+3.6 Warning about missing python support           *UltiSnips-python-warning*
 ----------------------------------------
 
 When UltiSnips is loaded, it will check that the running Vim was compiled with
@@ -954,6 +964,44 @@ The 'snip' object provides some properties as well: >
         'start' - placeholder start on the moment of selection;
         'end' - placeholder end on the moment of selection;
 
+
+The 'snip.store' object provides dict-like stores to remember variables accross
+snippet executions: >
+
+    snip.store.tmp:
+        A temporary local store accessible only during the snippet execution
+        and updates. It is reset each time the snippet is called, but not
+        between updates.
+
+    snip.store.buffer:
+        A store accessible to all snippets executed in the same buffer. Each
+        buffer has its own one.
+
+    snip.store.session:
+        A store accessible to all snippets in a same vim instance.
+
+    snip.store.file:
+        A persistent store attached to a file. Any snippet executed on the
+        same file (possibly on different vim instances) will access the same
+        store. If g:UltiSnipStoreDir is unset or set to v:null, then it behave
+        similary to store.buffer.
+
+    snip.store.common:
+        A persistent global store common to all snippet executions in all buffers and any
+        vim instance. If g:UltiSnipStoreDir is unset or set to v:null, then it behave
+        similary to store.session.
+
+The stores have some syntax sugars compared to built-in dicts : >
+    store['key', default]
+      where default is either a value either a factory is equivalent to:
+      if key not in store:
+        store['key'] = default
+      return store['key']
+
+    store.key
+      is equivalent to store['key']. Limitation : key should not start with an
+      underscore '_'
+
 For your convenience, the 'snip' object also provides the following
 operators: >
 
@@ -980,6 +1028,37 @@ endsnippet
 ------------------- SNAP -------------------
 wow<tab>Hello World ->
 Hello World                                                     HELLO WORLD
+
+
+The following snippet uses the file store to remember the last test suite used
+
+------------------- SNIP -------------------
+snippet test
+TEST(${1:`!psnip.rv=snip.store.file['test_suite', '']`}, $2){
+    $0
+}`!p
+snip.store.file.test_suite = t[1]
+`
+endsnippet
+
+
+The following snippet implements a counter. It uses the 'tmp' store to make
+sure the counter is incremented only once (else, the snippet update would run the
+code again)
+
+------------------- SNIP -------------------
+snippet inc "increment"
+`!p
+if snip.store.tmp['todo', True]:
+    snip.rv = snip.store.file['i', 1]
+    snip.store.file.i += 1
+    snip.store.tmp.todo = False
+`
+endsnippet
+------------------- SNAP -------------------
+inc<tab> inc<tab> inc<tab> ->
+1 2 3
+
 
 The following snippet uses the regular expression option and illustrates
 regular expression grouping using python's match object. It shows that the

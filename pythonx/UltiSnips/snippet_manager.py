@@ -26,6 +26,7 @@ from UltiSnips.snippet.source import (
 from UltiSnips.text import escape
 from UltiSnips.vim_state import VimState, VisualContentPreserver
 from UltiSnips.buffer_proxy import use_proxy_buffer, suspend_proxy_edits
+from UltiSnips.store import StoreManager
 
 
 def _ask_user(a, formatted):
@@ -143,6 +144,8 @@ class SnippetManager:
 
         self._should_update_textobjects = False
         self._should_reset_visual = False
+
+        self._storeManager = StoreManager()
 
         self._reinit()
 
@@ -465,12 +468,16 @@ class SnippetManager:
         vim_helper.command(
             "silent doautocmd <nomodeline> User UltiSnipsEnterFirstSnippet"
         )
+
+        self._storeManager._setup_state()
+
         self._inner_state_up = True
 
     def _teardown_inner_state(self):
         """Reverse _setup_inner_state."""
         if not self._inner_state_up:
             return
+        self._storeManager._teardown_state()
         try:
             vim_helper.command(
                 "silent doautocmd <nomodeline> User UltiSnipsExitLastSnippet"

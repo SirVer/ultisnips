@@ -11,6 +11,7 @@ from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text_objects.base import NoneditableTextObject
 from UltiSnips.vim_state import _Placeholder
 import UltiSnips.snippet_manager
+from UltiSnips.store import BufferStore
 
 
 class _Tabs:
@@ -46,6 +47,34 @@ class SnippetUtilForAction(dict):
         UltiSnips.snippet_manager.UltiSnips_Manager.expand_anon(*args, **kwargs)
         self.cursor.preserve()
 
+class StoreProxy:
+    """
+    Provide access to the stores
+    """
+    def __init__(self):
+        self._tmp = BufferStore()
+        self._store = UltiSnips.snippet_manager.UltiSnips_Manager._storeManager
+
+    @property
+    def buffer(self):
+        return self._store.buffer
+
+    @property
+    def session(self):
+        return self._store.session
+
+    @property
+    def file(self):
+        return self._store.file
+
+    @property
+    def common(self):
+        return self._store.common
+
+    @property
+    def tmp(self):
+        return self._tmp
+ 
 
 class SnippetUtil:
 
@@ -64,6 +93,7 @@ class SnippetUtil:
         self._start = parent.start
         self._end = parent.end
         self._parent = parent
+        self._store = StoreProxy()
 
     def _reset(self, cur):
         """Gets the snippet ready for another update.
@@ -179,6 +209,10 @@ class SnippetUtil:
     @property
     def context(self):
         return self._context
+
+    @property
+    def store(self):
+        return self._store
 
     def opt(self, option, default=None):  # pylint:disable=no-self-use
         """Gets a Vim variable."""
