@@ -970,7 +970,12 @@ snippet executions: >
 
     snip.store.tmp:
         A temporary local store accessible only during the snippet execution
-        and updates. It is reset each time the snippet is called, but not
+        and updates in the same python code section. It is reset each time the snippet is called, but not
+        between updates.
+
+    snip.store.snippet:
+        A temporary local store accessible only during the snippet execution
+        and updates in all python code sections. It is reset each time the snippet is called, but not
         between updates.
 
     snip.store.buffer:

@@ -537,7 +537,7 @@ class SnippetManager:
 
     def _current_snippet_is_done(self):
         """The current snippet should be terminated."""
-        self._active_snippets.pop()
+        self._active_snippets.pop().done()
         if not self._active_snippets:
             self._teardown_inner_state()
 

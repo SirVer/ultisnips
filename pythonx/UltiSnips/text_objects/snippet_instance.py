@@ -14,6 +14,7 @@ from UltiSnips.error import PebkacError
 from UltiSnips.position import Position, JumpDirection
 from UltiSnips.text_objects.base import EditableTextObject, NoneditableTextObject
 from UltiSnips.text_objects.tabstop import TabStop
+import UltiSnips.snippet_manager
 
 
 class SnippetInstance(EditableTextObject):
@@ -46,6 +47,7 @@ class SnippetInstance(EditableTextObject):
         self.globals = globals
         self.visual_content = visual_content
         self.current_placeholder = None
+        UltiSnips.snippet_manager.UltiSnips_Manager._storeManager._pushSnippet()
 
         EditableTextObject.__init__(self, parent, start, end, initial_text)
 
@@ -163,6 +165,9 @@ class SnippetInstance(EditableTextObject):
 
     def get_tabstops(self):
         return self._tabstops
+
+    def done(self):
+        UltiSnips.snippet_manager.UltiSnips_Manager._storeManager._popSnippet()
 
 
 class _VimCursor(NoneditableTextObject):

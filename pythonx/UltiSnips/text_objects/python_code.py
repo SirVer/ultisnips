@@ -54,6 +54,7 @@ class StoreProxy:
     def __init__(self):
         self._tmp = BufferStore()
         self._store = UltiSnips.snippet_manager.UltiSnips_Manager._storeManager
+        self._snippet = UltiSnips.snippet_manager.UltiSnips_Manager._storeManager.snippet
 
     @property
     def buffer(self):
@@ -74,6 +75,10 @@ class StoreProxy:
     @property
     def tmp(self):
         return self._tmp
+
+    @property
+    def snippet(self):
+        return self._snippet
  
 
 class SnippetUtil:

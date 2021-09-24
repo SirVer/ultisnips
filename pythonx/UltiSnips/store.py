@@ -205,13 +205,13 @@ class StoreManager(object):
     """
     def __init__(self):
         self._reset()
-        self._tmp = []
 
     def _reset(self):
         self.buffer = None
         self.session = None
         self.file = None
         self.common = None
+        self._snippet = []
 
     def _setup_state(self):
         number = vim_helper.buf.number
@@ -224,4 +224,14 @@ class StoreManager(object):
         self.file.save()
         self.common.save()
         self._reset()
+
+    def _pushSnippet(self):
+        self._snippet.append(BufferStore())
+
+    def _popSnippet(self):
+        self._snippet.pop()
+
+    @property
+    def snippet(self):
+        return self._snippet[-1]
 
