@@ -25,7 +25,8 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       3.4.4 UltiSnips#CanExpandSnippet          |UltiSnips#CanExpandSnippet|
       3.4.5 UltiSnips#CanJumpForwards           |UltiSnips#CanJumpForwards|
       3.4.6 UltiSnips#CanJumpBackwards          |UltiSnips#CanJumpBackwards|
-   3.5 Missing python support                   |UltiSnips-python-warning|
+   3.5 Store persistence directory              |UltiSnips-store-directory|
+   3.6 Missing python support                   |UltiSnips-python-warning|
 4. Authoring snippets                           |UltiSnips-authoring-snippets|
    4.1 Basics                                   |UltiSnips-basics|
       4.1.1 How snippets are loaded             |UltiSnips-how-snippets-are-loaded|
@@ -492,13 +493,15 @@ This function returns 1 if UltiSnips can jump backwards in the current
 situation. This is useful in conditional mappings.
 
 
-3.5 Store persistence directory                         *g:UltiSnipsStoreDir*
+3.5 Store persistence directory                   *UltiSnips-store-directory*
 -------------------------------
+                                                        *g:UltiSnipsStoreDir*
+Some interpolation data stores need persistence ('file' and 'common' stores).
+The g:UltiSnipsStoreDir should to be set to an absolute path string pointing
+to an existing directory to provide this functionality. If not set, or set
+to v:null, these stores will behave like 'buffer' and 'session'. >
 
-Some interpolation data stores need persistence ('file' and 'common' sotres).
-The g:UltiSnipsStoreDir should to be set to an existing directory to provide
-this functionnality. if not set, or set to v:null, these stores will behave
-like 'buffer' and 'session'.
+   let g:UltiSnipsSnippetDirectories="~/.vim/UltiSnips/stores"
 
 
 3.6 Warning about missing python support           *UltiSnips-python-warning*
@@ -509,9 +512,9 @@ python support.  If no support is detected, a warning will be displayed and
 loading of UltiSnips will be skipped.
 
 If you would like to suppress this warning message, you may add the following
-line to your vimrc file.
+line to your vimrc file. >
 
-    let g:UltiSnipsNoPythonWarning = 1
+   let g:UltiSnipsNoPythonWarning = 1
 
 This may be useful if your Vim configuration files are shared across several
 systems where some of them may not have Vim compiled with python support.
@@ -970,12 +973,13 @@ snippet executions: >
 
     snip.store.tmp:
         A temporary local store accessible only during the snippet execution
-        and updates in the same python code section. It is reset each time the snippet is called, but not
-        between updates.
+        and updates in the same python code section. It is reset each time the
+        snippet is called, but not between updates.
 
     snip.store.snippet:
         A temporary local store accessible only during the snippet execution
-        and updates in all python code sections. It is reset each time the snippet is called, but not
+        and updates in all python code sections. It is reset each time the snippet
+        is called, but not
         between updates.
 
     snip.store.buffer:
@@ -992,13 +996,21 @@ snippet executions: >
         similary to store.buffer.
 
     snip.store.common:
-        A persistent global store common to all snippet executions in all buffers and any
-        vim instance. If g:UltiSnipStoreDir is unset or set to v:null, then it behave
-        similary to store.session.
+        A persistent global store common to all snippet executions in all buffers
+        and any vim instance. If g:UltiSnipStoreDir is unset or set to v:null,
+        then it behave similary to store.session.
 
-The stores have some syntax sugars compared to built-in dicts : >
+Note : The stores are persisted as json. Keys and data stored are subject to the
+same limitations as the `json` python module (keys should be strings, and data
+should be made of 'None', 'bool' 'int', 'float', 'string', 'list' and 'dict').
+
+Note : Since JSON is a plain text file format, snippets should not store any
+sensitive information. If you are using this feature, please advise your users
+of this risk (e.g. Database passwords, private keys etc.).
+
+The stores have some syntax sugars in addition to built-in dict interface : >
     store['key', default]
-      where default is either a value either a factory is equivalent to:
+      where default is either a value either a factory, is equivalent to:
       if key not in store:
         store['key'] = default
       return store['key']

@@ -1,11 +1,12 @@
 from UltiSnips import vim_helper
 from pathlib import Path
+import hashlib
 import json
 from collections import defaultdict
 
 class Store(object):
     """
-    A dict-like supporting supporting the obj[key, default] synthax
+    A dict-like supporting supporting the obj[key, default] syntax
     """
     def __init__(self):
         self._dict = dict()
@@ -135,10 +136,10 @@ class _PersistentStore(Store):
         super().__setitem__(key, val)
 
 
-def _encodeFilePath(path):
-    return str(Path(path).resolve()).replace('%', '_%%_').replace('/', '%')
+def _encode_file_path(path):
+    return hashlib.sha1(str(path))
 
-def _storeDir():
+def _store_dir():
     p = vim_helper.eval('g:UltiSnipsStoreDir')
     if p is not None :
         return Path(p).expanduser().resolve()
@@ -155,10 +156,10 @@ class FileStore(_PersistentStore):
     @classmethod
     def get(cls, path):
         path = Path(path).resolve()
-        base = _storeDir()
+        base = _store_dir()
         if base is None :
             return cls._getAlternate(path)
-        return cls(base / _encodeFilePath(path))
+        return cls(base / _encode_file_path(path))
 
     @classmethod
     def _getAlternate(cls, path):
@@ -188,7 +189,7 @@ class CommonStore(_PersistentStore):
 
     @classmethod
     def get(cls):
-        base = _storeDir()
+        base = _store_dir()
         if base is None :
             return cls._getAlternate()
         return cls(base / 'common')

@@ -47,7 +47,7 @@ class SnippetInstance(EditableTextObject):
         self.globals = globals
         self.visual_content = visual_content
         self.current_placeholder = None
-        UltiSnips.snippet_manager.UltiSnips_Manager._storeManager._pushSnippet()
+        UltiSnips.snippet_manager.UltiSnips_Manager._store_manager._pushSnippet()
 
         EditableTextObject.__init__(self, parent, start, end, initial_text)
 
@@ -167,7 +167,7 @@ class SnippetInstance(EditableTextObject):
         return self._tabstops
 
     def done(self):
-        UltiSnips.snippet_manager.UltiSnips_Manager._storeManager._popSnippet()
+        UltiSnips.snippet_manager.UltiSnips_Manager._store_manager._popSnippet()
 
 
 class _VimCursor(NoneditableTextObject):
