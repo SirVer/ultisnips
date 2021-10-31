@@ -64,11 +64,12 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         """Adds extra lines to the vim_config list."""
 
     def _before_test(self):
-        """Send these keys before the test runs.
-
-        Used for buffer local variables and other options.
-
-        """
+        """Run before the test, once vim is launched
+        Used for buffer local variables and other options."""
+        
+    def _after_test(self):
+        """Run after the test, before vim is exited
+        Used to check additionnal behaviors"""
 
     def _create_file(self, file_path, content):
         """Creates a file in the runtimepath that is created for this test.
@@ -203,6 +204,8 @@ class VimTestCase(unittest.TestCase, TempFileManager):
                 time.sleep(self.sleeptime)
                 text = text[len(to_send) :]
             self.output = self.vim.get_buffer_data()
+         
+        self._after_test()
 
     def tearDown(self):
         if self.interrupt:

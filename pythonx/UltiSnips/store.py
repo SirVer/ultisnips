@@ -15,13 +15,7 @@ class Store(object):
         if isinstance(key, tuple) :
             key, _default = key
             key = str(key)
-            if key not in self._dict :
-                try :
-                    default = _default()
-                except :
-                    default = _default
-                self[key] = default
-                return default
+            return self.setdefault(key, _default)
         else :
             key = str(key)
         return self._dict[key]
@@ -43,6 +37,8 @@ class Store(object):
             self[key] = val
 
     def __setitem__(self, key, val):
+        if isinstance(key, tuple) :
+          key, _default = key
         key = str(key)
         return self._dict.__setitem__(key, val)
     def __delitem__(self, *args, **kwargs):
@@ -59,6 +55,26 @@ class Store(object):
 
     def save(self):
         pass
+
+    def get(self, *args):
+        """
+        get(key[, default[, assigned_val]])
+        Return for key if key is in the dictionary, else defaut.
+        If assigned_val is present and key is not in the dict,
+        assigned_val is assigned for the key, else nothing is inserted.
+        """
+        # If the call corresponds to dict.get() signature, forward
+        arg_count = len(args)
+        if arg_count <= 2:
+            return self._dict.get(*args)
+        if arg_count > 3 :
+            raise TypeError(f'get expected at most 3 arguments, got {arg_count}')
+        # else Do assign machinery
+        if args[0] in self._dict :
+          return self._dict[args[0]]
+        self._dict[args[0]] = args[2]
+        return args[1]
+        
 
 
 class BufferStore(Store):
