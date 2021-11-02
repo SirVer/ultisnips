@@ -24,7 +24,6 @@ def resolve_ambiguity(all_tokens, seen_ts):
             else:
                 Mirror(parent, seen_ts[token.number], token)
 
-
 def tokenize_snippet_text(
     snippet_instance,
     text,

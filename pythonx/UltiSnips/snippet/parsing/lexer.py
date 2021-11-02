@@ -116,11 +116,12 @@ class Token:
 
     """Represents a Token as parsed from a snippet definition."""
 
-    def __init__(self, gen, indent):
+    def __init__(self, gen, indent, tiebreaker):
         self.initial_text = ""
         self.start = gen.pos
         self._parse(gen, indent)
         self.end = gen.pos
+        self.tiebreaker = tiebreaker
 
     def _parse(self, stream, indent):
         """Parses the token from 'stream' with the current 'indent'."""
@@ -421,14 +422,16 @@ def tokenize(text, indent, offset, allowed_tokens):
     'allowed_tokens' are considered to be valid tokens."""
     stream = _TextIterator(text, offset)
     try:
+        tiebreaker = 0
         while True:
             done_something = False
             for token in allowed_tokens:
                 if token.starts_here(stream):
-                    yield token(stream, indent)
+                    yield token(stream, indent, tiebreaker)
+                    tiebreaker += 1
                     done_something = True
                     break
             if not done_something:
                 next(stream)
     except StopIteration:
-        yield EndOfTextToken(stream, indent)
+        yield EndOfTextToken(stream, indent, tiebreaker)

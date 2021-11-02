@@ -227,7 +227,7 @@ class PythonCode(NoneditableTextObject):
     """See module docstring."""
 
     def __init__(self, parent, token):
-
+        NoneditableTextObject.__init__(self, parent, token)
         # Find our containing snippet for snippet local data
         snippet = parent
         while snippet:
@@ -246,9 +246,8 @@ class PythonCode(NoneditableTextObject):
             "\n".join(snippet.globals.get("!p", [])).replace("\r\n", "\n"),
             token.code.replace("\\`", "`"),
         )
-        NoneditableTextObject.__init__(self, parent, token)
 
-    def _update(self, done, buf):
+    def _update(self, todo, buf):
         path = vim_helper.eval('expand("%")') or ""
         ct = self.current_text
         self._locals.update(

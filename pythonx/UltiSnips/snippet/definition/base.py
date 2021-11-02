@@ -485,6 +485,7 @@ class SnippetDefinition:
             context=self._context,
         )
         self.instantiate(snippet_instance, initial_text, indent)
+        snippet_instance._sort_children_rec()
         snippet_instance.replace_initial_text(vim_helper.buf)
         snippet_instance.update_textobjects(vim_helper.buf)
         return snippet_instance

@@ -15,6 +15,8 @@ class Choices(TabStop):
     """See module docstring."""
 
     def __init__(self, parent, token: ChoicesToken):
+        TabStop.__init__(self, parent, token)
+        
         self._number = token.number  # for TabStop property 'number'
         self._initial_text = token.initial_text
 
@@ -24,7 +26,6 @@ class Choices(TabStop):
         self._input_chars = list(self._initial_text)
         self._has_been_updated = False
 
-        TabStop.__init__(self, parent, token)
 
     def _get_choices_placeholder(self) -> str:
         # prefix choices with index number
@@ -37,7 +38,7 @@ class Choices(TabStop):
         text = "|".join(text_segs)
         return text
 
-    def _update(self, done, buf):
+    def _update(self, todo, buf):
         if self._done:
             return True
 
@@ -137,10 +138,15 @@ class Choices(TabStop):
             self.overwrite(buf, overwrite_text)
 
             # notify all tabstops those in the same line and after this to adjust their positions
-            pivot = Position(line, old_end_col)
-            diff_col = displayed_text_end_col - old_end_col
+            pivot, delta = Position._create_same_line_pivot_delta(
+                line,
+                old_end_col,
+                displayed_text_end_col
+            )
             self._parent._child_has_moved(
-                self._parent.children.index(self), pivot, Position(0, diff_col)
+                self._parent.children.index(self),
+                pivot,
+                delta
             )
 
             vim_helper.set_cursor_from_pos([buf_num, cursor_line, self._end.col + 1])

@@ -31,7 +31,7 @@ class VimBuffer:
     @property
     def line_till_cursor(self):  # pylint:disable=no-self-use
         """Returns the text before the cursor."""
-        _, col = self.cursor
+        col = self.cursor.col
         return vim.current.line[:col]
 
     @property

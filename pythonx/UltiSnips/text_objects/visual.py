@@ -23,6 +23,9 @@ class Visual(NoneditableTextObject, TextObjectTransformation):
     """See module docstring."""
 
     def __init__(self, parent, token):
+        NoneditableTextObject.__init__(self, parent, token)
+        TextObjectTransformation.__init__(self, token)
+        
         # Find our containing snippet for visual_content
         snippet = parent
         while snippet:
@@ -36,10 +39,8 @@ class Visual(NoneditableTextObject, TextObjectTransformation):
             self._text = token.alternative_text
             self._mode = "v"
 
-        NoneditableTextObject.__init__(self, parent, token)
-        TextObjectTransformation.__init__(self, token)
 
-    def _update(self, done, buf):
+    def _update(self, todo, buf):
         if self._mode == "v":  # Normal selection.
             text = self._text
         else:  # Block selection or line selection.

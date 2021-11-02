@@ -190,15 +190,11 @@ class VimBufferProxy(vim_helper.VimBuffer):
         line_before = line_number <= self._snippets_stack[0]._start.line
         column_before = column_number <= self._snippets_stack[0]._start.col
         if line_before and column_before:
-            direction = 1
-            if change_type == "D":
-                direction = -1
-
-            diff = Position(direction, 0)
-            if len(change) != 5:
-                diff = Position(0, direction * len(change_text))
-
-            self._snippets_stack[0]._move(Position(line_number, column_number), diff)
+            if len(change) == 5: # if len == 5, then it's a full line change (see _get_diff() and _get_line_diff() return values)
+                pivot, delta = Position._create_pivot_delta_for_line_change(change)
+            else :
+                pivot, delta = Position._create_pivot_delta_for_edit_cmd(change)
+            self._snippets_stack[0]._move(pivot, delta)
         else:
             if line_number > self._snippets_stack[0]._end.line:
                 return

@@ -35,9 +35,11 @@ class SnippetInstance(EditableTextObject):
         context,
     ):
         if start is None:
-            start = Position(0, 0)
+            start = Position.zero()
         if end is None:
-            end = Position(0, 0)
+            end = Position.zero()
+        EditableTextObject.__init__(self, parent, start, end, initial_text)
+        
         self.snippet = snippet
         self._cts = 0
 
@@ -47,7 +49,6 @@ class SnippetInstance(EditableTextObject):
         self.visual_content = visual_content
         self.current_placeholder = None
 
-        EditableTextObject.__init__(self, parent, start, end, initial_text)
 
     def replace_initial_text(self, buf):
         """Puts the initial text of all text elements into Vim."""
@@ -74,11 +75,10 @@ class SnippetInstance(EditableTextObject):
         This might also move the Cursor
 
         """
-        done = set()
-        not_done = set()
+        todo = []
 
         def _find_recursive(obj):
-            """Finds all text objects and puts them into 'not_done'."""
+            """Finds all text objects and puts them into 'todo'."""
             cursorInsideLowest = None
             if isinstance(obj, EditableTextObject):
                 if obj.start <= vim_helper.buf.cursor <= obj.end and not (
@@ -87,18 +87,15 @@ class SnippetInstance(EditableTextObject):
                     cursorInsideLowest = obj
                 for child in obj._children:
                     cursorInsideLowest = _find_recursive(child) or cursorInsideLowest
-            not_done.add(obj)
+            todo.append(obj)
             return cursorInsideLowest
 
         cursorInsideLowest = _find_recursive(self)
         if cursorInsideLowest is not None:
             vc = _VimCursor(cursorInsideLowest)
         counter = 10
-        while (done != not_done) and counter:
-            # Order matters for python locals!
-            for obj in sorted(not_done - done):
-                if obj._update(done, buf):
-                    done.add(obj)
+        while len(todo) and counter:
+            todo = [ obj for obj in todo if not obj._update(todo, buf) ] 
             counter -= 1
         if not counter:
             raise PebkacError(
@@ -176,7 +173,7 @@ class _VimCursor(NoneditableTextObject):
             parent,
             vim_helper.buf.cursor,
             vim_helper.buf.cursor,
-            tiebreaker=Position(-1, -1),
+            tiebreaker=-1,
         )
 
     def to_vim(self):

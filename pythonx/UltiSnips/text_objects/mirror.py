@@ -14,13 +14,13 @@ class Mirror(NoneditableTextObject):
         NoneditableTextObject.__init__(self, parent, token)
         self._ts = tabstop
 
-    def _update(self, done, buf):
+    def _update(self, todo, buf):
         if self._ts.is_killed:
             self.overwrite(buf, "")
             self._parent._del_child(self)  # pylint:disable=protected-access
             return True
 
-        if self._ts not in done:
+        if self._ts in todo:
             return False
 
         self.overwrite(buf, self._get_text())

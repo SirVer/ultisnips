@@ -49,7 +49,10 @@ class MovePosition_DelSecondLine(_MPBase, unittest.TestCase):
     # *a, was            ach nix
     # ach nix
     obj = (1, 0)
-    steps = (((0, 12), (0, -4), (1, 0)), ((0, 12), (-1, 0), (0, 12)))
+    steps = (
+        ((0, 12), (0, -4), (1, 0)),
+        ((0, 12), (-1, 0), (0, 12))
+    )
 
 
 class MovePosition_DelSecondLine1(_MPBase, unittest.TestCase):
