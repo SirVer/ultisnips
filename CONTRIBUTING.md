@@ -89,6 +89,13 @@ In this shell we can then trigger the test execution:
     ... now inside container
     # ./test_all.py
 
+### Enable the remote debug server
+
+The test suite provides `--remote-pdb*` options equivalent to the config variables to enable the debug server during the test suite.
+Note that some tests may fail because the post-mortem will catch an expected exceptions and that these options are mainly useful for single test case debugging. 
+
+Check `./test_all.py --help` for more informations.
+
 ## Documenting
 
 User documentation goes into [`doc/UltiSnips.txt`](https://github.com/SirVer/ultisnips/blob/00_contributing/doc/UltiSnips.txt).

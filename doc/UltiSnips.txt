@@ -1888,13 +1888,15 @@ You can install it this way: >
 
 It is a no-configuration replacement of the built-in pdb.
 
-To connect to the pdb server, simply run telnet: >
+To connect to the pdb server, simply use a telnet-like client.
+To have readline support (arrow keys working and history), you can use socat: >
 
-    telnet host:port
+    socat READLINE,history=$HOME/.ultisnips-dbg-history TCP:localhost:8080
 
+(Change `localhost` and `8080` to match your configuration)
 To leave the server and continue the execution, run Pdb's `quit` command
 
-Known issues : The arrow and tab keys (for completion) are not supported yet
+Known issue: Tab completion is not supported yet.
 
 =============================================================================
 7. FAQ                                                        *UltiSnips-FAQ*
@@ -1921,7 +1923,7 @@ A: Yes there is, try
   endfunction
 
 =============================================================================
-7. Helping Out                                            *UltiSnips-helping*
+8. Helping Out                                            *UltiSnips-helping*
 
 UltiSnips needs the help of the Vim community to keep improving. Please
 consider joining this effort by providing new features or bug reports.
