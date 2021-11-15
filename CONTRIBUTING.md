@@ -26,7 +26,7 @@ When enabled (by setting `let g:UltiSnipsDebugServerEnable=1`), whenever an exce
 and you will be able to connect to the debug server with netcat or telnet.
 By default, the server listens on 'localhost:8080' (it can be changed).
 
-See `:help UltiSnips-Debugging` for more informations
+See `:help UltiSnips-Advanced-Debugging` for more informations
 
 ## Testing
 
