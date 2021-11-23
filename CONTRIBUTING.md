@@ -19,6 +19,15 @@ There are several ways of doing this:
 
 Should there be agreement that your feature idea adds enough value to offset the maintenance burden, you can go ahead and implement it, including tests and documentation.
 
+## Debugging
+
+UltiSnips embeds some remote debugging facilities in the `UltiSnips.remote_pdb` module.
+When enabled (by setting `let g:UltiSnipsDebugServerEnable=1`), whenever an exception is raised, vim will pause
+and you will be able to connect to the debug server with netcat or telnet.
+By default, the server listens on 'localhost:8080' (it can be changed).
+
+See `:help UltiSnips-Advanced-Debugging` for more informations
+
 ## Testing
 
 UltiSnips has a rigorous test suite and every new feature or bug fix is expected to come with a new test.
@@ -79,6 +88,13 @@ In this shell we can then trigger the test execution:
     $ make shell_in_repro
     ... now inside container
     # ./test_all.py
+
+### Enable the remote debug server
+
+The test suite provides `--remote-pdb*` options equivalent to the config variables to enable the debug server during the test suite.
+Note that some tests may fail because the post-mortem will catch an expected exceptions and that these options are mainly useful for single test case debugging. 
+
+Check `./test_all.py --help` for more informations.
 
 ## Documenting
 

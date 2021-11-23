@@ -55,9 +55,10 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
 5. UltiSnips and Other Plugins                  |UltiSnips-other-plugins|
    5.1 Existing Integrations                    |UltiSnips-integrations|
    5.2 Extending UltiSnips                      |UltiSnips-extending|
-6. FAQ                                          |UltiSnips-FAQ|
-7. Helping Out                                  |UltiSnips-helping|
-8. Contributors                                 |UltiSnips-contributors|
+6. Debugging                                    |UltiSnips-Debugging|
+7. FAQ                                          |UltiSnips-FAQ|
+8. Helping Out                                  |UltiSnips-helping|
+9. Contributors                                 |UltiSnips-contributors|
 
 This plugin only works if 'compatible' is not set.
 {Vi does not have any of these features}
@@ -1811,7 +1812,18 @@ AddNewSnippetSource. Please contact us on github if you integrate UltiSnips
 with your plugin so it can be listed in the docs.
 
 =============================================================================
-6. FAQ                                                        *UltiSnips-FAQ*
+6. Debugging                                            *UltiSnips-Debugging*
+
+UltiSnips comes with a remote debugger disabled
+by default. When authoring a complex snippet
+with python code, you may want to be able to
+set breakpoints to inspect variables.
+It is also useful when debugging UltiSnips itself.
+
+See |UltiSnips-Advanced-Debugging| for more informations
+
+=============================================================================
+7. FAQ                                                        *UltiSnips-FAQ*
 
 Q: Do I have to call UltiSnips#ExpandSnippet() to check if a snippet is
    expandable? Is there instead an analog of neosnippet#expandable?
@@ -1835,7 +1847,7 @@ A: Yes there is, try
   endfunction
 
 =============================================================================
-7. Helping Out                                            *UltiSnips-helping*
+8. Helping Out                                            *UltiSnips-helping*
 
 UltiSnips needs the help of the Vim community to keep improving. Please
 consider joining this effort by providing new features or bug reports.
@@ -1849,7 +1861,7 @@ You can contribute by fixing or reporting bugs in our issue tracker:
 https://github.com/sirver/ultisnips/issues
 
 =============================================================================
-8. Contributors                                      *UltiSnips-contributors*
+9. Contributors                                      *UltiSnips-contributors*
 
 UltiSnips has been started and maintained from Jun 2009 - Dec 2015 by Holger
 Rapp (@SirVer, SirVer@gmx.de). Up to April 2018 it was maintained by Stanislav
