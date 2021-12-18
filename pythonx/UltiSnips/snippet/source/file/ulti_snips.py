@@ -61,7 +61,8 @@ def find_all_snippet_directories() -> List[str]:
             pth = normalize_file_path(
                 os.path.expanduser(os.path.join(rtp, snippet_dir))
             )
-            all_dirs.append(pth)
+            # Runtimepath entries may contain wildcards.
+            all_dirs.extend(glob.glob(pth))
     return all_dirs
 
 
