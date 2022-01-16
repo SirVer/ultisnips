@@ -16,6 +16,11 @@ from UltiSnips.text import escape
 from UltiSnips.text_objects import SnippetInstance
 from UltiSnips.text_objects.python_code import SnippetUtilForAction
 
+# We'll end up compiling the global snippets for every snippet so
+# caching compile() shoud pay off
+from functools import lru_cache
+compile = lru_cache(compile)
+
 __WHITESPACE_SPLIT = re.compile(r"\s")
 
 
@@ -104,10 +109,18 @@ class SnippetDefinition:
         self._matched = ""
         self._last_re = None
         self._globals = globals
+        self._compiled_globals = compile("\n".join([
+                    "import re, os, vim, string, random",
+                    "\n".join(self._globals.get("!p", [])).replace("\r\n", "\n")
+                ]), '<global-snippets>', 'exec')
         self._location = location
         self._context_code = context
+        if context:
+            self._compiled_context_code = compile('snip.context = ' + context, '<context-code>', 'exec')
         self._context = None
         self._actions = actions or {}
+        self._compiled_actions = {action: compile(source, '<action-code>', 'exec') for action,
+                source in self._actions.items()}
 
         # Make sure that we actually match our trigger in case we are
         # immediately expanded.
@@ -154,17 +167,9 @@ class SnippetDefinition:
             locals["visual_text"] = visual_content.text
             locals["last_placeholder"] = visual_content.placeholder
 
-        return self._eval_code("snip.context = " + self._context_code, locals).context
+        return self._eval_code("snip.context = " + self._context_code, locals, self._compiled_context_code).context
 
-    def _eval_code(self, code, additional_locals={}):
-        code = "\n".join(
-            [
-                "import re, os, vim, string, random",
-                "\n".join(self._globals.get("!p", [])).replace("\r\n", "\n"),
-                code,
-            ]
-        )
-
+    def _eval_code(self, code, additional_locals={}, compiled_code=None):
         current = vim.current
 
         locals = {
@@ -180,14 +185,23 @@ class SnippetDefinition:
         snip = SnippetUtilForAction(locals)
 
         try:
-            exec(code, {"snip": snip})
+            glob = {"snip": snip}
+            exec(self._compiled_globals, glob)
+            exec(compiled_code if compiled_code is not None else code, glob)
         except Exception as e:
+            code = "\n".join(
+                [
+                    "import re, os, vim, string, random",
+                    "\n".join(self._globals.get("!p", [])).replace("\r\n", "\n"),
+                    code,
+                ]
+            )
             self._make_debug_exception(e, code)
             raise
 
         return snip
 
-    def _execute_action(self, action, context, additional_locals={}):
+    def _execute_action(self, action, context, additional_locals={}, compiled_action=None):
         mark_to_use = "`"
         with vim_helper.save_mark(mark_to_use):
             vim_helper.set_mark_from_pos(mark_to_use, vim_helper.get_cursor_pos())
@@ -198,7 +212,7 @@ class SnippetDefinition:
 
             locals.update(additional_locals)
 
-            snip = self._eval_code(action, locals)
+            snip = self._eval_code(action, locals, compiled_action)
 
             if snip.cursor.is_set():
                 vim_helper.buf.cursor = Position(
@@ -394,7 +408,8 @@ class SnippetDefinition:
             locals = {"buffer": vim_helper.buf, "visual_content": visual_content}
 
             snip = self._execute_action(
-                self._actions["pre_expand"], self._context, locals
+                self._actions["pre_expand"], self._context, locals,
+                self._compiled_actions["pre_expand"]
             )
             self._context = snip.context
             return snip.cursor.is_set()
@@ -410,7 +425,8 @@ class SnippetDefinition:
             }
 
             snip = self._execute_action(
-                self._actions["post_expand"], snippets_stack[-1].context, locals
+                self._actions["post_expand"], snippets_stack[-1].context, locals,
+                self._compiled_actions["post_expand"]
             )
 
             snippets_stack[-1].context = snip.context
@@ -436,7 +452,8 @@ class SnippetDefinition:
             }
 
             snip = self._execute_action(
-                self._actions["post_jump"], current_snippet.context, locals
+                self._actions["post_jump"], current_snippet.context, locals,
+                self._compiled_actions["post_jump"]
             )
 
             current_snippet.context = snip.context
