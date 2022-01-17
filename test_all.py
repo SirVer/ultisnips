@@ -118,11 +118,11 @@ if __name__ == "__main__":
             "multiplexer and race conditions in writing to the file system.",
         )
         p.add_option(
-            "-x",
-            "--exitfirst",
-            dest="exitfirst",
+            "-f",
+            "--failfast",
+            dest="failfast",
             action="store_true",
-            help="exit instantly on first error or failed test.",
+            help="Stop the test run on the first error or failure.",
         )
         p.add_option(
             "--vim",
@@ -249,7 +249,7 @@ if __name__ == "__main__":
 
         v = 2 if options.verbose else 1
         successfull = (
-            unittest.TextTestRunner(verbosity=v, failfast=options.exitfirst)
+            unittest.TextTestRunner(verbosity=v, failfast=options.failfast)
             .run(suite)
             .wasSuccessful()
         )
