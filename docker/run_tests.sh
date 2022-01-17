@@ -15,6 +15,7 @@ tmux new -d -s vim
 
 $PYTHON_CMD ./test_all.py \
    -v \
+   --failfast \
    --plugins \
    --session vim \
    --vim $VIM \
