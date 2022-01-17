@@ -29,8 +29,7 @@ jobs:
         - { vim_version: "8.2", python_image: "3.9-buster", tag: "vim_82_py39" }
         - { vim_version: "git", python_image: "3.8-buster", tag: "vim_git_py39" }
 
-        - { vim_version: "8.1", python_image: "3.10-buster", tag: "vim_81_py310" }
-        - { vim_version: "8.2", python_image: "3.10-buster", tag: "vim_82_py310" }
+        # Vim 8.1 and 8.2 do not build with python 3.10, so only git is viable.
         - { vim_version: "git", python_image: "3.10-buster", tag: "vim_git_py310" }
 
     name: Build & Test using Docker
