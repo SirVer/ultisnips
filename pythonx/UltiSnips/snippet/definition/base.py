@@ -111,7 +111,7 @@ class SnippetDefinition:
         self._globals = globals
         self._compiled_globals = compile("\n".join([
                     "import re, os, vim, string, random",
-                    "\n".join(self._globals.get("!p", [])).replace("\r\n", "\n")
+                    "\n".join(globals.get("!p", [])).replace("\r\n", "\n")
                 ]), '<global-snippets>', 'exec')
         self._location = location
         self._context_code = context
