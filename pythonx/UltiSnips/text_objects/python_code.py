@@ -13,9 +13,10 @@ from UltiSnips.vim_state import _Placeholder
 import UltiSnips.snippet_manager
 
 # We'll end up compiling the global snippets for every snippet so
-# caching compile() shoud pay off
+# caching compile() should pay off
 from functools import lru_cache
-compile = lru_cache(compile)
+
+cached_compile = lru_cache(compile)
 
 
 class _Tabs:
@@ -247,13 +248,16 @@ class PythonCode(NoneditableTextObject):
         self._snip = SnippetUtil(token.indent, mode, text, context, snippet)
 
         self._codes = (
-            "import re, os, vim, string, random\n" +
-            "\n".join(snippet.globals.get("!p", [])).replace("\r\n", "\n"),
+            "import re, os, vim, string, random\n"
+            + "\n".join(snippet.globals.get("!p", [])).replace("\r\n", "\n"),
             token.code.replace("\\`", "`"),
         )
         self._compiled_codes = (
-            snippet._compiled_globals or compile(self._codes[0], '<exec-globals>', 'exec'),
-            compile(token.code.replace("\\`", "`"), '<exec-interpolation-code>', 'exec'),
+            snippet._compiled_globals
+            or cached_compile(self._codes[0], "<exec-globals>", "exec"),
+            cached_compile(
+                token.code.replace("\\`", "`"), "<exec-interpolation-code>", "exec"
+            ),
         )
         NoneditableTextObject.__init__(self, parent, token)
 

@@ -33,7 +33,7 @@ class SnippetInstance(EditableTextObject):
         last_re,
         globals,
         context,
-        _compiled_globals=None
+        _compiled_globals=None,
     ):
         if start is None:
             start = Position(0, 0)
