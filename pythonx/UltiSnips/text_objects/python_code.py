@@ -247,11 +247,14 @@ class PythonCode(NoneditableTextObject):
         self._snip = SnippetUtil(token.indent, mode, text, context, snippet)
 
         self._codes = (
-            "import re, os, vim, string, random",
+            "import re, os, vim, string, random\n" +
             "\n".join(snippet.globals.get("!p", [])).replace("\r\n", "\n"),
             token.code.replace("\\`", "`"),
         )
-        self._compiled_codes = tuple(compile(code, '<exec-code>', 'exec') for code in self._codes)
+        self._compiled_codes = (
+            snippet._compiled_globals or compile(self._codes[0], '<exec-globals>', 'exec'),
+            compile(token.code.replace("\\`", "`"), '<exec-interpolation-code>', 'exec'),
+        )
         NoneditableTextObject.__init__(self, parent, token)
 
     def _update(self, done, buf):

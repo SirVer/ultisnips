@@ -500,6 +500,7 @@ class SnippetDefinition:
             last_re=self._last_re,
             globals=self._globals,
             context=self._context,
+            _compiled_globals = self._compiled_globals,
         )
         self.instantiate(snippet_instance, initial_text, indent)
         snippet_instance.replace_initial_text(vim_helper.buf)
