@@ -10,6 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+     fail-fast: false
      matrix:
       include:
         - { vim_version: "7.4", python_image: "3.6-stretch", tag: "vim_74_py36" }
