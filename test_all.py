@@ -160,27 +160,27 @@ if __name__ == "__main__":
             "--remote-pdb",
             dest="pdb_enable",
             action="store_true",
-            help="If set, The remote pdb server will be run"
+            help="If set, The remote pdb server will be run",
         )
         p.add_option(
             "--remote-pdb-host",
             dest="pdb_host",
             type=str,
             default="localhost",
-            help="Remote pdb server host"
+            help="Remote pdb server host",
         )
         p.add_option(
             "--remote-pdb-port",
             dest="pdb_port",
             type=int,
             default=8080,
-            help="Remote pdb server port"
+            help="Remote pdb server port",
         )
         p.add_option(
             "--remote-pdb-non-blocking",
             dest="pdb_block",
             action="store_false",
-            help="If set, the server will not freeze vim on error"
+            help="If set, the server will not freeze vim on error",
         )
 
         o, args = p.parse_args()
