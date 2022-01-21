@@ -45,19 +45,21 @@ def wrap(func):
     def wrapper(self, *args, **kwds):
         try:
             return func(self, *args, **kwds)
-        except BdbQuit :
-            pass # A debugger stopped, but it's not really an error
+        except BdbQuit:
+            pass  # A debugger stopped, but it's not really an error
         except PebkacError as e:
-            if RemotePDB.is_enable() :
+            if RemotePDB.is_enable():
                 RemotePDB.pm()
             msg = "UltiSnips Error:\n\n"
             msg += str(e).strip()
-            if RemotePDB.is_enable() :
+            if RemotePDB.is_enable():
                 host, port = RemotePDB.get_host_port()
-                msg += '\nUltisnips\' post mortem debug server caught the error. Run `telnet {}:{}` to inspect it with pdb\n'.format(host, port)
+                msg += "\nUltisnips' post mortem debug server caught the error. Run `telnet {}:{}` to inspect it with pdb\n".format(
+                    host, port
+                )
             _report_exception(self, msg, e)
         except Exception as e:  # pylint: disable=bare-except
-            if RemotePDB.is_enable() :
+            if RemotePDB.is_enable():
                 RemotePDB.pm()
             msg = """An error occured. This is either a bug in UltiSnips or a bug in a
 snippet definition. If you think this is a bug, please report it to
@@ -68,10 +70,12 @@ https://github.com/SirVer/ultisnips/blob/master/CONTRIBUTING.md#reproducing-bugs
 Following is the full stack trace:
 """
             msg += traceback.format_exc()
-            if RemotePDB.is_enable() :
+            if RemotePDB.is_enable():
                 host, port = RemotePDB.get_host_port()
-                msg += '\nUltisnips\' post mortem debug server caught the error. Run `telnet {}:{}` to inspect it with pdb\n'.format(host, port)
-              
+                msg += "\nUltisnips' post mortem debug server caught the error. Run `telnet {}:{}` to inspect it with pdb\n".format(
+                    host, port
+                )
+
             _report_exception(self, msg, e)
 
     return wrapper

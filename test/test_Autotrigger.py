@@ -2,17 +2,7 @@ from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 
 
-def check_required_vim_version(test):
-    if test.vim_flavor == "neovim":
-        return None
-    if not test.vim.has_version(8, 0, 0):
-        return "Vim newer than 8.0 is required"
-    else:
-        return None
-
-
 class Autotrigger_CanMatchSimpleTrigger(_VimTest):
-    skip_if = check_required_vim_version
     files = {
         "us/all.snippets": r"""
         snippet a "desc" A
@@ -25,7 +15,6 @@ class Autotrigger_CanMatchSimpleTrigger(_VimTest):
 
 
 class Autotrigger_CanMatchContext(_VimTest):
-    skip_if = check_required_vim_version
     files = {
         "us/all.snippets": r"""
         snippet a "desc" "snip.line == 2" Ae
@@ -38,7 +27,6 @@ class Autotrigger_CanMatchContext(_VimTest):
 
 
 class Autotrigger_CanExpandOnTriggerWithLengthMoreThanOne(_VimTest):
-    skip_if = check_required_vim_version
     files = {
         "us/all.snippets": r"""
         snippet abc "desc" A
@@ -51,7 +39,6 @@ class Autotrigger_CanExpandOnTriggerWithLengthMoreThanOne(_VimTest):
 
 
 class Autotrigger_WillProduceNoExceptionWithVimLowerThan214(_VimTest):
-    skip_if = check_required_vim_version
 
     files = {
         "us/all.snippets": r"""
@@ -65,7 +52,6 @@ class Autotrigger_WillProduceNoExceptionWithVimLowerThan214(_VimTest):
 
 
 class Autotrigger_CanMatchPreviouslySelectedPlaceholder(_VimTest):
-    skip_if = check_required_vim_version
 
     files = {
         "us/all.snippets": r"""
