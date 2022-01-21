@@ -16,7 +16,10 @@ import UltiSnips.snippet_manager
 # caching compile() should pay off
 from functools import lru_cache
 
-cached_compile = lru_cache(compile)
+
+@lru_cache(maxsize=None)
+def cached_compile(*args):
+    return compile(*args)
 
 
 class _Tabs:

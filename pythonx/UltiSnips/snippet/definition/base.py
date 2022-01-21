@@ -14,13 +14,8 @@ from UltiSnips.indent_util import IndentUtil
 from UltiSnips.position import Position
 from UltiSnips.text import escape
 from UltiSnips.text_objects import SnippetInstance
-from UltiSnips.text_objects.python_code import SnippetUtilForAction
+from UltiSnips.text_objects.python_code import SnippetUtilForAction, cached_compile
 
-# We'll end up compiling the global snippets for every snippet so
-# caching compile() should pay off
-from functools import lru_cache
-
-cached_compile = lru_cache(compile)
 
 __WHITESPACE_SPLIT = re.compile(r"\s")
 
