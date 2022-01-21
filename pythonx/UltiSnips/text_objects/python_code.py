@@ -12,6 +12,15 @@ from UltiSnips.text_objects.base import NoneditableTextObject
 from UltiSnips.vim_state import _Placeholder
 import UltiSnips.snippet_manager
 
+# We'll end up compiling the global snippets for every snippet so
+# caching compile() should pay off
+from functools import lru_cache
+
+
+@lru_cache(maxsize=None)
+def cached_compile(*args):
+    return compile(*args)
+
 
 class _Tabs:
 
@@ -242,9 +251,16 @@ class PythonCode(NoneditableTextObject):
         self._snip = SnippetUtil(token.indent, mode, text, context, snippet)
 
         self._codes = (
-            "import re, os, vim, string, random",
-            "\n".join(snippet.globals.get("!p", [])).replace("\r\n", "\n"),
+            "import re, os, vim, string, random\n"
+            + "\n".join(snippet.globals.get("!p", [])).replace("\r\n", "\n"),
             token.code.replace("\\`", "`"),
+        )
+        self._compiled_codes = (
+            snippet._compiled_globals
+            or cached_compile(self._codes[0], "<exec-globals>", "exec"),
+            cached_compile(
+                token.code.replace("\\`", "`"), "<exec-interpolation-code>", "exec"
+            ),
         )
         NoneditableTextObject.__init__(self, parent, token)
 
@@ -263,9 +279,9 @@ class PythonCode(NoneditableTextObject):
         )
         self._snip._reset(ct)  # pylint:disable=protected-access
 
-        for code in self._codes:
+        for code, compiled_code in zip(self._codes, self._compiled_codes):
             try:
-                exec(code, self._locals)  # pylint:disable=exec-used
+                exec(compiled_code, self._locals)  # pylint:disable=exec-used
             except Exception as exception:
                 exception.snippet_code = code
                 raise
