@@ -10,9 +10,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+     fail-fast: false
      matrix:
       include:
-        - { vim_version: "7.4", python_image: "3.6-stretch", tag: "vim_74_py36" }
+        # 80 does not build with py37 and py38. The build errors out with
+        # "Require native threads".
         - { vim_version: "8.0", python_image: "3.6-stretch", tag: "vim_80_py36" }
         - { vim_version: "8.1", python_image: "3.6-stretch", tag: "vim_81_py36" }
         - { vim_version: "git", python_image: "3.6-stretch", tag: "vim_git_py36" }

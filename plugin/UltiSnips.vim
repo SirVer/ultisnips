@@ -3,9 +3,9 @@ if exists('did_plugin_ultisnips') || &cp
 endif
 let did_plugin_ultisnips=1
 
-if version < 704
+if version < 800
    echohl WarningMsg
-   echom  "UltiSnips requires Vim >= 7.4"
+   echom  "UltiSnips requires Vim >= 8.0"
    echohl None
    finish
 endif

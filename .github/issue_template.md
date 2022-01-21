@@ -33,7 +33,7 @@ and set of keystrokes that reproduces your problem.
 - **Vim Version**: <!-- first two lines of `:version` output -->
 - **UltiSnips Version**: <!-- e.g. 3.1. If you're using version from git 
                               run: `git rev-parse origin/master` -->
-- **Python inside Vim**: <!-- e.g. 2.7.14 / 3.6.5. If unsure run inside vim:
+- **Python inside Vim**: <!-- e.g. 3.9.1 / 3.6.5. If unsure run inside vim:
                               `:py import sys; print(sys.version)` and
                               `:py3 import sys; print(sys.version)' -->
 - **Docker repo/vimrc**: <!-- link to the branch containing the repro case, 

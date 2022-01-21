@@ -5,8 +5,8 @@ from test.constant import *
 def check_required_vim_version(test):
     if test.vim_flavor == "neovim":
         return None
-    if not test.vim.has_version(7, 4, 214):
-        return "Vim newer than 7.4.214 is required"
+    if not test.vim.has_version(8, 0, 0):
+        return "Vim newer than 8.0 is required"
     else:
         return None
 
@@ -51,11 +51,7 @@ class Autotrigger_CanExpandOnTriggerWithLengthMoreThanOne(_VimTest):
 
 
 class Autotrigger_WillProduceNoExceptionWithVimLowerThan214(_VimTest):
-    skip_if = (
-        lambda self: "Vim older than 7.4.214 is required"
-        if self.vim.has_version(7, 4, 214)
-        else None
-    )
+    skip_if = check_required_vim_version
 
     files = {
         "us/all.snippets": r"""

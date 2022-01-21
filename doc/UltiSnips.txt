@@ -1,4 +1,4 @@
-*UltiSnips.txt*    For Vim version 7.4 or later.
+*UltiSnips.txt*    For Vim version 8.0 or later.
 
         The Ultimate Plugin for Snippets in Vim~
 
@@ -93,7 +93,7 @@ http://vimcasts.org/episodes/ultisnips-visual-placeholder/
 1.1 Requirements                                     *UltiSnips-requirements*
 ----------------
 
-This plugin works with Vim version 7.4 or later with Python 3 support enabled.
+This plugin works with Vim version 8.0 or later with Python 3 support enabled.
 It only works if the 'compatible' setting is not set.
 
 The Python 3.x interface must be available. In other words, Vim
@@ -1058,9 +1058,9 @@ wow<tab>Hello World ->
 Hello World                                                     HELLO WORLD
 
 Python global functions can be stored in a python module and then imported.
-This makes global functions easily accessible to all snippet files. Since Vim
-7.4 you can just drop python files into ~/.vim/pythonx and import them
-directly inside your snippets. For example to use
+This makes global functions easily accessible to all snippet files. You can
+just drop python files into ~/.vim/pythonx and import them directly inside
+your snippets. For example to use
 ~/.vim/pythonx/my_snippets_helpers.py  >
 
    global !p
@@ -1721,8 +1721,6 @@ endsnippet
 
 4.11 Autotrigger                                       *UltiSnips-autotrigger*
 ----------------
-
-Note: vim must be newer than 7.4.214 to support this feature.
 
 Many language constructs can occur only at specific places, so it's
 possible to use snippets without manually triggering them.

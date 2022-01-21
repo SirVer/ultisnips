@@ -5,8 +5,8 @@ from test.constant import *
 def check_required_vim_version(test):
     if test.vim_flavor == "neovim":
         return None
-    if not test.vim.has_version(7, 4, 1):
-        return "Vim newer than 7.4.1 is required"
+    if not test.vim.has_version(8, 0, 0):
+        return "Vim newer than 8.0 is required"
     else:
         return None
 
