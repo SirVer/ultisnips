@@ -38,19 +38,6 @@ class Autotrigger_CanExpandOnTriggerWithLengthMoreThanOne(_VimTest):
     wanted = "autotriggered"
 
 
-class Autotrigger_WillProduceNoExceptionWithVimLowerThan214(_VimTest):
-
-    files = {
-        "us/all.snippets": r"""
-        snippet abc "desc" A
-        autotriggered
-        endsnippet
-        """
-    }
-    keys = "abc"
-    wanted = "abc"
-
-
 class Autotrigger_CanMatchPreviouslySelectedPlaceholder(_VimTest):
 
     files = {
