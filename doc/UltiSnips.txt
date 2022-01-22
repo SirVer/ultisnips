@@ -1432,7 +1432,7 @@ In that case snippet should be defined using this syntax: >
 
     snippet trigger_word "description" "expression" options
 
-The context can be defined using a special header: >
+The context can also be defined using a special header: >
 
     context "python_expression"
     snippet trigger_word "description" options
@@ -1464,7 +1464,8 @@ Global variable `snip` will be available with following properties:
         - 'start' - placeholder start on the moment of selection;
         - 'end' - placeholder end on the moment of selection;
 
-
+For regular expression triggered snippets the variable `match` will contain
+the return value of the match of the regular expression. See http://docs.python.org/library/re.html#match-objects.
 
 ------------------- SNIP -------------------
 snippet r "return" "re.match('^\s+if err ', snip.buffer[snip.line-1])" be
