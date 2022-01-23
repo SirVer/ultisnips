@@ -13,7 +13,13 @@ set -x
 
 tmux new -d -s vim
 
-$PYTHON_CMD ./test_all.py \
+# Tests on CI sometimes hang, but we do not know which test it is for sure,
+# since all we see are lines of the prior passed tests. In an attempt to have
+# every character appear unbuffered we hope to uncover where the test actually
+# hangs.
+# See https://stackoverflow.com/questions/3465619/how-to-make-output-of-any-shell-command-unbuffered/25548995
+stdbuf -i0 -o0 -e0 \
+   $PYTHON_CMD ./test_all.py \
    -v \
    --failfast \
    --plugins \
