@@ -3,8 +3,6 @@ from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 from test.util import running_on_windows
 
-# Test for Bug #774917
-
 
 def _snip_quote(qt):
     return (
