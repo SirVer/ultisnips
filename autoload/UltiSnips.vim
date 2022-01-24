@@ -17,6 +17,14 @@ function! s:compensate_for_pum() abort
     endif
 endfunction
 
+function! s:is_floating(winId) abort
+    if has('nvim')
+        return get(nvim_win_get_config(a:winId), 'relative', '') !=# ''
+    endif
+
+    return 0
+endfunction
+
 function! UltiSnips#Edit(bang, ...) abort
     if a:0 == 1 && a:1 != ''
         let type = a:1
@@ -153,8 +161,10 @@ endf
 function! UltiSnips#LeavingBuffer() abort
     let from_preview = getwinvar(winnr('#'), '&previewwindow')
     let to_preview = getwinvar(winnr(), '&previewwindow')
+    let from_floating = s:is_floating(win_getid('#'))
+    let to_floating = s:is_floating(win_getid())
 
-    if !(from_preview || to_preview)
+    if !(from_preview || to_preview || from_floating || to_floating)
         py3 UltiSnips_Manager._leaving_buffer()
     endif
 endf
