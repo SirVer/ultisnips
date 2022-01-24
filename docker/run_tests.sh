@@ -26,4 +26,5 @@ stdbuf -i0 -o0 -e0 \
    --session vim \
    --vim $VIM \
    --interface tmux \
-   --expected-python-version $PYTHON_VERSION | ts '[%Y-%m-%d %H:%M:%S]'
+   --expected-python-version $PYTHON_VERSION \
+   2>&1 | ts '[%Y-%m-%d %H:%M:%S]'
