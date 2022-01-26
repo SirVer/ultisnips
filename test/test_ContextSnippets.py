@@ -230,3 +230,18 @@ class ContextSnippets_Header_DoNotExpandOnFalse(_VimTest):
     }
     keys = "a" + EX
     wanted = keys
+
+
+class ContextSnippets_ContextHasAccessToReMatch(_VimTest):
+    files = {
+        "us/all.snippets": r"""
+        context "match.group(1) != 'no'"
+        snippet "(\w*) xxx" "desc" r
+        HERE
+        endsnippet
+        """
+    }
+    negative = "no xxx"
+    positive = "yes xxx"
+    keys = negative + EX + positive + EX
+    wanted = negative + EX + "HERE"

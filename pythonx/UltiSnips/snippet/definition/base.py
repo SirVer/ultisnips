@@ -193,7 +193,7 @@ class SnippetDefinition:
         snip = SnippetUtilForAction(locals)
 
         try:
-            glob = {"snip": snip}
+            glob = {"snip": snip, "match": self._last_re}
             exec(self._compiled_globals, glob)
             exec(compiled_code or code, glob)
         except Exception as e:
