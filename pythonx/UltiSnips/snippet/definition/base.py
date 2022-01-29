@@ -156,7 +156,7 @@ class SnippetDefinition:
             return match
         return False
 
-    def _context_match(self, visual_content):
+    def _context_match(self, visual_content, before):
         # skip on empty buffer
         if len(vim.current.buffer) == 1 and vim.current.buffer[0] == "":
             return
@@ -166,6 +166,7 @@ class SnippetDefinition:
             "visual_mode": "",
             "visual_text": "",
             "last_placeholder": None,
+            "before": before,
         }
 
         if visual_content:
@@ -354,7 +355,7 @@ class SnippetDefinition:
 
         self._context = None
         if match and self._context_code:
-            self._context = self._context_match(visual_content)
+            self._context = self._context_match(visual_content, before)
             if not self.context:
                 match = False
 
