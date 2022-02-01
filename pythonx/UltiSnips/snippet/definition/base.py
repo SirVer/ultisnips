@@ -180,7 +180,7 @@ class SnippetDefinition:
         snip = SnippetUtilForAction(locals)
 
         try:
-            exec(code, {"snip": snip})
+            exec(code, {"snip": snip, "match": self._last_re})
         except Exception as e:
             self._make_debug_exception(e, code)
             raise
