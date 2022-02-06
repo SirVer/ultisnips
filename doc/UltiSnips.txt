@@ -684,7 +684,7 @@ The options currently supported are: >
        preceded and followed by non-word characters. Word characters are
        defined by the 'iskeyword' setting. Use this option, for example, to
        permit expansion where the tab trigger follows punctuation without
-       expanding suffixes of larger words.
+       expanding suffixes of larger words. This option overrides 'i'.
 
    r   Regular expression - With this option, the tab trigger is expected to
        be a python regular expression. The snippet is expanded if the recently
@@ -692,7 +692,10 @@ The options currently supported are: >
        expression MUST be quoted (or surrounded with another character) like a
        multi-word tab trigger (see above) whether it has spaces or not. A
        resulting match is passed to any python code blocks in the snippet
-       definition as the local variable "match".
+       definition as the local variable "match". Regular expression snippets
+       can be triggered in-word by default. To avoid this you can start your
+       regex pattern with '\b', although this will not respect your
+       'iskeyword' setting.
 
    t   Do not expand tabs - If a snippet definition includes leading tab
        characters, by default UltiSnips expands the tab characters honoring
