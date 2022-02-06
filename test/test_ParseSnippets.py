@@ -236,6 +236,31 @@ class ParseSnippets_MultiWord_UnmatchedContainer(_VimTest):
     expected_error = "Invalid multiword trigger: '!inv snip/' in \S+:2"
 
 
+class ParseSnippets_Global_Python_After(_VimTest):
+    files = {
+        "us/all.snippets": r"""
+        snippet ab
+        x `!p snip.rv = tex("bob")` y
+        endsnippet
+
+        context "always()"
+        snippet ac
+        x `!p snip.rv = tex("jon")` y
+        endsnippet
+
+        global !p
+        def tex(ins):
+            return "a " + ins + " b"
+
+        def always():
+            return True
+        endglobal
+        """
+    }
+    keys = "ab" + EX + "\nac" + EX
+    wanted = "x a bob b y\nx a jon b y"
+
+
 class ParseSnippets_Global_Python(_VimTest):
     files = {
         "us/all.snippets": r"""
