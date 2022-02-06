@@ -82,3 +82,6 @@ class SnippetFileSource(SnippetSource):
                 self._snippets[ft].add_snippet(snippet)
             else:
                 assert False, "Unhandled %s: %r" % (event, data)
+        # precompile global snippets code for all snipepts we just sourced
+        for snippet in self._snippets[ft]:
+            snippet._precompile_globals()

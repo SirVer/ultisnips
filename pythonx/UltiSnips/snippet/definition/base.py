@@ -105,16 +105,7 @@ class SnippetDefinition:
         self._matched = ""
         self._last_re = None
         self._globals = globals
-        self._compiled_globals = cached_compile(
-            "\n".join(
-                [
-                    "import re, os, vim, string, random",
-                    "\n".join(globals.get("!p", [])).replace("\r\n", "\n"),
-                ]
-            ),
-            "<global-snippets>",
-            "exec",
-        )
+        self._compiled_globals = None
         self._location = location
         self._context_code = context
         if context:
@@ -193,6 +184,8 @@ class SnippetDefinition:
         snip = SnippetUtilForAction(locals)
 
         try:
+            if self._compiled_globals is None:
+                self._precompile_globals()
             glob = {"snip": snip, "match": self._last_re}
             exec(self._compiled_globals, glob)
             exec(compiled_code or code, glob)
@@ -273,6 +266,18 @@ class SnippetDefinition:
         )
 
         e.snippet_code = code
+
+    def _precompile_globals(self):
+        self._compiled_globals = cached_compile(
+            "\n".join(
+                [
+                    "import re, os, vim, string, random",
+                    "\n".join(self._globals.get("!p", [])).replace("\r\n", "\n"),
+                ]
+            ),
+            "<global-snippets>",
+            "exec",
+        )
 
     def has_option(self, opt):
         """Check if the named option is set."""
@@ -506,6 +511,8 @@ class SnippetDefinition:
             initial_text.append(result_line)
         initial_text = "\n".join(initial_text)
 
+        if self._compiled_globals is None:
+            self._precompile_globals()
         snippet_instance = SnippetInstance(
             self,
             parent,
