@@ -1784,6 +1784,10 @@ offers out of the box completion dialogue support for it too.
 deoplete - The successor of neocomplete is also supported. The completion 
 source is called 'ultisnips'.
 
+vim-easycomplete - Vim-EasyComplete needs ultisnips and vim-snippets for 
+snippets support. This two plugin is compatible with EasyComplete out of
+the box. More information: <https://github.com/jayli/vim-easycomplete>
+
 unite - UltiSnips has a source for unite. As an example of how you can use
 it add the following function and mappings to your vimrc: >
 
