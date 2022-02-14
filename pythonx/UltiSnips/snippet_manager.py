@@ -23,6 +23,9 @@ from UltiSnips.snippet.source import (
     find_all_snippet_files,
     find_snippet_files,
 )
+from UltiSnips.snippet.source.file.common import (
+    normalize_file_path,
+)
 from UltiSnips.text import escape
 from UltiSnips.vim_state import VimState, VisualContentPreserver
 from UltiSnips.buffer_proxy import use_proxy_buffer, suspend_proxy_edits
@@ -97,7 +100,9 @@ def _get_potential_snippet_filenames_to_edit(
         potentials.update(ft_snippets_files)
         if not ft_snippets_files:
             # If there is no snippet file yet, we just default to `ft.snippets`.
-            potentials.add(os.path.join(snippet_dir, ft + ".snippets"))
+            fpath = os.path.join(snippet_dir, ft + ".snippets")
+            fpath = normalize_file_path(fpath)
+            potentials.add(fpath)
     return potentials
 
 
