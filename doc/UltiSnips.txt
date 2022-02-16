@@ -1466,6 +1466,12 @@ Global variable `snip` will be available with following properties:
         - 'current_text' - text in the placeholder on the moment of selection;
         - 'start' - placeholder start on the moment of selection;
         - 'end' - placeholder end on the moment of selection;
+    'snip.before' - contains the text in the current line up to and including
+        the matched snippet. Since 'snip.column' counts bytes, not characters,
+        this is **not** equivalent to 'snip.buffer[snip.line][:snip.column+1]'.
+        This property is only available in the scope of contexts but not in
+        that of actions.
+
 
 For regular expression triggered snippets the variable `match` will contain
 the return value of the match of the regular expression. See http://docs.python.org/library/re.html#match-objects.
@@ -1565,7 +1571,7 @@ There are three types of actions:
 
 Specified code will be evaluated at stages defined above and same global
 variables and modules will be available that are stated in
-the |UltiSnips-custom-context-snippets| section.
+the |UltiSnips-custom-context-snippets| section (except 'snip.before').
 
                                                 *UltiSnips-buffer-proxy*
 
