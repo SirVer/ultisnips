@@ -48,6 +48,20 @@ class ContextSnippets_DoNotExpandOnFalse(_VimTest):
     wanted = keys
 
 
+class ContextSnippets_Before(_VimTest):
+    files = {
+        "us/all.snippets": r"""
+        context "len(snip.before) >= 5 and snip.before"
+        snippet dup "desc" i
+        [`!p snip.rv = snip.context[:-3]`]
+        endsnippet
+        """
+    }
+    word = 'Süßölgefäß'
+    keys = "adup" + EX + '\n' + word + 'dup' + EX
+    wanted = "adup" + EX + '\n' + word +'[' + word + ']'
+
+
 class ContextSnippets_UseContext(_VimTest):
     files = {
         "us/all.snippets": r"""
