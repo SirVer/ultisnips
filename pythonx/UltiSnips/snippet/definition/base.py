@@ -107,6 +107,13 @@ class SnippetDefinition:
         self._globals = globals
         self._compiled_globals = None
         self._location = location
+
+        # Make sure that we actually match our trigger in case we are
+        # immediately expanded. At this point we don't take into
+        # account a any context code
+        self._context_code = None
+        # self.matches(self._trigger)
+
         self._context_code = context
         if context:
             self._compiled_context_code = cached_compile(
@@ -118,10 +125,6 @@ class SnippetDefinition:
             action: cached_compile(source, "<action-code>", "exec")
             for action, source in self._actions.items()
         }
-
-        # Make sure that we actually match our trigger in case we are
-        # immediately expanded.
-        self.matches(self._trigger)
 
     def __repr__(self):
         return "_SnippetDefinition(%r,%s,%s,%s)" % (
