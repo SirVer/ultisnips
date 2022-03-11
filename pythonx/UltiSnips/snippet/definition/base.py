@@ -184,11 +184,10 @@ class SnippetDefinition:
         snip = SnippetUtilForAction(locals)
 
         try:
-            if self._compiled_globals is None:
+	    if self._compiled_globals is None:
                 self._precompile_globals()
             glob = {"snip": snip, "match": self._last_re}
             exec(self._compiled_globals, glob)
-            exec(compiled_code or code, glob)
         except Exception as e:
             self._make_debug_exception(e, code)
             raise
