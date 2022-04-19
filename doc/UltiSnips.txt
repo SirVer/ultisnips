@@ -758,10 +758,12 @@ but you can also just run >
 Add this snippet to 'all.snippets' and save the file.
 
 ------------------- SNIP -------------------
-snippet bye "My mail signature"
-Good bye, Sir. Hope to talk to you soon.
-- Arthur, King of Britain
-endsnippet
+>
+    snippet bye "My mail signature"
+    Good bye, Sir. Hope to talk to you soon.
+    - Arthur, King of Britain
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 UltiSnips detects when you write changes to a snippets file and automatically
@@ -803,9 +805,11 @@ will take selected text, replace every instance of "should" within it with
 "is", and wrap the result in tags.
 
 ------------------- SNIP -------------------
-snippet t
-<tag>${VISUAL:inside text/should/is/g}</tag>
-endsnippet
+>
+    snippet t
+    <tag>${VISUAL:inside text/should/is/g}</tag>
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 Start with this line of text: >
@@ -840,9 +844,11 @@ Here are some examples. This snippet uses a shell command to insert the
 current date.
 
 ------------------- SNIP -------------------
-snippet today
-Today is the `date +%d.%m.%y`.
-endsnippet
+>
+    snippet today
+    Today is the `date +%d.%m.%y`.
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 today<tab> ->
@@ -852,10 +858,12 @@ Today is the 15.07.09.
 This example inserts the current date using perl.
 
 ------------------- SNIP -------------------
-snippet today
-Today is `#!/usr/bin/perl
-@a = localtime(); print $a[3] . '.' . $a[4] . '.' . ($a[5]+1900);`.
-endsnippet
+>
+    snippet today
+    Today is `#!/usr/bin/perl
+    @a = localtime(); print $a[3] . '.' . $a[4] . '.' . ($a[5]+1900);`.
+    endsnippet
+<
 ------------------- SNAP -------------------
 today<tab> ->
 Today is 15.6.2009.
@@ -869,9 +877,11 @@ it as a Vim script, start the code with '!v'. Here is an example that counts
 the indent of the current line:
 
 ------------------- SNIP -------------------
-snippet indent
-Indent is: `!v indent(".")`.
-endsnippet
+>
+    snippet indent
+    Indent is: `!v indent(".")`.
+    endsnippet
+<
 ------------------- SNAP -------------------
     (note the 4 spaces in front): indent<tab> ->
     (note the 4 spaces in front): Indent is: 4.
@@ -978,9 +988,11 @@ snippet mirrors the first tabstop value on the same line but right aligned and
 in uppercase.
 
 ------------------- SNIP -------------------
-snippet wow
-${1:Text}`!p snip.rv = (75-2*len(t[1]))*' '+t[1].upper()`
-endsnippet
+>
+    snippet wow
+    ${1:Text}`!p snip.rv = (75-2*len(t[1]))*' '+t[1].upper()`
+    endsnippet
+<
 ------------------- SNAP -------------------
 wow<tab>Hello World ->
 Hello World                                                     HELLO WORLD
@@ -991,12 +1003,14 @@ expansion of a snippet can depend on the tab trigger used to define the
 snippet, and that tab trigger itself can vary.
 
 ------------------- SNIP -------------------
-snippet "be(gin)?( (\S+))?" "begin{} / end{}" br
-\begin{${1:`!p
-snip.rv = match.group(3) if match.group(2) is not None else "something"`}}
-    ${2:${VISUAL}}
-\end{$1}$0
-endsnippet
+>
+    snippet "be(gin)?( (\S+))?" "begin{} / end{}" br
+    \begin{${1:`!p
+    snip.rv = match.group(3) if match.group(2) is not None else "something"`}}
+        ${2:${VISUAL}}
+    \end{$1}$0
+    endsnippet
+<
 ------------------- SNAP -------------------
 be<tab>center<c-j> ->
 \begin{center}
@@ -1021,17 +1035,21 @@ account the text preceding a "trigger". This way, you can use it to create
 postfix snippets, which are popular in some IDEs.
 
 ------------------- SNIP -------------------
-snippet "(\w+).par" "Parenthesis (postfix)" r
-(`!p snip.rv = match.group(1)`$1)$0
-endsnippet
+>
+    snippet "(\w+).par" "Parenthesis (postfix)" r
+    (`!p snip.rv = match.group(1)`$1)$0
+    endsnippet
+<
 ------------------- SNAP -------------------
 something.par<tab> ->
 (something)
 
 ------------------- SNIP -------------------
-snippet "([^\s].*)\.return" "Return (postfix)" r
-return `!p snip.rv = match.group(1)`$0
-endsnippet
+>
+    snippet "([^\s].*)\.return" "Return (postfix)" r
+    return `!p snip.rv = match.group(1)`$0
+    endsnippet
+<
 ------------------- SNAP -------------------
 value.return<tab> ->
 return value
@@ -1048,14 +1066,16 @@ following snippet produces the same output as the last example . However, with
 this syntax the 'upper_right' snippet can be reused by other snippets.
 
 ------------------- SNIP -------------------
-global !p
-def upper_right(inp):
-    return (75 - 2 * len(inp))*' ' + inp.upper()
-endglobal
+>
+    global !p
+    def upper_right(inp):
+        return (75 - 2 * len(inp))*' ' + inp.upper()
+    endglobal
 
-snippet wow
-${1:Text}`!p snip.rv = upper_right(t[1])`
-endsnippet
+    snippet wow
+    ${1:Text}`!p snip.rv = upper_right(t[1])`
+    endsnippet
+<
 ------------------- SNAP -------------------
 wow<tab>Hello World ->
 Hello World                                                     HELLO WORLD
@@ -1090,12 +1110,14 @@ snippet no matter how many tabstops are defined. If there is no '$0' defined,
 Here is a simple example.
 
 ------------------- SNIP -------------------
-snippet letter
-Dear $1,
-$0
-Yours sincerely,
-$2
-endsnippet
+>
+    snippet letter
+    Dear $1,
+    $0
+    Yours sincerely,
+    $2
+    endsnippet
+<
 ------------------- SNAP -------------------
 letter<tab>Ben<c-j>Paul<c-j>Thanks for suggesting UltiSnips!->
 Dear Ben,
@@ -1117,11 +1139,13 @@ The following example illustrates a snippet for the shell 'case' statement.
 The tabstops use default values to remind the user of what value is expected.
 
 ------------------- SNIP -------------------
-snippet case
-case ${1:word} in
-    ${2:pattern} ) $0;;
-esac
-endsnippet
+>
+    snippet case
+    case ${1:word} in
+        ${2:pattern} ) $0;;
+    esac
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 case<tab>$option<c-j>-v<c-j>verbose=true
@@ -1135,11 +1159,13 @@ include the nested tabstop as part of the default text. Consider the following
 example illustrating an HTML anchor snippet.
 
 ------------------- SNIP -------------------
-snippet a
-<a href="${1:http://www.${2:example.com}}"
-    $0
-</a>
-endsnippet
+>
+    snippet a
+    <a href="${1:http://www.${2:example.com}}"
+        $0
+    </a>
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 When this snippet is expanded, the first tabstop has a default value of
@@ -1169,11 +1195,13 @@ intentionally as a handy way for providing optional tabstop values to the
 user. Here is an example to illustrate.
 
 ------------------- SNIP -------------------
-snippet a
-<a href="$1"${2: class="${3:link}"}>
-    $0
-</a>
-endsnippet
+>
+    snippet a
+    <a href="$1"${2: class="${3:link}"}>
+        $0
+    </a>
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 Here, '$1' marks the first tabstop. It is assumed you always want to add a
@@ -1197,15 +1225,17 @@ a<tab>http://www.google.com<c-j><BS><c-j>Google ->
 </a>
 
 Another special type of tabstop is choice tabstop. It let's you to choose
-from a predefined list of items. The syntax of a choice tabstop is
-'${1|item1,item2,item3,...|}'. Here is an example to illustrate this
-feature.
+from a predefined list of items. The syntax of a choice tabstop is >
+    ${1|item1,item2,item3,...|}
+Here is an example to illustrate this feature.
 
 ------------------- SNIP -------------------
-snippet q
-Your age: ${1|<18,18~60,>60|}
-Your height: ${2|<120cm,120cm~180cm,>180cm|}
-endsnippet
+>
+    snippet q
+    Your age: ${1|<18,18~60,>60|}
+    Your height: ${2|<120cm,120cm~180cm,>180cm|}
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 q<tab>2<c-j>2
@@ -1234,11 +1264,13 @@ labels, XML and HTML tags, and C code #ifndef blocks. Here are some snippet
 examples.
 
 ------------------- SNIP -------------------
-snippet env
-\begin{${1:enumerate}}
-    $0
-\end{$1}
-endsnippet
+>
+    snippet env
+    \begin{${1:enumerate}}
+        $0
+    \end{$1}
+    endsnippet
+<
 ------------------- SNAP -------------------
 env<tab>itemize ->
 \begin{itemize}
@@ -1246,12 +1278,14 @@ env<tab>itemize ->
 \end{itemize}
 
 ------------------- SNIP -------------------
-snippet ifndef
-#ifndef ${1:SOME_DEFINE}
-#define $1
-$0
-#endif /* $1 */
-endsnippet
+>
+    snippet ifndef
+    #ifndef ${1:SOME_DEFINE}
+    #define $1
+    $0
+    #endif /* $1 */
+    endsnippet
+<
 ------------------- SNAP -------------------
 ifndef<tab>WIN32 ->
 #ifndef WIN32
@@ -1339,10 +1373,12 @@ Hopefully the demos below help illustrate transformation features.
 
 Demo: Uppercase one character
 ------------------- SNIP -------------------
-snippet title "Title transformation"
-${1:a text}
-${1/\w+\s*/\u$0/}
-endsnippet
+>
+    snippet title "Title transformation"
+    ${1:a text}
+    ${1/\w+\s*/\u$0/}
+    endsnippet
+<
 ------------------- SNAP -------------------
 title<tab>big small ->
 big small
@@ -1351,10 +1387,12 @@ Big small
 
 Demo: Uppercase one character and global replace
 ------------------- SNIP -------------------
-snippet title "Titlelize in the Transformation"
-${1:a text}
-${1/\w+\s*/\u$0/g}
-endsnippet
+>
+    snippet title "Titlelize in the Transformation"
+    ${1:a text}
+    ${1/\w+\s*/\u$0/g}
+    endsnippet
+<
 ------------------- SNAP -------------------
 title<tab>this is a title ->
 this is a title
@@ -1363,10 +1401,12 @@ This Is A Title
 
 Demo: ASCII transformation
 ------------------- SNIP -------------------
-snippet ascii "Replace non ascii chars"
-${1: an accentued text}
-${1/.*/$0/a}
-endsnippet
+>
+    snippet ascii "Replace non ascii chars"
+    ${1: an accentued text}
+    ${1/.*/$0/a}
+    endsnippet
+<
 ------------------- SNAP -------------------
 ascii<tab>à la pêche aux moules
 à la pêche aux moules
@@ -1378,9 +1418,11 @@ Demo: Regular expression grouping
       when there is a format (%) character in the first tabstop.
 
 ------------------- SNIP -------------------
-snippet printf
-printf("${1:%s}\n"${1/([^%]|%%)*(%.)?.*/(?2:, :\);)/}$2${1/([^%]|%%)*(%.)?.*/(?2:\);)/}
-endsnippet
+>
+    snippet printf
+    printf("${1:%s}\n"${1/([^%]|%%)*(%.)?.*/(?2:, :\);)/}$2${1/([^%]|%%)*(%.)?.*/(?2:\);)/}
+    endsnippet
+<
 ------------------- SNAP -------------------
 printf<tab>Hello<c-j> // End of line ->
 printf("Hello\n"); // End of line
@@ -1400,7 +1442,9 @@ To remove snippets for the current file type, use the 'clearsnippets'
 directive.
 
 ------------------- SNIP -------------------
-clearsnippets
+>
+    clearsnippets
+<
 ------------------- SNAP -------------------
 
 'clearsnippets' removes all snippets with a priority lower than the current
@@ -1408,13 +1452,15 @@ one. For example, the following cleares all snippets that have priority <= 1,
 even though the example snippet is defined after the 'clearsnippets'.
 
 ------------------- SNIP -------------------
-priority 1
-clearsnippets
+>
+    priority 1
+    clearsnippets
 
-priority -1
-snippet example "Cleared example"
-	This will never be expanded.
-endsnippet
+    priority -1
+    snippet example "Cleared example"
+        This will never be expanded.
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 To clear one or more specific snippet, provide the triggers of the snippets as
@@ -1422,7 +1468,9 @@ arguments to the 'clearsnippets' command. The following example will clear the
 snippets 'trigger1' and 'trigger2'.
 
 ------------------- SNIP -------------------
-clearsnippets trigger1 trigger2
+>
+    clearsnippets trigger1 trigger2
+<
 ------------------- SNAP -------------------
 
 
@@ -1477,9 +1525,11 @@ For regular expression triggered snippets the variable `match` will contain
 the return value of the match of the regular expression. See http://docs.python.org/library/re.html#match-objects.
 
 ------------------- SNIP -------------------
-snippet r "return" "re.match('^\s+if err ', snip.buffer[snip.line-1])" be
-return err
-endsnippet
+>
+    snippet r "return" "re.match('^\s+if err ', snip.buffer[snip.line-1])" be
+    return err
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 That snippet will expand to 'return err' only if the previous line is starting
@@ -1489,17 +1539,19 @@ Note: custom context snippets are prioritized over other snippets. It makes poss
 to use other snippets as a fallback if no context can be matched:
 
 ------------------- SNIP -------------------
-snippet i "if ..." b
-if $1 {
-    $2
-}
-endsnippet
+>
+    snippet i "if ..." b
+    if $1 {
+        $2
+    }
+    endsnippet
 
-snippet i "if err != nil" "re.match('^\s+[^=]*err\s*:?=', snip.buffer[snip.line-1])" be
-if err != nil {
-    $1
-}
-endsnippet
+    snippet i "if err != nil" "re.match('^\s+[^=]*err\s*:?=', snip.buffer[snip.line-1])" be
+    if err != nil {
+        $1
+    }
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 That snippet will expand into 'if err != nil' if the previous line will match
@@ -1510,16 +1562,18 @@ used by other UltiSnips users. In that case, module should be imported
 using 'global' keyword, like this:
 
 ------------------- SNIP -------------------
-global !p
-import my_utils
-endglobal
+>
+    global !p
+    import my_utils
+    endglobal
 
-snippet , "return ..., nil/err" "my_utils.is_return_argument(snip)" ie
-, `!p if my_utils.is_in_err_condition():
-    snip.rv = "err"
-else:
-    snip.rv = "nil"`
-endsnippet
+    snippet , "return ..., nil/err" "my_utils.is_return_argument(snip)" ie
+    , `!p if my_utils.is_in_err_condition():
+        snip.rv = "err"
+    else:
+        snip.rv = "nil"`
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 That snippet will expand only if the cursor is located in the return statement,
@@ -1533,9 +1587,11 @@ expanded. The evaluated value of 'condition' is available in the 'snip.context'
 variable inside the snippet:
 
 ------------------- SNIP -------------------
-snippet + "var +=" "re.match('\s*(.*?)\s*:?=', snip.buffer[snip.line-1])" ie
-`!p snip.rv = snip.context.group(1)` += $1
-endsnippet
+>
+    snippet + "var +=" "re.match('\s*(.*?)\s*:?=', snip.buffer[snip.line-1])" ie
+    `!p snip.rv = snip.context.group(1)` += $1
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 That snippet will expand to 'var1 +=' after line, which begins from 'var1 :='.
@@ -1545,9 +1601,11 @@ That snippet will expand to 'var1 +=' after line, which begins from 'var1 :='.
 You can capture placeholder text from the previous snippet by using the
 following trick:
 ------------------- SNIP -------------------
-snippet = "desc" "snip.last_placeholder" Ae
-`!p snip.rv = snip.context.current_text` == nil
-endsnippet
+>
+    snippet = "desc" "snip.last_placeholder" Ae
+    `!p snip.rv = snip.context.current_text` == nil
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 That snippet will be expanded only if you will replace selected tabstop in
@@ -1611,22 +1669,26 @@ Following snippet will be expanded at 4 spaces indentation level no matter
 where it was triggered.
 
 ------------------- SNIP -------------------
-pre_expand "snip.buffer[snip.line] = ' '*4; snip.cursor.set(snip.line, 4)"
-snippet d
-def $1():
-    $0
-endsnippet
+>
+    pre_expand "snip.buffer[snip.line] = ' '*4; snip.cursor.set(snip.line, 4)"
+    snippet d
+    def $1():
+        $0
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 Following snippet will move the selected code to the end of file and create
 new method definition for it:
 
 ------------------- SNIP -------------------
-pre_expand "del snip.buffer[snip.line]; snip.buffer.append(''); snip.cursor.set(len(snip.buffer)-1, 0)"
-snippet x
-def $1():
-	${2:${VISUAL}}
-endsnippet
+>
+    pre_expand "del snip.buffer[snip.line]; snip.buffer.append(''); snip.cursor.set(len(snip.buffer)-1, 0)"
+    snippet x
+    def $1():
+        ${2:${VISUAL}}
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 4.10.2 Post-expand actions                     *UltiSnips-post-expand-actions*
@@ -1657,11 +1719,13 @@ additional newline after end of the snippet. It's very useful to create a
 function that will insert as many newlines as required in specific context.
 
 ------------------- SNIP -------------------
-post_expand "snip.buffer[snip.snippet_end[0]+1:snip.snippet_end[0]+1] = ['']"
-snippet d "Description" b
-def $1():
-	$2
-endsnippet
+>
+    post_expand "snip.buffer[snip.snippet_end[0]+1:snip.snippet_end[0]+1] = ['']"
+    snippet d "Description" b
+    def $1():
+        $2
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 4.10.3 Post-jump actions                         *UltiSnips-post-jump-actions*
@@ -1697,12 +1761,14 @@ Following snippet will insert section in the Table of Contents in the vim-help
 file:
 
 ------------------- SNIP -------------------
-post_jump "if snip.tabstop == 0: insert_toc_item(snip.tabstops[1], snip.buffer)"
-snippet s "section" b
-`!p insert_delimiter_0(snip, t)`$1`!p insert_section_title(snip, t)`
-`!p insert_delimiter_1(snip, t)`
-$0
-endsnippet
+>
+    post_jump "if snip.tabstop == 0: insert_toc_item(snip.tabstops[1], snip.buffer)"
+    snippet s "section" b
+    `!p insert_delimiter_0(snip, t)`$1`!p insert_section_title(snip, t)`
+    `!p insert_delimiter_1(snip, t)`
+    $0
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 'insert_toc_item' will be called after first jump and will add newly entered
@@ -1716,17 +1782,19 @@ Following example will insert method call at the end of file after user jump
 out of method declaration snippet.
 
 ------------------- SNIP -------------------
-global !p
-def insert_method_call(name):
-	vim.command('normal G')
-	snip.expand_anon(name + '($1)\n')
-endglobal
+>
+    global !p
+    def insert_method_call(name):
+        vim.command('normal G')
+        snip.expand_anon(name + '($1)\n')
+    endglobal
 
-post_jump "if snip.tabstop == 0: insert_method_call(snip.tabstops[1].current_text)"
-snippet d "method declaration" b
-def $1():
-	$2
-endsnippet
+    post_jump "if snip.tabstop == 0: insert_method_call(snip.tabstops[1].current_text)"
+    snippet d "method declaration" b
+    def $1():
+        $2
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 4.11 Autotrigger                                       *UltiSnips-autotrigger*
@@ -1747,15 +1815,17 @@ you discovered that, please report an issue.
 
 Consider following useful Go snippets:
 ------------------- SNIP -------------------
-snippet "^p" "package" rbA
-package ${1:main}
-endsnippet
+>
+    snippet "^p" "package" rbA
+    package ${1:main}
+    endsnippet
 
-snippet "^m" "func main" rbA
-func main() {
-	$1
-}
-endsnippet
+    snippet "^m" "func main" rbA
+    func main() {
+        $1
+    }
+    endsnippet
+<
 ------------------- SNAP -------------------
 
 When "p" character will occur in the beginning of the line, it will be
