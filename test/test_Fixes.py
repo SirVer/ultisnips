@@ -106,6 +106,7 @@ class NonUnicodeDataInUnnamedRegister(_VimTest):
 
 # End: #171
 
+
 # Test for #1184
 # UltiSnips should pass through any mapping that it currently can't execute as
 # the trigger key
