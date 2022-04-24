@@ -1,3 +1,4 @@
+main: CI
 on:
   push:
     branches:
