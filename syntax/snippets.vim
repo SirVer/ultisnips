@@ -80,7 +80,7 @@ syn match snipSnippetTriggerInvalid ,\S\@=.\{-}\S\ze\%(\s\+"[^"]*\%("\s\+[^"[:sp
 syn match snipSnippetDocString ,"[^"]*", contained nextgroup=snipSnippetOptions skipwhite
 syn match snipSnippetDocContextString ,"[^"]*", contained nextgroup=snipSnippetContext skipwhite
 syn match snipSnippetContext ,"[^"]\+", contained skipwhite contains=snipSnippetContextP
-syn region snipSnippetContextP start=,"\@<=., end=,\ze", contained contains=@Python nextgroup=snipSnippetOptions skipwhite keepend
+syn region snipSnippetContextP start=,"\@<=., end=,", contained contains=@Python nextgroup=snipSnippetOptions skipwhite keepend
 syn match snipSnippetOptions ,\S\+, contained contains=snipSnippetOptionFlag
 syn match snipSnippetOptionFlag ,[biwrtsmxAe], contained
 
