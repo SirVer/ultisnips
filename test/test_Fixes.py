@@ -105,3 +105,20 @@ class NonUnicodeDataInUnnamedRegister(_VimTest):
 
 
 # End: #171
+
+
+# Test for #1184
+# UltiSnips should pass through any mapping that it currently can't execute as
+# the trigger key
+
+
+class PassThroughNonexecutedTrigger(_VimTest):
+    snippets = ("text", "Expand me!", "", "")
+    keys = (
+        "tex" + EX + # this should be passed through
+        "more\n" +
+        "text" + EX # this should be expanded
+    )
+    wanted = "tex" + EX + "more\nExpand me!"
+
+# End: #1184

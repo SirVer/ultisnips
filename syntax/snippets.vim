@@ -80,7 +80,7 @@ syn match snipSnippetTriggerInvalid ,\S\@=.\{-}\S\ze\%(\s\+"[^"]*\%("\s\+[^"[:sp
 syn match snipSnippetDocString ,"[^"]*", contained nextgroup=snipSnippetOptions skipwhite
 syn match snipSnippetDocContextString ,"[^"]*", contained nextgroup=snipSnippetContext skipwhite
 syn match snipSnippetContext ,"[^"]\+", contained skipwhite contains=snipSnippetContextP
-syn region snipSnippetContextP start=,"\@<=., end=,\ze", contained contains=@Python nextgroup=snipSnippetOptions skipwhite keepend
+syn region snipSnippetContextP start=,"\@<=., end=,", contained contains=@Python nextgroup=snipSnippetOptions skipwhite keepend
 syn match snipSnippetOptions ,\S\+, contained contains=snipSnippetOptionFlag
 syn match snipSnippetOptionFlag ,[biwrtsmxAe], contained
 
@@ -133,16 +133,16 @@ syn cluster snipTabStopTokens add=snipTransformation
 
 " Generic (non-Python) {{{4
 
-syn region snipGlobal start="^global\_s" end="^\zeendglobal\s*$" contains=snipGlobalHeader nextgroup=snipGlobalFooter fold keepend
+syn region snipGlobal start="^global\_s" end="^endglobal\s*$" contains=snipGlobalHeader fold keepend
 syn match snipGlobalHeader "^.*$" nextgroup=snipGlobalBody,snipGlobalFooter skipnl contained contains=snipGlobalHeaderKeyword
-syn region snipGlobalBody start="\_." end="^\zeendglobal\s*$" contained contains=snipLeadingSpaces
+syn region snipGlobalBody start="\_." end="^\zeendglobal\s*$" contained nextgroup=snipGlobalFooter contains=snipLeadingSpaces
 
 " Python (!p) {{{4
 
-syn region snipGlobal start=,^global\s\+!p\%(\s\+"[^"]*\%("\s\+[^"[:space:]]\+\|"\)\=\)\=\s*$, end=,^\zeendglobal\s*$, contains=snipGlobalPHeader nextgroup=snipGlobalFooter fold keepend
+syn region snipGlobal start=,^global\s\+!p\%(\s\+"[^"]*\%("\s\+[^"[:space:]]\+\|"\)\=\)\=\s*$, end=,^endglobal\s*$, contains=snipGlobalPHeader fold keepend
 syn match snipGlobalPHeader "^.*$" nextgroup=snipGlobalPBody,snipGlobalFooter skipnl contained contains=snipGlobalHeaderKeyword
 syn match snipGlobalHeaderKeyword "^global" contained nextgroup=snipSnippetTrigger skipwhite
-syn region snipGlobalPBody start="\_." end="^\zeendglobal\s*$" contained contains=@Python
+syn region snipGlobalPBody start="\_." end="^\zeendglobal\s*$" contained nextgroup=snipGlobalFooter contains=@Python
 
 " Common {{{4
 
