@@ -58,3 +58,6 @@ class SnippetDictionary:
 
     def __len__(self):
         return len(self._snippets)
+
+    def __iter__(self):
+        return iter(self._snippets)
