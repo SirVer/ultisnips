@@ -33,6 +33,7 @@ class SnippetInstance(EditableTextObject):
         last_re,
         globals,
         context,
+        _compiled_globals=None,
     ):
         if start is None:
             start = Position(0, 0)
@@ -44,6 +45,7 @@ class SnippetInstance(EditableTextObject):
         self.context = context
         self.locals = {"match": last_re, "context": context}
         self.globals = globals
+        self._compiled_globals = _compiled_globals
         self.visual_content = visual_content
         self.current_placeholder = None
 
