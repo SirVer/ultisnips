@@ -200,14 +200,21 @@ if __name__ == "__main__":
 
         all_test_suites = unittest.defaultTestLoader.discover(start_dir="test")
 
-        vim = None
-        vim_flavor = "vim"
         if options.interface == "tmux":
             vim = VimInterfaceTmux(options.vim, options.session)
-            vim_flavor = "vim"
         else:
             vim = VimInterfaceTmuxNeovim(options.vim, options.session)
+
+        has_nvim = subprocess.check_output(
+            [options.vim, "-e", "-s", "-c", "verbose echo has('nvim')", "+q"],
+            stderr=subprocess.STDOUT,
+        )
+        if has_nvim == b"0":
+            vim_flavor = "vim"
+        elif has_nvim == b"1":
             vim_flavor = "neovim"
+        else:
+            assert 0, "Unexpected output, has_nvim=%r" % has_nvim
 
         if not options.clone_plugins and platform.system() == "Windows":
             raise RuntimeError(
