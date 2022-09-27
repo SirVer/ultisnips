@@ -522,7 +522,8 @@ list variable, set by default to >
    let g:UltiSnipsSnippetDirectories=["UltiSnips"]
 
 Note that "snippets" is reserved for snipMate snippets and cannot be used in
-this list.
+this list. Whether snipMate snippets are active or not is controlled by the
+variable `g:UltiSnipsEnableSnipMate`.
 
 UltiSnips will search each 'runtimepath' directory for the subdirectory names
 defined in g:UltiSnipsSnippetDirectories in the order they are defined. For
