@@ -115,10 +115,13 @@ class NonUnicodeDataInUnnamedRegister(_VimTest):
 class PassThroughNonexecutedTrigger(_VimTest):
     snippets = ("text", "Expand me!", "", "")
     keys = (
-        "tex" + EX + # this should be passed through
-        "more\n" +
-        "text" + EX # this should be expanded
+        "tex"
+        + EX
+        + "more\n"  # this should be passed through
+        + "text"
+        + EX  # this should be expanded
     )
     wanted = "tex" + EX + "more\nExpand me!"
+
 
 # End: #1184

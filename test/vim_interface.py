@@ -22,7 +22,7 @@ def wait_until_file_exists(file_path, times=None, interval=0.01):
 
 
 def _read_text_file(filename):
-    """Reads the contens of a text file."""
+    """Reads the content of a text file."""
     with open(filename, "r", encoding="utf-8") as to_read:
         return to_read.read()
 
@@ -37,11 +37,6 @@ def is_process_running(pid):
         return False
     else:
         return True
-
-
-def silent_call(cmd):
-    """Calls 'cmd' and returns the exit value."""
-    return subprocess.call(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
 
 def create_directory(dirname):
@@ -174,9 +169,11 @@ class VimInterfaceTmux(VimInterface):
         s = s.replace(";", r"\;")
 
         if len(s) == 1:
-            silent_call(["tmux", "send-keys", "-t", self.session, hex(ord(s))])
+            subprocess.check_call(
+                ["tmux", "send-keys", "-t", self.session, hex(ord(s))]
+            )
         else:
-            silent_call(["tmux", "send-keys", "-t", self.session, "-l", s])
+            subprocess.check_call(["tmux", "send-keys", "-t", self.session, "-l", s])
 
     def send_to_terminal(self, s):
         return self._send(s)

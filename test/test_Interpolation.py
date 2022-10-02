@@ -60,9 +60,9 @@ class TabStop_Shell_ShebangPython(_VimTest):
     snippets = (
         "test",
         """Hallo ${1:now `#!/usr/bin/env %s
-print "Hallo Welt"
+print("Hallo Welt")
 `} end"""
-        % (os.environ.get("PYTHON", "python2"),),
+        % os.environ.get("PYTHON", "python3"),
     )
     keys = "test" + EX + JF + "and more"
     wanted = "Hallo now Hallo Welt endand more"
