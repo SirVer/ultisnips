@@ -57,9 +57,9 @@ class ContextSnippets_Before(_VimTest):
         endsnippet
         """
     }
-    word = 'Süßölgefäß'
-    keys = "adup" + EX + '\n' + word + 'dup' + EX
-    wanted = "adup" + EX + '\n' + word +'[' + word + ']'
+    word = "Süßölgefäß"
+    keys = "adup" + EX + "\n" + word + "dup" + EX
+    wanted = "adup" + EX + "\n" + word + "[" + word + "]"
 
 
 class ContextSnippets_UseContext(_VimTest):
