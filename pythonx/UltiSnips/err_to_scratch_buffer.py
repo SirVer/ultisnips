@@ -13,6 +13,9 @@ from UltiSnips.remote_pdb import RemotePDB
 
 
 def _report_exception(self, msg, e):
+    if hasattr(e, 'args') and 'Keyboard interrupt' in e.args:
+        return
+
     if hasattr(e, "snippet_info"):
         msg += "\nSnippet, caused error:\n"
         msg += re.sub(r"^(?=\S)", "  ", e.snippet_info, flags=re.MULTILINE)
@@ -59,6 +62,7 @@ def wrap(func):
                 )
             _report_exception(self, msg, e)
         except Exception as e:  # pylint: disable=bare-except
+
             if RemotePDB.is_enable():
                 RemotePDB.pm()
             msg = """An error occured. This is either a bug in UltiSnips or a bug in a
