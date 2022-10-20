@@ -13,7 +13,7 @@ from UltiSnips.remote_pdb import RemotePDB
 
 
 def _report_exception(self, msg, e):
-    if hasattr(e, 'args') and 'Keyboard interrupt' in e.args:
+    if 'pynvim' in str(type(e)) and hasattr(e, 'args') and 'Keyboard interrupt' in e.args:
         return
 
     if hasattr(e, "snippet_info"):
