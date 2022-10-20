@@ -62,7 +62,6 @@ def wrap(func):
                 )
             _report_exception(self, msg, e)
         except Exception as e:  # pylint: disable=bare-except
-
             if RemotePDB.is_enable():
                 RemotePDB.pm()
             msg = """An error occured. This is either a bug in UltiSnips or a bug in a
