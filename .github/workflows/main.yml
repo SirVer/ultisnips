@@ -20,7 +20,7 @@ jobs:
         - { vim_version: "8.1", python_image: "3.9-bookworm", tag: "vim_81_py39" }
         - { vim_version: "8.2", python_image: "3.9-bookworm", tag: "vim_82_py39" }
         - { vim_version: "9.0", python_image: "3.9-bookworm", tag: "vim_90_py39" }
-        - { vim_version: "git", python_image: "3.8-bookworm", tag: "vim_git_py39" }
+        - { vim_version: "git", python_image: "3.9-bookworm", tag: "vim_git_py39" }
 
         # Vim 8.1 and 8.2 do not build with python 3.10.
         - { vim_version: "9.0", python_image: "3.10-bookworm", tag: "vim_90_py310" }
