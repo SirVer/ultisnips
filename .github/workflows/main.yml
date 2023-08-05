@@ -13,22 +13,22 @@ jobs:
      fail-fast: false
      matrix:
       include:
-        - { vim_version: "8.1", python_image: "3.7-stretch", tag: "vim_81_py37" }
-        - { vim_version: "8.2", python_image: "3.7-stretch", tag: "vim_82_py37" }
-        - { vim_version: "git", python_image: "3.7-stretch", tag: "vim_git_py37" }
+        - { vim_version: "8.1", python_image: "3.8-bookworm", tag: "vim_81_py38" }
+        - { vim_version: "8.2", python_image: "3.8-bookworm", tag: "vim_82_py38" }
+        - { vim_version: "git", python_image: "3.8-bookworm", tag: "vim_git_py38" }
 
-        - { vim_version: "8.1", python_image: "3.8-buster", tag: "vim_81_py38" }
-        - { vim_version: "8.2", python_image: "3.8-buster", tag: "vim_82_py38" }
-        - { vim_version: "git", python_image: "3.8-buster", tag: "vim_git_py38" }
-
-        - { vim_version: "8.1", python_image: "3.9-buster", tag: "vim_81_py39" }
-        - { vim_version: "8.2", python_image: "3.9-buster", tag: "vim_82_py39" }
-        - { vim_version: "9.0", python_image: "3.9-buster", tag: "vim_90_py39" }
-        - { vim_version: "git", python_image: "3.8-buster", tag: "vim_git_py39" }
+        - { vim_version: "8.1", python_image: "3.9-bookworm", tag: "vim_81_py39" }
+        - { vim_version: "8.2", python_image: "3.9-bookworm", tag: "vim_82_py39" }
+        - { vim_version: "9.0", python_image: "3.9-bookworm", tag: "vim_90_py39" }
+        - { vim_version: "git", python_image: "3.9-bookworm", tag: "vim_git_py39" }
 
         # Vim 8.1 and 8.2 do not build with python 3.10.
-        - { vim_version: "9.0", python_image: "3.10-buster", tag: "vim_90_py310" }
-        - { vim_version: "git", python_image: "3.10-buster", tag: "vim_git_py310" }
+        - { vim_version: "9.0", python_image: "3.10-bookworm", tag: "vim_90_py310" }
+        - { vim_version: "git", python_image: "3.10-bookworm", tag: "vim_git_py310" }
+
+        # Vim 8.1 and 8.2 hang forever with python 3.11.
+        - { vim_version: "9.0", python_image: "3.11-bookworm", tag: "vim_90_py311" }
+        - { vim_version: "git", python_image: "3.11-bookworm", tag: "vim_git_py311" }
 
     name: Build & Test using Docker
     steps:
