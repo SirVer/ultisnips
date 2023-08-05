@@ -26,15 +26,9 @@ jobs:
         - { vim_version: "9.0", python_image: "3.10-bookworm", tag: "vim_90_py310" }
         - { vim_version: "git", python_image: "3.10-bookworm", tag: "vim_git_py310" }
 
-        - { vim_version: "8.1", python_image: "3.11-bookworm", tag: "vim_81_py311" }
-        - { vim_version: "8.2", python_image: "3.11-bookworm", tag: "vim_82_py311" }
+        # Vim 8.1 and 8.2 hang forever with python 3.11.
         - { vim_version: "9.0", python_image: "3.11-bookworm", tag: "vim_90_py311" }
         - { vim_version: "git", python_image: "3.11-bookworm", tag: "vim_git_py311" }
-
-        - { vim_version: "8.1", python_image: "3.12-bookworm", tag: "vim_81_py312" }
-        - { vim_version: "8.2", python_image: "3.12-bookworm", tag: "vim_82_py312" }
-        - { vim_version: "9.0", python_image: "3.12-bookworm", tag: "vim_90_py312" }
-        - { vim_version: "git", python_image: "3.12-bookworm", tag: "vim_git_py312" }
 
     name: Build & Test using Docker
     steps:
