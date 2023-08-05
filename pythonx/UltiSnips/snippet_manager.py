@@ -155,7 +155,7 @@ class SnippetManager:
     def jump_forwards(self):
         """Jumps to the next tabstop."""
         vim_helper.command("let g:ulti_jump_forwards_res = 1")
-        vim_helper.command("let &undolevels = &undolevels")
+        vim_helper.command("let &g:undolevels = &g:undolevels")
         if not self._jump(JumpDirection.FORWARD):
             vim_helper.command("let g:ulti_jump_forwards_res = 0")
             return self._handle_failure(self.forward_trigger)
@@ -165,7 +165,7 @@ class SnippetManager:
     def jump_backwards(self):
         """Jumps to the previous tabstop."""
         vim_helper.command("let g:ulti_jump_backwards_res = 1")
-        vim_helper.command("let &undolevels = &undolevels")
+        vim_helper.command("let &g:undolevels = &g:undolevels")
         if not self._jump(JumpDirection.BACKWARD):
             vim_helper.command("let g:ulti_jump_backwards_res = 0")
             return self._handle_failure(self.backward_trigger)
@@ -808,7 +808,7 @@ class SnippetManager:
         if not snippets:
             # No snippet found
             return False
-        vim_helper.command("let &undolevels = &undolevels")
+        vim_helper.command("let &g:undolevels = &g:undolevels")
         if len(snippets) == 1:
             snippet = snippets[0]
         else:
@@ -816,7 +816,7 @@ class SnippetManager:
             if not snippet:
                 return True
         self._do_snippet(snippet, before)
-        vim_helper.command("let &undolevels = &undolevels")
+        vim_helper.command("let &g:undolevels = &g:undolevels")
         return True
 
     def can_expand(self, autotrigger_only=False):
