@@ -198,6 +198,24 @@ class SnippetManager:
             self._handle_failure(self.expand_trigger, True)
 
     @err_to_scratch_buffer.wrap
+    def jump_or_expand(self):
+        """This function is used for people who wants to have the same trigger
+        for expansion and forward jumping.
+
+        It first tries to jump forward, if this fails, it tries to
+        expand a snippet.
+
+        """
+        vim_helper.command("let g:ulti_expand_or_jump_res = 2")
+        rv = self._jump(JumpDirection.FORWARD)
+        if not rv:
+            vim_helper.command("let g:ulti_expand_or_jump_res = 1")
+            rv = self._try_expand()
+        if not rv:
+            vim_helper.command("let g:ulti_expand_or_jump_res = 0")
+            self._handle_failure(self.expand_trigger, True)
+
+    @err_to_scratch_buffer.wrap
     def snippets_in_current_scope(self, search_all):
         """Returns the snippets that could be expanded to Vim as a global
         variable."""
