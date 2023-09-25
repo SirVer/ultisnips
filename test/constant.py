@@ -18,3 +18,5 @@ EA = "#"  # Expand anonymous
 
 COMPL_KW = chr(24) + chr(14)
 COMPL_ACCEPT = chr(25)
+
+CTRL_V = chr(22)
