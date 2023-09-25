@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -e -o pipefail
 
 PYTHON_CMD="$(which python)"
 VIM="/usr/local/bin/vim"
