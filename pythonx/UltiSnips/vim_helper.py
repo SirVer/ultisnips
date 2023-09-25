@@ -120,6 +120,9 @@ def command(cmd):
 
 def eval(text):
     """Wraps vim.eval."""
+    # Replace null bytes with newlines, as vim raises a ValueError and neovim
+    # treats it as a terminator for the entire command.
+    text = text.replace("\x00", "\n")
     return vim.eval(text)
 
 

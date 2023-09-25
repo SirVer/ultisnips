@@ -135,14 +135,12 @@ class PassThroughNonexecutedTrigger(_VimTest):
 NULL_BYTE = CTRL_V + "000"
 
 
-@unittest.expectedFailure
 class NullByte_ListSnippets(_VimTest):
     snippets = ("word", "never expanded", "", "w")
     keys = "foobar" + NULL_BYTE + LS + "\n"
     wanted = "foobar\x00\n"
 
 
-@unittest.expectedFailure
 class NullByte_ExpandAfter(_VimTest):
     snippets = ("test", "Expand me!", "", "w")
     keys = "foobar " + NULL_BYTE + "test" + EX
