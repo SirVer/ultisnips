@@ -181,7 +181,7 @@ class SnippetManager:
 
     @err_to_scratch_buffer.wrap
     def expand_or_jump(self):
-        """This function is used for people who wants to have the same trigger
+        """This function is used for people who want to have the same trigger
         for expansion and forward jumping.
 
         It first tries to expand a snippet, if this fails, it tries to
@@ -199,7 +199,7 @@ class SnippetManager:
 
     @err_to_scratch_buffer.wrap
     def jump_or_expand(self):
-        """This function is used for people who wants to have the same trigger
+        """This function is used for people who want to have the same trigger
         for expansion and forward jumping.
 
         It first tries to jump forward, if this fails, it tries to

@@ -284,7 +284,7 @@ is set, g:UltiSnipsExpandOrJumpTrigger variable will take effects.
 
 3.2.2 Using your own trigger functions           *UltiSnips-trigger-functions*
 
-For advanced users there are four functions that you can map directly to a
+For advanced users there are functions that you can map directly to a
 key and that correspond to some of the triggers previously defined:
    g:UltiSnipsExpandTrigger        <--> UltiSnips#ExpandSnippet
    g:UltiSnipsJumpForwardTrigger   <--> UltiSnips#JumpForwards
