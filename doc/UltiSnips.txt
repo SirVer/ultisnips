@@ -246,6 +246,7 @@ The priority will then be rails -> ruby -> programming -> all.
 
                            *g:UltiSnipsExpandTrigger* *g:UltiSnipsListSnippets*
                *g:UltiSnipsJumpForwardTrigger* *g:UltiSnipsJumpBackwardTrigger*
+              *g:UltiSnipsExpandOrJumpTrigger* *g:UltiSnipsJumpOrExpandTrigger*
 
 You can define the keys used to trigger UltiSnips actions by setting global
 variables. Variables define the keys used to expand a snippet, jump forward
@@ -267,26 +268,44 @@ following to your vimrc file or switching to a plugin like Supertab or
 YouCompleteMe. >
    inoremap <c-x><c-k> <c-x><c-k>
 
+If you prefer to use the same trigger for expanding snippets and jumping
+forward, g:UltiSnipsExpandOrJumpTrigger and g:UltiSnipsJumpOrExpandTrigger
+variables are what you want. Try to set g:UltiSnipsExpandOrJumpTrigger if
+you give priority to expanding snippets. It'll expand snippets first when
+you are in a position where you can both expand snippets and jump forward. >
+   let g:UltiSnipsExpandOrJumpTrigger = "<tab>"
+
+Or else, if you have a preference for jumping forward first, set
+g:UltiSnipsJumpOrExpandTrigger instead. >
+   let g:UltiSnipsJumpOrExpandTrigger = "<tab>"
+
+If both g:UltiSnipsExpandOrJumpTrigger and g:UltiSnipsJumpOrExpandTrigger
+is set, g:UltiSnipsExpandOrJumpTrigger variable will take effects.
+
 3.2.2 Using your own trigger functions           *UltiSnips-trigger-functions*
 
-For advanced users there are four functions that you can map directly to a
+For advanced users there are functions that you can map directly to a
 key and that correspond to some of the triggers previously defined:
    g:UltiSnipsExpandTrigger        <--> UltiSnips#ExpandSnippet
    g:UltiSnipsJumpForwardTrigger   <--> UltiSnips#JumpForwards
    g:UltiSnipsJumpBackwardTrigger  <--> UltiSnips#JumpBackwards
+   g:UltiSnipsExpandOrJumpTrigger  <--> UltiSnips#ExpandSnippetOrJump
+   g:UltiSnipsJumpOrExpandTrigger  <--> UltiSnips#JumpOrExpandSnippet
 
 If you have g:UltiSnipsExpandTrigger and g:UltiSnipsJumpForwardTrigger set
 to the same value then the function you are actually going to use is
 UltiSnips#ExpandSnippetOrJump.
 
 Each time any of the functions UltiSnips#ExpandSnippet,
-UltiSnips#ExpandSnippetOrJump, UltiSnips#JumpForwards or
-UltiSnips#JumpBackwards is called a global variable is set that contains the
-return value of the corresponding function.
+UltiSnips#ExpandSnippetOrJump, UltiSnips#JumpOrExpandSnippet,
+UltiSnips#JumpForwards or UltiSnips#JumpBackwards is called a global variable
+is set that contains the return value of the corresponding function.
 
 The corresponding variables and functions are:
 UltiSnips#ExpandSnippet       --> g:ulti_expand_res (0: fail, 1: success)
 UltiSnips#ExpandSnippetOrJump --> g:ulti_expand_or_jump_res (0: fail,
+                                                    1: expand, 2: jump)
+UltiSnips#JumpOrExpandSnippet --> g:ulti_expand_or_jump_res (0: fail,
                                                     1: expand, 2: jump)
 UltiSnips#JumpForwards        --> g:ulti_jump_forwards_res (0: fail, 1: success)
 UltiSnips#JumpBackwards       --> g:ulti_jump_backwards_res (0: fail, 1: success)
