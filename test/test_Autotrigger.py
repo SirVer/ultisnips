@@ -52,3 +52,50 @@ class Autotrigger_CanMatchPreviouslySelectedPlaceholder(_VimTest):
     }
     keys = "if" + EX + "=" + ESC + "o="
     wanted = "if var == nil: pass\n="
+
+class Autotrigger_GlobalDisable(_VimTest):
+    def _extra_vim_config(self, vim_config):
+        vim_config.append("let g:UltiSnipsAutoTrigger=0")
+    files = {
+        "us/all.snippets": r"""
+        snippet a "desc" A
+        autotriggered
+        endsnippet
+        """
+    }
+    keys = "a"
+    wanted = "a"
+
+class Autotrigger_CanToggle(_VimTest):
+    files = {
+        "us/all.snippets": r"""
+        snippet a "desc" A
+        autotriggered
+        endsnippet
+        """
+    }
+    keys = (
+        "a"
+        + ESC + ":call UltiSnips#ToggleAutoTrigger()\n"
+        + "o" + "a"
+        + ESC + ":call UltiSnips#ToggleAutoTrigger()\n"
+        + "o" + "a"
+    )
+    wanted = "autotriggered\na\nautotriggered"
+
+class Autotrigger_GlobalDisableThenToggle(_VimTest):
+    def _extra_vim_config(self, vim_config):
+        vim_config.append("let g:UltiSnipsAutoTrigger=0")
+    files = {
+        "us/all.snippets": r"""
+        snippet a "desc" A
+        autotriggered
+        endsnippet
+        """
+    }
+    keys = (
+        "a"
+        + ESC + ":call UltiSnips#ToggleAutoTrigger()\n"
+        + "o" + "a"
+    )
+    wanted = "a\nautotriggered"
