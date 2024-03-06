@@ -27,9 +27,11 @@ class SnippetFileSource(SnippetSource):
         SnippetSource.__init__(self)
 
     def ensure(self, filetypes):
-        for ft in self.get_deep_extends(filetypes):
-            if self._needs_update(ft):
-                self._load_snippets_for(ft)
+        if self._must_refresh:
+            for ft in self.get_deep_extends(filetypes):
+                if self._needs_update(ft):
+                    self._load_snippets_for(ft)
+            self._must_refresh = False
 
     def refresh(self):
         self.__init__()
