@@ -183,6 +183,10 @@ function! UltiSnips#TrackChange() abort
     py3 UltiSnips_Manager._track_change()
 endfunction
 
+function! UltiSnips#CheckFiletype() abort
+    py3 UltiSnips_Manager._check_filetype(vim.eval('&ft'))
+endfunction
+
 function! UltiSnips#RefreshSnippets() abort
     py3 UltiSnips_Manager._refresh_snippets()
 endfunction

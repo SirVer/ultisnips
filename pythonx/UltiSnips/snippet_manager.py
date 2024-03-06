@@ -130,6 +130,7 @@ class SnippetManager:
         self._visual_content = VisualContentPreserver()
 
         self._snippet_sources = []
+        self._filetypes = []
 
         self._snip_expanded_in_action = False
         self._inside_action = False
@@ -973,6 +974,15 @@ class SnippetManager:
     def _refresh_snippets(self):
         for _, source in self._snippet_sources:
             source.refresh()
+
+
+    @err_to_scratch_buffer.wrap
+    def _check_filetype(self, ft):
+        """Ensure snippets are loaded for the current filetype."""
+        if ft not in self._filetypes:
+            self._filetypes.append(ft)
+            for _, source in self._snippet_sources:
+                source.refresh()
 
 
 UltiSnips_Manager = SnippetManager(  # pylint:disable=invalid-name

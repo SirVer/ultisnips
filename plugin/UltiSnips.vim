@@ -41,6 +41,7 @@ augroup UltiSnips_AutoTrigger
     if exists('##TextChangedP')
         au TextChangedP * call UltiSnips#TrackChange()
     endif
+    au FileType * call UltiSnips#CheckFiletype()
 augroup END
 
 call UltiSnips#map_keys#MapKeys()
