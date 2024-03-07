@@ -982,7 +982,7 @@ class SnippetManager:
         if ft not in self._filetypes:
             self._filetypes.append(ft)
             for _, source in self._snippet_sources:
-                source._must_refresh = True
+                source.must_ensure = True
 
 
 UltiSnips_Manager = SnippetManager(  # pylint:disable=invalid-name
