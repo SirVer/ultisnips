@@ -15,6 +15,7 @@ class SnippetSource:
     def __init__(self):
         self._snippets = defaultdict(SnippetDictionary)
         self._extends = defaultdict(set)
+        self.must_ensure = True
 
     def ensure(self, filetypes):
         """Ensures that snippets are loaded."""
