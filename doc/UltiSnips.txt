@@ -511,6 +511,21 @@ situation. This is useful in conditional mappings.
 This function returns 1 if UltiSnips can jump backwards in the current
 situation. This is useful in conditional mappings.
 
+ 3.4.7 UltiSnips#ToggleAutoTrigger              *UltiSnips#ToggleAutoTrigger*
+
+This function toggles the `autotrigger` functionality. Its return value
+corresponds to the new state of the `autotrigger` (0: disabled, 1: enabled).
+
+For example, the following mapping can be used to toggle the `autotrigger`
+in the Insert mode: >
+    inoremap <silent> <C-t> <CMD>call UltiSnips#ToggleAutoTrigger()<CR>
+<
+                                                    *g:UltiSnipsAutoTrigger*
+By default, `autotrigger` is enabled (relevant for snippets with the option 'A').
+If you want to disable it by default, add the following line to your vimrc: >
+    let g:UltiSnipsAutoTrigger = 0
+
+
 3.5 Warning about missing python support           *UltiSnips-python-warning*
 ----------------------------------------
 
@@ -1832,6 +1847,10 @@ will be triggered.
 
 *Warning:* using of this feature might lead to significant vim slowdown. If
 you discovered that, please report an issue.
+
+If you want to temporarily disable autotriggering, the `autotrigger` behavior
+can be toggled via |UltiSnips#ToggleAutoTrigger|. By default it is enabled,
+but it is possible to customize it with |g:UltiSnipsAutoTrigger|.
 
 Consider following useful Go snippets:
 ------------------- SNIP -------------------

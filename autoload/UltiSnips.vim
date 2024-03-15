@@ -123,6 +123,11 @@ function! UltiSnips#CanJumpBackwards() abort
 	return can_jump_backwards
 endfunction
 
+function! UltiSnips#ToggleAutoTrigger() abort
+    py3 vim.command("let autotrigger = %d" % UltiSnips_Manager._toggle_autotrigger())
+    return autotrigger
+endfunction
+
 function! UltiSnips#SaveLastVisualSelection() range abort
     py3 UltiSnips_Manager._save_last_visual_selection()
     return ""
