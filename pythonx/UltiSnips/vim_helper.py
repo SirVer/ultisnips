@@ -28,6 +28,9 @@ class VimBuffer:
     def __len__(self):
         return len(vim.current.buffer)
 
+    def __iter__(self):
+        return iter(vim.current.buffer)
+
     @property
     def line_till_cursor(self):  # pylint:disable=no-self-use
         """Returns the text before the cursor."""
