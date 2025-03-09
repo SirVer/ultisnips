@@ -29,7 +29,7 @@ class Transformation_SimpleCaseTransformInFrontDefVal_ECR(_VimTest):
 
 
 class Transformation_MultipleTransformations_ECR(_VimTest):
-    snippets = ("test", "${1:Some Text}${1/.+/\\U$0\E/}\n${1/.+/\L$0\E/}")
+    snippets = ("test", "${1:Some Text}${1/.+/\\U$0\\E/}\n${1/.+/\\L$0\\E/}")
     keys = "test" + EX + "SomE tExt "
     wanted = "SomE tExt SOME TEXT \nsome text "
 
@@ -89,19 +89,19 @@ class Transformation_CleverTransformUpercaseChar_ExpectCorrectResult(_VimTest):
 
 
 class Transformation_CleverTransformLowercaseChar_ExpectCorrectResult(_VimTest):
-    snippets = ("test", "$1 ${1/(.*)/\l$1/}")
+    snippets = ("test", "$1 ${1/(.*)/\\l$1/}")
     keys = "test" + EX + "Hallo"
     wanted = "Hallo hallo"
 
 
 class Transformation_CleverTransformLongUpper_ExpectCorrectResult(_VimTest):
-    snippets = ("test", "$1 ${1/(.*)/\\U$1\E/}")
+    snippets = ("test", "$1 ${1/(.*)/\\U$1\\E/}")
     keys = "test" + EX + "hallo"
     wanted = "hallo HALLO"
 
 
 class Transformation_CleverTransformLongLower_ExpectCorrectResult(_VimTest):
-    snippets = ("test", "$1 ${1/(.*)/\L$1\E/}")
+    snippets = ("test", "$1 ${1/(.*)/\\L$1\\E/}")
     keys = "test" + EX + "HALLO"
     wanted = "HALLO hallo"
 
@@ -115,7 +115,7 @@ class Transformation_SimpleCaseAsciiResult(_VimTest):
 
 class Transformation_LowerCaseAsciiResult(_VimTest):
     skip_if = lambda self: no_unidecode_available()
-    snippets = ("ascii", "$1 ${1/(.*)/\L$1\E/a}")
+    snippets = ("ascii", "$1 ${1/(.*)/\\L$1\\E/a}")
     keys = "ascii" + EX + "éèàçôïÉÈÀÇÔÏ€"
     wanted = "éèàçôïÉÈÀÇÔÏ€ eeacoieeacoieur"
 
