@@ -101,7 +101,7 @@ class Choices_With_Mirror_ContinueMirroring_EvenAfterSelectionDone(_VimTest):
 class Choices_ShouldThrowErrorWithZeroTabstop(_VimTest):
     snippets = ("test", "${0|red,blue|}")
     keys = "test" + EX
-    expected_error = "Choices selection is not supported on \$0"
+    expected_error = r"Choices selection is not supported on \$0"
 
 
 class Choices_CanEscapeCommaInsideChoiceItem(_VimTest):

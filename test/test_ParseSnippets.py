@@ -220,7 +220,7 @@ class ParseSnippets_MultiWord_NoContainer(_VimTest):
     }
     keys = "test snip" + EX
     wanted = keys
-    expected_error = "Invalid multiword trigger: 'test snip' in \S+:2"
+    expected_error = "Invalid multiword trigger: 'test snip' in \\S+:2"
 
 
 class ParseSnippets_MultiWord_UnmatchedContainer(_VimTest):
@@ -233,7 +233,7 @@ class ParseSnippets_MultiWord_UnmatchedContainer(_VimTest):
     }
     keys = "inv snip" + EX
     wanted = keys
-    expected_error = "Invalid multiword trigger: '!inv snip/' in \S+:2"
+    expected_error = "Invalid multiword trigger: '!inv snip/' in \\S+:2"
 
 
 class ParseSnippets_Global_Python_After(_VimTest):
@@ -324,7 +324,7 @@ class ParseSnippets_PrintPythonStacktraceMultiline(_VimTest):
     }
     keys = "test" + EX
     wanted = keys
-    expected_error = " > \s+qwe"
+    expected_error = " > \\s+qwe"
 
 
 class ParseSnippets_PrintErroneousSnippet(_VimTest):

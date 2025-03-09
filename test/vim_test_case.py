@@ -51,7 +51,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         SLEEPTIMES = [0.01, 0.15, 0.3, 0.4, 0.5, 1]
         for i in range(self.retries):
             if self.output and self.expected_error:
-                self.assertRegexpMatches(self.output, self.expected_error)
+                self.assertRegex(self.output, self.expected_error)
                 return
             if self.output != wanted or self.output is None:
                 # Redo this, but slower
