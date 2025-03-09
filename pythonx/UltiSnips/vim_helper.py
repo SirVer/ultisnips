@@ -28,6 +28,11 @@ class VimBuffer:
     def __len__(self):
         return len(vim.current.buffer)
 
+    # This is a workaround for a bug in Neovim's Python layer. See here for
+    # context https://github.com/SirVer/ultisnips/issues/1041
+    def __iter__(self):
+        return iter(vim.current.buffer)
+
     @property
     def line_till_cursor(self):  # pylint:disable=no-self-use
         """Returns the text before the cursor."""
