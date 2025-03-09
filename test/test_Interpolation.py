@@ -494,7 +494,7 @@ class PythonCode_CanOverwriteTabstop(_VimTest):
         """$1`!p if len(t[1]) > 3 and len(t[2]) == 0:
             t[2] = t[1][2:];
             t[1] = t[1][:2] + '-\\n\\t';
-            vim.command('call feedkeys("\<End>", "n")');
+            vim.command('call feedkeys("\\\\<End>", "n")');
             `$2""",
     )
     keys = "test" + EX + "blah" + ", bah"

@@ -219,7 +219,7 @@ class SnippetOptions_Regex_Multiple(_VimTest):
 
 
 class _Regex_Self(_VimTest):
-    snippets = ("((?<=\W)|^)(\.)", "self.", "", "r")
+    snippets = ("((?<=\\W)|^)(\\.)", "self.", "", "r")
 
 
 class SnippetOptions_Regex_Self_Start(_Regex_Self):
