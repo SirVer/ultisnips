@@ -29,7 +29,7 @@ Please add pull requests and issues there.
 UltiSnips was started in Jun 2009 by @SirVer. In Dec 2015, maintenance was
 handed over to [@seletskiy](https://github.com/seletskiy) who ran out of time
 in early 2017. Since Jun 2019, @SirVer is maintaining UltiSnips again on a
-very constraint time budget. If you can help triaging issues it would be
+very constrained time budget. If you can help triaging issues it would be
 greatly appreciated.
 
 
