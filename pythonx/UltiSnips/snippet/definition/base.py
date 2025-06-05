@@ -135,7 +135,7 @@ class SnippetDefinition:
         )
 
     def _re_match(self, trigger):
-        """Test if a the current regex trigger matches `trigger`.
+        """Test if the current regex trigger matches `trigger`.
 
         If so, set _last_re and _matched.
 
