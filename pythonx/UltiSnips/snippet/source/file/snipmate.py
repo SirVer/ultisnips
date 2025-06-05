@@ -109,7 +109,7 @@ def _parse_snippets_file(data, filename):
         head, tail = head_tail(line)
         if head == "extends":
             yield handle_extends(tail, lines.line_index)
-        elif head in "snippet":
+        elif head == "snippet":
             snippet = _parse_snippet(line, lines, filename)
             if snippet is not None:
                 yield snippet

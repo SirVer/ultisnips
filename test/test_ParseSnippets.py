@@ -37,6 +37,17 @@ class ParseSnippets_UnknownDirective(_VimTest):
     expected_error = r"Invalid line 'unknown directive' in \S+:2"
 
 
+class ParseSnippets_InvalidPartialSnippet(_VimTest):
+    files = {
+        "us/all.snippets": r"""
+        snip invalid
+        """
+    }
+    keys = "testsnip" + EX
+    wanted = "testsnip" + EX
+    expected_error = r"Invalid line 'snip invalid' in \S+:2"
+
+
 class ParseSnippets_InvalidPriorityLine(_VimTest):
     files = {
         "us/all.snippets": r"""
