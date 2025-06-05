@@ -70,7 +70,7 @@ def _parse_snippet_file(content, full_filename):
 
 
 def _parse_snippet(line, lines, filename):
-    """Parse a snippet defintions."""
+    """Parse a snippet definition."""
     start_line_index = lines.line_index
     trigger, description = head_tail(line[len("snippet") :].lstrip())
     content = ""
