@@ -4,7 +4,7 @@
 UltiSnips
 =========
 
-UltiSnips is the ultimate solution for snippets in Vim. It has many features,
+UltiSnips is a powerful and flexible solution for snippets in Vim. It has many features,
 speed being one of them.
 
 ![GIF Demo](https://raw.github.com/SirVer/ultisnips/master/doc/demo.gif)
