@@ -56,6 +56,10 @@ class SnippetFileSource(SnippetSource):
         for parent_ft in self.get_deep_extends([ft]):
             if parent_ft != ft and self._needs_update(parent_ft):
                 self._load_snippets_for(parent_ft)
+        # Make sure the dictionary will exist even if no snippets are found;
+        # this ensures each `ft` is scanned only once, preventing expensive
+        # searches down Vim's 'runtimepath'.
+        self._snippets[ft]
 
     def _parse_snippets(self, ft, filename):
         """Parse the 'filename' for the given 'ft'."""
