@@ -116,7 +116,7 @@ class VerifyVimDict2(_VimTest):
     """
 
     snippets = ('te"stâ', "abc123ά", "123êabc")
-    akey = "'te{}stâ'".format('"')
+    akey = """'te"stâ'"""
     keys = f'te"=(UltiSnips#SnippetsInCurrentScope()[{akey}]' + ")\n"
     wanted = 'te"123êabc'
 
@@ -127,7 +127,7 @@ class VerifyVimDict3(_VimTest):
     """
 
     snippets = ("te'stâ", "abc123ά", "123êabc")
-    akey = '"te{}stâ"'.format("'")
+    akey = '''"te'stâ"'''
     keys = f"te'=(UltiSnips#SnippetsInCurrentScope()[{akey}]" + ")\n"
     wanted = "te'123êabc"
 
@@ -167,4 +167,4 @@ class MySnippetSource(SnippetSource):
     return []
 """,
         )
-        vim_config.append("py3file {}".format(self.name_temp("snippet_source.py")))
+        vim_config.append(f"py3file {self.name_temp('snippet_source.py')}")

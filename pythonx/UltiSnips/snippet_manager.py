@@ -50,7 +50,8 @@ def _ask_user(a, formatted):
 def _show_user_warning(msg):
     """Shows a Vim warning message to the user."""
     vim_helper.command("echohl WarningMsg")
-    vim_helper.command('echom "{}"'.format(msg.replace('"', '\\"')))
+    escaped = msg.replace('"', '\\"')
+    vim_helper.command(f'echom "{escaped}"')
     vim_helper.command("echohl None")
 
 
@@ -243,24 +244,17 @@ class SnippetManager:
             ):
                 description = description[1:-1]
 
-            vim_helper.command(
-                "let g:current_ulti_dict['{key}'] = '{val}'".format(
-                    key=key.replace("'", "''"), val=description.replace("'", "''")
-                )
-            )
+            ekey = key.replace("'", "''")
+            edesc = description.replace("'", "''")
+            vim_helper.command(f"let g:current_ulti_dict['{ekey}'] = '{edesc}'")
 
             if search_all:
+                eloc = location.replace("'", "''")
                 vim_helper.command(
-                    (
-                        "let g:current_ulti_dict_info['{key}'] = {{"
-                        "'description': '{description}',"
-                        "'location': '{location}',"
-                        "}}"
-                    ).format(
-                        key=key.replace("'", "''"),
-                        location=location.replace("'", "''"),
-                        description=description.replace("'", "''"),
-                    )
+                    f"let g:current_ulti_dict_info['{ekey}'] = {{"
+                    f"'description': '{edesc}',"
+                    f"'location': '{eloc}',"
+                    f"}}"
                 )
 
     @err_to_scratch_buffer.wrap

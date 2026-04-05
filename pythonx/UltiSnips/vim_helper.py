@@ -11,10 +11,10 @@ from pathlib import Path
 import vim
 from vim import error
 
-from UltiSnips.compatibility import byte2col, col2byte
 from UltiSnips.error import PebkacError
 from UltiSnips.position import Position
 from UltiSnips.snippet.source.file.common import normalize_file_path
+from UltiSnips.vim_encoding import byte2col, col2byte
 
 
 class VimBuffer:
@@ -108,7 +108,8 @@ def escape(inp):
                 + "}"
             )
         else:
-            rv = '"{}"'.format(obj.replace('"', '\\"'))
+            escaped = obj.replace('"', '\\"')
+            rv = f'"{escaped}"'
         return rv
 
     return conv(inp)

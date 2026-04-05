@@ -286,7 +286,7 @@ class ChoicesToken(Token):
                     choice_list.append(last_choice_item)
                 break
         self.choice_list = choice_list
-        self.initial_text = "|{}|".format(",".join(choice_list))
+        self.initial_text = f"|{','.join(choice_list)}|"
 
         _parse_till_closing_brace(stream)
 
