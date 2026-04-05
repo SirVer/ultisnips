@@ -2,7 +2,6 @@
 
 """Parsing of snippet files."""
 
-import glob
 from collections import defaultdict
 from pathlib import Path
 
@@ -23,10 +22,10 @@ def find_snippet_files(ft, directory: str) -> set[str]:
     """Returns all matching snippet files for 'ft' in 'directory'."""
     patterns = ["%s.snippets", "%s_*.snippets", str(Path("%s") / "*")]
     ret = set()
-    directory = str(Path(directory).expanduser())
+    directory_path = Path(directory).expanduser()
     for pattern in patterns:
-        for fn in glob.glob(str(Path(directory) / (pattern % ft))):
-            ret.add(normalize_file_path(fn))
+        for fn in directory_path.glob(pattern % ft):
+            ret.add(normalize_file_path(str(fn)))
     return ret
 
 
@@ -56,9 +55,11 @@ def find_all_snippet_directories() -> list[str]:
                     "directory is reserved for snipMate snippets. Use another "
                     "directory for UltiSnips snippets."
                 )
-            pth = normalize_file_path(str(Path(rtp, snippet_dir).expanduser()))
+            pth = Path(rtp, snippet_dir).expanduser()
             # Runtimepath entries may contain wildcards.
-            all_dirs.extend(glob.glob(pth))
+            all_dirs.extend(
+                str(p) for p in Path(pth.anchor).glob(str(pth.relative_to(pth.anchor)))
+            )
     return all_dirs
 
 
@@ -71,8 +72,8 @@ def find_all_snippet_files(ft) -> set[str]:
         if not Path(directory).is_dir():
             continue
         for pattern in patterns:
-            for fn in glob.glob(str(Path(directory) / (pattern % ft))):
-                ret.add(fn)
+            for fn in Path(directory).glob(pattern % ft):
+                ret.add(str(fn))
     return ret
 
 
