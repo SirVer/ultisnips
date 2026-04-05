@@ -50,7 +50,7 @@ def guess_edit(initial_line, last_text, current_text, vim_state):
     None) otherwise.
 
     """
-    if not len(last_text) and not len(current_text):
+    if not last_text and not current_text:
         return True, ()
     pos = vim_state.pos
     ppos = vim_state.ppos
