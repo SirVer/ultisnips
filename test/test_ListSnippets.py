@@ -46,3 +46,11 @@ class ListAllAvailable_Disabled_ExpectCorrectResult(_ListAllSnippets):
 
     def _extra_vim_config(self, vim_config):
         vim_config.append('let g:UltiSnipsListSnippets=""')
+
+
+# GH #1036: In-word snippets should be listed even when preceded by
+# non-word characters.
+class ListAllAvailable_InWordWithPrefix_ExpectCorrectResult(_VimTest):
+    snippets = (("exists", "exists('${1}')", "exists check", "i"),)
+    keys = "!exists" + LS + "1\n"
+    wanted = "!exists('')"

@@ -384,9 +384,15 @@ class SnippetDefinition:
             if words_suffix != words:
                 match = False
         elif "i" in self._opts:
-            # TODO: It is hard to define when a inword snippet could match,
-            # therefore we check only for full-word trigger.
-            match = self._trigger.startswith(words)
+            # In-word snippets can appear after arbitrary non-word
+            # characters, so check if the trigger starts with any
+            # suffix of `words`.  GH #1036.
+            match = False
+            for i in range(len(words)):
+                if self._trigger.startswith(words[i:]):
+                    match = True
+                    self._matched = words[i:]
+                    break
         else:
             match = self._trigger.startswith(words)
 
