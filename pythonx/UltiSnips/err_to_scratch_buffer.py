@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import re
 import sys
 import traceback
@@ -61,7 +63,7 @@ def wrap(func):
         except Exception as e:
             if RemotePDB.is_enable():
                 RemotePDB.pm()
-            msg = """An error occured. This is either a bug in UltiSnips or a bug in a
+            msg = """An error occurred. This is either a bug in UltiSnips or a bug in a
 snippet definition. If you think this is a bug, please report it to
 https://github.com/SirVer/ultisnips/issues/new
 Please read and follow:

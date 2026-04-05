@@ -36,6 +36,7 @@ select = [
     "RET",    # flake8-return
     "PIE",    # flake8-pie
     "PERF",   # perflint
+    "PLC1802", # pylint: no `not len(x)`, use `not x`
     "RUF",    # ruff-specific
     "T20",    # flake8-print
     "ERA",    # eradicate (commented-out code)

@@ -2,7 +2,6 @@
 
 """Parses snipMate files."""
 
-import glob
 import os
 from pathlib import Path
 
@@ -30,10 +29,10 @@ def _snipmate_files_for(ft):
     ]
     ret = set()
     for rtp in vim_helper.eval("&runtimepath").split(","):
-        path = normalize_file_path(str(Path(rtp, "snippets").expanduser()))
+        path = Path(rtp, "snippets").expanduser()
         for pattern in patterns:
-            for fn in glob.glob(str(Path(path) / pattern)):
-                ret.add(fn)
+            for fn in path.glob(pattern):
+                ret.add(normalize_file_path(str(fn)))
     return ret
 
 

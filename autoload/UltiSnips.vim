@@ -31,7 +31,7 @@ function! UltiSnips#Edit(bang, ...) abort
     else
         let type = ""
     endif
-    py3 vim.command("let file = '%s'" % UltiSnips_Manager._file_to_edit(vim.eval("type"), vim.eval('a:bang')))
+    let file = py3eval("UltiSnips_Manager._file_to_edit(vim.eval('type'), vim.eval('a:bang'))")
 
     if !len(file)
        return
@@ -109,23 +109,19 @@ function! UltiSnips#SnippetsInCurrentScope(...) abort
 endfunction
 
 function! UltiSnips#CanExpandSnippet() abort
-	py3 vim.command("let can_expand = %d" % UltiSnips_Manager.can_expand())
-	return can_expand
+	return py3eval("UltiSnips_Manager.can_expand()")
 endfunction
 
 function! UltiSnips#CanJumpForwards() abort
-	py3 vim.command("let can_jump_forwards = %d" % UltiSnips_Manager.can_jump_forwards())
-	return can_jump_forwards
+	return py3eval("UltiSnips_Manager.can_jump_forwards()")
 endfunction
 
 function! UltiSnips#CanJumpBackwards() abort
-	py3 vim.command("let can_jump_backwards = %d" % UltiSnips_Manager.can_jump_backwards())
-	return can_jump_backwards
+	return py3eval("UltiSnips_Manager.can_jump_backwards()")
 endfunction
 
 function! UltiSnips#ToggleAutoTrigger() abort
-    py3 vim.command("let autotrigger = %d" % UltiSnips_Manager._toggle_autotrigger())
-    return autotrigger
+    return py3eval("UltiSnips_Manager._toggle_autotrigger()")
 endfunction
 
 function! UltiSnips#SaveLastVisualSelection() range abort

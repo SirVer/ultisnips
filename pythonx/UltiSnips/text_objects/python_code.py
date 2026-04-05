@@ -259,7 +259,7 @@ class PythonCode(NoneditableTextObject):
             ),
         )
 
-        NoneditableTextObject.__init__(self, parent, token)
+        super().__init__(parent, token)
 
     def _update(self, done, buf):
         path = vim_helper.eval('expand("%")') or ""
