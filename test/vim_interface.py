@@ -39,10 +39,7 @@ def is_process_running(pid):
 
 def create_directory(dirname):
     """Creates 'dirname' and its parents if it does not exist."""
-    try:
-        os.makedirs(dirname)
-    except OSError:
-        pass
+    os.makedirs(dirname, exist_ok=True)
 
 
 class TempFileManager:
