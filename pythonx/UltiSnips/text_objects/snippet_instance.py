@@ -18,8 +18,6 @@ from UltiSnips.text_objects.tabstop import TabStop
 class SnippetInstance(EditableTextObject):
     """See module docstring."""
 
-    # pylint:disable=protected-access
-
     def __init__(
         self,
         snippet,

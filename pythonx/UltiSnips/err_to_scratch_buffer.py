@@ -30,7 +30,7 @@ def _report_exception(self, msg, e):
 
     # Vim sends no WinLeave msg here.
     if hasattr(self, "_leaving_buffer"):
-        self._leaving_buffer()  # pylint:disable=protected-access
+        self._leaving_buffer()
     vim_helper.new_scratch_buffer(msg)
 
 
@@ -58,7 +58,7 @@ def wrap(func):
                     " to inspect it with pdb\n"
                 )
             _report_exception(self, msg, e)
-        except Exception as e:  # pylint: disable=bare-except
+        except Exception as e:
             if RemotePDB.is_enable():
                 RemotePDB.pm()
             msg = """An error occured. This is either a bug in UltiSnips or a bug in a

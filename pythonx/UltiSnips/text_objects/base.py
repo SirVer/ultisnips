@@ -39,7 +39,6 @@ def _replace_text(buf, start, end, text):
 
 # These classes use their subclasses a lot and we really do not want to expose
 # their functions more globally.
-# pylint: disable=protected-access
 
 
 class TextObject:

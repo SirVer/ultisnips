@@ -28,13 +28,13 @@ class _Tabs:
         self._to = to
 
     def __getitem__(self, no):
-        ts = self._to._get_tabstop(self._to, int(no))  # pylint:disable=protected-access
+        ts = self._to._get_tabstop(self._to, int(no))
         if ts is None:
             return ""
         return ts.current_text
 
     def __setitem__(self, no, value):
-        ts = self._to._get_tabstop(self._to, int(no))  # pylint:disable=protected-access
+        ts = self._to._get_tabstop(self._to, int(no))
         if ts is None:
             return
         # TODO(sirver): The buffer should be passed into the object on construction.
@@ -132,22 +132,22 @@ class SnippetUtil:
 
     # Utility methods
     @property
-    def fn(self):  # pylint:disable=no-self-use,invalid-name
+    def fn(self):
         """The filename."""
         return vim_helper.eval('expand("%:t")') or ""
 
     @property
-    def basename(self):  # pylint:disable=no-self-use
+    def basename(self):
         """The filename without extension."""
         return vim_helper.eval('expand("%:t:r")') or ""
 
     @property
-    def ft(self):  # pylint:disable=invalid-name
+    def ft(self):
         """The filetype."""
         return self.opt("&filetype", "")
 
     @property
-    def rv(self):  # pylint:disable=invalid-name
+    def rv(self):
         """The return value.
 
         The text to insert at the location of the placeholder.
@@ -156,7 +156,7 @@ class SnippetUtil:
         return self._rv
 
     @rv.setter
-    def rv(self, value):  # pylint:disable=invalid-name
+    def rv(self, value):
         """See getter."""
         self._changed = True
         self._rv = value
@@ -167,12 +167,12 @@ class SnippetUtil:
         return self._changed
 
     @property
-    def c(self):  # pylint:disable=invalid-name
+    def c(self):
         """The current text of the placeholder."""
         return self._cur
 
     @property
-    def v(self):  # pylint:disable=invalid-name
+    def v(self):
         """Content of visual expansions."""
         return self._visual
 
@@ -186,7 +186,7 @@ class SnippetUtil:
     def context(self):
         return self._context
 
-    def opt(self, option, default=None):  # pylint:disable=no-self-use
+    def opt(self, option, default=None):
         """Gets a Vim variable."""
         if vim_helper.eval(f"exists('{option}')") == "1":
             try:
@@ -197,7 +197,7 @@ class SnippetUtil:
 
     def __add__(self, value):
         """Appends the given line to rv using mkline."""
-        self.rv += "\n"  # pylint:disable=invalid-name
+        self.rv += "\n"
         self.rv += self.mkline(value)
         return self
 
@@ -243,7 +243,7 @@ class PythonCode(NoneditableTextObject):
                 context = snippet.context
                 break
             except AttributeError:
-                snippet = snippet._parent  # pylint:disable=protected-access
+                snippet = snippet._parent
         self._snip = SnippetUtil(token.indent, mode, text, context, snippet)
 
         self._codes = (
@@ -274,16 +274,16 @@ class PythonCode(NoneditableTextObject):
                 "snip": self._snip,
             }
         )
-        self._snip._reset(ct)  # pylint:disable=protected-access
+        self._snip._reset(ct)
 
         for code, compiled_code in zip(self._codes, self._compiled_codes, strict=False):
             try:
-                exec(compiled_code, self._locals)  # pylint:disable=exec-used
+                exec(compiled_code, self._locals)
             except Exception as exception:
                 exception.snippet_code = code
                 raise
 
-        rv = str(self._snip.rv if self._snip._rv_changed else self._locals["res"])  # pylint:disable=protected-access
+        rv = str(self._snip.rv if self._snip._rv_changed else self._locals["res"])
 
         if ct != rv:
             self.overwrite(buf, rv)

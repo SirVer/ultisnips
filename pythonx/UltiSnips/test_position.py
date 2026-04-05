@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-# pylint: skip-file
-
 import unittest
 
 from position import Position

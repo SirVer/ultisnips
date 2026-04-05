@@ -20,7 +20,7 @@ class TabStop(EditableTextObject):
         else:
             self._number = token.number
             EditableTextObject.__init__(self, parent, token)
-        parent._tabstops[self._number] = self  # pylint:disable=protected-access
+        parent._tabstops[self._number] = self
 
     @property
     def number(self):

@@ -7,8 +7,8 @@ import os
 import platform
 from contextlib import contextmanager
 
-import vim  # pylint:disable=import-error
-from vim import error  # pylint:disable=import-error,unused-import
+import vim
+from vim import error
 
 from UltiSnips.compatibility import byte2col, col2byte
 from UltiSnips.error import PebkacError
@@ -34,13 +34,13 @@ class VimBuffer:
         return iter(vim.current.buffer)
 
     @property
-    def line_till_cursor(self):  # pylint:disable=no-self-use
+    def line_till_cursor(self):
         """Returns the text before the cursor."""
         _, col = self.cursor
         return vim.current.line[:col]
 
     @property
-    def number(self):  # pylint:disable=no-self-use
+    def number(self):
         """The bufnr() of the current buffer."""
         return vim.current.buffer.number
 
@@ -49,7 +49,7 @@ class VimBuffer:
         return [ft for ft in vim.eval("&filetype").split(".") if ft]
 
     @property
-    def cursor(self):  # pylint:disable=no-self-use
+    def cursor(self):
         """The current windows cursor.
 
         Note that this is 0 based in col and 0 based in line which is
@@ -61,13 +61,13 @@ class VimBuffer:
         return Position(line - 1, col)
 
     @cursor.setter
-    def cursor(self, pos):  # pylint:disable=no-self-use
+    def cursor(self, pos):
         """See getter."""
         nbyte = col2byte(pos.line + 1, pos.col)
         vim.current.window.cursor = pos.line + 1, nbyte
 
 
-buf = VimBuffer()  # pylint:disable=invalid-name
+buf = VimBuffer()
 
 
 @contextmanager
