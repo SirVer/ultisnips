@@ -223,6 +223,8 @@ class SnippetManager:
 
         # Sort snippets alphabetically
         snippets.sort(key=lambda x: x.trigger)
+        ulti_dict = {}
+        ulti_dict_info = {}
         for snip in snippets:
             description = snip.description[
                 snip.description.find(snip.trigger) + len(snip.trigger) + 2 :
@@ -240,13 +242,20 @@ class SnippetManager:
             ):
                 description = description[1:-1]
 
-            vim.vars["current_ulti_dict"][key] = description
+            ulti_dict[key] = description
 
             if search_all:
-                vim.vars["current_ulti_dict_info"][key] = {
+                ulti_dict_info[key] = {
                     "description": description,
                     "location": location,
                 }
+
+        # Assign the full dict at once rather than mutating
+        # vim.vars["current_ulti_dict"][key] — neovim's Python API returns a
+        # copy for dict values, so per-key mutation is silently lost.
+        vim.vars["current_ulti_dict"] = ulti_dict
+        if search_all:
+            vim.vars["current_ulti_dict_info"] = ulti_dict_info
 
     @err_to_scratch_buffer.wrap
     def list_snippets(self):
