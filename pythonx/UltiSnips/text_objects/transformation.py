@@ -22,10 +22,7 @@ def _find_closing_brace(string, start_pos):
                 bracks_open -= 1
             if not bracks_open:
                 return start_pos + idx + 1
-        if char == "\\":
-            escaped = not escaped
-        else:
-            escaped = False
+        escaped = not escaped if char == "\\" else False
 
 
 def _split_conditional(string):
@@ -34,7 +31,7 @@ def _split_conditional(string):
     args = []
     carg = ""
     escaped = False
-    for idx, char in enumerate(string):
+    for _idx, char in enumerate(string):
         if char == "(":
             if not escaped:
                 bracks_open += 1
@@ -47,10 +44,7 @@ def _split_conditional(string):
             escaped = False
             continue
         carg += char
-        if char == "\\":
-            escaped = not escaped
-        else:
-            escaped = False
+        escaped = not escaped if char == "\\" else False
     args.append(carg)
     return args
 
@@ -97,8 +91,7 @@ class _CleverReplace:
             """Replaces one character case changes."""
             if match.group(1)[0] == "u":
                 return match.group(1)[-1].upper()
-            else:
-                return match.group(1)[-1].lower()
+            return match.group(1)[-1].lower()
 
         transformed = _ONE_CHAR_CASE_SWITCH.subn(_one_char_case_change, transformed)[0]
 
@@ -106,8 +99,7 @@ class _CleverReplace:
             """Replaces multi character case changes."""
             if match.group(1)[0] == "U":
                 return match.group(1)[1:].upper()
-            else:
-                return match.group(1)[1:].lower()
+            return match.group(1)[1:].lower()
 
         transformed = _LONG_CASEFOLDINGS.subn(_multi_char_case_change, transformed)[0]
         transformed = _replace_conditional(match, transformed)

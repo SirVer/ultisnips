@@ -276,7 +276,7 @@ class PythonCode(NoneditableTextObject):
         )
         self._snip._reset(ct)  # pylint:disable=protected-access
 
-        for code, compiled_code in zip(self._codes, self._compiled_codes):
+        for code, compiled_code in zip(self._codes, self._compiled_codes, strict=False):
             try:
                 exec(compiled_code, self._locals)  # pylint:disable=exec-used
             except Exception as exception:

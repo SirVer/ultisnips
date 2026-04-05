@@ -2,6 +2,7 @@
 
 """Wrapper functionality around the functions we need from Vim."""
 
+import contextlib
 import os
 import platform
 from contextlib import contextmanager
@@ -195,7 +196,7 @@ def select(start, end):
 
     if start == end:
         # Zero Length Tabstops, use 'i' or 'a'.
-        if col == 0 or mode not in "i" and col < len(buf[start.line]):
+        if col == 0 or (mode not in "i" and col < len(buf[start.line])):
             move_cmd += "i"
         else:
             move_cmd += "a"
@@ -237,10 +238,9 @@ def get_dot_vim():
         my_vimrc = os.path.expandvars(os.environ["MYVIMRC"])
         candidates.append(normalize_file_path(os.path.dirname(my_vimrc)))
 
-    candidates_normalized = []
-    for candidate in candidates:
-        if os.path.isdir(candidate):
-            candidates_normalized.append(normalize_file_path(candidate))
+    candidates_normalized = [
+        normalize_file_path(c) for c in candidates if os.path.isdir(c)
+    ]
     if candidates_normalized:
         # We remove duplicates on return
         return sorted(set(candidates_normalized))
@@ -281,7 +281,7 @@ def _get_pos(name):
 
 
 def _is_pos_zero(pos):
-    return ["0"] * 4 == pos or [0] == pos
+    return pos == ["0"] * 4 or pos == [0]
 
 
 def _unmap_select_mode_mapping():
@@ -292,7 +292,7 @@ def _unmap_select_mode_mapping():
 
     """
     if int(eval("g:UltiSnipsRemoveSelectModeMappings")):
-        ignores = eval("g:UltiSnipsMappingsToIgnore") + ["UltiSnips"]
+        ignores = [*eval("g:UltiSnipsMappingsToIgnore"), "UltiSnips"]
 
         for option in ("<buffer>", ""):
             # Put all smaps into a var, and then read the var
@@ -346,15 +346,13 @@ def _unmap_select_mode_mapping():
                     continue
 
                 # Actually unmap it
-                try:
+                # Bug 908139: ignore unmaps that fail because of
+                # unprintable characters. This is not ideal because we
+                # will not be able to unmap lhs with any unprintable
+                # character. If the lhs stats with a printable
+                # character this will leak to the user when he tries to
+                # type this character as a first in a selected tabstop.
+                # This case should be rare enough to not bother us
+                # though.
+                with contextlib.suppress(error):
                     command(f"silent! sunmap {option} {trig}")
-                except error:
-                    # Bug 908139: ignore unmaps that fail because of
-                    # unprintable characters. This is not ideal because we
-                    # will not be able to unmap lhs with any unprintable
-                    # character. If the lhs stats with a printable
-                    # character this will leak to the user when he tries to
-                    # type this character as a first in a selected tabstop.
-                    # This case should be rare enough to not bother us
-                    # though.
-                    pass

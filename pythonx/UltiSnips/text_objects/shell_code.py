@@ -53,7 +53,7 @@ def _get_tmp():
     ]:
         if (
             not os.path.exists(testdir)
-            or not _run_shell_command("echo success", testdir) == "success"
+            or _run_shell_command("echo success", testdir) != "success"
         ):
             continue
         return testdir

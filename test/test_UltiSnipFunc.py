@@ -92,14 +92,16 @@ hi4"""
 class VerifyVimDict1(_VimTest):
     """check:
     correct type (4 means vim dictionary)
-    correct length of dictionary (in this case we have on element if the use same prefix, dictionary should have 1 element)
+    correct length of dictionary (in this case we have on element
+    if the use same prefix, dictionary should have 1 element)
     correct description (including the apostrophe)
     if the prefix is mismatched no resulting dict should have 0 elements
     """
 
     snippets = ("testâ", "abc123ά", "123'êabc")
     keys = (
-        "test=(type(UltiSnips#SnippetsInCurrentScope()) . len(UltiSnips#SnippetsInCurrentScope()) . "
+        "test=(type(UltiSnips#SnippetsInCurrentScope())"
+        " . len(UltiSnips#SnippetsInCurrentScope()) . "
         + 'UltiSnips#SnippetsInCurrentScope()["testâ"]'
         + ")\n"
         + "=len(UltiSnips#SnippetsInCurrentScope())\n"

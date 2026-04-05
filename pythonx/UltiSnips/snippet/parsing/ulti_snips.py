@@ -57,7 +57,8 @@ def _create_transformations(all_tokens, seen_ts):
         if isinstance(token, TransformationToken):
             if token.number not in seen_ts:
                 raise PebkacError(
-                    f"Tabstop {token.number} is not known but is used by a Transformation"
+                    f"Tabstop {token.number} is not known"
+                    " but is used by a Transformation"
                 )
             Transformation(parent, seen_ts[token.number], token)
 

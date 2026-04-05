@@ -17,7 +17,7 @@ class _SelectModeMappings(_VimTest):
         vim_config.append(
             f":let g:UltiSnipsRemoveSelectModeMappings={int(self.do_unmapping)}"
         )
-        vim_config.append(f":let g:UltiSnipsMappingsToIgnore={repr(self.ignores)}")
+        vim_config.append(f":let g:UltiSnipsMappingsToIgnore={self.ignores!r}")
 
         if not isinstance(self.maps[0], tuple):
             self.maps = (self.maps,)

@@ -36,8 +36,7 @@ class SnippetDictionary:
 
         if not potentially:
             return [s for s in all_snippets if s.matches(trigger, visual_content)]
-        else:
-            return [s for s in all_snippets if s.could_match(trigger)]
+        return [s for s in all_snippets if s.could_match(trigger)]
 
     def clear_snippets(self, priority, triggers):
         """Clear the snippets by mark them as cleared.

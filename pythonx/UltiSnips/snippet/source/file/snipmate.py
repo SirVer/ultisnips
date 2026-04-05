@@ -22,12 +22,11 @@ def _splitall(path):
         if parts[0] == path:  # sentinel for absolute paths
             allparts.insert(0, parts[0])
             break
-        elif parts[1] == path:  # sentinel for relative paths
+        if parts[1] == path:  # sentinel for relative paths
             allparts.insert(0, parts[1])
             break
-        else:
-            path = parts[0]
-            allparts.insert(0, parts[1])
+        path = parts[0]
+        allparts.insert(0, parts[1])
     return allparts
 
 
@@ -58,7 +57,7 @@ def _parse_snippet_file(content, full_filename):
     assert len(segments) in (2, 3)
 
     trigger = segments[1]
-    description = segments[2] if 2 < len(segments) else ""
+    description = segments[2] if len(segments) > 2 else ""
 
     # Chomp \n if any.
     if content and content.endswith(os.linesep):

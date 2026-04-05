@@ -67,7 +67,7 @@ class SnippetFileSource(SnippetSource):
                     f"""fnamemodify({vim_helper.escape(filename)}, ":~:.")"""
                 )
                 raise SnippetSyntaxError(filename, line_index, msg)
-            elif event == "clearsnippets":
+            if event == "clearsnippets":
                 priority, triggers = data
                 self._snippets[ft].clear_snippets(priority, triggers)
             elif event == "extends":
@@ -79,7 +79,7 @@ class SnippetFileSource(SnippetSource):
                 (snippet,) = data
                 self._snippets[ft].add_snippet(snippet)
             else:
-                assert False, f"Unhandled {event}: {data!r}"
+                raise AssertionError(f"Unhandled {event}: {data!r}")
         # precompile global snippets code for all snipepts we just sourced
         for snippet in self._snippets[ft]:
             snippet._precompile_globals()

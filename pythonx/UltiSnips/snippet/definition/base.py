@@ -68,12 +68,11 @@ def _words_for_line(trigger, before, num_words=None):
     word_list = split_at_whitespace(before)
     if len(word_list) <= num_words:
         return before.strip()
-    else:
-        before_words = before
-        for i in range(-1, -(num_words + 1), -1):
-            left = before_words.rfind(word_list[i])
-            before_words = before_words[:left]
-        return before[len(before_words) :].strip()
+    before_words = before
+    for i in range(-1, -(num_words + 1), -1):
+        left = before_words.rfind(word_list[i])
+        before_words = before_words[:left]
+    return before[len(before_words) :].strip()
 
 
 class SnippetDefinition:
@@ -124,7 +123,11 @@ class SnippetDefinition:
         }
 
     def __repr__(self):
-        return f"_SnippetDefinition({self._priority!r},{self._trigger},{self._description},{self._opts})"
+        return (
+            f"_SnippetDefinition({self._priority!r},"
+            f"{self._trigger},{self._description},"
+            f"{self._opts})"
+        )
 
     def _re_match(self, trigger):
         """Test if the current regex trigger matches `trigger`.
@@ -135,8 +138,7 @@ class SnippetDefinition:
         for match in re.finditer(self._trigger, trigger):
             if match.end() != len(trigger):
                 continue
-            else:
-                self._matched = trigger[match.start() : match.end()]
+            self._matched = trigger[match.start() : match.end()]
 
             self._last_re = match
             return match
@@ -164,7 +166,9 @@ class SnippetDefinition:
             "snip.context = " + self._context_code, locals, self._compiled_context_code
         ).context
 
-    def _eval_code(self, code, additional_locals={}, compiled_code=None):
+    def _eval_code(self, code, additional_locals=None, compiled_code=None):
+        if additional_locals is None:
+            additional_locals = {}
         current = vim.current
 
         locals = {
@@ -199,8 +203,10 @@ class SnippetDefinition:
         return snip
 
     def _execute_action(
-        self, action, context, additional_locals={}, compiled_action=None
+        self, action, context, additional_locals=None, compiled_action=None
     ):
+        if additional_locals is None:
+            additional_locals = {}
         mark_to_use = "`"
         with vim_helper.save_mark(mark_to_use):
             vim_helper.set_mark_from_pos(mark_to_use, vim_helper.get_cursor_pos())
@@ -252,12 +258,8 @@ class SnippetDefinition:
             self._trigger,
             self._description,
             self._context_code if self._context_code else "<none>",
-            self._actions["pre_expand"] if "pre_expand" in self._actions else "<none>",
-            (
-                self._actions["post_expand"]
-                if "post_expand" in self._actions
-                else "<none>"
-            ),
+            self._actions.get("pre_expand", "<none>"),
+            (self._actions.get("post_expand", "<none>")),
             code,
         )
 
@@ -426,8 +428,7 @@ class SnippetDefinition:
             )
             self._context = snip.context
             return snip.cursor.is_set()
-        else:
-            return False
+        return False
 
     def do_post_expand(self, start, end, snippets_stack):
         if "post_expand" in self._actions:
@@ -447,8 +448,7 @@ class SnippetDefinition:
             snippets_stack[-1].context = snip.context
 
             return snip.cursor.is_set()
-        else:
-            return False
+        return False
 
     def do_post_jump(
         self, tabstop_number, jump_direction, snippets_stack, current_snippet
@@ -476,8 +476,7 @@ class SnippetDefinition:
             current_snippet.context = snip.context
 
             return snip.cursor.is_set()
-        else:
-            return False
+        return False
 
     def launch(self, text_before, visual_content, parent, start, end):
         """Launch this snippet, overwriting the text 'start' to 'end' and
@@ -493,10 +492,7 @@ class SnippetDefinition:
         # Replace leading tabs in the snippet definition via proper indenting
         initial_text = []
         for line_num, line in enumerate(lines):
-            if "t" in self._opts:
-                tabs = 0
-            else:
-                tabs = len(self._TABS.match(line).group(0))
+            tabs = 0 if "t" in self._opts else len(self._TABS.match(line).group(0))
             line_ind = ind_util.ntabs_to_proper_indent(tabs)
             if line_num != 0:
                 line_ind = indent + line_ind

@@ -95,7 +95,7 @@ class VimBufferProxy(vim_helper.VimBuffer):
         changes and applies them to the current snippet stack.
         """
         if isinstance(key, slice):
-            value = [line for line in value]
+            value = list(value)
             changes = list(self._get_diff(key.start, key.stop, value))
             self._buffer[key.start : key.stop] = [line.strip("\n") for line in value]
         else:
@@ -143,7 +143,7 @@ class VimBufferProxy(vim_helper.VimBuffer):
             line_number = len(self)
         if not isinstance(line, list):
             line = [line]
-        self[line_number:line_number] = [l for l in line]
+        self[line_number:line_number] = list(line)
 
     def __delitem__(self, key):
         if isinstance(key, slice):
@@ -162,7 +162,7 @@ class VimBufferProxy(vim_helper.VimBuffer):
 
         if start < 0:
             start = len(self._buffer) + start
-        for line_number in range(0, len(new_value)):
+        for line_number in range(len(new_value)):
             yield ("I", start + line_number, 0, new_value[line_number], True)
 
     def _get_line_diff(self, line_number, before, after):

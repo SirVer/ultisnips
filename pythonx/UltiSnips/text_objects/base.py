@@ -2,6 +2,8 @@
 
 """Base classes for all text objects."""
 
+import contextlib
+
 from UltiSnips import vim_helper
 from UltiSnips.position import Position
 
@@ -109,11 +111,10 @@ class TextObject:
         """The current text of this object."""
         if self._start.line == self._end.line:
             return vim_helper.buf[self._start.line][self._start.col : self._end.col]
-        else:
-            lines = [vim_helper.buf[self._start.line][self._start.col :]]
-            lines.extend(vim_helper.buf[self._start.line + 1 : self._end.line])
-            lines.append(vim_helper.buf[self._end.line][: self._end.col])
-            return "\n".join(lines)
+        lines = [vim_helper.buf[self._start.line][self._start.col :]]
+        lines.extend(vim_helper.buf[self._start.line + 1 : self._end.line])
+        lines.append(vim_helper.buf[self._end.line][: self._end.col])
+        return "\n".join(lines)
 
     @property
     def start(self):
@@ -214,7 +215,7 @@ class EditableTextObject(TextObject):
                     to_kill.add(child)
                     new_cmds.append(cmd)
                     break
-                elif (child._start <= pos <= child._end) and isinstance(
+                if (child._start <= pos <= child._end) and isinstance(
                     child, EditableTextObject
                 ):
                     if pos == child.end and not child.children:
@@ -239,24 +240,23 @@ class EditableTextObject(TextObject):
                         to_kill.add(child)
                         new_cmds.append(cmd)
                         break
-                    else:
-                        child._do_edit(cmd, ctab)
-                        return
-                elif (
+                    child._do_edit(cmd, ctab)
+                    return
+                if (
                     pos < child._start and child._end <= delend and child.start < delend
                 ) or (pos <= child._start and child._end < delend):
                     # Case: this deletion removes the child
                     to_kill.add(child)
                     new_cmds.append(cmd)
                     break
-                elif pos < child._start and (child._start < delend <= child._end):
+                if pos < child._start and (child._start < delend <= child._end):
                     # Case: partially for us, partially for the child
                     my_text = text[: (child._start - pos).col]
                     c_text = text[(child._start - pos).col :]
                     new_cmds.append((ctype, line, col, my_text))
                     new_cmds.append((ctype, line, col, c_text))
                     break
-                elif delend >= child._end and (child._start <= pos < child._end):
+                if delend >= child._end and (child._start <= pos < child._end):
                     # Case: partially for us, partially for the child
                     c_text = text[(child._end - pos).col :]
                     my_text = text[: (child._end - pos).col]
@@ -388,10 +388,8 @@ class EditableTextObject(TextObject):
 
         # If this is a tabstop, delete it. Might have been deleted already if
         # it was nested.
-        try:
+        with contextlib.suppress(AttributeError, KeyError):
             del self._tabstops[child.number]
-        except (AttributeError, KeyError):
-            pass
 
 
 class NoneditableTextObject(TextObject):

@@ -121,7 +121,7 @@ class Token:
 
     def _parse(self, stream, indent):
         """Parses the token from 'stream' with the current 'indent'."""
-        pass  # Does nothing
+        # Does nothing
 
 
 class TabStopToken(Token):
@@ -146,7 +146,10 @@ class TabStopToken(Token):
         self.initial_text = _parse_till_closing_brace(stream)
 
     def __repr__(self):
-        return f"TabStopToken({self.start!r},{self.end!r},{self.number!r},{self.initial_text!r})"
+        return (
+            f"TabStopToken({self.start!r},{self.end!r},"
+            f"{self.number!r},{self.initial_text!r})"
+        )
 
 
 class VisualToken(Token):
@@ -177,7 +180,7 @@ class VisualToken(Token):
             except StopIteration:
                 raise PebkacError(
                     "Invalid ${VISUAL} transformation! Forgot to escape a '/'?"
-                )
+                ) from None
         else:
             self.search = None
             self.replace = None
@@ -211,7 +214,11 @@ class TransformationToken(Token):
         self.options = _parse_till_closing_brace(stream)
 
     def __repr__(self):
-        return f"TransformationToken({self.start!r},{self.end!r},{self.number!r},{self.search!r},{self.replace!r})"
+        return (
+            f"TransformationToken({self.start!r},"
+            f"{self.end!r},{self.number!r},"
+            f"{self.search!r},{self.replace!r})"
+        )
 
 
 class MirrorToken(Token):
@@ -288,7 +295,10 @@ class ChoicesToken(Token):
         return escaped_choice_item.replace(r"\,", ",")
 
     def __repr__(self):
-        return f"ChoicesToken({self.start!r},{self.end!r},{self.number!r},|{self.initial_text!r}|)"
+        return (
+            f"ChoicesToken({self.start!r},{self.end!r},"
+            f"{self.number!r},|{self.initial_text!r}|)"
+        )
 
 
 class EscapeCharToken(Token):

@@ -89,7 +89,7 @@ class SnippetSource:
         todo_fts = list(set(base_filetypes))
         while todo_fts:
             todo_ft = todo_fts.pop()
-            unseen_extends = set(ft for ft in self._extends[todo_ft] if ft not in seen)
+            unseen_extends = {ft for ft in self._extends[todo_ft] if ft not in seen}
             seen.update(unseen_extends)
             todo_fts.extend(unseen_extends)
         return seen

@@ -51,7 +51,12 @@ def wrap(func):
             msg += str(e).strip()
             if RemotePDB.is_enable():
                 host, port = RemotePDB.get_host_port()
-                msg += f"\nUltisnips' post mortem debug server caught the error. Run `telnet {host}:{port}` to inspect it with pdb\n"
+                msg += (
+                    "\nUltisnips' post mortem debug server"
+                    " caught the error."
+                    f" Run `telnet {host}:{port}`"
+                    " to inspect it with pdb\n"
+                )
             _report_exception(self, msg, e)
         except Exception as e:  # pylint: disable=bare-except
             if RemotePDB.is_enable():
@@ -67,7 +72,12 @@ Following is the full stack trace:
             msg += traceback.format_exc()
             if RemotePDB.is_enable():
                 host, port = RemotePDB.get_host_port()
-                msg += f"\nUltisnips' post mortem debug server caught the error. Run `telnet {host}:{port}` to inspect it with pdb\n"
+                msg += (
+                    "\nUltisnips' post mortem debug server"
+                    " caught the error."
+                    f" Run `telnet {host}:{port}`"
+                    " to inspect it with pdb\n"
+                )
 
             _report_exception(self, msg, e)
 

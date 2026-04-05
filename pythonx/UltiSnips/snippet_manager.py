@@ -76,7 +76,7 @@ def _select_and_create_file_to_edit(potentials: set[str]) -> str:
         _bs = "\\"
         formatted = [
             f"{'*' if exists else ' '} {i}: {escape(fn, _bs)}"
-            for i, (fn, exists) in enumerate(zip(files, exists), 1)
+            for i, (fn, exists) in enumerate(zip(files, exists, strict=False), 1)
         ]
         file_to_edit = _ask_user(files, formatted)
         if file_to_edit is None:
@@ -123,7 +123,7 @@ class SnippetManager:
         self._supertab_keys = None
 
         self._active_snippets = []
-        self._added_buffer_filetypes = defaultdict(lambda: [])
+        self._added_buffer_filetypes = defaultdict(list)
 
         self._vstate = VimState()
         self._visual_content = VisualContentPreserver()
@@ -237,9 +237,12 @@ class SnippetManager:
             key = snip.trigger
 
             # remove surrounding "" or '' in snippet description if it exists
-            if len(description) > 2:
-                if description[0] == description[-1] and description[0] in "'\"":
-                    description = description[1:-1]
+            if (
+                len(description) > 2
+                and description[0] == description[-1]
+                and description[0] in "'\""
+            ):
+                description = description[1:-1]
 
             vim_helper.command(
                 "let g:current_ulti_dict['{key}'] = '{val}'".format(
@@ -651,9 +654,7 @@ class SnippetManager:
 
     def _handle_failure(self, trigger, pass_through=False):
         """Mainly make sure that we play well with SuperTab."""
-        if trigger.lower() == "<tab>":
-            feedkey = "\\" + trigger
-        elif trigger.lower() == "<s-tab>":
+        if trigger.lower() == "<tab>" or trigger.lower() == "<s-tab>":
             feedkey = "\\" + trigger
         elif pass_through:
             # pass through the trigger key if it did nothing
@@ -755,11 +756,13 @@ class SnippetManager:
         if snippet.matched:
             text_before = before[: -len(snippet.matched)]
 
-        with use_proxy_buffer(self._active_snippets, self._vstate):
-            with self._action_context():
-                cursor_set_in_action = snippet.do_pre_expand(
-                    self._visual_content.text, self._active_snippets
-                )
+        with (
+            use_proxy_buffer(self._active_snippets, self._vstate),
+            self._action_context(),
+        ):
+            cursor_set_in_action = snippet.do_pre_expand(
+                self._visual_content.text, self._active_snippets
+            )
 
         if cursor_set_in_action:
             text_before = vim_helper.buf.line_till_cursor
@@ -794,19 +797,22 @@ class SnippetManager:
             self._visual_content.reset()
             self._active_snippets.append(snippet_instance)
 
-            with use_proxy_buffer(self._active_snippets, self._vstate):
-                with self._action_context():
-                    snippet.do_post_expand(
-                        snippet_instance.start,
-                        snippet_instance.end,
-                        self._active_snippets,
-                    )
+            with (
+                use_proxy_buffer(self._active_snippets, self._vstate),
+                self._action_context(),
+            ):
+                snippet.do_post_expand(
+                    snippet_instance.start,
+                    snippet_instance.end,
+                    self._active_snippets,
+                )
 
             self._vstate.remember_buffer(self._active_snippets[0])
 
-            if not self._snip_expanded_in_action:
-                self._jump(JumpDirection.FORWARD)
-            elif self._current_snippet.current_text != "":
+            if (
+                not self._snip_expanded_in_action
+                or self._current_snippet.current_text != ""
+            ):
                 self._jump(JumpDirection.FORWARD)
             else:
                 self._current_snippet_is_done()
@@ -841,7 +847,8 @@ class SnippetManager:
         return True
 
     def can_expand(self, autotrigger_only=False):
-        """Check if we would be able to successfully find a snippet in the current position."""
+        """Check if we would be able to successfully find a
+        snippet in the current position."""
         return bool(self._can_expand(autotrigger_only)[1])
 
     def can_jump(self, direction):

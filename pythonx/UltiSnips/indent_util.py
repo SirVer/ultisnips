@@ -23,8 +23,7 @@ class IndentUtil:
         """Convert 'ntabs' number of tabs to the proper indent prefix."""
         line_ind = ntabs * self.shiftwidth * " "
         line_ind = self.indent_to_spaces(line_ind)
-        line_ind = self.spaces_to_indent(line_ind)
-        return line_ind
+        return self.spaces_to_indent(line_ind)
 
     def indent_to_spaces(self, indent):
         """Converts indentation to spaces respecting Vim settings."""

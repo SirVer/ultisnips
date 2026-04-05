@@ -71,5 +71,4 @@ class Position:
             raise IndexError("position can be indexed only 0 (line) and 1 (column)")
         if index == 0:
             return self.line
-        else:
-            return self.col
+        return self.col
