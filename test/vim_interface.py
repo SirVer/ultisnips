@@ -5,13 +5,14 @@ import subprocess
 import tempfile
 import textwrap
 import time
+from pathlib import Path
 
 from test.constant import ARR_D, ARR_L, ARR_R, ARR_U, BS, ESC
 
 
 def wait_until_file_exists(file_path, times=None, interval=0.01):
     while times is None or times:
-        if os.path.exists(file_path):
+        if Path(file_path).exists():
             return True
         time.sleep(interval)
         if times is not None:
@@ -39,28 +40,28 @@ def is_process_running(pid):
 
 def create_directory(dirname):
     """Creates 'dirname' and its parents if it does not exist."""
-    os.makedirs(dirname, exist_ok=True)
+    Path(dirname).mkdir(parents=True, exist_ok=True)
 
 
 class TempFileManager:
     def __init__(self, name=""):
-        self._temp_dir = tempfile.mkdtemp(prefix="UltiSnipsTest_" + name)
+        self._temp_dir = Path(tempfile.mkdtemp(prefix="UltiSnipsTest_" + name))
 
     def name_temp(self, file_path):
-        return os.path.join(self._temp_dir, file_path)
+        return self._temp_dir / file_path
 
     def write_temp(self, file_path, content):
         abs_path = self.name_temp(file_path)
-        create_directory(os.path.dirname(abs_path))
+        create_directory(abs_path.parent)
         with open(abs_path, "w", encoding="utf-8") as f:
             f.write(content)
         return abs_path
 
     def unique_name_temp(self, suffix="", prefix=""):
-        file_handler, abspath = tempfile.mkstemp(suffix, prefix, self._temp_dir)
+        file_handler, abspath = tempfile.mkstemp(suffix, prefix, str(self._temp_dir))
         os.close(file_handler)
-        os.remove(abspath)
-        return abspath
+        Path(abspath).unlink()
+        return Path(abspath)
 
     def clear_temp(self):
         shutil.rmtree(self._temp_dir)
@@ -110,11 +111,11 @@ class VimInterface(TempFileManager):
             config = []
         pid_file = self.name_temp("vim.pid")
         version_file = self.name_temp("vim_version")
-        if os.path.exists(version_file):
-            os.remove(version_file)
+        if version_file.exists():
+            version_file.unlink()
         done_file = self.name_temp("loading_done")
-        if os.path.exists(done_file):
-            os.remove(done_file)
+        if done_file.exists():
+            done_file.unlink()
 
         post_config = []
         post_config.append("py3 << EOF")

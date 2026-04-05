@@ -2,13 +2,12 @@
 
 """Common code for snipMate and UltiSnips snippet files."""
 
-import os.path
+from pathlib import Path
 
 
 def normalize_file_path(path: str) -> str:
-    """Calls normpath and normcase on path"""
-    path = os.path.realpath(path)
-    return os.path.normcase(os.path.normpath(path))
+    """Resolves the path to its canonical form."""
+    return str(Path(path).resolve())
 
 
 def handle_extends(tail, line_index):

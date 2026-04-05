@@ -2,12 +2,12 @@
 
 """Implements `!p ` interpolation."""
 
-import os
 from collections import namedtuple
 
 # We'll end up compiling the global snippets for every snippet so
 # caching compile() should pay off
 from functools import cache
+from pathlib import Path
 
 import UltiSnips.snippet_manager
 from UltiSnips import vim_helper
@@ -267,7 +267,7 @@ class PythonCode(NoneditableTextObject):
         self._locals.update(
             {
                 "t": _Tabs(self._parent),
-                "fn": os.path.basename(path),
+                "fn": Path(path).name,
                 "path": path,
                 "cur": ct,
                 "res": ct,
