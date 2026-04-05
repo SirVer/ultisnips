@@ -928,11 +928,11 @@ class SnippetManager:
         else:
             if not potentials:
                 _show_user_warning(
-                    "UltiSnips was not able to find a default directory for snippets. "
-                    "Do any of " + dot_vim_dirs.__str__() + " exist AND contain "
-                    "any of the folders in g:UltiSnipsSnippetDirectories ? "
-                    "With default vim settings that would be: ~/.vim/UltiSnips "
-                    "Try :UltiSnipsEdit! instead of :UltiSnipsEdit."
+                    f"UltiSnips was not able to find a default directory for snippets. "
+                    f"Do any of {dot_vim_dirs} exist AND contain "
+                    f"any of the folders in g:UltiSnipsSnippetDirectories ? "
+                    f"With default vim settings that would be: ~/.vim/UltiSnips "
+                    f"Try :UltiSnipsEdit! instead of :UltiSnipsEdit."
                 )
                 return ""
         return _select_and_create_file_to_edit(potentials)
