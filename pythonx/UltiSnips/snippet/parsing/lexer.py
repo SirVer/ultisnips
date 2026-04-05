@@ -283,7 +283,7 @@ class ChoicesToken(Token):
                 if not result:
                     continue
                 choice_list.append(self._get_unescaped_choice_item(result))
-            except:
+            except StopIteration:
                 last_choice_item = self._get_unescaped_choice_item(
                     choices_text[cur_col:]
                 )

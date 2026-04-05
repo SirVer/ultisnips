@@ -105,7 +105,7 @@ def escape(inp):
                 + ",".join(
                     [
                         "%s:%s" % (conv(key), conv(value))
-                        for key, value in obj.iteritems()
+                        for key, value in obj.items()
                     ]
                 )
                 + "}"
@@ -269,7 +269,7 @@ def get_cursor_pos():
 def delete_mark(name):
     try:
         return command("delma " + name)
-    except:
+    except error:
         return False
 
 
@@ -349,7 +349,7 @@ def _unmap_select_mode_mapping():
                 # Actually unmap it
                 try:
                     command("silent! sunmap %s %s" % (option, trig))
-                except:  # pylint:disable=bare-except
+                except error:
                     # Bug 908139: ignore unmaps that fail because of
                     # unprintable characters. This is not ideal because we
                     # will not be able to unmap lhs with any unprintable
