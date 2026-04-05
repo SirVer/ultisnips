@@ -52,7 +52,6 @@ def head_tail(line):
 
 
 class LineIterator:
-
     """Convenience class that keeps track of line numbers in files."""
 
     def __init__(self, text):

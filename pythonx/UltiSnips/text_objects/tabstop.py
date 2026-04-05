@@ -12,7 +12,6 @@ from UltiSnips.text_objects.base import EditableTextObject
 
 
 class TabStop(EditableTextObject):
-
     """See module docstring."""
 
     def __init__(self, parent, token, start=None, end=None):

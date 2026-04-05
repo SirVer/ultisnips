@@ -109,7 +109,6 @@ def _get_potential_snippet_filenames_to_edit(
 # TODO(sirver): This class is still too long. It should only contain public
 # facing methods, most of the private methods should be moved outside of it.
 class SnippetManager:
-
     """The main entry point for all UltiSnips functionality.
 
     All Vim functions call methods in this class.

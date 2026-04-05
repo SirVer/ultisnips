@@ -42,7 +42,6 @@ def _replace_text(buf, start, end, text):
 
 
 class TextObject:
-
     """Represents any object in the text that has a span in any ways."""
 
     def __init__(
@@ -162,7 +161,6 @@ class TextObject:
 
 
 class EditableTextObject(TextObject):
-
     """This base class represents any object in the text that can be changed by
     the user."""
 
@@ -398,7 +396,6 @@ class EditableTextObject(TextObject):
 
 
 class NoneditableTextObject(TextObject):
-
     """All passive text objects that the user can't edit by hand."""
 
     def _update(self, done, buf):

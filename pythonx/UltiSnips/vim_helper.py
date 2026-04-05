@@ -16,7 +16,6 @@ import vim  # pylint:disable=import-error
 
 
 class VimBuffer:
-
     """Wrapper around the current Vim buffer."""
 
     def __getitem__(self, idx):

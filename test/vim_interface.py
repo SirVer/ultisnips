@@ -83,9 +83,11 @@ class VimInterface(TempFileManager):
 
     def has_version(self, major, minor, patchlevel):
         cmd = [
-            self._vim_executable, "-e", "-c",
+            self._vim_executable,
+            "-e",
+            "-c",
             "if has('patch-%d.%d.%d') | quit | else | cquit | endif"
-                % (major, minor, patchlevel),
+            % (major, minor, patchlevel),
         ]
         return not subprocess.call(cmd, stdout=subprocess.DEVNULL)
 

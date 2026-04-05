@@ -9,7 +9,6 @@ from UltiSnips.snippet.source.snippet_dictionary import SnippetDictionary
 
 
 class SnippetSource:
-
     """See module docstring."""
 
     def __init__(self):

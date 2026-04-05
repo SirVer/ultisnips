@@ -7,7 +7,6 @@ from UltiSnips import vim_helper
 
 
 class IndentUtil:
-
     """Utility class for dealing properly with indentation."""
 
     def __init__(self):

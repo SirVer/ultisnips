@@ -8,7 +8,6 @@ from UltiSnips.snippet.parsing.snipmate import parse_and_instantiate
 
 
 class SnipMateSnippetDefinition(SnippetDefinition):
-
     """See module doc."""
 
     SNIPMATE_SNIPPET_PRIORITY = -1000

@@ -11,9 +11,11 @@ RUN src/scripts/download_vim.sh
 COPY docker/build_vim.sh src/scripts/
 RUN src/scripts/build_vim.sh
 
-RUN pip install unidecode
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 COPY . /src/UltiSnips
 WORKDIR /src/UltiSnips
+
+RUN uv pip install --system unidecode
 
 RUN ./test_all.py --clone-plugins

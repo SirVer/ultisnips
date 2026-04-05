@@ -19,7 +19,6 @@ _REPLACE_NON_WS = re.compile(r"[^ \t]")
 
 
 class Visual(NoneditableTextObject, TextObjectTransformation):
-
     """See module docstring."""
 
     def __init__(self, parent, token):

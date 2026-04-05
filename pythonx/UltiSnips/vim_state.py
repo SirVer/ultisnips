@@ -13,7 +13,6 @@ _Placeholder = namedtuple("_FrozenPlaceholder", ["current_text", "start", "end"]
 
 
 class VimPosition(Position):
-
     """Represents the current position in the buffer, together with some status
     variables that might change our decisions down the line."""
 
@@ -29,7 +28,6 @@ class VimPosition(Position):
 
 
 class VimState:
-
     """Caches some state information from Vim to better guess what editing
     tasks the user might have done in the last step."""
 
@@ -104,7 +102,6 @@ class VimState:
 
 
 class VisualContentPreserver:
-
     """Saves the current visual selection and the selection mode it was done in
     (e.g. line selection, block selection or regular selection.)"""
 

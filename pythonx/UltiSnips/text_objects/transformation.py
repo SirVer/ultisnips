@@ -80,7 +80,6 @@ _CONDITIONAL = re.compile(r"\(\?(\d+):", re.DOTALL)
 
 
 class _CleverReplace:
-
     """Mimics TextMates replace syntax."""
 
     def __init__(self, expression):
@@ -121,7 +120,6 @@ UNIDECODE_ALERT_RAISED = False
 
 
 class TextObjectTransformation:
-
     """Base class for Transformations and ${VISUAL}."""
 
     def __init__(self, token):
@@ -167,7 +165,6 @@ class TextObjectTransformation:
 
 
 class Transformation(Mirror, TextObjectTransformation):
-
     """See module docstring."""
 
     def __init__(self, parent, ts, token):

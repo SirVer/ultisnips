@@ -60,8 +60,7 @@ class ProperIndenting_AutoIndentAndNewline_ECR(_VimTest):
 class ProperIndenting_FirstLineInFile_ECR(_VimTest):
     text_before = ""
     text_after = ""
-    files = {
-        "us/all.snippets": r"""
+    files = {"us/all.snippets": r"""
 global !p
 def complete(t, opts):
   if t:
@@ -77,8 +76,7 @@ endglobal
 snippet '^#?inc' "#include <>" !r
 #include <$1`!p snip.rv = complete(t[1], ['cassert', 'cstdio', 'cstdlib', 'cstring', 'fstream', 'iostream', 'sstream'])`>
 endsnippet
-        """
-    }
+        """}
     keys = "inc" + EX + "foo"
     wanted = "#include <foo>"
 

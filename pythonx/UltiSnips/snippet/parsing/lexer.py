@@ -13,7 +13,6 @@ from UltiSnips.text import unescape
 
 
 class _TextIterator:
-
     """Helper class to make iterating over text easier."""
 
     def __init__(self, text, offset):
@@ -113,7 +112,6 @@ def _parse_till_unescaped_char(stream, chars):
 
 
 class Token:
-
     """Represents a Token as parsed from a snippet definition."""
 
     def __init__(self, gen, indent):
@@ -128,7 +126,6 @@ class Token:
 
 
 class TabStopToken(Token):
-
     """${1:blub}"""
 
     CHECK = re.compile(r"^\${\d+[:}]")
@@ -159,7 +156,6 @@ class TabStopToken(Token):
 
 
 class VisualToken(Token):
-
     """${VISUAL}"""
 
     CHECK = re.compile(r"^\${VISUAL[:}/]")
@@ -198,7 +194,6 @@ class VisualToken(Token):
 
 
 class TransformationToken(Token):
-
     """${1/match/replace/options}"""
 
     CHECK = re.compile(r"^\${\d+\/")
@@ -232,7 +227,6 @@ class TransformationToken(Token):
 
 
 class MirrorToken(Token):
-
     """$1."""
 
     CHECK = re.compile(r"^\$\d+")
@@ -252,7 +246,6 @@ class MirrorToken(Token):
 
 
 class ChoicesToken(Token):
-
     """${1|o1,o2,o3|}
     P.S. This is not a subclass of TabStop,
          so its content will not be parsed recursively.
@@ -316,7 +309,6 @@ class ChoicesToken(Token):
 
 
 class EscapeCharToken(Token):
-
     """\\n."""
 
     @classmethod
@@ -336,7 +328,6 @@ class EscapeCharToken(Token):
 
 
 class ShellCodeToken(Token):
-
     """`echo "hi"`"""
 
     @classmethod
@@ -354,7 +345,6 @@ class ShellCodeToken(Token):
 
 
 class PythonCodeToken(Token):
-
     """`!p snip.rv = "Hi"`"""
 
     CHECK = re.compile(r"^`!p\s")
@@ -387,7 +377,6 @@ class PythonCodeToken(Token):
 
 
 class VimLCodeToken(Token):
-
     """`!v g:hi`"""
 
     CHECK = re.compile(r"^`!v\s")
@@ -408,7 +397,6 @@ class VimLCodeToken(Token):
 
 
 class EndOfTextToken(Token):
-
     """Appears at the end of the text."""
 
     def __repr__(self):

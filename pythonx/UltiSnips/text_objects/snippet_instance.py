@@ -17,7 +17,6 @@ from UltiSnips.text_objects.tabstop import TabStop
 
 
 class SnippetInstance(EditableTextObject):
-
     """See module docstring."""
 
     # pylint:disable=protected-access
@@ -168,7 +167,6 @@ class SnippetInstance(EditableTextObject):
 
 
 class _VimCursor(NoneditableTextObject):
-
     """Helper class to keep track of the Vim Cursor when text objects expand
     and move."""
 

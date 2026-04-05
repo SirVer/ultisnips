@@ -5,7 +5,6 @@
 
 
 class SnippetDictionary:
-
     """See module docstring."""
 
     def __init__(self):
