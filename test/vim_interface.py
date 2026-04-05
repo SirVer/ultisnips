@@ -84,7 +84,7 @@ class VimInterface(TempFileManager):
             f"if has('patch-{major}.{minor}.{patchlevel}')"
             " | quit | else | cquit | endif",
         ]
-        return not subprocess.call(cmd, stdout=subprocess.DEVNULL)
+        return not subprocess.run(cmd, stdout=subprocess.DEVNULL).returncode
 
     def get_buffer_data(self):
         buffer_path = self.unique_name_temp(prefix="buffer_")

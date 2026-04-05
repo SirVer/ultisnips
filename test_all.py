@@ -38,7 +38,7 @@ def clone_plugin(plugin):
         print(f"Skip cloning of {plugin}. Already there.")
         return
     create_directory(dirname)
-    subprocess.call(
+    subprocess.run(
         [
             "git",
             "clone",
@@ -52,7 +52,7 @@ def clone_plugin(plugin):
 
     if plugin == "Valloric/YouCompleteMe":
         # CLUTCH: this plugin needs something extra.
-        subprocess.call(os.path.join(dirname, "./install.sh"), cwd=dirname)
+        subprocess.run(os.path.join(dirname, "./install.sh"), cwd=dirname)
 
 
 def setup_other_plugins(all_plugins):
