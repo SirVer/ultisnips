@@ -288,6 +288,8 @@ def _get_pos(name):
 
 
 def _is_pos_zero(pos):
+    # getpos() returns ["0","0","0","0"] for unset marks in most cases,
+    # but can return [0] in some Vim/Neovim Python binding edge cases.
     return pos == ["0"] * 4 or pos == [0]
 
 
@@ -305,13 +307,9 @@ def _unmap_select_mode_mapping():
             # Put all smaps into a var, and then read the var
             vim.command(rf"redir => _tmp_smaps | silent smap {option} " + "| redir END")
 
-            # Check if any mappings where found
-            if hasattr(vim, "bindeval"):
-                # Safer to use bindeval, if it exists, because it can deal with
-                # non-UTF-8 characters in mappings; see GH #690.
-                all_maps = bindeval(r"_tmp_smaps")
-            else:
-                all_maps = eval(r"_tmp_smaps")
+            # Use bindeval because it can deal with non-UTF-8 characters
+            # in mappings; see GH #690.
+            all_maps = bindeval(r"_tmp_smaps")
             all_maps = list(filter(len, all_maps.splitlines()))
             if len(all_maps) == 1 and all_maps[0][0] not in " sv":
                 # "No maps found". String could be localized. Hopefully
