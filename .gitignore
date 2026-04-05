@@ -3,3 +3,4 @@
 doc/tags
 /.ropeproject/
 /.mypy_cache/
+.venv/
