@@ -6,7 +6,7 @@ requires-python = ">=3.10"
 
 [dependency-groups]
 dev = [
-    "black",
+    "black>=26.3.1",
     "mypy",
     "pylint",
 ]

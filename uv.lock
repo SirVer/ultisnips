@@ -436,7 +436,7 @@ dev = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "black" },
+    { name = "black", specifier = ">=26.3.1" },
     { name = "mypy" },
     { name = "pylint" },
 ]
