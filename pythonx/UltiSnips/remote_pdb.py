@@ -50,7 +50,7 @@ class RemotePDB(object):
         """
         try:
             self._pdb.interaction(None, tb)
-        except:  # Ignore all exceptions part of debugger shutdown (and bugs... https://bugs.python.org/issue44461 )
+        except Exception:  # Ignore exceptions from debugger shutdown (and bugs... https://bugs.python.org/issue44461 )
             pass
 
     def set_trace(self, frame):

@@ -3,6 +3,7 @@ if exists('did_plugin_ultisnips') || &cp
 endif
 let did_plugin_ultisnips=1
 
+" CI tests against Vim 9.1+, but older versions down to 8.0 may still work.
 if version < 800
    echohl WarningMsg
    echom  "UltiSnips requires Vim >= 8.0"
