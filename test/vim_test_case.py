@@ -101,7 +101,9 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         vim_config = []
         vim_config.append("set nocompatible")
         vim_config.append(
-            f"set runtimepath=$VIMRUNTIME,{os.path.dirname(os.path.dirname(__file__))},{self._temp_dir}"
+            "set runtimepath=$VIMRUNTIME,"
+            f"{os.path.dirname(os.path.dirname(__file__))},"
+            f"{self._temp_dir}"
         )
 
         if self.plugins:
@@ -172,7 +174,9 @@ class VimTestCase(unittest.TestCase, TempFileManager):
             if len(s) > 4:
                 priority = s[4]
             vim_config.append(
-                f"UltiSnips_Manager.add_snippet({sv!r}, {content!r}, {description!r}, {options!r}, priority={priority})"
+                f"UltiSnips_Manager.add_snippet("
+                f"{sv!r}, {content!r}, {description!r},"
+                f" {options!r}, priority={priority})"
             )
 
         # fill buffer with default text and place cursor in between.

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""A ${VISUAL} placeholder that will use the text that was last visually
+"""A ${VISUAL} placeholder that will use the text that was last visually
 selected and insert it here.
 
 If there was no text visually selected, this will be the empty string.

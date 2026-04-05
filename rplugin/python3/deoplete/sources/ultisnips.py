@@ -11,15 +11,13 @@ class Source(Base):
         self.is_volatile = True
 
     def gather_candidates(self, context):
-        suggestions = []
         snippets = self.vim.eval("UltiSnips#SnippetsInCurrentScope()")
-        for trigger in snippets:
-            suggestions.append(
-                {
-                    "word": trigger,
-                    "menu": self.mark + " " + snippets.get(trigger, ""),
-                    "dup": 1,
-                    "kind": "snippet",
-                }
-            )
-        return suggestions
+        return [
+            {
+                "word": trigger,
+                "menu": self.mark + " " + snippets.get(trigger, ""),
+                "dup": 1,
+                "kind": "snippet",
+            }
+            for trigger in snippets
+        ]

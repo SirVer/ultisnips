@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-"""Choices are enumeration values you can choose, by selecting index number.
-It is a special TabStop, its content are taken literally, thus said, they will not be parsed recursively.
+"""Choices are enumeration values you can choose, by selecting
+index number. It is a special TabStop, its content are taken
+literally, thus said, they will not be parsed recursively.
 """
 
 from UltiSnips import vim_helper
@@ -33,8 +34,7 @@ class Choices(TabStop):
         for choice in self._choice_list:
             text_segs.append(f"{index}.{choice}")
             index += 1
-        text = "|".join(text_segs)
-        return text
+        return "|".join(text_segs)
 
     def _update(self, done, buf):
         if self._done:
@@ -135,7 +135,8 @@ class Choices(TabStop):
             self._end.col = displayed_text_end_col
             self.overwrite(buf, overwrite_text)
 
-            # notify all tabstops those in the same line and after this to adjust their positions
+            # notify all tabstops those in the same line and
+            # after this to adjust their positions
             pivot = Position(line, old_end_col)
             diff_col = displayed_text_end_col - old_end_col
             self._parent._child_has_moved(
@@ -145,4 +146,8 @@ class Choices(TabStop):
             vim_helper.set_cursor_from_pos([buf_num, cursor_line, self._end.col + 1])
 
     def __repr__(self):
-        return f"Choices({self._number},{self._start!r}->{self._end!r},{self._initial_text!r})"
+        return (
+            f"Choices({self._number},"
+            f"{self._start!r}->{self._end!r},"
+            f"{self._initial_text!r})"
+        )

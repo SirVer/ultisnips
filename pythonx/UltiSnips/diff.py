@@ -33,7 +33,9 @@ def is_complete_edit(initial_line, original, wanted, cmds):
         elif ctype == "I":
             buf[line] = buf[line][:col] + char + buf[line][col:]
         buf = "\n".join(buf).split("\n")
-    return len(buf) == len(wanted) and all(j == k for j, k in zip(buf, wanted))
+    return len(buf) == len(wanted) and all(
+        j == k for j, k in zip(buf, wanted, strict=False)
+    )
 
 
 def guess_edit(initial_line, last_text, current_text, vim_state):
@@ -228,14 +230,16 @@ def diff(a, b, sline=0):
                             y + 1,
                             line,
                             ncol,
-                            what[:-1]
-                            + (("I", what[-1][1], what[-1][2], what[-1][-1] + b[y]),),
+                            (
+                                *what[:-1],
+                                ("I", what[-1][1], what[-1][2], what[-1][-1] + b[y]),
+                            ),
                         )
                     )
                 elif seen[x, y + 1] > cost + insertion_cost + ncol:
                     seen[x, y + 1] = cost + insertion_cost + ncol
                     d[cost + ncol + insertion_cost].append(
-                        (x, y + 1, nline, ncol, what + (("I", line, col, b[y]),))
+                        (x, y + 1, nline, ncol, (*what, ("I", line, col, b[y])))
                     )
             if x < len(a):  # DELETE
                 if (
@@ -254,12 +258,12 @@ def diff(a, b, sline=0):
                             y,
                             line,
                             col,
-                            what[:-1] + (("D", line, col, what[-1][-1] + a[x]),),
+                            (*what[:-1], ("D", line, col, what[-1][-1] + a[x])),
                         )
                     )
                 elif seen[x + 1, y] > cost + deletion_cost:
                     seen[x + 1, y] = cost + deletion_cost
                     d[cost + deletion_cost].append(
-                        (x + 1, y, line, col, what + (("D", line, col, a[x]),))
+                        (x + 1, y, line, col, (*what, ("D", line, col, a[x])))
                     )
         cost += 1

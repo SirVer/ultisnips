@@ -25,18 +25,29 @@ target-version = "py311"
 line-length = 88
 
 [tool.ruff.lint]
-# Start conservative: only enable safe, high-value rule sets.
-# E/W: pycodestyle errors/warnings
-# F: pyflakes (unused imports, undefined names, etc.)
-# I: isort (import sorting)
-# UP: pyupgrade (modernize Python syntax)
-select = ["E", "W", "F", "I", "UP"]
-
-# Ignore rules that conflict with the codebase style or are too noisy.
+select = [
+    "E", "W", # pycodestyle
+    "F",      # pyflakes
+    "I",      # isort
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "SIM",    # flake8-simplify
+    "C4",     # flake8-comprehensions
+    "RET",    # flake8-return
+    "PIE",    # flake8-pie
+    "PERF",   # perflint
+    "RUF",    # ruff-specific
+    "T20",    # flake8-print
+    "ERA",    # eradicate (commented-out code)
+]
 ignore = [
     "E501",   # line too long — enforced by formatter, not linter
-    "E731",   # lambda assignment — used intentionally for skip_if in tests
-    "E741",   # ambiguous variable name (l, O, I) — common in vim plugin code
+    "E731",    # lambda assignment — used intentionally for skip_if in tests
+    "E741",    # ambiguous variable name (l, O, I) — common in vim plugin code
+    "RET503",  # missing explicit return None — implicit is fine
+    "RET502",  # unnecessary explicit return None — conflicts with RET503
+    "RUF001",  # ambiguous unicode — intentional in langmap test data
+    "RUF012",  # mutable class defaults — used as test data declarations, not shared state
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -45,6 +56,9 @@ ignore = [
 "pythonx/UltiSnips/snippet/definition/__init__.py" = ["F401"]
 "pythonx/UltiSnips/snippet/source/__init__.py" = ["F401"]
 "pythonx/UltiSnips/text_objects/__init__.py" = ["F401"]
+# Test infrastructure uses print for progress output.
+"test_all.py" = ["T201"]
+"test/vim_test_case.py" = ["T201"]
 
 [tool.ruff.format]
 # Match black's defaults.

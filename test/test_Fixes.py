@@ -21,8 +21,6 @@ class VirtualEdit(_VimTest):
         vim_config.append("set noexpandtab")
 
 
-# End: 1251994
-
 # Test for Github Pull Request #134 - Retain unnamed register
 
 

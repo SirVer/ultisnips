@@ -6,5 +6,3 @@ class PebkacError(RuntimeError):
     i.e. caused by the user. Hence: "Problem exists between keyboard and
     chair".
     """
-
-    pass

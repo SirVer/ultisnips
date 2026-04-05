@@ -201,7 +201,7 @@ if __name__ == "__main__":
 
             if len(selected_tests):
                 id = test.id().split(".")[1]
-                if not any([id.startswith(t) for t in selected_tests]):
+                if not any(id.startswith(t) for t in selected_tests):
                     continue
             tests.add(test)
 

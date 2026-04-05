@@ -125,7 +125,7 @@ class SnippetInstance(EditableTextObject):
                 return self._tabstops.get(self._cts, None)
             self._cts, ts = res
             return ts
-        elif jump_direction == JumpDirection.FORWARD:
+        if jump_direction == JumpDirection.FORWARD:
             res = self._get_next_tab(self._cts)
             if res is None:
                 self._cts = None
@@ -139,11 +139,9 @@ class SnippetInstance(EditableTextObject):
                 start = Position(self.end.line, self.end.col)
                 end = Position(self.end.line, self.end.col)
                 return TabStop(self, 0, start, end)
-            else:
-                self._cts, ts = res
-                return ts
-        else:
-            assert False, f"Unknown JumpDirection: {jump_direction!r}"
+            self._cts, ts = res
+            return ts
+        raise AssertionError(f"Unknown JumpDirection: {jump_direction!r}")
 
     def has_next_tab(self, jump_direction: JumpDirection):
         if jump_direction == JumpDirection.BACKWARD:

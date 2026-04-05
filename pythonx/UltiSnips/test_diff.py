@@ -171,5 +171,3 @@ class MultiLine(_Base, unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-    # k = TestEditScript()
-    # unittest.TextTestRunner().run(k)

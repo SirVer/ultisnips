@@ -93,11 +93,10 @@ def _handle_snippet_or_global(
     remain = line[len(snip) :].strip()
     words = remain.split()
 
-    if len(words) > 2:
-        # second to last word ends with a quote
-        if '"' not in words[-1] and words[-2][-1] == '"':
-            opts = words[-1]
-            remain = remain[: -len(opts) - 1].rstrip()
+    # second to last word ends with a quote
+    if len(words) > 2 and '"' not in words[-1] and words[-2][-1] == '"':
+        opts = words[-1]
+        remain = remain[: -len(opts) - 1].rstrip()
 
     if "e" in opts and not context:
         left = remain[:-1].rfind('"')

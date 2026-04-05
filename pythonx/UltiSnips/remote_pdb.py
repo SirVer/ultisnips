@@ -1,3 +1,4 @@
+import contextlib
 import sys
 import threading
 
@@ -30,7 +31,7 @@ class RemotePDB:
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
         self.server.bind((self.host, self.port))
         self.server.listen(1)
-        self.connection, address = self.server.accept()
+        self.connection, _address = self.server.accept()
         io = self.connection.makefile("rw")
         parent = self
 
@@ -47,10 +48,10 @@ class RemotePDB:
         """
         Launch the server as post mortem on the currently handled exception
         """
-        try:
+        # Ignore exceptions from debugger shutdown
+        # (and bugs... https://bugs.python.org/issue44461 )
+        with contextlib.suppress(Exception):
             self._pdb.interaction(None, tb)
-        except Exception:  # Ignore exceptions from debugger shutdown (and bugs... https://bugs.python.org/issue44461 )
-            pass
 
     def set_trace(self, frame):
         self._pdb.set_trace(frame)
@@ -101,7 +102,7 @@ class RemotePDB:
         if cls.singleton is None and not cls.is_enable():
             return
         cls._create()
-        t, val, tb = sys.exc_info()
+        _t, _val, tb = sys.exc_info()
 
         def _thread_run():
             cls.singleton.start_server()

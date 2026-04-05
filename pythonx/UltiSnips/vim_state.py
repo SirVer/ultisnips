@@ -127,9 +127,10 @@ class VisualContentPreserver:
 
         # When 'selection' is 'exclusive', the > mark is one column behind the
         # actual content being copied, but never before the < mark.
-        if vim_helper.eval("&selection") == "exclusive":
-            if not (sl == el and sbyte == ebyte):
-                ec -= 1
+        if vim_helper.eval("&selection") == "exclusive" and not (
+            sl == el and sbyte == ebyte
+        ):
+            ec -= 1
 
         _vim_line_with_eol = lambda ln: vim_helper.buf[ln] + "\n"
 

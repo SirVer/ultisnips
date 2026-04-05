@@ -81,7 +81,8 @@ class VimInterface(TempFileManager):
             self._vim_executable,
             "-e",
             "-c",
-            f"if has('patch-{major}.{minor}.{patchlevel}') | quit | else | cquit | endif",
+            f"if has('patch-{major}.{minor}.{patchlevel}')"
+            " | quit | else | cquit | endif",
         ]
         return not subprocess.call(cmd, stdout=subprocess.DEVNULL)
 
@@ -103,8 +104,10 @@ class VimInterface(TempFileManager):
         # Note the leading space to exclude it from shell history.
         return f""" {self._vim_executable} -u {config_path}\r\n"""
 
-    def launch(self, config=[]):
+    def launch(self, config=None):
         """Returns the python version in Vim as a string, e.g. '3.7'"""
+        if config is None:
+            config = []
         pid_file = self.name_temp("vim.pid")
         version_file = self.name_temp("vim_version")
         if os.path.exists(version_file):
@@ -117,7 +120,8 @@ class VimInterface(TempFileManager):
         post_config.append("py3 << EOF")
         post_config.append("import vim, sys")
         post_config.append(
-            f"with open('{pid_file}', 'w') as pid_file: pid_file.write(vim.eval('getpid()'))"
+            f"with open('{pid_file}', 'w') as pid_file:"
+            " pid_file.write(vim.eval('getpid()'))"
         )
         post_config.append(f"with open('{version_file}', 'w') as version_file:")
         post_config.append("    version_file.write('%i.%i.%i' % sys.version_info[:3])")
@@ -210,9 +214,7 @@ class VimInterfaceWindows(VimInterface):
 
     def is_focused(self, title=None):
         cur_title = self.win32gui.GetWindowText(self.win32gui.GetForegroundWindow())
-        if (title or "- GVIM") in cur_title:
-            return True
-        return False
+        return (title or "- GVIM") in cur_title
 
     def focus(self, title=None):
         if not self.shell.AppActivate(title or "- GVIM"):
