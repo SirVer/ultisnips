@@ -1,4 +1,4 @@
-from test.constant import *
+from test.constant import BS, ESC, EX, JF
 from test.util import no_unidecode_available
 from test.vim_test_case import VimTestCase as _VimTest
 

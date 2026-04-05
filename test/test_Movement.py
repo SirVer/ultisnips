@@ -1,4 +1,4 @@
-from test.constant import *
+from test.constant import ARR_D, ARR_L, ARR_R, ARR_U, BS, ESC, EX, JF
 from test.vim_test_case import VimTestCase as _VimTest
 
 

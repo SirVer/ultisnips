@@ -40,10 +40,6 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-# Test files use wildcard imports and unused imports by design.
-"test/test_*.py" = ["F403", "F405"]
-"test/constant.py" = ["F401"]
-"test/util.py" = ["F401"]
 # __init__.py files re-export symbols for convenience.
 "pythonx/UltiSnips/__init__.py" = ["F401"]
 "pythonx/UltiSnips/snippet/definition/__init__.py" = ["F401"]
