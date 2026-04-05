@@ -139,15 +139,11 @@ class SnippetManager:
         self.register_snippet_source("ultisnips_files", UltiSnipsFileSource())
         self.register_snippet_source("added", self._added_snippets_source)
 
-        enable_snipmate = "1"
-        if vim_helper.eval("exists('g:UltiSnipsEnableSnipMate')") == "1":
-            enable_snipmate = vim_helper.eval("g:UltiSnipsEnableSnipMate")
-        if enable_snipmate == "1":
+        enable_snipmate = vim.vars.get("UltiSnipsEnableSnipMate", 1)
+        if int(enable_snipmate):
             self.register_snippet_source("snipmate_files", SnipMateFileSource())
 
-        self._autotrigger = True
-        if vim_helper.eval("exists('g:UltiSnipsAutoTrigger')") == "1":
-            self._autotrigger = vim_helper.eval("g:UltiSnipsAutoTrigger") == "1"
+        self._autotrigger = bool(int(vim.vars.get("UltiSnipsAutoTrigger", 1)))
 
         self._should_update_textobjects = False
         self._should_reset_visual = False
@@ -157,29 +153,29 @@ class SnippetManager:
     @err_to_scratch_buffer.wrap
     def jump_forwards(self):
         """Jumps to the next tabstop."""
-        vim_helper.command("let g:ulti_jump_forwards_res = 1")
+        vim.vars["ulti_jump_forwards_res"] = 1
         vim_helper.command("let &g:undolevels = &g:undolevels")
         if not self._jump(JumpDirection.FORWARD):
-            vim_helper.command("let g:ulti_jump_forwards_res = 0")
+            vim.vars["ulti_jump_forwards_res"] = 0
             return self._handle_failure(self.forward_trigger)
         return None
 
     @err_to_scratch_buffer.wrap
     def jump_backwards(self):
         """Jumps to the previous tabstop."""
-        vim_helper.command("let g:ulti_jump_backwards_res = 1")
+        vim.vars["ulti_jump_backwards_res"] = 1
         vim_helper.command("let &g:undolevels = &g:undolevels")
         if not self._jump(JumpDirection.BACKWARD):
-            vim_helper.command("let g:ulti_jump_backwards_res = 0")
+            vim.vars["ulti_jump_backwards_res"] = 0
             return self._handle_failure(self.backward_trigger)
         return None
 
     @err_to_scratch_buffer.wrap
     def expand(self):
         """Try to expand a snippet at the current position."""
-        vim_helper.command("let g:ulti_expand_res = 1")
+        vim.vars["ulti_expand_res"] = 1
         if not self._try_expand():
-            vim_helper.command("let g:ulti_expand_res = 0")
+            vim.vars["ulti_expand_res"] = 0
             self._handle_failure(self.expand_trigger, True)
 
     @err_to_scratch_buffer.wrap
@@ -191,13 +187,13 @@ class SnippetManager:
         jump forward.
 
         """
-        vim_helper.command("let g:ulti_expand_or_jump_res = 1")
+        vim.vars["ulti_expand_or_jump_res"] = 1
         rv = self._try_expand()
         if not rv:
-            vim_helper.command("let g:ulti_expand_or_jump_res = 2")
+            vim.vars["ulti_expand_or_jump_res"] = 2
             rv = self._jump(JumpDirection.FORWARD)
         if not rv:
-            vim_helper.command("let g:ulti_expand_or_jump_res = 0")
+            vim.vars["ulti_expand_or_jump_res"] = 0
             self._handle_failure(self.expand_trigger, True)
 
     @err_to_scratch_buffer.wrap
@@ -209,13 +205,13 @@ class SnippetManager:
         expand a snippet.
 
         """
-        vim_helper.command("let g:ulti_expand_or_jump_res = 2")
+        vim.vars["ulti_expand_or_jump_res"] = 2
         rv = self._jump(JumpDirection.FORWARD)
         if not rv:
-            vim_helper.command("let g:ulti_expand_or_jump_res = 1")
+            vim.vars["ulti_expand_or_jump_res"] = 1
             rv = self._try_expand()
         if not rv:
-            vim_helper.command("let g:ulti_expand_or_jump_res = 0")
+            vim.vars["ulti_expand_or_jump_res"] = 0
             self._handle_failure(self.expand_trigger, True)
 
     @err_to_scratch_buffer.wrap
@@ -244,18 +240,13 @@ class SnippetManager:
             ):
                 description = description[1:-1]
 
-            ekey = key.replace("'", "''")
-            edesc = description.replace("'", "''")
-            vim_helper.command(f"let g:current_ulti_dict['{ekey}'] = '{edesc}'")
+            vim.vars["current_ulti_dict"][key] = description
 
             if search_all:
-                eloc = location.replace("'", "''")
-                vim_helper.command(
-                    f"let g:current_ulti_dict_info['{ekey}'] = {{"
-                    f"'description': '{edesc}',"
-                    f"'location': '{eloc}',"
-                    f"}}"
-                )
+                vim.vars["current_ulti_dict_info"][key] = {
+                    "description": description,
+                    "location": location,
+                }
 
     @err_to_scratch_buffer.wrap
     def list_snippets(self):
@@ -265,7 +256,7 @@ class SnippetManager:
         snippets = self._snips(before, True)
 
         if len(snippets) == 0:
-            self._handle_failure(vim.eval("g:UltiSnipsListSnippets"))
+            self._handle_failure(vim_helper.as_str(vim.vars["UltiSnipsListSnippets"]))
             return True
 
         # Sort snippets alphabetically
@@ -656,10 +647,11 @@ class SnippetManager:
             feedkey = None
         mode = "n"
         if not self._supertab_keys:
-            if vim_helper.eval("exists('g:SuperTabMappingForward')") != "0":
+            fwd = vim.vars.get("SuperTabMappingForward", None)
+            if fwd is not None:
                 self._supertab_keys = (
-                    vim_helper.eval("g:SuperTabMappingForward"),
-                    vim_helper.eval("g:SuperTabMappingBackward"),
+                    vim_helper.as_str(fwd),
+                    vim_helper.as_str(vim.vars.get("SuperTabMappingBackward", b"")),
                 )
             else:
                 self._supertab_keys = ["", ""]
@@ -885,16 +877,11 @@ class SnippetManager:
 
         dot_vim_dirs = vim_helper.get_dot_vim()
         all_snippet_directories = find_all_snippet_directories()
-        has_storage_dir = (
-            vim_helper.eval(
-                "exists('g:UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit')"
-            )
-            == "1"
+        snippet_storage_dir = vim.vars.get(
+            "UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit", None
         )
-        if has_storage_dir:
-            snippet_storage_dir = vim_helper.eval(
-                "g:UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit"
-            )
+        if snippet_storage_dir is not None:
+            snippet_storage_dir = vim_helper.as_str(snippet_storage_dir)
             full_path = str(Path(snippet_storage_dir).expanduser())
             potentials.update(
                 _get_potential_snippet_filenames_to_edit(full_path, filetypes)
@@ -908,6 +895,7 @@ class SnippetManager:
                 )
             )
 
+        has_storage_dir = snippet_storage_dir is not None
         if (len(all_snippet_directories) != 1 and not has_storage_dir) or (
             has_storage_dir and bang
         ):
@@ -984,7 +972,7 @@ class SnippetManager:
 
 
 UltiSnips_Manager = SnippetManager(
-    vim.eval("g:UltiSnipsExpandTrigger"),
-    vim.eval("g:UltiSnipsJumpForwardTrigger"),
-    vim.eval("g:UltiSnipsJumpBackwardTrigger"),
+    vim_helper.as_str(vim.vars["UltiSnipsExpandTrigger"]),
+    vim_helper.as_str(vim.vars["UltiSnipsJumpForwardTrigger"]),
+    vim_helper.as_str(vim.vars["UltiSnipsJumpBackwardTrigger"]),
 )
