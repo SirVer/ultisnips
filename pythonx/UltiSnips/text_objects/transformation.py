@@ -86,6 +86,11 @@ class _CleverReplace:
             0
         ]
 
+        # Shelter escaped backslashes (\\) so that e.g. \\l is not
+        # consumed by the case-switch regex as \l.  GH #1495.
+        _ESCAPED_BSLASH = "\x00"
+        transformed = transformed.replace("\\\\", _ESCAPED_BSLASH)
+
         # Replace Case switches
         def _one_char_case_change(match):
             """Replaces one character case changes."""
@@ -102,6 +107,10 @@ class _CleverReplace:
             return match.group(1)[1:].lower()
 
         transformed = _LONG_CASEFOLDINGS.subn(_multi_char_case_change, transformed)[0]
+
+        # Restore escaped backslashes before unescape turns \\ into \.
+        transformed = transformed.replace(_ESCAPED_BSLASH, "\\\\")
+
         transformed = _replace_conditional(match, transformed)
         return unescape(fill_in_whitespace(transformed))
 
