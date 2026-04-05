@@ -34,7 +34,7 @@ def is_complete_edit(initial_line, original, wanted, cmds):
             buf[line] = buf[line][:col] + char + buf[line][col:]
         buf = "\n".join(buf).split("\n")
     return len(buf) == len(wanted) and all(
-        j == k for j, k in zip(buf, wanted, strict=False)
+        j == k for j, k in zip(buf, wanted, strict=True)
     )
 
 

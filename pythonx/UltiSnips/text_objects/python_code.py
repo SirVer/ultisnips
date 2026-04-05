@@ -276,7 +276,7 @@ class PythonCode(NoneditableTextObject):
         )
         self._snip._reset(ct)
 
-        for code, compiled_code in zip(self._codes, self._compiled_codes, strict=False):
+        for code, compiled_code in zip(self._codes, self._compiled_codes, strict=True):
             try:
                 exec(compiled_code, self._locals)
             except Exception as exception:
