@@ -102,6 +102,20 @@ Note that some tests may fail because the post-mortem will catch an expected exc
 
 Check `./test_all.py --help` for more informations.
 
+## Linting and Formatting
+
+UltiSnips uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting.
+CI enforces both — PRs that fail lint or format checks will not pass.
+
+    $ make lint      # check for lint errors
+    $ make format    # auto-format code
+
+To catch issues before committing, install the git pre-commit hook:
+
+    $ ./scripts/install-hooks
+
+This runs `ruff check` and `ruff format --check` on every `git commit`.
+
 ## Documenting
 
 User documentation goes into [`doc/UltiSnips.txt`](https://github.com/SirVer/ultisnips/blob/00_contributing/doc/UltiSnips.txt).

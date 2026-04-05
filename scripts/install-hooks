@@ -1,0 +1,23 @@
+#!/bin/sh
+# Installs git pre-commit hook that runs ruff lint and format checks.
+
+HOOK=".git/hooks/pre-commit"
+
+cat > "$HOOK" << 'EOF'
+#!/bin/sh
+# Ruff lint and format checks. Installed by scripts/install-hooks.
+
+if ! command -v uv > /dev/null 2>&1; then
+    echo "uv not found, skipping pre-commit checks"
+    exit 0
+fi
+
+echo "Running ruff check..."
+uv run ruff check . || exit 1
+
+echo "Running ruff format --check..."
+uv run ruff format --check . || exit 1
+EOF
+
+chmod +x "$HOOK"
+echo "Installed pre-commit hook to $HOOK"
