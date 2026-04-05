@@ -22,7 +22,6 @@ from test.vim_interface import (
     create_directory,
     tempfile,
     VimInterfaceTmux,
-    VimInterfaceTmuxNeovim,
 )
 
 
@@ -132,21 +131,12 @@ if __name__ == "__main__":
             help="executable to run when launching vim.",
         )
         p.add_option(
-            "--interface",
-            dest="interface",
-            type=str,
-            default="tmux",
-            help="Interface to use. Use 'tmux' with vanilla Vim and 'tmux_nvim' "
-            "with Neovim.",
-        )
-        p.add_option(
             "--python-host-prog",
             dest="python_host_prog",
             type=str,
             default="",
-            help="Neovim needs a variable to tell it which python interpretor to use for "
-            "py blocks. This needs to be set to point to the correct python interpretor. "
-            "It is ignored for vanilla Vim.",
+            help="Sets g:python3_host_prog in neovim to select which python "
+            "interpreter to use for py3 blocks. Ignored for vanilla Vim.",
         )
         p.add_option(
             "--expected-python-version",
@@ -211,16 +201,7 @@ if __name__ == "__main__":
         else:
             assert 0, "Unexpected output, has_nvim=%r" % has_nvim
 
-        if options.interface == "tmux":
-            assert vim_flavor == "vim", (
-                "Interface is tmux, but vim_flavor is %s" % vim_flavor
-            )
-            vim = VimInterfaceTmux(options.vim, options.session)
-        else:
-            assert vim_flavor == "neovim", (
-                "Interface is TmuxNeovim, but vim_flavor is %s" % vim_flavor
-            )
-            vim = VimInterfaceTmuxNeovim(options.vim, options.session)
+        vim = VimInterfaceTmux(options.vim, options.session)
 
         if not options.clone_plugins and platform.system() == "Windows":
             raise RuntimeError(

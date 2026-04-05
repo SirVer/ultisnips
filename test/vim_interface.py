@@ -182,12 +182,6 @@ class VimInterfaceTmux(VimInterface):
             raise RuntimeError("Need at least tmux 1.8, you have %s." % stdout.strip())
 
 
-class VimInterfaceTmuxNeovim(VimInterfaceTmux):
-    """Neovim interface that sends keystrokes via tmux, just like vanilla Vim."""
-
-    pass
-
-
 class VimInterfaceWindows(VimInterface):
     BRACES = re.compile("([}{])")
     WIN_ESCAPES = ["+", "^", "%", "~", "[", "]", "<", ">", "(", ")"]

@@ -1,0 +1,20 @@
+ARG PYTHON_IMAGE
+
+FROM python:${PYTHON_IMAGE}
+
+ARG NVIM_VERSION
+
+COPY docker/install_packages.sh src/scripts/
+RUN src/scripts/install_packages.sh
+
+COPY docker/install_nvim.sh src/scripts/
+RUN src/scripts/install_nvim.sh
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+COPY . /src/UltiSnips
+WORKDIR /src/UltiSnips
+
+RUN uv pip install --system unidecode pynvim
+
+RUN ./test_all.py --clone-plugins
