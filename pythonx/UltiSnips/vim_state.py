@@ -2,7 +2,8 @@
 
 """Some classes to conserve Vim's state for comparing over time."""
 
-from collections import deque, namedtuple
+from collections import deque
+from typing import NamedTuple
 
 import vim
 
@@ -10,7 +11,11 @@ from UltiSnips import vim_helper
 from UltiSnips.position import Position
 from UltiSnips.vim_encoding import byte2col
 
-_Placeholder = namedtuple("_FrozenPlaceholder", ["current_text", "start", "end"])
+
+class _Placeholder(NamedTuple):
+    current_text: str
+    start: Position
+    end: Position
 
 
 class VimPosition(Position):
@@ -20,7 +25,7 @@ class VimPosition(Position):
     def __init__(self):
         pos = vim_helper.buf.cursor
         self._mode = vim_helper.eval("mode()")
-        Position.__init__(self, pos.line, pos.col)
+        super().__init__(pos.line, pos.col)
 
     @property
     def mode(self):

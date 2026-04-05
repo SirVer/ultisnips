@@ -12,8 +12,7 @@ class SnipMateSnippetDefinition(SnippetDefinition):
     SNIPMATE_SNIPPET_PRIORITY = -1000
 
     def __init__(self, trigger, value, description, location):
-        SnippetDefinition.__init__(
-            self,
+        super().__init__(
             self.SNIPMATE_SNIPPET_PRIORITY,
             trigger,
             value,

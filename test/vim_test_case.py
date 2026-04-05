@@ -35,7 +35,9 @@ class VimTestCase(unittest.TestCase, TempFileManager):
     )
 
     def __init__(self, *args, **kwargs):
-        unittest.TestCase.__init__(self, *args, **kwargs)
+        # Non-cooperative multiple inheritance: unittest.TestCase doesn't
+        # call super().__init__(), so TempFileManager must be init'd explicitly.
+        super().__init__(*args, **kwargs)
         TempFileManager.__init__(self, "Case")
 
     def runTest(self):

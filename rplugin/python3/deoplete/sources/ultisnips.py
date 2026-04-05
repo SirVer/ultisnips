@@ -3,7 +3,7 @@ from deoplete.base.source import Base
 
 class Source(Base):
     def __init__(self, vim):
-        Base.__init__(self, vim)
+        super().__init__(vim)
 
         self.name = "ultisnips"
         self.mark = "[US]"
