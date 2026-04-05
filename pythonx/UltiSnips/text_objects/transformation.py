@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
+
 """Implements TabStop transformations."""
 
 import re
 import sys
 
-from UltiSnips.text import unescape, fill_in_whitespace
+from UltiSnips.text import fill_in_whitespace, unescape
 from UltiSnips.text_objects.mirror import Mirror
 
 
@@ -151,7 +152,7 @@ class TextObjectTransformation:
 
                 text = unidecode.unidecode(text)
             except Exception:  # pylint:disable=broad-except
-                if UNIDECODE_ALERT_RAISED == False:
+                if not UNIDECODE_ALERT_RAISED:
                     UNIDECODE_ALERT_RAISED = True
                     sys.stderr.write(
                         "Please install unidecode python package in order to "

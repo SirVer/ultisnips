@@ -1,6 +1,5 @@
 import sys
 import threading
-from bdb import BdbQuit
 
 from UltiSnips import vim_helper
 

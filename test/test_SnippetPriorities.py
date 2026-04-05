@@ -1,5 +1,5 @@
+from test.constant import ESC, EX
 from test.vim_test_case import VimTestCase as _VimTest
-from test.constant import EX, ESC
 
 
 class SnippetPriorities_MultiWordTriggerOverwriteExisting(_VimTest):
@@ -54,59 +54,69 @@ class SnippetPriorities_OverwriteThenChoose_ECR(_VimTest):
 
 
 class SnippetPriorities_AddedHasHigherThanFile(_VimTest):
-    files = {"us/all.snippets": r"""
+    files = {
+        "us/all.snippets": r"""
         snippet test "Test Snippet" b
         This is a test snippet
         endsnippet
-        """}
+        """
+    }
     snippets = (("test", "We overwrite", "Overwrite the two", "", 1),)
     keys = "test" + EX
     wanted = "We overwrite"
 
 
 class SnippetPriorities_FileHasHigherThanAdded(_VimTest):
-    files = {"us/all.snippets": r"""
+    files = {
+        "us/all.snippets": r"""
         snippet test "Test Snippet" b
         This is a test snippet
         endsnippet
-        """}
+        """
+    }
     snippets = (("test", "We do not overwrite", "Overwrite the two", "", -1),)
     keys = "test" + EX
     wanted = "This is a test snippet"
 
 
 class SnippetPriorities_FileHasHigherThanAdded_neg_prio(_VimTest):
-    files = {"us/all.snippets": r"""
+    files = {
+        "us/all.snippets": r"""
         priority -3
         snippet test "Test Snippet" b
         This is a test snippet
         endsnippet
-        """}
+        """
+    }
     snippets = (("test", "We overwrite", "Overwrite the two", "", -5),)
     keys = "test" + EX
     wanted = "This is a test snippet"
 
 
 class SnippetPriorities_SimpleClear(_VimTest):
-    files = {"us/all.snippets": r"""
+    files = {
+        "us/all.snippets": r"""
         priority 1
         clearsnippets
         priority -1
         snippet test "Test Snippet"
         Should not expand to this.
         endsnippet
-        """}
+        """
+    }
     keys = "test" + EX
     wanted = "test" + EX
 
 
 class SnippetPriorities_SimpleClear2(_VimTest):
-    files = {"us/all.snippets": r"""
+    files = {
+        "us/all.snippets": r"""
         clearsnippets
         snippet test "Test snippet"
         Should not expand to this.
         endsnippet
-        """}
+        """
+    }
     keys = "test" + EX
     wanted = "test" + EX
 

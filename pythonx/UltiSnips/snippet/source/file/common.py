@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """Common code for snipMate and UltiSnips snippet files."""
 
 import os.path
@@ -23,7 +24,7 @@ def handle_action(head, tail, line_index):
         action = tail.strip('"').replace(r"\"", '"').replace(r"\\\\", r"\\")
         return head, (action,)
     else:
-        return "error", ("'{}' without specified action".format(head), line_index)
+        return "error", (f"'{head}' without specified action", line_index)
 
 
 def handle_context(tail, line_index):

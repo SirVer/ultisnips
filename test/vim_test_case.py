@@ -7,8 +7,8 @@ import textwrap
 import time
 import unittest
 
-from test.constant import SEQUENCES, EX
-from test.vim_interface import create_directory, TempFileManager
+from test.constant import EX, SEQUENCES
+from test.vim_interface import TempFileManager, create_directory
 
 
 def plugin_cache_dir():
@@ -101,8 +101,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         vim_config = []
         vim_config.append("set nocompatible")
         vim_config.append(
-            "set runtimepath=$VIMRUNTIME,%s,%s"
-            % (os.path.dirname(os.path.dirname(__file__)), self._temp_dir)
+            f"set runtimepath=$VIMRUNTIME,{os.path.dirname(os.path.dirname(__file__))},{self._temp_dir}"
         )
 
         if self.plugins:
@@ -135,12 +134,12 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         vim_config.append('let g:UltiSnipsListSnippets="@"')
 
         vim_config.append(
-            "let g:UltiSnipsDebugServerEnable={}".format(1 if self.pdb_enable else 0)
+            f"let g:UltiSnipsDebugServerEnable={1 if self.pdb_enable else 0}"
         )
-        vim_config.append('let g:UltiSnipsDebugHost="{}"'.format(self.pdb_host))
-        vim_config.append("let g:UltiSnipsDebugPort={}".format(self.pdb_port))
+        vim_config.append(f'let g:UltiSnipsDebugHost="{self.pdb_host}"')
+        vim_config.append(f"let g:UltiSnipsDebugPort={self.pdb_port}")
         vim_config.append(
-            "let g:UltiSnipsPMDebugBlocking={}".format(1 if self.pdb_block else 0)
+            f"let g:UltiSnipsPMDebugBlocking={1 if self.pdb_block else 0}"
         )
 
         # Work around https://github.com/vim/vim/issues/3117 for testing >
@@ -151,7 +150,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
 
         vim_config.append('let g:UltiSnipsSnippetDirectories=["us"]')
         if self.python_host_prog:
-            vim_config.append('let g:python3_host_prog="%s"' % self.python_host_prog)
+            vim_config.append(f'let g:python3_host_prog="{self.python_host_prog}"')
 
         self._extra_vim_config(vim_config)
 
@@ -173,14 +172,13 @@ class VimTestCase(unittest.TestCase, TempFileManager):
             if len(s) > 4:
                 priority = s[4]
             vim_config.append(
-                "UltiSnips_Manager.add_snippet(%r, %r, %r, %r, priority=%i)"
-                % (sv, content, description, options, priority)
+                f"UltiSnips_Manager.add_snippet({sv!r}, {content!r}, {description!r}, {options!r}, priority={priority})"
             )
 
         # fill buffer with default text and place cursor in between.
         prefilled_text = (self.text_before + self.text_after).splitlines()
         vim_config.append("import vim\n")
-        vim_config.append("vim.current.buffer[:] = %r\n" % prefilled_text)
+        vim_config.append(f"vim.current.buffer[:] = {prefilled_text!r}\n")
         vim_config.append(
             "vim.current.window.cursor = (max(len(vim.current.buffer)//2, 1), 0)"
         )
@@ -213,7 +211,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
 
     def tearDown(self):
         if self.interrupt:
-            print("Working directory: %s" % (self._temp_dir))
+            print(f"Working directory: {self._temp_dir}")
             return
         self.vim.leave_with_wait()
         self.clear_temp()

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """See module doc."""
 
 from UltiSnips import vim_helper

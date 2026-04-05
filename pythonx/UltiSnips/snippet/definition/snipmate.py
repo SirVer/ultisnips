@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """A snipMate snippet after parsing."""
 
 from UltiSnips.snippet.definition.base import SnippetDefinition

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """Base class for snippet sources."""
 
 from collections import defaultdict

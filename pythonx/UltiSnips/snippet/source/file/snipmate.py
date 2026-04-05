@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+
 """Parses snipMate files."""
 
-import os
 import glob
+import os
 
 from UltiSnips import vim_helper
 from UltiSnips.snippet.definition import SnipMateSnippetDefinition
@@ -35,7 +36,7 @@ def _snipmate_files_for(ft):
     if ft == "all":
         ft = "_"
     patterns = [
-        "%s.snippets" % ft,
+        f"{ft}.snippets",
         os.path.join(ft, "*.snippets"),
         os.path.join(ft, "*.snippet"),
         os.path.join(ft, "*/*.snippet"),
@@ -62,8 +63,9 @@ def _parse_snippet_file(content, full_filename):
     # Chomp \n if any.
     if content and content.endswith(os.linesep):
         content = content[: -len(os.linesep)]
-    yield "snippet", (
-        SnipMateSnippetDefinition(trigger, content, description, full_filename),
+    yield (
+        "snippet",
+        (SnipMateSnippetDefinition(trigger, content, description, full_filename),),
     )
 
 
@@ -87,7 +89,7 @@ def _parse_snippet(line, lines, filename):
         "snippet",
         (
             SnipMateSnippetDefinition(
-                trigger, content, description, "%s:%i" % (filename, start_line_index)
+                trigger, content, description, f"{filename}:{start_line_index}"
             ),
         ),
     )
@@ -112,7 +114,7 @@ def _parse_snippets_file(data, filename):
             if snippet is not None:
                 yield snippet
         elif head and not head.startswith("#"):
-            yield "error", ("Invalid line %r" % line.rstrip(), lines.line_index)
+            yield "error", (f"Invalid line {line.rstrip()!r}", lines.line_index)
 
 
 class SnipMateFileSource(SnippetFileSource):

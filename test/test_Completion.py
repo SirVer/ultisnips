@@ -1,5 +1,5 @@
+from test.constant import COMPL_ACCEPT, COMPL_KW, EX, JB, JF
 from test.vim_test_case import VimTestCase as _VimTest
-from test.constant import *
 
 
 class Completion_SimpleExample_ECR(_VimTest):

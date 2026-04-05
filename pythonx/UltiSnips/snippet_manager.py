@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
+
 """Contains the SnippetManager facade used by all Vim Functions."""
 
+import os
 from collections import defaultdict
 from contextlib import contextmanager
-import os
-from typing import Set
 from pathlib import Path
+
 import vim
 
-from UltiSnips import vim_helper
-from UltiSnips import err_to_scratch_buffer
+from UltiSnips import err_to_scratch_buffer, vim_helper
+from UltiSnips.buffer_proxy import suspend_proxy_edits, use_proxy_buffer
 from UltiSnips.diff import diff, guess_edit
-from UltiSnips.position import Position, JumpDirection
+from UltiSnips.position import JumpDirection, Position
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
 from UltiSnips.snippet.source import (
     AddedSnippetsSource,
@@ -26,14 +27,13 @@ from UltiSnips.snippet.source.file.common import (
 )
 from UltiSnips.text import escape
 from UltiSnips.vim_state import VimState, VisualContentPreserver
-from UltiSnips.buffer_proxy import use_proxy_buffer, suspend_proxy_edits
 
 
 def _ask_user(a, formatted):
     """Asks the user using inputlist() and returns the selected element or
     None."""
     try:
-        rv = vim_helper.eval("inputlist(%s)" % vim_helper.escape(formatted))
+        rv = vim_helper.eval(f"inputlist({vim_helper.escape(formatted)})")
         if rv is None or rv == "0":
             return None
         rv = int(rv)
@@ -51,29 +51,31 @@ def _ask_user(a, formatted):
 def _show_user_warning(msg):
     """Shows a Vim warning message to the user."""
     vim_helper.command("echohl WarningMsg")
-    vim_helper.command('echom "%s"' % msg.replace('"', '\\"'))
+    vim_helper.command('echom "{}"'.format(msg.replace('"', '\\"')))
     vim_helper.command("echohl None")
 
 
 def _ask_snippets(snippets):
     """Given a list of snippets, ask the user which one they want to use, and
     return it."""
+    _bs = "\\"
     display = [
-        "%i: %s (%s)" % (i + 1, escape(s.description, "\\"), escape(s.location, "\\"))
+        f"{i + 1}: {escape(s.description, _bs)} ({escape(s.location, _bs)})"
         for i, s in enumerate(snippets)
     ]
     return _ask_user(snippets, display)
 
 
-def _select_and_create_file_to_edit(potentials: Set[str]) -> str:
+def _select_and_create_file_to_edit(potentials: set[str]) -> str:
     assert len(potentials) >= 1
 
     file_to_edit = ""
     if len(potentials) > 1:
         files = sorted(potentials)
         exists = [os.path.exists(f) for f in files]
+        _bs = "\\"
         formatted = [
-            "%s %i: %s" % ("*" if exists else " ", i, escape(fn, "\\"))
+            f"{'*' if exists else ' '} {i}: {escape(fn, _bs)}"
             for i, (fn, exists) in enumerate(zip(files, exists), 1)
         ]
         file_to_edit = _ask_user(files, formatted)
@@ -83,14 +85,15 @@ def _select_and_create_file_to_edit(potentials: Set[str]) -> str:
         file_to_edit = potentials.pop()
 
     dirname = os.path.dirname(file_to_edit)
-    os.makedirs(dirname, exist_ok=True)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
 
     return file_to_edit
 
 
 def _get_potential_snippet_filenames_to_edit(
     snippet_dir: str, filetypes: str
-) -> Set[str]:
+) -> set[str]:
     potentials = set()
     for ft in filetypes:
         ft_snippets_files = find_snippet_files(ft, snippet_dir)
@@ -499,10 +502,10 @@ class SnippetManager:
                 "silent doautocmd <nomodeline> User UltiSnipsExitLastSnippet"
             )
             if self.expand_trigger != self.forward_trigger:
-                vim_helper.command("iunmap <buffer> %s" % self.forward_trigger)
-                vim_helper.command("sunmap <buffer> %s" % self.forward_trigger)
-            vim_helper.command("iunmap <buffer> %s" % self.backward_trigger)
-            vim_helper.command("sunmap <buffer> %s" % self.backward_trigger)
+                vim_helper.command(f"iunmap <buffer> {self.forward_trigger}")
+                vim_helper.command(f"sunmap <buffer> {self.forward_trigger}")
+            vim_helper.command(f"iunmap <buffer> {self.backward_trigger}")
+            vim_helper.command(f"sunmap <buffer> {self.backward_trigger}")
             vim_helper.command("augroup UltiSnips")
             vim_helper.command("autocmd!")
             vim_helper.command("augroup END")
@@ -679,9 +682,9 @@ class SnippetManager:
                 break
 
         if feedkey in (r"\<Plug>SuperTabForward", r"\<Plug>SuperTabBackward"):
-            vim_helper.command("return SuperTab(%s)" % vim_helper.escape(mode))
+            vim_helper.command(f"return SuperTab({vim_helper.escape(mode)})")
         elif feedkey:
-            vim_helper.command("return %s" % vim_helper.escape(feedkey))
+            vim_helper.command(f"return {vim_helper.escape(feedkey)}")
 
     def _snips(self, before, partial, autotrigger_only=False):
         """Returns all the snippets for the given text before the cursor.
@@ -842,7 +845,7 @@ class SnippetManager:
         return bool(self._can_expand(autotrigger_only)[1])
 
     def can_jump(self, direction):
-        if self._current_snippet == None:
+        if self._current_snippet is None:
             return False
         return self._current_snippet.has_next_tab(direction)
 

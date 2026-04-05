@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """Handles manually added snippets UltiSnips_Manager.add_snippet()."""
 
 from UltiSnips.snippet.source.base import SnippetSource

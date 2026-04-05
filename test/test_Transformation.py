@@ -1,6 +1,6 @@
-from test.vim_test_case import VimTestCase as _VimTest
-from test.constant import *
+from test.constant import BS, ESC, EX, JF
 from test.util import no_unidecode_available
+from test.vim_test_case import VimTestCase as _VimTest
 
 
 class Transformation_SimpleCase_ExpectCorrectResult(_VimTest):
@@ -208,7 +208,7 @@ class Transformation_OptionReplaceGlobalMatchInReplace_ECR(_VimTest):
 class TransformationUsingBackspaceToDeleteDefaultValueInFirstTab_ECR(_VimTest):
     snippets = (
         "test",
-        "snip ${1/.+/(?0:m1)/} ${2/.+/(?0:m2)/} " "${1:default} ${2:def}",
+        "snip ${1/.+/(?0:m1)/} ${2/.+/(?0:m2)/} ${1:default} ${2:def}",
     )
     keys = "test" + EX + BS + JF + "hi"
     wanted = "snip  m2  hi"
@@ -217,7 +217,7 @@ class TransformationUsingBackspaceToDeleteDefaultValueInFirstTab_ECR(_VimTest):
 class TransformationUsingBackspaceToDeleteDefaultValueInSecondTab_ECR(_VimTest):
     snippets = (
         "test",
-        "snip ${1/.+/(?0:m1)/} ${2/.+/(?0:m2)/} " "${1:default} ${2:def}",
+        "snip ${1/.+/(?0:m1)/} ${2/.+/(?0:m2)/} ${1:default} ${2:def}",
     )
     keys = "test" + EX + "hi" + JF + BS
     wanted = "snip m1  hi "

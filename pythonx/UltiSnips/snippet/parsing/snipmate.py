@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
+
 """Parses a snipMate snippet definition and launches it into Vim."""
 
 from UltiSnips.snippet.parsing.base import (
-    tokenize_snippet_text,
     finalize,
     resolve_ambiguity,
+    tokenize_snippet_text,
 )
 from UltiSnips.snippet.parsing.lexer import (
     EscapeCharToken,
-    VisualToken,
-    TabStopToken,
     MirrorToken,
     ShellCodeToken,
+    TabStopToken,
+    VisualToken,
 )
-from UltiSnips.text_objects import EscapedChar, Mirror, VimLCode, Visual
+from UltiSnips.text_objects import EscapedChar, VimLCode, Visual
 
 _TOKEN_TO_TEXTOBJECT = {
     EscapeCharToken: EscapedChar,

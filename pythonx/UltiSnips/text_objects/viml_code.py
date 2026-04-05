@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """Implements `!v ` VimL interpolation."""
 
 from UltiSnips import vim_helper

@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
+
 """Choices are enumeration values you can choose, by selecting index number.
 It is a special TabStop, its content are taken literally, thus said, they will not be parsed recursively.
 """
 
 from UltiSnips import vim_helper
 from UltiSnips.position import Position
-from UltiSnips.text_objects.tabstop import TabStop
 from UltiSnips.snippet.parsing.lexer import ChoicesToken
+from UltiSnips.text_objects.tabstop import TabStop
 
 
 class Choices(TabStop):
@@ -30,7 +31,7 @@ class Choices(TabStop):
         text_segs = []
         index = 1
         for choice in self._choice_list:
-            text_segs.append("%s.%s" % (index, choice))
+            text_segs.append(f"{index}.{choice}")
             index += 1
         text = "|".join(text_segs)
         return text
@@ -144,9 +145,4 @@ class Choices(TabStop):
             vim_helper.set_cursor_from_pos([buf_num, cursor_line, self._end.col + 1])
 
     def __repr__(self):
-        return "Choices(%s,%r->%r,%r)" % (
-            self._number,
-            self._start,
-            self._end,
-            self._initial_text,
-        )
+        return f"Choices({self._number},{self._start!r}->{self._end!r},{self._initial_text!r})"

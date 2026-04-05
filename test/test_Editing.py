@@ -1,5 +1,5 @@
+from test.constant import BS, ESC, EX, JB, JF
 from test.vim_test_case import VimTestCase as _VimTest
-from test.constant import *
 
 
 class Undo_RemoveMultilineSnippet(_VimTest):

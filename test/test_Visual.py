@@ -1,5 +1,5 @@
+from test.constant import ARR_D, ARR_U, ESC, EX, JF
 from test.vim_test_case import VimTestCase as _VimTest
-from test.constant import *
 
 
 class Visual_NoVisualSelection_Ignore(_VimTest):

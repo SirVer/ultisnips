@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """A Mirror object contains the same text as its related tabstop."""
 
 from UltiSnips.text_objects.base import NoneditableTextObject

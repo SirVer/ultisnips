@@ -1,5 +1,5 @@
+from test.constant import ESC, EX, JF
 from test.vim_test_case import VimTestCase as _VimTest
-from test.constant import *
 
 
 class FoldingEnabled_SnippetWithFold_ExpectNoFolding(_VimTest):

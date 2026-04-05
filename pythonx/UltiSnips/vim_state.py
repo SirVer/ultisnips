@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """Some classes to conserve Vim's state for comparing over time."""
 
 from collections import deque, namedtuple

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
+
 """Commands to compare text objects and to guess how to transform from one to
 another."""
 
-from collections import defaultdict
 import sys
+from collections import defaultdict
 
 from UltiSnips import vim_helper
 from UltiSnips.position import Position

@@ -17,4 +17,7 @@ shell_in_repro:
 	docker exec -it $(shell docker ps -q) /bin/bash
 
 format:
-	uv run black .
+	uv run ruff format .
+
+lint:
+	uv run ruff check .

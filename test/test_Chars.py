@@ -1,6 +1,6 @@
-from test.vim_test_case import VimTestCase as _VimTest
-from test.constant import *
+from test.constant import ARR_L, BS, EX, JF, LS
 from test.util import running_on_windows
+from test.vim_test_case import VimTestCase as _VimTest
 
 
 def _snip_quote(qt):

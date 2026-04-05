@@ -1,5 +1,5 @@
+from test.constant import EX, JF
 from test.vim_test_case import VimTestCase as _VimTest
-from test.constant import *
 
 # Test for bug 427298 #
 
@@ -15,9 +15,9 @@ class _SelectModeMappings(_VimTest):
 
     def _extra_vim_config(self, vim_config):
         vim_config.append(
-            ":let g:UltiSnipsRemoveSelectModeMappings=%i" % int(self.do_unmapping)
+            f":let g:UltiSnipsRemoveSelectModeMappings={int(self.do_unmapping)}"
         )
-        vim_config.append(":let g:UltiSnipsMappingsToIgnore=%s" % repr(self.ignores))
+        vim_config.append(f":let g:UltiSnipsMappingsToIgnore={repr(self.ignores)}")
 
         if not isinstance(self.maps[0], tuple):
             self.maps = (self.maps,)
@@ -27,11 +27,11 @@ class _SelectModeMappings(_VimTest):
         for key, m in self.maps:
             if not len(key):
                 continue
-            vim_config.append(":smap %s %s" % (key, m))
+            vim_config.append(f":smap {key} {m}")
         for key, m in self.buffer_maps:
             if not len(key):
                 continue
-            vim_config.append(":smap <buffer> %s %s" % (key, m))
+            vim_config.append(f":smap <buffer> {key} {m}")
 
 
 class SelectModeMappings_RemoveBeforeSelecting_ECR(_SelectModeMappings):

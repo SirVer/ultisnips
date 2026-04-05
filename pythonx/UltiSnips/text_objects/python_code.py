@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
+
 """Implements `!p ` interpolation."""
 
 import os
 from collections import namedtuple
 
+# We'll end up compiling the global snippets for every snippet so
+# caching compile() should pay off
+from functools import cache
+
+import UltiSnips.snippet_manager
 from UltiSnips import vim_helper
 from UltiSnips.indent_util import IndentUtil
 from UltiSnips.text_objects.base import NoneditableTextObject
 from UltiSnips.vim_state import _Placeholder
-import UltiSnips.snippet_manager
-
-# We'll end up compiling the global snippets for every snippet so
-# caching compile() should pay off
-from functools import lru_cache
 
 
-@lru_cache(maxsize=None)
+@cache
 def cached_compile(*args):
     return compile(*args)
 
@@ -187,7 +188,7 @@ class SnippetUtil:
 
     def opt(self, option, default=None):  # pylint:disable=no-self-use
         """Gets a Vim variable."""
-        if vim_helper.eval("exists('%s')" % option) == "1":
+        if vim_helper.eval(f"exists('{option}')") == "1":
             try:
                 return vim_helper.eval(option)
             except vim_helper.error:
@@ -282,9 +283,7 @@ class PythonCode(NoneditableTextObject):
                 exception.snippet_code = code
                 raise
 
-        rv = str(
-            self._snip.rv if self._snip._rv_changed else self._locals["res"]
-        )  # pylint:disable=protected-access
+        rv = str(self._snip.rv if self._snip._rv_changed else self._locals["res"])  # pylint:disable=protected-access
 
         if ct != rv:
             self.overwrite(buf, rv)

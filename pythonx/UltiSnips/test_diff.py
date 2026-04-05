@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
+
 # pylint: skip-file
 
 import unittest
 
 from diff import diff, guess_edit
 from position import Position
-from typing import List
 
 
 def transform(a, cmds):
@@ -35,8 +35,8 @@ class _BaseGuessing:
 
 
 class TestGuessing_Noop0(_BaseGuessing, unittest.TestCase):
-    a: List[str] = []
-    b: List[str] = []
+    a: list[str] = []
+    b: list[str] = []
     initial_line = 0
     ppos, pos = (0, 6), (0, 7)
     wanted = ()

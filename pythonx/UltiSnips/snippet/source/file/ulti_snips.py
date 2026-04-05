@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
+
 """Parsing of snippet files."""
 
-from collections import defaultdict
 import glob
 import os
-from typing import Set, List
+from collections import defaultdict
 
 from UltiSnips import vim_helper
 from UltiSnips.error import PebkacError
@@ -19,7 +19,7 @@ from UltiSnips.snippet.source.file.common import (
 from UltiSnips.text import LineIterator, head_tail
 
 
-def find_snippet_files(ft, directory: str) -> Set[str]:
+def find_snippet_files(ft, directory: str) -> set[str]:
     """Returns all matching snippet files for 'ft' in 'directory'."""
     patterns = ["%s.snippets", "%s_*.snippets", os.path.join("%s", "*")]
     ret = set()
@@ -30,7 +30,7 @@ def find_snippet_files(ft, directory: str) -> Set[str]:
     return ret
 
 
-def find_all_snippet_directories() -> List[str]:
+def find_all_snippet_directories() -> list[str]:
     """Returns a list of the absolute path of all potential snippet
     directories, no matter if they exist or not."""
 
@@ -64,7 +64,7 @@ def find_all_snippet_directories() -> List[str]:
     return all_dirs
 
 
-def find_all_snippet_files(ft) -> Set[str]:
+def find_all_snippet_files(ft) -> set[str]:
     """Returns all snippet files matching 'ft' in the given runtime path
     directory."""
     patterns = ["%s.snippets", "%s_*.snippets", os.path.join("%s", "*")]
@@ -115,7 +115,7 @@ def _handle_snippet_or_global(
     trig = remain.strip()
     if len(trig.split()) > 1 or "r" in opts:
         if trig[0] != trig[-1]:
-            return "error", ("Invalid multiword trigger: '%s'" % trig, lines.line_index)
+            return "error", (f"Invalid multiword trigger: '{trig}'", lines.line_index)
         trig = trig[1:-1]
     end = "end" + snip
     content = ""
@@ -129,7 +129,7 @@ def _handle_snippet_or_global(
         content += line
 
     if not found_end:
-        return "error", ("Missing 'endsnippet' for %r" % trig, lines.line_index)
+        return "error", (f"Missing 'endsnippet' for {trig!r}", lines.line_index)
 
     if snip == "global":
         python_globals[trig].append(content)
@@ -141,13 +141,13 @@ def _handle_snippet_or_global(
             descr,
             opts,
             python_globals,
-            "%s:%i" % (filename, start_line_index),
+            f"{filename}:{start_line_index}",
             context,
             pre_expand,
         )
         return "snippet", (definition,)
     else:
-        return "error", ("Invalid snippet type: '%s'" % snip, lines.line_index)
+        return "error", (f"Invalid snippet type: '{snip}'", lines.line_index)
 
 
 def _parse_snippets_file(data, filename):
@@ -197,7 +197,7 @@ def _parse_snippets_file(data, filename):
             try:
                 current_priority = int(tail.split()[0])
             except (ValueError, IndexError):
-                yield "error", ("Invalid priority %r" % tail, lines.line_index)
+                yield "error", (f"Invalid priority {tail!r}", lines.line_index)
         elif head in ["pre_expand", "post_expand", "post_jump"]:
             head, tail = handle_action(head, tail, lines.line_index)
             if head == "error":
@@ -205,7 +205,7 @@ def _parse_snippets_file(data, filename):
             else:
                 (actions[head],) = tail
         elif head and not head.startswith("#"):
-            yield "error", ("Invalid line %r" % line.rstrip(), lines.line_index)
+            yield "error", (f"Invalid line {line.rstrip()!r}", lines.line_index)
 
 
 class UltiSnipsFileSource(SnippetFileSource):
@@ -215,5 +215,4 @@ class UltiSnipsFileSource(SnippetFileSource):
         return find_all_snippet_files(ft)
 
     def _parse_snippet_file(self, filedata, filename):
-        for event, data in _parse_snippets_file(filedata, filename):
-            yield event, data
+        yield from _parse_snippets_file(filedata, filename)

@@ -1,5 +1,5 @@
+from test.constant import LS
 from test.vim_test_case import VimTestCase as _VimTest
-from test.constant import *
 
 
 class _ListAllSnippets(_VimTest):

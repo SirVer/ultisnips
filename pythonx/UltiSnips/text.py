@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """Utilities to deal with text."""
 
 

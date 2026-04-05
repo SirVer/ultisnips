@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
+
 """Snippet representation after parsing."""
 
 import re
+import textwrap
 
 import vim
-import textwrap
 
 from UltiSnips import vim_helper
 from UltiSnips.error import PebkacError
@@ -123,12 +124,7 @@ class SnippetDefinition:
         }
 
     def __repr__(self):
-        return "_SnippetDefinition(%r,%s,%s,%s)" % (
-            self._priority,
-            self._trigger,
-            self._description,
-            self._opts,
-        )
+        return f"_SnippetDefinition({self._priority!r},{self._trigger},{self._description},{self._opts})"
 
     def _re_match(self, trigger):
         """Test if the current regex trigger matches `trigger`.
@@ -286,7 +282,7 @@ class SnippetDefinition:
     @property
     def description(self):
         """Descriptive text for this snippet."""
-        return ("(%s) %s" % (self._trigger, self._description)).strip()
+        return (f"({self._trigger}) {self._description}").strip()
 
     @property
     def priority(self):
@@ -340,7 +336,7 @@ class SnippetDefinition:
             if match and words_prefix:
                 # Require a word boundary between prefix and suffix.
                 boundary_chars = escape(words_prefix[-1:] + words_suffix[:1], r"\"")
-                match = vim_helper.eval('"%s" =~# "\\\\v.<."' % boundary_chars) != "0"
+                match = vim_helper.eval(f'"{boundary_chars}" =~# "\\\\v.<."') != "0"
         elif "i" in self._opts:
             match = words.endswith(self._trigger)
         else:
@@ -384,7 +380,7 @@ class SnippetDefinition:
             # Trim non-empty prefix up to word boundary, if present.
             qwords = escape(words, r"\"")
             words_suffix = vim_helper.eval(
-                'substitute("%s", "\\\\v^.+<(.+)", "\\\\1", "")' % qwords
+                f'substitute("{qwords}", "\\\\v^.+<(.+)", "\\\\1", "")'
             )
             match = self._trigger.startswith(words_suffix)
             self._matched = words_suffix
