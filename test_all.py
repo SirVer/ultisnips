@@ -22,7 +22,6 @@ from test.vim_interface import (
     create_directory,
     tempfile,
     VimInterfaceTmux,
-    VimInterfaceTmuxNeovim,
 )
 
 
@@ -132,21 +131,12 @@ if __name__ == "__main__":
             help="executable to run when launching vim.",
         )
         p.add_option(
-            "--interface",
-            dest="interface",
-            type=str,
-            default="tmux",
-            help="Interface to use. Use 'tmux' with vanilla Vim and 'tmux_nvim' "
-            "with Neovim.",
-        )
-        p.add_option(
             "--python-host-prog",
             dest="python_host_prog",
             type=str,
             default="",
-            help="Neovim needs a variable to tell it which python interpretor to use for "
-            "py blocks. This needs to be set to point to the correct python interpretor. "
-            "It is ignored for vanilla Vim.",
+            help="Sets g:python3_host_prog in neovim to select which python "
+            "interpreter to use for py3 blocks. Ignored for vanilla Vim.",
         )
         p.add_option(
             "--expected-python-version",
@@ -200,6 +190,31 @@ if __name__ == "__main__":
 
         all_test_suites = unittest.defaultTestLoader.discover(start_dir="test")
 
+        all_other_plugins = set()
+        tests = set()
+        suite = unittest.TestSuite()
+
+        # Collect tests and their plugin dependencies. We do this before vim
+        # detection so that --clone-plugins works without a vim binary.
+        for test in flatten_test_suite(all_test_suites):
+            all_other_plugins.update(test.plugins)
+
+            if len(selected_tests):
+                id = test.id().split(".")[1]
+                if not any([id.startswith(t) for t in selected_tests]):
+                    continue
+            tests.add(test)
+
+        if options.plugins or options.clone_plugins:
+            setup_other_plugins(all_other_plugins)
+            if options.clone_plugins:
+                return
+
+        if platform.system() == "Windows":
+            raise RuntimeError(
+                "TODO: TestSuite is broken under windows. Volunteers wanted!."
+            )
+
         has_nvim = subprocess.check_output(
             [options.vim, "-e", "-s", "-c", "verbose echo has('nvim')", "+q"],
             stderr=subprocess.STDOUT,
@@ -211,30 +226,9 @@ if __name__ == "__main__":
         else:
             assert 0, "Unexpected output, has_nvim=%r" % has_nvim
 
-        if options.interface == "tmux":
-            assert vim_flavor == "vim", (
-                "Interface is tmux, but vim_flavor is %s" % vim_flavor
-            )
-            vim = VimInterfaceTmux(options.vim, options.session)
-        else:
-            assert vim_flavor == "neovim", (
-                "Interface is TmuxNeovim, but vim_flavor is %s" % vim_flavor
-            )
-            vim = VimInterfaceTmuxNeovim(options.vim, options.session)
+        vim = VimInterfaceTmux(options.vim, options.session)
 
-        if not options.clone_plugins and platform.system() == "Windows":
-            raise RuntimeError(
-                "TODO: TestSuite is broken under windows. Volunteers wanted!."
-            )
-            # vim = VimInterfaceWindows()
-            # vim.focus()
-
-        all_other_plugins = set()
-
-        tests = set()
-        suite = unittest.TestSuite()
-
-        for test in flatten_test_suite(all_test_suites):
+        for test in tests:
             test.interrupt = options.interrupt
             test.retries = options.retries
             test.test_plugins = options.plugins
@@ -246,19 +240,7 @@ if __name__ == "__main__":
             test.pdb_host = options.pdb_host
             test.pdb_port = options.pdb_port
             test.pdb_block = options.pdb_block
-            all_other_plugins.update(test.plugins)
-
-            if len(selected_tests):
-                id = test.id().split(".")[1]
-                if not any([id.startswith(t) for t in selected_tests]):
-                    continue
-            tests.add(test)
         suite.addTests(tests)
-
-        if options.plugins or options.clone_plugins:
-            setup_other_plugins(all_other_plugins)
-            if options.clone_plugins:
-                return
 
         v = 2 if options.verbose else 1
         successfull = (

@@ -53,6 +53,12 @@ The basic process of running the suite is simple:
    vim: `tmux new -s vim`. Do not type anything into the tmux session.
 2. In a second terminal, run `./test_all.py`.
 
+To run tests with Neovim instead of Vim:
+
+    $ ./test_all.py --vim nvim
+
+The test runner auto-detects whether the executable is Vim or Neovim.
+
 To filter the tests that are executed, specify a pattern to be used to match the beginning of the test name.
 For instance, the following will execute all tests that start with `SimpleExpand`:
 

@@ -105,6 +105,10 @@ class VimInterface(TempFileManager):
         """Types 's' into the vim instance under test."""
         raise NotImplementedError()
 
+    def _build_launch_command(self, config_path):
+        # Note the leading space to exclude it from shell history.
+        return """ %s -u %s\r\n""" % (self._vim_executable, config_path)
+
     def launch(self, config=[]):
         """Returns the python version in Vim as a string, e.g. '3.7'"""
         pid_file = self.name_temp("vim.pid")
@@ -133,20 +137,19 @@ class VimInterface(TempFileManager):
             textwrap.dedent(os.linesep.join(config + post_config) + "\n"),
         )
 
-        # Note the space to exclude it from shell history. Also we always set
-        # NVIM_LISTEN_ADDRESS, even when running vanilla Vim, because it will
-        # just not care.
-        self.send_to_terminal(
-            """ NVIM_LISTEN_ADDRESS=/tmp/nvim %s -u %s\r\n"""
-            % (self._vim_executable, config_path)
-        )
-        wait_until_file_exists(done_file)
+        self.send_to_terminal(self._build_launch_command(config_path))
+        if not wait_until_file_exists(done_file, times=1000):
+            raise RuntimeError("Vim did not start within 10 seconds")
         self._vim_pid = int(_read_text_file(pid_file))
         return _read_text_file(version_file).strip()
 
     def leave_with_wait(self):
         self.send_to_vim(3 * ESC + ":qa!\n")
+        start = time.time()
         while is_process_running(self._vim_pid):
+            if time.time() - start > 10:
+                os.kill(self._vim_pid, 9)
+                break
             time.sleep(0.01)
 
 
@@ -182,36 +185,6 @@ class VimInterfaceTmux(VimInterface):
         m = re.match(r"tmux (\d+).(\d+)", stdout)
         if not m or not (int(m.group(1)), int(m.group(2))) >= (1, 8):
             raise RuntimeError("Need at least tmux 1.8, you have %s." % stdout.strip())
-
-
-class VimInterfaceTmuxNeovim(VimInterfaceTmux):
-    def __init__(self, vim_executable, session):
-        VimInterfaceTmux.__init__(self, vim_executable, session)
-        self._nvim = None
-
-    def send_to_vim(self, s):
-        if s == ARR_L:
-            s = "<Left>"
-        elif s == ARR_R:
-            s = "<Right>"
-        elif s == ARR_U:
-            s = "<Up>"
-        elif s == ARR_D:
-            s = "<Down>"
-        elif s == BS:
-            s = "<bs>"
-        elif s == ESC:
-            s = "<esc>"
-        elif s == "<":
-            s = "<lt>"
-        self._nvim.input(s)
-
-    def launch(self, config=[]):
-        import neovim
-
-        rv = VimInterfaceTmux.launch(self, config)
-        self._nvim = neovim.attach("socket", path="/tmp/nvim")
-        return rv
 
 
 class VimInterfaceWindows(VimInterface):

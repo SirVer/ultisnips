@@ -7,7 +7,7 @@ on:
       - master
 
 jobs:
-  test:
+  test-vim:
     runs-on: ubuntu-latest
     strategy:
      fail-fast: false
@@ -31,10 +31,26 @@ jobs:
         - { vim_version: "git", python_image: "3.13-bookworm", tag: "vim_git_py313" }
 
     # Builds Vim and Tests it within docker.
-    name: CI
+    name: Vim ${{ matrix.vim_version }} / Python ${{ matrix.python_image }}
     steps:
       - uses: actions/checkout@v2
       - name: Build the image
         run: docker build -t ultisnips:${{ matrix.tag }} --build-arg PYTHON_IMAGE=${{ matrix.python_image }} --build-arg VIM_VERSION=${{ matrix.vim_version }} .
       - name: Run the tests
         run: docker run --rm -t ultisnips:${{ matrix.tag }} docker/run_tests.sh
+
+  test-nvim:
+    runs-on: ubuntu-latest
+    strategy:
+     fail-fast: false
+     matrix:
+      include:
+        - { nvim_version: "0.12.0", python_image: "3.13-bookworm", tag: "nvim_0120_py313" }
+
+    name: Neovim ${{ matrix.nvim_version }} / Python ${{ matrix.python_image }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build the image
+        run: docker build -t ultisnips:${{ matrix.tag }} -f Dockerfile.nvim --build-arg PYTHON_IMAGE=${{ matrix.python_image }} --build-arg NVIM_VERSION=${{ matrix.nvim_version }} .
+      - name: Run the tests
+        run: docker run --rm -t ultisnips:${{ matrix.tag }} docker/run_tests_nvim.sh

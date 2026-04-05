@@ -1,6 +1,6 @@
-*UltiSnips.txt*    For Vim version 8.0 or later.
+*UltiSnips.txt*    For Vim version 9.0 or later and Neovim.
 
-        The Ultimate Plugin for Snippets in Vim~
+        The Ultimate Plugin for Snippets in Vim and Neovim~
 
 UltiSnips                                      *snippet* *snippets* *UltiSnips*
 
@@ -93,10 +93,10 @@ http://vimcasts.org/episodes/ultisnips-visual-placeholder/
 1.1 Requirements                                     *UltiSnips-requirements*
 ----------------
 
-This plugin works with Vim version 8.0 or later with Python 3 support enabled.
-It only works if the 'compatible' setting is not set.
+This plugin works with Vim version 9.0 or later and Neovim, with Python 3
+support enabled. It only works if the 'compatible' setting is not set.
 
-The Python 3.x interface must be available. In other words, Vim
+For Vim, the Python 3.x interface must be available. In other words, Vim
 must be compiled with the |+python3| feature.
 The following commands show how to test if you have python compiled in Vim.
 They print '1' if the python version is compiled in, '0' if not.
@@ -108,6 +108,9 @@ The python version Vim is linked against can be found with: >
 
 Note that Vim is maybe not using your system-wide installed python version, so
 make sure to check the Python version inside of Vim.
+
+For Neovim, the Python 3 provider must be available. You can set
+|g:python3_host_prog| to point to a specific Python interpreter if needed.
 
 
 1.2 Acknowledgments                               *UltiSnips-acknowledgments*
