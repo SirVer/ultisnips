@@ -160,7 +160,7 @@ class EditableTextObject(TextObject):
     the user."""
 
     def __init__(self, *args, **kwargs):
-        TextObject.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._children = []
         self._tabstops = {}
 
@@ -261,7 +261,7 @@ class EditableTextObject(TextObject):
 
         for child in to_kill:
             self._del_child(child)
-        if len(new_cmds):
+        if new_cmds:
             for child in new_cmds:
                 self._do_edit(child)
             return
@@ -282,7 +282,7 @@ class EditableTextObject(TextObject):
         self._child_has_moved(idx, pivot, delta)
 
     def _move(self, pivot, diff):
-        TextObject._move(self, pivot, diff)
+        super()._move(pivot, diff)
 
         for child in self._children:
             child._move(pivot, diff)
@@ -302,7 +302,7 @@ class EditableTextObject(TextObject):
 
     def _get_next_tab(self, number):
         """Returns the next tabstop after 'number'."""
-        if not len(self._tabstops.keys()):
+        if not self._tabstops:
             return
         tno_max = max(self._tabstops.keys())
 
@@ -319,14 +319,14 @@ class EditableTextObject(TextObject):
 
         possible_sol += child
 
-        if not len(possible_sol):
+        if not possible_sol:
             return None
 
         return min(possible_sol)
 
     def _get_prev_tab(self, number):
         """Returns the previous tabstop before 'number'."""
-        if not len(self._tabstops.keys()):
+        if not self._tabstops:
             return
         tno_min = min(self._tabstops.keys())
 
@@ -343,7 +343,7 @@ class EditableTextObject(TextObject):
 
         possible_sol += child
 
-        if not len(possible_sol):
+        if not possible_sol:
             return None
 
         return max(possible_sol)

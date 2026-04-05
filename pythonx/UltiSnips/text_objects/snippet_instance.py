@@ -45,7 +45,7 @@ class SnippetInstance(EditableTextObject):
         self.visual_content = visual_content
         self.current_placeholder = None
 
-        EditableTextObject.__init__(self, parent, start, end, initial_text)
+        super().__init__(parent, start, end, initial_text)
 
     def replace_initial_text(self, buf):
         """Puts the initial text of all text elements into Vim."""
@@ -166,8 +166,7 @@ class _VimCursor(NoneditableTextObject):
     and move."""
 
     def __init__(self, parent):
-        NoneditableTextObject.__init__(
-            self,
+        super().__init__(
             parent,
             vim_helper.buf.cursor,
             vim_helper.buf.cursor,
