@@ -44,10 +44,10 @@ class VimBufferProxy(vim_helper.VimBuffer):
     Proxy object used for tracking changes that made from snippet actions.
 
     Unfortunately, vim by itself lacks of the API for changing text in
-    trackable maner.
+    trackable manner.
 
     Vim marks offers limited functionality for tracking line additions and
-    deletions, but nothing offered for tracking changes withing single line.
+    deletions, but nothing offered for tracking changes within single line.
 
     Instance of this class is passed to all snippet actions and behaves as
     internal vim.current.window.buffer.
@@ -78,7 +78,7 @@ class VimBufferProxy(vim_helper.VimBuffer):
 
     def validate_buffer(self):
         """
-        Raises exception if buffer is changes beyound proxy object.
+        Raises exception if buffer is changed beyond proxy object.
         """
         if self.is_buffer_changed_outside():
             raise PebkacError(
@@ -111,23 +111,11 @@ class VimBufferProxy(vim_helper.VimBuffer):
             if self._snippets_stack:
                 self._vstate.remember_buffer(self._snippets_stack[0])
 
-    def __setslice__(self, i, j, text):
-        """
-        Same as __setitem__.
-        """
-        self.__setitem__(slice(i, j), text)
-
     def __getitem__(self, key):
         """
         Just passing call to the vim.current.window.buffer.__getitem__.
         """
         return self._buffer[key]
-
-    def __getslice__(self, i, j):
-        """
-        Same as __getitem__.
-        """
-        return self.__getitem__(slice(i, j))
 
     def __len__(self):
         """
