@@ -27,10 +27,11 @@ make shell_in_repro              # shell 2: enter container, then `./test_all.py
 
 CI uses Docker across Vim 9.1/9.2/git, Neovim 0.12, and Python 3.11-3.14 (`.github/workflows/main.yml`).
 
-## Formatting
+## Linting and Formatting
 
 ```
-make format
+make lint       # ruff check
+make format     # ruff format
 ```
 
-Runs `black` on all Python files.
+CI enforces both. Install the pre-commit hook with `./scripts/install-hooks`.

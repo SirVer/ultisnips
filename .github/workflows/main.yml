@@ -7,6 +7,15 @@ on:
       - master
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    name: Lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+
   test-vim:
     runs-on: ubuntu-latest
     strategy:
