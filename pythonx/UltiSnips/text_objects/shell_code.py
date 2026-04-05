@@ -6,6 +6,7 @@ import os
 import platform
 import stat
 import tempfile
+from pathlib import Path
 from subprocess import PIPE, Popen
 
 from UltiSnips.text_objects.base import NoneditableTextObject
@@ -44,15 +45,15 @@ def _run_shell_command(cmd, tmpdir):
 
 def _get_tmp():
     """Find an executable tmp directory."""
-    userdir = os.path.expanduser("~")
+    userdir = Path("~").expanduser()
     for testdir in [
         tempfile.gettempdir(),
-        os.path.join(userdir, ".cache"),
-        os.path.join(userdir, ".tmp"),
-        userdir,
+        str(userdir / ".cache"),
+        str(userdir / ".tmp"),
+        str(userdir),
     ]:
         if (
-            not os.path.exists(testdir)
+            not Path(testdir).exists()
             or _run_shell_command("echo success", testdir) != "success"
         ):
             continue

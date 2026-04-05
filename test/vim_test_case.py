@@ -1,9 +1,9 @@
-import os
 import subprocess
 import tempfile
 import textwrap
 import time
 import unittest
+from pathlib import Path
 
 from test.constant import EX, SEQUENCES
 from test.vim_interface import TempFileManager, create_directory
@@ -11,7 +11,7 @@ from test.vim_interface import TempFileManager, create_directory
 
 def plugin_cache_dir():
     """The directory that we check out our bundles to."""
-    return os.path.join(tempfile.gettempdir(), "UltiSnips_test_vim_plugins")
+    return Path(tempfile.gettempdir()) / "UltiSnips_test_vim_plugins"
 
 
 class VimTestCase(unittest.TestCase, TempFileManager):
@@ -79,7 +79,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         temp dir."""
         absdir = self.name_temp(relative_destination)
         create_directory(absdir)
-        os.symlink(source, os.path.join(absdir, os.path.basename(source)))
+        (absdir / Path(source).name).symlink_to(source)
 
     def setUp(self):
         if not VimTestCase.version:
@@ -100,18 +100,14 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         vim_config.append("set nocompatible")
         vim_config.append(
             "set runtimepath=$VIMRUNTIME,"
-            f"{os.path.dirname(os.path.dirname(__file__))},"
+            f"{Path(__file__).parent.parent},"
             f"{self._temp_dir}"
         )
 
         if self.plugins:
-            self._link_file(
-                os.path.join(plugin_cache_dir(), "vim-pathogen", "autoload"), "."
-            )
+            self._link_file(plugin_cache_dir() / "vim-pathogen" / "autoload", ".")
             for plugin in self.plugins:
-                self._link_file(
-                    os.path.join(plugin_cache_dir(), os.path.basename(plugin)), "bundle"
-                )
+                self._link_file(plugin_cache_dir() / Path(plugin).name, "bundle")
             vim_config.append("execute pathogen#infect()")
 
         # Some configurations are unnecessary for vanilla Vim, but Neovim

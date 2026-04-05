@@ -2,7 +2,6 @@
 
 """Contains the SnippetManager facade used by all Vim Functions."""
 
-import os
 from collections import defaultdict
 from contextlib import contextmanager
 from pathlib import Path
@@ -72,7 +71,7 @@ def _select_and_create_file_to_edit(potentials: set[str]) -> str:
     file_to_edit = ""
     if len(potentials) > 1:
         files = sorted(potentials)
-        exists = [os.path.exists(f) for f in files]
+        exists = [Path(f).exists() for f in files]
         _bs = "\\"
         formatted = [
             f"{'*' if exists else ' '} {i}: {escape(fn, _bs)}"
@@ -84,9 +83,9 @@ def _select_and_create_file_to_edit(potentials: set[str]) -> str:
     else:
         file_to_edit = potentials.pop()
 
-    dirname = os.path.dirname(file_to_edit)
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
+    dirname = Path(file_to_edit).parent
+    if not dirname.exists():
+        dirname.mkdir(parents=True)
 
     return file_to_edit
 
@@ -100,7 +99,7 @@ def _get_potential_snippet_filenames_to_edit(
         potentials.update(ft_snippets_files)
         if not ft_snippets_files:
             # If there is no snippet file yet, we just default to `ft.snippets`.
-            fpath = os.path.join(snippet_dir, ft + ".snippets")
+            fpath = str(Path(snippet_dir) / (ft + ".snippets"))
             fpath = normalize_file_path(fpath)
             potentials.add(fpath)
     return potentials
@@ -902,7 +901,7 @@ class SnippetManager:
             snippet_storage_dir = vim_helper.eval(
                 "g:UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit"
             )
-            full_path = os.path.expanduser(snippet_storage_dir)
+            full_path = str(Path(snippet_storage_dir).expanduser())
             potentials.update(
                 _get_potential_snippet_filenames_to_edit(full_path, filetypes)
             )

@@ -11,10 +11,10 @@
 # for this to work properly as SendKeys is a piece of chunk. (i.e. it sends
 # <F13> when you send a | symbol while using german key mappings)
 
-import os
 import platform
 import subprocess
 import unittest
+from pathlib import Path
 
 from test.vim_interface import (
     VimInterfaceTmux,
@@ -25,14 +25,14 @@ from test.vim_interface import (
 
 def plugin_cache_dir():
     """The directory that we check out our bundles to."""
-    return os.path.join(tempfile.gettempdir(), "UltiSnips_test_vim_plugins")
+    return Path(tempfile.gettempdir()) / "UltiSnips_test_vim_plugins"
 
 
 def clone_plugin(plugin):
     """Clone the given plugin into our plugin directory."""
-    dirname = os.path.join(plugin_cache_dir(), os.path.basename(plugin))
+    dirname = plugin_cache_dir() / Path(plugin).name
     print(f"Cloning {plugin} -> {dirname}")
-    if os.path.exists(dirname):
+    if dirname.exists():
         print(f"Skip cloning of {plugin}. Already there.")
         return
     create_directory(dirname)
@@ -44,13 +44,13 @@ def clone_plugin(plugin):
             "--depth",
             "1",
             f"https://github.com/{plugin}",
-            dirname,
+            str(dirname),
         ]
     )
 
     if plugin == "Valloric/YouCompleteMe":
         # CLUTCH: this plugin needs something extra.
-        subprocess.run(os.path.join(dirname, "./install.sh"), cwd=dirname)
+        subprocess.run(str(dirname / "./install.sh"), cwd=str(dirname))
 
 
 def setup_other_plugins(all_plugins):
