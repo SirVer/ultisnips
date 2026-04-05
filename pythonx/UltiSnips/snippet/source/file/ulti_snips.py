@@ -211,7 +211,6 @@ def _parse_snippets_file(data, filename):
 
 
 class UltiSnipsFileSource(SnippetFileSource):
-
     """Manages all snippets definitions found in rtp for ultisnips."""
 
     def _get_all_snippet_files_for(self, ft):

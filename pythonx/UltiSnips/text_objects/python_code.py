@@ -23,7 +23,6 @@ def cached_compile(*args):
 
 
 class _Tabs:
-
     """Allows access to tabstop content via t[] inside of python code."""
 
     def __init__(self, to):
@@ -57,7 +56,6 @@ class SnippetUtilForAction(dict):
 
 
 class SnippetUtil:
-
     """Provides easy access to indentation, etc.
 
     This is the 'snip' object in python code.
@@ -232,7 +230,6 @@ class SnippetUtil:
 
 
 class PythonCode(NoneditableTextObject):
-
     """See module docstring."""
 
     def __init__(self, parent, token):

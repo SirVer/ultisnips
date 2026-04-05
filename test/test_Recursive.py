@@ -321,8 +321,7 @@ class RecTabStops_MirroredZeroTS_ECR(_VimTest):
 
 class RecTabStops_ChildTriggerContainsParentTextObjects(_VimTest):
     # https://bugs.launchpad.net/bugs/1191617
-    files = {
-        "us/all.snippets": r"""
+    files = {"us/all.snippets": r"""
 global !p
 def complete(t, opts):
  if t:
@@ -338,8 +337,7 @@ snippet /form_for(.*){([^|]*)/ "form_for html options" rw!
 auto = autocomplete_options(t, match.group(2), attr=["id: ", "class: ", "title:  "])
 snip.rv = "form_for" + match.group(1) + "{"`$1`!p if (snip.c != auto) : snip.rv=auto`
 endsnippet
-"""
-    }
+"""}
     keys = "form_for user, namespace: some_namespace, html: {i" + EX + "i" + EX
     wanted = (
         "form_for user, namespace: some_namespace, html: {(id: |class: |title:  )d: "

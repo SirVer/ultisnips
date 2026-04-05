@@ -8,7 +8,6 @@ from UltiSnips.snippet.parsing.ulti_snips import parse_and_instantiate
 
 
 class UltiSnipsSnippetDefinition(SnippetDefinition):
-
     """See module doc."""
 
     def instantiate(self, snippet_instance, initial_text, indent):

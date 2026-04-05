@@ -7,7 +7,6 @@ from UltiSnips.text_objects.base import NoneditableTextObject
 
 
 class Mirror(NoneditableTextObject):
-
     """See module docstring."""
 
     def __init__(self, parent, tabstop, token):

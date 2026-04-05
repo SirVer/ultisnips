@@ -62,7 +62,6 @@ def _get_tmp():
 
 
 class ShellCode(NoneditableTextObject):
-
     """See module docstring."""
 
     def __init__(self, parent, token):

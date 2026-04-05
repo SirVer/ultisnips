@@ -13,7 +13,6 @@ from UltiSnips.snippet.source.base import SnippetSource
 
 
 class SnippetSyntaxError(PebkacError):
-
     """Thrown when a syntax error is found in a file."""
 
     def __init__(self, filename, line_index, msg):

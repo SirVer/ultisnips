@@ -91,7 +91,6 @@ hi4"""
 
 
 class VerifyVimDict1(_VimTest):
-
     """check:
     correct type (4 means vim dictionary)
     correct length of dictionary (in this case we have on element if the use same prefix, dictionary should have 1 element)
@@ -111,7 +110,6 @@ class VerifyVimDict1(_VimTest):
 
 
 class VerifyVimDict2(_VimTest):
-
     """check:
     can use " in trigger
     """
@@ -123,7 +121,6 @@ class VerifyVimDict2(_VimTest):
 
 
 class VerifyVimDict3(_VimTest):
-
     """check:
     can use ' in trigger
     """

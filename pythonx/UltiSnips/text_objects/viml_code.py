@@ -8,7 +8,6 @@ from UltiSnips.text_objects.base import NoneditableTextObject
 
 
 class VimLCode(NoneditableTextObject):
-
     """See module docstring."""
 
     def __init__(self, parent, token):

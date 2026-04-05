@@ -118,7 +118,6 @@ def _parse_snippets_file(data, filename):
 
 
 class SnipMateFileSource(SnippetFileSource):
-
     """Manages all snipMate snippet definitions found in rtp."""
 
     def _get_all_snippet_files_for(self, ft):
