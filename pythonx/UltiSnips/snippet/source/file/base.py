@@ -11,14 +11,14 @@ class SnippetSyntaxError(PebkacError):
     """Thrown when a syntax error is found in a file."""
 
     def __init__(self, filename, line_index, msg):
-        RuntimeError.__init__(self, f"{msg} in {filename}:{line_index}")
+        super().__init__(f"{msg} in {filename}:{line_index}")
 
 
 class SnippetFileSource(SnippetSource):
     """Base class that abstracts away 'extends' info and file hashes."""
 
     def __init__(self):
-        SnippetSource.__init__(self)
+        super().__init__()
 
     def ensure(self, filetypes):
         for ft in self.get_deep_extends(filetypes):

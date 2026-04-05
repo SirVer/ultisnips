@@ -9,7 +9,7 @@ class Mirror(NoneditableTextObject):
     """See module docstring."""
 
     def __init__(self, parent, tabstop, token):
-        NoneditableTextObject.__init__(self, parent, token)
+        super().__init__(parent, token.start, token.end, token.initial_text)
         self._ts = tabstop
 
     def _update(self, done, buf):

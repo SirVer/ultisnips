@@ -16,6 +16,14 @@ jobs:
       - run: uv run ruff check .
       - run: uv run ruff format --check .
 
+  test-unit:
+    runs-on: ubuntu-latest
+    name: Unit Tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: PYTHONPATH=pythonx uv run pytest pythonx/UltiSnips/test_*.py
+
   test-vim:
     runs-on: ubuntu-latest
     strategy:

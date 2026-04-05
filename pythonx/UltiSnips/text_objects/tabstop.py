@@ -13,13 +13,18 @@ from UltiSnips.text_objects.base import EditableTextObject
 class TabStop(EditableTextObject):
     """See module docstring."""
 
-    def __init__(self, parent, token, start=None, end=None):
+    def __init__(self, parent, token_or_number, start=None, end=None):
         if start is not None:
-            self._number = token
-            EditableTextObject.__init__(self, parent, start, end)
+            self._number = token_or_number
+            super().__init__(parent, start, end)
         else:
-            self._number = token.number
-            EditableTextObject.__init__(self, parent, token)
+            self._number = token_or_number.number
+            super().__init__(
+                parent,
+                token_or_number.start,
+                token_or_number.end,
+                token_or_number.initial_text,
+            )
         parent._tabstops[self._number] = self
 
     @property

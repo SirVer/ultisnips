@@ -2,12 +2,11 @@
 
 """Implements `!p ` interpolation."""
 
-from collections import namedtuple
-
 # We'll end up compiling the global snippets for every snippet so
 # caching compile() should pay off
 from functools import cache
 from pathlib import Path
+from typing import NamedTuple
 
 import UltiSnips.snippet_manager
 from UltiSnips import vim_helper
@@ -41,7 +40,9 @@ class _Tabs:
         ts.overwrite(vim_helper.buf, value)
 
 
-_VisualContent = namedtuple("_VisualContent", ["mode", "text"])
+class _VisualContent(NamedTuple):
+    mode: str
+    text: str
 
 
 class SnippetUtilForAction(dict):
@@ -259,7 +260,7 @@ class PythonCode(NoneditableTextObject):
             ),
         )
 
-        super().__init__(parent, token)
+        super().__init__(parent, token.start, token.end, token.initial_text)
 
     def _update(self, done, buf):
         path = vim_helper.eval('expand("%")') or ""

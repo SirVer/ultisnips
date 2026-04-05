@@ -187,4 +187,3 @@ endfunction
 function! UltiSnips#RefreshSnippets() abort
     py3 UltiSnips_Manager._refresh_snippets()
 endfunction
-" }}}

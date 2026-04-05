@@ -2,7 +2,7 @@
 
 import unittest
 
-from position import Position
+from UltiSnips.position import Position
 
 
 class _MPBase:

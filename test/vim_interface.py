@@ -70,7 +70,7 @@ class TempFileManager:
 
 class VimInterface(TempFileManager):
     def __init__(self, vim_executable, name):
-        TempFileManager.__init__(self, name)
+        super().__init__(name)
         self._vim_executable = vim_executable
 
     @property
@@ -153,7 +153,7 @@ class VimInterface(TempFileManager):
 
 class VimInterfaceTmux(VimInterface):
     def __init__(self, vim_executable, session):
-        VimInterface.__init__(self, vim_executable, "Tmux")
+        super().__init__(vim_executable, "Tmux")
         self.session = session
         self._check_version()
 

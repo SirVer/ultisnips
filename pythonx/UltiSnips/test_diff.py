@@ -2,8 +2,8 @@
 
 import unittest
 
-from diff import diff, guess_edit
-from position import Position
+from UltiSnips.diff import diff, guess_edit
+from UltiSnips.position import Position
 
 
 def transform(a, cmds):
@@ -23,11 +23,26 @@ def transform(a, cmds):
     return "\n".join(buf)
 
 
+class _MockPosition(Position):
+    """Position with a mode attribute, mimicking VimPosition for tests."""
+
+    def __init__(self, line, col, mode="n"):
+        super().__init__(line, col)
+        self.mode = mode
+
+
+class _MockVimState:
+    """Minimal stand-in for VimState used by guess_edit."""
+
+    def __init__(self, ppos, pos):
+        self.ppos = _MockPosition(*ppos)
+        self.pos = _MockPosition(*pos)
+
+
 class _BaseGuessing:
     def runTest(self):
-        rv, es = guess_edit(
-            self.initial_line, self.a, self.b, Position(*self.ppos), Position(*self.pos)
-        )
+        vim_state = _MockVimState(self.ppos, self.pos)
+        rv, es = guess_edit(self.initial_line, self.a, self.b, vim_state)
         self.assertEqual(rv, True)
         self.assertEqual(self.wanted, es)
 

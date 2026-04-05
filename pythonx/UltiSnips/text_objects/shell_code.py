@@ -65,7 +65,7 @@ class ShellCode(NoneditableTextObject):
     """See module docstring."""
 
     def __init__(self, parent, token):
-        NoneditableTextObject.__init__(self, parent, token)
+        super().__init__(parent, token.start, token.end, token.initial_text)
         self._code = token.code.replace("\\`", "`")
         self._tmpdir = _get_tmp()
 

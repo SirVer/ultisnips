@@ -16,6 +16,9 @@ repro:
 shell_in_repro:
 	docker exec -it $(shell docker ps -q) /bin/bash
 
+test_unit:
+	PYTHONPATH=pythonx uv run pytest pythonx/UltiSnips/test_*.py
+
 format:
 	uv run ruff format .
 
