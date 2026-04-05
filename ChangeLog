@@ -1,3 +1,75 @@
+next:
+	Breaking changes:
+	- Python 2 support removed. Support for Python 3.5–3.9 was also dropped.
+	  Minimum Python version is now 3.11.
+	- Minimum Vim version is now 9.1 (was 7.4). Older versions down to 8.0
+	  may still work but are not tested.
+	- Neovim is now officially supported and tested in CI.
+	- |g:UltiSnipsSnippetsDir| removed. Snippet discovery was rewritten —
+	  see |UltiSnips-how-snippets-are-loaded|. `:UltiSnipsEdit` now opens
+	  snippet files relative to your `.vim` directory using
+	  `[gb]:UltiSnipsSnippetDirectories`. Without bang it only looks in the
+	  private snippet directory; with bang it additionally shows all snippet
+	  files currently loaded from across the runtimepath. UltiSnips now also
+	  uses `$MYVIMRC` as a heuristic to locate `~/.vim`, fixing setups with
+	  non-standard paths.
+	- snipMate snippets now expand with the `w` option instead of `i`,
+	  restoring correct behavior for triggers like `.`.
+	  See |UltiSnips-snipMate|.
+	- snipMate parser now requires directives to be fully spelled out (e.g.
+	  `extends`, not shorthand). Snippets using abbreviated directives will
+	  fail to load.
+
+	New features:
+	- Choice tabstops: `${1|one,two,three|}`. Select items by index
+	  (1, 2, 3…). Commas can be escaped with `\,`, space works as a
+	  selection terminator. See |UltiSnips-tabstops|.
+	- |CanExpandSnippet()|, |CanJumpForwards()|, |CanJumpBackwards()| —
+	  query snippet state from mappings or statusline.
+	  See |UltiSnips-functions|.
+	- |g:UltiSnipsJumpOrExpandTrigger| — expand if possible, otherwise jump
+	  forward. See |UltiSnips-trigger-key-mappings|.
+	- Trigger key is passed through as a normal keypress when no expansion or
+	  jump occurs, instead of being swallowed.
+	- Context conditions gained `match` (the regex match object for
+	  regex-triggered snippets) and `snip.before` (text on the line up to
+	  the trigger). See |UltiSnips-custom-context-snippets|.
+	- |g:UltiSnipsAutoTrigger| disables/enables autotrigger at runtime.
+	  |UltiSnips#ToggleAutoTrigger()| toggles it. Autotrigger now only fires
+	  on character insertion, not cursor movement.
+	  See |UltiSnips-autotrigger|.
+	- |g:UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit| controls where
+	  `:UltiSnipsEdit` stores new snippet files.
+	- Remote debug server for Python snippets via
+	  |g:UltiSnipsDebugServerEnable| — connect with telnet/netcat to step
+	  through snippet code. See |UltiSnips-advanced.txt|.
+	- Spell checking enabled in snippet file comments.
+
+	Performance:
+	- Runtimepath traversal now happens once (or when a snippet source needs
+	  refresh), not on every keypress. Combined with an internal caching
+	  layer this fixes long-standing insert mode lag, especially with
+	  autotrigger. (#1552)
+	- Python code in snippets is precompiled, which catches syntax errors early. (#1470)
+
+	Bug fixes:
+	- Wildcards in `&runtimepath` entries (e.g. `/bundle/*`) are now
+	  expanded, fixing compatibility with many modern plugin managers.
+	  (#1416)
+	- Wrong cursor position in nested snippets. (#1347)
+	- Backslash escaping in placeholder defaults. (#1346)
+	- Reading snippet files with BOM. (#1366)
+	- Floating windows no longer incorrectly trigger buffer-leave logic.
+	  (#1417)
+	- Null bytes in eval'd text are sanitized. (#1538)
+	- Creating an undo break no longer changes `undolevels`. (#1534)
+	- User errors reported without Python backtraces. (#1384)
+	- Out-of-bounds error in Neovim with |CanExpandSnippet()|. (#1562)
+
+	Infrastructure:
+	- CI moved from Travis CI to GitHub Actions.
+	- Build tooling migrated from pipenv to uv.
+
 version 3.2 (05-Nov-2019):
 	- This is the first release done again by @SirVer. And this is also posted
 	  on vim.org again. `¯\_(ツ)_/¯`
