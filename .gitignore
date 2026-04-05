@@ -8,3 +8,4 @@ doc/tags
 /.mypy_cache/
 .venv/
 .claude/
+MODERNIZATION.md
