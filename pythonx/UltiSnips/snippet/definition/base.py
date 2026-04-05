@@ -246,22 +246,14 @@ class SnippetDefinition:
         return snip
 
     def _make_debug_exception(self, e, code=""):
-        e.snippet_info = textwrap.dedent("""
-            Defined in: {}
-            Trigger: {}
-            Description: {}
-            Context: {}
-            Pre-expand: {}
-            Post-expand: {}
-        """).format(
-            self._location,
-            self._trigger,
-            self._description,
-            self._context_code if self._context_code else "<none>",
-            self._actions.get("pre_expand", "<none>"),
-            (self._actions.get("post_expand", "<none>")),
-            code,
-        )
+        e.snippet_info = textwrap.dedent(f"""
+            Defined in: {self._location}
+            Trigger: {self._trigger}
+            Description: {self._description}
+            Context: {self._context_code if self._context_code else "<none>"}
+            Pre-expand: {self._actions.get("pre_expand", "<none>")}
+            Post-expand: {self._actions.get("post_expand", "<none>")}
+        """)
 
         e.snippet_code = code
 

@@ -5,8 +5,8 @@
 from collections import deque, namedtuple
 
 from UltiSnips import vim_helper
-from UltiSnips.compatibility import byte2col
 from UltiSnips.position import Position
+from UltiSnips.vim_encoding import byte2col
 
 _Placeholder = namedtuple("_FrozenPlaceholder", ["current_text", "start", "end"])
 
