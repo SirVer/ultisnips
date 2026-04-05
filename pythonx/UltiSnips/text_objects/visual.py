@@ -29,7 +29,7 @@ class Visual(NoneditableTextObject, TextObjectTransformation):
                 self._mode = snippet.visual_content.mode
                 break
             except AttributeError:
-                snippet = snippet._parent  # pylint:disable=protected-access
+                snippet = snippet._parent
         if not self._text:
             self._text = token.alternative_text
             self._mode = "v"
@@ -55,6 +55,6 @@ class Visual(NoneditableTextObject, TextObjectTransformation):
 
         text = self._transform(text)
         self.overwrite(buf, text)
-        self._parent._del_child(self)  # pylint:disable=protected-access
+        self._parent._del_child(self)
 
         return True

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-# pylint: skip-file
-
 import unittest
 
 from diff import diff, guess_edit

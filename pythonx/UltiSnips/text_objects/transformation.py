@@ -137,13 +137,13 @@ class TextObjectTransformation:
 
     def _transform(self, text):
         """Do the actual transform on the given text."""
-        global UNIDECODE_ALERT_RAISED  # pylint:disable=global-statement
+        global UNIDECODE_ALERT_RAISED
         if self._convert_to_ascii:
             try:
                 import unidecode
 
                 text = unidecode.unidecode(text)
-            except Exception:  # pylint:disable=broad-except
+            except Exception:
                 if not UNIDECODE_ALERT_RAISED:
                     UNIDECODE_ALERT_RAISED = True
                     sys.stderr.write(

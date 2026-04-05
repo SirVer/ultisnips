@@ -75,5 +75,5 @@ class ShellCode(NoneditableTextObject):
         else:
             output = _run_shell_command(self._code, self._tmpdir)
         self.overwrite(buf, output)
-        self._parent._del_child(self)  # pylint:disable=protected-access
+        self._parent._del_child(self)
         return True

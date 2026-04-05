@@ -19,7 +19,7 @@ with open(DUMP_FILENAME, "w"):
 
 def echo_to_hierarchy(text_object):
     """Outputs the given 'text_object' and its children hierarchically."""
-    # pylint:disable=protected-access
+
     orig = text_object
     parent = text_object
     while parent._parent:

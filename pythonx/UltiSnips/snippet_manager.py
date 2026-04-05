@@ -989,7 +989,7 @@ class SnippetManager:
             source.refresh()
 
 
-UltiSnips_Manager = SnippetManager(  # pylint:disable=invalid-name
+UltiSnips_Manager = SnippetManager(
     vim.eval("g:UltiSnipsExpandTrigger"),
     vim.eval("g:UltiSnipsJumpForwardTrigger"),
     vim.eval("g:UltiSnipsJumpBackwardTrigger"),

@@ -175,7 +175,7 @@ def diff(a, b, sline=0):
     [2] This is that "hello\n\n" -> "hello\n\n\n" will insert a newline after
         hello and not after \n
     """
-    d = defaultdict(list)  # pylint:disable=invalid-name
+    d = defaultdict(list)
     seen = defaultdict(lambda: sys.maxsize)
 
     d[0] = [(0, 0, sline, 0, ())]

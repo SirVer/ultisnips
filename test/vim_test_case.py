@@ -1,5 +1,3 @@
-# pylint: skip-file
-
 import subprocess
 import tempfile
 import textwrap

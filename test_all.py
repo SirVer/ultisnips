@@ -11,8 +11,6 @@
 # for this to work properly as SendKeys is a piece of chunk. (i.e. it sends
 # <F13> when you send a | symbol while using german key mappings)
 
-# pylint: skip-file
-
 import platform
 import subprocess
 import unittest
