@@ -64,73 +64,83 @@ def setup_other_plugins(all_plugins):
 
 
 if __name__ == "__main__":
-    import optparse
+    import argparse
     import sys
 
     def parse_args():
-        p = optparse.OptionParser("%prog [OPTIONS] <test case names to run>")
-
-        p.set_defaults(
-            session="vim", interrupt=False, verbose=False, retries=4, plugins=False
+        p = argparse.ArgumentParser(
+            description="Run UltiSnips test suite.",
+            usage="%(prog)s [OPTIONS] [test case names to run]",
         )
 
-        p.add_option(
+        p.add_argument(
+            "args",
+            nargs="*",
+            metavar="test",
+            help="test case names to run",
+        )
+        p.add_argument(
             "-v",
             "--verbose",
             dest="verbose",
             action="store_true",
+            default=False,
             help="print name of tests as they are executed",
         )
-        p.add_option(
+        p.add_argument(
             "--clone-plugins",
             action="store_true",
             help="Only clones dependant plugins and exits the test runner.",
         )
-        p.add_option(
+        p.add_argument(
             "--plugins",
             action="store_true",
+            default=False,
             help="Run integration tests with other Vim plugins.",
         )
-        p.add_option(
+        p.add_argument(
             "-s",
             "--session",
             dest="session",
             metavar="SESSION",
-            help="session parameters for the terminal multiplexer SESSION [%default]",
+            default="vim",
+            help="session parameters for the terminal multiplexer SESSION [%(default)s]",
         )
-        p.add_option(
+        p.add_argument(
             "-i",
             "--interrupt",
             dest="interrupt",
             action="store_true",
+            default=False,
             help="Stop after defining the snippet. This allows the user "
             "to interactively test the snippet in vim. You must give "
             "exactly one test case on the cmdline. The test will always fail.",
         )
-        p.add_option(
+        p.add_argument(
             "-r",
             "--retries",
             dest="retries",
             type=int,
+            default=4,
             help="How often should each test be retried before it is "
             "considered failed. Works around flakyness in the terminal "
             "multiplexer and race conditions in writing to the file system.",
         )
-        p.add_option(
+        p.add_argument(
             "-f",
             "--failfast",
             dest="failfast",
             action="store_true",
             help="Stop the test run on the first error or failure.",
         )
-        p.add_option(
+        p.add_argument(
             "--vim",
             dest="vim",
             type=str,
             default="vim",
             help="executable to run when launching vim.",
         )
-        p.add_option(
+        p.add_argument(
             "--python-host-prog",
             dest="python_host_prog",
             type=str,
@@ -138,7 +148,7 @@ if __name__ == "__main__":
             help="Sets g:python3_host_prog in neovim to select which python "
             "interpreter to use for py3 blocks. Ignored for vanilla Vim.",
         )
-        p.add_option(
+        p.add_argument(
             "--expected-python-version",
             dest="expected_python_version",
             type=str,
@@ -146,35 +156,35 @@ if __name__ == "__main__":
             help="If set, each test will check sys.version inside of vim to "
             "verify we are testing against the expected Python version.",
         )
-        p.add_option(
+        p.add_argument(
             "--remote-pdb",
             dest="pdb_enable",
             action="store_true",
             help="If set, The remote pdb server will be run",
         )
-        p.add_option(
+        p.add_argument(
             "--remote-pdb-host",
             dest="pdb_host",
             type=str,
             default="localhost",
             help="Remote pdb server host",
         )
-        p.add_option(
+        p.add_argument(
             "--remote-pdb-port",
             dest="pdb_port",
             type=int,
             default=8080,
             help="Remote pdb server port",
         )
-        p.add_option(
+        p.add_argument(
             "--remote-pdb-non-blocking",
             dest="pdb_block",
             action="store_false",
             help="If set, the server will not freeze vim on error",
         )
 
-        o, args = p.parse_args()
-        return o, args
+        o = p.parse_args()
+        return o, o.args
 
     def flatten_test_suite(suite):
         flatten = unittest.TestSuite()
