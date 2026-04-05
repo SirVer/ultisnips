@@ -1,12 +1,9 @@
+__pycache__/
+.claude/
+.venv/
+*.egg-info/
 *.pyc
 *.swp
-*.egg-info/
-__pycache__/
-.DS_Store
-doc/tags
-/.ropeproject/
 /.mypy_cache/
-.venv/
-.claude/
-MODERNIZATION.md
+doc/tags
 watcher.lua
