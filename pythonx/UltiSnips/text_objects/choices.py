@@ -24,7 +24,7 @@ class Choices(TabStop):
         self._input_chars = list(self._initial_text)
         self._has_been_updated = False
 
-        TabStop.__init__(self, parent, token)
+        super().__init__(parent, token)
 
     def _get_choices_placeholder(self) -> str:
         # prefix choices with index number
@@ -54,8 +54,7 @@ class Choices(TabStop):
 
     def _do_edit(self, cmd, ctab=None):
         if self._done:
-            # do as what parent class do
-            TabStop._do_edit(self, cmd, ctab)
+            super()._do_edit(cmd, ctab)
             return
 
         ctype, line, col, cmd_text = cmd

@@ -159,6 +159,8 @@ class Transformation(Mirror, TextObjectTransformation):
     """See module docstring."""
 
     def __init__(self, parent, ts, token):
+        # Non-cooperative multiple inheritance: Mirror and
+        # TextObjectTransformation have incompatible __init__ signatures.
         Mirror.__init__(self, parent, ts, token)
         TextObjectTransformation.__init__(self, token)
 

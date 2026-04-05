@@ -34,7 +34,12 @@ class Visual(NoneditableTextObject, TextObjectTransformation):
             self._text = token.alternative_text
             self._mode = "v"
 
-        NoneditableTextObject.__init__(self, parent, token)
+        # Non-cooperative multiple inheritance: NoneditableTextObject and
+        # TextObjectTransformation have incompatible __init__ signatures, so
+        # we call each parent explicitly rather than using super().
+        NoneditableTextObject.__init__(
+            self, parent, token.start, token.end, token.initial_text
+        )
         TextObjectTransformation.__init__(self, token)
 
     def _update(self, done, buf):

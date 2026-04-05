@@ -12,3 +12,6 @@ class EscapedChar(NoneditableTextObject):
 
     This is a base class without functionality just to mark it in the code.
     """
+
+    def __init__(self, parent, token):
+        super().__init__(parent, token.start, token.end, token.initial_text)
