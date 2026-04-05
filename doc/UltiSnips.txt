@@ -1291,7 +1291,7 @@ the same value. To mirror a tabstop simply insert the tabstop again using the
 
 A tabstop can be mirrored multiple times in one snippet, and more than one
 tabstop can be mirrored in the same snippet. A mirrored tabstop can have a
-default value defined. Only the first instance of the tabstop need have a
+default value defined. Only the first instance of the tabstop needs to have a
 default value. Mirrored tabstop will take on the default value automatically.
 
 Mirrors are handy for start-end tags, for example, TeX 'begin' and 'end' tag
@@ -1370,7 +1370,7 @@ The options can be any combination of >
           By default, transformation are made on the raw utf-8 string. With
           this option, matching is done on the corresponding ASCII string
           instead, for example 'à' will become 'a'.
-          This option required the python package 'unidecode'.
+          This option requires the python package 'unidecode'.
 
 The syntax of regular expressions is beyond the scope of this document. Python
 regular expressions are used internally, so the python 're' module can be used
