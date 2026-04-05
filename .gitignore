@@ -9,3 +9,4 @@ doc/tags
 .venv/
 .claude/
 MODERNIZATION.md
+watcher.lua
