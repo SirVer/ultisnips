@@ -18,7 +18,7 @@ syn cluster snipTabStopTokens contains=snipVisual,snipMirror,snipEscape,snipmate
 
 " Syntax definitions {{{1
 
-syn match snipmateComment "^#.*"
+syn match snipmateComment "^#.*" contains=snipTODO,@Spell
 
 syn match snipmateExtends "^extends\%(\s.*\|$\)" contains=snipExtendsKeyword display
 

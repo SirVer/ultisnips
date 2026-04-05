@@ -290,3 +290,18 @@ class Transformation_LiteralBackslashT(_VimTest):
     snippets = ("test", r"$1 ${1/.*/\\t/}")
     keys = "test" + EX + "hi"
     wanted = "hi \\t"
+
+
+# GH #1495: \l and \u in replacement strings are case-switch directives.
+# An escaped backslash (\\) before l/u should produce a literal backslash,
+# not trigger the case switch.
+class Transformation_EscapedBackslashBeforeLowercaseL(_VimTest):
+    snippets = ("test", r"$1 ${1/(.+)/\\l$1/}")
+    keys = "test" + EX + "world"
+    wanted = r"world \lworld"
+
+
+class Transformation_EscapedBackslashBeforeUppercaseU(_VimTest):
+    snippets = ("test", r"$1 ${1/(.+)/\\u$1/}")
+    keys = "test" + EX + "world"
+    wanted = r"world \uworld"
