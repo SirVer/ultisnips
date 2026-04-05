@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 """A Snippet instance is an instance of a Snippet Definition.
 
@@ -11,7 +10,7 @@ also a TextObject.
 
 from UltiSnips import vim_helper
 from UltiSnips.error import PebkacError
-from UltiSnips.position import Position, JumpDirection
+from UltiSnips.position import JumpDirection, Position
 from UltiSnips.text_objects.base import EditableTextObject, NoneditableTextObject
 from UltiSnips.text_objects.tabstop import TabStop
 
@@ -144,7 +143,7 @@ class SnippetInstance(EditableTextObject):
                 self._cts, ts = res
                 return ts
         else:
-            assert False, "Unknown JumpDirection: %r" % jump_direction
+            assert False, f"Unknown JumpDirection: {jump_direction!r}"
 
     def has_next_tab(self, jump_direction: JumpDirection):
         if jump_direction == JumpDirection.BACKWARD:

@@ -1,5 +1,5 @@
-from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
+from test.vim_test_case import VimTestCase as _VimTest
 
 
 class _AnonBase(_VimTest):
@@ -7,7 +7,7 @@ class _AnonBase(_VimTest):
 
     def _extra_vim_config(self, vim_config):
         vim_config.append(
-            "inoremap <silent> %s <C-R>=UltiSnips#Anon(%s)<cr>" % (EA, self.args)
+            f"inoremap <silent> {EA} <C-R>=UltiSnips#Anon({self.args})<cr>"
         )
 
 

@@ -1,12 +1,11 @@
-# coding=utf8
+from contextlib import contextmanager
 
 import vim
+
 from UltiSnips import vim_helper
 from UltiSnips.diff import diff
 from UltiSnips.error import PebkacError
 from UltiSnips.position import Position
-
-from contextlib import contextmanager
 
 
 @contextmanager

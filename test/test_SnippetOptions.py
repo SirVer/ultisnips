@@ -1,7 +1,6 @@
-# encoding: utf-8
-from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
 from test.util import running_on_windows
+from test.vim_test_case import VimTestCase as _VimTest
 
 
 class SnippetOptions_OnlyExpandWhenWSInFront_Expand(_VimTest):

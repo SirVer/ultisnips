@@ -6,7 +6,50 @@ requires-python = ">=3.11"
 
 [dependency-groups]
 dev = [
-    "black>=26.3.1",
     "mypy",
-    "pylint",
+    "ruff",
 ]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+mypy_path = "pythonx/UltiSnips"
+
+[[tool.mypy.overrides]]
+module = ["vim", "unidecode"]
+ignore_missing_imports = true
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+# Start conservative: only enable safe, high-value rule sets.
+# E/W: pycodestyle errors/warnings
+# F: pyflakes (unused imports, undefined names, etc.)
+# I: isort (import sorting)
+# UP: pyupgrade (modernize Python syntax)
+select = ["E", "W", "F", "I", "UP"]
+
+# Ignore rules that conflict with the codebase style or are too noisy.
+ignore = [
+    "E501",   # line too long — enforced by formatter, not linter
+    "E731",   # lambda assignment — used intentionally for skip_if in tests
+    "E741",   # ambiguous variable name (l, O, I) — common in vim plugin code
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Test files use wildcard imports and unused imports by design.
+"test/test_*.py" = ["F403", "F405"]
+"test/constant.py" = ["F401"]
+"test/util.py" = ["F401"]
+# __init__.py files re-export symbols for convenience.
+"pythonx/UltiSnips/__init__.py" = ["F401"]
+"pythonx/UltiSnips/snippet/definition/__init__.py" = ["F401"]
+"pythonx/UltiSnips/snippet/source/__init__.py" = ["F401"]
+"pythonx/UltiSnips/text_objects/__init__.py" = ["F401"]
+
+[tool.ruff.format]
+# Match black's defaults.
+quote-style = "double"

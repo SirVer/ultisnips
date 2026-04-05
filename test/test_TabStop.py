@@ -1,5 +1,5 @@
-from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
+from test.vim_test_case import VimTestCase as _VimTest
 
 
 class TabStopSimpleReplace_ExpectCorrectResult(_VimTest):
@@ -208,8 +208,7 @@ class TabStopTestMultilineExpand_ExpectCorrectResult(_VimTest):
         + JF
     )
     wanted = (
-        "test hallo one more" + JF + "\nnice world work\n"
-        "test try\nSeem to work World"
+        "test hallo one more" + JF + "\nnice world work\ntest try\nSeem to work World"
     )
 
 
@@ -457,26 +456,30 @@ class TabStop_AdjacentTabStopAddText_ExpectCorrectResult(_VimTest):
 
 
 class TabStop_KeepCorrectJumpListOnOverwriteOfPartOfSnippet(_VimTest):
-    files = {"us/all.snippets": r"""
+    files = {
+        "us/all.snippets": r"""
         snippet i
         ia$1: $2
         endsnippet
 
         snippet ia
         ia($1, $2)
-        endsnippet"""}
+        endsnippet"""
+    }
     keys = "i" + EX + EX + "1" + JF + "2" + JF + " after" + JF + "3"
     wanted = "ia(1, 2) after: 3"
 
 
 class TabStop_KeepCorrectJumpListOnOverwriteOfPartOfSnippetRE(_VimTest):
-    files = {"us/all.snippets": r"""
+    files = {
+        "us/all.snippets": r"""
         snippet i
         ia$1: $2
         endsnippet
 
         snippet "^ia" "regexp" r
         ia($1, $2)
-        endsnippet"""}
+        endsnippet"""
+    }
     keys = "i" + EX + EX + "1" + JF + "2" + JF + " after" + JF + "3"
     wanted = "ia(1, 2) after: 3"

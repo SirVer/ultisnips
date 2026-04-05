@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 """Wrapper functionality around the functions we need from Vim."""
 
-from contextlib import contextmanager
 import os
 import platform
+from contextlib import contextmanager
 
-from UltiSnips.compatibility import col2byte, byte2col
+import vim  # pylint:disable=import-error
+from vim import error  # pylint:disable=import-error,unused-import
+
+from UltiSnips.compatibility import byte2col, col2byte
 from UltiSnips.error import PebkacError
 from UltiSnips.position import Position
 from UltiSnips.snippet.source.file.common import normalize_file_path
-from vim import error  # pylint:disable=import-error,unused-import
-import vim  # pylint:disable=import-error
 
 
 class VimBuffer:
@@ -72,11 +72,11 @@ buf = VimBuffer()  # pylint:disable=invalid-name
 @contextmanager
 def option_set_to(name, new_value):
     old_value = vim.eval("&" + name)
-    command("set {0}={1}".format(name, new_value))
+    command(f"set {name}={new_value}")
     try:
         yield
     finally:
-        command("set {0}={1}".format(name, old_value))
+        command(f"set {name}={old_value}")
 
 
 @contextmanager
@@ -102,16 +102,11 @@ def escape(inp):
         elif isinstance(obj, dict):
             rv = (
                 "{"
-                + ",".join(
-                    [
-                        "%s:%s" % (conv(key), conv(value))
-                        for key, value in obj.items()
-                    ]
-                )
+                + ",".join([f"{conv(key)}:{conv(value)}" for key, value in obj.items()])
                 + "}"
             )
         else:
-            rv = '"%s"' % obj.replace('"', '\\"')
+            rv = '"{}"'.format(obj.replace('"', '\\"'))
         return rv
 
     return conv(inp)
@@ -155,7 +150,7 @@ def feedkeys(keys, mode="n"):
     if keys == "startinsert":
         command("startinsert")
     else:
-        command(r'call feedkeys("%s", "%s")' % (keys, mode))
+        command(rf'call feedkeys("{keys}", "{mode}")')
 
 
 def new_scratch_buffer(text):
@@ -180,7 +175,7 @@ def new_scratch_buffer(text):
 def virtual_position(line, col):
     """Runs the position through virtcol() and returns the result."""
     nbytes = col2byte(line, col)
-    return line, int(eval("virtcol([%d, %d])" % (line, nbytes)))
+    return line, int(eval(f"virtcol([{line}, {nbytes}])"))
 
 
 def select(start, end):
@@ -209,14 +204,18 @@ def select(start, end):
         move_cmd += "v"
         if "inclusive" in selection:
             if end.col == 0:
-                move_cmd += "%iG$" % end.line
+                move_cmd += f"{end.line}G$"
             else:
-                move_cmd += "%iG%i|" % virtual_position(end.line + 1, end.col)
+                vp = virtual_position(end.line + 1, end.col)
+                move_cmd += f"{vp[0]}G{vp[1]}|"
         elif "old" in selection:
-            move_cmd += "%iG%i|" % virtual_position(end.line + 1, end.col)
+            vp = virtual_position(end.line + 1, end.col)
+            move_cmd += f"{vp[0]}G{vp[1]}|"
         else:
-            move_cmd += "%iG%i|" % virtual_position(end.line + 1, end.col + 1)
-        move_cmd += "o%iG%i|o\\<c-g>" % virtual_position(start.line + 1, start.col + 1)
+            vp = virtual_position(end.line + 1, end.col + 1)
+            move_cmd += f"{vp[0]}G{vp[1]}|"
+        vp = virtual_position(start.line + 1, start.col + 1)
+        move_cmd += f"o{vp[0]}G{vp[1]}|o\\<c-g>"
     feedkeys(move_cmd)
 
 
@@ -246,7 +245,7 @@ def get_dot_vim():
         # We remove duplicates on return
         return sorted(set(candidates_normalized))
     raise PebkacError(
-        "Unable to find user configuration directory. I tried '%s'." % candidates
+        f"Unable to find user configuration directory. I tried '{candidates}'."
     )
 
 
@@ -274,11 +273,11 @@ def delete_mark(name):
 
 
 def _set_pos(name, pos):
-    return eval('setpos("{0}", {1})'.format(name, pos))
+    return eval(f'setpos("{name}", {pos})')
 
 
 def _get_pos(name):
-    return eval('getpos("{0}")'.format(name))
+    return eval(f'getpos("{name}")')
 
 
 def _is_pos_zero(pos):
@@ -297,7 +296,7 @@ def _unmap_select_mode_mapping():
 
         for option in ("<buffer>", ""):
             # Put all smaps into a var, and then read the var
-            command(r"redir => _tmp_smaps | silent smap %s " % option + "| redir END")
+            command(rf"redir => _tmp_smaps | silent smap {option} " + "| redir END")
 
             # Check if any mappings where found
             if hasattr(vim, "bindeval"):
@@ -337,7 +336,7 @@ def _unmap_select_mode_mapping():
                     add = False
                     # Only allow these
                     for valid in ["Tab", "NL", "CR", "C-Tab", "BS"]:
-                        if trig == "<%s>" % valid:
+                        if trig == f"<{valid}>":
                             add = True
                     if not add:
                         continue
@@ -348,7 +347,7 @@ def _unmap_select_mode_mapping():
 
                 # Actually unmap it
                 try:
-                    command("silent! sunmap %s %s" % (option, trig))
+                    command(f"silent! sunmap {option} {trig}")
                 except error:
                     # Bug 908139: ignore unmaps that fail because of
                     # unprintable characters. This is not ideal because we

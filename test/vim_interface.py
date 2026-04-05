@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 import os
 import re
 import shutil
@@ -8,7 +6,7 @@ import tempfile
 import textwrap
 import time
 
-from test.constant import ARR_D, ARR_L, ARR_R, ARR_U, BS, ESC, SEQUENCES
+from test.constant import ARR_D, ARR_L, ARR_R, ARR_U, BS, ESC
 
 
 def wait_until_file_exists(file_path, times=None, interval=0.01):
@@ -23,7 +21,7 @@ def wait_until_file_exists(file_path, times=None, interval=0.01):
 
 def _read_text_file(filename):
     """Reads the content of a text file."""
-    with open(filename, "r", encoding="utf-8") as to_read:
+    with open(filename, encoding="utf-8") as to_read:
         return to_read.read()
 
 
@@ -86,14 +84,13 @@ class VimInterface(TempFileManager):
             self._vim_executable,
             "-e",
             "-c",
-            "if has('patch-%d.%d.%d') | quit | else | cquit | endif"
-            % (major, minor, patchlevel),
+            f"if has('patch-{major}.{minor}.{patchlevel}') | quit | else | cquit | endif",
         ]
         return not subprocess.call(cmd, stdout=subprocess.DEVNULL)
 
     def get_buffer_data(self):
         buffer_path = self.unique_name_temp(prefix="buffer_")
-        self.send_to_vim(ESC + ":w! %s\n" % buffer_path)
+        self.send_to_vim(ESC + f":w! {buffer_path}\n")
         if wait_until_file_exists(buffer_path, 50):
             return _read_text_file(buffer_path)[:-1]
 
@@ -107,7 +104,7 @@ class VimInterface(TempFileManager):
 
     def _build_launch_command(self, config_path):
         # Note the leading space to exclude it from shell history.
-        return """ %s -u %s\r\n""" % (self._vim_executable, config_path)
+        return f""" {self._vim_executable} -u {config_path}\r\n"""
 
     def launch(self, config=[]):
         """Returns the python version in Vim as a string, e.g. '3.7'"""
@@ -123,12 +120,11 @@ class VimInterface(TempFileManager):
         post_config.append("py3 << EOF")
         post_config.append("import vim, sys")
         post_config.append(
-            "with open('%s', 'w') as pid_file: pid_file.write(vim.eval('getpid()'))"
-            % pid_file
+            f"with open('{pid_file}', 'w') as pid_file: pid_file.write(vim.eval('getpid()'))"
         )
-        post_config.append("with open('%s', 'w') as version_file:" % version_file)
+        post_config.append(f"with open('{version_file}', 'w') as version_file:")
         post_config.append("    version_file.write('%i.%i.%i' % sys.version_info[:3])")
-        post_config.append("with open('%s', 'w') as done_file:" % done_file)
+        post_config.append(f"with open('{done_file}', 'w') as done_file:")
         post_config.append("    done_file.write('all_done!')")
         post_config.append("EOF")
 
@@ -184,7 +180,7 @@ class VimInterfaceTmux(VimInterface):
         stdout = stdout.decode("utf-8")
         m = re.match(r"tmux (\d+).(\d+)", stdout)
         if not m or not (int(m.group(1)), int(m.group(2))) >= (1, 8):
-            raise RuntimeError("Need at least tmux 1.8, you have %s." % stdout.strip())
+            raise RuntimeError(f"Need at least tmux 1.8, you have {stdout.strip()}.")
 
 
 class VimInterfaceWindows(VimInterface):
@@ -229,7 +225,7 @@ class VimInterfaceWindows(VimInterface):
     def convert_keys(self, keys):
         keys = self.BRACES.sub(r"{\1}", keys)
         for k in self.WIN_ESCAPES:
-            keys = keys.replace(k, "{%s}" % k)
+            keys = keys.replace(k, f"{{{k}}}")
         for f, r in self.WIN_REPLACES:
             keys = keys.replace(f, r)
         return keys

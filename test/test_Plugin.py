@@ -1,7 +1,5 @@
-import sys
-
-from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
+from test.vim_test_case import VimTestCase as _VimTest
 
 
 class Plugin_SuperTab_SimpleTest(_VimTest):

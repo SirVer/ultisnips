@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 """This is the most important TextObject.
 
@@ -39,4 +38,4 @@ class TabStop(EditableTextObject):
             text = self.current_text
         except IndexError:
             text = "<err>"
-        return "TabStop(%s,%r->%r,%r)" % (self.number, self._start, self._end, text)
+        return f"TabStop({self.number},{self._start!r}->{self._end!r},{text!r})"

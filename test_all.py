@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 #
 # See CONTRIBUTING.md for an explanation of this file.
 #
@@ -18,10 +17,11 @@ import os
 import platform
 import subprocess
 import unittest
+
 from test.vim_interface import (
+    VimInterfaceTmux,
     create_directory,
     tempfile,
-    VimInterfaceTmux,
 )
 
 
@@ -33,9 +33,9 @@ def plugin_cache_dir():
 def clone_plugin(plugin):
     """Clone the given plugin into our plugin directory."""
     dirname = os.path.join(plugin_cache_dir(), os.path.basename(plugin))
-    print("Cloning %s -> %s" % (plugin, dirname))
+    print(f"Cloning {plugin} -> {dirname}")
     if os.path.exists(dirname):
-        print("Skip cloning of %s. Already there." % plugin)
+        print(f"Skip cloning of {plugin}. Already there.")
         return
     create_directory(dirname)
     subprocess.call(
@@ -45,7 +45,7 @@ def clone_plugin(plugin):
             "--recursive",
             "--depth",
             "1",
-            "https://github.com/%s" % plugin,
+            f"https://github.com/{plugin}",
             dirname,
         ]
     )
@@ -224,7 +224,7 @@ if __name__ == "__main__":
         elif has_nvim == b"1":
             vim_flavor = "neovim"
         else:
-            assert 0, "Unexpected output, has_nvim=%r" % has_nvim
+            assert 0, f"Unexpected output, has_nvim={has_nvim!r}"
 
         vim = VimInterfaceTmux(options.vim, options.session)
 

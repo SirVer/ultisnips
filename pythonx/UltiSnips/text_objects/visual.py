@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 """A ${VISUAL} placeholder that will use the text that was last visually
 selected and insert it here.
@@ -12,8 +11,8 @@ import re
 import textwrap
 
 from UltiSnips.indent_util import IndentUtil
-from UltiSnips.text_objects.transformation import TextObjectTransformation
 from UltiSnips.text_objects.base import NoneditableTextObject
+from UltiSnips.text_objects.transformation import TextObjectTransformation
 
 _REPLACE_NON_WS = re.compile(r"[^ \t]")
 

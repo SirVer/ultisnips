@@ -1,36 +1,33 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 """Parses a UltiSnips snippet definition and launches it into Vim."""
 
+from UltiSnips.error import PebkacError
 from UltiSnips.snippet.parsing.base import (
-    tokenize_snippet_text,
     finalize,
     resolve_ambiguity,
+    tokenize_snippet_text,
 )
 from UltiSnips.snippet.parsing.lexer import (
-    EscapeCharToken,
-    VisualToken,
-    TransformationToken,
     ChoicesToken,
-    TabStopToken,
+    EscapeCharToken,
     MirrorToken,
     PythonCodeToken,
-    VimLCodeToken,
     ShellCodeToken,
+    TabStopToken,
+    TransformationToken,
+    VimLCodeToken,
+    VisualToken,
 )
 from UltiSnips.text_objects import (
+    Choices,
     EscapedChar,
-    Mirror,
     PythonCode,
     ShellCode,
-    TabStop,
     Transformation,
     VimLCode,
     Visual,
-    Choices,
 )
-from UltiSnips.error import PebkacError
 
 _TOKEN_TO_TEXTOBJECT = {
     EscapeCharToken: EscapedChar,
@@ -60,8 +57,7 @@ def _create_transformations(all_tokens, seen_ts):
         if isinstance(token, TransformationToken):
             if token.number not in seen_ts:
                 raise PebkacError(
-                    "Tabstop %i is not known but is used by a Transformation"
-                    % token.number
+                    f"Tabstop {token.number} is not known but is used by a Transformation"
                 )
             Transformation(parent, seen_ts[token.number], token)
 

@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 """Implements `echo hi` shell code interpolation."""
 
 import os
 import platform
-from subprocess import Popen, PIPE
 import stat
 import tempfile
+from subprocess import PIPE, Popen
 
 from UltiSnips.text_objects.base import NoneditableTextObject
 

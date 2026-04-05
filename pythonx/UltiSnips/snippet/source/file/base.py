@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 """Code to provide access to UltiSnips files from disk."""
 
-from collections import defaultdict
-import os
-
-from UltiSnips import compatibility
 from UltiSnips import vim_helper
 from UltiSnips.error import PebkacError
 from UltiSnips.snippet.source.base import SnippetSource
@@ -16,7 +11,7 @@ class SnippetSyntaxError(PebkacError):
     """Thrown when a syntax error is found in a file."""
 
     def __init__(self, filename, line_index, msg):
-        RuntimeError.__init__(self, "%s in %s:%d" % (msg, filename, line_index))
+        RuntimeError.__init__(self, f"{msg} in {filename}:{line_index}")
 
 
 class SnippetFileSource(SnippetSource):
@@ -44,7 +39,7 @@ class SnippetFileSource(SnippetSource):
     def _needs_update(self, ft):
         """Returns true if any files for 'ft' have changed and must be
         reloaded."""
-        return not (ft in self._snippets)
+        return ft not in self._snippets
 
     def _load_snippets_for(self, ft):
         """Load all snippets for the given 'ft'."""
@@ -62,14 +57,14 @@ class SnippetFileSource(SnippetSource):
 
     def _parse_snippets(self, ft, filename):
         """Parse the 'filename' for the given 'ft'."""
-        with open(filename, "r", encoding="utf-8-sig") as to_read:
+        with open(filename, encoding="utf-8-sig") as to_read:
             file_data = to_read.read()
         self._snippets[ft]  # Make sure the dictionary exists
         for event, data in self._parse_snippet_file(file_data, filename):
             if event == "error":
                 msg, line_index = data
                 filename = vim_helper.eval(
-                    """fnamemodify(%s, ":~:.")""" % vim_helper.escape(filename)
+                    f"""fnamemodify({vim_helper.escape(filename)}, ":~:.")"""
                 )
                 raise SnippetSyntaxError(filename, line_index, msg)
             elif event == "clearsnippets":
@@ -84,7 +79,7 @@ class SnippetFileSource(SnippetSource):
                 (snippet,) = data
                 self._snippets[ft].add_snippet(snippet)
             else:
-                assert False, "Unhandled %s: %r" % (event, data)
+                assert False, f"Unhandled {event}: {data!r}"
         # precompile global snippets code for all snipepts we just sourced
         for snippet in self._snippets[ft]:
             snippet._precompile_globals()

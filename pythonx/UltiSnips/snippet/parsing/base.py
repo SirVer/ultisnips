@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 """Common functionality of the snippet parsing codes."""
 
 from UltiSnips.position import Position
-from UltiSnips.snippet.parsing.lexer import tokenize, TabStopToken
-from UltiSnips.text_objects import TabStop
-
-from UltiSnips.text_objects import Mirror
-from UltiSnips.snippet.parsing.lexer import MirrorToken
+from UltiSnips.snippet.parsing.lexer import MirrorToken, TabStopToken, tokenize
+from UltiSnips.text_objects import Mirror, TabStop
 
 
 def resolve_ambiguity(all_tokens, seen_ts):

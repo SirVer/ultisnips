@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 from enum import Enum
 
@@ -65,7 +64,7 @@ class Position:
         return (self.line, self.col) <= (other.line, other.col)
 
     def __repr__(self):
-        return "(%i,%i)" % (self.line, self.col)
+        return f"({self.line},{self.col})"
 
     def __getitem__(self, index):
         if index > 1:

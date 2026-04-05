@@ -1,13 +1,12 @@
-from test.vim_test_case import VimTestCase as _VimTest
 from test.constant import *
+from test.vim_test_case import VimTestCase as _VimTest
 
 
 class CursorMovement_Multiline_ECR(_VimTest):
     snippets = ("test", r"$1 ${1:a tab}")
     keys = "test" + EX + "this is something\nvery nice\nnot" + JF + "more text"
     wanted = (
-        "this is something\nvery nice\nnot "
-        "this is something\nvery nice\nnotmore text"
+        "this is something\nvery nice\nnot this is something\nvery nice\nnotmore text"
     )
 
 

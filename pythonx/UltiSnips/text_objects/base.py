@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 """Base classes for all text objects."""
 
@@ -103,7 +102,7 @@ class TextObject:
         except IndexError:
             ct = "<err>"
 
-        return "%s(%r->%r,%r)" % (self.__class__.__name__, self._start, self._end, ct)
+        return f"{self.__class__.__name__}({self._start!r}->{self._end!r},{ct!r})"
 
     @property
     def current_text(self):

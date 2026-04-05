@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-# encoding: utf-8
 
 """Not really a lexer in the classical sense, but code to convert snippet
 definitions into logical units called Tokens."""
 
-import string
 import re
+import string
 
 from UltiSnips.error import PebkacError
 from UltiSnips.position import Position
@@ -147,12 +146,7 @@ class TabStopToken(Token):
         self.initial_text = _parse_till_closing_brace(stream)
 
     def __repr__(self):
-        return "TabStopToken(%r,%r,%r,%r)" % (
-            self.start,
-            self.end,
-            self.number,
-            self.initial_text,
-        )
+        return f"TabStopToken({self.start!r},{self.end!r},{self.number!r},{self.initial_text!r})"
 
 
 class VisualToken(Token):
@@ -190,7 +184,7 @@ class VisualToken(Token):
             self.options = None
 
     def __repr__(self):
-        return "VisualToken(%r,%r)" % (self.start, self.end)
+        return f"VisualToken({self.start!r},{self.end!r})"
 
 
 class TransformationToken(Token):
@@ -217,13 +211,7 @@ class TransformationToken(Token):
         self.options = _parse_till_closing_brace(stream)
 
     def __repr__(self):
-        return "TransformationToken(%r,%r,%r,%r,%r)" % (
-            self.start,
-            self.end,
-            self.number,
-            self.search,
-            self.replace,
-        )
+        return f"TransformationToken({self.start!r},{self.end!r},{self.number!r},{self.search!r},{self.replace!r})"
 
 
 class MirrorToken(Token):
@@ -242,7 +230,7 @@ class MirrorToken(Token):
         self.number = _parse_number(stream)
 
     def __repr__(self):
-        return "MirrorToken(%r,%r,%r)" % (self.start, self.end, self.number)
+        return f"MirrorToken({self.start!r},{self.end!r},{self.number!r})"
 
 
 class ChoicesToken(Token):
@@ -291,7 +279,7 @@ class ChoicesToken(Token):
                     choice_list.append(last_choice_item)
                 break
         self.choice_list = choice_list
-        self.initial_text = "|{0}|".format(",".join(choice_list))
+        self.initial_text = "|{}|".format(",".join(choice_list))
 
         _parse_till_closing_brace(stream)
 
@@ -300,12 +288,7 @@ class ChoicesToken(Token):
         return escaped_choice_item.replace(r"\,", ",")
 
     def __repr__(self):
-        return "ChoicesToken(%r,%r,%r,|%r|)" % (
-            self.start,
-            self.end,
-            self.number,
-            self.initial_text,
-        )
+        return f"ChoicesToken({self.start!r},{self.end!r},{self.number!r},|{self.initial_text!r}|)"
 
 
 class EscapeCharToken(Token):
@@ -324,7 +307,7 @@ class EscapeCharToken(Token):
         self.initial_text = next(stream)
 
     def __repr__(self):
-        return "EscapeCharToken(%r,%r,%r)" % (self.start, self.end, self.initial_text)
+        return f"EscapeCharToken({self.start!r},{self.end!r},{self.initial_text!r})"
 
 
 class ShellCodeToken(Token):
@@ -341,7 +324,7 @@ class ShellCodeToken(Token):
         self.code = _parse_till_unescaped_char(stream, "`")[0]
 
     def __repr__(self):
-        return "ShellCodeToken(%r,%r,%r)" % (self.start, self.end, self.code)
+        return f"ShellCodeToken({self.start!r},{self.end!r},{self.code!r})"
 
 
 class PythonCodeToken(Token):
@@ -373,7 +356,7 @@ class PythonCodeToken(Token):
         self.indent = indent
 
     def __repr__(self):
-        return "PythonCodeToken(%r,%r,%r)" % (self.start, self.end, self.code)
+        return f"PythonCodeToken({self.start!r},{self.end!r},{self.code!r})"
 
 
 class VimLCodeToken(Token):
@@ -393,14 +376,14 @@ class VimLCodeToken(Token):
         self.code = _parse_till_unescaped_char(stream, "`")[0]
 
     def __repr__(self):
-        return "VimLCodeToken(%r,%r,%r)" % (self.start, self.end, self.code)
+        return f"VimLCodeToken({self.start!r},{self.end!r},{self.code!r})"
 
 
 class EndOfTextToken(Token):
     """Appears at the end of the text."""
 
     def __repr__(self):
-        return "EndOfText(%r)" % self.end
+        return f"EndOfText({self.end!r})"
 
 
 def tokenize(text, indent, offset, allowed_tokens):
