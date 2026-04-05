@@ -1,5 +1,8 @@
 *.pyc
 *.swp
+*.egg-info/
+__pycache__/
+.DS_Store
 doc/tags
 /.ropeproject/
 /.mypy_cache/

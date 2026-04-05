@@ -33,7 +33,7 @@ jobs:
     # Builds Vim and Tests it within docker.
     name: Vim ${{ matrix.vim_version }} / Python ${{ matrix.python_image }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Build the image
         run: docker build -t ultisnips:${{ matrix.tag }} --build-arg PYTHON_IMAGE=${{ matrix.python_image }} --build-arg VIM_VERSION=${{ matrix.vim_version }} .
       - name: Run the tests
@@ -49,7 +49,7 @@ jobs:
 
     name: Neovim ${{ matrix.nvim_version }} / Python ${{ matrix.python_image }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Build the image
         run: docker build -t ultisnips:${{ matrix.tag }} -f Dockerfile.nvim --build-arg PYTHON_IMAGE=${{ matrix.python_image }} --build-arg NVIM_VERSION=${{ matrix.nvim_version }} .
       - name: Run the tests
