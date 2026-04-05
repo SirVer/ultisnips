@@ -25,7 +25,7 @@ make image_repro && make repro   # shell 1: build + launch container, then `tmux
 make shell_in_repro              # shell 2: enter container, then `./test_all.py`
 ```
 
-CI uses Docker across Vim 9.0/9.1/git, Neovim, and Python 3.10-3.13 (`.github/workflows/main.yml`).
+CI uses Docker across Vim 9.1/9.2/git, Neovim 0.12, and Python 3.11-3.14 (`.github/workflows/main.yml`).
 
 ## Formatting
 

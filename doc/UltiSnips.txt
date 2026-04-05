@@ -1,4 +1,4 @@
-*UltiSnips.txt*    For Vim version 9.0 or later and Neovim.
+*UltiSnips.txt*    For Vim version 9.1 or later and Neovim.
 
         The Ultimate Plugin for Snippets in Vim and Neovim~
 
@@ -93,7 +93,7 @@ http://vimcasts.org/episodes/ultisnips-visual-placeholder/
 1.1 Requirements                                     *UltiSnips-requirements*
 ----------------
 
-This plugin works with Vim version 9.0 or later and Neovim, with Python 3
+This plugin works with Vim version 9.1 or later and Neovim, with Python 3
 support enabled. It only works if the 'compatible' setting is not set.
 
 For Vim, the Python 3.x interface must be available. In other words, Vim
