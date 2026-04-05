@@ -4,6 +4,7 @@
 
 import glob
 import os
+from pathlib import Path
 
 from UltiSnips import vim_helper
 from UltiSnips.snippet.definition import SnipMateSnippetDefinition
@@ -14,20 +15,7 @@ from UltiSnips.text import LineIterator, head_tail
 
 def _splitall(path):
     """Split 'path' into all its components."""
-    # From http://my.safaribooksonline.com/book/programming/
-    # python/0596001673/files/pythoncook-chp-4-sect-16
-    allparts = []
-    while True:
-        parts = os.path.split(path)
-        if parts[0] == path:  # sentinel for absolute paths
-            allparts.insert(0, parts[0])
-            break
-        if parts[1] == path:  # sentinel for relative paths
-            allparts.insert(0, parts[1])
-            break
-        path = parts[0]
-        allparts.insert(0, parts[1])
-    return allparts
+    return list(Path(path).parts)
 
 
 def _snipmate_files_for(ft):
@@ -36,15 +24,15 @@ def _snipmate_files_for(ft):
         ft = "_"
     patterns = [
         f"{ft}.snippets",
-        os.path.join(ft, "*.snippets"),
-        os.path.join(ft, "*.snippet"),
-        os.path.join(ft, "*/*.snippet"),
+        str(Path(ft) / "*.snippets"),
+        str(Path(ft) / "*.snippet"),
+        str(Path(ft) / "*" / "*.snippet"),
     ]
     ret = set()
     for rtp in vim_helper.eval("&runtimepath").split(","):
-        path = normalize_file_path(os.path.expanduser(os.path.join(rtp, "snippets")))
+        path = normalize_file_path(str(Path(rtp, "snippets").expanduser()))
         for pattern in patterns:
-            for fn in glob.glob(os.path.join(path, pattern)):
+            for fn in glob.glob(str(Path(path) / pattern)):
                 ret.add(fn)
     return ret
 

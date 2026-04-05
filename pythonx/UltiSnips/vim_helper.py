@@ -6,6 +6,7 @@ import contextlib
 import os
 import platform
 from contextlib import contextmanager
+from pathlib import Path
 
 import vim  # pylint:disable=import-error
 from vim import error  # pylint:disable=import-error,unused-import
@@ -222,24 +223,24 @@ def select(start, end):
 
 def get_dot_vim():
     """Returns the likely places for ~/.vim for the current setup."""
-    home = vim.eval("$HOME")
+    home = Path(vim.eval("$HOME"))
     candidates = []
     if platform.system() == "Windows":
-        candidates.append(os.path.join(home, "vimfiles"))
+        candidates.append(str(home / "vimfiles"))
     if vim.eval("has('nvim')") == "1":
-        xdg_home_config = vim.eval("$XDG_CONFIG_HOME") or os.path.join(home, ".config")
-        candidates.append(os.path.join(xdg_home_config, "nvim"))
+        xdg_home_config = vim.eval("$XDG_CONFIG_HOME") or str(home / ".config")
+        candidates.append(str(Path(xdg_home_config) / "nvim"))
 
-    candidates.append(os.path.join(home, ".vim"))
+    candidates.append(str(home / ".vim"))
 
     # Note: this potentially adds a duplicate on nvim
     # I assume nvim sets the MYVIMRC env variable (to beconfirmed)
     if "MYVIMRC" in os.environ:
-        my_vimrc = os.path.expandvars(os.environ["MYVIMRC"])
-        candidates.append(normalize_file_path(os.path.dirname(my_vimrc)))
+        my_vimrc = Path(os.path.expandvars(os.environ["MYVIMRC"]))
+        candidates.append(normalize_file_path(str(my_vimrc.parent)))
 
     candidates_normalized = [
-        normalize_file_path(c) for c in candidates if os.path.isdir(c)
+        normalize_file_path(c) for c in candidates if Path(c).is_dir()
     ]
     if candidates_normalized:
         # We remove duplicates on return

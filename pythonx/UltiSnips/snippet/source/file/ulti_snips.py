@@ -3,8 +3,8 @@
 """Parsing of snippet files."""
 
 import glob
-import os
 from collections import defaultdict
+from pathlib import Path
 
 from UltiSnips import vim_helper
 from UltiSnips.error import PebkacError
@@ -21,11 +21,11 @@ from UltiSnips.text import LineIterator, head_tail
 
 def find_snippet_files(ft, directory: str) -> set[str]:
     """Returns all matching snippet files for 'ft' in 'directory'."""
-    patterns = ["%s.snippets", "%s_*.snippets", os.path.join("%s", "*")]
+    patterns = ["%s.snippets", "%s_*.snippets", str(Path("%s") / "*")]
     ret = set()
-    directory = os.path.expanduser(directory)
+    directory = str(Path(directory).expanduser())
     for pattern in patterns:
-        for fn in glob.glob(os.path.join(directory, pattern % ft)):
+        for fn in glob.glob(str(Path(directory) / (pattern % ft))):
             ret.add(normalize_file_path(fn))
     return ret
 
@@ -42,9 +42,9 @@ def find_all_snippet_directories() -> list[str]:
     if len(snippet_dirs) == 1:
         # To reduce confusion and increase consistency with
         # `UltiSnipsSnippetsDir`, we expand ~ here too.
-        full_path = os.path.expanduser(snippet_dirs[0])
-        if os.path.isabs(full_path):
-            return [full_path]
+        full_path = Path(snippet_dirs[0]).expanduser()
+        if full_path.is_absolute():
+            return [str(full_path)]
 
     all_dirs = []
     check_dirs = vim_helper.eval("&runtimepath").split(",")
@@ -56,9 +56,7 @@ def find_all_snippet_directories() -> list[str]:
                     "directory is reserved for snipMate snippets. Use another "
                     "directory for UltiSnips snippets."
                 )
-            pth = normalize_file_path(
-                os.path.expanduser(os.path.join(rtp, snippet_dir))
-            )
+            pth = normalize_file_path(str(Path(rtp, snippet_dir).expanduser()))
             # Runtimepath entries may contain wildcards.
             all_dirs.extend(glob.glob(pth))
     return all_dirs
@@ -67,13 +65,13 @@ def find_all_snippet_directories() -> list[str]:
 def find_all_snippet_files(ft) -> set[str]:
     """Returns all snippet files matching 'ft' in the given runtime path
     directory."""
-    patterns = ["%s.snippets", "%s_*.snippets", os.path.join("%s", "*")]
+    patterns = ["%s.snippets", "%s_*.snippets", str(Path("%s") / "*")]
     ret = set()
     for directory in find_all_snippet_directories():
-        if not os.path.isdir(directory):
+        if not Path(directory).is_dir():
             continue
         for pattern in patterns:
-            for fn in glob.glob(os.path.join(directory, pattern % ft)):
+            for fn in glob.glob(str(Path(directory) / (pattern % ft))):
                 ret.add(fn)
     return ret
 
