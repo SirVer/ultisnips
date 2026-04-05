@@ -74,11 +74,11 @@ buf = VimBuffer()
 @contextmanager
 def option_set_to(name, new_value):
     old_value = vim.eval("&" + name)
-    command(f"set {name}={new_value}")
+    vim.command(f"set {name}={new_value}")
     try:
         yield
     finally:
-        command(f"set {name}={old_value}")
+        vim.command(f"set {name}={old_value}")
 
 
 @contextmanager
@@ -125,11 +125,6 @@ def as_str(value):
     return str(value)
 
 
-def command(cmd):
-    """Wraps vim.command."""
-    return vim.command(cmd)
-
-
 def eval(text):
     """Wraps vim.eval."""
     # Replace null bytes with newlines, as vim raises a ValueError and neovim
@@ -161,9 +156,9 @@ def feedkeys(keys, mode="n"):
             keys = "startinsert"
 
     if keys == "startinsert":
-        command("startinsert")
+        vim.command("startinsert")
     else:
-        command(rf'call feedkeys("{keys}", "{mode}")')
+        vim.command(rf'call feedkeys("{keys}", "{mode}")')
 
 
 def new_scratch_buffer(text):
@@ -279,7 +274,7 @@ def get_cursor_pos():
 
 def delete_mark(name):
     try:
-        return command("delma " + name)
+        return vim.command("delma " + name)
     except error:
         return False
 
@@ -308,7 +303,7 @@ def _unmap_select_mode_mapping():
 
         for option in ("<buffer>", ""):
             # Put all smaps into a var, and then read the var
-            command(rf"redir => _tmp_smaps | silent smap {option} " + "| redir END")
+            vim.command(rf"redir => _tmp_smaps | silent smap {option} " + "| redir END")
 
             # Check if any mappings where found
             if hasattr(vim, "bindeval"):
@@ -367,4 +362,4 @@ def _unmap_select_mode_mapping():
                 # This case should be rare enough to not bother us
                 # though.
                 with contextlib.suppress(error):
-                    command(f"silent! sunmap {option} {trig}")
+                    vim.command(f"silent! sunmap {option} {trig}")

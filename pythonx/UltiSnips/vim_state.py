@@ -4,6 +4,8 @@
 
 from collections import deque, namedtuple
 
+import vim
+
 from UltiSnips import vim_helper
 from UltiSnips.position import Position
 from UltiSnips.vim_encoding import byte2col
@@ -43,7 +45,7 @@ class VimState:
         # data that cannot be coerced to Unicode, and so a simple vim.eval('@"')
         # fails badly.  Keeping the cached value in Vim directly, sidesteps the
         # problem.
-        vim_helper.command('let g:_ultisnips_unnamed_reg_cache = ""')
+        vim.command('let g:_ultisnips_unnamed_reg_cache = ""')
 
     def remember_unnamed_register(self, text_to_expect):
         """Save the unnamed register.
@@ -58,14 +60,14 @@ class VimState:
         escaped_text = self._text_to_expect.replace("'", "''")
         res = int(vim_helper.eval('@" != ' + "'" + escaped_text + "'"))
         if res:
-            vim_helper.command('let g:_ultisnips_unnamed_reg_cache = @"')
+            vim.command('let g:_ultisnips_unnamed_reg_cache = @"')
         self._text_to_expect = text_to_expect
 
     def restore_unnamed_register(self):
         """Restores the unnamed register and forgets what we cached."""
         if not self._unnamed_reg_cached:
             return
-        vim_helper.command('let @" = g:_ultisnips_unnamed_reg_cache')
+        vim.command('let @" = g:_ultisnips_unnamed_reg_cache')
         self._unnamed_reg_cached = False
 
     def remember_position(self):

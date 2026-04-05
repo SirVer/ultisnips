@@ -49,10 +49,10 @@ def _ask_user(a, formatted):
 
 def _show_user_warning(msg):
     """Shows a Vim warning message to the user."""
-    vim_helper.command("echohl WarningMsg")
+    vim.command("echohl WarningMsg")
     escaped = msg.replace('"', '\\"')
-    vim_helper.command(f'echom "{escaped}"')
-    vim_helper.command("echohl None")
+    vim.command(f'echom "{escaped}"')
+    vim.command("echohl None")
 
 
 def _ask_snippets(snippets):
@@ -154,7 +154,7 @@ class SnippetManager:
     def jump_forwards(self):
         """Jumps to the next tabstop."""
         vim.vars["ulti_jump_forwards_res"] = 1
-        vim_helper.command("let &g:undolevels = &g:undolevels")
+        vim.command("let &g:undolevels = &g:undolevels")
         if not self._jump(JumpDirection.FORWARD):
             vim.vars["ulti_jump_forwards_res"] = 0
             return self._handle_failure(self.forward_trigger)
@@ -164,7 +164,7 @@ class SnippetManager:
     def jump_backwards(self):
         """Jumps to the previous tabstop."""
         vim.vars["ulti_jump_backwards_res"] = 1
-        vim_helper.command("let &g:undolevels = &g:undolevels")
+        vim.command("let &g:undolevels = &g:undolevels")
         if not self._jump(JumpDirection.BACKWARD):
             vim.vars["ulti_jump_backwards_res"] = 0
             return self._handle_failure(self.backward_trigger)
@@ -446,47 +446,45 @@ class SnippetManager:
         if self._inner_state_up:
             return
         if self.expand_trigger != self.forward_trigger:
-            vim_helper.command(
+            vim.command(
                 "inoremap <buffer><nowait><silent> "
                 + self.forward_trigger
                 + " <C-R>=UltiSnips#JumpForwards()<cr>"
             )
-            vim_helper.command(
+            vim.command(
                 "snoremap <buffer><nowait><silent> "
                 + self.forward_trigger
                 + " <Esc>:call UltiSnips#JumpForwards()<cr>"
             )
-        vim_helper.command(
+        vim.command(
             "inoremap <buffer><nowait><silent> "
             + self.backward_trigger
             + " <C-R>=UltiSnips#JumpBackwards()<cr>"
         )
-        vim_helper.command(
+        vim.command(
             "snoremap <buffer><nowait><silent> "
             + self.backward_trigger
             + " <Esc>:call UltiSnips#JumpBackwards()<cr>"
         )
 
         # Setup the autogroups.
-        vim_helper.command("augroup UltiSnips")
-        vim_helper.command("autocmd!")
-        vim_helper.command("autocmd CursorMovedI * call UltiSnips#CursorMoved()")
-        vim_helper.command("autocmd CursorMoved * call UltiSnips#CursorMoved()")
+        vim.command("augroup UltiSnips")
+        vim.command("autocmd!")
+        vim.command("autocmd CursorMovedI * call UltiSnips#CursorMoved()")
+        vim.command("autocmd CursorMoved * call UltiSnips#CursorMoved()")
 
-        vim_helper.command("autocmd InsertLeave * call UltiSnips#LeavingInsertMode()")
+        vim.command("autocmd InsertLeave * call UltiSnips#LeavingInsertMode()")
 
-        vim_helper.command("autocmd BufEnter * call UltiSnips#LeavingBuffer()")
-        vim_helper.command("autocmd CmdwinEnter * call UltiSnips#LeavingBuffer()")
-        vim_helper.command("autocmd CmdwinLeave * call UltiSnips#LeavingBuffer()")
+        vim.command("autocmd BufEnter * call UltiSnips#LeavingBuffer()")
+        vim.command("autocmd CmdwinEnter * call UltiSnips#LeavingBuffer()")
+        vim.command("autocmd CmdwinLeave * call UltiSnips#LeavingBuffer()")
 
         # Also exit the snippet when we enter a unite complete buffer.
-        vim_helper.command("autocmd Filetype unite call UltiSnips#LeavingBuffer()")
+        vim.command("autocmd Filetype unite call UltiSnips#LeavingBuffer()")
 
-        vim_helper.command("augroup END")
+        vim.command("augroup END")
 
-        vim_helper.command(
-            "silent doautocmd <nomodeline> User UltiSnipsEnterFirstSnippet"
-        )
+        vim.command("silent doautocmd <nomodeline> User UltiSnipsEnterFirstSnippet")
         self._inner_state_up = True
 
     def _teardown_inner_state(self):
@@ -494,17 +492,15 @@ class SnippetManager:
         if not self._inner_state_up:
             return
         try:
-            vim_helper.command(
-                "silent doautocmd <nomodeline> User UltiSnipsExitLastSnippet"
-            )
+            vim.command("silent doautocmd <nomodeline> User UltiSnipsExitLastSnippet")
             if self.expand_trigger != self.forward_trigger:
-                vim_helper.command(f"iunmap <buffer> {self.forward_trigger}")
-                vim_helper.command(f"sunmap <buffer> {self.forward_trigger}")
-            vim_helper.command(f"iunmap <buffer> {self.backward_trigger}")
-            vim_helper.command(f"sunmap <buffer> {self.backward_trigger}")
-            vim_helper.command("augroup UltiSnips")
-            vim_helper.command("autocmd!")
-            vim_helper.command("augroup END")
+                vim.command(f"iunmap <buffer> {self.forward_trigger}")
+                vim.command(f"sunmap <buffer> {self.forward_trigger}")
+            vim.command(f"iunmap <buffer> {self.backward_trigger}")
+            vim.command(f"sunmap <buffer> {self.backward_trigger}")
+            vim.command("augroup UltiSnips")
+            vim.command("autocmd!")
+            vim.command("augroup END")
         except vim_helper.error:
             # This happens when a preview window was opened. This issues
             # CursorMoved, but not BufLeave. We have no way to unmap, until we
@@ -611,7 +607,7 @@ class SnippetManager:
                     self._should_reset_visual = False
                     self._active_snippets[0].update_textobjects(vim_helper.buf)
                     # Open any folds this might have created
-                    vim_helper.command("normal! zv")
+                    vim.command("normal! zv")
                     self._vstate.remember_buffer(self._active_snippets[0])
 
                     if ntab.number == 0 and self._active_snippets:
@@ -677,9 +673,9 @@ class SnippetManager:
                 break
 
         if feedkey in (r"\<Plug>SuperTabForward", r"\<Plug>SuperTabBackward"):
-            vim_helper.command(f"return SuperTab({vim_helper.escape(mode)})")
+            vim.command(f"return SuperTab({vim_helper.escape(mode)})")
         elif feedkey:
-            vim_helper.command(f"return {vim_helper.escape(feedkey)}")
+            vim.command(f"return {vim_helper.escape(feedkey)}")
 
     def _snips(self, before, partial, autotrigger_only=False):
         """Returns all the snippets for the given text before the cursor.
@@ -786,7 +782,7 @@ class SnippetManager:
                 text_before, self._visual_content, parent, start, end
             )
             # Open any folds this might have created
-            vim_helper.command("normal! zv")
+            vim.command("normal! zv")
 
             self._visual_content.reset()
             self._active_snippets.append(snippet_instance)
@@ -829,7 +825,7 @@ class SnippetManager:
         if not snippets:
             # No snippet found
             return False
-        vim_helper.command("let &g:undolevels = &g:undolevels")
+        vim.command("let &g:undolevels = &g:undolevels")
         if len(snippets) == 1:
             snippet = snippets[0]
         else:
@@ -837,7 +833,7 @@ class SnippetManager:
             if not snippet:
                 return True
         self._do_snippet(snippet, before)
-        vim_helper.command("let &g:undolevels = &g:undolevels")
+        vim.command("let &g:undolevels = &g:undolevels")
         return True
 
     def can_expand(self, autotrigger_only=False):
