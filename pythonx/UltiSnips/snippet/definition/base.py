@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
-
 """Snippet representation after parsing."""
 
 import re

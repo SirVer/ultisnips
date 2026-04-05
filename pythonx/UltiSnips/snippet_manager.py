@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
-
 """Contains the SnippetManager facade used by all Vim Functions."""
 
 from collections import defaultdict
@@ -85,8 +83,7 @@ def _select_and_create_file_to_edit(potentials: Set[str]) -> str:
         file_to_edit = potentials.pop()
 
     dirname = os.path.dirname(file_to_edit)
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
+    os.makedirs(dirname, exist_ok=True)
 
     return file_to_edit
 

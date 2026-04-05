@@ -1,5 +1,3 @@
-# coding=utf8
-
 from functools import wraps
 import traceback
 import re

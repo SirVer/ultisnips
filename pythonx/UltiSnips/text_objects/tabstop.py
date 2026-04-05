@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
-
 """This is the most important TextObject.
 
 A TabStop is were the cursor comes to rest when the user taps through

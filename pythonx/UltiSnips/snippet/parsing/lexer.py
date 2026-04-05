@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
-
 """Not really a lexer in the classical sense, but code to convert snippet
 definitions into logical units called Tokens."""
 

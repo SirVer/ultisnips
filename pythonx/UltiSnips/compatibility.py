@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
-
 """This file contains compatibility code to stay compatible with as many python
 versions as possible."""
 

@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
-
 """Implements `!p ` interpolation."""
 
 import os
@@ -47,7 +45,7 @@ _VisualContent = namedtuple("_VisualContent", ["mode", "text"])
 
 class SnippetUtilForAction(dict):
     def __init__(self, *args, **kwargs):
-        super(SnippetUtilForAction, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.__dict__ = self
 
     def expand_anon(self, *args, **kwargs):

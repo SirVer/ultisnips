@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
-
 """A Snippet instance is an instance of a Snippet Definition.
 
 That is, when the user expands a snippet, a SnippetInstance is created

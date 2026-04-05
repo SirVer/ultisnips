@@ -1,4 +1,3 @@
-# encoding: utf-8
 import os
 
 from test.vim_test_case import VimTestCase as _VimTest

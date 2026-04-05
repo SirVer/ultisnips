@@ -5,7 +5,7 @@ from bdb import BdbQuit
 from UltiSnips import vim_helper
 
 
-class RemotePDB(object):
+class RemotePDB:
     """
     Launch a pdb instance listening on (host, port).
     Used to provide debug facilities you can access with netcat or telnet.
