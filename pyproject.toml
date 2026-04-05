@@ -2,7 +2,7 @@
 name = "ultisnips"
 version = "0.1.0"
 description = "The ultimate snippet solution for Vim."
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 
 [dependency-groups]
 dev = [

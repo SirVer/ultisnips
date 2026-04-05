@@ -13,24 +13,24 @@ jobs:
      fail-fast: false
      matrix:
       include:
-        - { vim_version: "9.0.0000", python_image: "3.10-bookworm", tag: "vim_90_py310" }
-        - { vim_version: "9.1.0000", python_image: "3.10-bookworm", tag: "vim_91_py310" }
-        - { vim_version: "git", python_image: "3.10-bookworm", tag: "vim_git_py310" }
-
-        - { vim_version: "9.0.0000", python_image: "3.11-bookworm", tag: "vim_90_py311" }
         - { vim_version: "9.1.0000", python_image: "3.11-bookworm", tag: "vim_91_py311" }
+        - { vim_version: "9.2.0000", python_image: "3.11-bookworm", tag: "vim_92_py311" }
         - { vim_version: "git", python_image: "3.11-bookworm", tag: "vim_git_py311" }
 
-        - { vim_version: "9.0.0000", python_image: "3.12-bookworm", tag: "vim_90_py312" }
         - { vim_version: "9.1.0000", python_image: "3.12-bookworm", tag: "vim_91_py312" }
+        - { vim_version: "9.2.0000", python_image: "3.12-bookworm", tag: "vim_92_py312" }
         - { vim_version: "git", python_image: "3.12-bookworm", tag: "vim_git_py312" }
 
-        # Vim 9.0 and 9.1 prior to 417 hang forever with python 3.13 due to a bug fixed here
-        # https://github.com/vim/vim/issues/14776.
+        # Vim 9.1 prior to 417 hangs forever with python 3.13+ due to a bug
+        # fixed here: https://github.com/vim/vim/issues/14776.
         - { vim_version: "9.1.0417", python_image: "3.13-bookworm", tag: "vim_91_py313" }
+        - { vim_version: "9.2.0000", python_image: "3.13-bookworm", tag: "vim_92_py313" }
         - { vim_version: "git", python_image: "3.13-bookworm", tag: "vim_git_py313" }
 
-    # Builds Vim and Tests it within docker.
+        - { vim_version: "9.1.0417", python_image: "3.14-bookworm", tag: "vim_91_py314" }
+        - { vim_version: "9.2.0000", python_image: "3.14-bookworm", tag: "vim_92_py314" }
+        - { vim_version: "git", python_image: "3.14-bookworm", tag: "vim_git_py314" }
+
     name: Vim ${{ matrix.vim_version }} / Python ${{ matrix.python_image }}
     steps:
       - uses: actions/checkout@v2
