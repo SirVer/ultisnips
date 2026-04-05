@@ -105,6 +105,10 @@ class VimInterface(TempFileManager):
         """Types 's' into the vim instance under test."""
         raise NotImplementedError()
 
+    def _build_launch_command(self, config_path):
+        # Note the leading space to exclude it from shell history.
+        return """ %s -u %s\r\n""" % (self._vim_executable, config_path)
+
     def launch(self, config=[]):
         """Returns the python version in Vim as a string, e.g. '3.7'"""
         pid_file = self.name_temp("vim.pid")
@@ -133,13 +137,7 @@ class VimInterface(TempFileManager):
             textwrap.dedent(os.linesep.join(config + post_config) + "\n"),
         )
 
-        # Note the space to exclude it from shell history. Also we always set
-        # NVIM_LISTEN_ADDRESS, even when running vanilla Vim, because it will
-        # just not care.
-        self.send_to_terminal(
-            """ NVIM_LISTEN_ADDRESS=/tmp/nvim %s -u %s\r\n"""
-            % (self._vim_executable, config_path)
-        )
+        self.send_to_terminal(self._build_launch_command(config_path))
         wait_until_file_exists(done_file)
         self._vim_pid = int(_read_text_file(pid_file))
         return _read_text_file(version_file).strip()
@@ -185,33 +183,9 @@ class VimInterfaceTmux(VimInterface):
 
 
 class VimInterfaceTmuxNeovim(VimInterfaceTmux):
-    def __init__(self, vim_executable, session):
-        VimInterfaceTmux.__init__(self, vim_executable, session)
-        self._nvim = None
+    """Neovim interface that sends keystrokes via tmux, just like vanilla Vim."""
 
-    def send_to_vim(self, s):
-        if s == ARR_L:
-            s = "<Left>"
-        elif s == ARR_R:
-            s = "<Right>"
-        elif s == ARR_U:
-            s = "<Up>"
-        elif s == ARR_D:
-            s = "<Down>"
-        elif s == BS:
-            s = "<bs>"
-        elif s == ESC:
-            s = "<esc>"
-        elif s == "<":
-            s = "<lt>"
-        self._nvim.input(s)
-
-    def launch(self, config=[]):
-        import neovim
-
-        rv = VimInterfaceTmux.launch(self, config)
-        self._nvim = neovim.attach("socket", path="/tmp/nvim")
-        return rv
+    pass
 
 
 class VimInterfaceWindows(VimInterface):
