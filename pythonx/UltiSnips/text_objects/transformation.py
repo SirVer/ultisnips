@@ -86,6 +86,13 @@ class _CleverReplace:
             0
         ]
 
+        # Shelter escaped backslashes (\\) so they are not consumed by
+        # case-switch regexes (\l, \u, \U, \L) or whitespace escapes
+        # (\n, \t, ...).  Restored before the final unescape() which
+        # turns \\ into a literal \.  GH #998, GH #1495.
+        _ESCAPED_BSLASH = "\x00"
+        transformed = transformed.replace("\\\\", _ESCAPED_BSLASH)
+
         # Replace Case switches
         def _one_char_case_change(match):
             """Replaces one character case changes."""
@@ -103,7 +110,10 @@ class _CleverReplace:
 
         transformed = _LONG_CASEFOLDINGS.subn(_multi_char_case_change, transformed)[0]
         transformed = _replace_conditional(match, transformed)
-        return unescape(fill_in_whitespace(transformed))
+
+        transformed = fill_in_whitespace(transformed)
+        transformed = transformed.replace(_ESCAPED_BSLASH, "\\\\")
+        return unescape(transformed)
 
 
 # flag used to display only one time the lack of unidecode
