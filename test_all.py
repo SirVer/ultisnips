@@ -190,6 +190,31 @@ if __name__ == "__main__":
 
         all_test_suites = unittest.defaultTestLoader.discover(start_dir="test")
 
+        all_other_plugins = set()
+        tests = set()
+        suite = unittest.TestSuite()
+
+        # Collect tests and their plugin dependencies. We do this before vim
+        # detection so that --clone-plugins works without a vim binary.
+        for test in flatten_test_suite(all_test_suites):
+            all_other_plugins.update(test.plugins)
+
+            if len(selected_tests):
+                id = test.id().split(".")[1]
+                if not any([id.startswith(t) for t in selected_tests]):
+                    continue
+            tests.add(test)
+
+        if options.plugins or options.clone_plugins:
+            setup_other_plugins(all_other_plugins)
+            if options.clone_plugins:
+                return
+
+        if platform.system() == "Windows":
+            raise RuntimeError(
+                "TODO: TestSuite is broken under windows. Volunteers wanted!."
+            )
+
         has_nvim = subprocess.check_output(
             [options.vim, "-e", "-s", "-c", "verbose echo has('nvim')", "+q"],
             stderr=subprocess.STDOUT,
@@ -203,19 +228,7 @@ if __name__ == "__main__":
 
         vim = VimInterfaceTmux(options.vim, options.session)
 
-        if not options.clone_plugins and platform.system() == "Windows":
-            raise RuntimeError(
-                "TODO: TestSuite is broken under windows. Volunteers wanted!."
-            )
-            # vim = VimInterfaceWindows()
-            # vim.focus()
-
-        all_other_plugins = set()
-
-        tests = set()
-        suite = unittest.TestSuite()
-
-        for test in flatten_test_suite(all_test_suites):
+        for test in tests:
             test.interrupt = options.interrupt
             test.retries = options.retries
             test.test_plugins = options.plugins
@@ -227,19 +240,7 @@ if __name__ == "__main__":
             test.pdb_host = options.pdb_host
             test.pdb_port = options.pdb_port
             test.pdb_block = options.pdb_block
-            all_other_plugins.update(test.plugins)
-
-            if len(selected_tests):
-                id = test.id().split(".")[1]
-                if not any([id.startswith(t) for t in selected_tests]):
-                    continue
-            tests.add(test)
         suite.addTests(tests)
-
-        if options.plugins or options.clone_plugins:
-            setup_other_plugins(all_other_plugins)
-            if options.clone_plugins:
-                return
 
         v = 2 if options.verbose else 1
         successfull = (
