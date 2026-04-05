@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(uv init:*)",
+      "Bash(uv lock:*)",
+      "Bash(uv run:*)",
+      "Bash(grep -E \"FAIL$\")",
+      "Bash(tee /tmp/nvim_test_results2.txt)",
+      "WebSearch",
+      "WebFetch(domain:neovim.io)",
+      "Bash(git push:*)",
+      "Bash(gh run:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(./test_all.py:*)"
+    ]
+  }
+}

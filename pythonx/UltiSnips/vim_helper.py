@@ -115,6 +115,16 @@ def escape(inp):
     return conv(inp)
 
 
+def as_str(value):
+    """Convert a value from vim.vars to a Python str.
+
+    vim.vars returns bytes for string values in Vim's Python 3 binding.
+    """
+    if isinstance(value, bytes):
+        return value.decode(vim.eval("&encoding"), "replace")
+    return str(value)
+
+
 def eval(text):
     """Wraps vim.eval."""
     # Replace null bytes with newlines, as vim raises a ValueError and neovim
