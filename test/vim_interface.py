@@ -138,13 +138,18 @@ class VimInterface(TempFileManager):
         )
 
         self.send_to_terminal(self._build_launch_command(config_path))
-        wait_until_file_exists(done_file)
+        if not wait_until_file_exists(done_file, times=1000):
+            raise RuntimeError("Vim did not start within 10 seconds")
         self._vim_pid = int(_read_text_file(pid_file))
         return _read_text_file(version_file).strip()
 
     def leave_with_wait(self):
         self.send_to_vim(3 * ESC + ":qa!\n")
+        start = time.time()
         while is_process_running(self._vim_pid):
+            if time.time() - start > 10:
+                os.kill(self._vim_pid, 9)
+                break
             time.sleep(0.01)
 
 
