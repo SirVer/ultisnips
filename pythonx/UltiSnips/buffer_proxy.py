@@ -1,5 +1,3 @@
-# coding=utf8
-
 import vim
 from UltiSnips import vim_helper
 from UltiSnips.diff import diff

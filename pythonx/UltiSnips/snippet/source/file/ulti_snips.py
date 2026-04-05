@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
-
 """Parsing of snippet files."""
 
 from collections import defaultdict

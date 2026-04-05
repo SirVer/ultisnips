@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
-
 """Common code for snipMate and UltiSnips snippet files."""
 
 import os.path

@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
-
 """See module comment."""
 
 from UltiSnips.text_objects.base import NoneditableTextObject

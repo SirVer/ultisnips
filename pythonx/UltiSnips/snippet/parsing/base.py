@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
-
 """Common functionality of the snippet parsing codes."""
 
 from UltiSnips.position import Position

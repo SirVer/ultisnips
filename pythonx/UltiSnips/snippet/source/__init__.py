@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
-
 """Sources of snippet definitions."""
 
 from UltiSnips.snippet.source.base import SnippetSource

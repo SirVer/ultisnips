@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
-
 """Wrapper functionality around the functions we need from Vim."""
 
 from contextlib import contextmanager

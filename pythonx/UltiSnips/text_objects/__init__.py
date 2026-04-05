@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
-
 """Public facing classes for TextObjects."""
 
 from UltiSnips.text_objects.escaped_char import EscapedChar

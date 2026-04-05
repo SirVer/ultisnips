@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
-
 """Choices are enumeration values you can choose, by selecting index number.
 It is a special TabStop, its content are taken literally, thus said, they will not be parsed recursively.
 """

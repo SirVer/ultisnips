@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# encoding: utf-8
-
 """A UltiSnips snippet after parsing."""
 
 from UltiSnips.snippet.definition.base import SnippetDefinition
