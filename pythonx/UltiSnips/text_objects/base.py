@@ -37,10 +37,6 @@ def _replace_text(buf, start, end, text):
     return new_end
 
 
-# These classes use their subclasses a lot and we really do not want to expose
-# their functions more globally.
-
-
 class TextObject:
     """Represents any object in the text that has a span in any ways."""
 
