@@ -55,4 +55,4 @@ shell_in_repro:
 	docker exec -it $(shell docker ps -q) /bin/bash
 
 format:
-	uv run black .
+	uv run black -t py310 .
