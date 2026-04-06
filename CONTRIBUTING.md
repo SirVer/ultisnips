@@ -75,7 +75,7 @@ To avoid this problem, we strongly suggest running the tests inside of [Docker](
 It is useful to think of Docker as a lightweight virtual machine, i.e. a way of running exactly the same OS and userland configuration on any machine.
 
 UltiSnips comes with a [Makefile](https://github.com/SirVer/ultisnips/blob/master/Makefile) that makes the use of Docker easy.
-First, build the image of the test environment (Vim 8.0, using Python 3):
+First, build the image of the test environment:
 
     $ make image_repro
 

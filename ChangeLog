@@ -2,7 +2,7 @@ next:
 	Breaking changes:
 	- Python 2 support removed. Support for Python 3.5–3.9 was also dropped.
 	  Minimum Python version is now 3.11.
-	- Minimum Vim version is now 9.1 (was 7.4). Older versions down to 8.0
+	- Minimum Vim version is now 9.1 (was 7.4). Older versions down to 8.2
 	  may still work but are not tested.
 	- Neovim is now officially supported and tested in CI.
 	- |g:UltiSnipsSnippetsDir| removed. Snippet discovery was rewritten —
