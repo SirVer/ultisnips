@@ -11,7 +11,6 @@ import vim
 from UltiSnips import err_to_scratch_buffer, vim_helper
 from UltiSnips.buffer_proxy import suspend_proxy_edits, use_proxy_buffer
 from UltiSnips.change_provider import (
-    LegacyChangeProvider,
     NvimOnBytesChangeProvider,
     VimListenerChangeProvider,
 )
@@ -154,10 +153,8 @@ class SnippetManager:
 
         if int(vim_helper.eval("has('nvim')")):
             self._change_provider = NvimOnBytesChangeProvider()
-        elif int(vim_helper.eval("exists('*listener_add')")):
-            self._change_provider = VimListenerChangeProvider()
         else:
-            self._change_provider = LegacyChangeProvider()
+            self._change_provider = VimListenerChangeProvider()
 
         self._reinit()
 

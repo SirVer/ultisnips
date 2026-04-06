@@ -86,12 +86,6 @@ class VimState:
         self.remember_position()
 
     @property
-    def diff_in_buffer_length(self):
-        """Returns the difference in the length of the current buffer compared
-        to the remembered."""
-        return len(vim_helper.buf) - self._lvb_len
-
-    @property
     def pos(self):
         """The last remembered position."""
         return self._poss[-1]
