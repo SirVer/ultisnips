@@ -116,16 +116,24 @@ def _edits_for_line_range(
     if old_lines == new_lines:
         return []
 
-    # Trim matching lines from front and back.
+    # Trim matching lines from front and back, but never trim past the
+    # cursor line — with mirrors, multiple lines can be identical and
+    # trimming the cursor's line would misattribute the edit.
+    cursor_idx = (cursor_line - start_line) if cursor_line is not None else None
     front = 0
     limit = min(len(old_lines), len(new_lines))
-    while front < limit and old_lines[front] == new_lines[front]:
+    while (
+        front < limit
+        and old_lines[front] == new_lines[front]
+        and (cursor_idx is None or front < cursor_idx)
+    ):
         front += 1
     back = 0
     while (
         back < (len(old_lines) - front)
         and back < (len(new_lines) - front)
         and old_lines[-(back + 1)] == new_lines[-(back + 1)]
+        and (cursor_idx is None or (len(new_lines) - back - 1) > cursor_idx)
     ):
         back += 1
 
@@ -145,9 +153,6 @@ def _edits_for_line_range(
     if len(old_core) > len(new_core):
         # Case 2: Lines were deleted.
         common = len(new_core)
-        # Check if any remaining lines changed content (mixed change).
-        # If so, fall back to guess_edit since the change is complex
-        # (e.g., multiline selection replacement).
         has_line_changes = any(old_core[i] != new_core[i] for i in range(common))
         if not has_line_changes:
             # Pure line deletion -- emit content-first deletion commands.
@@ -159,12 +164,10 @@ def _edits_for_line_range(
                     cmds.append(("D", del_line, 0, content))
                 cmds.append(("D", del_line, 0, "\n"))
             return cmds
-        # Mixed change: fall through to guess_edit.
-        return None
 
-    # Case 3: Lines were added. Return None to signal the caller should
-    # use guess_edit/diff (which handle newline insertion correctly using
-    # cursor position).
+    # Line count changed with content modifications, or lines added.
+    # Signal caller to use guess_edit (which uses cursor position to
+    # anchor the edit correctly when mirrors make buffer regions identical).
     return None
 
 
@@ -222,9 +225,9 @@ class VimListenerChangeProvider(ChangeProvider):
         if es is not None:
             return es or None
 
-        # Line insertion case: _edits_for_line_range returns None.
-        # Fall back to guess_edit (which uses cursor position for newline
-        # detection) with diff as backstop.
+        # Line count changed: fall back to guess_edit which uses cursor
+        # position to anchor the edit correctly when mirrors make multiple
+        # buffer regions identical.
         rv, es = guess_edit(snippet_start, old_lines, new_lines, vstate)
         if not rv:
             lt = "\n".join(old_lines)
