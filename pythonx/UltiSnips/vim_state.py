@@ -106,6 +106,11 @@ class VimState:
         """The content of the remembered buffer."""
         return self._lvb[:]
 
+    @property
+    def remembered_buffer_length(self):
+        """The total buffer length when the buffer was last remembered."""
+        return self._lvb_len
+
 
 class VisualContentPreserver:
     """Saves the current visual selection and the selection mode it was done in

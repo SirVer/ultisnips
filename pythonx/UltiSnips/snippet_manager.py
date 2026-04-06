@@ -10,7 +10,7 @@ import vim
 
 from UltiSnips import err_to_scratch_buffer, vim_helper
 from UltiSnips.buffer_proxy import suspend_proxy_edits, use_proxy_buffer
-from UltiSnips.diff import diff, guess_edit
+from UltiSnips.change_provider import LegacyChangeProvider, VimListenerChangeProvider
 from UltiSnips.position import JumpDirection, Position
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
 from UltiSnips.snippet.source import (
@@ -147,6 +147,11 @@ class SnippetManager:
 
         self._should_update_textobjects = False
         self._should_reset_visual = False
+
+        if int(vim_helper.eval("exists('*listener_add')")):
+            self._change_provider = VimListenerChangeProvider()
+        else:
+            self._change_provider = LegacyChangeProvider()
 
         self._reinit()
 
@@ -382,58 +387,11 @@ class SnippetManager:
             return
 
         if self._active_snippets:
-            cstart = self._active_snippets[0].start.line
-            cend = (
-                self._active_snippets[0].end.line + self._vstate.diff_in_buffer_length
+            es = self._change_provider.consume_edits(
+                vim_helper.buf, self._active_snippets[0], self._vstate
             )
-            ct = vim_helper.buf[cstart : cend + 1]
-            lt = self._vstate.remembered_buffer
-            pos = vim_helper.buf.cursor
-
-            lt_span = [0, len(lt)]
-            ct_span = [0, len(ct)]
-            initial_line = cstart
-
-            # Cut down on lines searched for changes. Start from behind and
-            # remove all equal lines. Then do the same from the front.
-            if lt and ct:
-                while (
-                    lt[lt_span[1] - 1] == ct[ct_span[1] - 1]
-                    and self._vstate.ppos.line < initial_line + lt_span[1] - 1
-                    and pos.line < initial_line + ct_span[1] - 1
-                    and (lt_span[0] < lt_span[1])
-                    and (ct_span[0] < ct_span[1])
-                ):
-                    ct_span[1] -= 1
-                    lt_span[1] -= 1
-                while (
-                    lt_span[0] < lt_span[1]
-                    and ct_span[0] < ct_span[1]
-                    and lt[lt_span[0]] == ct[ct_span[0]]
-                    and self._vstate.ppos.line >= initial_line
-                    and pos.line >= initial_line
-                ):
-                    ct_span[0] += 1
-                    lt_span[0] += 1
-                    initial_line += 1
-            ct_span[0] = max(0, ct_span[0] - 1)
-            lt_span[0] = max(0, lt_span[0] - 1)
-            initial_line = max(cstart, initial_line - 1)
-
-            lt = lt[lt_span[0] : lt_span[1]]
-            ct = ct[ct_span[0] : ct_span[1]]
-
-            try:
-                rv, es = guess_edit(initial_line, lt, ct, self._vstate)
-                if not rv:
-                    lt = "\n".join(lt)
-                    ct = "\n".join(ct)
-                    es = diff(lt, ct, initial_line)
+            if es is not None:
                 self._active_snippets[0].replay_user_edits(es, self._ctab)
-            except IndexError:
-                # Rather do nothing than throwing an error. It will be correct
-                # most of the time
-                pass
 
         self._check_if_still_inside_snippet()
         if self._active_snippets:
@@ -485,6 +443,7 @@ class SnippetManager:
         vim.command("augroup END")
 
         vim.command("silent doautocmd <nomodeline> User UltiSnipsEnterFirstSnippet")
+        self._change_provider.attach(vim.current.buffer.number)
         self._inner_state_up = True
 
     def _teardown_inner_state(self):
@@ -507,6 +466,7 @@ class SnippetManager:
             # are back in our buffer
             pass
         finally:
+            self._change_provider.detach()
             self._inner_state_up = False
 
     @err_to_scratch_buffer.wrap
@@ -609,6 +569,7 @@ class SnippetManager:
                     # Open any folds this might have created
                     vim.command("normal! zv")
                     self._vstate.remember_buffer(self._active_snippets[0])
+                    self._change_provider.reset()
 
                     if ntab.number == 0 and self._active_snippets:
                         self._current_snippet_is_done()
@@ -627,7 +588,9 @@ class SnippetManager:
                     self._ignore_movements = True
 
             if len(stack_for_post_jump) > 0 and ntab is not None:
-                with use_proxy_buffer(stack_for_post_jump, self._vstate):
+                with use_proxy_buffer(
+                    stack_for_post_jump, self._vstate, self._change_provider
+                ):
                     snippet_for_action.snippet.do_post_jump(
                         ntab.number,
                         -1 if jump_direction == JumpDirection.BACKWARD else 1,
@@ -747,7 +710,9 @@ class SnippetManager:
             text_before = before[: -len(snippet.matched)]
 
         with (
-            use_proxy_buffer(self._active_snippets, self._vstate),
+            use_proxy_buffer(
+                self._active_snippets, self._vstate, self._change_provider
+            ),
             self._action_context(),
         ):
             cursor_set_in_action = snippet.do_pre_expand(
@@ -788,7 +753,9 @@ class SnippetManager:
             self._active_snippets.append(snippet_instance)
 
             with (
-                use_proxy_buffer(self._active_snippets, self._vstate),
+                use_proxy_buffer(
+                    self._active_snippets, self._vstate, self._change_provider
+                ),
                 self._action_context(),
             ):
                 snippet.do_post_expand(
@@ -798,6 +765,7 @@ class SnippetManager:
                 )
 
             self._vstate.remember_buffer(self._active_snippets[0])
+            self._change_provider.reset()
 
             if (
                 not self._snip_expanded_in_action

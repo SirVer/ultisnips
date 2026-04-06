@@ -9,18 +9,22 @@ from UltiSnips.position import Position
 
 
 @contextmanager
-def use_proxy_buffer(snippets_stack, vstate):
+def use_proxy_buffer(snippets_stack, vstate, change_provider=None):
     """
     Forward all changes made in the buffer to the current snippet stack while
     function call.
     """
     buffer_proxy = VimBufferProxy(snippets_stack, vstate)
     old_buffer = vim_helper.buf
+    if change_provider is not None:
+        change_provider.suppress()
     try:
         vim_helper.buf = buffer_proxy
         yield
     finally:
         vim_helper.buf = old_buffer
+        if change_provider is not None:
+            change_provider.unsuppress()
     buffer_proxy.validate_buffer()
 
 
