@@ -236,6 +236,65 @@ class VimListenerChangeProvider(ChangeProvider):
         return es
 
 
+class NvimOnBytesChangeProvider(ChangeProvider):
+    """Uses Neovim's nvim_buf_attach with on_bytes as a change signal.
+
+    on_bytes fires for ALL buffer modifications regardless of mode.  We use
+    it purely as a "something changed" signal and then compare old vs new
+    buffer state -- the same approach as VimListenerChangeProvider.  This
+    avoids issues with accumulated multi-change coordinates and undo/redo.
+    """
+
+    def __init__(self):
+        self._attached = False
+
+    def attach(self, bufnr):
+        vim.command(f"lua require('ultisnips.on_bytes').attach({bufnr})")
+        self._attached = True
+
+    def detach(self):
+        if self._attached:
+            vim.command("lua require('ultisnips.on_bytes').detach()")
+            self._attached = False
+
+    def suppress(self):
+        vim.command("lua require('ultisnips.on_bytes').suppress()")
+
+    def unsuppress(self):
+        vim.command("lua require('ultisnips.on_bytes').unsuppress()")
+
+    def reset(self):
+        vim.command("lua require('ultisnips.on_bytes').reset()")
+
+    def consume_edits(self, buf, snippet, vstate):
+        raw = vim.eval("g:_ultisnips_nvim_changes")
+        vim.command("let g:_ultisnips_nvim_changes = []")
+
+        if not raw:
+            return None
+
+        # Use the same buffer-comparison approach as VimListenerChangeProvider.
+        old_lines = vstate.remembered_buffer
+        snippet_start = snippet.start.line
+        new_end_line = snippet.end.line + (len(buf) - vstate.remembered_buffer_length)
+        new_lines = buf[snippet_start : new_end_line + 1]
+
+        pos = buf.cursor
+        es = _edits_for_line_range(
+            old_lines, new_lines, snippet_start, pos.line, pos.col
+        )
+        if es is not None:
+            return es or None
+
+        # Fall back to guess_edit for line-count changes.
+        rv, es = guess_edit(snippet_start, old_lines, new_lines, vstate)
+        if not rv:
+            lt = "\n".join(old_lines)
+            ct = "\n".join(new_lines)
+            es = diff(lt, ct, snippet_start)
+        return es
+
+
 class LegacyChangeProvider(ChangeProvider):
     """Wraps the original guess_edit() + diff() logic as a fallback."""
 
