@@ -4,7 +4,9 @@ endif
 let did_plugin_ultisnips=1
 
 " CI tests against Vim 9.1+, but older versions down to 8.2 may still work.
-if version < 820
+" Neovim reports a low 'version' (801) for Vim compatibility, so skip the
+" check there — Neovim compatibility is validated separately in CI.
+if !has('nvim') && version < 820
    echohl WarningMsg
    echom  "UltiSnips requires Vim >= 8.2"
    echohl None
