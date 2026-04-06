@@ -86,8 +86,10 @@ class _CleverReplace:
             0
         ]
 
-        # Shelter escaped backslashes (\\) so that e.g. \\l is not
-        # consumed by the case-switch regex as \l.  GH #1495.
+        # Shelter escaped backslashes (\\) so they are not consumed by
+        # case-switch regexes (\l, \u, \U, \L) or whitespace escapes
+        # (\n, \t, ...).  Restored before the final unescape() which
+        # turns \\ into a literal \.  GH #998, GH #1495.
         _ESCAPED_BSLASH = "\x00"
         transformed = transformed.replace("\\\\", _ESCAPED_BSLASH)
 
@@ -107,12 +109,11 @@ class _CleverReplace:
             return match.group(1)[1:].lower()
 
         transformed = _LONG_CASEFOLDINGS.subn(_multi_char_case_change, transformed)[0]
-
-        # Restore escaped backslashes before unescape turns \\ into \.
-        transformed = transformed.replace(_ESCAPED_BSLASH, "\\\\")
-
         transformed = _replace_conditional(match, transformed)
-        return unescape(fill_in_whitespace(transformed))
+
+        transformed = fill_in_whitespace(transformed)
+        transformed = transformed.replace(_ESCAPED_BSLASH, "\\\\")
+        return unescape(transformed)
 
 
 # flag used to display only one time the lack of unidecode

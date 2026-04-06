@@ -277,6 +277,21 @@ class Transformation_ConditionalWithBackslashBeforeDelimiter1(_VimTest):
     wanted = "ab no\\"
 
 
+# GH #998: An escaped backslash before a whitespace escape character
+# (n, t, r, ...) should produce a literal backslash + letter, not the
+# whitespace character.
+class Transformation_LiteralBackslashN(_VimTest):
+    snippets = ("test", r"$1 ${1/.*/\\n/}")
+    keys = "test" + EX + "hi"
+    wanted = "hi \\n"
+
+
+class Transformation_LiteralBackslashT(_VimTest):
+    snippets = ("test", r"$1 ${1/.*/\\t/}")
+    keys = "test" + EX + "hi"
+    wanted = "hi \\t"
+
+
 # GH #1495: \l and \u in replacement strings are case-switch directives.
 # An escaped backslash (\\) before l/u should produce a literal backslash,
 # not trigger the case switch.
