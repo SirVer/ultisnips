@@ -10,10 +10,7 @@ import vim
 
 from UltiSnips import err_to_scratch_buffer, vim_helper
 from UltiSnips.buffer_proxy import suspend_proxy_edits, use_proxy_buffer
-from UltiSnips.change_provider import (
-    NvimOnBytesChangeProvider,
-    VimListenerChangeProvider,
-)
+from UltiSnips.change_provider import NvimChangeProvider, VimChangeProvider
 from UltiSnips.position import JumpDirection, Position
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
 from UltiSnips.snippet.source import (
@@ -152,9 +149,9 @@ class SnippetManager:
         self._should_reset_visual = False
 
         if int(vim_helper.eval("has('nvim')")):
-            self._change_provider = NvimOnBytesChangeProvider()
+            self._change_provider = NvimChangeProvider()
         else:
-            self._change_provider = VimListenerChangeProvider()
+            self._change_provider = VimChangeProvider()
 
         self._reinit()
 
