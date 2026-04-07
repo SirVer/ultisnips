@@ -19,6 +19,12 @@ Every new feature or bug fix needs a test. Tests are integration tests that run 
 
 The test runner auto-detects Vim vs Neovim from the executable.
 
+When a `tmux new -s vim` session is already running, run integration tests directly:
+```
+./test_all.py <TestNamePrefix>        # run matching tests
+./test_all.py Transformation          # example: all transformation tests
+```
+
 Prefer running inside Docker for isolation:
 ```
 make image_repro && make repro   # shell 1: build + launch container, then `tmux new -s vim`
