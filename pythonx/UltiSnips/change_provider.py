@@ -272,6 +272,39 @@ def detect_edits(old_lines, new_lines, start_line, cursor_line, cursor_col):
     return None
 
 
+def _listener_to_edits(
+    event, old_lines, new_buf, snippet_start, cursor_line, cursor_col
+):
+    """Translate a single Vim listener_add event to edit commands.
+
+    event: dict with 'lnum' (1-indexed first changed line), 'end' (1-indexed
+           line past last original changed line), 'added' (lines added, can
+           be negative).
+    old_lines: remembered buffer slice (snippet region).
+    new_buf: current full buffer.
+    snippet_start: absolute line number of snippet start.
+
+    Uses the listener metadata to scope detect_edits to just the affected
+    lines, improving disambiguation for cases with identical lines.
+    """
+    lnum = int(event["lnum"])  # 1-indexed
+    end = int(event["end"])  # 1-indexed, exclusive
+    added = int(event["added"])
+
+    start_0 = lnum - 1  # 0-indexed absolute line
+    old_count = end - lnum
+    new_count = old_count + added
+
+    rel_start = start_0 - snippet_start
+    if rel_start < 0 or rel_start + old_count > len(old_lines):
+        return None  # Change outside snippet region
+
+    old_region = old_lines[rel_start : rel_start + old_count]
+    new_region = list(new_buf[start_0 : start_0 + new_count])
+
+    return detect_edits(old_region, new_region, start_0, cursor_line, cursor_col)
+
+
 class VimChangeProvider:
     """Uses listener_add() as a reliable change signal for Vim.
 
@@ -311,9 +344,19 @@ class VimChangeProvider:
 
         old_lines = vstate.remembered_buffer
         snippet_start = snippet.start.line
+        pos = buf.cursor
+
+        if len(raw) == 1:
+            # Single event: use listener metadata to scope comparison
+            es = _listener_to_edits(
+                raw[0], old_lines, buf, snippet_start, pos.line, pos.col
+            )
+            if es is not None:
+                return es or None
+
+        # Multiple events or scoped detection failed: full snippet comparison
         new_end = snippet.end.line + (len(buf) - vstate.remembered_buffer_length)
         new_lines = buf[snippet_start : new_end + 1]
-        pos = buf.cursor
 
         es = detect_edits(old_lines, new_lines, snippet_start, pos.line, pos.col)
         if es is not None:

@@ -42,6 +42,7 @@ sys.modules["UltiSnips.change_provider"] = _cp
 _spec.loader.exec_module(_cp)
 
 _on_bytes_to_edits = _cp._on_bytes_to_edits
+_listener_to_edits = _cp._listener_to_edits
 detect_edits = _cp.detect_edits
 
 
@@ -273,6 +274,96 @@ class TestOnBytesToEdits(unittest.TestCase):
                 ("I", 5, 2, "X"),
             ],
         )
+
+
+class TestListenerToEdits(unittest.TestCase):
+    """Test _listener_to_edits for Vim listener_add event translation."""
+
+    def _check(self, event, old_lines, new_buf, snippet_start, cursor_line, cursor_col):
+        cmds = _listener_to_edits(
+            event, old_lines, new_buf, snippet_start, cursor_line, cursor_col
+        )
+        self.assertIsNotNone(cmds, "_listener_to_edits returned None (gave up)")
+        result = _apply(old_lines, cmds, snippet_start)
+        # Build expected new_lines from the snippet region in new_buf
+        added = int(event["added"])
+        new_end = snippet_start + len(old_lines) + added
+        expected = list(new_buf[snippet_start:new_end])
+        self.assertEqual(
+            result, expected, f"Commands {cmds} did not produce expected result"
+        )
+        return cmds
+
+    def test_single_line_char_insert(self):
+        # Type "x" on line 5 (1-indexed lnum=6, end=7, added=0)
+        event = {"lnum": "6", "end": "7", "added": "0"}
+        old_lines = ["hello"]
+        new_buf = [""] * 5 + ["helxlo"]
+        cmds = self._check(event, old_lines, new_buf, 5, 5, 4)
+        self.assertEqual(len(cmds), 1)
+        self.assertEqual(cmds[0][0], "I")
+
+    def test_single_line_backspace(self):
+        # Backspace on line 5 (lnum=6, end=7, added=0)
+        event = {"lnum": "6", "end": "7", "added": "0"}
+        old_lines = ["hello"]
+        new_buf = [""] * 5 + ["helo"]
+        cmds = self._check(event, old_lines, new_buf, 5, 5, 3)
+        self.assertEqual(cmds, [("D", 5, 3, "l")])
+
+    def test_line_deletion_dd(self):
+        # dd on "bbb" at buffer line 7 (1-indexed), snippet starts at line 5 (0-indexed)
+        event = {"lnum": "7", "end": "8", "added": "-1"}
+        old_lines = ["aaa", "bbb", "ccc"]
+        new_buf = [""] * 5 + ["aaa", "ccc"]
+        cmds = self._check(event, old_lines, new_buf, 5, 6, 0)
+        result = _apply(["aaa", "bbb", "ccc"], cmds, 5)
+        self.assertEqual(result, ["aaa", "ccc"])
+
+    def test_enter_split(self):
+        # Enter on line 6 (1-indexed): lnum=6, end=7, added=1
+        event = {"lnum": "6", "end": "7", "added": "1"}
+        old_lines = ["hello"]
+        new_buf = [""] * 5 + ["hel", "lo"]
+        cmds = self._check(event, old_lines, new_buf, 5, 6, 0)
+        result = _apply(["hello"], cmds, 5)
+        self.assertEqual(result, ["hel", "lo"])
+
+    def test_multi_line_snippet_scoped_to_changed_line(self):
+        # Snippet has 3 lines, only middle line changed
+        event = {"lnum": "7", "end": "8", "added": "0"}
+        old_lines = ["aaa", "bbb", "ccc"]
+        new_buf = [""] * 5 + ["aaa", "bxb", "ccc"]
+        cmds = self._check(event, old_lines, new_buf, 5, 6, 2)
+        # Should produce edit only for line 6 (0-indexed)
+        self.assertEqual(len(cmds), 2)  # D + I for the replacement
+
+    def test_disambiguates_identical_lines(self):
+        # Snippet: ["aaa", "bbb", "aaa"], delete middle line
+        # Without scoping, trimming might be confused by identical "aaa" lines
+        event = {"lnum": "7", "end": "8", "added": "-1"}
+        old_lines = ["aaa", "bbb", "aaa"]
+        new_buf = [""] * 5 + ["aaa", "aaa"]
+        cmds = self._check(event, old_lines, new_buf, 5, 6, 0)
+        result = _apply(["aaa", "bbb", "aaa"], cmds, 5)
+        self.assertEqual(result, ["aaa", "aaa"])
+
+    def test_change_outside_snippet_returns_none(self):
+        # Change on line 3 but snippet starts at line 5
+        event = {"lnum": "4", "end": "5", "added": "0"}
+        old_lines = ["hello"]
+        new_buf = [""] * 5 + ["hello"]
+        cmds = _listener_to_edits(event, old_lines, new_buf, 5, 3, 0)
+        self.assertIsNone(cmds)
+
+    def test_multi_line_deletion(self):
+        # Delete "bbb" and "ccc": buffer lines 7-8 (1-indexed), snippet starts at 5 (0-indexed)
+        event = {"lnum": "7", "end": "9", "added": "-2"}
+        old_lines = ["aaa", "bbb", "ccc", "ddd"]
+        new_buf = [""] * 5 + ["aaa", "ddd"]
+        cmds = self._check(event, old_lines, new_buf, 5, 6, 0)
+        result = _apply(["aaa", "bbb", "ccc", "ddd"], cmds, 5)
+        self.assertEqual(result, ["aaa", "ddd"])
 
 
 if __name__ == "__main__":
