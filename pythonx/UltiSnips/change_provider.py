@@ -14,21 +14,52 @@ import vim
 from UltiSnips.diff import diff
 
 
+def _byte_to_char_col(line, byte_col):
+    """Convert UTF-8 byte offset within a line to character offset."""
+    if byte_col == 0:
+        return 0
+    encoded = line.encode("utf-8")
+    if byte_col >= len(encoded):
+        return len(line)
+    return len(encoded[:byte_col].decode("utf-8", errors="replace"))
+
+
 def _on_bytes_to_edits(event, old_lines, new_buf, snippet_start):
     """Translate one on_bytes event to edit commands.
 
     event: (start_row, start_col, old_end_row, old_end_col, new_end_row, new_end_col)
+        Note: column values are UTF-8 BYTE offsets (Neovim convention).
     old_lines: remembered buffer slice (list of strings, snippet region)
     new_buf: current full buffer (for reading inserted text)
     snippet_start: absolute line number of snippet start
+
+    Returns list of edit commands using CHARACTER columns (UltiSnips
+    convention), or None if the event extends beyond available data
+    (caller should fall back to detect_edits/diff).
     """
-    start_row, start_col, old_end_row, old_end_col, new_end_row, new_end_col = event
-    cmds = []
+    start_row, start_col_b, old_end_row, old_end_col_b, new_end_row, new_end_col_b = (
+        event
+    )
     rel_row = start_row - snippet_start
 
+    # Bounds checks: change must be within the snippet region we know about
+    if rel_row < 0 or rel_row >= len(old_lines):
+        return None
+    if old_end_row > 0 and rel_row + old_end_row >= len(old_lines):
+        return None
+    if new_end_row > 0 and start_row + new_end_row >= len(new_buf):
+        return None
+
+    cmds = []
+    # The line at start_row exists in both old and new (change starts AT this
+    # row, not above), so byte→char conversion at start_col_b yields the same
+    # character position in both.
+    start_col = _byte_to_char_col(old_lines[rel_row], start_col_b)
+
     # --- Deletion ---
-    if old_end_row == 0 and old_end_col > 0:
-        deleted = old_lines[rel_row][start_col : start_col + old_end_col]
+    if old_end_row == 0 and old_end_col_b > 0:
+        end_col = _byte_to_char_col(old_lines[rel_row], start_col_b + old_end_col_b)
+        deleted = old_lines[rel_row][start_col:end_col]
         cmds.append(("D", start_row, start_col, deleted))
     elif old_end_row > 0:
         # Multi-line deletion — all at (start_row, start_col)
@@ -41,13 +72,16 @@ def _on_bytes_to_edits(event, old_lines, new_buf, snippet_start):
             if content:
                 cmds.append(("D", start_row, start_col, content))
             cmds.append(("D", start_row, start_col, "\n"))
-        last = old_lines[rel_row + old_end_row][:old_end_col]
+        last_line = old_lines[rel_row + old_end_row]
+        last_end_col = _byte_to_char_col(last_line, old_end_col_b)
+        last = last_line[:last_end_col]
         if last:
             cmds.append(("D", start_row, start_col, last))
 
     # --- Insertion ---
-    if new_end_row == 0 and new_end_col > 0:
-        inserted = new_buf[start_row][start_col : start_col + new_end_col]
+    if new_end_row == 0 and new_end_col_b > 0:
+        end_col = _byte_to_char_col(new_buf[start_row], start_col_b + new_end_col_b)
+        inserted = new_buf[start_row][start_col:end_col]
         cmds.append(("I", start_row, start_col, inserted))
     elif new_end_row > 0:
         first = new_buf[start_row][start_col:]
@@ -59,7 +93,9 @@ def _on_bytes_to_edits(event, old_lines, new_buf, snippet_start):
             if content:
                 cmds.append(("I", start_row + i, 0, content))
             cmds.append(("I", start_row + i, len(content), "\n"))
-        last_text = new_buf[start_row + new_end_row][:new_end_col]
+        last_new_line = new_buf[start_row + new_end_row]
+        last_end_col = _byte_to_char_col(last_new_line, new_end_col_b)
+        last_text = last_new_line[:last_end_col]
         if last_text:
             cmds.append(("I", start_row + new_end_row, 0, last_text))
 
@@ -398,7 +434,9 @@ class NvimChangeProvider:
 
         if len(raw) == 1:
             event = tuple(int(x) for x in raw[0])
-            return _on_bytes_to_edits(event, old_lines, buf, snippet_start)
+            es = _on_bytes_to_edits(event, old_lines, buf, snippet_start)
+            if es is not None:
+                return es or None
 
         new_end = snippet.end.line + (len(buf) - vstate.remembered_buffer_length)
         new_lines = buf[snippet_start : new_end + 1]

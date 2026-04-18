@@ -275,6 +275,53 @@ class TestOnBytesToEdits(unittest.TestCase):
             ],
         )
 
+    def test_utf8_insert_after_umlauts(self):
+        # "te üü " is 8 bytes (t=1, e=1, space=1, ü=2, ü=2, space=1) and 6 chars.
+        # Inserting "h" at byte position 8 = char position 6.
+        event = (5, 8, 0, 0, 0, 1)
+        old_lines = ["te üü world"]
+        new_buf = [""] * 5 + ["te üü hworld"]
+        cmds = _on_bytes_to_edits(event, old_lines, new_buf, 5)
+        self.assertEqual(cmds, [("I", 5, 6, "h")])
+
+    def test_utf8_replace_in_umlaut_string(self):
+        # Replace "world" with "h" at byte 8 = char 6
+        # Old: "te üü world" (13 bytes, 11 chars)
+        # New: "te üü h" (9 bytes, 7 chars)
+        event = (5, 8, 0, 5, 0, 1)
+        old_lines = ["te üü world"]
+        new_buf = [""] * 5 + ["te üü h"]
+        cmds = _on_bytes_to_edits(event, old_lines, new_buf, 5)
+        self.assertEqual(cmds, [("D", 5, 6, "world"), ("I", 5, 6, "h")])
+
+    def test_utf8_delete_umlaut(self):
+        # Delete one "ü" (2 bytes) at byte position 3 (char position 3)
+        # Old: "te üü world", new: "te ü world"
+        event = (5, 3, 0, 2, 0, 0)
+        old_lines = ["te üü world"]
+        new_buf = [""] * 5 + ["te ü world"]
+        cmds = _on_bytes_to_edits(event, old_lines, new_buf, 5)
+        self.assertEqual(cmds, [("D", 5, 3, "ü")])
+
+    def test_bounds_violation_returns_none(self):
+        # Multi-line deletion extending past snippet boundary
+        # Snippet has 3 lines, but old_end_row=2 + start_col=0 means we'd
+        # need a 4th line for the trailing slice
+        event = (1, 0, 2, 0, 0, 0)
+        old_lines = ["hello", "nice", "world"]  # 3 lines
+        new_buf = ["", ""]  # not relevant
+        # rel_row=1, old_end_row=2, rel_row + old_end_row = 3 = len(old_lines)
+        cmds = _on_bytes_to_edits(event, old_lines, new_buf, 0)
+        self.assertIsNone(cmds)
+
+    def test_bounds_change_above_snippet_returns_none(self):
+        # Change at row 3, but snippet starts at row 5
+        event = (3, 0, 0, 1, 0, 0)
+        old_lines = ["hello"]
+        new_buf = [""] * 3 + [""]
+        cmds = _on_bytes_to_edits(event, old_lines, new_buf, 5)
+        self.assertIsNone(cmds)
+
 
 class TestListenerToEdits(unittest.TestCase):
     """Test _listener_to_edits for Vim listener_add event translation."""
