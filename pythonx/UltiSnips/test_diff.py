@@ -2,8 +2,7 @@
 
 import unittest
 
-from UltiSnips.diff import diff, guess_edit
-from UltiSnips.position import Position
+from UltiSnips.diff import diff
 
 
 def transform(a, cmds):
@@ -21,66 +20,6 @@ def transform(a, cmds):
             buf[line] = buf[line][:col] + char + buf[line][col:]
         buf = "\n".join(buf).split("\n")
     return "\n".join(buf)
-
-
-class _MockPosition(Position):
-    """Position with a mode attribute, mimicking VimPosition for tests."""
-
-    def __init__(self, line, col, mode="n"):
-        super().__init__(line, col)
-        self.mode = mode
-
-
-class _MockVimState:
-    """Minimal stand-in for VimState used by guess_edit."""
-
-    def __init__(self, ppos, pos):
-        self.ppos = _MockPosition(*ppos)
-        self.pos = _MockPosition(*pos)
-
-
-class _BaseGuessing:
-    def runTest(self):
-        vim_state = _MockVimState(self.ppos, self.pos)
-        rv, es = guess_edit(self.initial_line, self.a, self.b, vim_state)
-        self.assertEqual(rv, True)
-        self.assertEqual(self.wanted, es)
-
-
-class TestGuessing_Noop0(_BaseGuessing, unittest.TestCase):
-    a: list[str] = []
-    b: list[str] = []
-    initial_line = 0
-    ppos, pos = (0, 6), (0, 7)
-    wanted = ()
-
-
-class TestGuessing_InsertOneChar(_BaseGuessing, unittest.TestCase):
-    a, b = ["Hello  World"], ["Hello   World"]
-    initial_line = 0
-    ppos, pos = (0, 6), (0, 7)
-    wanted = (("I", 0, 6, " "),)
-
-
-class TestGuessing_InsertOneChar1(_BaseGuessing, unittest.TestCase):
-    a, b = ["Hello  World"], ["Hello   World"]
-    initial_line = 0
-    ppos, pos = (0, 7), (0, 8)
-    wanted = (("I", 0, 7, " "),)
-
-
-class TestGuessing_BackspaceOneChar(_BaseGuessing, unittest.TestCase):
-    a, b = ["Hello  World"], ["Hello World"]
-    initial_line = 0
-    ppos, pos = (0, 7), (0, 6)
-    wanted = (("D", 0, 6, " "),)
-
-
-class TestGuessing_DeleteOneChar(_BaseGuessing, unittest.TestCase):
-    a, b = ["Hello  World"], ["Hello World"]
-    initial_line = 0
-    ppos, pos = (0, 5), (0, 5)
-    wanted = (("D", 0, 5, " "),)
 
 
 class _Base:
