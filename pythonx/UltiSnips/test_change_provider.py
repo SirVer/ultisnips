@@ -11,29 +11,29 @@ import sys
 import types
 import unittest
 
-# Build a minimal mock environment so we can import change_provider.py
-# without pulling in the full UltiSnips package (which requires a live
-# Vim runtime).
-
+# Load change_provider in isolation: it has `import vim` and
+# `from UltiSnips.diff import diff` at module level, but the full
+# UltiSnips package needs a live Vim runtime to import.  We temporarily
+# install minimal stubs in sys.modules, load change_provider, then
+# restore sys.modules so other test files (e.g. test_diff.py) see the
+# real package.
 _here = os.path.dirname(os.path.abspath(__file__))
+_stub_keys = ["vim", "UltiSnips", "UltiSnips.diff", "UltiSnips.change_provider"]
+_saved = {k: sys.modules.get(k) for k in _stub_keys}
 
-# Mock vim
 sys.modules["vim"] = types.ModuleType("vim")
 
-# Register a bare UltiSnips package so submodule imports don't trigger
-# __init__.py (which imports snippet_manager → whole dependency tree).
 _pkg = types.ModuleType("UltiSnips")
 _pkg.__path__ = [_here]
 _pkg.__package__ = "UltiSnips"
 sys.modules["UltiSnips"] = _pkg
 
-# Mock UltiSnips.diff — change_provider only uses diff() as a fallback,
-# which these tests never exercise.
+# change_provider only uses diff() as a fallback, which these tests never
+# exercise — the stub is enough for `from UltiSnips.diff import diff`.
 _mock_diff = types.ModuleType("UltiSnips.diff")
 _mock_diff.diff = None
 sys.modules["UltiSnips.diff"] = _mock_diff
 
-# Now load change_provider directly.
 _spec = importlib.util.spec_from_file_location(
     "UltiSnips.change_provider", os.path.join(_here, "change_provider.py")
 )
@@ -44,6 +44,13 @@ _spec.loader.exec_module(_cp)
 _on_bytes_to_edits = _cp._on_bytes_to_edits
 _listener_to_edits = _cp._listener_to_edits
 detect_edits = _cp.detect_edits
+
+# Restore sys.modules so other test files load the real UltiSnips package.
+for k, v in _saved.items():
+    if v is None:
+        sys.modules.pop(k, None)
+    else:
+        sys.modules[k] = v
 
 
 def _apply(old_lines, cmds, start_line=0):
