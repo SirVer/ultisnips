@@ -46,7 +46,16 @@ class VimTestCase(unittest.TestCase, TempFileManager):
 
         # Only checks the output. All work is done in setUp().
         wanted = self.text_before + self.wanted + self.text_after
-        SLEEPTIMES = [0.01, 0.15, 0.3, 0.4, 0.5, 1]
+        # Neovim's Python plugin is a remote process communicating via
+        # msgpack RPC, so every CursorMovedI handler adds ms-level latency.
+        # At sleeptime 0 the test-runner keystrokes race ahead of the
+        # handler and we end up with mode glitches (ESC not taking effect,
+        # :w! typed into the buffer instead of executed). Give the first
+        # attempt headroom and start retries higher for nvim.
+        if self.vim_flavor == "neovim":
+            SLEEPTIMES = [0.15, 0.2, 0.3, 0.4, 0.5, 1]
+        else:
+            SLEEPTIMES = [0.01, 0.15, 0.3, 0.4, 0.5, 1]
         for i in range(self.retries):
             if self.output and self.expected_error:
                 self.assertRegex(self.output, self.expected_error)
@@ -195,7 +204,10 @@ class VimTestCase(unittest.TestCase, TempFileManager):
 
         if not self.interrupt:
             # Go into insert mode and type the keys but leave Vim some time to
-            # react.
+            # react. For nvim, give the first attempt some headroom (see
+            # comment in runTest).
+            if self.vim_flavor == "neovim" and self.sleeptime == 0.00:
+                self.sleeptime = 0.05
             text = "i" + self.keys
             while text:
                 to_send = None
