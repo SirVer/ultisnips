@@ -51,6 +51,10 @@ next:
 	  layer this fixes long-standing insert mode lag, especially with
 	  autotrigger. (#1552)
 	- Python code in snippets is precompiled, which catches syntax errors early. (#1470)
+	- Edit detection rewritten to use Vim's `listener_add()` and Neovim's
+	  `on_bytes` as real change signals, replacing the `guess_edit()`
+	  heuristic chain.  On the test suite, expensive `diff()` fallback is
+	  hit ~96% less often on both Vim and Neovim. (#1613)
 
 	Bug fixes:
 	- Wildcards in `&runtimepath` entries (e.g. `/bundle/*`) are now
@@ -65,6 +69,10 @@ next:
 	- Creating an undo break no longer changes `undolevels`. (#1534)
 	- User errors reported without Python backtraces. (#1384)
 	- Out-of-bounds error in Neovim with |CanExpandSnippet()|. (#1562)
+	- Edit detection during a snippet no longer relies on cursor-movement
+	  heuristics, so visual/select-mode replacements, macros, and
+	  autocomplete/LSP insertions are handled correctly rather than
+	  silently falling through to the expensive full-buffer diff. (#1613)
 
 	Infrastructure:
 	- CI moved from Travis CI to GitHub Actions.
