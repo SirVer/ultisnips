@@ -152,6 +152,7 @@ class SnippetManager:
             self._change_provider = NvimChangeProvider()
         else:
             self._change_provider = VimChangeProvider()
+        assert self._change_provider is not None
 
         self._reinit()
 

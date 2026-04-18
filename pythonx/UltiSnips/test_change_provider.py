@@ -2,55 +2,18 @@
 
 """Tests for change_provider pure-Python helper functions.
 
-Tests detect_edits and _on_bytes_to_edits as pure functions (no Vim dependency).
+Tests detect_edits and _on_bytes_to_edits as pure functions.  The `vim`
+module is mocked by pythonx/conftest.py so these run without Vim.
 """
 
-import importlib.util
-import os
-import sys
-import types
 import unittest
 
-# Load change_provider in isolation: it has `import vim` and
-# `from UltiSnips.diff import diff` at module level, but the full
-# UltiSnips package needs a live Vim runtime to import.  We temporarily
-# install minimal stubs in sys.modules, load change_provider, then
-# restore sys.modules so other test files (e.g. test_diff.py) see the
-# real package.
-_here = os.path.dirname(os.path.abspath(__file__))
-_stub_keys = ["vim", "UltiSnips", "UltiSnips.diff", "UltiSnips.change_provider"]
-_saved = {k: sys.modules.get(k) for k in _stub_keys}
-
-sys.modules["vim"] = types.ModuleType("vim")
-
-_pkg = types.ModuleType("UltiSnips")
-_pkg.__path__ = [_here]
-_pkg.__package__ = "UltiSnips"
-sys.modules["UltiSnips"] = _pkg
-
-# change_provider only uses diff() as a fallback, which these tests never
-# exercise — the stub is enough for `from UltiSnips.diff import diff`.
-_mock_diff = types.ModuleType("UltiSnips.diff")
-_mock_diff.diff = None
-sys.modules["UltiSnips.diff"] = _mock_diff
-
-_spec = importlib.util.spec_from_file_location(
-    "UltiSnips.change_provider", os.path.join(_here, "change_provider.py")
+from UltiSnips.change_provider import (
+    _listener_to_edits,
+    _on_bytes_to_edits,
+    detect_edits,
+    diff,
 )
-_cp = importlib.util.module_from_spec(_spec)
-sys.modules["UltiSnips.change_provider"] = _cp
-_spec.loader.exec_module(_cp)
-
-_on_bytes_to_edits = _cp._on_bytes_to_edits
-_listener_to_edits = _cp._listener_to_edits
-detect_edits = _cp.detect_edits
-
-# Restore sys.modules so other test files load the real UltiSnips package.
-for k, v in _saved.items():
-    if v is None:
-        sys.modules.pop(k, None)
-    else:
-        sys.modules[k] = v
 
 
 def _apply(old_lines, cmds, start_line=0):
@@ -484,6 +447,123 @@ class TestListenerToEdits(unittest.TestCase):
         cmds = self._check(event, old_lines, new_buf, 5, 5, 1)
         result = _apply(["hello"], cmds, 5)
         self.assertEqual(result, ["xhello"])
+
+
+class TestDiff(unittest.TestCase):
+    """Test diff() — the shortest-edit-path fallback."""
+
+    @staticmethod
+    def _transform(a, cmds):
+        buf = a.split("\n")
+        for cmd in cmds:
+            ctype, line, col, char = cmd
+            if ctype == "D":
+                if char != "\n":
+                    buf[line] = buf[line][:col] + buf[line][col + len(char) :]
+                else:
+                    buf[line] = buf[line] + buf[line + 1]
+                    del buf[line + 1]
+            elif ctype == "I":
+                buf[line] = buf[line][:col] + char + buf[line][col:]
+            buf = "\n".join(buf).split("\n")
+        return "\n".join(buf)
+
+    def _check(self, a, b, wanted):
+        es = diff(a, b)
+        self.assertEqual(b, self._transform(a, es))
+        self.assertEqual(wanted, es)
+
+    def test_empty_string(self):
+        self._check("", "", ())
+
+    def test_all_match(self):
+        self._check("abcdef", "abcdef", ())
+
+    def test_lotsa_newlines(self):
+        self._check(
+            "Hello",
+            "Hello\nWorld\nWorld\nWorld",
+            (
+                ("I", 0, 5, "\n"),
+                ("I", 1, 0, "World"),
+                ("I", 1, 5, "\n"),
+                ("I", 2, 0, "World"),
+                ("I", 2, 5, "\n"),
+                ("I", 3, 0, "World"),
+            ),
+        )
+
+    def test_crash(self):
+        self._check(
+            "hallo Blah mitte=sdfdsfsd\nhallo kjsdhfjksdhfkjhsdfkh mittekjshdkfhkhsdfdsf",
+            "hallo Blah mitte=sdfdsfsd\nhallo b mittekjshdkfhkhsdfdsf",
+            (("D", 1, 6, "kjsdhfjksdhfkjhsdfkh"), ("I", 1, 6, "b")),
+        )
+
+    def test_real_life(self):
+        self._check(
+            "hallo End Beginning",
+            "hallo End t",
+            (("D", 0, 10, "Beginning"), ("I", 0, 10, "t")),
+        )
+
+    def test_real_life_1(self):
+        self._check(
+            "Vorne hallo Hinten",
+            "Vorne hallo  Hinten",
+            (("I", 0, 11, " "),),
+        )
+
+    def test_with_newline(self):
+        self._check(
+            "First Line\nSecond Line",
+            "n",
+            (
+                ("D", 0, 0, "First Line"),
+                ("D", 0, 0, "\n"),
+                ("D", 0, 0, "Second Line"),
+                ("I", 0, 0, "n"),
+            ),
+        )
+
+    def test_cheap_delete(self):
+        self._check(
+            "Vorne hallo Hinten",
+            "Vorne Hinten",
+            (("D", 0, 5, " hallo"),),
+        )
+
+    def test_no_substring(self):
+        self._check("abc", "def", (("D", 0, 0, "abc"), ("I", 0, 0, "def")))
+
+    def test_common_characters(self):
+        self._check(
+            "hasomelongertextbl",
+            "hol",
+            (("D", 0, 1, "asomelongertextb"), ("I", 0, 1, "o")),
+        )
+
+    def test_ultisnips_problem(self):
+        self._check(
+            "this is it this is it this is it",
+            "this is it a this is it",
+            (("D", 0, 11, "this is it"), ("I", 0, 11, "a")),
+        )
+
+    def test_match_is_too_cheap(self):
+        self._check("stdin.h", "s", (("D", 0, 1, "tdin.h"),))
+
+    def test_multi_line(self):
+        self._check(
+            "hi first line\nsecond line first line\nsecond line world",
+            "hi first line\nsecond line k world",
+            (
+                ("D", 1, 12, "first line"),
+                ("D", 1, 12, "\n"),
+                ("D", 1, 12, "second line"),
+                ("I", 1, 12, "k"),
+            ),
+        )
 
 
 if __name__ == "__main__":
