@@ -2,7 +2,7 @@ next:
 	Breaking changes:
 	- Python 2 support removed. Support for Python 3.5–3.9 was also dropped.
 	  Minimum Python version is now 3.11.
-	- Minimum Vim version is now 9.1 (was 7.4). Older versions down to 8.0
+	- Minimum Vim version is now 9.1 (was 7.4). Older versions down to 8.2
 	  may still work but are not tested.
 	- Neovim is now officially supported and tested in CI.
 	- |g:UltiSnipsSnippetsDir| removed. Snippet discovery was rewritten —
@@ -51,6 +51,10 @@ next:
 	  layer this fixes long-standing insert mode lag, especially with
 	  autotrigger. (#1552)
 	- Python code in snippets is precompiled, which catches syntax errors early. (#1470)
+	- Edit detection rewritten to use Vim's `listener_add()` and Neovim's
+	  `on_bytes` as real change signals, replacing the `guess_edit()`
+	  heuristic chain.  On the test suite, expensive `diff()` fallback is
+	  hit ~96% less often on both Vim and Neovim. (#1613)
 
 	Bug fixes:
 	- Wildcards in `&runtimepath` entries (e.g. `/bundle/*`) are now
@@ -65,6 +69,10 @@ next:
 	- Creating an undo break no longer changes `undolevels`. (#1534)
 	- User errors reported without Python backtraces. (#1384)
 	- Out-of-bounds error in Neovim with |CanExpandSnippet()|. (#1562)
+	- Edit detection during a snippet no longer relies on cursor-movement
+	  heuristics, so visual/select-mode replacements, macros, and
+	  autocomplete/LSP insertions are handled correctly rather than
+	  silently falling through to the expensive full-buffer diff. (#1613)
 
 	Infrastructure:
 	- CI moved from Travis CI to GitHub Actions.

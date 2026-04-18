@@ -3,24 +3,26 @@ from contextlib import contextmanager
 import vim
 
 from UltiSnips import vim_helper
-from UltiSnips.diff import diff
+from UltiSnips.change_provider import diff
 from UltiSnips.error import PebkacError
 from UltiSnips.position import Position
 
 
 @contextmanager
-def use_proxy_buffer(snippets_stack, vstate):
+def use_proxy_buffer(snippets_stack, vstate, change_provider):
     """
     Forward all changes made in the buffer to the current snippet stack while
     function call.
     """
     buffer_proxy = VimBufferProxy(snippets_stack, vstate)
     old_buffer = vim_helper.buf
+    change_provider.suppress()
     try:
         vim_helper.buf = buffer_proxy
         yield
     finally:
         vim_helper.buf = old_buffer
+        change_provider.unsuppress()
     buffer_proxy.validate_buffer()
 
 
