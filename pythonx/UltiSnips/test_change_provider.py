@@ -126,6 +126,22 @@ class TestDetectEdits(unittest.TestCase):
         cmds = self._check(["hello"], ["helxlo"], 5, 5, 4)
         self.assertEqual(cmds[0][1], 5)  # line number should be absolute
 
+    def test_insert_with_repeated_pattern_after(self):
+        # Regression: inserting a space at col 5 in "hallo hallo hallo hallo"
+        # The greedy prefix matches "hallo " (6 chars), then cursor disambiguation
+        # must reduce prefix to 5 AND let suffix grow so the result is a clean
+        # 1-char insertion, not a delete-and-insert.
+        cmds = self._check(
+            ["hallo hallo hallo hallo"], ["hallo  hallo hallo hallo"], 0, 0, 6
+        )
+        self.assertEqual(cmds, [("I", 0, 5, " ")])
+
+    def test_insert_in_repeated_substring(self):
+        # Insert "x" between two identical "abc" substrings: "abcabc" → "abcxabc"
+        # Greedy prefix could match all 3 of "abc" before differing.
+        cmds = self._check(["abcabc"], ["abcxabc"], 0, 0, 4)
+        self.assertEqual(cmds, [("I", 0, 3, "x")])
+
     def test_line_deletion_dd(self):
         cmds = self._check(["a", "b", "c"], ["a", "c"], 0, 1, 0)
         self.assertIsNotNone(cmds)

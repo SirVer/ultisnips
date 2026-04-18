@@ -102,6 +102,28 @@ def _on_bytes_to_edits(event, old_lines, new_buf, snippet_start):
     return cmds
 
 
+def _suffix_match(old_line, new_line, prefix):
+    """Largest suffix length where old_line and new_line match, given prefix already matches."""
+    suffix = 0
+    max_suffix = min(len(old_line) - prefix, len(new_line) - prefix)
+    while (
+        suffix < max_suffix
+        and old_line[len(old_line) - 1 - suffix] == new_line[len(new_line) - 1 - suffix]
+    ):
+        suffix += 1
+    return suffix
+
+
+def _common_prefix_suffix(old_line, new_line):
+    """Greedy common prefix and (then) suffix between two strings."""
+    prefix = 0
+    max_prefix = min(len(old_line), len(new_line))
+    while prefix < max_prefix and old_line[prefix] == new_line[prefix]:
+        prefix += 1
+    suffix = _suffix_match(old_line, new_line, prefix)
+    return prefix, suffix
+
+
 def detect_edits(old_lines, new_lines, start_line, cursor_line, cursor_col):
     """Produce edit commands transforming old_lines into new_lines.
 
@@ -122,42 +144,23 @@ def detect_edits(old_lines, new_lines, start_line, cursor_line, cursor_col):
                 continue
             old_line = old_lines[i]
             new_line = new_lines[i]
-            # Find common prefix
-            prefix = 0
-            max_prefix = min(len(old_line), len(new_line))
-            while prefix < max_prefix and old_line[prefix] == new_line[prefix]:
-                prefix += 1
-            # Find common suffix (not overlapping prefix)
-            suffix = 0
-            max_suffix = min(len(old_line) - prefix, len(new_line) - prefix)
-            while (
-                suffix < max_suffix
-                and old_line[len(old_line) - 1 - suffix]
-                == new_line[len(new_line) - 1 - suffix]
-            ):
-                suffix += 1
+            prefix, suffix = _common_prefix_suffix(old_line, new_line)
             # Cursor disambiguation: on the cursor's line, constrain prefix
+            # to be no greater than the position where the edit actually
+            # happened. After reducing prefix, suffix can grow naturally.
             if i == cursor_rel:
                 del_len = len(old_line) - prefix - suffix
                 ins_len = len(new_line) - prefix - suffix
+                max_prefix = None
                 if ins_len > del_len:
-                    # Insertion: cursor is after inserted text
-                    net = ins_len - del_len
-                    max_allowed = cursor_col - net
-                    if prefix > max_allowed:
-                        overshoot = prefix - max_allowed
-                        prefix -= overshoot
-                        suffix -= overshoot
-                        if suffix < 0:
-                            suffix = 0
+                    # Insertion: cursor ends after inserted text
+                    max_prefix = cursor_col - (ins_len - del_len)
                 elif del_len > ins_len:
-                    # Deletion: cursor is at deletion point
-                    if prefix > cursor_col:
-                        overshoot = prefix - cursor_col
-                        prefix -= overshoot
-                        suffix -= overshoot
-                        if suffix < 0:
-                            suffix = 0
+                    # Deletion: cursor at deletion point
+                    max_prefix = cursor_col
+                if max_prefix is not None and prefix > max_prefix:
+                    prefix = max(0, max_prefix)
+                    suffix = _suffix_match(old_line, new_line, prefix)
 
             abs_line = start_line + i
             deleted = old_line[prefix : len(old_line) - suffix if suffix else None]
