@@ -395,11 +395,9 @@ class SnippetManager:
 
         self._check_if_still_inside_snippet()
         if self._active_snippets:
-            self._change_provider.suppress()
-            self._active_snippets[0].update_textobjects(vim_helper.buf)
-            self._vstate.remember_buffer(self._active_snippets[0])
-            self._change_provider.reset()
-            self._change_provider.unsuppress()
+            with self._change_provider.suppressed():
+                self._active_snippets[0].update_textobjects(vim_helper.buf)
+                self._vstate.remember_buffer(self._active_snippets[0])
 
     def _setup_inner_state(self):
         """Map keys and create autocommands that should only be defined when a
@@ -550,31 +548,29 @@ class SnippetManager:
                     if self._current_snippet.snippet.has_option("s"):
                         lineno = vim_helper.buf.cursor.line
                         vim_helper.buf[lineno] = vim_helper.buf[lineno].rstrip()
-                    self._change_provider.suppress()
-                    vim_helper.select(ntab.start, ntab.end)
-                    jumped = True
-                    if (
-                        self._ctab is not None
-                        and ntab.start - self._ctab.end == Position(0, 1)
-                        and ntab.end - ntab.start == Position(0, 1)
-                    ):
-                        ntab_short_and_near = True
+                    with self._change_provider.suppressed():
+                        vim_helper.select(ntab.start, ntab.end)
+                        jumped = True
+                        if (
+                            self._ctab is not None
+                            and ntab.start - self._ctab.end == Position(0, 1)
+                            and ntab.end - ntab.start == Position(0, 1)
+                        ):
+                            ntab_short_and_near = True
 
-                    self._ctab = ntab
+                        self._ctab = ntab
 
-                    # Run interpolations again to update new placeholder
-                    # values, binded to currently newly jumped placeholder.
-                    self._visual_content.conserve_placeholder(self._ctab)
-                    self._current_snippet.current_placeholder = (
-                        self._visual_content.placeholder
-                    )
-                    self._should_reset_visual = False
-                    self._active_snippets[0].update_textobjects(vim_helper.buf)
-                    # Open any folds this might have created
-                    vim.command("normal! zv")
-                    self._vstate.remember_buffer(self._active_snippets[0])
-                    self._change_provider.reset()
-                    self._change_provider.unsuppress()
+                        # Run interpolations again to update new placeholder
+                        # values, binded to currently newly jumped placeholder.
+                        self._visual_content.conserve_placeholder(self._ctab)
+                        self._current_snippet.current_placeholder = (
+                            self._visual_content.placeholder
+                        )
+                        self._should_reset_visual = False
+                        self._active_snippets[0].update_textobjects(vim_helper.buf)
+                        # Open any folds this might have created
+                        vim.command("normal! zv")
+                        self._vstate.remember_buffer(self._active_snippets[0])
 
                     if ntab.number == 0 and self._active_snippets:
                         self._current_snippet_is_done()

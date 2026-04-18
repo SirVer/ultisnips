@@ -9,9 +9,34 @@ Edit commands are tuples of ("I"|"D", line, col, text) where:
 - line numbers are 0-indexed absolute buffer positions
 """
 
+from contextlib import contextmanager
+
 import vim
 
 from UltiSnips.diff import diff
+
+
+class _ChangeProvider:
+    """Base class providing the suppress→reset→unsuppress protocol.
+
+    Subclasses implement suppress(), unsuppress(), and reset().
+    """
+
+    @contextmanager
+    def suppressed(self):
+        """Run a block of UltiSnips-driven buffer modifications without
+        recording them as user changes.
+
+        Calls reset() before unsuppressing so any events queued during
+        suppression (and not yet delivered) are flushed and discarded
+        instead of leaking out as user edits.
+        """
+        self.suppress()
+        try:
+            yield
+        finally:
+            self.reset()
+            self.unsuppress()
 
 
 def _byte_to_char_col(line, byte_col):
@@ -316,35 +341,60 @@ def _listener_to_edits(
 ):
     """Translate a single Vim listener_add event to edit commands.
 
-    event: dict with 'lnum' (1-indexed first changed line), 'end' (1-indexed
-           line past last original changed line), 'added' (lines added, can
-           be negative).
-    old_lines: remembered buffer slice (snippet region).
-    new_buf: current full buffer.
-    snippet_start: absolute line number of snippet start.
+    event: dict with 1-indexed 'lnum' (first changed line), 'end' (line
+        past last original changed line), 'added' (lines added; negative
+        if removed), and 'col' (1-indexed BYTE start column on lnum, or
+        1 if "unknown / whole line affected" per :help listener_add).
 
-    Uses the listener metadata to scope detect_edits to just the affected
-    lines, improving disambiguation for cases with identical lines.
+    For single-line changes with a known col (>1), translate directly:
+    col gives a hard prefix anchor, so we can find the change span by
+    matching the suffix only — no greedy prefix matching, no cursor
+    heuristics.
+
+    For multi-line changes or unknown col, scope detect_edits to the
+    affected line range (still better than full-snippet comparison
+    because identical lines elsewhere can't confuse the prefix/suffix).
+
+    Returns edit commands, or None if the change extends outside the
+    known snippet region (caller falls back to detect_edits/diff).
     """
-    lnum = int(event["lnum"])  # 1-indexed
-    end = int(event["end"])  # 1-indexed, exclusive
+    lnum = int(event["lnum"])
+    end = int(event["end"])
     added = int(event["added"])
+    col_b = int(event.get("col", 1))
 
-    start_0 = lnum - 1  # 0-indexed absolute line
+    start_0 = lnum - 1
     old_count = end - lnum
     new_count = old_count + added
 
     rel_start = start_0 - snippet_start
     if rel_start < 0 or rel_start + old_count > len(old_lines):
-        return None  # Change outside snippet region
+        return None
+    if start_0 + new_count > len(new_buf):
+        return None
 
+    # Fast deterministic path: single-line change with reliable col.
+    if old_count == 1 and new_count == 1 and col_b > 1:
+        old_line = old_lines[rel_start]
+        new_line = new_buf[start_0]
+        prefix = _byte_to_char_col(old_line, col_b - 1)
+        suffix = _suffix_match(old_line, new_line, prefix)
+        deleted = old_line[prefix : len(old_line) - suffix if suffix else None]
+        inserted = new_line[prefix : len(new_line) - suffix if suffix else None]
+        cmds = []
+        if deleted:
+            cmds.append(("D", start_0, prefix, deleted))
+        if inserted:
+            cmds.append(("I", start_0, prefix, inserted))
+        return cmds
+
+    # Multi-line or unknown-col path: scoped detect_edits.
     old_region = old_lines[rel_start : rel_start + old_count]
     new_region = list(new_buf[start_0 : start_0 + new_count])
-
     return detect_edits(old_region, new_region, start_0, cursor_line, cursor_col)
 
 
-class VimChangeProvider:
+class VimChangeProvider(_ChangeProvider):
     """Uses listener_add() as a reliable change signal for Vim.
 
     listener_add() fires for ALL buffer modifications regardless of mode.
@@ -403,7 +453,7 @@ class VimChangeProvider:
         return diff("\n".join(old_lines), "\n".join(new_lines), snippet_start)
 
 
-class NvimChangeProvider:
+class NvimChangeProvider(_ChangeProvider):
     """Uses on_bytes for deterministic edit detection in Neovim.
 
     For single on_bytes events, translates the exact byte coordinates

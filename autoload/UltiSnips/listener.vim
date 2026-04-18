@@ -15,6 +15,7 @@ function! s:on_change(bufnr, start, end, added, changes) abort
             \ 'lnum': change.lnum,
             \ 'end': change.end,
             \ 'added': change.added,
+            \ 'col': change.col,
             \ })
     endfor
 endfunction

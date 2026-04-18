@@ -435,6 +435,56 @@ class TestListenerToEdits(unittest.TestCase):
         result = _apply(["aaa", "bbb", "ccc", "ddd"], cmds, 5)
         self.assertEqual(result, ["aaa", "ddd"])
 
+    # Deterministic fast path: single-line change with col >= 2.
+    # cursor_line/cursor_col are passed but unused by the fast path —
+    # the col anchor makes the prefix unambiguous.
+
+    def test_col_anchored_insert(self):
+        # Insert "x" at byte col 4 (= char col 3) in "hello" → "helxlo"
+        event = {"lnum": "6", "end": "7", "added": "0", "col": "4"}
+        old_lines = ["hello"]
+        new_buf = [""] * 5 + ["helxlo"]
+        cmds = _listener_to_edits(event, old_lines, new_buf, 5, 5, 4)
+        self.assertEqual(cmds, [("I", 5, 3, "x")])
+
+    def test_col_anchored_avoids_ambiguity(self):
+        # Insert space at col 6 in "hallo hallo hallo hallo".
+        # Without col, greedy prefix matches "hallo " (6 chars).
+        # With col=6, prefix is fixed at 5 (col-1).
+        event = {"lnum": "6", "end": "7", "added": "0", "col": "6"}
+        old_lines = ["hallo hallo hallo hallo"]
+        new_buf = [""] * 5 + ["hallo  hallo hallo hallo"]
+        cmds = _listener_to_edits(event, old_lines, new_buf, 5, 5, 6)
+        self.assertEqual(cmds, [("I", 5, 5, " ")])
+
+    def test_col_anchored_utf8_byte_to_char(self):
+        # Insert "h" at byte col 9 (= char col 6) in "te üü world"
+        # ("te üü " is 8 bytes, 6 chars, so byte col 9 is right after).
+        event = {"lnum": "6", "end": "7", "added": "0", "col": "9"}
+        old_lines = ["te üü world"]
+        new_buf = [""] * 5 + ["te üü hworld"]
+        cmds = _listener_to_edits(event, old_lines, new_buf, 5, 5, 7)
+        self.assertEqual(cmds, [("I", 5, 6, "h")])
+
+    def test_col_anchored_delete(self):
+        # Delete "ell" at byte col 2 (= char col 1) in "hello" → "ho"
+        event = {"lnum": "6", "end": "7", "added": "0", "col": "2"}
+        old_lines = ["hello"]
+        new_buf = [""] * 5 + ["ho"]
+        cmds = _listener_to_edits(event, old_lines, new_buf, 5, 5, 1)
+        self.assertEqual(cmds, [("D", 5, 1, "ell")])
+
+    def test_col_one_falls_back_to_scoped(self):
+        # col == 1 means "unknown / whole line". Fast path is skipped;
+        # we fall through to scoped detect_edits which can still find
+        # the edit (with cursor disambiguation).
+        event = {"lnum": "6", "end": "7", "added": "0", "col": "1"}
+        old_lines = ["hello"]
+        new_buf = [""] * 5 + ["xhello"]
+        cmds = self._check(event, old_lines, new_buf, 5, 5, 1)
+        result = _apply(["hello"], cmds, 5)
+        self.assertEqual(result, ["xhello"])
+
 
 if __name__ == "__main__":
     unittest.main()
