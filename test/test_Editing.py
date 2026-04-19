@@ -48,6 +48,19 @@ class Undo_CompletelyUndoSnippet(_VimTest):
     wanted = ""
 
 
+# Regression for #1513: undoing a big deletion while a snippet is still
+# tracked used to fall into the O(n·m) diff() fallback in _cursor_moved and
+# freeze Vim for tens of seconds. After the fix detect_edits handles the
+# 1 → N line transition deterministically (and _cursor_moved drops the
+# snippet instead of hanging if even that gives up).
+class Undo_RestoreLinesWhileSnippetTracked(_VimTest):
+    snippets = ("(", "($1)")
+    text_before = "AAAAA\n" * 49 + "AAAAA"  # 50 lines
+    text_after = ""
+    keys = ESC + "ggVGd" + "i(" + EX + ESC + "uuu"
+    wanted = ""  # final buffer = text_before + "" + text_after = 50 AAAAA lines
+
+
 class JumpForward_DefSnippet(_VimTest):
     snippets = ("test", "${1}\n`!p snip.rv = '\\n'.join(t[1].split())`\n\n${0:pass}")
     keys = "test" + EX + "a b c" + JF + "shallnot"

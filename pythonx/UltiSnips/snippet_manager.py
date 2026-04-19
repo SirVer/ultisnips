@@ -10,7 +10,11 @@ import vim
 
 from UltiSnips import err_to_scratch_buffer, vim_helper
 from UltiSnips.buffer_proxy import suspend_proxy_edits, use_proxy_buffer
-from UltiSnips.change_provider import NvimChangeProvider, VimChangeProvider
+from UltiSnips.change_provider import (
+    DROP_SNIPPET,
+    NvimChangeProvider,
+    VimChangeProvider,
+)
 from UltiSnips.position import JumpDirection, Position
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
 from UltiSnips.snippet.source import (
@@ -391,6 +395,14 @@ class SnippetManager:
             es = self._change_provider.consume_edits(
                 vim_helper.buf, self._active_snippets[0], self._vstate
             )
+            if es is DROP_SNIPPET:
+                # Buffer has diverged from the snippet's tracked state so
+                # heavily that reconciling would hang diff() or corrupt
+                # the text-object tree. Abandon the snippet cleanly.
+                while self._active_snippets:
+                    self._current_snippet_is_done()
+                self._reinit()
+                return
             if es is not None:
                 self._active_snippets[0].replay_user_edits(es, self._ctab)
 
