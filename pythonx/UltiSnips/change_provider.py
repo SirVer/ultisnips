@@ -15,6 +15,39 @@ from contextlib import contextmanager
 
 import vim
 
+# Returned by consume_edits when the buffer change cannot plausibly be
+# reconciled against the snippet's tracked state (pre-snippet content
+# restored by undo, huge single-event paste dumped outside any tabstop,
+# etc.). The caller terminates the snippet rather than hanging in diff()
+# or producing a corrupted text-object tree.
+DROP_SNIPPET = object()
+
+# diff() is an O(|a|·|b|) shortest-edit-path search. For total char counts
+# up to a few hundred it is imperceptible; beyond ~2000 the latency becomes
+# a freeze. Rather than feed such inputs to diff(), we treat them as a
+# signal that the snippet has lost its grip on the buffer.
+_PATHOLOGICAL_CHAR_DELTA = 2000
+
+
+def _joined_len(lines):
+    """Length of '\\n'.join(lines) without materializing the string."""
+    if not lines:
+        return 0
+    return sum(len(l) for l in lines) + len(lines) - 1
+
+
+def _is_pathological_diff_input(old_lines, new_lines):
+    """Return True when running diff(old, new) would be both slow and
+    structurally suspect — meaning the buffer has diverged from the
+    snippet's tracked state in a way no reasonable replay can recover.
+
+    Heuristic: the character-count delta exceeds what an interactive
+    snippet edit could plausibly produce in a single CursorMoved cycle.
+    """
+    return (
+        abs(_joined_len(new_lines) - _joined_len(old_lines)) > _PATHOLOGICAL_CHAR_DELTA
+    )
+
 
 def diff(a, b, sline=0):
     """
@@ -444,6 +477,44 @@ def detect_edits(old_lines, new_lines, start_line, cursor_line, cursor_col):
                     cmds.append(("I", base_line + 1, 0, new_second_part))
                 return cmds
 
+            # added >= 2: a single line becomes many (multi-line paste into
+            # a tabstop, etc.). Bridge by preserving the common prefix with
+            # rem_new[0] and the common suffix with rem_new[-1]; the
+            # intermediate lines are pure insertions.
+            if old_line:
+                p = 0
+                max_p = min(len(old_line), len(rem_new[0]))
+                while p < max_p and old_line[p] == rem_new[0][p]:
+                    p += 1
+                s = 0
+                max_s = min(len(old_line) - p, len(rem_new[-1]))
+                while (
+                    s < max_s
+                    and old_line[len(old_line) - 1 - s]
+                    == rem_new[-1][len(rem_new[-1]) - 1 - s]
+                ):
+                    s += 1
+                cmds = []
+                deleted_mid = old_line[p : len(old_line) - s if s else None]
+                if deleted_mid:
+                    cmds.append(("D", base_line, p, deleted_mid))
+                extra_on_first = rem_new[0][p:]
+                if extra_on_first:
+                    cmds.append(("I", base_line, p, extra_on_first))
+                cmds.append(("I", base_line, len(rem_new[0]), "\n"))
+                for i in range(1, len(rem_new) - 1):
+                    if rem_new[i]:
+                        cmds.append(("I", base_line + i, 0, rem_new[i]))
+                    cmds.append(("I", base_line + i, len(rem_new[i]), "\n"))
+                last_prefix = rem_new[-1][: len(rem_new[-1]) - s if s else None]
+                if last_prefix:
+                    cmds.append(("I", base_line + len(rem_new) - 1, 0, last_prefix))
+                return cmds
+            # old_line is empty and many new lines arrived: likely the
+            # snippet's remembered state no longer reflects the buffer
+            # (e.g. undo past the expansion). Let the caller's pathological
+            # check decide to drop the snippet.
+
         return None
 
     return None
@@ -563,6 +634,8 @@ class VimChangeProvider(_ChangeProvider):
         es = detect_edits(old_lines, new_lines, snippet_start, pos.line, pos.col)
         if es is not None:
             return es
+        if _is_pathological_diff_input(old_lines, new_lines):
+            return DROP_SNIPPET
         return diff("\n".join(old_lines), "\n".join(new_lines), snippet_start)
 
 
@@ -611,4 +684,6 @@ class NvimChangeProvider(_ChangeProvider):
         es = detect_edits(old_lines, new_lines, snippet_start, pos.line, pos.col)
         if es is not None:
             return es
+        if _is_pathological_diff_input(old_lines, new_lines):
+            return DROP_SNIPPET
         return diff("\n".join(old_lines), "\n".join(new_lines), snippet_start)

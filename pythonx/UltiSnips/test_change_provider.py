@@ -9,6 +9,7 @@ module is mocked by pythonx/conftest.py so these run without Vim.
 import unittest
 
 from UltiSnips.change_provider import (
+    _is_pathological_diff_input,
     _listener_to_edits,
     _on_bytes_to_edits,
     detect_edits,
@@ -156,6 +157,76 @@ class TestDetectEdits(unittest.TestCase):
         self.assertIsNotNone(cmds)
         result = _apply(["hello", "world"], cmds, 0)
         self.assertEqual(result, ["helloworld"])
+
+    def test_1_to_n_multi_line_paste(self):
+        # Paste of 3 additional lines into a single line — mimics e.g. a
+        # multi-line clipboard paste inside a tabstop. Previously this
+        # fell through detect_edits to the O(n·m) diff() fallback; it now
+        # resolves deterministically via the general 1→N handler.
+        old = ["hello world"]
+        new = ["hello X", "middle", "another", "Y world"]
+        cmds = self._check(old, new, 0, 0, 0)
+        self.assertIsNotNone(cmds)
+
+    def test_1_to_n_many_lines_large_paste(self):
+        # Regression for the #1074-style large-paste-into-tabstop case:
+        # detect_edits must resolve this without falling back to diff.
+        old = ["AB"]
+        new = ["A" + "x" + str(i) for i in range(100)] + ["end B"]
+        cmds = self._check(old, new, 0, 0, 0)
+        self.assertIsNotNone(cmds)
+
+    def test_1_to_n_empty_old_returns_none(self):
+        # Regression for #1513: when rem_old is a single empty line, the
+        # snippet's remembered state has diverged from the buffer (e.g.
+        # undo past the expansion). detect_edits deliberately gives up
+        # here so that consume_edits' pathological check can drop the
+        # snippet instead of replaying edits into a stale tree.
+        old = [""]
+        new = ["AAAAA"] * 50
+        cmds = detect_edits(old, new, 0, 0, 0)
+        self.assertIsNone(cmds)
+
+
+class TestIsPathologicalDiffInput(unittest.TestCase):
+    """Regression for #1513/#155/#1074 — diff() is O(n·m) and freezes for
+    large inputs. consume_edits uses _is_pathological_diff_input as a
+    guard: when the old→new character delta is too large, we signal the
+    caller to drop the snippet rather than attempting a (slow, and at
+    this point semantically pointless) reconciliation."""
+
+    def test_pure_insert_many_lines_is_pathological(self):
+        # The #1513 shape: [''] → thousands of content lines (undo of big
+        # deletion while snippet still tracked).
+        self.assertTrue(_is_pathological_diff_input([""], ["AAAAA"] * 3000))
+
+    def test_pure_delete_many_lines_is_pathological(self):
+        # The #155 shape: thousands of lines visually selected and fed
+        # into a snippet ${VISUAL} ends up producing a huge delta in the
+        # other direction on subsequent edits.
+        self.assertTrue(_is_pathological_diff_input(["AAAAA"] * 3000, [""]))
+
+    def test_small_edit_is_not_pathological(self):
+        # Normal typing/backspace: diff() would be trivial anyway.
+        self.assertFalse(_is_pathological_diff_input(["hello"], ["hellox"]))
+        self.assertFalse(_is_pathological_diff_input(["hello"], ["helo"]))
+
+    def test_moderate_multi_line_edit_is_not_pathological(self):
+        # ~100-char paste: diff would run in a few ms. Not worth dropping
+        # the snippet over.
+        old = ["hello world"]
+        new = ["hello"] + ["x" * 10] * 5 + ["world"]
+        self.assertFalse(_is_pathological_diff_input(old, new))
+
+    def test_at_threshold_boundary(self):
+        # Delta exactly at the threshold is NOT pathological;
+        # above is. Documents the cutoff.
+        from UltiSnips.change_provider import _PATHOLOGICAL_CHAR_DELTA
+
+        under = ["a" * _PATHOLOGICAL_CHAR_DELTA]
+        self.assertFalse(_is_pathological_diff_input([""], under))
+        over = ["a" * (_PATHOLOGICAL_CHAR_DELTA + 1)]
+        self.assertTrue(_is_pathological_diff_input([""], over))
 
 
 class TestOnBytesToEdits(unittest.TestCase):
