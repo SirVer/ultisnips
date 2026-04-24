@@ -263,7 +263,10 @@ their default values are: >
    g:UltiSnipsJumpBackwardTrigger         <c-k>
 
 UltiSnips will only map the jump triggers while a snippet is active to
-interfere as little as possible with other mappings.
+interfere as little as possible with other mappings. Because of this,
+inspecting the mappings with |:map| (for example `:verbose imap <c-k>`)
+reports no mapping until a snippet is actually being expanded — expand
+a snippet first, then inspect the mappings while still inside it.
 
 The default value for g:UltiSnipsJumpBackwardTrigger interferes with the
 built-in complete function: |i_CTRL-X_CTRL-K|. A workaround is to add the
