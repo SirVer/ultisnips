@@ -620,19 +620,9 @@ class SnippetManager:
 
     def _handle_failure(self, trigger, pass_through=False):
         """Mainly make sure that we play well with SuperTab."""
-        if trigger.lower() == "<tab>" or trigger.lower() == "<s-tab>":
-            feedkey = "\\" + trigger
-        elif pass_through and int(
-            vim.vars.get("UltiSnipsInsertTriggerOnFailure", 1)
+        if trigger.lower() in ("<tab>", "<s-tab>") or (
+            pass_through and int(vim.vars.get("UltiSnipsInsertTriggerOnNoMatch", 1))
         ):
-            # Re-emit the trigger as text via `:return` through the `<C-R>=`
-            # mapping. For Tab/Space/printable chars this round-trips cleanly,
-            # but for `<c-space>`, `<a-;>`, `<F2>` etc. the bytes are vim's
-            # internal multi-byte key codes (displayed as garbage like
-            # <t_ü>); for `<c-j>` they're LF, which splits the line and
-            # bypasses `imap <c-j> <nop>`. Users who hit those cases set
-            # `g:UltiSnipsInsertTriggerOnFailure = 0` to suppress the
-            # re-emission. See issues #1232, #1460, #1482, #1523.
             feedkey = "\\" + trigger
         else:
             feedkey = None

@@ -131,7 +131,7 @@ class PassThroughNonexecutedTrigger(_VimTest):
 #   #1482 — `<c-space>` as trigger inserts <t_ü>
 #   #1523 — `<a-;>` as trigger inserts <t_u;>
 #
-# `g:UltiSnipsInsertTriggerOnFailure` (default 1) gates the re-emission.
+# `g:UltiSnipsInsertTriggerOnNoMatch` (default 1) gates the re-emission.
 # Users with `<…>`-form triggers whose bytes don't round-trip cleanly as
 # text (most special keys other than Tab/Space) set it to 0. <c-j> is the
 # easiest of the cluster to drive end-to-end because its byte (LF / 0x0a)
@@ -139,7 +139,7 @@ class PassThroughNonexecutedTrigger(_VimTest):
 
 
 class TriggerKey_CtrlJ_DefaultBehaviorReFires(_VimTest):
-    """Default `g:UltiSnipsInsertTriggerOnFailure=1`: pressing <c-j> with no
+    """Default `g:UltiSnipsInsertTriggerOnNoMatch=1`: pressing <c-j> with no
     snippet inserts a newline (LF), preserving the historical behaviour."""
 
     keys = "test\n"
@@ -150,7 +150,7 @@ class TriggerKey_CtrlJ_DefaultBehaviorReFires(_VimTest):
 
 
 class TriggerKey_CtrlJ_OptOutSuppressesReFire(_VimTest):
-    """With `g:UltiSnipsInsertTriggerOnFailure=0`, pressing <c-j> with no
+    """With `g:UltiSnipsInsertTriggerOnNoMatch=0`, pressing <c-j> with no
     snippet does nothing — closes #1460 and (via the same code path)
     #1482 / #1523 for users who set the option."""
 
@@ -159,7 +159,7 @@ class TriggerKey_CtrlJ_OptOutSuppressesReFire(_VimTest):
 
     def _extra_vim_config(self, vim_config):
         vim_config.append('let g:UltiSnipsExpandTrigger="<c-j>"')
-        vim_config.append("let g:UltiSnipsInsertTriggerOnFailure=0")
+        vim_config.append("let g:UltiSnipsInsertTriggerOnNoMatch=0")
 
 
 class TriggerKey_CtrlJ_StillExpandsSnippet(_VimTest):
@@ -172,7 +172,7 @@ class TriggerKey_CtrlJ_StillExpandsSnippet(_VimTest):
 
     def _extra_vim_config(self, vim_config):
         vim_config.append('let g:UltiSnipsExpandTrigger="<c-j>"')
-        vim_config.append("let g:UltiSnipsInsertTriggerOnFailure=0")
+        vim_config.append("let g:UltiSnipsInsertTriggerOnNoMatch=0")
 
 
 class TriggerKey_Space_DefaultInsertsSpace(_VimTest):
@@ -196,7 +196,7 @@ class TriggerKey_Space_OptOutConsumesSpace(_VimTest):
 
     def _extra_vim_config(self, vim_config):
         vim_config.append('let g:UltiSnipsExpandTrigger="<space>"')
-        vim_config.append("let g:UltiSnipsInsertTriggerOnFailure=0")
+        vim_config.append("let g:UltiSnipsInsertTriggerOnNoMatch=0")
 
 
 # End: trigger-key fallthrough cluster
