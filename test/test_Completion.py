@@ -126,3 +126,43 @@ class NoPopup_NestedNonAutosnippet_DoesNotJumpBackward(_VimTest):
     text_before = "fraction fracture fractal --- some text before --- \n\n"
     keys = "frac" + EX + "frac" + EX + "frac" + EX + JF + JF + JF + "k"
     wanted = r"\frac{\frac{\frac{}{}}{k}}{}"
+
+
+# https://github.com/SirVer/ultisnips/issues/1400 — reporter's exact case:
+# `\test{$1}{$2}$0` iA, nested 5 deep with a completion engine open. They saw
+# select-mode landing on a previous placeholder, and the next keystroke
+# replaced its content. Same root cause as #1380/#1327; this is the same fix
+# (PR #1620), exercised at the depth they reported.
+class Popup_DeeplyNestedAutosnippet_Issue1400(_VimTest):
+    files = {
+        "us/all.snippets": r"""
+        snippet test "test" iA
+        \test{${1:${VISUAL}}}{$2}$0
+        endsnippet
+        """
+    }
+    text_before = "tester testing tested --- some text before --- \n\n"
+    keys = (
+        "test"
+        + COMPL_KW
+        + "test"
+        + COMPL_KW
+        + "test"
+        + COMPL_KW
+        + "test"
+        + COMPL_KW
+        + "test"
+        + JF
+        + JF
+        + JF
+        + JF
+        + JF
+        + "k"
+    )
+    # 5 JFs from innermost T1 walk (per the same logic documented above):
+    #   L5 T1 → L5 T2 → (T0 & pop) → L4 T2 → (T0 & pop) → L3 T2
+    # 'k' lands at L3's $2.
+    wanted = r"\test{\test{\test{\test{\test{}{}}{}}{k}}{}}{}"
+
+    def _extra_vim_config(self, vim_config):
+        vim_config.append("set completeopt=menu,menuone,noinsert,noselect")
