@@ -539,6 +539,49 @@ snip.rv = "placeholder: " + snip.p.current_text`)""",
 first second (placeholder: )"""
 
 
+# Issue #1405: same pattern as PythonVisual_HasAccessToSelectedPlaceholders, but
+# with the !p block placed before the tabstops. The reporter claimed this
+# variant exposed a cursor / selection sync bug.
+class PythonVisual_ReversedHasAccessToSelectedPlaceholders(_VimTest):
+    snippets = (
+        "test",
+        """(`!p
+snip.rv = "placeholder: " + snip.p.current_text`) ${1:first} ${2:second}""",
+    )
+    keys = "test" + EX + ESC + "otest" + EX + JF + ESC
+    wanted = """(placeholder: first) first second
+(placeholder: second) first second"""
+
+
+# Issue #1405: zero-length tabstop preceded by a `!p` that evaluates to "" on
+# first expansion exposes the cursor-sync bug the reporter pinpointed in
+# vim_helper.select() (`i` vs `a` choice for zero-length tabstops).
+class Issue1405_EmptyPythonBeforeZeroLengthTabstop(_VimTest):
+    snippets = ("test", "`!p snip.rv = ''`abc$1def")
+    keys = "test" + EX + "X"
+    wanted = "abcXdef"
+
+
+class Issue1405_EmptyPythonAtStartZeroLengthTabstopMid(_VimTest):
+    snippets = ("test", "`!p snip.rv = ''`$1abc")
+    keys = "test" + EX + "X"
+    wanted = "Xabc"
+
+
+class Issue1405_EmptyPythonZeroLengthTabstopEnd(_VimTest):
+    snippets = ("test", "abc$1`!p snip.rv = ''`")
+    keys = "test" + EX + "X"
+    wanted = "abcX"
+
+
+# First tabstop is zero-length and sits right after an empty !p block —
+# the closest reconstruction of the issue's "ZeroLength_Trivial" repro.
+class Issue1405_ZeroLengthTabstopAfterEmptyPython(_VimTest):
+    snippets = ("test", "(`!p snip.rv = ''`)$1 ${2:second}")
+    keys = "test" + EX + "X" + JF + "Y"
+    wanted = "()X Y"
+
+
 class Python_SnipRvCanBeNonText(_VimTest):
     # Test for https://github.com/SirVer/ultisnips/issues/1132
     snippets = ("test", "`!p snip.rv = 5`")
