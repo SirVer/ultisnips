@@ -620,10 +620,9 @@ class SnippetManager:
 
     def _handle_failure(self, trigger, pass_through=False):
         """Mainly make sure that we play well with SuperTab."""
-        if trigger.lower() == "<tab>" or trigger.lower() == "<s-tab>":
-            feedkey = "\\" + trigger
-        elif pass_through:
-            # pass through the trigger key if it did nothing
+        if trigger.lower() in ("<tab>", "<s-tab>") or (
+            pass_through and int(vim.vars.get("UltiSnipsInsertTriggerOnNoMatch", 1))
+        ):
             feedkey = "\\" + trigger
         else:
             feedkey = None

@@ -285,6 +285,18 @@ g:UltiSnipsJumpOrExpandTrigger instead. >
 If both g:UltiSnipsExpandOrJumpTrigger and g:UltiSnipsJumpOrExpandTrigger
 is set, g:UltiSnipsExpandOrJumpTrigger variable will take effects.
 
+                                       *g:UltiSnipsInsertTriggerOnNoMatch*
+
+When the expand trigger fires but no snippet matches, UltiSnips by default
+re-emits the trigger as text, so that e.g. <tab> still inserts a tab when
+there's nothing to expand. For special-key triggers like <c-j>, <c-space>,
+<a-;> or <F2> this re-emission inserts the raw key code (typically shown
+as `<t_…>`-style garbage) or, for <c-j>, a literal newline. Set this variable
+to 0 to suppress the re-emission; the trigger is then consumed silently when
+no snippet matches. Default: 1.
+>
+   let g:UltiSnipsInsertTriggerOnNoMatch = 0
+
 3.2.2 Using your own trigger functions           *UltiSnips-trigger-functions*
 
 For advanced users there are functions that you can map directly to a
