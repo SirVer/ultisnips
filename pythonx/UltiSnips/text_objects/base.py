@@ -40,21 +40,21 @@ def _replace_text(buf, start, end, text):
 class TextObject:
     """Represents any object in the text that has a span in any ways."""
 
-    # Monotonic counter used as the final tiebreaker when two text objects
-    # share start position and end position (e.g. two zero-width `!p` blocks
-    # back-to-back). Without it, sort order falls back to set iteration —
-    # which is non-deterministic — and side-effecting interpolations execute
-    # in the wrong order. See #1403.
-    _next_creation_index = 0
-
     def __init__(self, parent, start, end, initial_text="", tiebreaker=None):
         self._parent = parent
         self._start = start
         self._end = end
         self._initial_text = initial_text
         self._tiebreaker = tiebreaker or Position(self._start.line, self._end.line)
-        self._creation_index = TextObject._next_creation_index
-        TextObject._next_creation_index += 1
+        # Immutable snapshot of the original start position. Used as a final
+        # sort tiebreaker so that two text objects that started at different
+        # source positions but later collapsed to the same runtime position
+        # (e.g. two zero-width `!p` blocks back-to-back, or a TabStop and a
+        # PythonCode that both shrunk to col 10) keep their source-document
+        # order. Without it, sort order falls back to set iteration — which
+        # is non-deterministic — and side-effecting interpolations execute
+        # in the wrong order. See #1403.
+        self._origin = Position(start.line, start.col)
         if parent is not None:
             parent._add_child(self)
 
@@ -69,7 +69,8 @@ class TextObject:
             self._start.col,
             self._tiebreaker.line,
             self._tiebreaker.col,
-            self._creation_index,
+            self._origin.line,
+            self._origin.col,
         )
 
     def __lt__(self, other):

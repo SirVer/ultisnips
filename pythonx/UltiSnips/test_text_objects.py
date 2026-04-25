@@ -19,48 +19,54 @@ class _FakeParent:
         self._children.append(child)
 
 
-class TextObjectSort_SamePositionFallsBackToCreationOrder(unittest.TestCase):
-    """Two text objects sharing start, end, and tiebreaker must sort in the
-    order they were created.
+class TextObjectSort_RuntimeCollisionFallsBackToOrigin(unittest.TestCase):
+    """Two text objects that started at different source positions but
+    later collapsed to the same runtime position must sort by source
+    position (origin), not by set iteration order.
 
     Regression for https://github.com/SirVer/ultisnips/issues/1403: two
-    `!p` blocks back-to-back (each initially zero-width) had identical
-    sort keys, so `sorted(set(...))` fell back to set iteration order —
-    non-deterministic in CPython. The producer block could run after the
-    consumer, the convergence loop never re-ran the consumer, and the
-    inter-block dependency silently dropped.
+    `!p` blocks back-to-back (each initially zero-width after placement)
+    had identical runtime positions and identical legacy tiebreakers, so
+    `sorted(set(...))` fell back to set iteration order — non-deterministic
+    in CPython. The producer block could run after the consumer, the
+    convergence loop never re-ran the consumer, and the inter-block
+    dependency silently dropped.
     """
 
-    def test_set_sorted_yields_creation_order(self):
+    def test_runtime_tie_breaks_by_construction_position(self):
         parent = _FakeParent()
-        first = TextObject(parent, Position(0, 5), Position(0, 5))
-        second = TextObject(parent, Position(0, 5), Position(0, 5))
+        # Two text objects parsed from different source positions ...
+        first = TextObject(parent, Position(0, 5), Position(0, 10))
+        second = TextObject(parent, Position(0, 10), Position(0, 20))
+        # ... that later collapse to the same runtime span (e.g. both
+        # `!p` blocks shrink to zero-width at col 5 after initial-text
+        # placement).
+        first._start.col = 5
+        first._end.col = 5
+        second._start.col = 5
+        second._end.col = 5
 
-        # Identical sort keys other than creation index — but creation
-        # index is the trump card and should put first before second
-        # regardless of how the input set iterates.
         self.assertLess(first, second)
         self.assertLessEqual(first, second)
         self.assertFalse(second < first)
 
-        ordered = sorted({first, second})
-        self.assertEqual([first, second], ordered)
-
-        # Also true if we shove them into the set in the opposite order.
-        ordered_rev = sorted({second, first})
-        self.assertEqual([first, second], ordered_rev)
+        # And, importantly, the result is the same regardless of which
+        # order the underlying set hands them back.
+        self.assertEqual([first, second], sorted({first, second}))
+        self.assertEqual([first, second], sorted({second, first}))
 
 
-class TextObjectSort_PositionStillBeatsCreationOrder(unittest.TestCase):
-    """Creation order is the *last* tiebreaker — earlier positions still win."""
+class TextObjectSort_PositionBeatsOrigin(unittest.TestCase):
+    """Construction origin is the *last* tiebreaker — earlier runtime
+    positions still win."""
 
-    def test_later_creation_with_earlier_start_sorts_first(self):
+    def test_later_origin_with_earlier_runtime_start_sorts_first(self):
         parent = _FakeParent()
-        later = TextObject(parent, Position(0, 10), Position(0, 10))
-        earlier = TextObject(parent, Position(0, 2), Position(0, 2))
-        # earlier was created second but its start.col is smaller.
-        self.assertLess(earlier, later)
-        self.assertEqual([earlier, later], sorted({later, earlier}))
+        from_late = TextObject(parent, Position(0, 50), Position(0, 50))
+        from_early = TextObject(parent, Position(0, 5), Position(0, 5))
+        # from_early was constructed second but its start.col is smaller.
+        self.assertLess(from_early, from_late)
+        self.assertEqual([from_early, from_late], sorted({from_late, from_early}))
 
 
 if __name__ == "__main__":
