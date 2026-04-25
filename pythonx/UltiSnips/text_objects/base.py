@@ -40,12 +40,21 @@ def _replace_text(buf, start, end, text):
 class TextObject:
     """Represents any object in the text that has a span in any ways."""
 
+    # Monotonic counter used as the final tiebreaker when two text objects
+    # share start position and end position (e.g. two zero-width `!p` blocks
+    # back-to-back). Without it, sort order falls back to set iteration —
+    # which is non-deterministic — and side-effecting interpolations execute
+    # in the wrong order. See #1403.
+    _next_creation_index = 0
+
     def __init__(self, parent, start, end, initial_text="", tiebreaker=None):
         self._parent = parent
         self._start = start
         self._end = end
         self._initial_text = initial_text
         self._tiebreaker = tiebreaker or Position(self._start.line, self._end.line)
+        self._creation_index = TextObject._next_creation_index
+        TextObject._next_creation_index += 1
         if parent is not None:
             parent._add_child(self)
 
@@ -54,35 +63,20 @@ class TextObject:
         self._start.move(pivot, diff)
         self._end.move(pivot, diff)
 
-    def __lt__(self, other):
-        me_tuple = (
-            self.start.line,
-            self.start.col,
-            self._tiebreaker.line,
-            self._tiebreaker.col,
-        )
-        other_tuple = (
-            other._start.line,
-            other._start.col,
-            other._tiebreaker.line,
-            other._tiebreaker.col,
-        )
-        return me_tuple < other_tuple
-
-    def __le__(self, other):
-        me_tuple = (
+    def _sort_key(self):
+        return (
             self._start.line,
             self._start.col,
             self._tiebreaker.line,
             self._tiebreaker.col,
+            self._creation_index,
         )
-        other_tuple = (
-            other._start.line,
-            other._start.col,
-            other._tiebreaker.line,
-            other._tiebreaker.col,
-        )
-        return me_tuple <= other_tuple
+
+    def __lt__(self, other):
+        return self._sort_key() < other._sort_key()
+
+    def __le__(self, other):
+        return self._sort_key() <= other._sort_key()
 
     def __repr__(self):
         ct = ""
