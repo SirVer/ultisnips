@@ -20,18 +20,51 @@ Every new feature or bug fix needs a test. Tests are integration tests that run 
 The test runner auto-detects Vim vs Neovim from the executable.
 
 When a `tmux new -s vim` session is already running, run integration tests directly:
+
 ```
 ./test_all.py <TestNamePrefix>        # run matching tests
 ./test_all.py Transformation          # example: all transformation tests
 ```
 
 Prefer running inside Docker for isolation:
+
 ```
 make image_repro && make repro   # shell 1: build + launch container, then `tmux new -s vim`
 make shell_in_repro              # shell 2: enter container, then `./test_all.py`
 ```
 
-CI uses Docker across Vim 9.1/9.2/git, Neovim 0.12, and Python 3.11-3.14 (`.github/workflows/main.yml`).
+### Test framework gotchas
+
+- Pre-existing buffer content goes in `text_before` / `text_after` — do **not** prepend it to `keys`.
+  Content in `keys` is typed in insert mode and triggers iA snippets, mappings, abbreviations.
+- `wanted` is the content **between** `text_before` and `text_after`; `VimTestCase.runTest` wraps it. Don't
+  repeat the prefill text in `wanted`.
+- Default `--retries 4` retries with progressively slower typing. Use `--retries 1` for clean single-run
+  logs, but iA snippets with long triggers need more retries to type slowly enough — drop to `--retries 1`
+  only when speed isn't the variable you're studying or monkey-patch the sleep time higher in that case.
+
+### Debugging buffer-tracking issues
+
+When the textobject tree appears corrupted (jumps land in the wrong place, tabstops disappear),
+instrument the suspect sites with `pythonx/UltiSnips/debug.py` instead of trying to read the whole tree
+at once. It provides `debug(msg)`, `debug_section(label="")`, `debug_snippet_stack(active_snippets)`,
+and `echo_to_hierarchy(text_object)`. Importing the module clears the log file (default
+`/tmp/file.txt`, override with `ULTISNIPS_DEBUG_PATH`); each line carries a monotonic-time prefix so
+diffs line up. Typical sites: `SnippetManager._jump`, `SnippetManager._cursor_moved`,
+`SnippetInstance.select_next_tab`, and the `_active_snippets.append` line in `_do_snippet`. Run the
+failing test, then a control test with the suspected variable removed (e.g. popup vs. no popup), and
+`diff` the two log files. The first divergence is usually the smoking gun.
+
+Remove the imports/calls before committing.
+
+### Vim popup ↔ UltiSnips facts
+
+- `CursorMovedI` and `TextChangedI` are **suppressed while the completion popup is visible**;
+  `TextChangedP` fires instead. `_cursor_moved` is bound to `CursorMovedI`, so popup-time edits queue in
+  the listener but aren't drained until the popup closes.
+- `autoload/UltiSnips.vim` defines `s:compensate_for_pum()` — calls `_cursor_moved()` if `pumvisible()`. It
+  must be called at the top of every `UltiSnips#…` entry point that triggers expansion or jumping;
+  otherwise `_try_expand` / `_jump` runs against a stale tree.
 
 ## Linting and Formatting
 
