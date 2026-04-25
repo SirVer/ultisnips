@@ -603,3 +603,43 @@ class PythonCode_SameStartCol_OrderedBySource_Issue1403(_VimTest):
     )
     keys = "test" + EX
     wanted = "tt"
+
+
+# https://github.com/SirVer/ultisnips/issues/1402 — a `!p` block that
+# converges in two evaluations (because rv depends on side-effect state
+# set by the first call). Before the fix in PythonCode._update, the
+# convergence loop exited after the first call (ct == rv == ""), the
+# snippet end was still at column 0, _jump placed the cursor there, and
+# the *second* update_textobjects (driven by _jump) wrote "tt" to the
+# buffer but could no longer move the cursor — the user's first keystroke
+# landed at the wrong end ("Xtt" instead of "ttX").
+class PythonCode_TwoStepConverge_RvExplicitlyEmpty_Issue1402(_VimTest):
+    snippets = (
+        "test1402a",
+        """`!p
+import sys
+if 'ut_1402_a' not in sys.modules:
+    sys.modules['ut_1402_a'] = 'tt'
+    snip.rv = ''
+else:
+    snip.rv = 'tt'
+`""",
+    )
+    keys = "test1402a" + EX + "X"
+    wanted = "ttX"
+
+
+class PythonCode_TwoStepConverge_RvNotMutated_Issue1402(_VimTest):
+    snippets = (
+        "test1402b",
+        """`!p
+import sys
+if 'ut_1402_b' not in sys.modules:
+    sys.modules['ut_1402_b'] = 'tt'
+    # snip.rv is intentionally not mutated on first execution
+else:
+    snip.rv = 'tt'
+`""",
+    )
+    keys = "test1402b" + EX + "X"
+    wanted = "ttX"

@@ -517,5 +517,26 @@ class SnippetDefinition:
         )
         self.instantiate(snippet_instance, initial_text, indent)
         snippet_instance.replace_initial_text(vim_helper.buf)
-        snippet_instance.update_textobjects(vim_helper.buf)
+
+        # Iterate update_textobjects until the snippet's text reaches a fixed
+        # point. A `!p` block whose rv depends on its own side effect
+        # (sys.modules state, locals[] cache, ...) only produces its final
+        # value on a later evaluation; the inner convergence loop alone
+        # exits as soon as one evaluation produces ct == rv, leaving
+        # snippet.end stale before _jump synthesizes the implicit $0 and
+        # parks the cursor. Repeat until current_text stabilizes; cap at the
+        # same depth the inner loop uses. See issue #1402.
+        prev_text = None
+        for _ in range(10):
+            snippet_instance.update_textobjects(vim_helper.buf)
+            cur_text = snippet_instance.current_text
+            if cur_text == prev_text:
+                break
+            prev_text = cur_text
+        else:
+            raise PebkacError(
+                "The snippets content did not converge: text kept changing "
+                "across 10 update_textobjects passes. Check `!p` blocks for "
+                "non-idempotent rv that never settles."
+            )
         return snippet_instance
