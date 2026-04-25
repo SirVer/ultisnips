@@ -77,6 +77,7 @@ function! UltiSnips#FileTypeComplete(arglead, cmdline, cursorpos) abort
 endfunction
 
 function! UltiSnips#ExpandSnippet() abort
+    call s:compensate_for_pum()
     py3 UltiSnips_Manager.expand()
     return ""
 endfunction
@@ -94,6 +95,7 @@ function! UltiSnips#JumpOrExpandSnippet() abort
 endfunction
 
 function! UltiSnips#ListSnippets() abort
+    call s:compensate_for_pum()
     py3 UltiSnips_Manager.list_snippets()
     return ""
 endfunction
