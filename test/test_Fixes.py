@@ -125,6 +125,48 @@ class PassThroughNonexecutedTrigger(_VimTest):
 # End: #1184
 
 
+# Tests for the trigger-key fallthrough cluster:
+#   #1460 — `<c-j>` as trigger silently overrides `imap <c-j> <nop>`
+#   #1482 — `<c-space>` as trigger inserts <t_ü>
+#   #1523 — `<a-;>` as trigger inserts <t_u;>
+#   #1232 — `<space>` as trigger should still re-emit space on failure
+#
+# All share `_handle_failure`'s `\<keyname>` re-emission. <…>-form special
+# keys (other than <space>) are no longer re-fed; <space> and literal
+# characters still are. <c-j> is the easiest to drive end-to-end because
+# its byte (LF / 0x0a) sends cleanly through tmux; <c-space>/<a-;> hit the
+# identical code path and are covered by the unit test in
+# pythonx/UltiSnips/test_snippet_manager.py.
+
+
+class TriggerKey_CtrlJ_NoSnippetDoesNothing(_VimTest):
+    keys = "test\n"
+    wanted = "test"
+
+    def _extra_vim_config(self, vim_config):
+        vim_config.append('let g:UltiSnipsExpandTrigger="<c-j>"')
+
+
+class TriggerKey_CtrlJ_StillExpandsSnippet(_VimTest):
+    snippets = ("hello", "Hallo Welt!")
+    keys = "hello\n"
+    wanted = "Hallo Welt!"
+
+    def _extra_vim_config(self, vim_config):
+        vim_config.append('let g:UltiSnipsExpandTrigger="<c-j>"')
+
+
+class TriggerKey_Space_FallthroughInsertsSpace(_VimTest):
+    keys = "test "
+    wanted = "test "
+
+    def _extra_vim_config(self, vim_config):
+        vim_config.append('let g:UltiSnipsExpandTrigger="<space>"')
+
+
+# End: trigger-key fallthrough cluster
+
+
 # Tests for https://github.com/SirVer/ultisnips/issues/1386 (embedded null byte)
 
 

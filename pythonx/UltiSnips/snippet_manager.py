@@ -95,6 +95,23 @@ def _select_and_create_file_to_edit(potentials: set[str]) -> str:
     return file_to_edit
 
 
+def _trigger_roundtrips_as_text(trigger: str) -> bool:
+    """Whether re-emitting `trigger` as text on a failed expansion is safe.
+
+    `_handle_failure` re-feeds the trigger by returning `\\<keyname>` from the
+    wrapping `<C-R>=…<cr>` mapping. The returned bytes are inserted as buffer
+    text. For most named keys that text is either a vim-internal multi-byte
+    key code (which displays as garbage like `<t_ü>`) or a control character
+    that doesn't match user intent (e.g. `\\<c-j>` is LF, which splits the
+    line and silently overrides `imap <c-j> <nop>`). Only `<space>` is in the
+    `<…>`-form whitelist because it cleanly evaluates to ASCII 0x20.
+    """
+    t = trigger.lower()
+    if t == "<space>":
+        return True
+    return not (t.startswith("<") and t.endswith(">"))
+
+
 def _get_potential_snippet_filenames_to_edit(
     snippet_dir: str, filetypes: str
 ) -> set[str]:
@@ -622,8 +639,15 @@ class SnippetManager:
         """Mainly make sure that we play well with SuperTab."""
         if trigger.lower() == "<tab>" or trigger.lower() == "<s-tab>":
             feedkey = "\\" + trigger
-        elif pass_through:
-            # pass through the trigger key if it did nothing
+        elif pass_through and _trigger_roundtrips_as_text(trigger):
+            # The trigger is re-emitted as text via `:return` through the
+            # `<C-R>=` mapping. That works for printable bytes (Tab, Space,
+            # plain ASCII), but `\<keyname>` for keys like <c-space>, <a-;>,
+            # or <F2> evaluates to vim's internal multi-byte key codes —
+            # inserting those as text shows up as garbage like <t_ü>. <c-j>
+            # is also skipped because its byte (LF) splits the line and
+            # silently overrides the user's `imap <c-j> <nop>`. See issues
+            # #1523, #1482, #1460.
             feedkey = "\\" + trigger
         else:
             feedkey = None
