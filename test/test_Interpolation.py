@@ -544,3 +544,19 @@ class Python_SnipRvCanBeNonText(_VimTest):
     snippets = ("test", "`!p snip.rv = 5`")
     keys = "test" + EX
     wanted = "5"
+
+
+# https://github.com/SirVer/ultisnips/issues/1403 — two `!p` blocks at the
+# same start position (back-to-back, both initially empty) had no stable
+# tiebreaker in `TextObject.__lt__`, so `sorted(set_of_objects)` fell back
+# to set iteration order. The producer ran after the consumer, the
+# convergence loop never re-ran the consumer (its text already matched its
+# stale rv=''), and the inter-block dependency silently dropped.
+class PythonCode_SameStartCol_OrderedBySource_Issue1403(_VimTest):
+    snippets = (
+        "test",
+        "`!p import sys; sys.modules['ut_1403_marker'] = 'tt'; snip.rv = ''`"
+        "`!p import sys; snip.rv = sys.modules.get('ut_1403_marker', '')`",
+    )
+    keys = "test" + EX
+    wanted = "tt"
