@@ -167,14 +167,54 @@ function! UltiSnips#CursorMoved() abort
     py3 UltiSnips_Manager._cursor_moved()
 endf
 
-function! UltiSnips#LeavingBuffer() abort
-    let from_preview = getwinvar(winnr('#'), '&previewwindow')
-    let to_preview = getwinvar(winnr(), '&previewwindow')
-    let from_floating = s:is_floating(win_getid('#'))
-    let to_floating = s:is_floating(win_getid())
+function! s:is_aux_window(winnr) abort
+    " Auxiliary windows that should not tear down an active snippet:
+    "   - the preview window
+    "   - neovim floating windows
+    "   - quickfix and location-list windows
+    " These are typically opened transiently by other plugins
+    " (nvim-cmp docs popup, vimtex quickfix, lsp signature_help, …) and the
+    " user expects to come back to the snippet afterwards.
+    if getwinvar(a:winnr, '&previewwindow')
+        return 1
+    endif
+    if s:is_floating(win_getid(a:winnr))
+        return 1
+    endif
+    if getwinvar(a:winnr, '&buftype') ==# 'quickfix'
+        return 1
+    endif
+    " On `:copen`/`:lopen` Vim sets `&buftype` *after* `BufEnter` fires, so
+    " also recognise the window via `getwininfo()`'s `quickfix` / `loclist`
+    " flags (populated synchronously when the qf window is created).
+    let l:winid = win_getid(a:winnr)
+    if l:winid <= 0
+        return 0
+    endif
+    let l:info = getwininfo(l:winid)
+    if empty(l:info)
+        return 0
+    endif
+    return l:info[0].quickfix || l:info[0].loclist
+endfunction
 
-    if !(from_preview || to_preview || from_floating || to_floating)
+function! s:leaving_buffer_impl() abort
+    if !(s:is_aux_window(winnr('#')) || s:is_aux_window(winnr()))
         py3 UltiSnips_Manager._leaving_buffer()
+    endif
+endfunction
+
+function! UltiSnips#LeavingBuffer() abort
+    " The check is deferred to the next event-loop tick because some auxiliary
+    " windows (notably quickfix / location-list opened via `:copen` / `:lopen`)
+    " set their `&buftype` *after* BufEnter fires. Running the check
+    " synchronously from the BufEnter autocmd would see an unmarked window and
+    " incorrectly tear the snippet down. By the time the timer callback runs,
+    " the window/buffer is fully initialised.
+    if exists('*timer_start')
+        call timer_start(0, {-> s:leaving_buffer_impl()})
+    else
+        call s:leaving_buffer_impl()
     endif
 endf
 
