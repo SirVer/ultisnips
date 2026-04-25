@@ -483,3 +483,38 @@ class TabStop_KeepCorrectJumpListOnOverwriteOfPartOfSnippetRE(_VimTest):
     }
     keys = "i" + EX + EX + "1" + JF + "2" + JF + " after" + JF + "3"
     wanted = "ia(1, 2) after: 3"
+
+
+# Issue #1407: deeply nested tabstops where the navigation order is non-obvious.
+# Expansion order in the snippet text is 1, 4, 2, 3, but jumping must still
+# walk them in numeric order: 1 -> 2 -> 3 -> 4 -> 0.
+class TabStop_Issue1407_Expand(_VimTest):
+    snippets = ("test", "${1:foo${4:${2:zzz}bar$3fo}}")
+    keys = "test" + EX
+    wanted = "foozzzbarfo"
+
+
+class TabStop_Issue1407_OverwriteFirst(_VimTest):
+    snippets = ("test", "${1:foo${4:${2:zzz}bar$3fo}}")
+    keys = "test" + EX + "X"
+    wanted = "X"
+
+
+class TabStop_Issue1407_JumpAll_NoEdits(_VimTest):
+    snippets = ("test", "${1:foo${4:${2:zzz}bar$3fo}}")
+    keys = "test" + EX + JF + JF + JF + JF
+    wanted = "foozzzbarfo"
+
+
+class TabStop_Issue1407_OverwriteEach(_VimTest):
+    snippets = ("test", "${1:foo${4:${2:zzz}bar$3fo}}")
+    # Jump 1 (default selected) -> 2 (overwrite zzz with A) ->
+    # 3 (zero length, type B) -> 4 (now contains "AbarBfo", overwrite with C) -> 0.
+    keys = "test" + EX + JF + "A" + JF + "B" + JF + "C"
+    wanted = "fooC"
+
+
+class TabStop_Issue1407_OverwriteOnly2And3(_VimTest):
+    snippets = ("test", "${1:foo${4:${2:zzz}bar$3fo}}")
+    keys = "test" + EX + JF + "A" + JF + "B" + JF + JF
+    wanted = "fooAbarBfo"
