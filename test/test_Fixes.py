@@ -126,42 +126,77 @@ class PassThroughNonexecutedTrigger(_VimTest):
 
 
 # Tests for the trigger-key fallthrough cluster:
+#   #1232 — `<space>` as trigger should still re-emit space on failure
 #   #1460 — `<c-j>` as trigger silently overrides `imap <c-j> <nop>`
 #   #1482 — `<c-space>` as trigger inserts <t_ü>
 #   #1523 — `<a-;>` as trigger inserts <t_u;>
-#   #1232 — `<space>` as trigger should still re-emit space on failure
 #
-# All share `_handle_failure`'s `\<keyname>` re-emission. <…>-form special
-# keys (other than <space>) are no longer re-fed; <space> and literal
-# characters still are. <c-j> is the easiest to drive end-to-end because
-# its byte (LF / 0x0a) sends cleanly through tmux; <c-space>/<a-;> hit the
-# identical code path and are covered by the unit test in
-# pythonx/UltiSnips/test_snippet_manager.py.
+# `g:UltiSnipsInsertTriggerOnFailure` (default 1) gates the re-emission.
+# Users with `<…>`-form triggers whose bytes don't round-trip cleanly as
+# text (most special keys other than Tab/Space) set it to 0. <c-j> is the
+# easiest of the cluster to drive end-to-end because its byte (LF / 0x0a)
+# sends cleanly through tmux; <c-space>/<a-;> hit the identical code path.
 
 
-class TriggerKey_CtrlJ_NoSnippetDoesNothing(_VimTest):
+class TriggerKey_CtrlJ_DefaultBehaviorReFires(_VimTest):
+    """Default `g:UltiSnipsInsertTriggerOnFailure=1`: pressing <c-j> with no
+    snippet inserts a newline (LF), preserving the historical behaviour."""
+
     keys = "test\n"
-    wanted = "test"
+    wanted = "test\n"
 
     def _extra_vim_config(self, vim_config):
         vim_config.append('let g:UltiSnipsExpandTrigger="<c-j>"')
 
 
+class TriggerKey_CtrlJ_OptOutSuppressesReFire(_VimTest):
+    """With `g:UltiSnipsInsertTriggerOnFailure=0`, pressing <c-j> with no
+    snippet does nothing — closes #1460 and (via the same code path)
+    #1482 / #1523 for users who set the option."""
+
+    keys = "test\n"
+    wanted = "test"
+
+    def _extra_vim_config(self, vim_config):
+        vim_config.append('let g:UltiSnipsExpandTrigger="<c-j>"')
+        vim_config.append("let g:UltiSnipsInsertTriggerOnFailure=0")
+
+
 class TriggerKey_CtrlJ_StillExpandsSnippet(_VimTest):
+    """The opt-out only affects the failure path: when a snippet matches,
+    <c-j> still expands it."""
+
     snippets = ("hello", "Hallo Welt!")
     keys = "hello\n"
     wanted = "Hallo Welt!"
 
     def _extra_vim_config(self, vim_config):
         vim_config.append('let g:UltiSnipsExpandTrigger="<c-j>"')
+        vim_config.append("let g:UltiSnipsInsertTriggerOnFailure=0")
 
 
-class TriggerKey_Space_FallthroughInsertsSpace(_VimTest):
+class TriggerKey_Space_DefaultInsertsSpace(_VimTest):
+    """Default behaviour with <space> as trigger: spaces still pass through
+    on failed expansion (#1232)."""
+
     keys = "test "
     wanted = "test "
 
     def _extra_vim_config(self, vim_config):
         vim_config.append('let g:UltiSnipsExpandTrigger="<space>"')
+
+
+class TriggerKey_Space_OptOutConsumesSpace(_VimTest):
+    """With the opt-out, `<space>` is consumed on failure too — documents
+    the consistent behaviour for users who pick the more aggressive
+    setting."""
+
+    keys = "test "
+    wanted = "test"
+
+    def _extra_vim_config(self, vim_config):
+        vim_config.append('let g:UltiSnipsExpandTrigger="<space>"')
+        vim_config.append("let g:UltiSnipsInsertTriggerOnFailure=0")
 
 
 # End: trigger-key fallthrough cluster
