@@ -798,6 +798,12 @@ class SnippetManager:
 
     def _try_expand(self, autotrigger_only=False):
         """Try to expand a snippet in the current place."""
+        # Drain buffer edits queued while CursorMovedI could not fire —
+        # notably while the completion popup was visible. Without this the
+        # text-object tree is stale and _do_snippet's replay crosses
+        # placeholder boundaries, deleting sibling tabstops. See #1380/#1327.
+        if self._active_snippets:
+            self._cursor_moved()
         before, snippets = self._can_expand(autotrigger_only)
         if snippets:
             # prefer snippets with context if any
