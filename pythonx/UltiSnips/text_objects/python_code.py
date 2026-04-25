@@ -260,10 +260,6 @@ class PythonCode(NoneditableTextObject):
             ),
         )
 
-        # Tracks whether this block has produced an apparently-stable rv at
-        # least once. See _update for why this matters (issue #1402).
-        self._has_stabilized_once = False
-
         super().__init__(parent, token.start, token.end, token.initial_text)
 
     def _update(self, done, buf):
@@ -292,19 +288,5 @@ class PythonCode(NoneditableTextObject):
 
         if ct != rv:
             self.overwrite(buf, rv)
-            return False
-
-        # ct == rv, so the buffer matches what we just produced. But the
-        # block may have side effects (e.g. sys.modules state, locals[]
-        # mutation) that only manifest on the *next* execution and would
-        # produce a different rv. Force one extra evaluation before
-        # declaring this block done so the convergence loop does not exit
-        # while the snippet end position is still stale. Without this,
-        # _jump runs select_next_tab against the stale end, plants the
-        # cursor there, and the second update_textobjects (called from
-        # _jump itself) fixes the text but cannot move the already-placed
-        # cursor. See issue #1402.
-        if not self._has_stabilized_once:
-            self._has_stabilized_once = True
             return False
         return True
