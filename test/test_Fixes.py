@@ -221,3 +221,21 @@ class NullByte_ExpandAfter(_VimTest):
 
 
 # End: #1386
+
+
+# https://github.com/SirVer/ultisnips/issues/1628 — :bd! while a snippet with
+# a !p block is active used to fire CursorMoved against the new buffer before
+# the deferred BufEnter teardown ran, leaving the snippet trying to reconcile
+# its text-object tree against an unrelated buffer.
+class BufferDelete_DropsActiveSnippet_Issue1628(_VimTest):
+    text_before = ""
+    text_after = ""
+    files = {
+        "us/all.snippets": r"""
+snippet ott
+${1:Video} tube`!p snip.rv = '' if t[1] else 's'`.
+endsnippet
+        """
+    }
+    keys = "ott" + EX + ESC + ":bd!\n"
+    wanted = ""
