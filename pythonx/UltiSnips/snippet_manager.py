@@ -124,6 +124,7 @@ class SnippetManager:
         self.forward_trigger = forward_trigger
         self.backward_trigger = backward_trigger
         self._inner_state_up = False
+        self._snippet_buffer_number = None
         self._supertab_keys = None
 
         self._active_snippets = []
@@ -392,6 +393,16 @@ class SnippetManager:
             return
 
         if self._active_snippets:
+            # `:bd!` (and similar buffer-switch commands) fire CursorMoved on
+            # the new buffer before the BufEnter-scheduled `_leaving_buffer`
+            # timer callback runs. Reconciling the snippet's text objects
+            # against an unrelated buffer corrupts both the buffer and the
+            # snippet state — drop the snippets here so the caller sees a
+            # clean slate.
+            if vim.current.buffer.number != self._snippet_buffer_number:
+                self._leaving_buffer()
+                return
+
             es = self._change_provider.consume_edits(
                 vim_helper.buf, self._active_snippets[0], self._vstate
             )
@@ -458,6 +469,7 @@ class SnippetManager:
 
         vim.command("silent doautocmd <nomodeline> User UltiSnipsEnterFirstSnippet")
         self._change_provider.attach(vim.current.buffer.number)
+        self._snippet_buffer_number = vim.current.buffer.number
         self._inner_state_up = True
 
     def _teardown_inner_state(self):
@@ -481,6 +493,7 @@ class SnippetManager:
             pass
         finally:
             self._change_provider.detach()
+            self._snippet_buffer_number = None
             self._inner_state_up = False
 
     @err_to_scratch_buffer.wrap
