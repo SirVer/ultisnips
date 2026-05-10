@@ -1,26 +1,6 @@
-next:
-	Breaking changes:
-	- Python 2 support removed. Support for Python 3.5–3.9 was also dropped.
-	  Minimum Python version is now 3.11.
-	- Minimum Vim version is now 9.1 (was 7.4). Older versions down to 8.2
-	  may still work but are not tested.
-	- Neovim is now officially supported and tested in CI.
-	- |g:UltiSnipsSnippetsDir| removed. Snippet discovery was rewritten —
-	  see |UltiSnips-how-snippets-are-loaded|. `:UltiSnipsEdit` now opens
-	  snippet files relative to your `.vim` directory using
-	  `[gb]:UltiSnipsSnippetDirectories`. Without bang it only looks in the
-	  private snippet directory; with bang it additionally shows all snippet
-	  files currently loaded from across the runtimepath. UltiSnips now also
-	  uses `$MYVIMRC` as a heuristic to locate `~/.vim`, fixing setups with
-	  non-standard paths.
-	- snipMate snippets now expand with the `w` option instead of `i`,
-	  restoring correct behavior for triggers like `.`.
-	  See |UltiSnips-snipMate|.
-	- snipMate parser now requires directives to be fully spelled out (e.g.
-	  `extends`, not shorthand). Snippets using abbreviated directives will
-	  fail to load.
-
+version 4.0 (10-May-2026):
 	New features:
+	- Neovim is now officially supported and tested in CI.
 	- Choice tabstops: `${1|one,two,three|}`. Select items by index
 	  (1, 2, 3…). Commas can be escaped with `\,`, space works as a
 	  selection terminator. See |UltiSnips-tabstops|.
@@ -40,10 +20,35 @@ next:
 	  See |UltiSnips-autotrigger|.
 	- |g:UltiSnipsSnippetStorageDirectoryForUltiSnipsEdit| controls where
 	  `:UltiSnipsEdit` stores new snippet files.
+	- |g:UltiSnipsInsertTriggerOnFailure| controls whether the trigger key
+	  is re-inserted as buffer text when expansion fails. Default 1
+	  preserves today's behavior; set to 0 to suppress garbage insertion
+	  for non-round-tripping special-key triggers like `<c-j>` or
+	  `<c-space>`. See |UltiSnips-trigger-key-mappings|.
 	- Remote debug server for Python snippets via
 	  |g:UltiSnipsDebugServerEnable| — connect with telnet/netcat to step
 	  through snippet code. See |UltiSnips-advanced.txt|.
 	- Spell checking enabled in snippet file comments.
+
+	Breaking changes:
+	- Python 2 support removed. Support for Python 3.5–3.9 was also dropped.
+	  Minimum Python version is now 3.11.
+	- Minimum Vim version is now 9.1 (was 7.4). Older versions down to 8.2
+	  may still work but are not tested.
+	- |g:UltiSnipsSnippetsDir| removed. Snippet discovery was rewritten —
+	  see |UltiSnips-how-snippets-are-loaded|. `:UltiSnipsEdit` now opens
+	  snippet files relative to your `.vim` directory using
+	  `[gb]:UltiSnipsSnippetDirectories`. Without bang it only looks in the
+	  private snippet directory; with bang it additionally shows all snippet
+	  files currently loaded from across the runtimepath. UltiSnips now also
+	  uses `$MYVIMRC` as a heuristic to locate `~/.vim`, fixing setups with
+	  non-standard paths.
+	- snipMate snippets now expand with the `w` option instead of `i`,
+	  restoring correct behavior for triggers like `.`.
+	  See |UltiSnips-snipMate|.
+	- snipMate parser now requires directives to be fully spelled out (e.g.
+	  `extends`, not shorthand). Snippets using abbreviated directives will
+	  fail to load.
 
 	Performance:
 	- Runtimepath traversal now happens once (or when a snippet source needs
@@ -73,6 +78,30 @@ next:
 	  heuristics, so visual/select-mode replacements, macros, and
 	  autocomplete/LSP insertions are handled correctly rather than
 	  silently falling through to the expensive full-buffer diff. (#1613)
+	- Pathological buffer changes (large undo, multi-line paste into a
+	  tabstop, `${VISUAL}` capture of a huge selection) no longer hang
+	  Vim for tens of seconds in `diff()`; the snippet is dropped
+	  instead. (#1513, #1074, #155, #1617)
+	- Nested snippet expansion triggered while a completion popup is
+	  visible (built-in pum, coc.nvim, deoplete, nvim-compe) no longer
+	  corrupts the placeholder structure. Queued buffer edits are
+	  drained before expansion runs. (#1380, #1327, #1620)
+	- Back-to-back `!p` blocks at the same buffer position no longer
+	  produce empty output due to non-deterministic text-object
+	  ordering. (#1403)
+	- Cursor placement is correct after `!p` blocks whose output takes
+	  more than one iteration to converge. (#1402)
+	- Quickfix or location-list opening mid-snippet (e.g. vimtex
+	  continuous compilation with `:copen`) no longer tears down the
+	  active snippet or orphans buffer-local mappings. (#1527)
+	- Failed expansion no longer inserts `<t_…>` garbage for special-key
+	  triggers (`<c-space>`, `<a-;>`, `<F2>`, …) or a literal LF for
+	  `<c-j>`. Set |g:UltiSnipsInsertTriggerOnFailure| to 0 to opt out.
+	  (#1232, #1460, #1482, #1523)
+	- Buffer switches (`:bd!` and similar commands that fire
+	  `CursorMoved` on the new buffer before `BufEnter` teardown runs)
+	  no longer corrupt the destination buffer when leaving a buffer
+	  with an active snippet. (#1628)
 
 	Infrastructure:
 	- CI moved from Travis CI to GitHub Actions.
