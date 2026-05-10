@@ -42,3 +42,10 @@ Maintainer notes for cutting a new release.
 
    https://www.vim.org/scripts/script.php?script_id=2715 → "upload new
    version". Paste the same release notes used for the GitHub Release.
+
+   > **Note (2026-05-10, 4.0):** vim.org's upload form returned
+   > "Request Entity Too Large" for every file (even 1 KB), across
+   > multiple browsers and incognito sessions. The slim zip is fine —
+   > the upload endpoint itself appears broken. 4.0 was therefore
+   > **not** uploaded to vim.org. Retry on the next release; if the
+   > form is still broken, contact vim.org admins.
