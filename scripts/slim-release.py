@@ -19,7 +19,6 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-
 REPO = "SirVer/ultisnips"
 STRIP_SUFFIXES = {".gif"}
 

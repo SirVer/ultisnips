@@ -61,6 +61,8 @@ ignore = [
 # Test infrastructure uses print for progress output.
 "test_all.py" = ["T201"]
 "test/vim_test_case.py" = ["T201"]
+# CLI scripts emit progress on stdout.
+"scripts/*.py" = ["T201"]
 
 [tool.ruff.format]
 # Match black's defaults.
