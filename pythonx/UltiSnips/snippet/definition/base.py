@@ -461,6 +461,11 @@ class SnippetDefinition:
                 "tabstops": current_snippet.get_tabstops(),
                 "snippet_start": start,
                 "snippet_end": end,
+                # Passed visual_content and current_placeholder from the
+                # current snippet instance so that post_jump actions can access them.
+                "visual_mode": current_snippet.visual_content.mode,
+                "visual_text": current_snippet.visual_content.text,
+                "last_placeholder": current_snippet.current_placeholder,
                 "buffer": vim_helper.buf,
             }
 
