@@ -62,6 +62,20 @@ def _show_user_warning(msg):
 def _ask_snippets(snippets):
     """Given a list of snippets, ask the user which one they want to use, and
     return it."""
+    # Deduplicate entries that are identical in display attributes.
+    # This works around cases where internal filtering might miss subtle
+    # differences or when two truly identical snippets are loaded and pass
+    # previous filtering steps.
+    unique_snippets = []
+    seen_snippet_display_ids = set()
+    for s in snippets:
+        # Create a composite key from attributes that are displayed to the user.
+        snippet_display_id = (s.trigger, s.description, s.location)
+        if snippet_display_id not in seen_snippet_display_ids:
+            unique_snippets.append(s)
+            seen_snippet_display_ids.add(snippet_display_id)
+    snippets = unique_snippets
+
     _bs = "\\"
     display = [
         f"{i + 1}: {escape(s.description, _bs)} ({escape(s.location, _bs)})"
