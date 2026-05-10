@@ -2,7 +2,7 @@
 
 Snippet engine for Vim and Neovim. Plugin code lives in `pythonx/UltiSnips/`, docs in `doc/UltiSnips.txt`.
 
-See `CONTRIBUTING.md` for full contributor guidelines.
+See `docs/CONTRIBUTING.md` for full contributor guidelines.
 
 ## Branching
 

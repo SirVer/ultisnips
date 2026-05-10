@@ -1,6 +1,6 @@
 # Releasing UltiSnips
 
-Maintainer notes for cutting a new release. Audience: project maintainers.
+Maintainer notes for cutting a new release.
 
 ## Steps
 
@@ -9,7 +9,7 @@ Maintainer notes for cutting a new release. Audience: project maintainers.
    - Add entries for every user-visible change since the previous release.
      Find the cut-off with `git log -1 --format=%h -- ChangeLog`, then
      `git log <last>..HEAD` to enumerate commits.
-   - Open a PR for the ChangeLog (e.g. `/mr`) and merge it before tagging.
+   - Open a PR for the ChangeLog and merge it before tagging.
 
 2. **Tag and push.**
 
@@ -19,13 +19,12 @@ Maintainer notes for cutting a new release. Audience: project maintainers.
    git push origin <X.Y>
    ```
 
-   Pushing the tag does **not** create a GitHub Release — only the tag.
-
 3. **Create a GitHub Release from the tag.**
-   - GitHub UI: Releases → "Draft a new release" → choose the tag.
+   - GitHub UI: Releases → "Draft a new release" → choose the tag. This
+     automatically attaches the right files to the release.
    - Title: `UltiSnips <X.Y>`.
-   - Notes: paste the `version <X.Y>` section from `ChangeLog`.
-   - Publishing auto-attaches source `.tar.gz` and `.zip` assets.
+   - Notes: paste the `version <X.Y>` section from `ChangeLog`. GitHub is picky
+     about markdown, so you need to do some manual editing.
 
 4. **Build the slim vim.org archive.**
 
@@ -33,7 +32,7 @@ Maintainer notes for cutting a new release. Audience: project maintainers.
    demo GIFs under `doc/`. Strip them with:
 
    ```
-   ./scripts/slim-release.sh <X.Y>
+   ./scripts/slim-release.py <X.Y>
    ```
 
    This downloads the GitHub source zip for the tag, removes all GIFs,

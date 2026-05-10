@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# See CONTRIBUTING.md for an explanation of this file.
+# See docs/CONTRIBUTING.md for an explanation of this file.
 #
 # NOTE: The test suite is not working under Windows right now as I have no
 # access to a windows system for fixing it. Volunteers welcome. Here are some

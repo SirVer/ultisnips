@@ -67,7 +67,7 @@ def wrap(func):
 snippet definition. If you think this is a bug, please report it to
 https://github.com/SirVer/ultisnips/issues/new
 Please read and follow:
-https://github.com/SirVer/ultisnips/blob/master/CONTRIBUTING.md#reproducing-bugs
+https://github.com/SirVer/ultisnips/blob/master/docs/CONTRIBUTING.md#reproducing-bugs
 
 Following is the full stack trace:
 """
