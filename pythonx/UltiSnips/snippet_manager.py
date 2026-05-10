@@ -285,6 +285,12 @@ class SnippetManager:
         if not snippets:
             return True
 
+        # If only one snippet is found, expand it immediately without asking,
+        # as this is usually the desired behavior and avoids the inputlist() prompt.
+        if len(snippets) == 1:
+            self._do_snippet(snippets[0], before)
+            return True
+
         snippet = _ask_snippets(snippets)
         if not snippet:
             return True
