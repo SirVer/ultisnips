@@ -176,9 +176,14 @@ class VimBufferProxy(vim_helper.VimBuffer):
 
         change_type, line_number, column_number, change_text = change[0:4]
 
-        line_before = line_number <= self._snippets_stack[0]._start.line
-        column_before = column_number <= self._snippets_stack[0]._start.col
-        if line_before and column_before:
+        # Position comparison must be lexicographic on (line, col); the
+        # historical version compared line and column independently, which
+        # silently dropped any edit whose `column_number` >= `_end.col` —
+        # for a multi-line snippet whose end sits at the start of a line
+        # (`_end.col == 0`) that's *every* edit on an interior line.
+        snippet = self._snippets_stack[0]
+        pos = Position(line_number, column_number)
+        if pos <= snippet._start:
             direction = 1
             if change_type == "D":
                 direction = -1
@@ -187,13 +192,11 @@ class VimBufferProxy(vim_helper.VimBuffer):
             if len(change) != 5:
                 diff = Position(0, direction * len(change_text))
 
-            self._snippets_stack[0]._move(Position(line_number, column_number), diff)
+            snippet._move(pos, diff)
+        elif pos >= snippet._end:
+            return
         else:
-            if line_number > self._snippets_stack[0]._end.line:
-                return
-            if column_number >= self._snippets_stack[0]._end.col:
-                return
-            self._snippets_stack[0]._do_edit(change[0:4])
+            snippet._do_edit(change[0:4])
 
     def _disable_edits(self):
         """
