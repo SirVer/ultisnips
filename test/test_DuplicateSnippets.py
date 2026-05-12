@@ -88,5 +88,7 @@ class DuplicateSnippets_DoesNotMergeDistinctTriggers(_VimTest):
         endsnippet
         """,
     }
+    # Buffer filetype `b` is listed first by `get_deep_extends`, so b's
+    # snippet appears as option 1 in the prompt and a's as option 2.
     keys = ESC + ":set ft=b\n" + "ihi" + EX + "2\n"
-    wanted = "from_b"
+    wanted = "from_a"
