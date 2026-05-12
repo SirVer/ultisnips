@@ -75,6 +75,30 @@ class RetainsTheUnnamedRegister_FromVisualMode(_VimTest):
     wanted = "yank HELLO world yank"
 
 
+# Test for https://github.com/SirVer/ultisnips/issues/1037 —
+# Snippet expansion must not clobber the yank register @0 when the user
+# has separated @" and @0 (e.g. by yanking, then deleting/changing).
+
+
+class PreservesYankRegisterAcrossSnippet(_VimTest):
+    snippets = ("test", "[${1:hello}]$0")
+    keys = (
+        "yank dlt"
+        + ESC
+        + "0yiw"
+        + "$"
+        + "B"
+        + "diw"
+        + "atest"
+        + EX
+        + "X"
+        + JF
+        + ESC
+        + '"0p'
+    )
+    wanted = "yank [X]yank"
+
+
 # End: Github Pull Request # 134
 
 # Test to ensure that shiftwidth follows tabstop when it's set to zero post

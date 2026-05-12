@@ -44,13 +44,13 @@ class VimState:
         self._text_to_expect = ""
         self._unnamed_reg_cached = False
 
-        # We store the cached value of the unnamed register in Vim directly to
-        # avoid any Unicode issues with saving and restoring the unnamed
-        # register across the Python bindings.  The unnamed register can contain
-        # data that cannot be coerced to Unicode, and so a simple vim.eval('@"')
-        # fails badly.  Keeping the cached value in Vim directly, sidesteps the
-        # problem.
-        vim.command('let g:_ultisnips_unnamed_reg_cache = ""')
+        # Cache the full reginfo dict for @" (value + which register the
+        # unnamed pointer aliases) and restore via setreg(), not `let @"=`.
+        # `let @"=X` writes to @0 as well, clobbering the user's yank
+        # register; setreg with a reginfo dict writes only to the register
+        # the pointer targets, leaving @0 alone unless the original state
+        # already aliased @0.
+        vim.command("let g:_ultisnips_unnamed_reg_cache = {}")
 
     def remember_unnamed_register(self, text_to_expect):
         """Save the unnamed register.
@@ -65,14 +65,14 @@ class VimState:
         escaped_text = self._text_to_expect.replace("'", "''")
         res = int(vim_helper.eval('@" != ' + "'" + escaped_text + "'"))
         if res:
-            vim.command('let g:_ultisnips_unnamed_reg_cache = @"')
+            vim.command("let g:_ultisnips_unnamed_reg_cache = getreginfo('\"')")
         self._text_to_expect = text_to_expect
 
     def restore_unnamed_register(self):
         """Restores the unnamed register and forgets what we cached."""
         if not self._unnamed_reg_cached:
             return
-        vim.command('let @" = g:_ultisnips_unnamed_reg_cache')
+        vim.command("call setreg('\"', g:_ultisnips_unnamed_reg_cache)")
         self._unnamed_reg_cached = False
 
     def remember_position(self):
