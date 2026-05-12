@@ -222,6 +222,10 @@ function! UltiSnips#LeavingInsertMode() abort
     py3 UltiSnips_Manager._leaving_insert_mode()
 endfunction
 
+function! UltiSnips#EnteringInsertMode() abort
+    py3 UltiSnips_Manager._entering_insert_mode()
+endfunction
+
 function! UltiSnips#TrackChange() abort
     py3 UltiSnips_Manager._track_change()
 endfunction

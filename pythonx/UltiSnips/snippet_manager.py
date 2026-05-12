@@ -457,6 +457,7 @@ class SnippetManager:
         vim.command("autocmd CursorMoved * call UltiSnips#CursorMoved()")
 
         vim.command("autocmd InsertLeave * call UltiSnips#LeavingInsertMode()")
+        vim.command("autocmd InsertEnter * call UltiSnips#EnteringInsertMode()")
 
         vim.command("autocmd BufEnter * call UltiSnips#LeavingBuffer()")
         vim.command("autocmd CmdwinEnter * call UltiSnips#LeavingBuffer()")
@@ -658,6 +659,28 @@ class SnippetManager:
     def _leaving_insert_mode(self):
         """Called whenever we leave the insert mode."""
         self._vstate.restore_unnamed_register()
+
+    @err_to_scratch_buffer.wrap
+    def _entering_insert_mode(self):
+        """Called on InsertEnter — re-entering insert mode.
+
+        If the cursor is now outside the snippet's bounds (typically because
+        the user did `o`/`G`/etc. in normal mode after pressing <Esc>),
+        terminate the snippet. Otherwise the next `_cursor_moved` would
+        consume the off-snippet edit as a snippet edit and silently extend
+        the snippet to follow the cursor, leaving the jump-back / jump-
+        forward triggers still mapped against an irrelevant span. See #1454.
+        """
+        if not self._active_snippets:
+            return
+        if vim.current.buffer.number != self._snippet_buffer_number:
+            return
+        snippet = self._active_snippets[0]
+        cursor = vim_helper.buf.cursor
+        if not (snippet.start <= cursor <= snippet.end):
+            while self._active_snippets:
+                self._current_snippet_is_done()
+            self._reinit()
 
     def _handle_failure(self, trigger, pass_through=False):
         """Mainly make sure that we play well with SuperTab."""
