@@ -187,7 +187,14 @@ def virtual_position(line, col):
 
 
 def select(start, end):
-    """Select the span in Select mode."""
+    """Position the cursor for a snippet jump and return the keys that
+    enter the target mode (insert / select), to be fed by the caller.
+
+    Returns an empty string when there's nothing to feed — either the fast
+    path has already left the cursor in the right state, or the caller
+    decides (see issue #751 for why deferring matters when a `post_jump`
+    action consumes typeahead or expands a nested snippet).
+    """
     _unmap_select_mode_mapping()
 
     selection = eval("&selection")
@@ -196,6 +203,25 @@ def select(start, end):
     buf.cursor = start
 
     mode = eval("mode()")
+
+    # Fast path: empty tabstop while already in insert mode. The cursor is
+    # already at the new tabstop and we're in the target mode; only an undo
+    # break is needed (the `\<Esc>a` path created one implicitly).
+    if mode == "i" and start == end:
+        return r"\<C-g>u"
+
+    # Leave a non-normal mode synchronously where possible. Doing this via
+    # the queued `\<Esc>` in the move command lets a typeahead-consuming
+    # `post_jump` action (input(), getchar()) swallow it.
+    if mode == "i":
+        vim.command("stopinsert")
+        mode = "n"
+    elif mode in ("s", "S", "\x13", "v", "V", "\x16"):
+        vim.command(r'call feedkeys("\<C-\>\<C-N>", "nx")')
+        # The mode-leave moves the cursor to one of the selection endpoints;
+        # restore it.
+        buf.cursor = start
+        mode = "n"
 
     move_cmd = ""
     if mode != "n":
@@ -224,7 +250,7 @@ def select(start, end):
             move_cmd += f"{vp[0]}G{vp[1]}|"
         vp = virtual_position(start.line + 1, start.col + 1)
         move_cmd += f"o{vp[0]}G{vp[1]}|o\\<c-g>"
-    feedkeys(move_cmd)
+    return move_cmd
 
 
 def get_dot_vim():

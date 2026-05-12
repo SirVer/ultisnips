@@ -575,6 +575,7 @@ class SnippetManager:
             else:
                 snippet_for_action = None
 
+            move_cmd = ""
             if self._current_snippet:
                 ntab = self._current_snippet.select_next_tab(jump_direction)
                 if ntab:
@@ -582,7 +583,7 @@ class SnippetManager:
                         lineno = vim_helper.buf.cursor.line
                         vim_helper.buf[lineno] = vim_helper.buf[lineno].rstrip()
                     with self._change_provider.suppressed():
-                        vim_helper.select(ntab.start, ntab.end)
+                        move_cmd = vim_helper.select(ntab.start, ntab.end)
                         jumped = True
                         if (
                             self._ctab is not None
@@ -621,9 +622,25 @@ class SnippetManager:
                 if not ntab_short_and_near:
                     self._ignore_movements = True
 
+            # Reset the flag so we observe only what *this* post_jump action
+            # does. _do_snippet sets it to True at its tail when called from
+            # within an action context, and we read it back below to decide
+            # whether our move command is still needed.
+            snip_expanded_in_action = False
             if len(stack_for_post_jump) > 0 and ntab is not None:
-                with use_proxy_buffer(
-                    stack_for_post_jump, self._vstate, self._change_provider
+                # Run the post_jump action inside an action context so that a
+                # nested `snip.expand_anon()` inside it gets recorded in
+                # `_snip_expanded_in_action`. We use that flag below to decide
+                # whether the move command we built for this jump still needs
+                # to be fed — if the action expanded a new snippet, that
+                # snippet's own _jump already queued the right mode-entry
+                # keys and our outer move command would just override them.
+                self._snip_expanded_in_action = False
+                with (
+                    use_proxy_buffer(
+                        stack_for_post_jump, self._vstate, self._change_provider
+                    ),
+                    self._action_context(),
                 ):
                     snippet_for_action.snippet.do_post_jump(
                         ntab.number,
@@ -631,6 +648,10 @@ class SnippetManager:
                         stack_for_post_jump,
                         snippet_for_action,
                     )
+                snip_expanded_in_action = self._snip_expanded_in_action
+
+            if move_cmd and not snip_expanded_in_action:
+                vim_helper.feedkeys(move_cmd)
 
         return jumped
 
