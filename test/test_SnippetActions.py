@@ -524,3 +524,49 @@ class SnippetActions_ExpandAnonLeadingTextBeforeTabstop_AsInGH1115(_VimTest):
     }
     keys = "stnd.3" + EX + "A" + JF + "B" + JF + "C"
     wanted = "- A\n- B\n- C\n"
+
+
+# GH #1281: `snip.expand_anon()` parses its argument as a snippet body, so
+# backticks/`$`/`\` from the buffer get interpreted as shell code / tabstops
+# / escape sequences.  This pins down the "unescaped" footgun behavior --
+# a pair of backticks becomes empty shell-code and gets swallowed.
+class SnippetActions_ExpandAnonReparsesBackticks_GH1281(_VimTest):
+    files = {
+        "us/all.snippets": """
+        global !p
+        def echo_line(snip):
+            if snip.tabstop == 0:
+                snip.expand_anon('> ' + snip.buffer[snip.line])
+        endglobal
+
+        post_jump "echo_line(snip)"
+        snippet bug "" w
+        endsnippet
+        """
+    }
+    keys = "test with ``quotes'' bug" + EX
+    # The `` pair becomes empty shell-code and disappears.
+    wanted = "test with ``quotes'' > test with quotes'' "
+
+
+# GH #1281: The documented workaround is to escape backticks/`$`/`\` before
+# passing arbitrary text in; this test pins the workaround down.
+class SnippetActions_ExpandAnonEscapeBufferText_GH1281(_VimTest):
+    files = {
+        "us/all.snippets": """
+        global !p
+        def echo_line(snip):
+            if snip.tabstop == 0:
+                text = snip.buffer[snip.line]
+                safe = text.replace('\\\\', '\\\\\\\\')
+                safe = safe.replace('`', '\\\\`').replace('$', '\\\\$')
+                snip.expand_anon('> ' + safe)
+        endglobal
+
+        post_jump "echo_line(snip)"
+        snippet bug "" w
+        endsnippet
+        """
+    }
+    keys = "test with ``quotes'' bug" + EX
+    wanted = "test with ``quotes'' > test with ``quotes'' "
