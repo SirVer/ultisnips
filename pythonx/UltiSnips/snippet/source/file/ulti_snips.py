@@ -73,7 +73,9 @@ def find_all_snippet_files(ft) -> set[str]:
             continue
         for pattern in patterns:
             for fn in Path(directory).glob(pattern % ft):
-                ret.add(str(fn))
+                # Canonicalize so symlinked or duplicated runtimepath entries
+                # don't make the same file appear twice.
+                ret.add(normalize_file_path(str(fn)))
     return ret
 
 
