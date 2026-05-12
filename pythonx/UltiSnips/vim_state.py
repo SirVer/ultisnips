@@ -44,13 +44,13 @@ class VimState:
         self._text_to_expect = ""
         self._unnamed_reg_cached = False
 
-        # Cache the full reginfo dict for @" (value + which register the
-        # unnamed pointer aliases) and restore via setreg(), not `let @"=`.
-        # `let @"=X` writes to @0 as well, clobbering the user's yank
-        # register; setreg with a reginfo dict writes only to the register
-        # the pointer targets, leaving @0 alone unless the original state
-        # already aliased @0.
-        vim.command("let g:_ultisnips_unnamed_reg_cache = {}")
+        # We store the cached register values in Vim directly to avoid any
+        # Unicode issues with saving and restoring across the Python bindings.
+        # Registers can contain data that cannot be coerced to Unicode, so a
+        # simple vim.eval('@"') fails badly. Keeping the cache in Vim
+        # sidesteps the problem.
+        vim.command('let g:_ultisnips_unnamed_reg_cache = ""')
+        vim.command('let g:_ultisnips_yank_reg_cache = ""')
 
     def remember_unnamed_register(self, text_to_expect):
         """Save the unnamed register.
@@ -65,14 +65,25 @@ class VimState:
         escaped_text = self._text_to_expect.replace("'", "''")
         res = int(vim_helper.eval('@" != ' + "'" + escaped_text + "'"))
         if res:
-            vim.command("let g:_ultisnips_unnamed_reg_cache = getreginfo('\"')")
+            vim.command('let g:_ultisnips_unnamed_reg_cache = @"')
+            vim.command("let g:_ultisnips_yank_reg_cache = @0")
         self._text_to_expect = text_to_expect
 
     def restore_unnamed_register(self):
-        """Restores the unnamed register and forgets what we cached."""
+        """Restores the unnamed register and forgets what we cached.
+
+        `let @"=X` writes to @0 too, which would clobber the user's yank
+        register. We restore @" first (which writes our cached @" to both
+        @" and @0), then restore @0 (which writes our cached @0 to both
+        @0 and @"). The yank register ends up preserved; @" inherits @0's
+        value, which is the trade-off — the user can still reach the
+        delete that previously lived in @" via @1 / @-.
+
+        """
         if not self._unnamed_reg_cached:
             return
-        vim.command("call setreg('\"', g:_ultisnips_unnamed_reg_cache)")
+        vim.command('let @" = g:_ultisnips_unnamed_reg_cache')
+        vim.command("let @0 = g:_ultisnips_yank_reg_cache")
         self._unnamed_reg_cached = False
 
     def remember_position(self):
