@@ -340,3 +340,42 @@ endsnippet
     }
     keys = "ott" + EX + ESC + ":bd!\n"
     wanted = ""
+
+
+# Regression test for #161 — typing `<Esc>O` immediately after expanding a
+# snippet used to race CursorMoved and bleed snippet text into the new line.
+# Fixed in passing by the listener-based edit-detection rewrite (#1613).
+
+
+class Issue161_EscOpenAfterExpand(_VimTest):
+    files = {
+        "us/all.snippets": r"""
+        snippet cls "class"
+        class ${1:Name}:
+            $0
+        endsnippet
+        """
+    }
+    keys = "cls" + EX + ESC + "Otop"
+    wanted = "top\nclass Name:\n    "
+
+
+# Regression test for #168 — when ${VISUAL} is empty and immediately followed
+# by another tabstop, that tabstop's content used to land outside the
+# surrounding quotes; jumping past the first tabstop without editing it left
+# the second tabstop at the wrong column.
+
+
+class Issue168_VisualPlaceholderDoesNotShiftFollowingTabstop(_VimTest):
+    files = {
+        "us/all.snippets": r"""
+        snippet se "" b
+        ,{
+          'AUTHOR': '${1:Williams}',
+          'TEXT': '${VISUAL}$2',
+        }
+        endsnippet
+        """
+    }
+    keys = "se" + EX + JF + "X"
+    wanted = ",{\n  'AUTHOR': 'Williams',\n  'TEXT': 'X',\n}"
