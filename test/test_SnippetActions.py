@@ -454,6 +454,78 @@ class SnippetActions_DoNotBreakCursorOnSingleLikeChange(_VimTest):
     }
     keys = "a" + EX + "123"
     wanted = "def123"
+
+
+# GH #1115: expand_anon called from post_jump must place the cursor at the
+# first tabstop *after* any leading literal text, not one column to its left.
+class SnippetActions_ExpandAnonLeadingTextBeforeTabstop(_VimTest):
+    files = {
+        "us/all.snippets": r"""
+        global !p
+        def add_bullet(snip):
+            if snip.tabstop == 0:
+                snip.buffer[snip.line] = ''
+                snip.expand_anon('- $1')
+        endglobal
+
+        post_jump "add_bullet(snip)"
+        snippet bullet "" b
+        endsnippet
+        """
+    }
+    keys = "bullet" + EX + "X"
+    wanted = "- X"
+
+
+class SnippetActions_ExpandAnonLeadingTextBeforeTabstop_Multi(_VimTest):
+    files = {
+        "us/all.snippets": r"""
+        global !p
+        def add_bullets(snip):
+            if snip.tabstop == 0:
+                snip.buffer[snip.line] = ''
+                snip.expand_anon('- $1\n- $2\n- $3')
+        endglobal
+
+        post_jump "add_bullets(snip)"
+        snippet bullets "" b
+        endsnippet
+        """
+    }
+    keys = "bullets" + EX + "X" + JF + "Y" + JF + "Z"
+    wanted = "- X\n- Y\n- Z"
+
+
+# Mirror of the user's repro in GH #1115: regex trigger captures a digit,
+# the snippet body returns it via `!p snip.rv = match.group(1)` (so the
+# captured digit goes onto the current line), and post_jump expands an
+# anonymous snippet that builds N bullet points with leading `- ` text.
+class SnippetActions_ExpandAnonLeadingTextBeforeTabstop_AsInGH1115(_VimTest):
+    files = {
+        "us/all.snippets": r"""
+        global !p
+        def create_dotpoints(snip):
+            try:
+                amount = int(snip.buffer[snip.line].strip())
+            except:
+                amount = 1
+            snip.buffer[snip.line] = ''
+            body = ''
+            for i in range(amount):
+                body += '- $' + str(i+1) + '\n'
+            snip.expand_anon(body)
+        endglobal
+
+        post_jump "create_dotpoints(snip)"
+        snippet "stnd\.(\d?)" "Adds dot-points" br
+        `!p snip.rv = match.group(1)`
+        endsnippet
+        """
+    }
+    keys = "stnd.3" + EX + "A" + JF + "B" + JF + "C"
+    wanted = "- A\n- B\n- C\n"
+
+
 # GH #1281: `snip.expand_anon()` parses its argument as a snippet body, so
 # backticks/`$`/`\` from the buffer get interpreted as shell code / tabstops
 # / escape sequences.  This pins down the "unescaped" footgun behavior --
@@ -498,5 +570,3 @@ class SnippetActions_ExpandAnonEscapeBufferText_GH1281(_VimTest):
     }
     keys = "test with ``quotes'' bug" + EX
     wanted = "test with ``quotes'' > test with ``quotes'' "
-
-
