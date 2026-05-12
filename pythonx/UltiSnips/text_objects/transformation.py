@@ -81,16 +81,20 @@ class _CleverReplace:
     def replace(self, match):
         """Replaces 'match' through the correct replacement string."""
         transformed = self._expression
-        # Replace all $? with capture groups
-        transformed = _DOLLAR.subn(lambda m: match.group(int(m.group(1))), transformed)[
-            0
-        ]
 
         # Shelter escaped backslashes (\\) so they are not consumed by
         # case-switch regexes (\l, \u, \U, \L) or whitespace escapes
         # (\n, \t, ...).  Restored before the final unescape() which
-        # turns \\ into a literal \.  GH #998, GH #1495.
+        # turns \\ into a literal \.  GH #998, GH #1495.  Capture-group
+        # content is sheltered the same way so backslashes from $1..$9
+        # aren't reinterpreted as escape sequences either.  GH #1444.
         _ESCAPED_BSLASH = "\x00"
+
+        def _expand_dollar(dollar_match):
+            group = match.group(int(dollar_match.group(1))) or ""
+            return group.replace("\\", _ESCAPED_BSLASH)
+
+        transformed = _DOLLAR.subn(_expand_dollar, transformed)[0]
         transformed = transformed.replace("\\\\", _ESCAPED_BSLASH)
 
         # Replace Case switches
