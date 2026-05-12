@@ -149,3 +149,23 @@ should wrap properlyafter
 startThis is a
 longersnippet that
 should wrap properlyend"""
+
+
+# GH #1510: auto-triggered snippet expands across a textwidth-induced wrap.
+# Trigger `mm` near column tw forces Vim to insert a newline mid-expansion;
+# the body `\( $1 \) $0` must come out intact, not corrupted into `\|)`.
+class _Tw79Base(_VimTest):
+    def _extra_vim_config(self, vim_config):
+        vim_config.append("set tw=79")
+        vim_config.append("set fo+=t")
+
+
+class FOAutoTriggerNearWrap_GH1510(_Tw79Base):
+    # Snippet body matches the user's `\\( $1 \\) $0` literally.  The parser
+    # turns each `\\` into a literal backslash, leaving the body `\( $1 \) $0`.
+    snippets = ("mm", r"\\( $1 \\) $0", "Inline Math", "wA")
+    # 78 chars of "x " padding plus "mm" → trigger fires at col 80, beyond tw.
+    # After expansion, "Y" goes into $1 and "Z" into $0; both must land in
+    # the snippet body, not get smeared into the surrounding `\(...\)`.
+    keys = "x " * 39 + "mm" + "Y" + JF + "Z"
+    wanted = ("x " * 39).rstrip() + "\n\\( Y \\) Z"
