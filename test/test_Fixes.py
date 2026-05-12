@@ -340,3 +340,62 @@ endsnippet
     }
     keys = "ott" + EX + ESC + ":bd!\n"
     wanted = ""
+
+
+# Regression tests for #1182 and #193 — `VimBufferProxy._apply_change`
+# used to compare line and column independently against the snippet's
+# end, dropping any edit whose column was >= the snippet's end column.
+# For a multi-line snippet whose end sits at the start of a line
+# (`_end.col == 0`, which is the common case) that's *every* edit on
+# an interior line. The downstream symptom: a `snip.buffer` mutation in
+# a `post_jump` action that runs inside an outer snippet leaves the
+# outer's text-object tree pointing at stale (line, col) coordinates,
+# producing garbled output and the appearance of tabstops "multiplying".
+
+
+class Issue1182_NestedDynamicTabstop(_VimTest):
+    files = {
+        "us/all.snippets": r"""
+        global !p
+        def create_row_placeholders(snip):
+            placeholders_amount = int(snip.buffer[snip.line].strip())
+            snip.buffer[snip.line] = ''
+            anon = ' & '.join(['$' + str(i + 1) for i in range(placeholders_amount)])
+            snip.expand_anon(anon)
+        endglobal
+
+        post_jump "create_row_placeholders(snip)"
+        snippet "tr(\d+)" "latex table row" r
+        `!p snip.rv = match.group(1)`
+        endsnippet
+
+        snippet "\[\[" "display math" r
+        \\begin{align*}
+            $1
+        \\end{align*}
+        $0
+        endsnippet
+        """
+    }
+    keys = "[[" + EX + "tr2" + EX + "a" + JF + "b"
+    wanted = "\\begin{align*}\na & b\n\\end{align*}\n"
+
+
+class Issue193_AnonAddsLineInsideContainer(_VimTest):
+    files = {
+        "us/all.snippets": r"""
+        global !p
+        def insert_extra(snip):
+            snip.expand_anon("EXTRA_$1\n")
+        endglobal
+
+        post_jump "if snip.tabstop == 1: insert_extra(snip)"
+        snippet container "container" b
+        A:${1}
+        B:${2}
+        C:${3}
+        endsnippet
+        """
+    }
+    keys = "container" + EX + "x" + JF + JF + "y" + JF + "z"
+    wanted = "A:EXTRA_x\n\nB:y\nC:z"
