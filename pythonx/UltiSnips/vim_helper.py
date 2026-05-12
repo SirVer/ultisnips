@@ -197,6 +197,26 @@ def select(start, end):
 
     mode = eval("mode()")
 
+    # The move command we build below is fed via feedkeys(), which queues into
+    # the typeahead. A post_jump action that calls a typeahead-consuming Vim
+    # function (e.g. input()/getchar()) sees those queued keys and either
+    # consumes the leading `\<Esc>` (canceling the prompt) or accumulates the
+    # whole move command as input — either way the remainder ends up typed
+    # into the buffer as text. To avoid that, leave any non-normal mode here
+    # synchronously when the cheap fast path is available. See issue #751.
+    if mode == "i":
+        if start == end:
+            # The cursor is already at the new tabstop after `buf.cursor =
+            # start` above and we're already in the target mode (insert), so
+            # we only need to insert an undo break — the historical `\<Esc>a`
+            # path implicitly created one by leaving and re-entering insert.
+            feedkeys(r"\<C-g>u")
+            return
+        # Visual case: leave insert mode synchronously and rebuild move_cmd
+        # without the `\<Esc>` prefix that would have been eaten by input().
+        vim.command("stopinsert")
+        mode = "n"
+
     move_cmd = ""
     if mode != "n":
         move_cmd += r"\<Esc>"
