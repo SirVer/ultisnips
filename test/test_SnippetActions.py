@@ -454,6 +454,8 @@ class SnippetActions_DoNotBreakCursorOnSingleLikeChange(_VimTest):
     }
     keys = "a" + EX + "123"
     wanted = "def123"
+
+
 # GH #1115: expand_anon called from post_jump must place the cursor at the
 # first tabstop *after* any leading literal text, not one column to its left.
 class SnippetActions_ExpandAnonLeadingTextBeforeTabstop(_VimTest):
