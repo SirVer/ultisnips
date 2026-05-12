@@ -79,9 +79,7 @@ class VimState:
         if res:
             for reg in self._PRESERVED_REGISTERS:
                 lit = _vim_str(reg)
-                vim.command(
-                    f"let g:_ultisnips_reg_cache[{lit}] = getreginfo({lit})"
-                )
+                vim.command(f"let g:_ultisnips_reg_cache[{lit}] = getreginfo({lit})")
         self._text_to_expect = text_to_expect
 
     def restore_unnamed_register(self):
