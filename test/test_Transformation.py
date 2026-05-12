@@ -305,3 +305,17 @@ class Transformation_EscapedBackslashBeforeUppercaseU(_VimTest):
     snippets = ("test", r"$1 ${1/(.+)/\\u$1/}")
     keys = "test" + EX + "world"
     wanted = r"world \uworld"
+
+
+# GH #1444: Backslashes coming from a capture group ($1..$9) must stay
+# literal -- they must not be reinterpreted as case-switch escapes.
+class Transformation_BackslashInCaptureNotCaseSwitch(_VimTest):
+    snippets = ("test", r"$1 ${1/^(\\u)/$1aa/}")
+    keys = "test" + EX + r"\u"
+    wanted = r"\u \uaa"
+
+
+class Transformation_BackslashInCaptureNotLongCaseSwitch(_VimTest):
+    snippets = ("test", r"$1 ${1/^(.+)/$1aa/}")
+    keys = "test" + EX + r"\Uhi"
+    wanted = r"\Uhi \Uhiaa"
