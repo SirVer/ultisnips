@@ -48,6 +48,33 @@ class RetainsTheUnnamedRegister_ButOnlyOnce(_VimTest):
     wanted = "\nblah\nhello world "
 
 
+# Test for https://github.com/SirVer/ultisnips/issues/1297 —
+# Triggering a snippet directly from visual mode (the xnoremap path)
+# must not clobber the unnamed register with the visually-selected text.
+
+
+class RetainsTheUnnamedRegister_FromVisualMode(_VimTest):
+    snippets = ("test", "${1:hello} ${2:world} ${0}")
+    keys = (
+        "yank "
+        + ESC
+        + "0y4l"
+        + "$a"
+        + "VICTIM"
+        + ESC
+        + "v5h"
+        + EX
+        + "test"
+        + EX
+        + "HELLO"
+        + JF
+        + JF
+        + ESC
+        + "p"
+    )
+    wanted = "yank HELLO world yank"
+
+
 # End: Github Pull Request # 134
 
 # Test to ensure that shiftwidth follows tabstop when it's set to zero post
