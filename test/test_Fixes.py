@@ -99,6 +99,56 @@ class PreservesYankRegisterAcrossSnippet(_VimTest):
     wanted = "yank [X]yank"
 
 
+# Companion to PreservesYankRegisterAcrossSnippet: the same setup, but paste
+# from `@"` rather than `@0`. `@"` was last set by `diw` (so points at `@-` /
+# `@1`); snippet expansion must restore that state too.
+
+
+class PreservesUnnamedRegisterAcrossSnippet(_VimTest):
+    snippets = ("test", "[${1:hello}]$0")
+    keys = (
+        "yank dlt"
+        + ESC
+        + "0yiw"
+        + "$"
+        + "B"
+        + "diw"
+        + "atest"
+        + EX
+        + "X"
+        + JF
+        + ESC
+        + "p"
+    )
+    wanted = "yank [X]dlt"
+
+
+# Companion test for `@1`. We line-delete with `dd` (writes to `@1`, not just
+# `@-`), then expand a snippet whose placeholder spans two lines — replacing
+# it pushes the placeholder text into `@1` and shifts our user state out. The
+# fix must restore `@1` to the original `LINE1` line.
+
+
+class PreservesNumberedRegisterAcrossSnippet(_VimTest):
+    snippets = ("test", "[${1:first\nsecond}]$0")
+    keys = (
+        "LINE1"
+        + ESC
+        + "dd"
+        + "otest"
+        + EX
+        + "X"
+        + JF
+        + ESC
+        + "o"
+        + ESC
+        + '"1p'
+        + "o"
+        + ESC
+    )
+    wanted = "\n[X]\n\nLINE1"
+
+
 # End: Github Pull Request # 134
 
 # Test to ensure that shiftwidth follows tabstop when it's set to zero post

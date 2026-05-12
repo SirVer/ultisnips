@@ -476,6 +476,13 @@ class SnippetManager:
         """Reverse _setup_inner_state."""
         if not self._inner_state_up:
             return
+        # Restore cached registers now: the InsertLeave autocmd that would
+        # normally call _leaving_insert_mode is removed below, so without
+        # this the clobbering done by the LAST placeholder edit would
+        # never be undone. Then drop the cache so the next snippet starts
+        # from a clean slate.
+        self._vstate.restore_unnamed_register()
+        self._vstate.reset_register_cache()
         try:
             vim.command("silent doautocmd <nomodeline> User UltiSnipsExitLastSnippet")
             if self.expand_trigger != self.forward_trigger:
