@@ -450,12 +450,5 @@ class Issue168_VisualPlaceholderDoesNotShiftFollowingTabstop(_VimTest):
 
 class Issue503_MOptionStripsEmptyVisualLines(_VimTest):
     snippets = ("test", "${VISUAL}", "", "m")
-    keys = (
-        "empty line in visual\n\nshould be empty"
-        + ESC
-        + "V2k"
-        + EX
-        + "\ttest"
-        + EX
-    )
+    keys = "empty line in visual\n\nshould be empty" + ESC + "V2k" + EX + "\ttest" + EX
     wanted = "\tempty line in visual\n\n\tshould be empty"
