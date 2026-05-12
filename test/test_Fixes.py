@@ -400,6 +400,7 @@ class Issue193_AnonAddsLineInsideContainer(_VimTest):
     keys = "container" + EX + "x" + JF + JF + "y" + JF + "z"
     wanted = "A:EXTRA_x\n\nB:y\nC:z"
 
+
 # Regression test for #161 — typing `<Esc>O` immediately after expanding a
 # snippet used to race CursorMoved and bleed snippet text into the new line.
 # Fixed in passing by the listener-based edit-detection rewrite (#1613).
