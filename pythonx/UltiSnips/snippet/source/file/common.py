@@ -13,7 +13,15 @@ def normalize_file_path(path: str) -> str:
 def handle_extends(tail, line_index):
     """Handles an extends line in a snippet."""
     if tail:
-        return "extends", ([p.strip() for p in tail.split(",")],)
+        filetypes = []
+        for p in tail.split(","):
+            p = p.strip()
+            # `extends` takes filetype names, not file names. Tolerate the
+            # common mistake of including the .snippets extension.
+            if p.endswith(".snippets"):
+                p = p[: -len(".snippets")]
+            filetypes.append(p)
+        return "extends", (filetypes,)
     return "error", ("'extends' without file types", line_index)
 
 

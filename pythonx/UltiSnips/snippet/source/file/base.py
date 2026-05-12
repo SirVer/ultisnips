@@ -25,6 +25,27 @@ class SnippetFileSource(SnippetSource):
             if self._needs_update(ft):
                 self._load_snippets_for(ft)
 
+    def get_snippets(
+        self, filetypes, before, possible, autotrigger_only, visual_content
+    ):
+        # The same file can legitimately be loaded under multiple filetype
+        # buckets — for example `<ft>_<sub>.snippets` is picked up for filetype
+        # `<ft>` via the `<ft>_*.snippets` glob and again for filetype
+        # `<ft>_<sub>` when something explicitly extends it. Dedupe by
+        # `(trigger, location)` so the user sees one match instead of a
+        # spurious "multiple matches" prompt.
+        seen = set()
+        result = []
+        for snippet in super().get_snippets(
+            filetypes, before, possible, autotrigger_only, visual_content
+        ):
+            key = (snippet.trigger, snippet.location)
+            if key in seen:
+                continue
+            seen.add(key)
+            result.append(snippet)
+        return result
+
     def refresh(self):
         self.__init__()
 
