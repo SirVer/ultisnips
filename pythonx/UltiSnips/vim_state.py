@@ -12,6 +12,11 @@ from UltiSnips.position import Position
 from UltiSnips.vim_encoding import byte2col
 
 
+def _vim_str(s):
+    """Render a Python string as a single-quoted Vim string literal."""
+    return "'" + s.replace("'", "''") + "'"
+
+
 class _Placeholder(NamedTuple):
     current_text: str
     start: Position
@@ -37,43 +42,79 @@ class VimState:
     """Caches some state information from Vim to better guess what editing
     tasks the user might have done in the last step."""
 
+    # Registers preserved across snippet expansion. Iteration order is the
+    # restore order: @- and @1-@9 are written first because setreg on those
+    # only touches the target register; @0 is next because setreg('0', …)
+    # re-points the unnamed register at @0; @" is last so its points-to
+    # alias ends up where it was pre-snippet. The unnamed register `"`
+    # appears in the iterable for caching but is handled specially on
+    # restore via setreg with the cached reginfo dict.
+    _PRESERVED_REGISTERS = ("-", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", '"')
+
     def __init__(self):
         self._poss = deque(maxlen=5)
         self._lvb = None
 
         self._text_to_expect = ""
-        self._unnamed_reg_cached = False
 
-        # We store the cached value of the unnamed register in Vim directly to
-        # avoid any Unicode issues with saving and restoring the unnamed
-        # register across the Python bindings.  The unnamed register can contain
-        # data that cannot be coerced to Unicode, and so a simple vim.eval('@"')
-        # fails badly.  Keeping the cached value in Vim directly, sidesteps the
-        # problem.
-        vim.command('let g:_ultisnips_unnamed_reg_cache = ""')
+        # Cache reginfo dicts for each preserved register in a Vim variable
+        # so binary register contents (which can't always cross the
+        # Python/Vim string boundary) survive cleanly. An empty dict means
+        # "nothing to restore" — populated on first remember during a
+        # snippet, cleared at teardown.
+        vim.command("let g:_ultisnips_reg_cache = {}")
 
     def remember_unnamed_register(self, text_to_expect):
-        """Save the unnamed register.
+        """Cache the snippet-clobberable registers if @" doesn't already
+        match the previously-expected text.
 
-        'text_to_expect' is text that we expect
-        to be contained in the register the next time this method is called -
-        this could be text from the tabstop that was selected and might have
-        been overwritten. We will not cache that then.
+        'text_to_expect' is text we expect to be in @" on the next call
+        (typically the placeholder text the snippet just put there). When
+        @" still matches the previous expectation we know we put it there
+        ourselves, so we don't overwrite the original cached state.
 
         """
-        self._unnamed_reg_cached = True
         escaped_text = self._text_to_expect.replace("'", "''")
         res = int(vim_helper.eval('@" != ' + "'" + escaped_text + "'"))
         if res:
-            vim.command('let g:_ultisnips_unnamed_reg_cache = @"')
+            for reg in self._PRESERVED_REGISTERS:
+                lit = _vim_str(reg)
+                vim.command(f"let g:_ultisnips_reg_cache[{lit}] = getreginfo({lit})")
         self._text_to_expect = text_to_expect
 
     def restore_unnamed_register(self):
-        """Restores the unnamed register and forgets what we cached."""
-        if not self._unnamed_reg_cached:
+        """Restore the cached registers, if we have any cached.
+
+        Iteration order matters because `setreg('0', …)` and
+        `setreg('"', dict)` both update the unnamed-register pointer.
+        We restore @- and @1-@9 first (those only touch the target
+        register), then @0 (which re-points @" to @0), then @" last
+        with its cached reginfo dict — `setreg('"', dict)` honours
+        the dict's `points_to` and writes the value into whichever
+        register the pointer aliased pre-snippet, leaving the others
+        intact (pre-snippet `@"` and its alias-target hold the same
+        value, so this is content-neutral for the alias target).
+
+        Restore is idempotent — running it twice in a row gives the
+        same end state. The cache itself is only cleared in
+        :meth:`reset_cache`, called from teardown.
+
+        """
+        if int(vim_helper.eval("empty(g:_ultisnips_reg_cache)")):
             return
-        vim.command('let @" = g:_ultisnips_unnamed_reg_cache')
-        self._unnamed_reg_cached = False
+        for reg in self._PRESERVED_REGISTERS:
+            lit = _vim_str(reg)
+            vim.command(
+                f"if has_key(g:_ultisnips_reg_cache, {lit}) | "
+                f"call setreg({lit}, g:_ultisnips_reg_cache[{lit}]) | "
+                f"endif"
+            )
+
+    def reset_register_cache(self):
+        """Drop the cached register state. Called when the snippet
+        finishes so the next one starts from a clean slate."""
+        vim.command("let g:_ultisnips_reg_cache = {}")
+        self._text_to_expect = ""
 
     def remember_position(self):
         """Remember the current position as a previous pose."""

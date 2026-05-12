@@ -120,6 +120,10 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         vim_config.append("set noautoindent")
         vim_config.append('set backspace=""')
         vim_config.append('set clipboard=""')
+        # Isolate each test from on-disk viminfo so register state doesn't
+        # leak between tests. Without this the `let @" = ""` below is
+        # silently overridden by Vim's post-vimrc viminfo restoration.
+        vim_config.append('set viminfo=""')
         vim_config.append("set encoding=utf-8")
         vim_config.append("set fileencoding=utf-8")
         vim_config.append("set buftype=nofile")
