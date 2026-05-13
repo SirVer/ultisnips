@@ -528,8 +528,9 @@ class SnippetActions_ExpandAnonLeadingTextBeforeTabstop_AsInGH1115(_VimTest):
 
 # GH #1281: `snip.expand_anon()` parses its argument as a snippet body, so
 # backticks/`$`/`\` from the buffer get interpreted as shell code / tabstops
-# / escape sequences.  This pins down the "unescaped" footgun behavior --
-# a pair of backticks becomes empty shell-code and gets swallowed.
+# / escape sequences -- the full DSL is intentionally available.  This pins
+# down what happens when arbitrary text is passed through unescaped: a pair
+# of backticks is read as an empty shell-code block and disappears.
 class SnippetActions_ExpandAnonReparsesBackticks_GH1281(_VimTest):
     files = {
         "us/all.snippets": """
@@ -545,12 +546,13 @@ class SnippetActions_ExpandAnonReparsesBackticks_GH1281(_VimTest):
         """
     }
     keys = "test with ``quotes'' bug" + EX
-    # The `` pair becomes empty shell-code and disappears.
+    # The `` pair is read as an empty shell-code block and disappears.
     wanted = "test with ``quotes'' > test with quotes'' "
 
 
-# GH #1281: The documented workaround is to escape backticks/`$`/`\` before
-# passing arbitrary text in; this test pins the workaround down.
+# GH #1281: When arbitrary buffer text is spliced into an `expand_anon`
+# argument, the DSL characters must be escaped first so they survive as
+# literal text; this test pins down the documented escape recipe.
 class SnippetActions_ExpandAnonEscapeBufferText_GH1281(_VimTest):
     files = {
         "us/all.snippets": """
