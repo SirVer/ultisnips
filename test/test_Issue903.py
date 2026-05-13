@@ -22,7 +22,7 @@ class Issue903_FirstQuoteExpands(_VimTest):
     files = {
         "us/all.snippets": "\n".join(
             [
-                "snippet ' \"auto pair\" iA",
+                'snippet \' "auto pair" iA',
                 "'${1:${VISUAL}}'$0",
                 "endsnippet",
             ]
@@ -36,7 +36,7 @@ class Issue903_TabJumpsOutOfPair(_VimTest):
     files = {
         "us/all.snippets": "\n".join(
             [
-                "snippet ' \"auto pair\" iA",
+                'snippet \' "auto pair" iA',
                 "'${1:${VISUAL}}'$0",
                 "endsnippet",
             ]
@@ -53,7 +53,7 @@ class Issue903_SecondQuoteRetriggers(_VimTest):
     files = {
         "us/all.snippets": "\n".join(
             [
-                "snippet ' \"auto pair\" iA",
+                'snippet \' "auto pair" iA',
                 "'${1:${VISUAL}}'$0",
                 "endsnippet",
             ]

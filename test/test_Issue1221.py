@@ -23,7 +23,7 @@ class Issue1221_NoPopup_BeginExpands(_VimTest):
     files = {
         "us/all.snippets": "\n".join(
             [
-                "snippet \\begin \"begin{arg}\" bA",
+                'snippet \\begin "begin{arg}" bA',
                 r"\\begin\{${1}}",
                 "${0:${VISUAL}}",
                 r"\\end\{$1}",
@@ -39,7 +39,7 @@ class Issue1450_NoPopup_FracExpands(_VimTest):
     files = {
         "us/all.snippets": "\n".join(
             [
-                "snippet fra \"Frac\" wA",
+                'snippet fra "Frac" wA',
                 r"\frac{$1}{$2} $0",
                 "endsnippet",
             ]
@@ -56,7 +56,7 @@ class Issue1450_KeywordPopup_FracExpands(_VimTest):
     files = {
         "us/all.snippets": "\n".join(
             [
-                "snippet fra \"Frac\" wA",
+                'snippet fra "Frac" wA',
                 r"\frac{$1}{$2} $0",
                 "endsnippet",
             ]
@@ -74,7 +74,7 @@ class Issue1221_KeywordPopup_BeginExpands(_VimTest):
     files = {
         "us/all.snippets": "\n".join(
             [
-                "snippet \\begin \"begin{arg}\" bA",
+                'snippet \\begin "begin{arg}" bA',
                 r"\\begin\{${1}}",
                 "${0:${VISUAL}}",
                 r"\\end\{$1}",
