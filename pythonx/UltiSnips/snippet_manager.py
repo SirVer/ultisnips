@@ -722,10 +722,18 @@ class SnippetManager:
 
         def walk(obj):
             if isinstance(obj, TabStop):
+                # The tabstop's tracked end position can be ahead of the
+                # buffer when called from `InsertEnter` — the text-object
+                # tree only resyncs inside `_cursor_moved`. A select-mode
+                # `<BS>` (delete-selection + enter insert) fires
+                # InsertEnter before the deletion edit has been replayed,
+                # so reading `current_text` raises IndexError on Vim and
+                # `vim.error` (`NvimError`) on Neovim. Treat that as
+                # "not modified" — we'll re-evaluate on the next entry.
                 try:
                     if obj.current_text != obj._initial_text:
                         return True
-                except IndexError:
+                except (IndexError, vim_helper.error):
                     pass
             children = getattr(obj, "_children", None)
             if children is not None:
