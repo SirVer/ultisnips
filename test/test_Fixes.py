@@ -458,3 +458,17 @@ class Issue1454_JumpBackAfterOffSnippetEditTerminates(_VimTest):
     snippets = ("fra", r"\frac{$1}{$2}")
     keys = "fra" + EX + "num" + JF + "den" + ESC + "ohi" + JB + "X"
     wanted = "\\frac{num}{den}\nhi" + JB + "X"
+
+
+# Regression test for #503 — the `m` option strips trailing whitespace from
+# each line of the snippet at launch time, but ${VISUAL} replaces a single-
+# line placeholder with multi-line content during update_textobjects, so
+# the line-mode indent prepended to each new line was never stripped.
+# Empty visual lines came out as a bare indent string instead of an empty
+# line.
+
+
+class Issue503_MOptionStripsEmptyVisualLines(_VimTest):
+    snippets = ("test", "${VISUAL}", "", "m")
+    keys = "empty line in visual\n\nshould be empty" + ESC + "V2k" + EX + "\ttest" + EX
+    wanted = "\tempty line in visual\n\n\tshould be empty"
