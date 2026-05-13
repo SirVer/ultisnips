@@ -1,4 +1,4 @@
-from test.constant import ARR_L, ARR_U, CTRL_V, ESC, EX, JF, LS
+from test.constant import ARR_L, ARR_U, CTRL_V, ESC, EX, JB, JF, LS
 from test.vim_test_case import VimTestCase as _VimTest
 
 
@@ -438,6 +438,26 @@ class Issue168_VisualPlaceholderDoesNotShiftFollowingTabstop(_VimTest):
     }
     keys = "se" + EX + JF + "X"
     wanted = ",{\n  'AUTHOR': 'Williams',\n  'TEXT': 'X',\n}"
+
+
+# Regression test for #1454 — when the user left insert mode, did off-snippet
+# work (`o` to open a new line below) and re-entered insert there, the snippet
+# stayed active and a subsequent jump still drove the cursor back into the
+# original placeholders. The expected behaviour is that re-entering insert
+# outside the snippet's bounds drops the snippet.
+#
+# We drive the case where the user types in $2, escapes, opens a new line,
+# types content, and then presses the jump-backwards trigger. Without the
+# fix the snippet is still alive and the trigger jumps back into $1 and
+# enters select mode, so the subsequent typed character replaces "2x+1";
+# with the fix the snippet is gone, the trigger is no longer mapped and
+# the literal key character is inserted instead.
+
+
+class Issue1454_JumpBackAfterOffSnippetEditTerminates(_VimTest):
+    snippets = ("fra", r"\frac{$1}{$2}")
+    keys = "fra" + EX + "num" + JF + "den" + ESC + "ohi" + JB + "X"
+    wanted = "\\frac{num}{den}\nhi" + JB + "X"
 
 
 # Regression test for #1359 — when adjacent zero-width tabstops/mirrors share
