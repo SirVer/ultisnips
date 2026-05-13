@@ -688,19 +688,19 @@ class SnippetManager:
         the snippet to follow the cursor, leaving the jump-back / jump-
         forward triggers still mapped against an irrelevant span. See #1454.
 
-        Only kicks in once the user has manually jumped through the snippet
-        with the JumpForwards / JumpBackwards triggers. Without that gate,
-        the `${1:default}` + `<Esc>otest<EX>` recursive-expansion pattern
-        (PythonVisual_HasAccessToZeroPlaceholders) would also be killed
-        — the user hasn't progressed through the snippet yet, so leaving
-        the still-fresh selection to add content below should leave the
-        outer snippet alive so the inner can nest inside it.
+        Only kicks in once the user has actually progressed through the
+        snippet — either by pressing a jump trigger (`_user_has_jumped`)
+        or by typing content into a tabstop (`_user_has_modified_snippet`).
+        The fresh-just-expanded-default-still-selected state is preserved
+        so the `${1:default}` + `<Esc>otest<EX>` recursive-expansion
+        pattern (PythonVisual_HasAccessToZeroPlaceholders) keeps working.
+        See #1311 (ei14 variant) for the typed-but-not-jumped case.
         """
         if not self._active_snippets:
             return
         if vim.current.buffer.number != self._snippet_buffer_number:
             return
-        if not self._user_has_jumped:
+        if not (self._user_has_jumped or self._user_has_modified_snippet()):
             return
         snippet = self._active_snippets[0]
         cursor = vim_helper.buf.cursor
@@ -708,6 +708,33 @@ class SnippetManager:
             while self._active_snippets:
                 self._current_snippet_is_done()
             self._reinit()
+
+    def _user_has_modified_snippet(self):
+        """Returns True when any tabstop's `current_text` differs from the
+        default it was instantiated with. Used by `_entering_insert_mode`
+        as a "user has actually edited the snippet" gate alongside
+        `_user_has_jumped`.
+        """
+        from UltiSnips.text_objects.tabstop import TabStop
+
+        if not self._active_snippets:
+            return False
+
+        def walk(obj):
+            if isinstance(obj, TabStop):
+                try:
+                    if obj.current_text != obj._initial_text:
+                        return True
+                except IndexError:
+                    pass
+            children = getattr(obj, "_children", None)
+            if children is not None:
+                for child in children:
+                    if walk(child):
+                        return True
+            return False
+
+        return walk(self._active_snippets[0])
 
     def _handle_failure(self, trigger, pass_through=False):
         """Mainly make sure that we play well with SuperTab."""

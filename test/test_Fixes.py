@@ -491,3 +491,27 @@ class Issue503_MOptionStripsEmptyVisualLines(_VimTest):
     snippets = ("test", "${VISUAL}", "", "m")
     keys = "empty line in visual\n\nshould be empty" + ESC + "V2k" + EX + "\ttest" + EX
     wanted = "\tempty line in visual\n\n\tshould be empty"
+
+
+# Regression test for the ei14 variant of #1311 — `pair` snippet `($1, $2)`,
+# type into $1, `<Esc>`, `o` to drop a new line below, then press the expand
+# trigger. With `g:UltiSnipsExpandTrigger == g:UltiSnipsJumpForwardTrigger`
+# (Tab mapped via `ExpandSnippetOrJump`), no snippet matches at the new-line
+# cursor, so the trigger falls through to `_jump` and yanks the cursor back
+# into the dead snippet — even though the user has moved to a different
+# line. #1648 only fired this termination once the user had pressed a jump
+# trigger; here the user only typed inside $1, which leaves the heuristic
+# blind. Extend it to count "user has typed into a tabstop" as progress.
+
+
+class Issue1311_PairTabAfterModeRoundTrip(_VimTest):
+    snippets = ("pair", "($1, $2)")
+    # Mirror the ei14 repro by mapping Tab to both expand and jump (the
+    # default when the two triggers are identical).
+    keys = "pair" + EX + "1" + ESC + "o" + EX
+    wanted = "(1, )\n" + EX
+
+    def _extra_vim_config(self, vim_config):
+        vim_config.append('let g:UltiSnipsExpandTrigger="<tab>"')
+        vim_config.append('let g:UltiSnipsJumpForwardTrigger="<tab>"')
+        vim_config.append('let g:UltiSnipsJumpBackwardTrigger="<s-tab>"')
