@@ -420,7 +420,7 @@ class SnippetManager:
         self._check_if_still_inside_snippet()
         if self._active_snippets:
             with self._change_provider.suppressed():
-                self._active_snippets[0].update_textobjects(vim_helper.buf)
+                self._active_snippets[0].update_textobjects(vim_helper.buf, self._ctab)
                 self._vstate.remember_buffer(self._active_snippets[0])
 
     def _setup_inner_state(self):
@@ -601,7 +601,9 @@ class SnippetManager:
                             self._visual_content.placeholder
                         )
                         self._should_reset_visual = False
-                        self._active_snippets[0].update_textobjects(vim_helper.buf)
+                        self._active_snippets[0].update_textobjects(
+                            vim_helper.buf, self._ctab
+                        )
                         # Open any folds this might have created
                         vim.command("normal! zv")
                         self._vstate.remember_buffer(self._active_snippets[0])

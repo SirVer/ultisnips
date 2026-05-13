@@ -440,6 +440,25 @@ class Issue168_VisualPlaceholderDoesNotShiftFollowingTabstop(_VimTest):
     wanted = ",{\n  'AUTHOR': 'Williams',\n  'TEXT': 'X',\n}"
 
 
+# Regression test for #1359 — when adjacent zero-width tabstops/mirrors share
+# a position, typing into the active tabstop misattributed the cursor to the
+# trailing sibling. The mirror update then dragged the cursor with it, so
+# only the first character was mirrored and subsequent characters landed
+# in the wrong place (or outside any tabstop).
+
+
+class Issue1359_AdjacentMirrorTabstop_TypingMirrors(_VimTest):
+    snippets = ("test", "$1$1$2(some other things)$0")
+    keys = "test" + EX + "words"
+    wanted = "wordswords(some other things)"
+
+
+class Issue1359_AdjacentMirrorTabstop_JumpThenType(_VimTest):
+    snippets = ("test", "$1$1$2")
+    keys = "test" + EX + "hi" + JF + "x"
+    wanted = "hihix"
+
+
 # Regression test for #503 — the `m` option strips trailing whitespace from
 # each line of the snippet at launch time, but ${VISUAL} replaces a single-
 # line placeholder with multi-line content during update_textobjects, so

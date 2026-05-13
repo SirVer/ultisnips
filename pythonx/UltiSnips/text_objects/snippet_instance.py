@@ -65,7 +65,7 @@ class SnippetInstance(EditableTextObject):
         for cmd in cmds:
             self._do_edit(cmd, ctab)
 
-    def update_textobjects(self, buf):
+    def update_textobjects(self, buf, ctab=None):
         """Update the text objects that should change automagically after the
         users edits have been replayed.
 
@@ -75,6 +75,17 @@ class SnippetInstance(EditableTextObject):
         done = set()
         not_done = set()
 
+        def _contains_ctab(obj):
+            """True if obj is ctab or one of its ancestors."""
+            if ctab is None:
+                return False
+            cur = ctab
+            while cur is not None:
+                if cur is obj:
+                    return True
+                cur = cur._parent
+            return False
+
         def _find_recursive(obj):
             """Finds all text objects and puts them into 'not_done'."""
             cursorInsideLowest = None
@@ -83,8 +94,26 @@ class SnippetInstance(EditableTextObject):
                     isinstance(obj, TabStop) and obj.number == 0
                 ):
                     cursorInsideLowest = obj
+                # Two siblings can both contain the cursor at a zero-width
+                # seam — e.g. `$1$2` immediately after expansion, or `$1$1$2`
+                # once `$1` has accumulated content and its mirror sits at
+                # the same column as the next tabstop. The last sibling
+                # would win the naive `or cursorInsideLowest` chain, but the
+                # currently-selected tabstop is where the user is editing,
+                # so prefer that branch. Without this, a mirror update
+                # inside the wrong sibling drags the cursor with it and
+                # subsequent typing falls outside any tabstop. See #1359.
+                preferred = None
+                fallback = cursorInsideLowest
                 for child in obj._children:
-                    cursorInsideLowest = _find_recursive(child) or cursorInsideLowest
+                    child_match = _find_recursive(child)
+                    if child_match is None:
+                        continue
+                    if _contains_ctab(child):
+                        preferred = child_match
+                    else:
+                        fallback = child_match
+                cursorInsideLowest = preferred or fallback
             not_done.add(obj)
             return cursorInsideLowest
 
