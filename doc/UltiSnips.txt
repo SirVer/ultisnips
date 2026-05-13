@@ -1801,14 +1801,20 @@ Next variables and methods will be also defined in the action code scope:
 * 'snip.snippet_end' - (line, column) of end of the expanded snippet;
 * 'snip.expand_anon()' - alias for 'UltiSnips_Manager.expand_anon()';
 
-The argument to 'snip.expand_anon()' is parsed as a snippet body, not as
-literal text.  If it is built from arbitrary buffer content, the characters
-'`', '$' and '\' will be interpreted as shell/Python code, tabstops, or
-escape sequences -- usually not what you want.  Escape them first, e.g.: >
+The argument to 'snip.expand_anon()' is parsed as a snippet body, so the full
+snippet DSL is available: backticks run shell code, '$N' creates tabstops, and
+'\X' is an escape sequence.  When the argument is built from arbitrary buffer
+content rather than authored as a snippet, escape those three characters so
+they survive as literal text, e.g.: >
 
-    safe = text.replace('\\', '\\\\').replace('`', '\\`').replace('$', '\\$')
+    safe = (text.replace('\\', '\\\\')
+                .replace('`',  '\\`')
+                .replace('$',  '\\$'))
     snip.expand_anon('> ' + safe)
 <
+The backslash replacement must come first; otherwise the backslashes
+introduced for '`' and '$' get escaped on a second pass.
+
 Tabstop object has several useful properties:
 * 'start' - (line, column) of the starting position of the tabstop (also
   accessible as 'tabstop.line' and 'tabstop.col').
