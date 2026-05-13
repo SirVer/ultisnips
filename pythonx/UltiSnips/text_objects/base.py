@@ -125,6 +125,20 @@ class TextObject:
             return
         old_end = self._end
         self._end = _replace_text(buf, self._start, self._end, gtext)
+        # The _VimCursor sentinel (tiebreaker (-1, -1)) holds the absolute
+        # (line, col) where the user's cursor should land after this update
+        # cycle. When an interpolation overwrites a tabstop with a
+        # differently-shaped string (e.g. a `!p` block that swaps in a
+        # multi-line replacement), the cursor's old absolute position can
+        # fall outside the rewritten span and the next to_vim() clamps it
+        # to an unrelated cell. Pull cursor sentinels back to the new end
+        # so they sit on a valid coordinate; the test in
+        # PythonCode_CanOverwriteTabstop exercises this exact path.
+        if hasattr(self, "_children"):
+            for child in self._children:
+                if child._tiebreaker == Position(-1, -1):
+                    child._start = Position(self._end.line, self._end.col)
+                    child._end = Position(self._end.line, self._end.col)
         if self._parent:
             self._parent._child_has_moved(
                 self._parent._children.index(self),
