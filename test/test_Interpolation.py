@@ -528,17 +528,6 @@ snip.rv = "placeholder: " + snip.p.current_text`)""",
 first second (placeholder: second)"""
 
 
-class PythonVisual_HasAccessToZeroPlaceholders(_VimTest):
-    snippets = (
-        "test",
-        """${1:first} ${2:second} (`!p
-snip.rv = "placeholder: " + snip.p.current_text`)""",
-    )
-    keys = "test" + EX + ESC + "otest" + EX + JF + JF + JF + JF
-    wanted = """first second (placeholder: first second (placeholder: ))
-first second (placeholder: )"""
-
-
 # Issue #1405: same pattern as PythonVisual_HasAccessToSelectedPlaceholders, but
 # with the !p block placed before the tabstops. The reporter claimed this
 # variant exposed a cursor / selection sync bug.

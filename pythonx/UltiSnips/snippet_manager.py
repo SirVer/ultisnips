@@ -138,16 +138,6 @@ class SnippetManager:
         self._snip_expanded_in_action = False
         self._inside_action = False
 
-        # Set when the user explicitly jumps with the JumpForwards /
-        # JumpBackwards triggers (and reset when no snippet is active).
-        # Used by `_entering_insert_mode` to distinguish two looks-alike
-        # workflows: (a) user expands a snippet whose $1 has default text,
-        # then `<Esc>o…` to add content below before filling — should NOT
-        # terminate the snippet (recursive expansion case), and (b) user
-        # has progressed through the snippet manually then escapes to
-        # work elsewhere — SHOULD terminate.
-        self._user_has_jumped = False
-
         self._last_change = ("", Position(-1, -1))
 
         self._added_snippets_source = AddedSnippetsSource()
@@ -176,7 +166,6 @@ class SnippetManager:
         """Jumps to the next tabstop."""
         vim.vars["ulti_jump_forwards_res"] = 1
         vim.command("let &g:undolevels = &g:undolevels")
-        self._user_has_jumped = True
         if not self._jump(JumpDirection.FORWARD):
             vim.vars["ulti_jump_forwards_res"] = 0
             return self._handle_failure(self.forward_trigger)
@@ -187,7 +176,6 @@ class SnippetManager:
         """Jumps to the previous tabstop."""
         vim.vars["ulti_jump_backwards_res"] = 1
         vim.command("let &g:undolevels = &g:undolevels")
-        self._user_has_jumped = True
         if not self._jump(JumpDirection.BACKWARD):
             vim.vars["ulti_jump_backwards_res"] = 0
             return self._handle_failure(self.backward_trigger)
@@ -214,7 +202,6 @@ class SnippetManager:
         rv = self._try_expand()
         if not rv:
             vim.vars["ulti_expand_or_jump_res"] = 2
-            self._user_has_jumped = True
             rv = self._jump(JumpDirection.FORWARD)
         if not rv:
             vim.vars["ulti_expand_or_jump_res"] = 0
@@ -230,7 +217,6 @@ class SnippetManager:
 
         """
         vim.vars["ulti_expand_or_jump_res"] = 2
-        self._user_has_jumped = True
         rv = self._jump(JumpDirection.FORWARD)
         if not rv:
             vim.vars["ulti_expand_or_jump_res"] = 1
@@ -471,7 +457,6 @@ class SnippetManager:
         vim.command("autocmd CursorMoved * call UltiSnips#CursorMoved()")
 
         vim.command("autocmd InsertLeave * call UltiSnips#LeavingInsertMode()")
-        vim.command("autocmd InsertEnter * call UltiSnips#EnteringInsertMode()")
 
         vim.command("autocmd BufEnter * call UltiSnips#LeavingBuffer()")
         vim.command("autocmd CmdwinEnter * call UltiSnips#LeavingBuffer()")
@@ -543,7 +528,6 @@ class SnippetManager:
         """Resets transient state."""
         self._ctab = None
         self._ignore_movements = False
-        self._user_has_jumped = False
 
     def _check_if_still_inside_snippet(self):
         """Checks if the cursor is outside of the current snippet."""
@@ -676,73 +660,6 @@ class SnippetManager:
     def _leaving_insert_mode(self):
         """Called whenever we leave the insert mode."""
         self._vstate.restore_unnamed_register()
-
-    @err_to_scratch_buffer.wrap
-    def _entering_insert_mode(self):
-        """Called on InsertEnter — re-entering insert mode.
-
-        If the cursor is now outside the snippet's bounds (typically because
-        the user did `o`/`G`/etc. in normal mode after pressing <Esc>),
-        terminate the snippet. Otherwise the next `_cursor_moved` would
-        consume the off-snippet edit as a snippet edit and silently extend
-        the snippet to follow the cursor, leaving the jump-back / jump-
-        forward triggers still mapped against an irrelevant span. See #1454.
-
-        Only kicks in once the user has actually progressed through the
-        snippet — either by pressing a jump trigger (`_user_has_jumped`)
-        or by typing content into a tabstop (`_user_has_modified_snippet`).
-        The fresh-just-expanded-default-still-selected state is preserved
-        so the `${1:default}` + `<Esc>otest<EX>` recursive-expansion
-        pattern (PythonVisual_HasAccessToZeroPlaceholders) keeps working.
-        See #1311 (ei14 variant) for the typed-but-not-jumped case.
-        """
-        if not self._active_snippets:
-            return
-        if vim.current.buffer.number != self._snippet_buffer_number:
-            return
-        if not (self._user_has_jumped or self._user_has_modified_snippet()):
-            return
-        snippet = self._active_snippets[0]
-        cursor = vim_helper.buf.cursor
-        if not (snippet.start <= cursor <= snippet.end):
-            while self._active_snippets:
-                self._current_snippet_is_done()
-            self._reinit()
-
-    def _user_has_modified_snippet(self):
-        """Returns True when any tabstop's `current_text` differs from the
-        default it was instantiated with. Used by `_entering_insert_mode`
-        as a "user has actually edited the snippet" gate alongside
-        `_user_has_jumped`.
-        """
-        from UltiSnips.text_objects.tabstop import TabStop
-
-        if not self._active_snippets:
-            return False
-
-        def walk(obj):
-            if isinstance(obj, TabStop):
-                # The tabstop's tracked end position can be ahead of the
-                # buffer when called from `InsertEnter` — the text-object
-                # tree only resyncs inside `_cursor_moved`. A select-mode
-                # `<BS>` (delete-selection + enter insert) fires
-                # InsertEnter before the deletion edit has been replayed,
-                # so reading `current_text` raises IndexError on Vim and
-                # `vim.error` (`NvimError`) on Neovim. Treat that as
-                # "not modified" — we'll re-evaluate on the next entry.
-                try:
-                    if obj.current_text != obj._initial_text:
-                        return True
-                except (IndexError, vim_helper.error):
-                    pass
-            children = getattr(obj, "_children", None)
-            if children is not None:
-                for child in children:
-                    if walk(child):
-                        return True
-            return False
-
-        return walk(self._active_snippets[0])
 
     def _handle_failure(self, trigger, pass_through=False):
         """Mainly make sure that we play well with SuperTab."""
