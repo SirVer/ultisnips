@@ -280,6 +280,16 @@ class EditableTextObject(TextObject):
         for cidx, child in enumerate(self._children):
             if child._start < pivot <= child._end:
                 idx = cidx
+        # An insertion that landed at our `_end` and that no child took is
+        # the user typing past the snippet (typically `o` from normal
+        # mode, which queues an "I" of `\n` at end-of-line). Don't drag
+        # `_end` along; leave the snippet's bounds where they were so
+        # `_check_if_still_inside_snippet` observes the cursor outside
+        # them and terminates the snippet. We only do this at the
+        # outermost level (no parent EditableTextObject above us) — nested
+        # tabstop / snippet edits still need to propagate.
+        if ctype == "I" and idx == -1 and self._parent is None and pivot >= self._end:
+            return
         self._child_has_moved(idx, pivot, delta)
 
     def _move(self, pivot, diff):

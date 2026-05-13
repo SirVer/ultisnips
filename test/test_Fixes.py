@@ -442,16 +442,11 @@ class Issue168_VisualPlaceholderDoesNotShiftFollowingTabstop(_VimTest):
 
 # Regression test for #1454 — when the user left insert mode, did off-snippet
 # work (`o` to open a new line below) and re-entered insert there, the snippet
-# stayed active and a subsequent jump still drove the cursor back into the
-# original placeholders. The expected behaviour is that re-entering insert
-# outside the snippet's bounds drops the snippet.
-#
-# We drive the case where the user types in $2, escapes, opens a new line,
-# types content, and then presses the jump-backwards trigger. Without the
-# fix the snippet is still alive and the trigger jumps back into $1 and
-# enters select mode, so the subsequent typed character replaces "2x+1";
-# with the fix the snippet is gone, the trigger is no longer mapped and
-# the literal key character is inserted instead.
+# used to stay active. The `\n` queued by `o` lands at the snippet's `_end`,
+# and the fall-through path in `_do_edit` previously dragged `_end` onto the
+# new line — so `_check_if_still_inside_snippet` never noticed the cursor was
+# now outside. Refusing to extend `_end` on past-end fall-through restores
+# the natural "cursor outside ⇒ drop snippet" path.
 
 
 class Issue1454_JumpBackAfterOffSnippetEditTerminates(_VimTest):
@@ -491,3 +486,27 @@ class Issue503_MOptionStripsEmptyVisualLines(_VimTest):
     snippets = ("test", "${VISUAL}", "", "m")
     keys = "empty line in visual\n\nshould be empty" + ESC + "V2k" + EX + "\ttest" + EX
     wanted = "\tempty line in visual\n\n\tshould be empty"
+
+
+# Regression test for the ei14 variant of #1311 — `pair` snippet `($1, $2)`,
+# type into $1, `<Esc>`, `o` to drop a new line below, then press the expand
+# trigger. With `g:UltiSnipsExpandTrigger == g:UltiSnipsJumpForwardTrigger`
+# (Tab mapped via `ExpandSnippetOrJump`), no snippet matches at the new-line
+# cursor, so the trigger falls through to `_jump`. Same mechanism as #1454:
+# `o` queued a `\n` at end-of-snippet, fall-through used to drag the
+# snippet's `_end` onto the new line, the cursor-bounds check then saw the
+# cursor inside the (extended) snippet and `_jump` happily jumped back in.
+# Refusing to extend on past-end fall-through closes both.
+
+
+class Issue1311_PairTabAfterModeRoundTrip(_VimTest):
+    snippets = ("pair", "($1, $2)")
+    # Mirror the ei14 repro by mapping Tab to both expand and jump (the
+    # default when the two triggers are identical).
+    keys = "pair" + EX + "1" + ESC + "o" + EX
+    wanted = "(1, )\n" + EX
+
+    def _extra_vim_config(self, vim_config):
+        vim_config.append('let g:UltiSnipsExpandTrigger="<tab>"')
+        vim_config.append('let g:UltiSnipsJumpForwardTrigger="<tab>"')
+        vim_config.append('let g:UltiSnipsJumpBackwardTrigger="<s-tab>"')
