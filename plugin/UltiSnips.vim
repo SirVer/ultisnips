@@ -13,46 +13,6 @@ if !has('nvim') && version < 820
    finish
 endif
 
-" Default the public globals before the Python import below. The autoload
-" file `autoload/UltiSnips/map_keys.vim` used to default these as a
-" side-effect of being sourced from `MapKeys()`, which ran *after* the
-" Python import — and the Python module reads
-" `g:UltiSnipsExpandTrigger` / `g:UltiSnipsJumpForwardTrigger` /
-" `g:UltiSnipsJumpBackwardTrigger` at module load, so a user who hadn't
-" set them in their vimrc would see a spurious "Python 3 is present but
-" unusable" warning with a `KeyError: 'Key not found:
-" UltiSnipsExpandTrigger'`. See #1679.
-"
-" NOTE: expansion and forward jumping can, but needn't be, the same
-" trigger.
-if !exists('g:UltiSnipsExpandTrigger')
-    let g:UltiSnipsExpandTrigger = '<tab>'
-endif
-if !exists('g:UltiSnipsListSnippets')
-    let g:UltiSnipsListSnippets = '<c-tab>'
-endif
-if !exists('g:UltiSnipsJumpForwardTrigger')
-    let g:UltiSnipsJumpForwardTrigger = '<c-j>'
-endif
-if !exists('g:UltiSnipsJumpBackwardTrigger')
-    let g:UltiSnipsJumpBackwardTrigger = '<c-k>'
-endif
-if !exists('g:UltiSnipsRemoveSelectModeMappings')
-    let g:UltiSnipsRemoveSelectModeMappings = 1
-endif
-if !exists('g:UltiSnipsMappingsToIgnore')
-    let g:UltiSnipsMappingsToIgnore = []
-endif
-if !exists('g:UltiSnipsEditSplit')
-    let g:UltiSnipsEditSplit = 'normal'
-endif
-if !exists('g:UltiSnipsSnippetDirectories')
-    let g:UltiSnipsSnippetDirectories = ['UltiSnips']
-endif
-if !exists('g:UltiSnipsEnableSnipMate')
-    let g:UltiSnipsEnableSnipMate = 1
-endif
-
 " UltiSnips needs Python 3. Bail with a clear message if Vim wasn't
 " compiled with python3 support at all, so we don't fall through to the
 " runtime-check below (which would just say "Python is broken" without
@@ -67,6 +27,17 @@ endif
 if !has('python3')
     finish
 endif
+
+" Apply default values for the public `g:UltiSnips*` globals before the
+" Python module imports. The defaults live at the head of
+" `autoload/UltiSnips/map_keys.vim` and run as a side effect of sourcing
+" that file; `MapKeys()` itself is harmless to call here. The Python
+" module reads `g:UltiSnipsExpandTrigger` / `g:UltiSnipsJumpForwardTrigger`
+" / `g:UltiSnipsJumpBackwardTrigger` at module load via `vim.vars[...]`,
+" so without the autoload's defaults a user who hadn't set those globals
+" in their vimrc would see a spurious "Python 3 is present but unusable"
+" warning with a `KeyError`. See #1679.
+call UltiSnips#map_keys#MapKeys()
 
 " `has('python3')` is necessary but not sufficient: Vim can be compiled
 " with dynamic Python support and still fail to load libpython at
@@ -124,7 +95,5 @@ augroup UltiSnips_AutoTrigger
         au TextChangedP * call UltiSnips#TrackChange()
     endif
 augroup END
-
-call UltiSnips#map_keys#MapKeys()
 
 " vim: ts=8 sts=4 sw=4
