@@ -56,6 +56,15 @@ class ListAllAvailable_InWordWithPrefix_ExpectCorrectResult(_VimTest):
     wanted = "!exists('')"
 
 
+# Word-boundary snippets should be listed when a partial trigger sits
+# after a non-word character, and selecting one must replace only the
+# partial suffix - not the preceding non-word chunk.
+class ListAllAvailable_WordOptionPartialAfterPunctuation_ExpectCorrectResult(_VimTest):
+    snippets = (("foo", "FOO", "foo word-snippet", "w"),)
+    keys = "x.fo" + LS + "1\n"
+    wanted = "x.FOO"
+
+
 # GH #1226: a number larger than the list length used to be clamped to
 # the last item, silently picking a snippet the user didn't choose (and a
 # negative answer from a mouse click above the menu could IndexError).

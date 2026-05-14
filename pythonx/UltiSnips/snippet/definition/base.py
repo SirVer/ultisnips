@@ -394,11 +394,6 @@ class SnippetDefinition:
             )
             match = self._trigger.startswith(words_suffix)
             self._matched = words_suffix
-
-            # TODO(sirver): list_snippets() function cannot handle partial-trigger
-            # matches yet, so for now fail if we trimmed the prefix.
-            if words_suffix != words:
-                match = False
         elif "i" in self._opts:
             # In-word snippets can appear after arbitrary non-word
             # characters, so check if the trigger starts with any
