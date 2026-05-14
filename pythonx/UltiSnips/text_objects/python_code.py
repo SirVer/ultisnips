@@ -82,6 +82,7 @@ class SnippetUtil:
         self._cur = cur
         self._rv = ""
         self._changed = False
+        self._mkline_seen_first = False
         self.reset_indent()
 
     def shift(self, amount=1):
@@ -116,9 +117,24 @@ class SnippetUtil:
         """
         if indent is None:
             indent = self.indent
-            # this deals with the fact that the first line is
-            # already properly indented
-            if "\n" not in self._rv:
+            # The first line emitted by mkline shares the buffer position
+            # where the snippet expansion landed, which already provides
+            # the snippet's initial indent. Subsequent lines start on a
+            # fresh line and need the full indent prepended.
+            #
+            # `snip.rv` is the historical signal for "we have already
+            # emitted something", but only `snip +=` / explicit
+            # `snip.rv += mkline(...)` updates it between calls. Users
+            # who build the result in a single expression
+            # (`snip.rv = mkline(...) + "\n" + mkline(...)`,
+            # `"\n".join(snip.mkline(x) for x in ...)`) leave `rv` empty
+            # until the end, so every mkline call used to under-indent.
+            # Track our own call counter so the second-and-later mkline
+            # within a python block keeps the full indent regardless of
+            # how the user is assembling the result.
+            first_line = "\n" not in self._rv and not self._mkline_seen_first
+            self._mkline_seen_first = True
+            if first_line:
                 try:
                     indent = indent[len(self._initial_indent) :]
                 except IndexError:
