@@ -653,7 +653,18 @@ class SnippetManager:
                 snip_expanded_in_action = self._snip_expanded_in_action
 
             if move_cmd and not snip_expanded_in_action:
-                vim_helper.feedkeys(move_cmd)
+                # Rebuild `move_cmd` against `ntab`'s current
+                # positions. If the action edited the buffer the
+                # tabstop's start/end have already been shifted to
+                # follow; the string we captured before the action ran
+                # would now drive the cursor to the old offsets and the
+                # select-mode range would land in the wrong place. The
+                # rebuild also re-anchors the cursor at the new start,
+                # which is the intent when an action sets `snip.cursor`
+                # to mirror a buffer shift it made. See #1013.
+                move_cmd = vim_helper.select(ntab.start, ntab.end)
+                if move_cmd:
+                    vim_helper.feedkeys(move_cmd)
 
         return jumped
 
