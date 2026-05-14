@@ -2,7 +2,6 @@
 
 from test.vim_test_case import VimTestCase as _VimTest
 
-
 _CHECK_HELPER = r"""
 import vim
 
