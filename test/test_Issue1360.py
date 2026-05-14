@@ -2,7 +2,7 @@
 
 `:UltiSnipsEdit!` must list SnipMate snippet files in addition to
 UltiSnips files when `g:UltiSnipsEnableSnipMate` is on. The picker list
-is built from ``SnippetManager._all_snippet_files_for(ft)``; here we
+is built from ``SnippetManager.all_snippet_files_for(ft)``; here we
 exercise that helper directly through ``py3`` so we don't have to drive
 the interactive ``inputlist()`` prompt.
 """
@@ -14,7 +14,7 @@ import os
 import vim
 from UltiSnips import UltiSnips_Manager
 
-files = sorted(UltiSnips_Manager._all_snippet_files_for("blubi"))
+files = sorted(UltiSnips_Manager.all_snippet_files_for("blubi"))
 # Keep only the last two path components so the assertion does not
 # depend on the (random) temp directory name.
 short = [os.sep.join(f.split(os.sep)[-2:]) for f in files]

@@ -335,19 +335,14 @@ class SnippetManager:
             return True
         return False
 
-    # TODO(robot): This is pretty ugly - it calls to a private function in the snippet sources that you apparentlý
-    # are not sure that it is defined every time. Instead, elevate _get_all_snippet_files_for in the sources 
-    # to be a public function and make sure it always is defined, returning maybe an empty set.
-    def _all_snippet_files_for(self, ft):
-        """Returns every snippet file that any registered file-based source
-        would load for filetype 'ft'. Used by :UltiSnipsEdit! to build the
-        picker list."""
+    def all_snippet_files_for(self, ft):
+        """Returns every snippet file that any registered source would load
+        for filetype 'ft'. Used by :UltiSnipsEdit! to build the picker
+        list. Sources that don't back snippets with files contribute an
+        empty set via the base-class default."""
         files = set()
         for _, source in self._snippet_sources:
-            collect = getattr(source, "_get_all_snippet_files_for", None)
-            if collect is None:
-                continue
-            files.update(collect(ft))
+            files.update(source.get_all_snippet_files_for(ft))
         return files
 
     def register_snippet_source(self, name, snippet_source):
@@ -1012,7 +1007,7 @@ class SnippetManager:
 
         if bang:
             for ft in filetypes:
-                potentials.update(self._all_snippet_files_for(ft))
+                potentials.update(self.all_snippet_files_for(ft))
         else:
             if not potentials:
                 _show_user_warning(

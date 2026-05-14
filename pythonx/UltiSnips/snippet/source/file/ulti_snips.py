@@ -63,23 +63,6 @@ def find_all_snippet_directories() -> list[str]:
     return all_dirs
 
 
-# TODO(robot): this function is private now; might as well inline it below.
-def find_all_snippet_files(ft) -> set[str]:
-    """Returns all snippet files matching 'ft' in the given runtime path
-    directory."""
-    patterns = ["%s.snippets", "%s_*.snippets", str(Path("%s") / "*")]
-    ret = set()
-    for directory in find_all_snippet_directories():
-        if not Path(directory).is_dir():
-            continue
-        for pattern in patterns:
-            for fn in Path(directory).glob(pattern % ft):
-                # Canonicalize so symlinked or duplicated runtimepath entries
-                # don't make the same file appear twice.
-                ret.add(normalize_file_path(str(fn)))
-    return ret
-
-
 def _handle_snippet_or_global(
     filename, line, lines, python_globals, priority, pre_expand, context
 ):
@@ -212,8 +195,20 @@ def _parse_snippets_file(data, filename):
 class UltiSnipsFileSource(SnippetFileSource):
     """Manages all snippets definitions found in rtp for ultisnips."""
 
-    def _get_all_snippet_files_for(self, ft):
-        return find_all_snippet_files(ft)
+    def get_all_snippet_files_for(self, ft):
+        """Returns all snippet files matching 'ft' in the given runtime
+        path directory."""
+        patterns = ["%s.snippets", "%s_*.snippets", str(Path("%s") / "*")]
+        ret = set()
+        for directory in find_all_snippet_directories():
+            if not Path(directory).is_dir():
+                continue
+            for pattern in patterns:
+                for fn in Path(directory).glob(pattern % ft):
+                    # Canonicalize so symlinked or duplicated runtimepath
+                    # entries don't make the same file appear twice.
+                    ret.add(normalize_file_path(str(fn)))
+        return ret
 
     def _parse_snippet_file(self, filedata, filename):
         yield from _parse_snippets_file(filedata, filename)

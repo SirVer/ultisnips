@@ -25,6 +25,13 @@ class SnippetSource:
         ensure.
         """
 
+    def get_all_snippet_files_for(self, ft):
+        """Returns the set of on-disk snippet files this source would load
+        for filetype 'ft'. Returns an empty set for sources that don't
+        back snippets with files (added programmatically, dynamic
+        sources, etc.). File-backed subclasses override this."""
+        return set()
+
     def _get_existing_deep_extends(self, base_filetypes):
         """Helper for get all existing filetypes extended by base filetypes."""
         deep_extends = self.get_deep_extends(base_filetypes)
