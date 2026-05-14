@@ -478,14 +478,19 @@ Another example on how to use this function consider the following function
 and mapping definition:
 
 function! ExpandPossibleShorterSnippet()
-  if len(UltiSnips#SnippetsInCurrentScope()) == 1 "only one candidate...
-    let curr_key = keys(UltiSnips#SnippetsInCurrentScope())[0]
-    normal diw
-    exe "normal a" . curr_key
-    exe "normal a "
-    return 1
+  let snippets = UltiSnips#SnippetsInCurrentScope()
+  if len(snippets) != 1
+    return 0
   endif
-  return 0
+  let trigger = keys(snippets)[0]
+  let [lnum, col] = [line('.'), col('.') - 1]
+  let line = getline(lnum)
+  let prefix_len = strlen(matchstr(strpart(line, 0, col), '\k*$'))
+  let head = strpart(line, 0, col - prefix_len)
+  let tail = strpart(line, col)
+  call setline(lnum, head . trigger . tail)
+  call cursor(lnum, strlen(head . trigger) + 1)
+  return 1
 endfunction
 inoremap <silent> <C-L> <C-R>=(ExpandPossibleShorterSnippet() == 0? '': UltiSnips#ExpandSnippet())<CR>
 
