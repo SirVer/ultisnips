@@ -455,6 +455,10 @@ class SnippetDefinition:
             start = current_snippet.start
             end = current_snippet.end
 
+            visual_content = current_snippet.visual_content
+            visual_text = visual_content.text if visual_content else ""
+            visual_mode = visual_content.mode if visual_content else ""
+
             locals = {
                 "tabstop": tabstop_number,
                 "jump_direction": jump_direction,
@@ -462,6 +466,9 @@ class SnippetDefinition:
                 "snippet_start": start,
                 "snippet_end": end,
                 "buffer": vim_helper.buf,
+                "visual_content": visual_content,
+                "visual_text": visual_text,
+                "visual_mode": visual_mode,
             }
 
             snip = self._execute_action(
