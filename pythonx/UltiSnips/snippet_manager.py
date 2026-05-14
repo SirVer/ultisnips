@@ -631,7 +631,19 @@ class SnippetManager:
                         self._vstate.remember_buffer(self._active_snippets[0])
 
                     if ntab.number == 0 and self._active_snippets:
+                        # The 'x' option asks for normal mode once the snippet
+                        # reaches its final tabstop. Capture the request before
+                        # popping the snippet, then suppress the queued
+                        # insert-mode re-entry below.
+                        finish_in_normal_mode = (
+                            self._current_snippet.snippet.has_option("x")
+                        )
                         self._current_snippet_is_done()
+                        if finish_in_normal_mode:
+                            # vim_helper.select() already left us in normal
+                            # mode synchronously; dropping move_cmd is enough
+                            # to keep us there.
+                            move_cmd = ""
                 else:
                     # This really shouldn't happen, because a snippet should
                     # have been popped when its final tabstop was used.

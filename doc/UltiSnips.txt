@@ -791,6 +791,13 @@ The options currently supported are: >
    A   Snippet will be triggered automatically, when condition matches.
        See |UltiSnips-autotrigger| for more info.
 
+   x   Exit to normal mode at the final tabstop. When the user reaches the
+       snippet's final tabstop ($0) by jumping forward, UltiSnips drops out
+       of insert / select mode rather than parking the cursor in insert
+       mode. Useful for snippets that are complete utterances after the
+       last jump (e.g. a small templating snippet whose $0 marks a place
+       you immediately want to navigate away from).
+
 The end line is the 'endsnippet' keyword on a line by itself. >
 
    endsnippet
