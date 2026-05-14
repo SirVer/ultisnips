@@ -25,6 +25,8 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       3.4.4 UltiSnips#CanExpandSnippet          |UltiSnips#CanExpandSnippet|
       3.4.5 UltiSnips#CanJumpForwards           |UltiSnips#CanJumpForwards|
       3.4.6 UltiSnips#CanJumpBackwards          |UltiSnips#CanJumpBackwards|
+      3.4.7 UltiSnips#FindAutoTriggerConflicts  |UltiSnips#FindAutoTriggerConflicts|
+      3.4.8 UltiSnips#ToggleAutoTrigger         |UltiSnips#ToggleAutoTrigger|
    3.5 Missing python support                   |UltiSnips-python-warning|
 4. Authoring snippets                           |UltiSnips-authoring-snippets|
    4.1 Basics                                   |UltiSnips-basics|
@@ -526,7 +528,27 @@ situation. This is useful in conditional mappings.
 This function returns 1 if UltiSnips can jump backwards in the current
 situation. This is useful in conditional mappings.
 
- 3.4.7 UltiSnips#ToggleAutoTrigger              *UltiSnips#ToggleAutoTrigger*
+ 3.4.7 UltiSnips#FindAutoTriggerConflicts *UltiSnips#FindAutoTriggerConflicts*
+
+This function returns the list of `[short, long]` trigger pairs where the
+`short` trigger is configured to autotrigger (option `A`) and is also a literal
+prefix of `long`. In that situation typing `long` is impossible: the
+`A`-snippet fires the moment the user finishes typing `short`, so the engine
+never sees the extra characters that would distinguish `long`. Regex triggers
+(option `r`) are skipped because prefix containment isn't well-defined for
+them.
+
+It walks the snippets visible in the current scope (including those inherited
+through `extends`). Example: >
+
+   :echo UltiSnips#FindAutoTriggerConflicts()
+   [['bs', 'bst']]
+
+Wire it into a `:checkhealth`-style command, run it after editing a snippet
+file, or include it in CI to keep a personal snippet collection
+non-overlapping.
+
+ 3.4.8 UltiSnips#ToggleAutoTrigger              *UltiSnips#ToggleAutoTrigger*
 
 This function toggles the `autotrigger` functionality. Its return value
 corresponds to the new state of the `autotrigger` (0: disabled, 1: enabled).

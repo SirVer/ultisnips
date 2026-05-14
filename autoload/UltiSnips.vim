@@ -126,6 +126,10 @@ function! UltiSnips#ToggleAutoTrigger() abort
     return py3eval("UltiSnips_Manager._toggle_autotrigger()")
 endfunction
 
+function! UltiSnips#FindAutoTriggerConflicts() abort
+    return py3eval("UltiSnips_Manager.find_autotrigger_prefix_conflicts()")
+endfunction
+
 function! UltiSnips#SaveLastVisualSelection() range abort
     py3 UltiSnips_Manager._save_last_visual_selection()
     return ""

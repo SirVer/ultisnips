@@ -933,6 +933,31 @@ class SnippetManager:
     def can_jump_backwards(self):
         return self.can_jump(JumpDirection.BACKWARD)
 
+    def find_autotrigger_prefix_conflicts(self):
+        """Return ``[(short_trigger, long_trigger), ...]`` pairs where the
+        short trigger fires automatically (option ``A``) and is a literal
+        prefix of the long trigger, so the user can never type far enough
+        to reach the longer trigger. Regex triggers (option ``r``) are
+        skipped because prefix containment isn't meaningful for them."""
+        all_snips = self._snips("", True)
+        auto_triggers = set()
+        all_triggers = set()
+        for snip in all_snips:
+            if snip.has_option("r"):
+                continue
+            trigger = snip.trigger
+            all_triggers.add(trigger)
+            if snip.has_option("A"):
+                auto_triggers.add(trigger)
+        conflicts = []
+        for short in sorted(auto_triggers):
+            conflicts.extend(
+                [short, other]
+                for other in sorted(all_triggers)
+                if other != short and other.startswith(short)
+            )
+        return conflicts
+
     def _toggle_autotrigger(self):
         self._autotrigger = not self._autotrigger
         return self._autotrigger
