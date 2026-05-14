@@ -662,7 +662,25 @@ class SnippetManager:
                         self._vstate.remember_buffer(self._active_snippets[0])
 
                     if ntab.number == 0 and self._active_snippets:
+                        # The 'x' option asks for normal mode once the snippet
+                        # reaches its final tabstop. Capture the request before
+                        # popping the snippet, then suppress the queued
+                        # insert-mode re-entry below.
+                        finish_in_normal_mode = (
+                            self._current_snippet.snippet.has_option("x")
+                        )
                         self._current_snippet_is_done()
+                        if finish_in_normal_mode:
+                            # Queue an `<Esc>` at the *front* of the typeahead
+                            # (the `i` flag) so it is processed before any
+                            # follow-up user keystrokes still in the input
+                            # queue. The deferred `:stopinsert` queued inside
+                            # `vim_helper.select()` is not reliably consumed
+                            # between this Python callback returning and the
+                            # next key being processed; an explicit prepended
+                            # `<Esc>` guarantees normal mode.
+                            vim.command(r'call feedkeys("\<Esc>", "in")')
+                            move_cmd = ""
                 else:
                     # This really shouldn't happen, because a snippet should
                     # have been popped when its final tabstop was used.
