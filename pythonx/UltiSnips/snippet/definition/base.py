@@ -207,37 +207,49 @@ class SnippetDefinition:
     ):
         if additional_locals is None:
             additional_locals = {}
-        # Capture the line the cursor sits on before the action runs.
-        # We rely on Vim/Neovim's own cursor auto-adjustment to keep
-        # the cursor on the same logical line across buffer edits inside
-        # the action (line insertions/deletions before the cursor shift
-        # the cursor's line number); the explicit comparison below then
-        # catches the case where the action mutated the line *content*
-        # under the cursor without setting `snip.cursor`.
-        #
-        # The previous implementation set Vim mark `\`` and consulted it
-        # after the action, which was load-bearing for Vim but broke on
-        # Neovim: replacing the cursor's line via the buffer API clears
-        # marks on that line, so any action that rewrote the snippet_end
-        # line raised a spurious "line under the cursor was modified".
-        cursor_line_before = vim_helper.buf.line_till_cursor
+        # Set Vim mark `\`` at the pre-action cursor; Vim auto-adjusts
+        # it across line insertions/deletions inside the action, so the
+        # mark tracks the *content* the cursor was attached to (not the
+        # absolute line number). The line-content comparison below then
+        # detects the case where the action mutated the line under the
+        # cursor without setting `snip.cursor`.
+        mark_to_use = "`"
+        with vim_helper.save_mark(mark_to_use):
+            vim_helper.set_mark_from_pos(mark_to_use, vim_helper.get_cursor_pos())
 
-        locals = {"context": context}
-        locals.update(additional_locals)
+            cursor_line_before = vim_helper.buf.line_till_cursor
 
-        snip = self._eval_code(action, locals, compiled_action)
+            locals = {"context": context}
+            locals.update(additional_locals)
 
-        if snip.cursor.is_set():
-            vim_helper.buf.cursor = Position(
-                snip.cursor._cursor[0], snip.cursor._cursor[1]
-            )
-        elif cursor_line_before != vim_helper.buf.line_till_cursor:
-            raise PebkacError(
-                "line under the cursor was modified, but "
-                + '"snip.cursor" variable is not set; either set '
-                + '"snip.cursor" to new cursor position, or do not '
-                + "modify cursor line"
-            )
+            snip = self._eval_code(action, locals, compiled_action)
+
+            if snip.cursor.is_set():
+                vim_helper.buf.cursor = Position(
+                    snip.cursor._cursor[0], snip.cursor._cursor[1]
+                )
+            else:
+                new_mark_pos = vim_helper.get_mark_pos(mark_to_use)
+                if not vim_helper._is_pos_zero(new_mark_pos):
+                    # Mark survived — use it; it knows where the cursor's
+                    # original content went after any line shifts.
+                    vim_helper.set_cursor_from_pos(new_mark_pos)
+                # else: Neovim cleared the mark because the cursor's
+                # line was replaced via the Python buffer API
+                # (`nvim_buf_set_lines` treats line-replace as
+                # delete+insert and drops marks on that line). The
+                # cursor itself stayed put across that replacement, so
+                # leave it where the action left it — line_till_cursor
+                # below will catch the case where the replacement
+                # actually changed the content under the cursor.
+
+                if cursor_line_before != vim_helper.buf.line_till_cursor:
+                    raise PebkacError(
+                        "line under the cursor was modified, but "
+                        + '"snip.cursor" variable is not set; either set '
+                        + '"snip.cursor" to new cursor position, or do not '
+                        + "modify cursor line"
+                    )
 
         return snip
 
