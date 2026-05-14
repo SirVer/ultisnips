@@ -636,6 +636,14 @@ class SnippetManager:
                     self._vstate.remember_unnamed_register(self._ctab.current_text)
                 if not ntab_short_and_near:
                     self._ignore_movements = True
+                # Let users hook a global handler that runs every time the
+                # cursor lands on a new tabstop -- including the initial
+                # expansion, since _do_snippet's first jump comes through
+                # this method. The final $0 is excluded because the snippet
+                # is torn down right after, and `UltiSnipsExitLastSnippet`
+                # is the right hook for that.
+                if self._ctab is None or self._ctab.number != 0:
+                    vim.command("silent doautocmd <nomodeline> User UltiSnipsJumped")
 
             # Reset the flag so we observe only what *this* post_jump action
             # does. _do_snippet sets it to True at its tail when called from

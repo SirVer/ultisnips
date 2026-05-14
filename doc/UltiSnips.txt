@@ -360,6 +360,7 @@ to make it possible to override these "inner" settings, it fires the following
 
 UltiSnipsEnterFirstSnippet
 UltiSnipsExitLastSnippet
+UltiSnipsJumped
 
 For example, to call a pair of custom functions in response to these events,
 you might do: >
@@ -373,6 +374,19 @@ Note that snippet expansion may be nested, in which case
 |UltiSnipsEnterFirstSnippet| will fire only as the first (outermost) snippet
 is entered, and |UltiSnipsExitLastSnippet| will only fire once the last
 (outermost) snippet have been exited.
+
+|UltiSnipsJumped| fires every time the cursor lands on a tabstop, including
+the very first tabstop after expansion. The final $0 stop is excluded - it
+is part of the snippet tear-down, for which |UltiSnipsExitLastSnippet| is
+the right hook. A typical use case is asking a completion engine to pop up
+its menu as soon as the cursor reaches a placeholder: >
+
+   " Trigger omni-completion every time UltiSnips parks the cursor on a
+   " tabstop. The timer hop is just to defer the feedkeys() out of the
+   " autocmd context so it doesn't fight with UltiSnips's own keystrokes.
+   autocmd! User UltiSnipsJumped
+   autocmd User UltiSnipsJumped call timer_start(0,
+       \ {-> feedkeys("\<C-X>\<C-O>", "n")})
 
 
  3.2.4 Direct use of Python API                   *UltiSnips-use-python-api*
