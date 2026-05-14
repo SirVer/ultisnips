@@ -245,3 +245,55 @@ snippet .
     }
     keys = "os." + EX + "foo\n." + EX
     wanted = "os.\tfoo\nself."
+
+
+class snipMate_UltiSnipsSyntaxInSnippetsDir_endsnippet(_VimTest):
+    # See #233, #1489: people regularly drop an UltiSnips-format file into
+    # `snippets/` (the snipMate-reserved directory) and get an opaque
+    # 'Invalid line' error. Verify we now point them at the fix.
+    files = {
+        "snippets/_.snippets": """
+snippet hello "greeting" b
+\tThis is a test snippet
+endsnippet
+"""
+    }
+    keys = "hello" + EX
+    wanted = "hello" + EX
+    expected_error = (
+        r"'endsnippet' is UltiSnips syntax, but this file lives in a "
+        r"'snippets/' directory which is reserved for snipMate"
+    )
+
+
+class snipMate_UltiSnipsSyntaxInSnippetsDir_priority(_VimTest):
+    files = {
+        "snippets/_.snippets": """
+priority 50
+snippet hello
+\tworld
+"""
+    }
+    keys = "hello" + EX
+    wanted = "hello" + EX
+    expected_error = (
+        r"'priority' is UltiSnips syntax, but this file lives in a "
+        r"'snippets/' directory which is reserved for snipMate"
+    )
+
+
+class snipMate_UltiSnipsSyntaxInSnippetsDir_globalp(_VimTest):
+    files = {
+        "snippets/_.snippets": """
+global !p
+def foo():
+    return 'bar'
+endglobal
+"""
+    }
+    keys = "hello" + EX
+    wanted = "hello" + EX
+    expected_error = (
+        r"'global' is UltiSnips syntax, but this file lives in a "
+        r"'snippets/' directory which is reserved for snipMate"
+    )

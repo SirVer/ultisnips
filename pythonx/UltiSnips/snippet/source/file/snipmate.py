@@ -81,6 +81,25 @@ def _parse_snippet(line, lines, filename):
     )
 
 
+# Directives that only exist in UltiSnips files. When we see one of these at
+# the top level of a snipMate file the user almost certainly placed an
+# UltiSnips-format file into a 'snippets/' directory. Several closed issues
+# (#233, #828, #1214, #1387, #1489) trace back to this confusion.
+_ULTISNIPS_DIRECTIVES = frozenset(
+    {
+        "endsnippet",
+        "global",
+        "priority",
+        "pre_expand",
+        "post_expand",
+        "post_jump",
+        "post_finish",
+        "clearsnippets",
+        "context",
+    }
+)
+
+
 def _parse_snippets_file(data, filename):
     """Parse 'data' assuming it is a .snippets file.
 
@@ -99,6 +118,19 @@ def _parse_snippets_file(data, filename):
             snippet = _parse_snippet(line, lines, filename)
             if snippet is not None:
                 yield snippet
+        elif head in _ULTISNIPS_DIRECTIVES:
+            yield (
+                "error",
+                (
+                    f"{head!r} is UltiSnips syntax, but this file lives in a "
+                    "'snippets/' directory which is reserved for snipMate. "
+                    "Move the file to a directory named 'UltiSnips' (see "
+                    ":help g:UltiSnipsSnippetDirectories) or set "
+                    "'g:UltiSnipsEnableSnipMate = 0' to stop loading snipMate "
+                    "snippets",
+                    lines.line_index,
+                ),
+            )
         elif head and not head.startswith("#"):
             yield "error", (f"Invalid line {line.rstrip()!r}", lines.line_index)
 
