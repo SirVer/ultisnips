@@ -3,7 +3,6 @@
 import re
 import sys
 import traceback
-from bdb import BdbQuit
 from functools import wraps
 
 from UltiSnips import vim_helper
@@ -43,8 +42,6 @@ def wrap(func):
     def wrapper(self, *args, **kwds):
         try:
             return func(self, *args, **kwds)
-        except BdbQuit:
-            pass  # A debugger stopped, but it's not really an error
         except PebkacError as e:
             msg = "UltiSnips Error:\n\n"
             msg += str(e).strip()
