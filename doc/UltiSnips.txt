@@ -851,6 +851,14 @@ The options currently supported are: >
        python expression. This option can be specified along with other
        options, like 'b'. See |UltiSnips-custom-context-snippets| for more info.
 
+   p   Partial prefix expansion - With this option the snippet expands when a
+       non-empty prefix of its trigger has been typed. For example, with the
+       trigger 'import' and option 'p', typing any of 'i', 'im', 'imp', 'impo',
+       'impor' or 'import' and pressing the expansion key replaces what was
+       typed with the snippet body. Only the characters the user actually
+       typed are removed, not the whole trigger. If several snippets resolve
+       to the same prefix you will be prompted to choose between them.
+
    A   Snippet will be triggered automatically, when condition matches.
        See |UltiSnips-autotrigger| for more info.
 
