@@ -207,41 +207,37 @@ class SnippetDefinition:
     ):
         if additional_locals is None:
             additional_locals = {}
-        mark_to_use = "`"
-        with vim_helper.save_mark(mark_to_use):
-            vim_helper.set_mark_from_pos(mark_to_use, vim_helper.get_cursor_pos())
+        # Capture the line the cursor sits on before the action runs.
+        # We rely on Vim/Neovim's own cursor auto-adjustment to keep
+        # the cursor on the same logical line across buffer edits inside
+        # the action (line insertions/deletions before the cursor shift
+        # the cursor's line number); the explicit comparison below then
+        # catches the case where the action mutated the line *content*
+        # under the cursor without setting `snip.cursor`.
+        #
+        # The previous implementation set Vim mark `\`` and consulted it
+        # after the action, which was load-bearing for Vim but broke on
+        # Neovim: replacing the cursor's line via the buffer API clears
+        # marks on that line, so any action that rewrote the snippet_end
+        # line raised a spurious "line under the cursor was modified".
+        cursor_line_before = vim_helper.buf.line_till_cursor
 
-            cursor_line_before = vim_helper.buf.line_till_cursor
+        locals = {"context": context}
+        locals.update(additional_locals)
 
-            locals = {"context": context}
+        snip = self._eval_code(action, locals, compiled_action)
 
-            locals.update(additional_locals)
-
-            snip = self._eval_code(action, locals, compiled_action)
-
-            if snip.cursor.is_set():
-                vim_helper.buf.cursor = Position(
-                    snip.cursor._cursor[0], snip.cursor._cursor[1]
-                )
-            else:
-                new_mark_pos = vim_helper.get_mark_pos(mark_to_use)
-
-                cursor_invalid = False
-
-                if vim_helper._is_pos_zero(new_mark_pos):
-                    cursor_invalid = True
-                else:
-                    vim_helper.set_cursor_from_pos(new_mark_pos)
-                    if cursor_line_before != vim_helper.buf.line_till_cursor:
-                        cursor_invalid = True
-
-                if cursor_invalid:
-                    raise PebkacError(
-                        "line under the cursor was modified, but "
-                        + '"snip.cursor" variable is not set; either set set '
-                        + '"snip.cursor" to new cursor position, or do not '
-                        + "modify cursor line"
-                    )
+        if snip.cursor.is_set():
+            vim_helper.buf.cursor = Position(
+                snip.cursor._cursor[0], snip.cursor._cursor[1]
+            )
+        elif cursor_line_before != vim_helper.buf.line_till_cursor:
+            raise PebkacError(
+                "line under the cursor was modified, but "
+                + '"snip.cursor" variable is not set; either set '
+                + '"snip.cursor" to new cursor position, or do not '
+                + "modify cursor line"
+            )
 
         return snip
 
