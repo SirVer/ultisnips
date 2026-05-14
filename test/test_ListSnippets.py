@@ -54,3 +54,12 @@ class ListAllAvailable_InWordWithPrefix_ExpectCorrectResult(_VimTest):
     snippets = (("exists", "exists('${1}')", "exists check", "i"),)
     keys = "!exists" + LS + "1\n"
     wanted = "!exists('')"
+
+
+# GH #1226: a number larger than the list length used to be clamped to
+# the last item, silently picking a snippet the user didn't choose (and a
+# negative answer from a mouse click above the menu could IndexError).
+# Treat any out-of-range answer as a cancellation.
+class ListAllAvailable_OutOfRangeAnswer_Cancels(_ListAllSnippets):
+    keys = "hallo test" + LS + "99\n"
+    wanted = "hallo test"
