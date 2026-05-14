@@ -17,9 +17,6 @@ class SnippetSyntaxError(PebkacError):
 class SnippetFileSource(SnippetSource):
     """Base class that abstracts away 'extends' info and file hashes."""
 
-    def __init__(self):
-        super().__init__()
-
     def ensure(self, filetypes):
         for ft in self.get_deep_extends(filetypes):
             if self._needs_update(ft):
