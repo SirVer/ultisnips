@@ -3,12 +3,10 @@
 import re
 import sys
 import traceback
-from bdb import BdbQuit
 from functools import wraps
 
 from UltiSnips import vim_helper
 from UltiSnips.error import PebkacError
-from UltiSnips.remote_pdb import RemotePDB
 
 
 def _report_exception(self, msg, e):
@@ -44,25 +42,11 @@ def wrap(func):
     def wrapper(self, *args, **kwds):
         try:
             return func(self, *args, **kwds)
-        except BdbQuit:
-            pass  # A debugger stopped, but it's not really an error
         except PebkacError as e:
-            if RemotePDB.is_enable():
-                RemotePDB.pm()
             msg = "UltiSnips Error:\n\n"
             msg += str(e).strip()
-            if RemotePDB.is_enable():
-                host, port = RemotePDB.get_host_port()
-                msg += (
-                    "\nUltisnips' post mortem debug server"
-                    " caught the error."
-                    f" Run `telnet {host}:{port}`"
-                    " to inspect it with pdb\n"
-                )
             _report_exception(self, msg, e)
         except Exception as e:
-            if RemotePDB.is_enable():
-                RemotePDB.pm()
             if hasattr(e, "snippet_code"):
                 # The exception happened inside user-authored snippet
                 # python code (snippet_code is attached by
@@ -82,15 +66,6 @@ https://github.com/SirVer/ultisnips/blob/master/docs/CONTRIBUTING.md#reproducing
 Following is the full stack trace:
 """
                 msg += traceback.format_exc()
-            if RemotePDB.is_enable():
-                host, port = RemotePDB.get_host_port()
-                msg += (
-                    "\nUltisnips' post mortem debug server"
-                    " caught the error."
-                    f" Run `telnet {host}:{port}`"
-                    " to inspect it with pdb\n"
-                )
-
             _report_exception(self, msg, e)
 
     return wrapper

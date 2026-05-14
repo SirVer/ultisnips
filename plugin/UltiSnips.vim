@@ -67,24 +67,6 @@ if !s:ultisnips_python3_ok
     finish
 endif
 
-" Enable Post debug server config
-if !exists("g:UltiSnipsDebugServerEnable")
-   let g:UltiSnipsDebugServerEnable = 0
-endif
-
-if !exists("g:UltiSnipsDebugHost")
-   let g:UltiSnipsDebugHost = 'localhost'
-endif
-
-if !exists("g:UltiSnipsDebugPort")
-   let g:UltiSnipsDebugPort = 8080
-endif
-
-if !exists("g:UltiSnipsPMDebugBlocking")
-   let g:UltiSnipsPMDebugBlocking = 0
-endif
-
-
 " The Commands we define.
 command! -bang -nargs=? -complete=customlist,UltiSnips#FileTypeComplete UltiSnipsEdit
     \ :call UltiSnips#Edit(<q-bang>, <q-args>)

@@ -154,33 +154,6 @@ if __name__ == "__main__":
             help="If set, each test will check sys.version inside of vim to "
             "verify we are testing against the expected Python version.",
         )
-        p.add_argument(
-            "--remote-pdb",
-            dest="pdb_enable",
-            action="store_true",
-            help="If set, The remote pdb server will be run",
-        )
-        p.add_argument(
-            "--remote-pdb-host",
-            dest="pdb_host",
-            type=str,
-            default="localhost",
-            help="Remote pdb server host",
-        )
-        p.add_argument(
-            "--remote-pdb-port",
-            dest="pdb_port",
-            type=int,
-            default=8080,
-            help="Remote pdb server port",
-        )
-        p.add_argument(
-            "--remote-pdb-non-blocking",
-            dest="pdb_block",
-            action="store_false",
-            help="If set, the server will not freeze vim on error",
-        )
-
         o = p.parse_args()
         return o, o.args
 
@@ -244,10 +217,6 @@ if __name__ == "__main__":
             test.expected_python_version = options.expected_python_version
             test.vim = vim
             test.vim_flavor = vim_flavor
-            test.pdb_enable = options.pdb_enable
-            test.pdb_host = options.pdb_host
-            test.pdb_port = options.pdb_port
-            test.pdb_block = options.pdb_block
         suite.addTests(tests)
 
         v = 2 if options.verbose else 1
