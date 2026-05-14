@@ -102,10 +102,8 @@ endfunction
 
 function! UltiSnips#SnippetsInCurrentScope(...) abort
     let g:current_ulti_dict = {}
+    let g:current_ulti_dict_info = {}
     let all = get(a:, 1, 0)
-    if all
-      let g:current_ulti_dict_info = {}
-    endif
     py3 UltiSnips_Manager.snippets_in_current_scope(int(vim.eval("all")))
     return g:current_ulti_dict
 endfunction
