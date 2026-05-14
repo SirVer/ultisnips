@@ -182,7 +182,7 @@ def _parse_snippets_file(data, filename):
                 current_priority = int(tail.split()[0])
             except (ValueError, IndexError):
                 yield "error", (f"Invalid priority {tail!r}", lines.line_index)
-        elif head in ["pre_expand", "post_expand", "post_jump"]:
+        elif head in ["pre_expand", "post_expand", "post_jump", "post_finish"]:
             head, tail = handle_action(head, tail, lines.line_index)
             if head == "error":
                 yield (head, tail)

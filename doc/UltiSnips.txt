@@ -12,6 +12,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    3.1 Commands                                 |UltiSnips-commands|
       3.1.1 UltiSnipsEdit                       |UltiSnipsEdit|
       3.1.2 UltiSnipsAddFiletypes               |UltiSnipsAddFiletypes|
+      3.1.3 UltiSnipsListLocations              |UltiSnipsListLocations|
    3.2 Triggers                                 |UltiSnips-triggers|
       3.2.1 Trigger key mappings                |UltiSnips-trigger-key-mappings|
       3.2.2 Using your own trigger functions    |UltiSnips-trigger-functions|
@@ -25,6 +26,8 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       3.4.4 UltiSnips#CanExpandSnippet          |UltiSnips#CanExpandSnippet|
       3.4.5 UltiSnips#CanJumpForwards           |UltiSnips#CanJumpForwards|
       3.4.6 UltiSnips#CanJumpBackwards          |UltiSnips#CanJumpBackwards|
+      3.4.7 UltiSnips#ToggleAutoTrigger         |UltiSnips#ToggleAutoTrigger|
+      3.4.8 UltiSnips#SnippetLocations          |UltiSnips#SnippetLocations|
    3.5 Missing python support                   |UltiSnips-python-warning|
 4. Authoring snippets                           |UltiSnips-authoring-snippets|
    4.1 Basics                                   |UltiSnips-basics|
@@ -241,6 +244,20 @@ snippets you can call >
    :UltiSnipsAddFiletypes ruby.programming
 
 The priority will then be rails -> ruby -> programming -> all.
+
+
+ 3.1.3 UltiSnipsListLocations                          *:UltiSnipsListLocations*
+
+The UltiSnipsListLocations command populates the |quickfix| list with one
+entry per snippet definition known to UltiSnips and opens the list with
+|:copen|. Entries point at the file and line where each snippet is defined,
+so the usual quickfix navigation (|:cnext|, |:cprev|, |<CR>|) jumps to the
+matching snippet. Snippets registered programmatically through
+|UltiSnips#AddSnippetWithPriority| have no file location and are omitted.
+
+See |UltiSnips#SnippetLocations| for the underlying function if you want to
+build your own picker (e.g. fuzzy-finder integration) instead of using the
+quickfix list.
 
 3.2 Triggers                                             *UltiSnips-triggers*
 ------------
@@ -483,6 +500,12 @@ for the current buffer, you can simply pass 1 (which means all) as first
 argument of this function, and use a global variable g:current_ulti_dict_info
 to get the result (see example below).
 
+Regardless of whether the function is called with no argument (matching
+snippets only) or with 1 (all snippets), |g:current_ulti_dict_info| is also
+populated with a dictionary keyed by trigger, where each value has a
+'description' and a 'location' (a "path:linenumber" string pointing at the
+snippet definition, or an empty string for snippets added programmatically).
+
 This function does not add any new functionality to ultisnips directly but
 allows to use third party plugins to integrate the current available snippets.
 For example, all completion plugins that integrate with UltiSnips use this
@@ -558,6 +581,28 @@ in the Insert mode: >
 By default, `autotrigger` is enabled (relevant for snippets with the option 'A').
 If you want to disable it by default, add the following line to your vimrc: >
     let g:UltiSnipsAutoTrigger = 0
+
+ 3.4.8 UltiSnips#SnippetLocations          *UltiSnips#SnippetLocations*
+
+UltiSnips#SnippetLocations() returns a list of dictionaries with the keys
+'filename', 'lnum', and 'text' - the same shape used by |setqflist()|. Each
+entry points at the file and line where a snippet is defined. Snippets
+without an on-disk location (e.g. those registered with
+|UltiSnips#AddSnippetWithPriority|) are omitted.
+
+This is the structured equivalent of |:UltiSnipsListSnippets| meant for
+plugin authors. Typical use - feed the list to a fuzzy finder or jump
+directly to a single entry: >
+
+    function! GotoSnippet(trigger) abort
+      for entry in UltiSnips#SnippetLocations()
+        if entry.text =~# '^' . a:trigger . '\>'
+          execute 'edit ' . fnameescape(entry.filename)
+          execute entry.lnum
+          return
+        endif
+      endfor
+    endfunction
 
 
 3.5 Warning about missing python support           *UltiSnips-python-warning*
@@ -1695,13 +1740,16 @@ tabstop value following by ' == nil'.
 A snippet action is an arbitrary python code which can be executed at specific
 points in the lifetime of a snippet expansion.
 
-There are three types of actions:
+There are four types of actions:
 
 * Pre-expand - invoked just after trigger condition was matched, but before
   snippet actually expanded;
 * Post-expand - invoked after snippet was expanded and interpolations
   were applied for the first time, but before jump on the first placeholder.
 * Jump - invoked just after a jump to the next/prev placeholder.
+* Post-finish - invoked once the snippet is removed from the active stack
+  (after the last tabstop is reached, when the cursor leaves the snippet,
+  or when the buffer changes). Useful to undo state set in `pre_expand`.
 
 Specified code will be evaluated at stages defined above and same global
 variables and modules will be available that are stated in
@@ -1826,6 +1874,13 @@ Next variables and methods will be also defined in the action code scope:
 * 'snip.snippet_start' - (line, column) of start of the expanded snippet;
 * 'snip.snippet_end' - (line, column) of end of the expanded snippet;
 * 'snip.expand_anon()' - alias for 'UltiSnips_Manager.expand_anon()';
+* 'snip.visual_text' - the visual selection captured when the snippet was
+  expanded from visual mode (empty string when expanded outside of visual
+  mode);
+* 'snip.visual_mode' - the corresponding |visual-mode| character ("v", "V",
+  "\<C-V>"), empty when there was no selection;
+* 'snip.visual_content' - the underlying object exposing both as attributes
+  ('.text', '.mode');
 
 The argument to 'snip.expand_anon()' is parsed as a snippet body, so the full
 snippet DSL is available: backticks run shell code, '$N' creates tabstops, and
@@ -1863,6 +1918,27 @@ file:
 
 'insert_toc_item' will be called after first jump and will add newly entered
 section into the TOC for current file.
+
+4.10.4 Post-finish actions                     *UltiSnips-post-finish-actions*
+
+Post-finish actions are invoked exactly once, when the snippet is being
+removed from the active snippet stack. That happens when the user jumps
+through the final tabstop, when the cursor moves outside the snippet's
+bounds, or when the buffer is left. Use them to clean up state that was
+set up earlier in 'pre_expand' (for example, to re-enable a completion
+plugin that was suspended for the duration of the snippet).
+
+Post-finish action declared as follows: >
+    post_finish "python code here"
+    snippet ...
+    endsnippet
+
+Buffer can be modified through 'snip.buffer'. Variables
+'snip.snippet_start' and 'snip.snippet_end' point at the final positions
+of the start and end of the snippet that just finished.
+
+Because 'post_finish' runs as the snippet is being torn down, do not rely
+on 'snip.cursor' or on jumping to further tabstops from this action.
 
 Note: It is also possible to trigger snippet expansion from the jump action.
 In that case method 'snip.cursor.preserve()' should be called, so UltiSnips

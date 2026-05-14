@@ -8,11 +8,15 @@ also a TextObject.
 
 """
 
+from collections import namedtuple
+
 from UltiSnips import vim_helper
 from UltiSnips.error import PebkacError
 from UltiSnips.position import JumpDirection, Position
 from UltiSnips.text_objects.base import EditableTextObject, NoneditableTextObject
 from UltiSnips.text_objects.tabstop import TabStop
+
+_VisualContentSnapshot = namedtuple("_VisualContentSnapshot", ["mode", "text"])
 
 
 class SnippetInstance(EditableTextObject):
@@ -42,7 +46,15 @@ class SnippetInstance(EditableTextObject):
         self.locals = {"match": last_re, "context": context}
         self.globals = globals
         self._compiled_globals = _compiled_globals
-        self.visual_content = visual_content
+        # Snapshot mode + text right at launch. The live preserver gets
+        # reset() immediately after launch returns, so any later read
+        # (e.g. inside `post_jump` / `post_finish`) needs a frozen view.
+        if visual_content is None:
+            self.visual_content = _VisualContentSnapshot("", "")
+        else:
+            self.visual_content = _VisualContentSnapshot(
+                visual_content.mode, visual_content.text
+            )
         self.current_placeholder = None
 
         super().__init__(parent, start, end, initial_text)

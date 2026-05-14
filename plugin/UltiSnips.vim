@@ -91,6 +91,8 @@ command! -bang -nargs=? -complete=customlist,UltiSnips#FileTypeComplete UltiSnip
 
 command! -nargs=1 UltiSnipsAddFiletypes :call UltiSnips#AddFiletypes(<q-args>)
 
+command! UltiSnipsListLocations :call UltiSnips#ListSnippetLocations()
+
 augroup UltiSnips_AutoTrigger
     au!
     au InsertCharPre * call UltiSnips#TrackChange()

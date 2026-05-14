@@ -259,18 +259,16 @@ class SnippetManager:
 
             ulti_dict[key] = description
 
-            if search_all:
-                ulti_dict_info[key] = {
-                    "description": description,
-                    "location": location,
-                }
+            ulti_dict_info[key] = {
+                "description": description,
+                "location": location,
+            }
 
         # Assign the full dict at once rather than mutating
         # vim.vars["current_ulti_dict"][key] — neovim's Python API returns a
         # copy for dict values, so per-key mutation is silently lost.
         vim.vars["current_ulti_dict"] = ulti_dict
-        if search_all:
-            vim.vars["current_ulti_dict_info"] = ulti_dict_info
+        vim.vars["current_ulti_dict_info"] = ulti_dict_info
 
     @err_to_scratch_buffer.wrap
     def list_snippets(self):
@@ -564,6 +562,13 @@ class SnippetManager:
 
     def _current_snippet_is_done(self):
         """The current snippet should be terminated."""
+        snippet_instance = self._active_snippets[-1]
+        snippets_stack = self._active_snippets[:]
+        with (
+            use_proxy_buffer(snippets_stack, self._vstate, self._change_provider),
+            self._action_context(),
+        ):
+            snippet_instance.snippet.do_post_finish(snippet_instance)
         self._active_snippets.pop()
         if not self._active_snippets:
             self._teardown_inner_state()
