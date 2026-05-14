@@ -13,6 +13,60 @@ if !has('nvim') && version < 820
    finish
 endif
 
+" UltiSnips needs Python 3. Bail with a clear message if Vim wasn't
+" compiled with python3 support at all, so we don't fall through to the
+" runtime-check below (which would just say "Python is broken" without
+" distinguishing missing-from-build vs broken-at-load).
+if !has('python3') && !get(g:, 'UltiSnipsNoPythonWarning', 0)
+    echohl WarningMsg
+    echom 'UltiSnips requires Vim compiled with +python3 support; disabling UltiSnips.'
+    echom '          See :help UltiSnips-requirements for setup.'
+    echom '          Silence this message with `let g:UltiSnipsNoPythonWarning = 1`.'
+    echohl None
+endif
+if !has('python3')
+    finish
+endif
+
+" `has('python3')` is necessary but not sufficient: Vim can be compiled
+" with dynamic Python support and still fail to load libpython at
+" runtime, or have UltiSnips off the Python path entirely. Force the
+" lazy load now by asking Python to flip a Vim-side flag — if either
+" libpython or the UltiSnips package import fails, the flag stays zero
+" and we bail before registering autocmds that would otherwise re-raise
+" E370 / E263 / NameError on every keystroke (#1237, #1209).
+let s:ultisnips_python3_ok = 0
+let s:ultisnips_python3_error = ''
+try
+    py3 << EOF
+try:
+    import vim
+    from UltiSnips import UltiSnips_Manager
+    vim.command('let s:ultisnips_python3_ok = 1')
+except Exception as _err:
+    import traceback as _tb
+    _msg = _tb.format_exception_only(type(_err), _err)[-1].strip()
+    vim.command("let s:ultisnips_python3_error = " + repr(_msg))
+EOF
+catch
+    " Catchable Python load failures (E370, E263) land here; the import
+    " block above never ran so s:ultisnips_python3_error stays empty.
+    let s:ultisnips_python3_error = v:exception
+endtry
+if !s:ultisnips_python3_ok
+    if !get(g:, 'UltiSnipsNoPythonWarning', 0)
+        echohl WarningMsg
+        echom 'UltiSnips: Python 3 is present but unusable; disabling UltiSnips.'
+        if !empty(s:ultisnips_python3_error)
+            echom '           ' . s:ultisnips_python3_error
+        endif
+        echom '           See :help UltiSnips-requirements for setup.'
+        echom '           Silence this message with `let g:UltiSnipsNoPythonWarning = 1`.'
+        echohl None
+    endif
+    finish
+endif
+
 " Enable Post debug server config
 if !exists("g:UltiSnipsDebugServerEnable")
    let g:UltiSnipsDebugServerEnable = 0
