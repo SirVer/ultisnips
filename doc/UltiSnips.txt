@@ -12,7 +12,8 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    3.1 Commands                                 |UltiSnips-commands|
       3.1.1 UltiSnipsEdit                       |UltiSnipsEdit|
       3.1.2 UltiSnipsAddFiletypes               |UltiSnipsAddFiletypes|
-      3.1.3 UltiSnipsListLocations              |UltiSnipsListLocations|
+      3.1.3 UltiSnipsRemoveFiletypes            |UltiSnipsRemoveFiletypes|
+      3.1.4 UltiSnipsListLocations              |UltiSnipsListLocations|
    3.2 Triggers                                 |UltiSnips-triggers|
       3.2.1 Trigger key mappings                |UltiSnips-trigger-key-mappings|
       3.2.2 Using your own trigger functions    |UltiSnips-trigger-functions|
@@ -246,7 +247,24 @@ snippets you can call >
 The priority will then be rails -> ruby -> programming -> all.
 
 
- 3.1.3 UltiSnipsListLocations                          *:UltiSnipsListLocations*
+ 3.1.3 UltiSnipsRemoveFiletypes                      *:UltiSnipsRemoveFiletypes*
+
+The UltiSnipsRemoveFiletypes command is the counterpart of
+|:UltiSnipsAddFiletypes|. It disables the snippets for the listed filetypes
+in the current buffer, even when those filetypes were inherited from
+'filetype' itself (for example after `set filetype=html.css`). The argument
+uses the same dotted syntax.
+
+For example, if `set filetype=html.css` brings in the html snippets but you
+only want the css ones, place the following in `ftplugin/css.vim` (or run
+it ad-hoc): >
+
+   :UltiSnipsRemoveFiletypes html
+
+A subsequent |:UltiSnipsAddFiletypes| with the same filetype re-enables it.
+
+
+ 3.1.4 UltiSnipsListLocations                          *:UltiSnipsListLocations*
 
 The UltiSnipsListLocations command populates the |quickfix| list with one
 entry per snippet definition known to UltiSnips and opens the list with

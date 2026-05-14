@@ -133,6 +133,7 @@ class SnippetManager:
 
         self._active_snippets = []
         self._added_buffer_filetypes = defaultdict(list)
+        self._removed_buffer_filetypes = defaultdict(set)
 
         self._vstate = VimState()
         self._visual_content = VisualContentPreserver()
@@ -371,25 +372,50 @@ class SnippetManager:
                 break
 
     def get_buffer_filetypes(self):
-        return (
+        removed = self._removed_buffer_filetypes[vim_helper.buf.number]
+        fts = (
             self._added_buffer_filetypes[vim_helper.buf.number]
             + vim_helper.buf.filetypes
             + ["all"]
         )
+        return [ft for ft in fts if ft not in removed]
 
     def add_buffer_filetypes(self, filetypes: str):
         """'filetypes' is a dotted filetype list, for example 'cuda.cpp'"""
         buf_fts = self._added_buffer_filetypes[vim_helper.buf.number]
+        removed = self._removed_buffer_filetypes[vim_helper.buf.number]
         idx = -1
         for ft in filetypes.split("."):
             ft = ft.strip()
             if not ft:
                 continue
+            # Adding a filetype overrides a previous removal so the user can
+            # cleanly re-enable a filetype they had disabled.
+            removed.discard(ft)
             try:
                 idx = buf_fts.index(ft)
             except ValueError:
                 self._added_buffer_filetypes[vim_helper.buf.number].insert(idx + 1, ft)
                 idx += 1
+
+    def remove_buffer_filetypes(self, filetypes: str):
+        """Disable snippets for the given filetypes in the current buffer.
+
+        Accepts the same dotted filetype syntax as |add_buffer_filetypes|
+        (e.g. 'html.css'). Filetypes that came from `&filetype`, from a
+        previous `add_buffer_filetypes`, or implicitly through `all` are all
+        eligible to be removed. Removal is persistent for the lifetime of the
+        buffer; a later `add_buffer_filetypes` re-enables the filetype.
+        """
+        buf_fts = self._added_buffer_filetypes[vim_helper.buf.number]
+        removed = self._removed_buffer_filetypes[vim_helper.buf.number]
+        for ft in filetypes.split("."):
+            ft = ft.strip()
+            if not ft:
+                continue
+            removed.add(ft)
+            if ft in buf_fts:
+                buf_fts.remove(ft)
 
     @err_to_scratch_buffer.wrap
     def _cursor_moved(self):

@@ -90,6 +90,7 @@ command! -bang -nargs=? -complete=customlist,UltiSnips#FileTypeComplete UltiSnip
     \ :call UltiSnips#Edit(<q-bang>, <q-args>)
 
 command! -nargs=1 UltiSnipsAddFiletypes :call UltiSnips#AddFiletypes(<q-args>)
+command! -nargs=1 UltiSnipsRemoveFiletypes :call UltiSnips#RemoveFiletypes(<q-args>)
 
 command! UltiSnipsListLocations :call UltiSnips#ListSnippetLocations()
 

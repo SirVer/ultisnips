@@ -60,6 +60,11 @@ function! UltiSnips#AddFiletypes(filetypes) abort
     return ""
 endfunction
 
+function! UltiSnips#RemoveFiletypes(filetypes) abort
+    py3 UltiSnips_Manager.remove_buffer_filetypes(vim.eval("a:filetypes"))
+    return ""
+endfunction
+
 function! UltiSnips#FileTypeComplete(arglead, cmdline, cursorpos) abort
     let ret = {}
     let items = map(
