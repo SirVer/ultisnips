@@ -108,6 +108,45 @@ function! UltiSnips#SnippetsInCurrentScope(...) abort
     return g:current_ulti_dict
 endfunction
 
+function! UltiSnips#SnippetLocations() abort
+    " Returns a list of {filename, lnum, text} dicts (quickfix-list format)
+    " describing where each snippet known to UltiSnips is defined. Snippets
+    " whose location is not a file (e.g. those added via
+    " UltiSnips#AddSnippetWithPriority) are omitted.
+    call UltiSnips#SnippetsInCurrentScope(1)
+    let l:result = []
+    for [l:trigger, l:info] in items(g:current_ulti_dict_info)
+        let l:idx = strridx(l:info.location, ':')
+        if l:idx <= 0
+            continue
+        endif
+        let l:lnum = str2nr(strpart(l:info.location, l:idx + 1))
+        if l:lnum <= 0
+            continue
+        endif
+        let l:text = l:trigger
+        if !empty(l:info.description)
+            let l:text .= ' - ' . l:info.description
+        endif
+        call add(l:result, {
+            \ 'filename': strpart(l:info.location, 0, l:idx),
+            \ 'lnum': l:lnum,
+            \ 'text': l:text,
+            \ })
+    endfor
+    return sort(l:result, {a, b -> a.text ==# b.text ? 0 : (a.text <# b.text ? -1 : 1)})
+endfunction
+
+function! UltiSnips#ListSnippetLocations() abort
+    let l:locs = UltiSnips#SnippetLocations()
+    if empty(l:locs)
+        echo "UltiSnips: no snippet definitions with file locations found."
+        return
+    endif
+    call setqflist([], 'r', {'title': 'UltiSnips snippet locations', 'items': l:locs})
+    copen
+endfunction
+
 function! UltiSnips#CanExpandSnippet() abort
 	return py3eval("UltiSnips_Manager.can_expand()")
 endfunction

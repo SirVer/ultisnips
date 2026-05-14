@@ -12,6 +12,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
    3.1 Commands                                 |UltiSnips-commands|
       3.1.1 UltiSnipsEdit                       |UltiSnipsEdit|
       3.1.2 UltiSnipsAddFiletypes               |UltiSnipsAddFiletypes|
+      3.1.3 UltiSnipsListLocations              |UltiSnipsListLocations|
    3.2 Triggers                                 |UltiSnips-triggers|
       3.2.1 Trigger key mappings                |UltiSnips-trigger-key-mappings|
       3.2.2 Using your own trigger functions    |UltiSnips-trigger-functions|
@@ -25,6 +26,8 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       3.4.4 UltiSnips#CanExpandSnippet          |UltiSnips#CanExpandSnippet|
       3.4.5 UltiSnips#CanJumpForwards           |UltiSnips#CanJumpForwards|
       3.4.6 UltiSnips#CanJumpBackwards          |UltiSnips#CanJumpBackwards|
+      3.4.7 UltiSnips#ToggleAutoTrigger         |UltiSnips#ToggleAutoTrigger|
+      3.4.8 UltiSnips#SnippetLocations          |UltiSnips#SnippetLocations|
    3.5 Missing python support                   |UltiSnips-python-warning|
 4. Authoring snippets                           |UltiSnips-authoring-snippets|
    4.1 Basics                                   |UltiSnips-basics|
@@ -241,6 +244,20 @@ snippets you can call >
    :UltiSnipsAddFiletypes ruby.programming
 
 The priority will then be rails -> ruby -> programming -> all.
+
+
+ 3.1.3 UltiSnipsListLocations                          *:UltiSnipsListLocations*
+
+The UltiSnipsListLocations command populates the |quickfix| list with one
+entry per snippet definition known to UltiSnips and opens the list with
+|:copen|. Entries point at the file and line where each snippet is defined,
+so the usual quickfix navigation (|:cnext|, |:cprev|, |<CR>|) jumps to the
+matching snippet. Snippets registered programmatically through
+|UltiSnips#AddSnippetWithPriority| have no file location and are omitted.
+
+See |UltiSnips#SnippetLocations| for the underlying function if you want to
+build your own picker (e.g. fuzzy-finder integration) instead of using the
+quickfix list.
 
 3.2 Triggers                                             *UltiSnips-triggers*
 ------------
@@ -564,6 +581,28 @@ in the Insert mode: >
 By default, `autotrigger` is enabled (relevant for snippets with the option 'A').
 If you want to disable it by default, add the following line to your vimrc: >
     let g:UltiSnipsAutoTrigger = 0
+
+ 3.4.8 UltiSnips#SnippetLocations          *UltiSnips#SnippetLocations*
+
+UltiSnips#SnippetLocations() returns a list of dictionaries with the keys
+'filename', 'lnum', and 'text' - the same shape used by |setqflist()|. Each
+entry points at the file and line where a snippet is defined. Snippets
+without an on-disk location (e.g. those registered with
+|UltiSnips#AddSnippetWithPriority|) are omitted.
+
+This is the structured equivalent of |:UltiSnipsListSnippets| meant for
+plugin authors. Typical use - feed the list to a fuzzy finder or jump
+directly to a single entry: >
+
+    function! GotoSnippet(trigger) abort
+      for entry in UltiSnips#SnippetLocations()
+        if entry.text =~# '^' . a:trigger . '\>'
+          execute 'edit ' . fnameescape(entry.filename)
+          execute entry.lnum
+          return
+        endif
+      endfor
+    endfunction
 
 
 3.5 Warning about missing python support           *UltiSnips-python-warning*
