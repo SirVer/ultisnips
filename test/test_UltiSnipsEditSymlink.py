@@ -26,12 +26,10 @@ class UltiSnipsEdit_SymlinkedConfigHome_FindsSnippet(_VimTest):
         return self._expected_file
 
     def _extra_vim_config(self, vim_config):
-        # Set up:
-        #   self._temp_dir/real_snippets/python.snippets   (target)
-        #   self._temp_dir/.vim/                           (dot-vim home)
-        #   self._temp_dir/.vim/UltiSnips -> real_snippets (symlink)
-        # then route $HOME through a symlinked alias of self._temp_dir
-        # so `get_dot_vim()` (which resolves) and `find_all_snippet_directories()`
+        # Lay out a real snippets directory, a dot-vim home, and a symlink
+        # from the dot-vim home into the snippets directory. Then route
+        # $HOME through a symlinked alias of `self._temp_dir` so
+        # `get_dot_vim()` (which resolves) and `find_all_snippet_directories()`
         # (which doesn't) disagree on the path layout (#1543).
         snippets_target = self._temp_dir / "real_snippets"
         snippets_target.mkdir(parents=True, exist_ok=True)
