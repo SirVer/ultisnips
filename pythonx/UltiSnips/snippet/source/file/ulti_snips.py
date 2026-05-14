@@ -63,6 +63,7 @@ def find_all_snippet_directories() -> list[str]:
     return all_dirs
 
 
+# TODO(robot): this function is private now; might as well inline it below.
 def find_all_snippet_files(ft) -> set[str]:
     """Returns all snippet files matching 'ft' in the given runtime path
     directory."""

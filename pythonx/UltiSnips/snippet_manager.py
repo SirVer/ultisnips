@@ -335,6 +335,9 @@ class SnippetManager:
             return True
         return False
 
+    # TODO(robot): This is pretty ugly - it calls to a private function in the snippet sources that you apparentlý
+    # are not sure that it is defined every time. Instead, elevate _get_all_snippet_files_for in the sources 
+    # to be a public function and make sure it always is defined, returning maybe an empty set.
     def _all_snippet_files_for(self, ft):
         """Returns every snippet file that any registered file-based source
         would load for filetype 'ft'. Used by :UltiSnipsEdit! to build the
