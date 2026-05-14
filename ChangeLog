@@ -45,10 +45,6 @@ next:
 	  bounds onto the new line. The expand/jump triggers stop
 	  responding once the cursor has clearly left the snippet.
 	  (#1649, #1311)
-	- The `g:UltiSnipsDebugServerEnable` remote-PDB hook introduced
-	  in 4.0 has been removed; the printf-debugging path through
-	  `pythonx/UltiSnips/debug.py` covers the same workflow with
-	  much less surface area. (#1677)
 
 	Bug fixes:
 	- Unnamed register `@"` no longer gets clobbered when a snippet
@@ -129,19 +125,6 @@ next:
 	  internal UltiSnips call stack. Genuine UltiSnips bugs still
 	  carry the full trace and the "please report" preamble.
 	  (#1676)
-
-	Infrastructure:
-	- Release flow documented in `docs/RELEASING.md`.
-	  `scripts/slim-release.py` strips GIFs from a tag's source
-	  zip for vim.org upload. (#1631)
-	- `make lint` now also runs `ruff format --check`. (#1645)
-	- Snippet-source iteration order is now deterministic, so the
-	  "Multiple matches" prompt no longer reorders between runs.
-	  (#1639)
-	- Regression tests pinned for previously-fixed-in-passing
-	  reports: #161, #168 (#1640); #1115, #1510 (#1643); #1281
-	  (#1644); #1221, #1450, #903 (#1651); #1305 (#1661); #1569
-	  (#1663); the `expand_anon` documentation footgun (#1650).
 
 version 4.0 (10-May-2026):
 	New features:
