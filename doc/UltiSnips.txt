@@ -442,6 +442,8 @@ complete definition as listed by the |:smap| command. >
 UltiSnips provides some functions for extending core functionality.
 
 
+                                              *UltiSnips-add-snippet*
+                                              *UltiSnips-add-snippets*
  3.4.1 UltiSnips#AddSnippetWithPriority    *UltiSnips#AddSnippetWithPriority*
 
 The first function is UltiSnips#AddSnippetWithPriority(trigger, value, description,
