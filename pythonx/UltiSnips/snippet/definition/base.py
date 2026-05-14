@@ -333,6 +333,14 @@ class SnippetDefinition:
                 match = vim_helper.eval(f'"{boundary_chars}" =~# "\\\\v.<."') != "0"
         elif "i" in self._opts:
             match = words.endswith(self._trigger)
+        elif "p" in self._opts:
+            # Partial prefix: match if the user typed a non-empty prefix of
+            # the trigger. The typed prefix (not the full trigger) is what
+            # gets removed before expansion, so the user only loses what
+            # they actually typed.
+            match = bool(words) and self._trigger.startswith(words)
+            if match:
+                self._matched = words
         else:
             match = words == self._trigger
 

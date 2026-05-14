@@ -82,7 +82,7 @@ syn match snipSnippetDocContextString ,"[^"]*", contained nextgroup=snipSnippetC
 syn match snipSnippetContext ,"[^"]\+", contained skipwhite contains=snipSnippetContextP
 syn region snipSnippetContextP start=,"\@<=., end=,", contained contains=@Python nextgroup=snipSnippetOptions skipwhite keepend
 syn match snipSnippetOptions ,\S\+, contained contains=snipSnippetOptionFlag
-syn match snipSnippetOptionFlag ,[biwrtsmxAe], contained
+syn match snipSnippetOptionFlag ,[biwrtspmxAe], contained
 
 " Command substitution {{{4
 
