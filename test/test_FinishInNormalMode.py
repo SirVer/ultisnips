@@ -39,3 +39,25 @@ class FinishInNormalMode_NoOption_LandsInInsertMode(_VimTest):
     }
     keys = "bb" + EX + JF + "iX"
     wanted = "foobarbaziX"
+
+
+class FinishInNormalMode_EmptyTabstopOrigin(_VimTest):
+    """Regression for the issue reporter: jumping from an *empty* tabstop
+    ($1 with no default placeholder, so we entered insert mode rather
+    than select mode) must still land in normal mode at $0.
+
+    Probe Vim's `mode()` right after the jump and stash it in the buffer.
+    The `:stopinsert` queued inside `vim_helper.select()` is not reliably
+    consumed before the next user keystroke; this test pins the synchronous
+    Esc-via-feedkeys behaviour that fixes it.
+    """
+
+    files = {
+        "us/all.snippets": r"""
+        snippet footle "Description" x
+        ${1} $1: foo$0
+        endsnippet
+        """
+    }
+    keys = "footle" + EX + "X" + JF + ":put =mode(1)\n"
+    wanted = "X X: foo\nn"

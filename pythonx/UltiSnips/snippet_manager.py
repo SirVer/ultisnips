@@ -640,9 +640,15 @@ class SnippetManager:
                         )
                         self._current_snippet_is_done()
                         if finish_in_normal_mode:
-                            # vim_helper.select() already left us in normal
-                            # mode synchronously; dropping move_cmd is enough
-                            # to keep us there.
+                            # Queue an `<Esc>` at the *front* of the typeahead
+                            # (the `i` flag) so it is processed before any
+                            # follow-up user keystrokes still in the input
+                            # queue. The deferred `:stopinsert` queued inside
+                            # `vim_helper.select()` is not reliably consumed
+                            # between this Python callback returning and the
+                            # next key being processed; an explicit prepended
+                            # `<Esc>` guarantees normal mode.
+                            vim.command(r'call feedkeys("\<Esc>", "in")')
                             move_cmd = ""
                 else:
                     # This really shouldn't happen, because a snippet should
