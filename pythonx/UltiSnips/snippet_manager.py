@@ -40,8 +40,13 @@ def _ask_user(a, formatted):
         if rv is None or rv == "0":
             return None
         rv = int(rv)
-        if rv > len(a):
-            rv = len(a)
+        # Vim's inputlist() returns -1 when the user clicks outside the menu,
+        # and may return values outside `1..len(a)` when the user types a
+        # number that doesn't correspond to a listed snippet (e.g. by clicking
+        # the prompt line below the list). Treat any out-of-range answer as a
+        # cancellation rather than picking an arbitrary entry.
+        if rv < 1 or rv > len(a):
+            return None
         return a[rv - 1]
     except vim_helper.error:
         # Likely "invalid expression", but might be translated. We have no way
