@@ -7,9 +7,8 @@ No new feature will be accepted without good test coverage, passing CI and prope
 
 ## Before you add a feature
 
-UltiSnips is so rich on features that it borders on feature creep.
-It is also an understaffed and undermaintained project.
-Since every feature needs to be maintained forever, we are very careful about new ones.
+UltiSnips has a deep feature set, and every feature needs to be maintained
+forever, so we like to align on a design before code is written.
 Please create alignment before putting too much work into a novel idea.
 There are several ways of doing this:
 
@@ -17,7 +16,7 @@ There are several ways of doing this:
 2. Open a PR with a hackish or minimal implementation, i.e. no tests and no docs.
 3. Write a short (<= 1 page) design doc in a Gist or on Google Docs.
 
-Should there be agreement that your feature idea adds enough value to offset the maintenance burden, you can go ahead and implement it, including tests and documentation.
+Once there is agreement on the shape of the feature, you can go ahead and implement it, including tests and documentation.
 
 ## Debugging
 
