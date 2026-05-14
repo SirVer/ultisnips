@@ -28,6 +28,13 @@ if !has('python3')
     finish
 endif
 
+" We are sourcing map_keys.vim here, because we want the UltiSnips trigger
+" variables to be defined before trying to load the Python code. However, we
+" do not want to map the keys yet - in case something goes wrong with the
+" loading, we do not want to have spuriously mapped keys; i.e. a half loaded
+" plugin (see #1658, #1679).
+runtime autoload/UltiSnips/map_keys.vim
+
 " `has('python3')` is necessary but not sufficient: Vim can be compiled
 " with dynamic Python support and still fail to load libpython at
 " runtime, or have UltiSnips off the Python path entirely. Force the
