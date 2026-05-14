@@ -138,15 +138,6 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         vim_config.append('let g:UltiSnipsJumpBackwardTrigger="+"')
         vim_config.append('let g:UltiSnipsListSnippets="@"')
 
-        vim_config.append(
-            f"let g:UltiSnipsDebugServerEnable={1 if self.pdb_enable else 0}"
-        )
-        vim_config.append(f'let g:UltiSnipsDebugHost="{self.pdb_host}"')
-        vim_config.append(f"let g:UltiSnipsDebugPort={self.pdb_port}")
-        vim_config.append(
-            f"let g:UltiSnipsPMDebugBlocking={1 if self.pdb_block else 0}"
-        )
-
         # Work around https://github.com/vim/vim/issues/3117 for testing >
         # py3.7 on Vim 8.1. Actually also reported against UltiSnips
         # https://github.com/SirVer/ultisnips/issues/996

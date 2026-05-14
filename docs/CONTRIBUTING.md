@@ -18,15 +18,6 @@ There are several ways of doing this:
 
 Once there is agreement on the shape of the feature, you can go ahead and implement it, including tests and documentation.
 
-## Debugging
-
-UltiSnips embeds some remote debugging facilities in the `UltiSnips.remote_pdb` module.
-When enabled (by setting `let g:UltiSnipsDebugServerEnable=1`), whenever an exception is raised, vim will pause
-and you will be able to connect to the debug server with netcat or telnet.
-By default, the server listens on 'localhost:8080' (it can be changed).
-
-See `:help UltiSnips-Advanced-Debugging` for more informations
-
 ## Testing
 
 UltiSnips has a rigorous test suite and every new feature or bug fix is expected to come with a new test.
