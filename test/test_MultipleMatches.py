@@ -19,9 +19,12 @@ class Multiple_SimpleCaseSelectSecond_ECR(_MultipleMatches):
     wanted = "Case2"
 
 
-class Multiple_SimpleCaseSelectTooHigh_ESelectLast(_MultipleMatches):
-    keys = "test" + EX + "5\n"
-    wanted = "Case2"
+# GH #1226: an inputlist() answer larger than the list used to be clamped to
+# the last entry (silently picking a snippet the user didn't choose).
+# Out-of-range answers now cancel, like every other invalid input.
+class Multiple_SimpleCaseSelectTooHigh_Cancels(_MultipleMatches):
+    keys = "test" + EX + "5\n" + "hi"
+    wanted = "testhi"
 
 
 class Multiple_SimpleCaseSelectZero_EEscape(_MultipleMatches):
