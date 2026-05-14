@@ -1,3 +1,131 @@
+next:
+	New features:
+	- |post_finish| snippet action: runs once when the snippet leaves
+	  the active stack, whether through tabbing past the final
+	  tabstop, the cursor moving outside the snippet, or the buffer
+	  being left. Pairs with |pre_expand| for state that must be
+	  cleaned up no matter how the user exits.
+	  See |UltiSnips-snippet-actions|. (#1672, #1415)
+	- New snippet option `x`: finishes in normal mode when the user
+	  reaches `$0` by jumping forward, instead of dropping back into
+	  insert. See |UltiSnips-snippet-options|. (#1671, #1399)
+	- New snippet option `p`: matches if the typed word is any
+	  non-empty prefix of the trigger, so typing `i`, `im`, ...,
+	  `import` all expand. See |UltiSnips-snippet-options|.
+	  (#1670, #1207)
+	- |:UltiSnipsRemoveFiletypes| / |UltiSnips#RemoveFiletypes()|:
+	  the inverse of |:UltiSnipsAddFiletypes|. Useful when
+	  `set filetype=html.css` activates two snippet sets and you
+	  want to suppress one. See |UltiSnips-commands|. (#1669, #792)
+	- |:UltiSnipsListLocations| and |UltiSnips#SnippetLocations()|:
+	  populate the quickfix list with every snippet's defining file
+	  and line so you can jump to definitions with standard
+	  quickfix bindings. See |UltiSnips-commands|. (#1668, #1198)
+	- `User UltiSnipsJumped` autocommand fires after every
+	  successful jump (initial tabstop and every subsequent jump),
+	  with the final `$0` deliberately excluded so
+	  `UltiSnipsExitLastSnippet` stays the right hook for snippet
+	  exit. See |UltiSnips-custom-autocommands|. (#1665, #1500)
+	- `snip.visual_text`, `snip.visual_mode`, and
+	  `snip.visual_content` are now available in `post_jump`
+	  actions, matching the existing context-code surface.
+	  `snip.visual_content` is also kept correct on the snippet
+	  instance for the duration of the snippet, so consumers
+	  reading it later (e.g. through `snip.context`) no longer see
+	  the post-reset empty value. (#1673, #1524)
+	- |g:current_ulti_dict_info| is now always populated by
+	  |UltiSnips#SnippetsInCurrentScope()|, not just when called
+	  with `1`. Consumers reading the matching subset now also see
+	  each snippet's defining file and line. (#1667, #981)
+
+	Breaking changes:
+	- Insertion at or past the active snippet's end with no child
+	  tabstop claiming the edit (e.g. pressing `o` after the
+	  snippet) now terminates the snippet instead of extending its
+	  bounds onto the new line. The expand/jump triggers stop
+	  responding once the cursor has clearly left the snippet.
+	  (#1649, #1311)
+
+	Bug fixes:
+	- Unnamed register `@"` no longer gets clobbered when a snippet
+	  is triggered from visual mode. (#1635, #1297)
+	- Yank register `@0` and registers `@1`-`@9`, `@-` are now
+	  preserved across snippet expansion. (#1636, #1037)
+	- "Multiple matches" prompt no longer shows duplicate entries
+	  when the same file is reachable via a symlinked runtimepath
+	  entry or via an `<ft>_*.snippets` glob that an `extends`
+	  directive also references. `extends foo.snippets` is now
+	  treated as `extends foo`. (#1637, #1341, #1519, #1559)
+	- Stray move-command bytes (`<Esc>`, `v3G10|o3G4|o`, ...) no
+	  longer leak into the buffer when a `post_jump` action calls
+	  a typeahead-consuming Vim function or nests a
+	  `snip.expand_anon` whose first tabstop is defaulted.
+	  (#1638, #751)
+	- Tabstops no longer drift out of sync after edits in
+	  multi-line snippets whose end sits at column 0, or after
+	  edits past column 0 on the first line of a snippet that
+	  starts at column 0. (#1641, #1182, #193)
+	- Transformation replacement strings no longer reinterpret a
+	  captured `\u` / `\l` / `\U` / `\L` / `\E` as a case-switch
+	  escape. (#1642, #1444)
+	- Empty `${VISUAL}` lines are now stripped when the snippet
+	  has the `m` option, so the renderer's indent of an empty
+	  visual line no longer survives. (#1647, #503)
+	- Cursor attribution at zero-width tabstop seams (e.g.
+	  `$1$1$2`) no longer prefers the later sibling, so mirrors
+	  stay routed to the source tabstop after the first character.
+	  (#1646, #1359)
+	- Re-entering insert mode outside the snippet bounds (e.g.
+	  `<Esc>` then `o`) terminates the snippet instead of leaving
+	  the jump triggers mapped against a stale span.
+	  (#1648, #1454)
+	- `post_jump` actions that move the cursor or edit the buffer
+	  now compose with the select-mode placeholder selection: the
+	  move command is rebuilt from the tabstop's current bounds
+	  before being fed. `snip.expand_anon` from a `post_expand`
+	  action no longer splices the inner body into the middle of
+	  the outer or skips the inner snippet's first tabstop.
+	  (#1652, #1013, #1434)
+	- `snip.mkline` now keeps the snippet indent on every line
+	  when the python block builds its result in one expression
+	  (`"\n".join(snip.mkline(x) for x in items)` and similar).
+	  (#1655, #1233)
+	- "Multiple matches" prompt now treats answers outside the
+	  valid range as a cancellation instead of clamping to the
+	  last item or raising `IndexError`. (#1653, #1226)
+	- `:UltiSnipsEdit` now resolves symlinks when matching snippet
+	  directories against the vim config directory, so symlinked
+	  `UltiSnips/` setups and macOS `/var` -> `/private/var`
+	  redirections find a default directory again. (#1656, #1543)
+	- Cursor visiting an auxiliary window (`:pedit` preview,
+	  quickfix, neovim floats) no longer tears down the active
+	  snippet. (#1657, #1168)
+	- The snippets syntax file now honours `\/` as an escape inside
+	  `${VISUAL:...}` defaults, so `${VISUAL:\/* code *\/}` no
+	  longer bleeds into the next snippet's highlight group.
+	  (#1659, #1468)
+	- `:UltiSnipsEdit!` picker now includes SnipMate `*.snippets`
+	  files when `g:UltiSnipsEnableSnipMate` is on. (#1660, #1360)
+	- Vim no longer spams a stack trace on every keystroke when
+	  `py3` cannot load libpython or the `UltiSnips` package is
+	  not importable. The plugin emits one warning (suppressible
+	  via |g:UltiSnipsNoPythonWarning|) and bails out cleanly.
+	  (#1658, #1237, #1209, #1377)
+	- Doc example for |UltiSnips#ExpandPossibleShorterSnippet| no
+	  longer leaves a trailing space in the buffer after
+	  expanding. (#1654, #951)
+	- UltiSnips-format snippet files placed in a snipMate-reserved
+	  `snippets/` directory now emit an actionable error pointing
+	  to either renaming the directory to `UltiSnips/` or setting
+	  `g:UltiSnipsEnableSnipMate = 0`, instead of failing with
+	  `Invalid line 'endsnippet'` or silently not expanding.
+	  (#1675)
+	- User-attributable snippet errors (`!p` block exceptions and
+	  pre/post-expand action exceptions) are now shown without the
+	  internal UltiSnips call stack. Genuine UltiSnips bugs still
+	  carry the full trace and the "please report" preamble.
+	  (#1676)
+
 version 4.0 (10-May-2026):
 	New features:
 	- Neovim is now officially supported and tested in CI.

@@ -62,15 +62,15 @@ function! s:unite_source.gather_candidates(args, context) abort
         \    'is_multiline': 0}
   let snippet_list = UltiSnips#SnippetsInCurrentScope()
   let max_len = s:unite_source.get_longest_snippet_len(snippet_list)
-  let canditates = []
+  let candidates = []
   for snip in items(snippet_list)
     let curr_val = copy(default_val)
     let curr_val['word'] = printf('%-*s', max_len, snip[0]) . "     " . snip[1]
     let curr_val['trigger'] = snip[0]
     let curr_val['kind'] = 'common'
-    call add(canditates, curr_val)
+    call add(candidates, curr_val)
   endfor
-  return canditates
+  return candidates
 endfunction
 
 function! unite#sources#ultisnips#define() abort

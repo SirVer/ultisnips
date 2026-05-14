@@ -17,9 +17,6 @@ class SnippetSyntaxError(PebkacError):
 class SnippetFileSource(SnippetSource):
     """Base class that abstracts away 'extends' info and file hashes."""
 
-    def __init__(self):
-        super().__init__()
-
     def ensure(self, filetypes):
         for ft in self.get_deep_extends(filetypes):
             if self._needs_update(ft):
@@ -92,8 +89,6 @@ class SnippetFileSource(SnippetSource):
                 priority, triggers = data
                 self._snippets[ft].clear_snippets(priority, triggers)
             elif event == "extends":
-                # TODO(sirver): extends information is more global
-                # than one snippet source.
                 (filetypes,) = data
                 self.update_extends(ft, filetypes)
             elif event == "snippet":

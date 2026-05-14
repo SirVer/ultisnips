@@ -46,7 +46,7 @@ class SnippetDictionary:
 
         """
         if not triggers:
-            if self._clear_priority is None or priority > self._clear_priority:
+            if priority > self._clear_priority:
                 self._clear_priority = priority
         else:
             for trigger in triggers:

@@ -55,6 +55,7 @@ UltiSnips                                      *snippet* *snippets* *UltiSnips*
       4.10.1 Pre-expand actions                 |UltiSnips-pre-expand-actions|
       4.10.2 Post-expand actions                |UltiSnips-post-expand-actions|
       4.10.3 Post-jump actions                  |UltiSnips-post-jump-actions|
+      4.10.4 Post-finish actions                |UltiSnips-post-finish-actions|
    4.11 Autotrigger                             |UltiSnips-autotrigger|
 5. UltiSnips and Other Plugins                  |UltiSnips-other-plugins|
    5.1 Existing Integrations                    |UltiSnips-integrations|
@@ -1965,22 +1966,14 @@ of the start and end of the snippet that just finished.
 Because 'post_finish' runs as the snippet is being torn down, do not rely
 on 'snip.cursor' or on jumping to further tabstops from this action.
 
-Note: It is also possible to trigger snippet expansion from the jump action.
-In that case method 'snip.cursor.preserve()' should be called, so UltiSnips
-will know that cursor is already at the required position.
-
-Following example will insert method call at the end of file after user jump
-out of method declaration snippet.
+Following snippet disables a completion plugin during expansion (via
+'pre_expand') and re-enables it from 'post_finish', so the cleanup
+runs regardless of how the user leaves the snippet.
 
 ------------------- SNIP -------------------
 >
-    global !p
-    def insert_method_call(name):
-        vim.command('normal G')
-        snip.expand_anon(name + '($1)\n')
-    endglobal
-
-    post_jump "if snip.tabstop == 0: insert_method_call(snip.tabstops[1].current_text)"
+    pre_expand  "vim.command('let b:ycm_disabled = 1')"
+    post_finish "vim.command('let b:ycm_disabled = 0')"
     snippet d "method declaration" b
     def $1():
         $2

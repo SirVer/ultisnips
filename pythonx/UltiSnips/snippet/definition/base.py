@@ -383,7 +383,7 @@ class SnippetDefinition:
             match = self._trigger.startswith(words_suffix)
             self._matched = words_suffix
 
-            # TODO: list_snippets() function cannot handle partial-trigger
+            # TODO(sirver): list_snippets() function cannot handle partial-trigger
             # matches yet, so for now fail if we trimmed the prefix.
             if words_suffix != words:
                 match = False

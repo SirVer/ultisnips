@@ -13,9 +13,7 @@ class IndentUtil:
 
     def reset(self):
         """Gets the spacing properties from Vim."""
-        self.shiftwidth = int(
-            vim_helper.eval("exists('*shiftwidth') ? shiftwidth() : &shiftwidth")
-        )
+        self.shiftwidth = int(vim_helper.eval("shiftwidth()"))
         self._expandtab = vim_helper.eval("&expandtab") == "1"
         self._tabstop = int(vim_helper.eval("&tabstop"))
 
