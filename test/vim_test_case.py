@@ -20,6 +20,7 @@ class VimTestCase(unittest.TestCase, TempFileManager):
     text_before = " --- some text before --- \n\n"
     text_after = "\n\n --- some text after --- "
     expected_error = ""
+    forbidden_in_error = ""
     wanted = ""
     keys = ""
     sleeptime = 0.00
@@ -50,6 +51,8 @@ class VimTestCase(unittest.TestCase, TempFileManager):
         for i in range(self.retries):
             if self.output and self.expected_error:
                 self.assertRegex(self.output, self.expected_error)
+                if self.forbidden_in_error:
+                    self.assertNotRegex(self.output, self.forbidden_in_error)
                 return
             if self.output != wanted or self.output is None:
                 # Redo this, but slower

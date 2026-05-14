@@ -63,7 +63,17 @@ def wrap(func):
         except Exception as e:
             if RemotePDB.is_enable():
                 RemotePDB.pm()
-            msg = """An error occurred. This is either a bug in UltiSnips or a bug in a
+            if hasattr(e, "snippet_code"):
+                # The exception happened inside user-authored snippet
+                # python code (snippet_code is attached by
+                # SnippetDefinition._make_debug_exception). The internal
+                # UltiSnips stack frames are not useful to the user; the
+                # offending line is already pointed at by the
+                # "Executed snippet code" block in _report_exception.
+                msg = "UltiSnips Error:\n\n"
+                msg += f"{type(e).__name__}: {e}".strip()
+            else:
+                msg = """An error occurred. This is either a bug in UltiSnips or a bug in a
 snippet definition. If you think this is a bug, please report it to
 https://github.com/SirVer/ultisnips/issues/new
 Please read and follow:
@@ -71,7 +81,7 @@ https://github.com/SirVer/ultisnips/blob/master/docs/CONTRIBUTING.md#reproducing
 
 Following is the full stack trace:
 """
-            msg += traceback.format_exc()
+                msg += traceback.format_exc()
             if RemotePDB.is_enable():
                 host, port = RemotePDB.get_host_port()
                 msg += (
