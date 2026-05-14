@@ -22,7 +22,6 @@ from UltiSnips.snippet.source import (
     SnipMateFileSource,
     UltiSnipsFileSource,
     find_all_snippet_directories,
-    find_all_snippet_files,
     find_snippet_files,
 )
 from UltiSnips.snippet.source.file.common import (
@@ -340,6 +339,16 @@ class SnippetManager:
             self._do_snippet(snip, before)
             return True
         return False
+
+    def all_snippet_files_for(self, ft):
+        """Returns every snippet file that any registered source would load
+        for filetype 'ft'. Used by :UltiSnipsEdit! to build the picker
+        list. Sources that don't back snippets with files contribute an
+        empty set via the base-class default."""
+        files = set()
+        for _, source in self._snippet_sources:
+            files.update(source.get_all_snippet_files_for(ft))
+        return files
 
     def register_snippet_source(self, name, snippet_source):
         """Registers a new 'snippet_source' with the given 'name'.
@@ -1029,7 +1038,7 @@ class SnippetManager:
 
         if bang:
             for ft in filetypes:
-                potentials.update(find_all_snippet_files(ft))
+                potentials.update(self.all_snippet_files_for(ft))
         else:
             if not potentials:
                 _show_user_warning(

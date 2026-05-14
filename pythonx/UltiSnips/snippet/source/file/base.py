@@ -49,7 +49,7 @@ class SnippetFileSource(SnippetSource):
     def refresh(self):
         self.__init__()
 
-    def _get_all_snippet_files_for(self, ft):
+    def get_all_snippet_files_for(self, ft):
         """Returns a set of all files that define snippets for 'ft'."""
         raise NotImplementedError()
 
@@ -65,7 +65,7 @@ class SnippetFileSource(SnippetSource):
     def _load_snippets_for(self, ft):
         """Load all snippets for the given 'ft'."""
         assert ft not in self._snippets
-        for fn in self._get_all_snippet_files_for(ft):
+        for fn in self.get_all_snippet_files_for(ft):
             self._parse_snippets(ft, fn)
         # Now load for the parents
         for parent_ft in self.get_deep_extends([ft]):
