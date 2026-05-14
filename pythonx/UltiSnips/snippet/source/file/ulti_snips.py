@@ -196,18 +196,15 @@ class UltiSnipsFileSource(SnippetFileSource):
     """Manages all snippets definitions found in rtp for ultisnips."""
 
     def get_all_snippet_files_for(self, ft):
-        """Returns all snippet files matching 'ft' in the given runtime
-        path directory."""
-        patterns = ["%s.snippets", "%s_*.snippets", str(Path("%s") / "*")]
+        """Returns all snippet files matching 'ft' across the configured
+        snippet directories. `find_snippet_files` already canonicalizes
+        paths, so symlinked or duplicated runtimepath entries don't make
+        the same file appear twice."""
         ret = set()
         for directory in find_all_snippet_directories():
             if not Path(directory).is_dir():
                 continue
-            for pattern in patterns:
-                for fn in Path(directory).glob(pattern % ft):
-                    # Canonicalize so symlinked or duplicated runtimepath
-                    # entries don't make the same file appear twice.
-                    ret.add(normalize_file_path(str(fn)))
+            ret.update(find_snippet_files(ft, directory))
         return ret
 
     def _parse_snippet_file(self, filedata, filename):

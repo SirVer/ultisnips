@@ -207,7 +207,7 @@ endfunction
 
 function! UltiSnips#CursorMoved() abort
     py3 UltiSnips_Manager._cursor_moved()
-endf
+endfunction
 
 function! UltiSnips#IsAuxWindow(winnr) abort
     " Auxiliary windows that should not tear down an active snippet:
@@ -253,12 +253,8 @@ function! UltiSnips#LeavingBuffer() abort
     " synchronously from the BufEnter autocmd would see an unmarked window and
     " incorrectly tear the snippet down. By the time the timer callback runs,
     " the window/buffer is fully initialised.
-    if exists('*timer_start')
-        call timer_start(0, {-> s:leaving_buffer_impl()})
-    else
-        call s:leaving_buffer_impl()
-    endif
-endf
+    call timer_start(0, {-> s:leaving_buffer_impl()})
+endfunction
 
 function! UltiSnips#LeavingInsertMode() abort
     py3 UltiSnips_Manager._leaving_insert_mode()
