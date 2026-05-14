@@ -89,8 +89,6 @@ class SnippetFileSource(SnippetSource):
                 priority, triggers = data
                 self._snippets[ft].clear_snippets(priority, triggers)
             elif event == "extends":
-                # TODO(sirver): extends information is more global
-                # than one snippet source.
                 (filetypes,) = data
                 self.update_extends(ft, filetypes)
             elif event == "snippet":
