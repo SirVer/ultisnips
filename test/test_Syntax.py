@@ -79,8 +79,7 @@ class Syntax_VisualEscapedSlashDefault_1468(_VimTest):
     def _extra_vim_config(self, vim_config):
         self._create_file(
             "issue_1468_setup.py",
-            "import vim\n"
-            "vim.current.buffer[:] = " + repr(self._snippet_lines) + "\n",
+            "import vim\nvim.current.buffer[:] = " + repr(self._snippet_lines) + "\n",
         )
         self._create_file("issue_1468_check.py", _CHECK_HELPER)
 
@@ -89,12 +88,8 @@ class Syntax_VisualEscapedSlashDefault_1468(_VimTest):
         # syntax engine without touching disk. Populate the buffer with the
         # bug sample, force a full syntax sync, then write the verdict back
         # into the buffer for the framework to read.
-        self.vim.send_to_vim(
-            f":py3file {self.name_temp('issue_1468_setup.py')}\n"
-        )
+        self.vim.send_to_vim(f":py3file {self.name_temp('issue_1468_setup.py')}\n")
         self.vim.send_to_vim(":setfiletype snippets\n")
         self.vim.send_to_vim(":syntax sync fromstart\n")
         self.vim.send_to_vim(":redraw!\n")
-        self.vim.send_to_vim(
-            f":py3file {self.name_temp('issue_1468_check.py')}\n"
-        )
+        self.vim.send_to_vim(f":py3file {self.name_temp('issue_1468_check.py')}\n")
