@@ -28,16 +28,12 @@ if !has('python3')
     finish
 endif
 
-" Apply default values for the public `g:UltiSnips*` globals before the
-" Python module imports. The defaults live at the head of
-" `autoload/UltiSnips/map_keys.vim` and run as a side effect of sourcing
-" that file; `MapKeys()` itself is harmless to call here. The Python
-" module reads `g:UltiSnipsExpandTrigger` / `g:UltiSnipsJumpForwardTrigger`
-" / `g:UltiSnipsJumpBackwardTrigger` at module load via `vim.vars[...]`,
-" so without the autoload's defaults a user who hadn't set those globals
-" in their vimrc would see a spurious "Python 3 is present but unusable"
-" warning with a `KeyError`. See #1679.
-call UltiSnips#map_keys#MapKeys()
+" We are sourcing map_keys.vim here, because we want the UltiSnips trigger
+" variables to be defined before trying to load the Python code. However, we
+" do not want to map the keys yet - in case something goes wrong with the
+" loading, we do not want to have spuriously mapped keys; i.e. a half loaded
+" plugin (see #1658, #1679).
+runtime autoload/UltiSnips/map_keys.vim
 
 " `has('python3')` is necessary but not sufficient: Vim can be compiled
 " with dynamic Python support and still fail to load libpython at
@@ -95,5 +91,7 @@ augroup UltiSnips_AutoTrigger
         au TextChangedP * call UltiSnips#TrackChange()
     endif
 augroup END
+
+call UltiSnips#map_keys#MapKeys()
 
 " vim: ts=8 sts=4 sw=4
