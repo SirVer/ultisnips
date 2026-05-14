@@ -26,9 +26,7 @@ class _PreviewBase(_VimTest):
         vim_config.append("function! UltiSnipsTest_OpenPreview() abort")
         vim_config.append("  execute 'pedit ' . g:_preview_file")
         vim_config.append("endfunction")
-        vim_config.append(
-            "inoremap <c-l> <cmd>call UltiSnipsTest_OpenPreview()<cr>"
-        )
+        vim_config.append("inoremap <c-l> <cmd>call UltiSnipsTest_OpenPreview()<cr>")
 
 
 class PreviewWindow_OpenedDuringSnippet_KeepsSnippet(_PreviewBase):
@@ -46,11 +44,16 @@ class PreviewWindow_OpenedThenFocused_DoesNotHang(_PreviewBase):
     # still get back to the snippet buffer and complete the jump.
     preview_lines = 500
     keys = (
-        "sel" + EX + "users" + "\x0c"
+        "sel"
+        + EX
+        + "users"
+        + "\x0c"
         # Leave insert mode, jump to the preview window, then back to the
         # snippet buffer. If this hangs, the test framework's per-test
         # timeout will surface the failure.
         + "\x1b\x17w\x17W"
-        + "a" + JF + "id, name"
+        + "a"
+        + JF
+        + "id, name"
     )
     wanted = "select id, name from users "
