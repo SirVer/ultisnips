@@ -9,8 +9,6 @@ LeavingBuffer ignores, so the snippet stays intact and navigating in
 and out of the preview should be cheap.
 """
 
-import textwrap
-
 from test.constant import EX, JF
 from test.vim_test_case import VimTestCase as _VimTest
 
