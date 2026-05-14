@@ -1688,13 +1688,16 @@ tabstop value following by ' == nil'.
 A snippet action is an arbitrary python code which can be executed at specific
 points in the lifetime of a snippet expansion.
 
-There are three types of actions:
+There are four types of actions:
 
 * Pre-expand - invoked just after trigger condition was matched, but before
   snippet actually expanded;
 * Post-expand - invoked after snippet was expanded and interpolations
   were applied for the first time, but before jump on the first placeholder.
 * Jump - invoked just after a jump to the next/prev placeholder.
+* Post-finish - invoked once the snippet is removed from the active stack
+  (after the last tabstop is reached, when the cursor leaves the snippet,
+  or when the buffer changes). Useful to undo state set in `pre_expand`.
 
 Specified code will be evaluated at stages defined above and same global
 variables and modules will be available that are stated in
@@ -1856,6 +1859,27 @@ file:
 
 'insert_toc_item' will be called after first jump and will add newly entered
 section into the TOC for current file.
+
+4.10.4 Post-finish actions                     *UltiSnips-post-finish-actions*
+
+Post-finish actions are invoked exactly once, when the snippet is being
+removed from the active snippet stack. That happens when the user jumps
+through the final tabstop, when the cursor moves outside the snippet's
+bounds, or when the buffer is left. Use them to clean up state that was
+set up earlier in 'pre_expand' (for example, to re-enable a completion
+plugin that was suspended for the duration of the snippet).
+
+Post-finish action declared as follows: >
+    post_finish "python code here"
+    snippet ...
+    endsnippet
+
+Buffer can be modified through 'snip.buffer'. Variables
+'snip.snippet_start' and 'snip.snippet_end' point at the final positions
+of the start and end of the snippet that just finished.
+
+Because 'post_finish' runs as the snippet is being torn down, do not rely
+on 'snip.cursor' or on jumping to further tabstops from this action.
 
 Note: It is also possible to trigger snippet expansion from the jump action.
 In that case method 'snip.cursor.preserve()' should be called, so UltiSnips

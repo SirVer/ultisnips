@@ -448,6 +448,21 @@ class SnippetDefinition:
             return snip.cursor.is_set()
         return False
 
+    def do_post_finish(self, snippet_instance):
+        if "post_finish" in self._actions:
+            locals = {
+                "snippet_start": snippet_instance.start,
+                "snippet_end": snippet_instance.end,
+                "buffer": vim_helper.buf,
+            }
+
+            self._execute_action(
+                self._actions["post_finish"],
+                snippet_instance.context,
+                locals,
+                self._compiled_actions["post_finish"],
+            )
+
     def do_post_jump(
         self, tabstop_number, jump_direction, snippets_stack, current_snippet
     ):
