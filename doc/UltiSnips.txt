@@ -1867,6 +1867,13 @@ Next variables and methods will be also defined in the action code scope:
 * 'snip.snippet_start' - (line, column) of start of the expanded snippet;
 * 'snip.snippet_end' - (line, column) of end of the expanded snippet;
 * 'snip.expand_anon()' - alias for 'UltiSnips_Manager.expand_anon()';
+* 'snip.visual_text' - the visual selection captured when the snippet was
+  expanded from visual mode (empty string when expanded outside of visual
+  mode);
+* 'snip.visual_mode' - the corresponding |visual-mode| character ("v", "V",
+  "\<C-V>"), empty when there was no selection;
+* 'snip.visual_content' - the underlying object exposing both as attributes
+  ('.text', '.mode');
 
 The argument to 'snip.expand_anon()' is parsed as a snippet body, so the full
 snippet DSL is available: backticks run shell code, '$N' creates tabstops, and
