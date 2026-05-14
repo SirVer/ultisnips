@@ -23,8 +23,9 @@ def cached_compile(*args):
 class _Tabs:
     """Allows access to tabstop content via t[] inside of python code."""
 
-    def __init__(self, to):
+    def __init__(self, to, buf):
         self._to = to
+        self._buf = buf
 
     def __getitem__(self, no):
         ts = self._to._get_tabstop(self._to, int(no))
@@ -36,8 +37,7 @@ class _Tabs:
         ts = self._to._get_tabstop(self._to, int(no))
         if ts is None:
             return
-        # TODO(sirver): The buffer should be passed into the object on construction.
-        ts.overwrite(vim_helper.buf, value)
+        ts.overwrite(self._buf, value)
 
 
 class _VisualContent(NamedTuple):
@@ -283,7 +283,7 @@ class PythonCode(NoneditableTextObject):
         ct = self.current_text
         self._locals.update(
             {
-                "t": _Tabs(self._parent),
+                "t": _Tabs(self._parent, buf),
                 "fn": Path(path).name,
                 "path": path,
                 "cur": ct,
