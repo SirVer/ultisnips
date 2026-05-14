@@ -411,7 +411,7 @@ a0"""
 class SnippetActions_PostActionModifiesCharAfterSnippet(_VimTest):
     # In neovim, modifying a buffer line in a post_expand action invalidates the
     # cursor mark, which triggers a spurious "line under the cursor was modified"
-    # error. TODO: investigate the mark handling difference.
+    # error. TODO(sirver): investigate the mark handling difference.
     skip_if = lambda self: (
         "Mark invalidated by buffer modification"
         if self.vim_flavor == "neovim"
