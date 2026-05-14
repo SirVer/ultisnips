@@ -13,6 +13,11 @@ if !has('nvim') && version < 820
    finish
 endif
 
+
+" TODO(robot): should we not have here a simple block to check for python3,
+" similar to the warning above for the required vim version? This means, this
+" check we no longor need.
+
 " Bail out cleanly when Python 3 is unusable, instead of letting every
 " autocmd and mapping below re-raise E370/E263 (Vim can't load libpython)
 " or `NameError: UltiSnips_Manager` (the package isn't on the Python path)
@@ -33,7 +38,7 @@ if has('python3')
         py3 << EOF
 try:
     import vim
-    from UltiSnips import UltiSnips_Manager  # noqa: F401
+    from UltiSnips import UltiSnips_Manager
     vim.command('let s:ultisnips_python3_ok = 1')
 except Exception as _err:
     import traceback as _tb
@@ -46,6 +51,7 @@ EOF
         " the generic message below.
     endtry
 endif
+" TODO(robot): This can then be a more specific error that Python is borked somehow
 if !s:ultisnips_python3_ok
     if !get(g:, 'UltiSnipsNoPythonWarning', 0)
         echohl WarningMsg
