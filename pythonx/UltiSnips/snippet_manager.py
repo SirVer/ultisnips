@@ -819,6 +819,16 @@ class SnippetManager:
             self._visual_content.reset()
             self._active_snippets.append(snippet_instance)
 
+            # Park the cursor at the snippet's end before `post_expand`
+            # runs. Without this, the cursor sits wherever the buffer
+            # write left it — typically at the trigger's old position,
+            # which is *inside* the body for a non-empty snippet. Any
+            # `snip.expand_anon` in the action would then splice the
+            # anon body into the middle of ours instead of appending it
+            # cleanly. See #1434.
+            vim_helper.buf.cursor = Position(
+                snippet_instance.end.line, snippet_instance.end.col
+            )
             with (
                 use_proxy_buffer(
                     self._active_snippets, self._vstate, self._change_provider
@@ -834,7 +844,37 @@ class SnippetManager:
             self._vstate.remember_buffer(self._active_snippets[0])
             self._change_provider.reset()
 
+            # Three shapes show up here depending on which action
+            # nested another snippet via `snip.expand_anon`:
+            #
+            #   1. No nesting. `_active_snippets[-1]` is `snippet_instance`
+            #      (the snippet we just launched). Jump into our first
+            #      tabstop as usual.
+            #
+            #   2. `pre_expand` nested. The action ran *before* our
+            #      `launch`, so the inner snippet was appended first and
+            #      our own append put us on top of it. `_active_snippets[-1]`
+            #      is still `snippet_instance` — but `current_text` on the
+            #      outer reflects only our body, which is empty when the
+            #      user is wrapping content with an anon snippet, so the
+            #      old `_current_snippet.current_text != ""` branch
+            #      naturally pops the empty wrapper.
+            #
+            #   3. `post_expand` nested. The action ran *after* our
+            #      append, so the inner sits on top of us. The nested
+            #      `_do_snippet` already jumped to its own first tabstop;
+            #      a second jump here would skip it. Drop ourselves from
+            #      the stack so the inner is the live snippet.
             if (
+                self._snip_expanded_in_action
+                and self._active_snippets
+                and self._active_snippets[-1] is not snippet_instance
+            ):
+                # Shape 3 — post_expand nested an inner snippet.
+                self._active_snippets.remove(snippet_instance)
+                if not self._active_snippets:
+                    self._teardown_inner_state()
+            elif (
                 not self._snip_expanded_in_action
                 or self._current_snippet.current_text != ""
             ):
