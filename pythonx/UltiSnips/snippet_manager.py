@@ -988,9 +988,19 @@ class SnippetManager:
             # Likely the array contains things like ["UltiSnips",
             # "mycoolsnippets"] There is no more obvious way to edit than in
             # the users vim config directory.
+            #
+            # `dot_vim_dirs` has already been canonicalised by
+            # `vim_helper.get_dot_vim()`, but the snippet dirs come straight
+            # from a runtimepath glob and keep symlinks intact. A user with
+            # a symlinked snippets directory (or, on macOS, a `$HOME` that
+            # lives under the auto-resolved `/private/var/...`) would see
+            # the two sides disagree and never populate `potentials`
+            # (#1543). Compare resolved forms so the check is independent
+            # of which leg of the path is a symlink.
             for snippet_dir in all_snippet_directories:
+                snippet_parent_resolved = Path(snippet_dir).parent.resolve()
                 for dot_vim_dir in dot_vim_dirs:
-                    if Path(dot_vim_dir) != Path(snippet_dir).parent:
+                    if Path(dot_vim_dir).resolve() != snippet_parent_resolved:
                         continue
                     potentials.update(
                         _get_potential_snippet_filenames_to_edit(snippet_dir, filetypes)
