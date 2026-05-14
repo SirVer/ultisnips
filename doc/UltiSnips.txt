@@ -483,6 +483,12 @@ for the current buffer, you can simply pass 1 (which means all) as first
 argument of this function, and use a global variable g:current_ulti_dict_info
 to get the result (see example below).
 
+Regardless of whether the function is called with no argument (matching
+snippets only) or with 1 (all snippets), |g:current_ulti_dict_info| is also
+populated with a dictionary keyed by trigger, where each value has a
+'description' and a 'location' (a "path:linenumber" string pointing at the
+snippet definition, or an empty string for snippets added programmatically).
+
 This function does not add any new functionality to ultisnips directly but
 allows to use third party plugins to integrate the current available snippets.
 For example, all completion plugins that integrate with UltiSnips use this

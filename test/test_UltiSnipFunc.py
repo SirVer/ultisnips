@@ -132,6 +132,53 @@ class VerifyVimDict3(_VimTest):
     wanted = "te'123êabc"
 
 
+class SnippetsInCurrentScope_PopulatesInfoForMatching(_VimTest):
+    """`g:current_ulti_dict_info` should be populated for the matching scope
+    even when `UltiSnips#SnippetsInCurrentScope` is called without the
+    'all' argument (GH #981)."""
+
+    snippets = (("hello", "world"),)
+
+    def _extra_vim_config(self, vim_config):
+        vim_config.extend(
+            [
+                "function! S_SnippetInfoMatching()",
+                "  call UltiSnips#SnippetsInCurrentScope()",
+                "  return '|'.get(get(g:current_ulti_dict_info, 'hello', {}),"
+                " 'location', '!nokey!')",
+                "endfunction",
+                "inoremap <silent> <C-L> <C-R>=S_SnippetInfoMatching()<CR>",
+            ]
+        )
+
+    keys = "hello" + chr(12)
+    wanted = "hello|added"
+
+
+class SnippetsInCurrentScope_PopulatesInfoForAll(_VimTest):
+    """Calling `UltiSnips#SnippetsInCurrentScope(1)` still populates the
+    info dict, with one entry per known snippet."""
+
+    snippets = (
+        ("alpha", "AAA"),
+        ("beta", "BBB"),
+    )
+
+    def _extra_vim_config(self, vim_config):
+        vim_config.extend(
+            [
+                "function! S_SnippetInfoAll()",
+                "  call UltiSnips#SnippetsInCurrentScope(1)",
+                "  return join(sort(keys(g:current_ulti_dict_info)), ',')",
+                "endfunction",
+                "inoremap <silent> <C-L> <C-R>=S_SnippetInfoAll()<CR>",
+            ]
+        )
+
+    keys = chr(12)
+    wanted = "alpha,beta"
+
+
 class AddNewSnippetSource(_VimTest):
     keys = (
         "blumba"
