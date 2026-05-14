@@ -5,7 +5,6 @@ If a user copies the example verbatim, typing the shortened prefix should
 expand the matching snippet with no extra characters appended.
 """
 
-from test.constant import EX
 from test.vim_test_case import VimTestCase as _VimTest
 
 EXPAND_SHORTER = chr(12)  # C-L, the keybinding the docs use.
