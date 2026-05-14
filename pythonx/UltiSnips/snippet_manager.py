@@ -399,7 +399,15 @@ class SnippetManager:
             # against an unrelated buffer corrupts both the buffer and the
             # snippet state — drop the snippets here so the caller sees a
             # clean slate.
+            #
+            # Excursions into auxiliary windows (the preview window,
+            # quickfix/loclist, neovim floats) are different: the user
+            # expects to come back to the snippet, so just bail out
+            # without touching the snippet state. `UltiSnips#LeavingBuffer`
+            # already applies the same classification.
             if vim.current.buffer.number != self._snippet_buffer_number:
+                if vim_helper.eval("UltiSnips#IsAuxWindow(winnr())") == "1":
+                    return
                 self._leaving_buffer()
                 return
 

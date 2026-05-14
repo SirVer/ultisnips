@@ -167,7 +167,7 @@ function! UltiSnips#CursorMoved() abort
     py3 UltiSnips_Manager._cursor_moved()
 endf
 
-function! s:is_aux_window(winnr) abort
+function! UltiSnips#IsAuxWindow(winnr) abort
     " Auxiliary windows that should not tear down an active snippet:
     "   - the preview window
     "   - neovim floating windows
@@ -199,7 +199,7 @@ function! s:is_aux_window(winnr) abort
 endfunction
 
 function! s:leaving_buffer_impl() abort
-    if !(s:is_aux_window(winnr('#')) || s:is_aux_window(winnr()))
+    if !(UltiSnips#IsAuxWindow(winnr('#')) || UltiSnips#IsAuxWindow(winnr()))
         py3 UltiSnips_Manager._leaving_buffer()
     endif
 endfunction
