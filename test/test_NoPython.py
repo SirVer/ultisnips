@@ -70,3 +70,42 @@ class NoPython_NoSpamOnInsertModeKeystrokes(_ReloadBase):
 
     def _before_test(self):
         self._reload_plugin_with_broken_import()
+
+
+class NoPython_DiagnosticsCapturedForBugReport(_ReloadBase):
+    """Without the silencer, the plugin captures a traceback, the failing
+    interpreter's `sys.executable`, and the issues/new URL into
+    `g:UltiSnipsPythonDiagnostics` so users can paste it into a bug
+    report (#1685)."""
+
+    wanted = "has_traceback=1 has_executable=1 has_url=1"
+
+    def _before_test(self):
+        plugin_file = self._repo_root() / "plugin" / "UltiSnips.vim"
+        self.vim.send_to_vim(":unlet! g:UltiSnipsNoPythonWarning\n")
+        self.vim.send_to_vim(":unlet! g:UltiSnipsPythonDiagnostics\n")
+        self.vim.send_to_vim(":py3 import sys\n")
+        self.vim.send_to_vim(
+            ":py3 for _k in [k for k in list(sys.modules) "
+            "if k == 'UltiSnips' or k.startswith('UltiSnips.')]: "
+            "del sys.modules[_k]\n"
+        )
+        self.vim.send_to_vim(":py3 sys.modules['UltiSnips'] = None\n")
+        self.vim.send_to_vim(":unlet! did_plugin_ultisnips\n")
+        self.vim.send_to_vim(":silent! delcommand UltiSnipsEdit\n")
+        self.vim.send_to_vim(":silent! autocmd! UltiSnips_AutoTrigger\n")
+        self.vim.send_to_vim(f":source {plugin_file}\n")
+        # `botright new` in the plugin opens a diagnostic split and
+        # focuses it; close that and return to the test buffer.
+        self.vim.send_to_vim(":silent! close\n")
+        self.vim.send_to_vim(
+            ":py3 _diag = '\\n'.join(vim.eval('g:UltiSnipsPythonDiagnostics'))\n"
+        )
+        self.vim.send_to_vim(
+            ":py3 vim.current.buffer[:] = ["
+            "'has_traceback=' + ('1' if 'Traceback' in _diag else '0') + "
+            "' has_executable=' + ('1' if 'sys.executable' in _diag else '0') + "
+            "' has_url=' + ("
+            "'1' if 'github.com/SirVer/ultisnips/issues/new' in _diag else '0'"
+            ")]\n"
+        )

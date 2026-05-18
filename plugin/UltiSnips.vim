@@ -13,18 +13,79 @@ if !has('nvim') && version < 820
    finish
 endif
 
+" Show the buffered diagnostic lines as a scratch buffer. Splits at
+" VimEnter when the plugin loads during startup (so we don't fight with
+" the arglist / quickfix), or immediately if Vim is already up (the
+" test-suite reload path).
+function! s:UltiSnipsShowDiagBuffer(lines) abort
+    let g:UltiSnipsPythonDiagnostics = a:lines
+    let s:ultisnips_pending_diag = a:lines
+    if v:vim_did_enter
+        call s:UltiSnipsOpenDiagBuffer()
+    else
+        augroup UltiSnipsPythonDiag
+            au!
+            au VimEnter * ++once call s:UltiSnipsOpenDiagBuffer()
+        augroup END
+    endif
+endfunction
+
+function! s:UltiSnipsOpenDiagBuffer() abort
+    if !exists('s:ultisnips_pending_diag')
+        return
+    endif
+    let l:lines = s:ultisnips_pending_diag
+    unlet s:ultisnips_pending_diag
+    botright new
+    silent! exe 'file' fnameescape('[UltiSnips Python diagnostics]')
+    setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
+    setlocal filetype=
+    call setline(1, l:lines)
+    setlocal nomodifiable nomodified
+endfunction
+
 " UltiSnips needs Python 3. Bail with a clear message if Vim wasn't
 " compiled with python3 support at all, so we don't fall through to the
 " runtime-check below (which would just say "Python is broken" without
 " distinguishing missing-from-build vs broken-at-load).
-if !has('python3') && !get(g:, 'UltiSnipsNoPythonWarning', 0)
-    echohl WarningMsg
-    echom 'UltiSnips requires Vim compiled with +python3 support; disabling UltiSnips.'
-    echom '          See :help UltiSnips-requirements for setup.'
-    echom '          Silence this message with `let g:UltiSnipsNoPythonWarning = 1`.'
-    echohl None
-endif
 if !has('python3')
+    if !get(g:, 'UltiSnipsNoPythonWarning', 0)
+        let s:diag = [
+            \ 'UltiSnips: Python 3 is not available; UltiSnips is disabled.',
+            \ '',
+            \ 'See :help UltiSnips-requirements for setup instructions.',
+            \ '',
+            \ ]
+        if has('nvim')
+            call add(s:diag, 'Neovim diagnostics:')
+            if exists('g:python3_host_prog')
+                call add(s:diag, '    g:python3_host_prog = ' . g:python3_host_prog)
+            else
+                call add(s:diag, '    g:python3_host_prog is not set.')
+            endif
+            call add(s:diag, '')
+            call add(s:diag, 'Neovim needs the `pynvim` package in the Python it uses for')
+            call add(s:diag, 'the python3 provider. Run `:checkhealth provider.python` to')
+            call add(s:diag, 'see which interpreter Neovim picked and what is missing.')
+        else
+            call add(s:diag, 'Vim must be compiled with the +python3 feature.')
+            call add(s:diag, 'Run `vim --version | grep python3` to confirm.')
+        endif
+        call add(s:diag, '')
+        call add(s:diag, 'If you think this is a bug, please file an issue at')
+        call add(s:diag, '    https://github.com/SirVer/ultisnips/issues/new')
+        call add(s:diag, 'and include everything in this buffer plus the output of')
+        if has('nvim')
+            call add(s:diag, '    :checkhealth provider.python')
+            call add(s:diag, '    nvim --version')
+        else
+            call add(s:diag, '    vim --version')
+        endif
+        call add(s:diag, '')
+        call add(s:diag, 'Silence this message with `let g:UltiSnipsNoPythonWarning = 1`.')
+        call s:UltiSnipsShowDiagBuffer(s:diag)
+        unlet s:diag
+    endif
     finish
 endif
 
@@ -42,37 +103,62 @@ runtime autoload/UltiSnips/map_keys.vim
 " libpython or the UltiSnips package import fails, the flag stays zero
 " and we bail before registering autocmds that would otherwise re-raise
 " E370 / E263 / NameError on every keystroke (#1237, #1209).
+"
+" When the import fails we let Python populate a list of diagnostic
+" lines (traceback + sys.executable / sys.path / sys.version) in
+" `g:ultisnips_py3_diag` so a user filing a bug report has the full
+" picture — see #1685. The list is consumed and unlet below.
 let s:ultisnips_python3_ok = 0
-let s:ultisnips_python3_error = ''
+let g:ultisnips_py3_diag = []
 try
     py3 << EOF
 try:
     import vim
     from UltiSnips import UltiSnips_Manager
     vim.command('let s:ultisnips_python3_ok = 1')
-except Exception as _err:
+except Exception:
+    import sys as _sys
     import traceback as _tb
-    _msg = _tb.format_exception_only(type(_err), _err)[-1].strip()
-    vim.command("let s:ultisnips_python3_error = " + repr(_msg))
+    _lines = ['Python diagnostics:']
+    _lines.append('    sys.version    : ' + _sys.version.replace('\n', ' '))
+    _lines.append('    sys.executable : ' + _sys.executable)
+    _lines.append('    sys.prefix     : ' + _sys.prefix)
+    _lines.append('    sys.path:')
+    for _p in _sys.path:
+        _lines.append('        ' + _p)
+    _lines.append('')
+    _lines.append('Traceback:')
+    for _l in _tb.format_exc().rstrip('\n').split('\n'):
+        _lines.append('    ' + _l)
+    vim.vars['ultisnips_py3_diag'] = _lines
 EOF
 catch
     " Catchable Python load failures (E370, E263) land here; the import
-    " block above never ran so s:ultisnips_python3_error stays empty.
-    let s:ultisnips_python3_error = v:exception
+    " block above never ran so the diag list stays empty.
+    let g:ultisnips_py3_diag = ['Traceback (from Vim):'] + split(v:exception, "\n")
 endtry
 if !s:ultisnips_python3_ok
     if !get(g:, 'UltiSnipsNoPythonWarning', 0)
-        echohl WarningMsg
-        echom 'UltiSnips: Python 3 is present but unusable; disabling UltiSnips.'
-        if !empty(s:ultisnips_python3_error)
-            echom '           ' . s:ultisnips_python3_error
-        endif
-        echom '           See :help UltiSnips-requirements for setup.'
-        echom '           Silence this message with `let g:UltiSnipsNoPythonWarning = 1`.'
-        echohl None
+        let s:diag = [
+            \ 'UltiSnips: Python 3 is present but unusable; UltiSnips is disabled.',
+            \ '',
+            \ 'See :help UltiSnips-requirements for setup instructions.',
+            \ '',
+            \ ]
+        call extend(s:diag, g:ultisnips_py3_diag)
+        call add(s:diag, '')
+        call add(s:diag, 'If you think this is a bug, please file an issue at')
+        call add(s:diag, '    https://github.com/SirVer/ultisnips/issues/new')
+        call add(s:diag, 'and include everything in this buffer.')
+        call add(s:diag, '')
+        call add(s:diag, 'Silence this message with `let g:UltiSnipsNoPythonWarning = 1`.')
+        call s:UltiSnipsShowDiagBuffer(s:diag)
+        unlet s:diag
     endif
+    unlet! g:ultisnips_py3_diag
     finish
 endif
+unlet! g:ultisnips_py3_diag
 
 " The Commands we define.
 command! -bang -nargs=? -complete=customlist,UltiSnips#FileTypeComplete UltiSnipsEdit

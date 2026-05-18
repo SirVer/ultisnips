@@ -627,8 +627,20 @@ directly to a single entry: >
 ----------------------------------------
 
 When UltiSnips is loaded, it will check that the running Vim was compiled with
-python support.  If no support is detected, a warning will be displayed and
-loading of UltiSnips will be skipped.
+python support and that the UltiSnips Python package can be imported. If
+either check fails, UltiSnips opens a scratch buffer named
+`[UltiSnips Python diagnostics]` with:
+
+- the failure reason (full Python traceback when the import failed at
+  runtime, or the missing-feature reason when Vim has no python3 at all);
+- environment diagnostics (`sys.executable`, `sys.path`, `sys.version`, or
+  for Neovim the value of `g:python3_host_prog`);
+- a pointer to https://github.com/SirVer/ultisnips/issues/new for users
+  who want to file a bug. The buffer is meant to be copy-pasted into the
+  report verbatim, so please include all of it.
+
+The same content is exposed in `g:UltiSnipsPythonDiagnostics` (a list of
+lines) for scripting use.
 
 If you would like to suppress this warning message, you may add the following
 line to your vimrc file.
