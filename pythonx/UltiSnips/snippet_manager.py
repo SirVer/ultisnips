@@ -863,6 +863,13 @@ class SnippetManager:
                 self._visual_content.text, self._active_snippets
             )
 
+        # `pre_expand` may have nested an anonymous snippet (the "wrap"
+        # pattern from #1579 / #1592). Capture that fact before our own
+        # body is launched so the post-expand book-keeping below can
+        # tell apart "inner was already there before us" from "inner
+        # came and went during our `post_expand`".
+        pre_expand_nested = self._snip_expanded_in_action
+
         if cursor_set_in_action:
             text_before = vim_helper.buf.line_till_cursor
             before = vim_helper.buf.line_till_cursor
@@ -921,36 +928,58 @@ class SnippetManager:
             self._vstate.remember_buffer(self._active_snippets[0])
             self._change_provider.reset()
 
-            # Three shapes show up here depending on which action
+            # Four shapes show up here depending on which action
             # nested another snippet via `snip.expand_anon`:
             #
-            #   1. No nesting. `_active_snippets[-1]` is `snippet_instance`
-            #      (the snippet we just launched). Jump into our first
-            #      tabstop as usual.
+            #   1. No nesting. `_snip_expanded_in_action` is False.
+            #      Jump into our first tabstop as usual (this is also
+            #      what fires `post_jump` on the implicit `$0` for
+            #      bodyless snippets).
             #
             #   2. `pre_expand` nested. The action ran *before* our
             #      `launch`, so the inner snippet was appended first and
             #      our own append put us on top of it. `_active_snippets[-1]`
-            #      is still `snippet_instance` — but `current_text` on the
-            #      outer reflects only our body, which is empty when the
-            #      user is wrapping content with an anon snippet, so the
-            #      old `_current_snippet.current_text != ""` branch
-            #      naturally pops the empty wrapper.
+            #      is still `snippet_instance`. If outer has its own
+            #      body the user expects to fill outer's tabstops first
+            #      (#1579 / #1592 wrap pattern), so jump; if outer is a
+            #      hollow wrapper (`current_text == ""`) pop it
+            #      immediately.
             #
-            #   3. `post_expand` nested. The action ran *after* our
-            #      append, so the inner sits on top of us. The nested
-            #      `_do_snippet` already jumped to its own first tabstop;
-            #      a second jump here would skip it. Drop ourselves from
-            #      the stack so the inner is the live snippet.
+            #   3. `post_expand` nested and the inner is still live. The
+            #      action ran *after* our append, so the inner sits on
+            #      top of us. The nested `_do_snippet` already jumped to
+            #      its own first tabstop; a second jump here would skip
+            #      it. Drop ourselves from the stack so the inner is the
+            #      live snippet.
+            #
+            #   4. `post_expand` nested an inner that finished its own
+            #      jumps inside the action (e.g. anon body with only `$0`
+            #      or plain text — `_jump` selects `$0` and pops it).
+            #      Outer's `$0` tabstop was stretched by
+            #      `_child_has_moved` to span the inner's text; jumping
+            #      into it now would re-select the entire inner body and
+            #      derail the buffer state. Outer has nothing left to
+            #      offer, so finish it cleanly. See #1688.
+            post_expand_nested_and_popped = (
+                self._snip_expanded_in_action
+                and not pre_expand_nested
+                and self._active_snippets
+                and self._active_snippets[-1] is snippet_instance
+            )
             if (
                 self._snip_expanded_in_action
                 and self._active_snippets
                 and self._active_snippets[-1] is not snippet_instance
             ):
-                # Shape 3 — post_expand nested an inner snippet.
+                # Shape 3 — inner is still on the stack.
                 self._active_snippets.remove(snippet_instance)
                 if not self._active_snippets:
                     self._teardown_inner_state()
+            elif post_expand_nested_and_popped:
+                # Shape 4 — post_expand nested an inner that already
+                # finished. Pop outer; jumping would re-select the
+                # inner body that outer's `$0` now wraps.
+                self._current_snippet_is_done()
             elif (
                 not self._snip_expanded_in_action
                 or self._current_snippet.current_text != ""
