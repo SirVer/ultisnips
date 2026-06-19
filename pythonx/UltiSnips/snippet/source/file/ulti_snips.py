@@ -25,7 +25,8 @@ def find_snippet_files(ft, directory: str) -> set[str]:
     directory_path = Path(directory).expanduser()
     for pattern in patterns:
         for fn in directory_path.glob(pattern % ft):
-            ret.add(normalize_file_path(str(fn)))
+            if fn.suffix != '.un~':
+                ret.add(normalize_file_path(str(fn)))
     return ret
 
 
