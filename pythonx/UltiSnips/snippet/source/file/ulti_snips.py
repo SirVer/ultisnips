@@ -25,6 +25,11 @@ def find_snippet_files(ft, directory: str) -> set[str]:
     directory_path = Path(directory).expanduser()
     for pattern in patterns:
         for fn in directory_path.glob(pattern % ft):
+            # Unlike glob.glob, Path.glob matches hidden files, so the
+            # "ft/*" pattern would pick up Vim's undo/swap files (e.g.
+            # ".foo.snippets.un~") and choke parsing them.
+            if fn.name.startswith("."):
+                continue
             ret.add(normalize_file_path(str(fn)))
     return ret
 

@@ -510,3 +510,45 @@ class Issue1311_PairTabAfterModeRoundTrip(_VimTest):
         vim_config.append('let g:UltiSnipsExpandTrigger="<tab>"')
         vim_config.append('let g:UltiSnipsJumpForwardTrigger="<tab>"')
         vim_config.append('let g:UltiSnipsJumpBackwardTrigger="<s-tab>"')
+
+
+# Regression tests for #1691 — the migration from glob.glob to Path.glob
+# (#1606) silently changed hidden-file semantics: glob.glob never matches
+# names starting with a dot, Path.glob does. Vim drops undo files like
+# ".foo.snippets.un~" next to edited snippet files (with 'undofile' set and
+# 'undodir' containing "."), and the "ft/*" lookup pattern then picked them
+# up and crashed with a UnicodeDecodeError on their binary content. Pin the
+# restored pre-#1606 behaviour: hidden files are never snippet sources.
+
+
+class Issue1691_UndoFileInSnippetSubdirectoryIsIgnored(_VimTest):
+    files = {
+        "us/all/real.snippets": r"""
+        snippet works "from the real file"
+        expanded fine
+        endsnippet
+        """
+    }
+    keys = "works" + EX
+    wanted = "expanded fine"
+
+    def _before_test(self):
+        # What Vim writes for real.snippets with 'undodir' set to ".":
+        # hidden and not valid UTF-8 (0x9f, the byte from the issue).
+        undo_file = self.name_temp("us/all/.real.snippets.un~")
+        undo_file.write_bytes(b"Vim\x9f\x00\x01 undo file")
+
+
+class Issue1691_HiddenSnippetFileIsIgnored(_VimTest):
+    """Even a parseable hidden file in ft/* must stay invisible, as it
+    was before the Path.glob migration."""
+
+    files = {
+        "us/all/.hidden.snippets": r"""
+        snippet spooky "from a hidden file"
+        BOO
+        endsnippet
+        """
+    }
+    keys = "spooky" + EX
+    wanted = "spooky" + EX

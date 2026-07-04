@@ -32,6 +32,10 @@ def _snipmate_files_for(ft):
         path = Path(rtp, "snippets").expanduser()
         for pattern in patterns:
             for fn in path.glob(pattern):
+                # Unlike glob.glob, Path.glob matches hidden files; skip
+                # them so editor droppings are not parsed as snippets.
+                if fn.name.startswith("."):
+                    continue
                 ret.add(normalize_file_path(str(fn)))
     return ret
 

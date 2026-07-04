@@ -297,3 +297,16 @@ endglobal
         r"'global' is UltiSnips syntax, but this file lives in a "
         r"'snippets/' directory which is reserved for snipMate"
     )
+
+
+class snipMate_HiddenFileIsIgnored(_VimTest):
+    """Regression test for #1691: Path.glob (unlike the glob.glob used
+    before #1606) matches hidden files; they must stay invisible."""
+
+    files = {
+        "snippets/_/.hidden.snippets": """
+snippet spooky
+\tBOO"""
+    }
+    keys = "spooky" + EX
+    wanted = "spooky" + EX
