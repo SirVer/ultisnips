@@ -149,6 +149,32 @@ class PreservesNumberedRegisterAcrossSnippet(_VimTest):
     wanted = "\n[X]\n\nLINE1"
 
 
+# Tests for https://github.com/SirVer/ultisnips/issues/1695 —
+# The register cache taken at expansion time is restored when the snippet
+# is torn down and whenever insert mode is left. Register changes the user
+# makes in between, while the snippet is still active but no placeholder is
+# being replaced, must survive that restore instead of being reverted to
+# the pre-snippet state.
+
+
+class RetainsUserRegisterChange_AfterLeavingSnippet(_VimTest):
+    # `yy`, expand, `<Esc>`, `dd` the snippet line, move away (teardown),
+    # `p`: the `dd`'d line must be pasted, not the yank from before the
+    # snippet.
+    snippets = ("test", "${1:hello} ${2:world} $0")
+    keys = "yank" + ESC + "yy" + "otest" + EX + ESC + "dd" + "k" + "p"
+    wanted = "yank\nhello world "
+
+
+class RetainsUserRegisterChange_OnInsertLeave(_VimTest):
+    # `yy`, expand, `<Esc>`, `x` inside the snippet (`@"` = "o"), re-enter
+    # and leave insert mode (InsertLeave restore), `p`: the `x`'d character
+    # must be pasted, not the yank from before the snippet.
+    snippets = ("test", "${1:hello} ${2:world} $0")
+    keys = "yank" + ESC + "yy" + "otest" + EX + ESC + "x" + "a" + ESC + "p"
+    wanted = "yank\nhell oworld "
+
+
 # End: Github Pull Request # 134
 
 # Test to ensure that shiftwidth follows tabstop when it's set to zero post
