@@ -41,8 +41,11 @@ def _expand_runtimepath_entry(pth: Path) -> list[Path]:
     Only the tail of the path starting at its first wildcard component is
     globbed. Handing the whole path to `Path.glob` from the filesystem root
     made Python 3.12 list every directory on the way down, once per
-    runtimepath entry, which took seconds on slow filesystems and silently
-    found nothing when an ancestor directory was not listable (#1694).
+    runtimepath entry: 3.12 dropped pathlib's fast path for literal pattern
+    segments when it gained `case_sensitive` (python/cpython#102710) and
+    3.13 brought it back (python/cpython#117732) without a backport. On slow
+    filesystems that took seconds, and it silently found nothing when an
+    ancestor directory was not listable (#1694).
     """
     parts = pth.parts
     for index, part in enumerate(parts):
