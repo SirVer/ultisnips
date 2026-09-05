@@ -34,9 +34,31 @@ def find_snippet_files(ft, directory: str) -> set[str]:
     return ret
 
 
+def _expand_runtimepath_entry(pth: Path) -> list[Path]:
+    """Expands the wildcards Vim allows in 'runtimepath' entries (see
+    :help 'runtimepath') and returns the existing paths matching `pth`.
+
+    Only the tail of the path starting at its first wildcard component is
+    globbed. Handing the whole path to `Path.glob` from the filesystem root
+    made Python 3.12 list every directory on the way down, once per
+    runtimepath entry, which took seconds on slow filesystems and silently
+    found nothing when an ancestor directory was not listable (#1694).
+    """
+    parts = pth.parts
+    for index, part in enumerate(parts):
+        if any(char in part for char in "*?["):
+            pattern = str(Path(*parts[index:]))
+            return list(Path(*parts[:index]).glob(pattern))
+    return [pth] if pth.exists() else []
+
+
 def find_all_snippet_directories() -> list[str]:
-    """Returns a list of the absolute path of all potential snippet
-    directories, no matter if they exist or not."""
+    """Returns the paths of all snippet directories to search.
+
+    A single absolute entry in `UltiSnipsSnippetDirectories` is returned as
+    is, whether it exists or not. Otherwise every 'runtimepath' entry is
+    combined with every configured directory name and only the combinations
+    that exist on disk are returned."""
 
     if vim_helper.eval("exists('b:UltiSnipsSnippetDirectories')") == "1":
         snippet_dirs = vim_helper.eval("b:UltiSnipsSnippetDirectories")
@@ -61,10 +83,7 @@ def find_all_snippet_directories() -> list[str]:
                     "directory for UltiSnips snippets."
                 )
             pth = Path(rtp, snippet_dir).expanduser()
-            # Runtimepath entries may contain wildcards.
-            all_dirs.extend(
-                str(p) for p in Path(pth.anchor).glob(str(pth.relative_to(pth.anchor)))
-            )
+            all_dirs.extend(str(p) for p in _expand_runtimepath_entry(pth))
     return all_dirs
 
 
