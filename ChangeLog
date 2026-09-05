@@ -129,7 +129,7 @@ next:
 	  active but no placeholder is being replaced (a `dd` after
 	  leaving the snippet with `<Esc>`, say) are no longer reverted
 	  to the pre-snippet registers when insert mode is left or the
-	  snippet is torn down. (#1695)
+	  snippet is torn down. (#1697, #1695)
 
 version 4.0 (10-May-2026):
 	New features:
