@@ -132,7 +132,7 @@ next:
 	  on slow filesystems, and it silently found no snippets when
 	  an ancestor directory was not listable. Literal entries are
 	  now a single existence check; only the part of an entry from
-	  its first wildcard on is globbed. (#1694)
+	  its first wildcard on is globbed. (#1696, #1694)
 
 version 4.0 (10-May-2026):
 	New features:
