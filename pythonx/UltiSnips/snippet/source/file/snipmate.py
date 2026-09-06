@@ -8,7 +8,11 @@ from pathlib import Path
 from UltiSnips import vim_helper
 from UltiSnips.snippet.definition import SnipMateSnippetDefinition
 from UltiSnips.snippet.source.file.base import SnippetFileSource
-from UltiSnips.snippet.source.file.common import handle_extends, normalize_file_path
+from UltiSnips.snippet.source.file.common import (
+    expand_runtimepath_entry,
+    handle_extends,
+    normalize_file_path,
+)
 from UltiSnips.text import LineIterator, head_tail
 
 
@@ -29,14 +33,17 @@ def _snipmate_files_for(ft):
     ]
     ret = set()
     for rtp in vim_helper.eval("&runtimepath").split(","):
-        path = Path(rtp, "snippets").expanduser()
-        for pattern in patterns:
-            for fn in path.glob(pattern):
-                # Unlike glob.glob, Path.glob matches hidden files; skip
-                # them so editor droppings are not parsed as snippets.
-                if fn.name.startswith("."):
-                    continue
-                ret.add(normalize_file_path(str(fn)))
+        # Honour wildcards in the runtimepath entry like the UltiSnips
+        # directories do, and skip entries without a snippets directory
+        # with a single existence check instead of one glob per pattern.
+        for path in expand_runtimepath_entry(Path(rtp, "snippets").expanduser()):
+            for pattern in patterns:
+                for fn in path.glob(pattern):
+                    # Unlike glob.glob, Path.glob matches hidden files; skip
+                    # them so editor droppings are not parsed as snippets.
+                    if fn.name.startswith("."):
+                        continue
+                    ret.add(normalize_file_path(str(fn)))
     return ret
 
 
