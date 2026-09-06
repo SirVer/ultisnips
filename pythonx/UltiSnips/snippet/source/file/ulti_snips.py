@@ -34,6 +34,7 @@ def find_snippet_files(ft, directory: str) -> set[str]:
     return ret
 
 
+# TODO(robot): Does snipmate file finding not have the same problem?
 def _expand_runtimepath_entry(pth: Path) -> list[Path]:
     """Expands the wildcards Vim allows in 'runtimepath' entries (see
     :help 'runtimepath') and returns the existing paths matching `pth`.
