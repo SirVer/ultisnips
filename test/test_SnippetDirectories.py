@@ -27,6 +27,21 @@ class SnippetDirectories_WildcardRuntimepath_ExpandsEntry(_VimTest):
         vim_config.append(f"set runtimepath+={self._temp_dir}/bundle/*")
 
 
+class SnippetDirectories_WildcardRuntimepath_ExpandsEntryForSnipMate(_VimTest):
+    # snipMate discovery used to glob below the unexpanded entry, so a
+    # `snippets/` directory behind a wildcard was never found.
+    files = {
+        "bundle/alpha/snippets/foo.snippets": """
+snippet hi
+\thello""",
+    }
+    keys = ESC + ":set ft=foo\n" + "ihi" + EX
+    wanted = "hello"
+
+    def _extra_vim_config(self, vim_config):
+        vim_config.append(f"set runtimepath+={self._temp_dir}/bundle/*")
+
+
 class SnippetDirectories_LiteralRuntimepath_DoesNotListDirectories(_VimTest):
     # The harness puts three literal entries on 'runtimepath'. Resolving them
     # must not list a single directory: an existence check per entry is all

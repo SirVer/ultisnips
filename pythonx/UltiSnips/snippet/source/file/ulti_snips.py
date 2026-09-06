@@ -10,6 +10,7 @@ from UltiSnips.error import PebkacError
 from UltiSnips.snippet.definition import UltiSnipsSnippetDefinition
 from UltiSnips.snippet.source.file.base import SnippetFileSource
 from UltiSnips.snippet.source.file.common import (
+    expand_runtimepath_entry,
     handle_action,
     handle_context,
     handle_extends,
@@ -32,28 +33,6 @@ def find_snippet_files(ft, directory: str) -> set[str]:
                 continue
             ret.add(normalize_file_path(str(fn)))
     return ret
-
-
-# TODO(robot): Does snipmate file finding not have the same problem?
-def _expand_runtimepath_entry(pth: Path) -> list[Path]:
-    """Expands the wildcards Vim allows in 'runtimepath' entries (see
-    :help 'runtimepath') and returns the existing paths matching `pth`.
-
-    Only the tail of the path starting at its first wildcard component is
-    globbed. Handing the whole path to `Path.glob` from the filesystem root
-    made Python 3.12 list every directory on the way down, once per
-    runtimepath entry: 3.12 dropped pathlib's fast path for literal pattern
-    segments when it gained `case_sensitive` (python/cpython#102710) and
-    3.13 brought it back (python/cpython#117732) without a backport. On slow
-    filesystems that took seconds, and it silently found nothing when an
-    ancestor directory was not listable (#1694).
-    """
-    parts = pth.parts
-    for index, part in enumerate(parts):
-        if any(char in part for char in "*?["):
-            pattern = str(Path(*parts[index:]))
-            return list(Path(*parts[:index]).glob(pattern))
-    return [pth] if pth.exists() else []
 
 
 def find_all_snippet_directories() -> list[str]:
@@ -87,7 +66,7 @@ def find_all_snippet_directories() -> list[str]:
                     "directory for UltiSnips snippets."
                 )
             pth = Path(rtp, snippet_dir).expanduser()
-            all_dirs.extend(str(p) for p in _expand_runtimepath_entry(pth))
+            all_dirs.extend(str(p) for p in expand_runtimepath_entry(pth))
     return all_dirs
 
 

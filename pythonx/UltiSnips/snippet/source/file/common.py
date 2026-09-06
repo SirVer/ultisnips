@@ -10,6 +10,28 @@ def normalize_file_path(path: str) -> str:
     return str(Path(path).resolve())
 
 
+def expand_runtimepath_entry(pth: Path) -> list[Path]:
+    """Expands the wildcards Vim allows in 'runtimepath' entries (see
+    :help 'runtimepath') and returns the existing paths matching `pth`, a
+    runtimepath entry joined with a snippet directory name.
+
+    Only the tail of the path starting at its first wildcard component is
+    globbed. Handing the whole path to `Path.glob` from the filesystem root
+    made Python 3.12 list every directory on the way down, once per
+    runtimepath entry: 3.12 dropped pathlib's fast path for literal pattern
+    segments when it gained `case_sensitive` (python/cpython#102710) and
+    3.13 brought it back (python/cpython#117732) without a backport. On slow
+    filesystems that took seconds, and it silently found nothing when an
+    ancestor directory was not listable (#1694).
+    """
+    parts = pth.parts
+    for index, part in enumerate(parts):
+        if any(char in part for char in "*?["):
+            pattern = str(Path(*parts[index:]))
+            return list(Path(*parts[:index]).glob(pattern))
+    return [pth] if pth.exists() else []
+
+
 def handle_extends(tail, line_index):
     """Handles an extends line in a snippet."""
     if tail:

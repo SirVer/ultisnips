@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-"""Tests for snippet directory discovery along 'runtimepath'
-(`find_all_snippet_directories` in snippet/source/file/ulti_snips.py).
+"""Tests for snippet directory discovery along 'runtimepath':
+`find_all_snippet_directories` in snippet/source/file/ulti_snips.py and
+`_snipmate_files_for` in snippet/source/file/snipmate.py.
 
-The function reads its configuration through `vim_helper.eval`, which is
-patched here so it runs without Vim. The `vim` module itself is mocked by
+Both read their configuration through `vim_helper.eval`, which is patched
+here so they run without Vim. The `vim` module itself is mocked by
 pythonx/conftest.py.
 """
 
@@ -16,7 +17,7 @@ from pathlib import Path
 from unittest import mock
 
 from UltiSnips.error import PebkacError
-from UltiSnips.snippet.source.file import ulti_snips
+from UltiSnips.snippet.source.file import snipmate, ulti_snips
 
 
 @contextlib.contextmanager
@@ -133,6 +134,50 @@ class TestFindAllSnippetDirectories(unittest.TestCase):
         with _vim_config([locked / "plugin"], ["UltiSnips"]):
             found = ulti_snips.find_all_snippet_directories()
         self.assertEqual(found, [str(directory)])
+
+
+@contextlib.contextmanager
+def _snipmate_runtimepath(runtimepath):
+    """Answers the `vim_helper.eval` query `_snipmate_files_for` makes as if
+    Vim had the given 'runtimepath'."""
+    answers = {"&runtimepath": ",".join(str(entry) for entry in runtimepath)}
+    with mock.patch.object(
+        snipmate.vim_helper, "eval", side_effect=answers.__getitem__
+    ):
+        yield
+
+
+class TestSnipMateFilesFor(unittest.TestCase):
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory(prefix="UltiSnipsTest_snipmate")
+        self.addCleanup(tmp.cleanup)
+        self.bundle = Path(tmp.name) / "bundle"
+        self.plugins = [self.bundle / f"plugin{i}" for i in range(3)]
+        for plugin in self.plugins:
+            plugin.mkdir(parents=True)
+        # Only the middle plugin ships snipMate snippets.
+        self.snippet_file = self.plugins[1] / "snippets" / "python.snippets"
+        self.snippet_file.parent.mkdir()
+        self.snippet_file.write_text("snippet hi\n\thello\n")
+
+    def test_literal_entries_find_snippet_files(self):
+        with _snipmate_runtimepath(self.plugins):
+            found = snipmate._snipmate_files_for("python")
+        self.assertEqual(found, {str(self.snippet_file.resolve())})
+
+    def test_wildcard_entry_is_expanded(self):
+        with _snipmate_runtimepath([self.bundle / "*"]):
+            found = snipmate._snipmate_files_for("python")
+        self.assertEqual(found, {str(self.snippet_file.resolve())})
+
+    def test_entries_without_snippets_directory_list_nothing(self):
+        with (
+            _snipmate_runtimepath([self.plugins[0], self.plugins[2]]),
+            _recording_scandir() as listed,
+        ):
+            found = snipmate._snipmate_files_for("python")
+        self.assertEqual(found, set())
+        self.assertEqual(listed, [])
 
 
 if __name__ == "__main__":
