@@ -126,6 +126,10 @@ next:
 	  carry the full trace and the "please report" preamble.
 	  (#1676)
 	- Work around a globbing performance issue in Python 3.12 (#1696, #1694)
+	- Register changes the user makes while a snippet is still active but no
+	  placeholder is being replaced are no longer reverted to the pre-snippet
+	  registers when insert mode is left or the snippet is torn down. (#1697,
+	  #1695)
 
 version 4.0 (10-May-2026):
 	New features:

@@ -55,7 +55,14 @@ class VimState:
         self._poss = deque(maxlen=5)
         self._lvb = None
 
-        self._text_to_expect = ""
+        # Texts of the placeholders the snippet has selected since the
+        # register cache below was taken. Typing over a select-mode
+        # placeholder deletes it into @" (and @- or @1), so @" holding one
+        # of these means the snippet clobbered the registers and the cache
+        # must be restored. Anything else in @" was put there by the user,
+        # e.g. a `dd` after leaving the snippet with <Esc>, and must win
+        # over the cache (#1695).
+        self._placeholder_texts = []
 
         # Cache reginfo dicts for each preserved register in a Vim variable
         # so binary register contents (which can't always cross the
@@ -64,26 +71,37 @@ class VimState:
         # snippet, cleared at teardown.
         vim.command("let g:_ultisnips_reg_cache = {}")
 
-    def remember_unnamed_register(self, text_to_expect):
-        """Cache the snippet-clobberable registers if @" doesn't already
-        match the previously-expected text.
+    def _unnamed_register_holds_placeholder_text(self):
+        """Whether @" holds the text of a placeholder the snippet selected
+        since the cache was taken, i.e. whether the snippet is what last
+        wrote @". Compared inside Vim so binary register contents never
+        have to cross the Python boundary."""
+        if not self._placeholder_texts:
+            return False
+        texts = ",".join(_vim_str(text) for text in self._placeholder_texts)
+        return vim_helper.eval(f'index([{texts}], @") >= 0') == "1"
 
-        'text_to_expect' is text we expect to be in @" on the next call
-        (typically the placeholder text the snippet just put there). When
-        @" still matches the previous expectation we know we put it there
-        ourselves, so we don't overwrite the original cached state.
-
-        """
-        escaped_text = self._text_to_expect.replace("'", "''")
-        res = int(vim_helper.eval('@" != ' + "'" + escaped_text + "'"))
-        if res:
+    def remember_unnamed_register(self, placeholder_text):
+        """Cache the snippet-clobberable registers unless @" still holds
+        text we put there ourselves, then note 'placeholder_text' (the text
+        of the placeholder the snippet just selected) as text a select-mode
+        replacement may push into @" before the next call."""
+        if not self._unnamed_register_holds_placeholder_text():
             for reg in self._PRESERVED_REGISTERS:
                 lit = _vim_str(reg)
                 vim.command(f"let g:_ultisnips_reg_cache[{lit}] = getreginfo({lit})")
-        self._text_to_expect = text_to_expect
+            self._placeholder_texts = []
+        if placeholder_text not in self._placeholder_texts:
+            self._placeholder_texts.append(placeholder_text)
 
     def restore_unnamed_register(self):
-        """Restore the cached registers, if we have any cached.
+        """Restore the cached registers, if we have any cached and the
+        snippet is what last wrote @".
+
+        When @" holds none of the placeholder texts the snippet selected,
+        the user changed the registers themselves while the snippet was
+        still active (a `dd` after leaving it with <Esc>, say) and restoring
+        the cache would throw their change away (#1695).
 
         Iteration order matters because `setreg('0', …)` and
         `setreg('"', dict)` both update the unnamed-register pointer.
@@ -102,6 +120,8 @@ class VimState:
         """
         if int(vim_helper.eval("empty(g:_ultisnips_reg_cache)")):
             return
+        if not self._unnamed_register_holds_placeholder_text():
+            return
         for reg in self._PRESERVED_REGISTERS:
             lit = _vim_str(reg)
             vim.command(
@@ -114,7 +134,7 @@ class VimState:
         """Drop the cached register state. Called when the snippet
         finishes so the next one starts from a clean slate."""
         vim.command("let g:_ultisnips_reg_cache = {}")
-        self._text_to_expect = ""
+        self._placeholder_texts = []
 
     def remember_position(self):
         """Remember the current position as a previous pose."""
