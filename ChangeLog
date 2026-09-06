@@ -125,15 +125,7 @@ next:
 	  internal UltiSnips call stack. Genuine UltiSnips bugs still
 	  carry the full trace and the "please report" preamble.
 	  (#1676)
-	- Snippet directory discovery no longer globs every
-	  'runtimepath' entry from the filesystem root. On Python 3.12
-	  that listed "/", "/home", ... once per entry, freezing Vim
-	  for seconds on the first expansion with a long runtimepath
-	  on slow filesystems, and it silently found no snippets when
-	  an ancestor directory was not listable. Literal entries are
-	  now a single existence check; only the part of an entry from
-	  its first wildcard on is globbed. snipMate `snippets/`
-	  directories now honour those wildcards too. (#1696, #1694)
+	- Work around a globbing performance issue in Python 3.12 (#1696, #1694)
 
 version 4.0 (10-May-2026):
 	New features:
